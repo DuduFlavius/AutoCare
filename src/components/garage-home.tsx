@@ -52,8 +52,8 @@ export function GarageHome({
   const [selectedCar, setSelectedCar] = useState('');
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
   const carDocuments = home.documents.filter((r) => r.vehicleId === car?.id);
-  const nextRecords = home.upcoming.filter((r) => r.vehicleId === car?.id);
-  const nearest = nextRecords[0];
+  const nextRecords = home.upcoming;
+
   const documentSoon = carDocuments.filter((r) => r.status.days !== null && r.status.days >= 0 && r.status.days <= 30).length;
   const documentExpired = carDocuments.filter((r) => r.status.days !== null && r.status.days < 0).length;
   const vehicle = (id: string) => {
@@ -105,13 +105,23 @@ export function GarageHome({
         <div className="autocare-dashboard-aside">
           <div className="autocare-upcoming-panel">
             <div className="autocare-panel-heading"><h3>Următoarele activități</h3><button onClick={() => navigate('Calendar')}>Vezi calendarul <ArrowUpRight size={16}/></button></div>
-            {nearest ? (
-              <button className="autocare-next-record" onClick={() => open(nearest)}>
-                <span className="autocare-next-icon"><CalendarDays size={22}/></span>
-                <span><strong>{nearest.category || nearest.title}</strong><small>{car?.brand} {car?.model} · {car?.plate}</small></span>
-                <time>{date(nearest.expiresAt)}</time><ArrowRight size={18}/>
-              </button>
-            ) : <p className="autocare-no-activity">Nu ai termene viitoare pentru această mașină. Adaugă RCA, ITP sau o revizie pentru a le urmări aici.</p>}
+            {nextRecords.length ? (
+              <div className="autocare-upcoming-list">
+                {nextRecords.map((record) => {
+                  const linkedCar = cars.find((v) => v.id === record.vehicleId);
+                  return (
+                    <button className="autocare-next-record" key={record.id} onClick={() => open(record)}>
+                      <span className="autocare-next-icon"><CalendarDays size={20}/></span>
+                      <span className="autocare-next-description">
+                        <strong>{record.category || record.title}</strong>
+                        <small>{linkedCar ? `${linkedCar.brand} ${linkedCar.model} · ${linkedCar.plate}` : 'Mașină'} · {record.kind === 'document' ? 'Document' : 'Întreținere'}</small>
+                      </span>
+                      <time>{date(record.expiresAt)}</time><ArrowRight size={17}/>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : <p className="autocare-no-activity">Nu ai termene viitoare înregistrate. Adaugă RCA, ITP sau o revizie pentru a le urmări aici.</p>}
           </div>
           <div className="autocare-document-stats">
             <button onClick={() => navigate('Documente')}><FileText size={23}/><strong>{carDocuments.length}</strong><span>Total documente</span></button>
