@@ -75,7 +75,17 @@ export function GarageHome({
       )}
       <div className="autocare-dashboard-feature">
         <section className="autocare-digital-garage" aria-label="Mașina selectată">
-          <div className="autocare-garage-glow" aria-hidden="true"><CarFront size={190} strokeWidth={0.65}/></div>
+          <div className="autocare-garage-art" aria-hidden="true">
+            <div className="autocare-garage-art-ring autocare-garage-art-ring-outer" />
+            <div className="autocare-garage-art-ring autocare-garage-art-ring-inner" />
+            <div className="autocare-garage-art-core">
+              <span className="autocare-garage-art-top">AUTOCARE</span>
+              <Gauge size={60} strokeWidth={1.2} />
+              <span className="autocare-garage-art-bottom">DIGITAL GARAGE</span>
+            </div>
+            <span className="autocare-garage-art-spark spark-one" />
+            <span className="autocare-garage-art-spark spark-two" />
+          </div>
           <div className="autocare-garage-kicker"><span className="autocare-status-dot"/> GARAJUL TĂU DIGITAL</div>
           <div className="autocare-garage-body">
             <div className="autocare-garage-symbol"><CarFront size={35} strokeWidth={1.7}/></div>
