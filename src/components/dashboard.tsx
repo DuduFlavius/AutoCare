@@ -655,29 +655,30 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           Garaj personal <span aria-hidden="true"> / </span>
           <span style={{ color: 'var(--text)' }}>{tab}</span>
         </span>
-        <div className="inline">
+        <div className="autocare-header-actions">
           {data?.profile.role === 'founder' && (
-            <a className="button founder-header-link" href="/admin">
-              Panou Fondator · Roluri și Premium
+            <a className="autocare-founder-shortcut" href="/admin" aria-label="Deschide Panoul Fondator">
+              <Shield size={17} />
+              <span>Panou Fondator</span>
+              <ArrowUpRight size={14} />
             </a>
           )}
-          <span>{name}</span>
+          <button className="autocare-header-user" onClick={() => navigate('Setări')} aria-label="Deschide profilul și preferințele">
+            <span className="autocare-header-avatar">{name.split(' ').map((n) => n[0]).slice(0,2).join('').toUpperCase()}</span>
+            <span className="autocare-header-identity"><strong>{name}</strong><small>{({founder:'Fondator',admin:'Administrator',assistant:'Asistent',user:'Utilizator'} as Record<string,string>)[data?.profile.role || 'user']}</small></span>
+            <ChevronDown size={16}/>
+          </button>
           <button
-            className="close"
+            className="autocare-header-signout"
             aria-label="Deconectare"
+            title="Deconectare"
             onClick={async () => {
               if (previewData) return;
-              if (
-                recordDirty &&
-                !window.confirm('Ai modificări nesalvate. Vrei să te deconectezi?')
-              )
-                return;
+              if (recordDirty && !window.confirm('Ai modificări nesalvate. Vrei să te deconectezi?')) return;
               await authClient.signOut();
               window.location.assign('/autentificare');
             }}
-          >
-            <LogOut size={18} />
-          </button>
+          ><LogOut size={18}/></button>
         </div>
       </header>
       <main
