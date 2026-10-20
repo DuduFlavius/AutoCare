@@ -868,27 +868,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                               {v.archived ? 'Arhivată' : 'Activă'}
                             </span>
                           </div>
-                          {data.photos.some((p) => p.vehicleId === v.id) ? (
-                            <img
-                              alt={v.brand + ' ' + v.model}
-                              src={
-                                previewData
-                                  ? '/design-car.jpg'
-                                  : '/api/v1/vehicles/' + v.id + '/photo'
-                              }
-                              style={{
-                                width: '100%',
-                                height: 160,
-                                objectFit: 'contain',
-                                margin: '15px 0',
-                              }}
-                            />
-                          ) : (
-                            <div className="vehicle-placeholder">
-                              <CarFront size={60} strokeWidth={1} />
-                              <span>Adaugă fotografia mașinii</span>
-                            </div>
-                          )}
+                          <div className="autocare-garage-card-icon" aria-hidden="true"><CarFront size={37} strokeWidth={1.5}/></div>
                           <h2>
                             {v.brand} {v.model}
                           </h2>
@@ -948,28 +928,6 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                             <button className="primary" onClick={() => setVehicleDetail(v.id)}>
                               Vezi mașina <ArrowUpRight size={14} />
                             </button>
-                            <label className="button small" style={{ cursor: 'pointer' }}>
-                              Fotografie
-                              <input
-                                className="sr-only"
-                                type="file"
-                                accept="image/jpeg,image/png"
-                                onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (!file) return;
-                                  const form = new FormData();
-                                  form.set('file', file);
-                                  await act(async () => {
-                                    const r = await fetch('/api/v1/vehicles/' + v.id + '/photo', {
-                                      method: 'POST',
-                                      body: form,
-                                    });
-                                    const out = await r.json();
-                                    if (!r.ok) throw new Error(out.error);
-                                  });
-                                }}
-                              />
-                            </label>
                             <button
                               disabled={v.archived}
                               onClick={() => setModal({ kind: 'vehicle', vehicle: v })}
