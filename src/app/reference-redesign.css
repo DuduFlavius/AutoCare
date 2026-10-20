@@ -180,3 +180,67 @@
 .app-shell .workspace-garage .car-card h2{color:#11223f!important;font-size:23px!important;letter-spacing:-.04em}
 .app-shell .workspace-garage .car-card .car-metrics{border-radius:12px!important;background:#f1f6fd!important}
 @media(max-width:760px){.app-shell .workspace-dashboard .autocare-digital-garage{min-height:330px;padding:20px}.app-shell .workspace-dashboard .autocare-garage-body{max-width:90%}.app-shell .workspace-dashboard .autocare-garage-glow{opacity:.45}.app-shell .workspace-dashboard .autocare-garage-bottom{align-items:flex-start;flex-direction:column}}
+
+
+/* Unified dark premium dashboard — no white header, no white lower cards */
+.app-shell:has(.workspace-dashboard){background:#071326!important}
+.app-shell:has(.workspace-dashboard) .app-header{background:linear-gradient(100deg,#09182d,#0d203b)!important;border-bottom:1px solid #223a5b!important;box-shadow:none!important;color:#e8f1ff!important}
+.app-shell:has(.workspace-dashboard) .app-header>.muted{color:#9eb5d4!important}
+.app-shell:has(.workspace-dashboard) .app-header>.muted span{color:#dbe9ff!important}
+.app-shell:has(.workspace-dashboard) .app-header .autocare-header-user{background:#142947!important;border:1px solid #29456b!important;padding:6px 11px!important}
+.app-shell:has(.workspace-dashboard) .app-header .autocare-header-user:hover{background:#1c375c!important}
+.app-shell:has(.workspace-dashboard) .app-header .autocare-header-identity strong{color:#f6f9ff!important}
+.app-shell:has(.workspace-dashboard) .app-header .autocare-header-identity small{color:#a7bfde!important}
+.app-shell:has(.workspace-dashboard) .app-header .autocare-header-user>svg{color:#a7bfde!important}
+.app-shell:has(.workspace-dashboard) .app-header .autocare-header-signout{background:#152b49!important;border:1px solid #2b4668!important;color:#b7cbe8!important}
+.app-shell:has(.workspace-dashboard) .app-header .autocare-header-signout:hover{background:#263a56!important;color:#fff!important}
+.app-shell .main.workspace-dashboard{background:radial-gradient(ellipse at 70% 0%,#152b4a 0%,#0a1a31 45%,#071326 100%)!important}
+.app-shell .main.workspace-dashboard .card,
+.app-shell .main.workspace-dashboard .stat,
+.app-shell .main.workspace-dashboard .for-you-card,
+.app-shell .main.workspace-dashboard .dashboard-secondary-stats button,
+.app-shell .main.workspace-dashboard .overview-columns>.card,
+.app-shell .main.workspace-dashboard .next-step.card{background:linear-gradient(150deg,#172c4a,#10213b)!important;border:1px solid #294566!important;box-shadow:0 12px 28px #020b1b38!important;color:#eef5ff!important}
+.app-shell .main.workspace-dashboard .card:hover,
+.app-shell .main.workspace-dashboard .for-you-card:hover{border-color:#4d7eb5!important;background:#1b3658!important}
+.app-shell .main.workspace-dashboard .card h2,
+.app-shell .main.workspace-dashboard .card h3,
+.app-shell .main.workspace-dashboard .card strong,
+.app-shell .main.workspace-dashboard .stat .value,
+.app-shell .main.workspace-dashboard .dashboard-secondary-stats .value,
+.app-shell .main.workspace-dashboard .for-you-card strong,
+.app-shell .main.workspace-dashboard .overview-columns .section-title h3{color:#f5f9ff!important}
+.app-shell .main.workspace-dashboard .card p,
+.app-shell .main.workspace-dashboard .card small,
+.app-shell .main.workspace-dashboard .card .muted,
+.app-shell .main.workspace-dashboard .card .micro,
+.app-shell .main.workspace-dashboard .card .eyebrow,
+.app-shell .main.workspace-dashboard .stat .muted,
+.app-shell .main.workspace-dashboard .overview-columns .micro{color:#aec2df!important}
+.app-shell .main.workspace-dashboard .dashboard-secondary-stats button .value{font-size:clamp(23px,2vw,33px)!important;color:#83b3ff!important}
+.app-shell .main.workspace-dashboard .dashboard-secondary-stats button{min-height:125px!important}
+.app-shell .main.workspace-dashboard .overview-columns{align-items:stretch}
+.app-shell .main.workspace-dashboard .overview-columns>.card{padding:23px!important}
+.app-shell .main.workspace-dashboard .overview-columns .mini-garage{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}
+.app-shell .main.workspace-dashboard .mini-vehicle{background:linear-gradient(130deg,#1c3658,#112640)!important;border:1px solid #365577!important;border-radius:14px!important;padding:19px!important;display:flex;align-items:center;gap:17px;text-align:left;min-height:135px}
+.app-shell .main.workspace-dashboard .mini-vehicle:hover{background:#234367!important;border-color:#6094d3!important}
+.app-shell .main.workspace-dashboard .mini-vehicle .autocare-vehicle-monogram{display:grid;place-items:center;flex:0 0 65px;width:65px!important;height:65px!important;min-height:65px!important;background:#2a5a973b!important;color:#8cbaff!important;border:1px solid #416d9d!important;border-radius:15px!important}
+.app-shell .main.workspace-dashboard .mini-vehicle .mini-details{min-width:0;flex:1}
+.app-shell .main.workspace-dashboard .mini-vehicle h3{font-size:19px!important;color:#fff!important;margin:5px 0!important}
+.app-shell .main.workspace-dashboard .mini-vehicle .plate{background:#eaf1ff!important;color:#172b4c!important;border-radius:5px!important;padding:5px 8px!important;font-size:11px!important}
+.app-shell .main.workspace-dashboard .event-line{background:#1a3150!important;border:1px solid #2b4b72!important;border-radius:10px!important;margin:8px 0!important;padding:12px!important;color:#fff!important}
+.app-shell .main.workspace-dashboard .event-line strong{color:#fff!important}
+.app-shell .main.workspace-dashboard .event-line .micro{color:#b2c7e4!important}
+.app-shell .main.workspace-dashboard .event-line .list-icon{background:#284b80!important;color:#8bb8ff!important}
+.app-shell .main.workspace-dashboard .overview-columns .close,
+.app-shell .main.workspace-dashboard .section-title .close{background:#213e63!important;color:#dceaff!important;border:1px solid #395a80!important}
+.app-shell .main.workspace-dashboard .overview-columns .close:hover{background:#2b5080!important}
+.app-shell .main.workspace-dashboard .recent-records,
+.app-shell .main.workspace-dashboard .record-line,
+.app-shell .main.workspace-dashboard .activity-line{background:#152b48!important;color:#e9f2ff!important;border-color:#2b4668!important}
+.app-shell .main.workspace-dashboard .next-step-items button{background:#1b3455!important;border:1px solid #315276!important;color:#e8f2ff!important}
+.app-shell .main.workspace-dashboard .next-step-items button strong{color:#fff!important}
+.app-shell .main.workspace-dashboard .next-step-items button small{color:#b7cce7!important}
+.app-shell .main.workspace-dashboard .autocare-vehicle-sheet-symbol{display:grid;place-items:center;width:150px;min-height:150px;background:linear-gradient(145deg,#15365c,#0b203c);color:#8ebcff;border-radius:18px;border:1px solid #3c6087}
+.app-shell .main.workspace-dashboard .overview-stack{padding-bottom:40px}
+@media(max-width:760px){.app-shell:has(.workspace-dashboard) .app-header{padding-inline:14px!important}.app-shell .main.workspace-dashboard .mini-vehicle{min-height:115px}.app-shell .main.workspace-dashboard .overview-columns .mini-garage{grid-template-columns:1fr}}
