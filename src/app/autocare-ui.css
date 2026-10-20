@@ -3480,3 +3480,29 @@ a:hover {
 .app-shell .main .maintenance-overview > .card { min-height:220px; }
 @media(max-width:1000px) { .app-shell .main .panoramic-hero { min-height:410px; } .app-shell .main .stat { min-height:105px;padding:18px; } }
 @media(max-width:640px) { .app-shell .main .panoramic-hero { min-height:360px; } .app-shell .main .hero-next-deadline { position:static; } .app-shell .main .page-head h1 { font-size:28px; } }
+
+
+/* AutoCare reference-aligned UI v3: dark navigation, luminous workspace */
+.app-shell { background:#f3f7fd;color:#101d35; }
+.app-shell .main { background:linear-gradient(155deg,#edf4ff 0%,#f7faff 42%,#f2f6fc 100%);color:#12213b; }
+.app-shell .app-header { background:#f6f9ff;color:#233450;border-bottom:1px solid #dce5f3; }
+.app-shell .main h1,.app-shell .main h2,.app-shell .main h3,.app-shell .main strong {color:#101d35;}
+.app-shell .main .small,.app-shell .main small,.app-shell .main .eyebrow {color:#647a9d;}
+.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty,.app-shell .main .for-you-card,.app-shell .main .dashboard-secondary-stats button {background:#ffffff;border:1px solid #e0e9f7;color:#15233d;box-shadow:0 8px 26px #233e6810;border-radius:18px;}
+.app-shell .main .card:hover,.app-shell .main .for-you-card:hover,.app-shell .main .dashboard-secondary-stats button:hover {border-color:#a7c2f9;box-shadow:0 13px 32px #254d8e1c;}
+.app-shell .main input,.app-shell .main select,.app-shell .main textarea {background:#fff;color:#13213a;border-color:#d6e2f2;}
+.app-shell .main input::placeholder,.app-shell .main textarea::placeholder {color:#7185a3;}
+.app-shell .main button:not(.primary):not(.active),.app-shell .main .button:not(.primary) {border-color:#dce6f5;color:#1b3154;background:#f7faff;}
+.app-shell .main .stat .value,.app-shell .main .dashboard-secondary-stats .value {color:#1764ed;}
+.app-shell .main .chart {color:#5a7398;}
+.app-shell .main .chart > * {border-color:#d7e4f5;}
+.app-shell .main .panoramic-hero {background:#08162c;border:1px solid #1c3c6c;}
+.app-shell .main .panoramic-hero .automotive-copy h2,.app-shell .main .panoramic-hero .automotive-copy strong {color:#fff;}
+.app-shell .main .hero-next-deadline strong {color:#fff;}
+.app-shell > .sidebar {width:256px;background:linear-gradient(165deg,#071426 0%,#06101e 100%);border-right:1px solid #1b2b47;}
+.app-shell > .sidebar nav button.active,.app-shell > .sidebar nav a.active {background:linear-gradient(100deg,#2875f8,#173a79);color:#fff;box-shadow:0 6px 18px #1b62d633;}
+.app-shell > .sidebar nav button:hover,.app-shell > .sidebar nav a:hover {background:#18345a;color:#fff;}
+.app-shell .main .dashboard-secondary-stats button {min-height:115px;}
+.app-shell .main .for-you-card {min-height:100px;}
+.app-shell .main .maintenance-overview > .card {min-height:190px;}
+@media(max-width:760px) { .app-shell > .sidebar {width:auto;} .app-shell .main .panoramic-hero {min-height:350px;} }
