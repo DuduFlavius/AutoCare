@@ -49,3 +49,56 @@
 @media(max-width:1100px){.app-shell>.sidebar{width:236px!important;min-width:236px!important}.app-shell .main .for-you-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:760px){.app-shell>.sidebar{display:none!important}.app-shell .app-header{padding-inline:16px!important}.app-shell .main .panoramic-hero{min-height:355px!important}.app-shell .main .for-you-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.app-shell .main .page-head h1{font-size:30px!important}}
 @media(max-width:520px){.app-shell .main .for-you-grid{grid-template-columns:1fr!important}.app-shell .main .for-you-card{min-height:145px!important}.app-shell .main .panoramic-hero{min-height:330px!important}}
+
+
+/* Dashboard reference layout: dark cinematic upper workspace */
+.app-shell .main:has(.autocare-dashboard-feature){background:#f4f7fc!important}
+.app-shell .main .autocare-dashboard-feature{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,1fr);gap:16px;align-items:stretch}
+.app-shell .main .autocare-dashboard-feature .automotive-stage{margin:0!important;min-width:0}
+.app-shell .main .autocare-car-showcase{height:100%;min-height:350px!important;position:relative;isolation:isolate;background:#07152b!important;display:flex;align-items:stretch;padding:0!important;overflow:hidden}
+.app-shell .main .autocare-car-showcase .autocare-car-image{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:-1;overflow:hidden}
+.app-shell .main .autocare-car-showcase .autocare-car-image img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important;filter:contrast(1.07) saturate(1.1);transform:none!important}
+.app-shell .main .autocare-car-showcase .autocare-car-image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#071323e8 0%,#071323a6 33%,#07132312 74%,#07132352 100%)!important;pointer-events:none}
+.app-shell .main .autocare-car-details{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:15px;padding:31px;position:relative;z-index:2;color:#fff!important;max-width:58%}
+.app-shell .main .autocare-car-details h2{font-size:clamp(25px,2.4vw,40px)!important;line-height:1.05;letter-spacing:-.045em;color:#fff!important;margin:0}
+.app-shell .main .autocare-car-year{font-size:13px;color:#d7e5f7}
+.app-shell .main .autocare-plate{display:inline-flex;align-items:center;gap:12px;background:#f6f9ff;color:#172741;border-radius:6px;padding:0 12px 0 0;overflow:hidden;font-weight:800;letter-spacing:.05em;min-height:34px}
+.app-shell .main .autocare-plate b{background:#286eff;color:#fff;padding:10px 8px;font-size:10px}
+.app-shell .main .autocare-car-facts{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
+.app-shell .main .autocare-car-facts>span{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;color:#fff}
+.app-shell .main .autocare-car-facts svg{grid-row:span 2;color:#d9e8ff}
+.app-shell .main .autocare-car-facts strong{color:#fff!important;font-size:16px}
+.app-shell .main .autocare-car-facts small{color:#b5c8e1!important;font-size:11px}
+.app-shell .main .autocare-car-open{background:#173a68bb!important;color:#fff!important;border:1px solid #5e85bd77!important;border-radius:8px;display:flex;gap:8px;align-items:center;padding:8px 12px}
+.app-shell .main .autocare-dashboard-aside{display:flex;flex-direction:column;gap:13px;min-width:0}
+.app-shell .main .autocare-upcoming-panel{background:linear-gradient(135deg,#172a48,#0c1b31);border:1px solid #2a4164;border-radius:17px;padding:18px 20px;flex:1;box-shadow:0 13px 35px #0a1a3433}
+.app-shell .main .autocare-panel-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:17px}
+.app-shell .main .autocare-panel-heading h3{font-size:16px!important;color:#fff!important;margin:0}
+.app-shell .main .autocare-panel-heading button{background:transparent!important;border:0!important;color:#78acff!important;font-size:12px;display:flex;gap:6px;align-items:center;white-space:nowrap}
+.app-shell .main .autocare-next-record{display:flex;align-items:center;gap:13px;width:100%;border:0!important;border-radius:12px!important;padding:15px!important;background:#1c3252!important;color:#fff!important;text-align:left}
+.app-shell .main .autocare-next-record>span:nth-child(2){display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.app-shell .main .autocare-next-record strong{color:#fff!important;font-size:15px}
+.app-shell .main .autocare-next-record small{color:#bbcae1!important;font-size:12px}
+.app-shell .main .autocare-next-record time{font-size:12px;color:#e1eaff;white-space:nowrap}
+.app-shell .main .autocare-next-icon{display:grid;place-items:center;padding:10px;border-radius:12px;background:#23539a;color:#81b6ff}
+.app-shell .main .autocare-no-activity{font-size:13px;color:#c1d1e8;line-height:1.6}
+.app-shell .main .autocare-document-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.app-shell .main .autocare-document-stats button{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px 10px!important;border:1px solid #213b5e!important;border-radius:13px!important;background:#10213b!important;color:#fff!important;text-align:left}
+.app-shell .main .autocare-document-stats button svg{color:#498bff}
+.app-shell .main .autocare-document-stats button:nth-child(2) svg,.app-shell .main .autocare-document-stats button:nth-child(2) strong{color:#32c995!important}
+.app-shell .main .autocare-document-stats button:nth-child(3) svg,.app-shell .main .autocare-document-stats button:nth-child(3) strong{color:#ffae32!important}
+.app-shell .main .autocare-document-stats button:nth-child(4) svg,.app-shell .main .autocare-document-stats button:nth-child(4) strong{color:#ff5b70!important}
+.app-shell .main .autocare-document-stats button strong{font-size:24px;color:#67a0ff!important;line-height:1}
+.app-shell .main .autocare-document-stats button span{font-size:10px;color:#b7c9e1;line-height:1.3}
+.app-shell .main .autocare-quick-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:16px 0 30px}
+.app-shell .main .autocare-quick-actions button{display:flex;align-items:center;gap:14px;padding:19px!important;border:1px solid #254267!important;border-radius:13px!important;background:linear-gradient(125deg,#1a3152,#10213a)!important;color:#fff!important;text-align:left;box-shadow:0 10px 22px #112c5320}
+.app-shell .main .autocare-quick-actions button>svg:first-child{color:#66a0ff;flex-shrink:0}
+.app-shell .main .autocare-quick-actions button>svg:last-child{color:#69a2ff;margin-left:auto;flex-shrink:0}
+.app-shell .main .autocare-quick-actions button span{display:flex;flex-direction:column;gap:4px}
+.app-shell .main .autocare-quick-actions button strong{color:#fff!important;font-size:13px}
+.app-shell .main .autocare-quick-actions button small{color:#b7c7e0!important;font-size:11px}
+.app-shell .main .autocare-quick-actions button:hover{background:#23446f!important;transform:translateY(-2px)}
+@media(max-width:1200px){.app-shell .main .autocare-dashboard-feature{grid-template-columns:1fr}.app-shell .main .autocare-car-showcase{min-height:380px!important}.app-shell .main .autocare-dashboard-aside{display:grid;grid-template-columns:1fr 1fr}.app-shell .main .autocare-document-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.app-shell .main .autocare-dashboard-aside{grid-template-columns:1fr}.app-shell .main .autocare-document-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.app-shell .main .autocare-quick-actions{grid-template-columns:1fr}.app-shell .main .autocare-car-details{max-width:78%;padding:20px}.app-shell .main .autocare-car-showcase{min-height:335px!important}}
+@media(max-width:420px){.app-shell .main .autocare-document-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.app-shell .main .autocare-next-record time{display:none}}
+@media(prefers-reduced-motion:reduce){.app-shell .main .autocare-quick-actions button{transition:none!important}.app-shell .main .autocare-quick-actions button:hover{transform:none!important}}
