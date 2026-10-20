@@ -683,7 +683,9 @@ export default function Dashboard({ name, previewData }: { name: string; preview
       <main
         className={
           'main workspace-' +
-          (tab === 'Documente'
+          (tab === 'Dashboard'
+            ? 'dashboard'
+            : tab === 'Documente'
             ? 'documents'
             : tab === 'Întreținere'
               ? 'service'
@@ -725,17 +727,12 @@ export default function Dashboard({ name, previewData }: { name: string; preview
               <div>
                 <p className="eyebrow">
                   {tab === 'Dashboard'
-                    ? new Date().toLocaleDateString('ro-RO', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })
+                    ? `Bună, ${name.split(' ')[0]} 👋`
                     : 'GARAJUL TĂU DIGITAL'}
                 </p>
                 <h1>
                   {tab === 'Dashboard'
-                    ? `Bună, ${name.split(' ')[0]}!`
+                    ? 'Acasă, în garaj.'
                     : tab === 'Garaj'
                       ? 'Garajul tău'
                       : tab === 'Întreținere'
@@ -756,7 +753,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                 </h1>
                 <p className="muted small">
                   {tab === 'Dashboard'
-                    ? 'Tot ce ai nevoie pentru mașina ta, într-un singur loc.'
+                    ? 'Totul despre mașinile tale, într-un singur loc.'
                     : (
                         {
                           Garaj: 'Toate mașinile tale, într-un singur loc.',
