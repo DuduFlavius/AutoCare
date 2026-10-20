@@ -152,3 +152,31 @@
 @media(max-width:820px){.app-shell .app-header .autocare-founder-shortcut span{display:none}.app-shell .app-header .autocare-founder-shortcut{padding:10px}.app-shell .app-header .autocare-header-identity{display:none}.app-shell .app-header .autocare-header-actions{gap:6px}}
 @media(max-width:460px){.app-shell .app-header .autocare-header-avatar{width:34px;height:34px}.app-shell .app-header .autocare-header-signout{width:34px;height:34px}}
 @media(prefers-reduced-motion:reduce){.app-shell .app-header .autocare-founder-shortcut{transition:none!important}}
+
+
+/* Photo-free premium garage: crisp vector silhouette and live vehicle details */
+.app-shell .workspace-dashboard .autocare-digital-garage{position:relative;isolation:isolate;min-height:350px;height:100%;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:26px 29px;background:radial-gradient(ellipse at 83% 55%,#1d5080 0%,#102b4d 30%,transparent 65%),linear-gradient(135deg,#112746 0%,#09192f 58%,#071326 100%);border:1px solid #315477;border-radius:18px;box-shadow:0 20px 45px #0005;color:#fff}
+.app-shell .workspace-dashboard .autocare-digital-garage:after{content:"";position:absolute;inset:auto -10% -30% 25%;height:65%;border-radius:50%;background:#2673cc1b;filter:blur(45px);z-index:-1}
+.app-shell .workspace-dashboard .autocare-garage-glow{position:absolute;right:2%;top:13%;width:43%;height:70%;display:grid;place-items:center;color:#438bdb70;transform:scale(1.4);z-index:-1;pointer-events:none}
+.app-shell .workspace-dashboard .autocare-garage-glow svg{width:100%;height:100%;filter:drop-shadow(0 0 28px #3286ef55)}
+.app-shell .workspace-dashboard .autocare-garage-kicker{font-size:10px;font-weight:750;letter-spacing:.17em;color:#a5c6ed;display:flex;align-items:center;gap:9px}
+.app-shell .workspace-dashboard .autocare-status-dot{width:7px;height:7px;border-radius:50%;background:#43d9ad;box-shadow:0 0 12px #43d9ad}
+.app-shell .workspace-dashboard .autocare-garage-body{max-width:75%;margin:16px 0}
+.app-shell .workspace-dashboard .autocare-garage-symbol{width:52px;height:52px;display:grid;place-items:center;border-radius:15px;background:#2662a43f;border:1px solid #5087c966;color:#8ec3ff;margin-bottom:14px}
+.app-shell .workspace-dashboard .autocare-garage-overline{color:#a9c3e3;font-size:12px}
+.app-shell .workspace-dashboard .autocare-garage-body h2{font-size:clamp(29px,2.6vw,43px)!important;color:#fff!important;letter-spacing:-.055em!important;line-height:1.1;margin:7px 0 8px!important}
+.app-shell .workspace-dashboard .autocare-garage-body p{color:#b8cbe3!important;font-size:12px;line-height:1.55;max-width:360px}
+.app-shell .workspace-dashboard .autocare-garage-plate{display:inline-flex;align-items:center;gap:13px;background:#f8fbff;border-radius:7px;overflow:hidden;margin-top:14px;color:#13233c}
+.app-shell .workspace-dashboard .autocare-garage-plate span{background:#2775f4;padding:9px;color:#fff;font-size:11px;font-weight:800}
+.app-shell .workspace-dashboard .autocare-garage-plate strong{padding-right:14px;font-size:13px;letter-spacing:.05em}
+.app-shell .workspace-dashboard .autocare-garage-bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;border-top:1px solid #44617d55;padding-top:17px}
+.app-shell .workspace-dashboard .autocare-garage-metrics{display:flex;gap:27px}
+.app-shell .workspace-dashboard .autocare-garage-metrics span{display:flex;flex-direction:column;gap:3px}
+.app-shell .workspace-dashboard .autocare-garage-metrics strong{font-size:16px;color:#fff}
+.app-shell .workspace-dashboard .autocare-garage-metrics small{font-size:11px;color:#a7bfda}
+.app-shell .workspace-dashboard .autocare-garage-bottom button{display:flex;align-items:center;gap:7px;padding:10px 13px!important;border-radius:9px!important;border:1px solid #527eaf!important;background:#244f85!important;color:#fff!important;font-size:12px;font-weight:700;white-space:nowrap}
+.app-shell .workspace-garage .car-card{border:1px solid #dfe8f6!important;border-radius:18px!important;background:linear-gradient(155deg,#fff,#f9fbff)!important;box-shadow:0 12px 28px #1a37610f!important;padding:22px!important}
+.app-shell .workspace-garage .autocare-garage-card-icon{width:74px;height:74px;display:grid;place-items:center;margin:16px 0;background:linear-gradient(145deg,#e8f1ff,#dceaff);border:1px solid #d0e1fc;border-radius:17px;color:#2c72e9}
+.app-shell .workspace-garage .car-card h2{color:#11223f!important;font-size:23px!important;letter-spacing:-.04em}
+.app-shell .workspace-garage .car-card .car-metrics{border-radius:12px!important;background:#f1f6fd!important}
+@media(max-width:760px){.app-shell .workspace-dashboard .autocare-digital-garage{min-height:330px;padding:20px}.app-shell .workspace-dashboard .autocare-garage-body{max-width:90%}.app-shell .workspace-dashboard .autocare-garage-glow{opacity:.45}.app-shell .workspace-dashboard .autocare-garage-bottom{align-items:flex-start;flex-direction:column}}
