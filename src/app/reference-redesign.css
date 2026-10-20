@@ -408,3 +408,28 @@
 .app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) input::placeholder{color:#a9c4e7!important}
 /* Founder admin has its own root, independent of .app-shell */
 body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
+
+
+/* Founder control center — same navy premium design, independent of garage app */
+.founder-shell{--bg:#0b1a30;--panel:#172d4c;--panel2:#203a5b;--border:#385b80;--text:#edf5ff;--muted:#b8cde8;--accent:#77aaff;background:#0b192e!important;color:#eaf3ff!important;color-scheme:dark}
+.founder-shell .founder-main{background:radial-gradient(ellipse at 72% -15%,#1d375a 0%,#0c1c33 52%,#09172a 100%)!important;color:#eaf3ff!important}
+.founder-shell .founder-sidebar{background:#0b172b!important;border-right:1px solid #304a6b!important;color:#f2f7ff!important}
+.founder-shell .founder-sidebar a{color:#d0e2fa!important}
+.founder-shell .founder-sidebar a:hover,.founder-shell .founder-sidebar a[aria-current="page"]{background:#203d66!important;color:#fff!important}
+.founder-shell .founder-page-header h1,.founder-shell .founder-main h1,.founder-shell .founder-main h2,.founder-shell .founder-main h3,.founder-shell .founder-main h4{color:#f5f9ff!important}
+.founder-shell .founder-main p,.founder-shell .founder-main .muted,.founder-shell .founder-main .micro,.founder-shell .founder-main .small,.founder-shell .founder-main .eyebrow{color:#bcd0eb!important}
+.founder-shell .founder-main .card,.founder-shell .founder-user-list,.founder-shell .founder-table-wrap,.founder-shell .founder-user-details,.founder-shell .founder-team-entry{background:linear-gradient(145deg,#1a3151,#132642)!important;border:1px solid #385879!important;color:#eaf3ff!important;box-shadow:0 14px 32px #020b1a25!important;border-radius:16px!important}
+.founder-shell .founder-main .card strong,.founder-shell .founder-main td strong,.founder-shell .founder-main .value{color:#fff!important}
+.founder-shell .founder-main input,.founder-shell .founder-main select,.founder-shell .founder-main textarea{background:#10223b!important;color:#f0f7ff!important;border:1px solid #45678d!important;border-radius:10px!important}
+.founder-shell .founder-main input::placeholder,.founder-shell .founder-main textarea::placeholder{color:#a7c0de!important}
+.founder-shell .founder-main label{color:#d5e5fa!important}
+.founder-shell .founder-main button:not(.primary):not(.danger),.founder-shell .founder-main .button:not(.primary){background:#254368!important;color:#edf6ff!important;border:1px solid #4a6b90!important;border-radius:10px!important}
+.founder-shell .founder-main button.primary{background:linear-gradient(110deg,#397bfa,#285fd5)!important;color:#fff!important;border:1px solid #689dff!important}
+.founder-shell .founder-main table,.founder-shell .founder-main thead,.founder-shell .founder-main tbody,.founder-shell .founder-main tr,.founder-shell .founder-main th,.founder-shell .founder-main td{background:transparent!important;color:#eaf3ff!important;border-color:#395a7d!important}
+.founder-shell .founder-main th{background:#243e60!important;color:#d0e2fb!important}
+.founder-shell .founder-main tr:hover td,.founder-shell .founder-main tr.selected-user td{background:#234266!important}
+.founder-shell .founder-main .pill.valid{background:#194d42!important;color:#b3f5d7!important}
+.founder-shell .founder-main .role-badge,.founder-shell .founder-main .founder-role-badge{background:#294e7d!important;color:#eaf3ff!important}
+.founder-shell .founder-main .notice{background:#204464!important;color:#d7eaff!important;border-color:#47759b!important}
+.founder-shell .founder-main button:disabled{opacity:.55}
+.founder-shell .founder-main :is(input,button,select,textarea,a):focus-visible{outline:2px solid #86b8ff!important;outline-offset:2px}
