@@ -4,6 +4,7 @@ import { dashboardHome } from '@/lib/dashboard-home';
 import {
   ArrowUpRight,
   CarFront,
+  Gauge,
   Files,
   Wrench,
   Wallet,
