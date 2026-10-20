@@ -319,3 +319,21 @@
 .app-shell .main .overview-columns .card,.app-shell .main .overview-columns .card *{border-color:#304e70}
 @media(prefers-reduced-motion:reduce){.app-shell *{transition-duration:0.01ms!important;animation-duration:0.01ms!important}}
 @media(max-width:760px){.app-shell .main{overflow-x:hidden}.app-shell .main .overview-columns,.app-shell .main .dashboard-secondary-stats{min-width:0}.app-shell .app-header .autocare-header-identity{max-width:115px;overflow:hidden}}
+
+
+/* Dashboard hero: understated instrument-inspired art, no car photo or silhouette */
+.app-shell .workspace-dashboard .autocare-digital-garage{background:radial-gradient(circle at 82% 44%,#244b7b 0%,#152f53 25%,transparent 57%),linear-gradient(125deg,#101f39 0%,#122747 60%,#0c1b33 100%)!important}
+.app-shell .workspace-dashboard .autocare-garage-art{position:absolute;right:3.5%;top:8%;width:43%;height:78%;display:grid;place-items:center;pointer-events:none;opacity:.93;z-index:-1}
+.app-shell .workspace-dashboard .autocare-garage-art-ring{position:absolute;border-radius:50%;aspect-ratio:1;box-shadow:inset 0 0 30px #468cf016,0 0 34px #326ab012}
+.app-shell .workspace-dashboard .autocare-garage-art-ring-outer{width:min(96%,320px);border:1px solid #5386c055;background:radial-gradient(circle,#234e7b44,transparent 66%)}
+.app-shell .workspace-dashboard .autocare-garage-art-ring-outer:before,.app-shell .workspace-dashboard .autocare-garage-art-ring-outer:after{content:"";position:absolute;inset:11px;border:1px dashed #6895d02d;border-radius:50%}
+.app-shell .workspace-dashboard .autocare-garage-art-ring-outer:after{inset:-12px;border-style:solid;border-color:#588ac333 transparent transparent transparent;transform:rotate(-30deg)}
+.app-shell .workspace-dashboard .autocare-garage-art-ring-inner{width:min(67%,215px);border:1px solid #6495ce66;background:linear-gradient(140deg,#1e467333,#0b244344)}
+.app-shell .workspace-dashboard .autocare-garage-art-core{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#91bfff;text-shadow:0 2px 18px #050f23;width:170px;height:170px}
+.app-shell .workspace-dashboard .autocare-garage-art-core svg{filter:drop-shadow(0 0 18px #5b9ef277)}
+.app-shell .workspace-dashboard .autocare-garage-art-top{font-size:12px;letter-spacing:.31em;font-weight:800;color:#d5e8ff}
+.app-shell .workspace-dashboard .autocare-garage-art-bottom{font-size:9px;letter-spacing:.22em;font-weight:700;color:#82addf}
+.app-shell .workspace-dashboard .autocare-garage-art-spark{position:absolute;width:5px;height:5px;background:#86bfff;border-radius:50%;box-shadow:0 0 14px #5aa4ff}
+.app-shell .workspace-dashboard .autocare-garage-art-spark.spark-one{top:17%;left:22%}
+.app-shell .workspace-dashboard .autocare-garage-art-spark.spark-two{bottom:19%;right:18%}
+@media(max-width:760px){.app-shell .workspace-dashboard .autocare-garage-art{right:-17%;top:13%;width:72%;height:65%;opacity:.2}.app-shell .workspace-dashboard .autocare-garage-body{position:relative;z-index:1;max-width:100%}}
