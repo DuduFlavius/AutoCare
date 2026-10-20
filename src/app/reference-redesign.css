@@ -244,3 +244,34 @@
 .app-shell .main.workspace-dashboard .autocare-vehicle-sheet-symbol{display:grid;place-items:center;width:150px;min-height:150px;background:linear-gradient(145deg,#15365c,#0b203c);color:#8ebcff;border-radius:18px;border:1px solid #3c6087}
 .app-shell .main.workspace-dashboard .overview-stack{padding-bottom:40px}
 @media(max-width:760px){.app-shell:has(.workspace-dashboard) .app-header{padding-inline:14px!important}.app-shell .main.workspace-dashboard .mini-vehicle{min-height:115px}.app-shell .main.workspace-dashboard .overview-columns .mini-garage{grid-template-columns:1fr}}
+
+
+/* Garage: entirely photo-free, premium and compact */
+.app-shell .main.workspace-garage{background:radial-gradient(ellipse at 70% 0%,#132b4c,#08172c 60%,#071326)!important;color:#eef5ff!important;min-height:calc(100vh - 70px)}
+.app-shell:has(.workspace-garage) .app-header{background:#0a1a31!important;border-bottom:1px solid #29415e!important;color:#eaf3ff!important}
+.app-shell:has(.workspace-garage) .app-header>.muted,.app-shell:has(.workspace-garage) .app-header .autocare-header-identity small{color:#a8c1df!important}
+.app-shell:has(.workspace-garage) .app-header>.muted span,.app-shell:has(.workspace-garage) .app-header .autocare-header-identity strong{color:#f1f7ff!important}
+.app-shell:has(.workspace-garage) .app-header .autocare-header-user{background:#172d4b!important;border:1px solid #355174!important}
+.app-shell .workspace-garage .page-head h1{color:#fff!important}
+.app-shell .workspace-garage .page-head p,.app-shell .workspace-garage .page-head .muted{color:#b6c8e2!important}
+.app-shell .workspace-garage .grid3{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr))!important;gap:20px!important;align-items:stretch}
+.app-shell .workspace-garage .car-card{background:linear-gradient(155deg,#182f50,#0e2039)!important;color:#eaf3ff!important;border:1px solid #345578!important;border-radius:18px!important;padding:24px!important;box-shadow:0 16px 38px #020a1b40!important;display:flex;flex-direction:column;gap:13px;min-height:390px}
+.app-shell .workspace-garage .car-card:hover{border-color:#5d8bc5!important;box-shadow:0 20px 45px #0005!important}
+.app-shell .workspace-garage .car-card .eyebrow,.app-shell .workspace-garage .car-card .small,.app-shell .workspace-garage .car-card .muted{color:#adc4e3!important}
+.app-shell .workspace-garage .car-card h2{color:#fff!important;font-size:clamp(23px,2vw,30px)!important;margin:0!important}
+.app-shell .workspace-garage .autocare-garage-card-icon{display:grid!important;place-items:center;width:90px!important;height:90px!important;margin:6px 0 2px!important;background:radial-gradient(circle at 30% 20%,#2d609a,#142c4c)!important;border:1px solid #4975a8!important;border-radius:20px!important;color:#a1ccff!important}
+.app-shell .workspace-garage .car-card .plate{background:#edf4ff!important;color:#13294c!important;border-radius:6px!important;padding:7px 10px!important;font-weight:750!important}
+.app-shell .workspace-garage .car-card .car-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;border:1px solid #304c70!important;background:#0c1c34!important;border-radius:12px!important;padding:14px!important}
+.app-shell .workspace-garage .car-card .car-metrics span{color:#9db6d7!important}
+.app-shell .workspace-garage .car-card .car-metrics strong{color:#f1f7ff!important}
+.app-shell .workspace-garage .car-card .row-actions{margin-top:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.app-shell .workspace-garage .car-card .row-actions button{min-height:43px!important;border-radius:9px!important;border:1px solid #395779!important;background:#203b60!important;color:#eaf3ff!important;font-weight:650!important;font-size:12px!important;padding:9px!important}
+.app-shell .workspace-garage .car-card .row-actions button.primary{grid-column:1/-1;background:linear-gradient(110deg,#3177f2,#2058bc)!important;border-color:#4187ff!important;color:#fff!important}
+.app-shell .workspace-garage .car-card .row-actions button.danger{background:#4b253b!important;border-color:#79445c!important;color:#ffc7d2!important}
+.app-shell .workspace-garage .add-car-tile{min-height:390px!important;border-radius:18px!important;border:1px dashed #46668d!important;background:linear-gradient(140deg,#122847,#0d203b)!important;color:#e8f2ff!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:17px!important;padding:28px!important}
+.app-shell .workspace-garage .add-car-tile:hover{border-color:#73a5ed!important;background:#193555!important}
+.app-shell .workspace-garage .add-car-tile>svg{color:#84b6ff!important}
+.app-shell .workspace-garage .add-car-tile span{color:#abc3e0!important;max-width:240px}
+.app-shell .workspace-garage .add-car-tile strong{color:#fff!important;font-size:19px}
+.app-shell .workspace-garage .car-card img,.app-shell .workspace-garage .car-card input[type=file]{display:none!important}
+@media(max-width:760px){.app-shell .workspace-garage .grid3{grid-template-columns:1fr!important}.app-shell .workspace-garage .car-card,.app-shell .workspace-garage .add-car-tile{min-height:0!important}.app-shell .workspace-garage .car-card .row-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
