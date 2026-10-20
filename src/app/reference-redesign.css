@@ -337,3 +337,48 @@
 .app-shell .workspace-dashboard .autocare-garage-art-spark.spark-one{top:17%;left:22%}
 .app-shell .workspace-dashboard .autocare-garage-art-spark.spark-two{bottom:19%;right:18%}
 @media(max-width:760px){.app-shell .workspace-dashboard .autocare-garage-art{right:-17%;top:13%;width:72%;height:65%;opacity:.2}.app-shell .workspace-dashboard .autocare-garage-body{position:relative;z-index:1;max-width:100%}}
+
+
+/* Accessibility pass: high contrast across records, calendar, maintenance and every workspace */
+.app-shell .main{--bg:#0b1a30!important;--panel:#172c4b!important;--panel2:#203959!important;--border:#365578!important;--text:#edf5ff!important;--muted:#bbcee7!important;--accent:#74a8ff!important;--warning:#ffd48a!important;--danger:#ff9ea8!important;color-scheme:dark}
+.app-shell .main button:not(.primary),.app-shell .main summary,.app-shell .main .button:not(.primary){color:#eaf3ff!important}
+.app-shell .main button:not(.primary):not(:disabled),.app-shell .main summary{background:#213c60!important;border-color:#43658b!important}
+.app-shell .main button:not(.primary):hover,.app-shell .main summary:hover{background:#2b4b75!important}
+.app-shell .main button:disabled{opacity:.52;cursor:not-allowed}
+.app-shell .main .record-tools{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
+.app-shell .main .record-search{background:#152b49!important;border:1px solid #49698e!important;color:#a8c9ff!important;border-radius:13px!important;display:flex;align-items:center;gap:12px;padding:0 14px;flex:1 1 340px;min-height:54px}
+.app-shell .main .record-search input{background:transparent!important;border:0!important;color:#f5f9ff!important;min-width:0;flex:1;box-shadow:none!important}
+.app-shell .main .record-search input::placeholder{color:#b0c6e4!important}
+.app-shell .main .record-filter-panel{background:#1b3455!important;border:1px solid #43658b!important;border-radius:13px!important;flex:0 1 auto;min-width:220px}
+.app-shell .main .record-filter-panel summary{background:transparent!important;color:#e8f2ff!important;padding:15px!important;cursor:pointer;list-style:none;display:flex;align-items:center;gap:9px}
+.app-shell .main .record-filter-panel[open]{background:#1b3455!important}
+.app-shell .main .record-filter-fields{background:#172d4c!important;color:#eaf3ff!important;border-color:#43658b!important;padding:15px!important}
+.app-shell .main .record-filter-fields label{color:#c8dbf3!important}
+.app-shell .main .record-filter-panel .filter-count{background:#305685!important;color:#fff!important;border-radius:8px;padding:2px 7px}
+.app-shell .main .record-list,.app-shell .main .records-list,.app-shell .main .record-grid,.app-shell .main .record-item,.app-shell .main .record-entry{background:transparent!important;color:#eef5ff!important;border-color:#3c5c80!important}
+.app-shell .main .record-item,.app-shell .main .record-entry{background:#1a3151!important;border:1px solid #395a80!important;border-radius:15px!important}
+.app-shell .main .record-item strong,.app-shell .main .record-entry strong{color:#fff!important}
+.app-shell .main .record-item small,.app-shell .main .record-entry small{color:#b9cde6!important}
+.app-shell .main .calendar-day{background:#172f4f!important;color:#eaf4ff!important;border:1px solid #395c84!important;border-radius:12px!important}
+.app-shell .main .calendar-day.today{border:2px solid #77b1ff!important;background:#254773!important}
+.app-shell .main .calendar-day small{color:#ffd18a!important}
+.app-shell .main .calendar-day button{color:#eaf4ff!important}
+.app-shell .main .calendar-day .muted{color:#aec6e4!important}
+.app-shell .main .toolbar{color:#eaf4ff!important;gap:12px}
+.app-shell .main .toolbar label{color:#c4d7ef!important}
+.app-shell .main .toolbar button[aria-pressed="true"]{background:#3974d2!important;color:#fff!important;border-color:#79b0ff!important}
+.app-shell .main .toolbar button[aria-pressed="false"]{background:#1e385a!important;color:#d7e8ff!important}
+.app-shell .main input[type="month"],.app-shell .main input[type="date"]{color-scheme:dark;background:#142844!important;color:#e9f4ff!important}
+.app-shell .main .status,.app-shell .main .status-badge,.app-shell .main .record-status,.app-shell .main .chip{font-weight:650!important}
+.app-shell .main .status.warning,.app-shell .main .status-badge.warning,.app-shell .main .chip.warning{background:#62451f!important;color:#ffe4a6!important;border-color:#a47735!important}
+.app-shell .main .status.valid,.app-shell .main .status-badge.valid{background:#173e3a!important;color:#a7f4cf!important;border-color:#317e65!important}
+.app-shell .main .status.expired,.app-shell .main .status-badge.expired{background:#582a3c!important;color:#ffc5d3!important;border-color:#a14c6a!important}
+.app-shell .main .record-tools button,.app-shell .main .record-tools summary,.app-shell .main .toolbar button{min-height:43px}
+.app-shell .main .card .button.small,.app-shell .main .card button.small{background:#27476e!important;color:#f0f7ff!important;border-color:#52749c!important}
+.app-shell .main .card .button.small:hover,.app-shell .main .card button.small:hover{background:#356093!important}
+.app-shell .main .card label.button.small{color:#eaf3ff!important}
+.app-shell .main .card .micro,.app-shell .main .card .small,.app-shell .main .card time{color:#c4d7f1!important}
+.app-shell .main .card .muted{color:#b9cee8!important}
+.app-shell .main .card svg{flex-shrink:0}
+.app-shell .main .card .icon,.app-shell .main .record-icon{background:#315786!important;color:#d2e6ff!important}
+.app-shell .main .card :is(input,select,textarea):focus-visible{outline:2px solid #87bdff!important}
