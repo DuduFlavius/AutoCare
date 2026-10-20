@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import AutomotiveHero from './automotive-hero';
 import { dashboardHome } from '@/lib/dashboard-home';
 import {
   ArrowUpRight,
@@ -51,12 +50,6 @@ export function GarageHome({
   const { cars, records, attention: due } = home;
   const [selectedCar, setSelectedCar] = useState('');
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
-  const photo =
-    car && data.photos.some((p) => p.vehicleId === car.id)
-      ? car.id.startsWith('design-')
-        ? '/design-car.jpg'
-        : '/api/v1/vehicles/' + car.id + '/photo'
-      : undefined;
   const carDocuments = home.documents.filter((r) => r.vehicleId === car?.id);
   const nextRecords = home.upcoming.filter((r) => r.vehicleId === car?.id);
   const nearest = nextRecords[0];
@@ -81,20 +74,23 @@ export function GarageHome({
         </label>
       )}
       <div className="autocare-dashboard-feature">
-        <div className="automotive-stage">
-          <AutomotiveHero
-            photo={photo}
-            vehicleName={car ? `${car.brand} ${car.model}` : undefined}
-            vehicleYear={car?.year}
-            vehicleFuel={car?.fuel}
-            vehiclePlate={car?.plate}
-            vehicleKm={car?.odometer}
-            name={name}
-            hasCars={cars.length > 0}
-            navigate={navigate}
-            add={add}
-          />
-        </div>
+        <section className="autocare-digital-garage" aria-label="Mașina selectată">
+          <div className="autocare-garage-glow" aria-hidden="true"><CarFront size={190} strokeWidth={0.65}/></div>
+          <div className="autocare-garage-kicker"><span className="autocare-status-dot"/> GARAJUL TĂU DIGITAL</div>
+          <div className="autocare-garage-body">
+            <div className="autocare-garage-symbol"><CarFront size={35} strokeWidth={1.7}/></div>
+            <span className="autocare-garage-overline">{car ? [car.year,car.fuel].filter(Boolean).join(' · ') : 'BUN VENIT ÎN AUTOCARE'}</span>
+            <h2>{car ? `${car.brand} ${car.model}` : 'Garajul tău începe aici'}</h2>
+            <p>{car ? 'Toate informațiile importante despre mașina ta, într-un singur loc.' : 'Adaugă prima mașină și urmărește documentele, reviziile și cheltuielile.'}</p>
+            {car && <div className="autocare-garage-plate"><span>RO</span><strong>{car.plate}</strong></div>}
+          </div>
+          <div className="autocare-garage-bottom">
+            <div className="autocare-garage-metrics">
+              {car ? <><span><strong>{car.odometer.toLocaleString('ro-RO')} km</strong><small>Kilometraj</small></span><span><strong>{car.fuel || '—'}</strong><small>Combustibil</small></span></> : <span><strong>Totul pregătit</strong><small>Adaugă prima mașină</small></span>}
+            </div>
+            <button onClick={() => car ? navigate('Garaj') : add('vehicle')}>{car ? 'Deschide garajul' : 'Adaugă mașină'} <ArrowUpRight size={16}/></button>
+          </div>
+        </section>
         <div className="autocare-dashboard-aside">
           <div className="autocare-upcoming-panel">
             <div className="autocare-panel-heading"><h3>Următoarele activități</h3><button onClick={() => navigate('Calendar')}>Vezi calendarul <ArrowUpRight size={16}/></button></div>
