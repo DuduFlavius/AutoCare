@@ -382,3 +382,29 @@
 .app-shell .main .card svg{flex-shrink:0}
 .app-shell .main .card .icon,.app-shell .main .record-icon{background:#315786!important;color:#d2e6ff!important}
 .app-shell .main .card :is(input,select,textarea):focus-visible{outline:2px solid #87bdff!important}
+
+
+/* AutoCare premium dark surfaces: alerts, preferences, support chat and founder administration */
+.app-shell .main .journal,.app-shell .main .journal-row,.app-shell .main .journal-item,.app-shell .main .deadline-row,.app-shell .main .alert-row,.app-shell .main .notification-row{background:#213b5f!important;color:#eaf3ff!important;border-color:#42648b!important}
+.app-shell .main .journal-row strong,.app-shell .main .journal-item strong,.app-shell .main .deadline-row strong,.app-shell .main .notification-row strong{color:#fff!important}
+.app-shell .main .journal-row small,.app-shell .main .journal-item small,.app-shell .main .deadline-row small{color:#bed4f0!important}
+.app-shell .main :is(.card,.panel,.notification-panel,.settings-panel) :is(label,summary){color:#e6f1ff}
+.app-shell .main :is(.card,.panel) :is(.checkbox-row,.checkbox-option,.check-option,.toggle-row,.notification-option,.preference-option){background:#1c3658!important;color:#eaf3ff!important;border:1px solid #45678c!important;border-radius:11px!important}
+.app-shell .main :is(.card,.panel) :is(.checkbox-row,.checkbox-option,.check-option,.toggle-row,.notification-option,.preference-option) label{color:#eaf3ff!important}
+.app-shell .main input[type=checkbox],.app-shell .main input[type=radio]{accent-color:#5a92ff}
+.app-shell .main :is(.card,.panel) :is(.notice,.notice-box,.permission-banner,.info-banner,.status-banner){background:#1e4065!important;color:#e7f3ff!important;border:1px solid #426e9b!important;border-radius:12px!important}
+.app-shell .main :is(.card,.panel) :is(.notice,.notice-box,.permission-banner,.info-banner,.status-banner) *{color:inherit}
+.app-shell .main .badge,.app-shell .main .status-badge,.app-shell .main .pill{background:#2b4d74;color:#eaf3ff!important}
+.app-shell .main :is(.badge,.status-badge,.pill)[class*="warn"],.app-shell .main :is(.badge,.status-badge,.pill)[class*="soon"]{background:#694c20!important;color:#ffe2a0!important;border:1px solid #9b763b!important}
+.app-shell .main :is(.badge,.status-badge,.pill)[class*="success"],.app-shell .main :is(.badge,.status-badge,.pill)[class*="valid"]{background:#1b5149!important;color:#aff4d2!important}
+.app-shell .main .card :is(button,label).button,.app-shell .main .card button:not(.primary){color:#eaf3ff!important}
+.app-shell .main .card :is(button,label).button:disabled,.app-shell .main .card button:disabled{background:#29415e!important;color:#a8bbd5!important;opacity:.65}
+.app-shell .main .card :is(input,textarea,select){background:#10243e!important;color:#eef6ff!important;border-color:#47688d!important}
+.app-shell .main .card input[type=checkbox]{background:initial!important}
+.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace){background:#132741!important;color:#ecf5ff!important;border:1px solid #36577b!important}
+.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(aside,header,footer,.sidebar,.chat-sidebar,.conversation-sidebar,.chat-main,.conversation-main,.chat-header,.conversation-header,.chat-body,.conversation-body,.empty-state){background:#192f4e!important;color:#e9f3ff!important;border-color:#385a7d!important}
+.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(h1,h2,h3,h4,strong,b,span,p,small){color:inherit}
+.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(input,textarea){background:#10243f!important;color:#f0f7ff!important}
+.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) input::placeholder{color:#a9c4e7!important}
+/* Founder admin has its own root, independent of .app-shell */
+body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
