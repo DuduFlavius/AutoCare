@@ -1,0 +1,1 @@
+ALTER TABLE "notifications" ADD COLUMN "readAt" timestamp with time zone;

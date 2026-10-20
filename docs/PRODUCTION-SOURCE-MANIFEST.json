@@ -1,0 +1,536 @@
+{
+  "deploymentId": "dpl_EFth1xktWENBaGQtW55rrWRA2rLw",
+  "productionAlias": "autocare-garaj.vercel.app",
+  "originalLocalCommit": "c1ec2fa",
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha1": "1f07a405c89f05a19cd6a49bda208a04bd82af3f",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": ".prettierrc.json",
+      "sha1": "5855320a7217f8316b448379bf9f8dc5d5470267",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "LANSARE.md",
+      "sha1": "c81b8d0be382da0dc04e4bf9d00e1139d956d574",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "README.md",
+      "sha1": "8f84553d98191f01eeaceedc5c9340e0b60f4c35",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "drizzle.config.ts",
+      "sha1": "0f6706fba687bb77d585a21573fd92ae2cee4333",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha1": "897c6b7aa1b16900830a23819516a58f33019e42",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0000_previous_santa_claus.sql",
+      "sha1": "9a091d5f7d9b802db36f0daf96830453b5a9c4b6",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0001_integrity.sql",
+      "sha1": "8fcf158e9a2f12920d09aebd4bf6b21dd323d41b",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0001_secret_changeling.sql",
+      "sha1": "ca324a421d906b062103fa9be32de86b490b34d3",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0002_white_millenium_guard.sql",
+      "sha1": "998b0644159e2728eb7d8d2c64199193630c62fd",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0003_notification_read.sql",
+      "sha1": "f316d302887a0e912efe7dfb530ff3caf9b323a5",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0003_photo_integrity.sql",
+      "sha1": "039aaffe0fd72365d07c0c9c9d4604f7485d9246",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0004_support_chat.sql",
+      "sha1": "88fe56e90c63492d35b0d52038052a7ec80bac1d",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0005_0_support_threads.sql",
+      "sha1": "6d0a4e47c8f87ed9cbd853eec13045e1aa5da426",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0005_founder_premium.sql",
+      "sha1": "03034a5ea3ab4a6bad6fe47027047ec0d862212d",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0006_chat_workflow.sql",
+      "sha1": "e005b00387a29d33fd70cc7c11aaa08b518f109c",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0007_support_history.sql",
+      "sha1": "6f487d6dfc7150918243ea22d283abfa3fc43ccc",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/0008_legacy_premium.sql",
+      "sha1": "337354a2fa437cc1e420e8ef128b3efc670551bc",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/meta/0000_snapshot.json",
+      "sha1": "2db37c7bca4ad26d69d76512a904423daba0a18f",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/meta/0001_snapshot.json",
+      "sha1": "fa1b74ba7554ef194da3d482c2efce1e4c42b362",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/meta/0002_snapshot.json",
+      "sha1": "101437cb0b969fa748c62f6dc0cbf949fab2831c",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "migrations/meta/_journal.json",
+      "sha1": "a01b3bea6ae067edaae0350c8a8bdace6f271dcd",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "next.config.ts",
+      "sha1": "e040310d57b8b014e4167faf2d4842a785f87a96",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "package-lock.json",
+      "sha1": "ecb3818cb826da6e5b8e5135220ecdc05c75fc62",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "package.json",
+      "sha1": "68818f89e526803d3341a5550f57ff0a8ad4fe48",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/design-car.jpg",
+      "sha1": "7a36a411fc0b811ff6ca4bc210b1e407f0a20f09",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/favicon.svg",
+      "sha1": "ebfd5f5a0251761714da9403a7cd72131f9877ff",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/icon-192.png",
+      "sha1": "d0a20eb0cc7e60f721ece6a57f605ec5d9a1263b",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/icon-512.png",
+      "sha1": "f0fbece86e07c7f50823c3167c3ba2299123e27b",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/images/aplicatie-intretinere-auto-640.webp",
+      "sha1": "d2bf1a62efa3c222177d619ae73f87d404c329aa",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/images/aplicatie-intretinere-auto.webp",
+      "sha1": "f5f17e201fa0b667428494c847ebd486f213ac46",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/images/evidenta-cheltuieli-auto.svg",
+      "sha1": "6e65d4f92f144c16f242f4423178d5e616a9600e",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/images/istoric-intretinere-auto.svg",
+      "sha1": "6f12af862f0cd3d7e8b74f0736ee77b81d1cc112",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/images/organizare-documente-auto.svg",
+      "sha1": "e1374352c6c20fe38f014afa0393c60a0d93fb3c",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "public/sw.js",
+      "sha1": "c37ab8d7eff52d9ca6ba2ba38da2d4035ac14223",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "scripts/backup.ts",
+      "sha1": "cde8a77915a3fed33a7180f9c65bdb471769f566",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "scripts/check-config.ts",
+      "sha1": "65e3da140a2358371f8e3c532195ccaa6625cb6d",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "scripts/identify-founder.ts",
+      "sha1": "947269c6100158559781f404c1686e36a01c931d",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "scripts/migrate.ts",
+      "sha1": "f88beade9a83f80e8bb1c05b80d129acb9b0073e",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "scripts/run-reminders.ts",
+      "sha1": "269ff84358df39489b0c104123a55771ab004436",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "scripts/set-admin.ts",
+      "sha1": "509a24bd7eb76a1b93915ffc60d4f9855d382621",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/autocare-ui.css",
+      "sha1": "cacf97c955b0be5300dde6f830c142475c12ea16",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/design-system.css",
+      "sha1": "f1d788b6efb88cc2945b0aa458344e0fdb20bd8b",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/globals.css",
+      "sha1": "4dc7adddd37c9f156aa404799744b67ab8b73cdf",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/layout.tsx",
+      "sha1": "731d4f00f13ba1afa7a69c26c663483339bd2479",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/manifest.ts",
+      "sha1": "5cdcc36fd878e0ed40cc342055cbe3c803dc1616",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/opengraph-image.tsx",
+      "sha1": "8d3f6e30c635dfb6815f261572b8b20e040b7ee5",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/page.tsx",
+      "sha1": "b61595826cdd65ac0e774af6798355a8d73028a7",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/premium.css",
+      "sha1": "487177de19043d0bd68b61ebb141cff06fad5dec",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/robots.ts",
+      "sha1": "33f79f0e9d4a2954a1815ea7d8a088058c980ace",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/sitemap.ts",
+      "sha1": "117f320bcab311588e11b3bb44127a0154a531b6",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/auth-form.tsx",
+      "sha1": "733414009cc537081afc33eea70aa4b3f7753ca7",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/automotive-hero.tsx",
+      "sha1": "d8a3fa1682415a97a7c8cda8b7dea8528d2b3028",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/brand.tsx",
+      "sha1": "670c0777207c9a2ee04af5d774aca11133806576",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/car-art.tsx",
+      "sha1": "9d3e9345b43685a0ee3c9e07953c5b70208e4939",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/dashboard.tsx",
+      "sha1": "70c197683fe0dc98e602ebe830809ff15c9fb66f",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/founder-panel.tsx",
+      "sha1": "11f2de7cd11bf9eebd6823b06638536c8d008af5",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/garage-home.tsx",
+      "sha1": "5a358e8716b163cb9aa54420481f56448443768f",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/membership.tsx",
+      "sha1": "bcccb521120cc7dcde958890138d7b51a692cb75",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/public-shell.tsx",
+      "sha1": "10c7f69a897c5abd358bb036e5354fbf1288b953",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/push-settings.tsx",
+      "sha1": "d63f76bdc641ed7cee88b694755dcdd5844a3c98",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/record-editor.tsx",
+      "sha1": "b759c7c1756bbfdcaeb678bbe6ac69f353fecc38",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/search-console-settings.tsx",
+      "sha1": "9122aaa47fc1a8ca7f00d3f6c0174bdedc87e12a",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/seo-content.tsx",
+      "sha1": "d7f3d25e5d75a9615ab7070ae51c4ba003c23afa",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/components/support-chat.tsx",
+      "sha1": "42f0aae8646294310efdf028fafabad43a4eba0a",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/auth-client.ts",
+      "sha1": "7b20e5a3b7266638d5c2384a66ae38eac84e06d1",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/auth-messages.ts",
+      "sha1": "d8fd7a753c7a89a8faed41edcc40803a9fca5e3b",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/auth.ts",
+      "sha1": "71d9861366b0c5ec0ea9f8fb41fef6427e9060f7",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/backup.ts",
+      "sha1": "fb5baba78b5d57c2afc4ee3a5226574f8f63b69b",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/billing.ts",
+      "sha1": "8d467bb18033bc87484eb80b0f16546576b76759",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/canonical.ts",
+      "sha1": "19ca35b4843815bb688b58481d1db54736fe6e87",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/config.ts",
+      "sha1": "c77402a219accef6ebff59fa9ae75b737da2b29e",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/dashboard-home.ts",
+      "sha1": "99b3249d62a105207fd1aa8de16a32fbc91dedda",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/db.ts",
+      "sha1": "ce570bd7741607ae3041f4a499a7705559c471f9",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/email-events.ts",
+      "sha1": "33c08ea6a5db187c6b0237fa85ae64f5b28f4b9e",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/founder.ts",
+      "sha1": "a3d5d7b233bb800ba18529a202aba680f460f4db",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/google-verification-server.ts",
+      "sha1": "1c05f08405bdb91982f607c1672c35a10890077e",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/google-verification.ts",
+      "sha1": "4bcbb7c7b64e9d947ec8c47f7ba852560c9d21c3",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/guides.ts",
+      "sha1": "9f68778c2163a507b0680b9b53fdbec76cdb78d9",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/mail.ts",
+      "sha1": "45d74c2d56403ac087330e24eb4f14853ca7a65e",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/navigation.ts",
+      "sha1": "eb3c44503dd4d6c55ad405700221611757d15091",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/pages.ts",
+      "sha1": "f6da5792599d51a1f77f30b9f016c34056e75cf2",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/permissions.ts",
+      "sha1": "8030eb39cbf6c182cd03fb96ad683b05db6ee5d9",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/pricing-display.ts",
+      "sha1": "166cafab1565b09d41d12266e413a99a6e950539",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/pricing.ts",
+      "sha1": "8588e0c22f09585cb943376a88496e3c12e9b3e1",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/record-filters.ts",
+      "sha1": "31e79a4f4912d078cef8ebfeffec26749b491b45",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/reminders.ts",
+      "sha1": "4eb1b843e8a59379439f936b560f5fb5515507f4",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/schema.ts",
+      "sha1": "235ed08907fe2574959d18ab572f6cd6ceb58ac7",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/seo.ts",
+      "sha1": "e6044ce5765b4d96d3cb82a444a47b764b2e1211",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/service.ts",
+      "sha1": "992b64770ec3644f7169164046271f0cd50cda0b",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/support-chat.ts",
+      "sha1": "0bb334a8c3d6c66457203acae3c89beec2ece9d9",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/lib/validation.ts",
+      "sha1": "ab176a11915bac68e49cef7324b2c841913894b2",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/proxy.ts",
+      "sha1": "97bcf681b56dd53f11b556a206563391bf537cd5",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha1": "6b92ebabb894b5526e966ce057e1ed427357bb8a",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "vercel.json",
+      "sha1": "293c8fef96316b9212b5b3a40c7475edcde1a106",
+      "verification": "deployment-file-tree-sha1"
+    },
+    {
+      "path": "src/app/[slug]/page.tsx",
+      "sha1": "2cd6ee1b0cdf6fec368574f574de0304bdf9f58f",
+      "verification": "content-addressed-deployment-retrieval",
+      "responseTruncated": true
+    },
+    {
+      "path": "src/app/admin/page.tsx",
+      "sha1": "81bb1a2c3083f8e9a9398229e0cc1ad01a61d271",
+      "verification": "content-addressed-deployment-retrieval",
+      "responseTruncated": false
+    },
+    {
+      "path": "src/app/api/auth/[...all]/route.ts",
+      "sha1": "50d08c3d224f6693a75f52762a32bd1d33ac77cf",
+      "verification": "content-addressed-deployment-retrieval",
+      "responseTruncated": false
+    },
+    {
+      "path": "src/app/api/v1/[...path]/route.ts",
+      "sha1": "8aecff86418c5ce67f526a568b633d043077c10a",
+      "verification": "content-addressed-deployment-retrieval",
+      "responseTruncated": true
+    },
+    {
+      "path": "src/app/cont/page.tsx",
+      "sha1": "e9704c08dd9291de482a91b6922f0877efb2f057",
+      "verification": "content-addressed-deployment-retrieval",
+      "responseTruncated": false
+    },
+    {
+      "path": "src/app/ghiduri/[slug]/page.tsx",
+      "sha1": "f02489990e72c58bf09164d6060fcc04a359fa30",
+      "verification": "content-addressed-deployment-retrieval",
+      "responseTruncated": true
+    },
+    {
+      "path": "src/app/ghiduri/page.tsx",
+      "sha1": "12d445e153c125c13238db3ec70369da1a3d3fcf",
+      "verification": "content-addressed-deployment-retrieval",
+      "responseTruncated": true
+    },
+    {
+      "path": "src/app/previzualizare/page.tsx",
+      "sha1": "8414453141462c0717ab97297d0bf4a48d4e5df8",
+      "verification": "content-addressed-deployment-retrieval",
+      "responseTruncated": true
+    },
+    {
+      "path": "src/app/start/route.ts",
+      "sha1": "e087e2a93a41b7690b52839213b52bf40e219bf5",
+      "verification": "content-addressed-deployment-retrieval",
+      "responseTruncated": false
+    }
+  ]
+}

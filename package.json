@@ -1,0 +1,53 @@
+{
+  "name": "autocare",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "db:migrate": "node --import tsx scripts/migrate.ts",
+    "check:config": "node --import tsx scripts/check-config.ts",
+    "backup": "node --import tsx scripts/backup.ts",
+    "admin:grant": "node --import tsx scripts/set-admin.ts",
+    "lint": "eslint src scripts tests",
+    "founder:identify": "node --import tsx scripts/identify-founder.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "latest",
+    "better-auth": "1.7.11",
+    "drizzle-orm": "0.45.4",
+    "lucide-react": "latest",
+    "next": "16.4.2",
+    "pdf-lib": "latest",
+    "pg": "latest",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "stripe": "latest",
+    "svix": "^2.8.0",
+    "web-push": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "latest",
+    "@types/pg": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@types/web-push": "latest",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "tsx": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "^8.72.0"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
+  }
+}

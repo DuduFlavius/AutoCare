@@ -1,0 +1,126 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> autocare@0.1.0 test
+> node --import tsx --test tests/*.test.ts
+
+✔ Deployment and legacy document links redirect to canonical while preserving the requested page (0.98555ms)
+✔ Canonical navigation leaves API mutations, other projects, development and preview trust unchanged (0.246838ms)
+✔ Authentication failures explain wrong credentials, duplicate accounts and origin mismatch in Romanian (0.287549ms)
+Migration applied: 0000_previous_santa_claus.sql
+Migration applied: 0001_integrity.sql
+Migration applied: 0001_secret_changeling.sql
+Migration applied: 0002_white_millenium_guard.sql
+Migration applied: 0003_notification_read.sql
+Migration applied: 0003_photo_integrity.sql
+Migration applied: 0004_support_chat.sql
+Migration applied: 0005_0_support_threads.sql
+Migration applied: 0005_founder_premium.sql
+Migration applied: 0006_chat_workflow.sql
+Migration applied: 0007_support_history.sql
+Migration applied: 0008_legacy_premium.sql
+Migration applied: 0000_previous_santa_claus.sql
+Migration applied: 0001_integrity.sql
+Migration applied: 0001_secret_changeling.sql
+Migration applied: 0002_white_millenium_guard.sql
+Migration applied: 0003_notification_read.sql
+Migration applied: 0003_photo_integrity.sql
+Migration applied: 0004_support_chat.sql
+Migration applied: 0005_0_support_threads.sql
+Migration applied: 0005_founder_premium.sql
+Migration applied: 0006_chat_workflow.sql
+Migration applied: 0007_support_history.sql
+Migration applied: 0008_legacy_premium.sql
+✔ Encrypted full backup restores into an empty PostgreSQL-compatible database and rejects wrong key/nonempty target (5149.198422ms)
+Migration applied: 0000_previous_santa_claus.sql
+Migration applied: 0001_integrity.sql
+Migration applied: 0001_secret_changeling.sql
+Migration applied: 0002_white_millenium_guard.sql
+Migration applied: 0003_notification_read.sql
+Migration applied: 0003_photo_integrity.sql
+Migration applied: 0004_support_chat.sql
+Migration applied: 0005_0_support_threads.sql
+Migration applied: 0005_founder_premium.sql
+Migration applied: 0006_chat_workflow.sql
+Migration applied: 0007_support_history.sql
+Migration applied: 0008_legacy_premium.sql
+2026-10-20T07:06:28.054Z WARN [Better Auth]: Rate limiting could not determine a client IP and is falling back to a single shared per-path bucket. Ensure your runtime forwards a trusted client IP header, then set `advanced.ipAddress.ipAddressHeaders` or `advanced.ipAddress.trustedProxies` so the address can be resolved.
+2026-10-20T07:06:28.302Z WARN [Better Auth]: Invalid password
+✔ 01 Registration, email verification, login, session and wrong password (3701.667573ms)
+✔ 02 Password recovery token is required and can reset a password (219.836742ms)
+✔ 03 Car create/edit, free limit including concurrent attempts (19.570955ms)
+✔ 04 Strict expiry validation, all offsets, past date, month and DST/timezones (1.546059ms)
+✔ 05 Records enforce owner, track changes, and keep expiry incomplete if omitted (33.792808ms)
+✔ 06 Scheduler offsets, date boundary, deduplication and acceptance (142.02202ms)
+✔ 07 Retry is bounded; parallel workers do not double claim; archive suppresses (138.816253ms)
+✔ 08 Mileage uses manual odometer and timezone/hour preferences are respected (38.934345ms)
+✔ 09 Private attachment authentication, ownership, MIME and size checks (18.762969ms)
+✔ 10 Cost aggregation is exact and CSV mitigates formula injection (0.640737ms)
+✔ 11 Cryptographic Stripe signatures, idempotency, failed payments and cancellation (22.662702ms)
+✔ 12 Server gates exports, plan upgrades and preferences; GDPR JSON remains free (78.941949ms)
+✔ 13 Server role checks and CSRF reject privilege escalation and foreign origins (41.59245ms)
+✔ 14 Verified delivery callback is distinct from provider acceptance (17.682175ms)
+✔ 15 Account data cascade removes files and records from active database (24.472574ms)
+✔ 16 Vehicle photos stay private and reject document files (22.532799ms)
+✔ 17 Full refund of latest invoice revokes Premium and stale subscription events cannot restore it (16.574291ms)
+✔ 18 Free plan cannot receive advanced statistics or gain Premium from checkout URL (18.805692ms)
+✔ 19 Scheduler is protected; push rejects arbitrary endpoints; body limits apply without Content-Length (9.91088ms)
+✔ 19b Logo resolves a verified session without exposing data; anonymous stays public (32.833149ms)
+✔ 20 Logout revokes session on server (13.708502ms)
+✔ 21 Direct auth deletion cannot bypass billing guard; authenticated deletion removes the account (410.389252ms)
+✔ Empty garage has no invented costs, deadlines or service recommendations (28.949516ms)
+✔ Dashboard uses active records of active vehicles and prioritizes overdue dates (4.966768ms)
+✔ Current-month costs use account timezone, omit unknowns and do not treat documents as expense (0.579686ms)
+✔ Only verified current sessions target the private dashboard (0.253228ms)
+Migration applied: 0000_previous_santa_claus.sql
+Migration applied: 0001_integrity.sql
+Migration applied: 0001_secret_changeling.sql
+Migration applied: 0002_white_millenium_guard.sql
+Migration applied: 0003_notification_read.sql
+Migration applied: 0003_photo_integrity.sql
+Migration applied: 0004_support_chat.sql
+Migration applied: 0005_0_support_threads.sql
+Migration applied: 0005_founder_premium.sql
+Migration applied: 0006_chat_workflow.sql
+Migration applied: 0007_support_history.sql
+Migration applied: 0008_legacy_premium.sql
+✔ Founder is configuration-bound; profile and stored founder cannot escalate (3058.8876ms)
+✔ Manual Premium extends, revokes, supports explicit lifetime and never creates payments (103.297253ms)
+✔ Suspension denies protected operations and founder remains protected (49.572756ms)
+✔ RON prices and exact yearly savings are server-derived (3.450804ms)
+✔ Calendar extension clamps month end and document validation rejects reversed dates (2.888324ms)
+✔ Documents and service persist minimal/full data, edit without duplicates and archive safely (113.109402ms)
+✔ Legacy manual subscription imports without payment and revocation cannot leave hidden Premium (54.542032ms)
+✔ Account, session, vehicle and document survive a full application process restart without email service (6997.146804ms)
+✔ Document states are exclusive; missing dates and archived documents are explicit (16.306863ms)
+✔ Service totals exclude unknown costs, include free work and do not invent next service (1.168746ms)
+Migration applied: 0000_previous_santa_claus.sql
+Migration applied: 0001_integrity.sql
+Migration applied: 0001_secret_changeling.sql
+Migration applied: 0002_white_millenium_guard.sql
+Migration applied: 0003_notification_read.sql
+Migration applied: 0003_photo_integrity.sql
+Migration applied: 0004_support_chat.sql
+Migration applied: 0005_0_support_threads.sql
+Migration applied: 0005_founder_premium.sql
+Migration applied: 0006_chat_workflow.sql
+Migration applied: 0007_support_history.sql
+Migration applied: 0008_legacy_premium.sql
+✔ Support: messages persist, owner isolation, server rejects role injection (3286.161701ms)
+✔ Support: founder join announcement uses real name and is concurrent/idempotent (83.648507ms)
+✔ Support: assistant and administrator announce their actual rank (63.539948ms)
+✔ Support: clients cannot finalize/trash/restore; trash requires completion and is reversible (102.860612ms)
+✔ Support: a new customer message after completion starts a new thread, concurrent sends reuse it (29.540193ms)
+✔ Support: history pagination preserves tied timestamps without duplicates (37.930121ms)
+Migration applied: 0005_0_support_threads.sql
+Migration applied: 0005_0_support_threads.sql
+✔ Support: legacy support import is lossless and rerunning migration does not duplicate (76.345221ms)
+✔ Support: customer deletion cascades through their private conversations and messages (22.297156ms)
+✔ Support: assignment, read markers and private attachments enforce permissions (115.296701ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 49
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7240.078503

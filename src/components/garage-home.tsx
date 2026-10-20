@@ -1,0 +1,705 @@
+'use client';
+import { useState } from 'react';
+import AutomotiveHero from './automotive-hero';
+import { dashboardHome } from '@/lib/dashboard-home';
+import {
+  ArrowUpRight,
+  CarFront,
+  Files,
+  Wrench,
+  Wallet,
+  CalendarDays,
+  ArrowRight,
+  Plus,
+} from 'lucide-react';
+import type { dashboard } from '@/lib/service';
+type Data = Awaited<ReturnType<typeof dashboard>>;
+type Entry = Data['records'][number];
+const money = (value: number) =>
+  new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(value / 100);
+const date = (value: string | null) =>
+  value
+    ? new Date(value + 'T12:00:00').toLocaleDateString('ro-RO', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : 'Dată necompletată';
+const kindNames: Record<string, string> = {
+  document: 'Document',
+  service: 'Întreținere',
+  expense: 'Cheltuială',
+};
+export function GarageHome({
+  data,
+  name,
+  navigate,
+  add,
+  open,
+}: {
+  data: Data;
+  name: string;
+  navigate: (tab: string) => void;
+  add: (kind: 'vehicle' | 'document' | 'service' | 'expense') => void;
+  open: (record: Entry) => void;
+}) {
+  const home = dashboardHome(data);
+  const { cars, records, attention: due } = home;
+  const [selectedCar, setSelectedCar] = useState('');
+  const car = cars.find((v) => v.id === selectedCar) || cars[0];
+  const photo =
+    car && data.photos.some((p) => p.vehicleId === car.id)
+      ? car.id.startsWith('design-')
+        ? '/design-car.jpg'
+        : '/api/v1/vehicles/' + car.id + '/photo'
+      : undefined;
+  const vehicle = (id: string) => {
+    const v = cars.find((v) => v.id === id);
+    return v ? `${v.brand} ${v.model} · ${v.plate}` : 'Mașină';
+  };
+  return (
+    <div className="overview-stack">
+      {cars.length > 1 && (
+        <label className="dashboard-car-select">
+          Mașina selectată
+          <select value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
+            {cars.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.brand} {v.model} · {v.plate}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      <div className="automotive-stage">
+        <AutomotiveHero
+          photo={photo}
+          vehicleName={car ? `${car.brand} ${car.model} · ${car.plate}` : undefined}
+          name={name}
+          hasCars={cars.length > 0}
+          navigate={navigate}
+          add={add}
+        />
+        {home.upcoming[0] && (
+          <button className="hero-next-deadline" onClick={() => open(home.upcoming[0])}>
+            <CalendarDays size={20} />
+            <span>
+              <small>URMĂTORUL TERMEN</small>
+              <strong>{home.upcoming[0].category || home.upcoming[0].title}</strong>
+              <span>{date(home.upcoming[0].expiresAt)}</span>
+            </span>
+            <ArrowUpRight size={17} />
+          </button>
+        )}
+      </div>
+      <section className="for-you-section" aria-labelledby="for-you-title">
+        <div className="section-title">
+          <div>
+            <p className="eyebrow">ESENȚIALUL, LA ÎNDEMÂNĂ</p>
+            <h2 id="for-you-title">Pentru tine</h2>
+          </div>
+          <span className="micro">Din datele înregistrate în cont</span>
+        </div>
+        <div className="for-you-grid">
+          <button
+            className="card for-you-card"
+            onClick={() => (home.upcoming[0] ? open(home.upcoming[0]) : navigate('Calendar'))}
+          >
+            <CalendarDays size={22} />
+            <span>{home.upcoming[0]?.category || 'Următorul termen'}</span>
+            <strong>
+              {home.upcoming[0] ? date(home.upcoming[0].expiresAt) : 'Niciun termen planificat'}
+            </strong>
+            <p>{home.upcoming[0]?.title || 'Adaugă un document sau planifică o intervenție.'}</p>
+            <ArrowUpRight size={16} />
+          </button>
+          <button className="card for-you-card" onClick={() => navigate('Documente')}>
+            <Files size={22} />
+            <span>Documente</span>
+            <strong>
+              {home.documents.length
+                ? home.documentAttention + ' necesită atenție'
+                : 'Primul document'}
+            </strong>
+            <p>
+              {home.documents.length
+                ? 'Consultă actele și datele lor de expirare.'
+                : 'Adaugă primul document pentru a urmări data expirării.'}
+            </p>
+            <ArrowUpRight size={16} />
+          </button>
+          <button className="card for-you-card" onClick={() => navigate('Întreținere')}>
+            <Wrench size={22} />
+            <span>Întreținere</span>
+            <strong>
+              {home.services.length
+                ? home.services.length + ' operațiuni în jurnal'
+                : 'Istoricul începe cu tine'}
+            </strong>
+            <p>
+              {home.services.length
+                ? 'Revizii, reparații și detaliile intervențiilor.'
+                : 'Înregistrează prima revizie pentru a-ți construi istoricul de service.'}
+            </p>
+            <ArrowUpRight size={16} />
+          </button>
+          <button className="card for-you-card" onClick={() => navigate('Cheltuieli')}>
+            <Wallet size={22} />
+            <span>Cheltuieli · luna curentă</span>
+            <strong>
+              {home.expenseCount ? money(home.monthBani) : 'Nicio cheltuială înregistrată'}
+            </strong>
+            <p>
+              {home.unknownCosts
+                ? home.unknownCosts + ' costuri necunoscute, excluse din total.'
+                : home.expenseCount
+                  ? 'Costuri cunoscute de service și cheltuieli.'
+                  : 'Adaugă cheltuielile pentru a vedea cât te costă mașina.'}
+            </p>
+            <ArrowUpRight size={16} />
+          </button>
+        </div>
+      </section>
+      <section className="next-step card">
+        <div>
+          <p className="eyebrow">DE REȚINUT</p>
+          <h3>{due.length ? 'Prioritățile tale' : 'Următorul pas'}</h3>
+        </div>
+        <div className="next-step-items">
+          {due.length ? (
+            due.slice(0, 3).map((r) => (
+              <button key={r.id} onClick={() => open(r)}>
+                <span
+                  className={
+                    'pill ' + (r.status.days !== null && r.status.days < 0 ? 'expired' : 'soon')
+                  }
+                >
+                  {r.status.days !== null && r.status.days < 0
+                    ? 'Termen depășit'
+                    : r.expiresAt
+                      ? date(r.expiresAt)
+                      : 'Prag de kilometraj'}
+                </span>
+                <strong>{r.title}</strong>
+                <small>{vehicle(r.vehicleId)}</small>
+                <ArrowUpRight size={16} />
+              </button>
+            ))
+          ) : (
+            <div className="next-step-empty">
+              <p>
+                {!cars.length
+                  ? 'Adaugă prima mașină pentru a începe.'
+                  : !home.documents.length
+                    ? 'Adaugă primul document și urmărește termenele importante.'
+                    : !home.services.length
+                      ? 'Înregistrează prima revizie și păstrează istoricul la îndemână.'
+                      : 'Nu ai termene apropiate în înregistrările tale.'}
+              </p>
+              <button
+                onClick={() =>
+                  !cars.length
+                    ? add('vehicle')
+                    : !home.documents.length
+                      ? add('document')
+                      : !home.services.length
+                        ? add('service')
+                        : navigate('Calendar')
+                }
+              >
+                {!cars.length
+                  ? 'Adaugă mașină'
+                  : !home.documents.length
+                    ? 'Adaugă document'
+                    : !home.services.length
+                      ? 'Adaugă operațiune'
+                      : 'Vezi calendarul'}
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+      <section className="dashboard-secondary-stats" aria-label="Rezumatul garajului">
+        {[
+          { title: 'Mașini', value: String(cars.length), tab: 'Garaj' },
+          {
+            title: 'Documente în termen · peste 30 zile',
+            value: String(home.validDocuments),
+            tab: 'Documente',
+          },
+          { title: 'Termene care necesită atenție', value: String(due.length), tab: 'Calendar' },
+          {
+            title: 'Costuri cunoscute · luna curentă',
+            value: money(home.monthBani),
+            tab: 'Cheltuieli',
+          },
+        ].map((stat) => (
+          <button className="card stat" key={stat.title} onClick={() => navigate(stat.tab)}>
+            <span className="small muted">{stat.title}</span>
+            <strong className="value">{stat.value}</strong>
+            <ArrowUpRight size={14} />
+          </button>
+        ))}
+      </section>
+      <div className="overview-columns">
+        <section className="card">
+          <div className="section-title">
+            <div>
+              <p className="eyebrow">MAȘINILE TALE</p>
+              <h3>Acasă, în garaj.</h3>
+            </div>
+            <button className="close small" onClick={() => navigate('Garaj')}>
+              Vezi garajul <ArrowUpRight size={16} />
+            </button>
+          </div>
+          {cars.length ? (
+            <div className="mini-garage">
+              {cars.slice(0, 4).map((v) => (
+                <button className="mini-vehicle" key={v.id} onClick={() => navigate('Garaj')}>
+                  <div className="vehicle-visual">
+                    {data.photos.some((p) => p.vehicleId === v.id) ? (
+                      <img
+                        src={
+                          v.id.startsWith('design-')
+                            ? '/design-car.jpg'
+                            : '/api/v1/vehicles/' + v.id + '/photo'
+                        }
+                        alt={v.brand + ' ' + v.model}
+                      />
+                    ) : (
+                      <>
+                        <CarFront size={48} strokeWidth={1} />
+                        <span>Adaugă fotografia ta</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="mini-details">
+                    <span className="micro">
+                      {v.year} · {v.fuel}
+                    </span>
+                    <h3>
+                      {v.brand} {v.model}
+                    </h3>
+                    <div className="between">
+                      <span className="plate">{v.plate}</span>
+                      <span className="small muted">{v.odometer.toLocaleString('ro-RO')} km</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="designed-empty">
+              <CarFront size={42} strokeWidth={1} />
+              <h3>Primul drum începe aici.</h3>
+              <p>Adaugă mașina și păstrează toate informațiile ei împreună.</p>
+              <button className="primary" onClick={() => add('vehicle')}>
+                <Plus size={16} /> Adaugă prima mașină
+              </button>
+            </div>
+          )}
+        </section>
+        <section className="card">
+          <div className="section-title">
+            <h3>Următoarele activități</h3>
+            <button className="close small" onClick={() => navigate('Calendar')}>
+              Vezi calendarul <ArrowRight size={14} />
+            </button>
+          </div>
+          {records
+            .filter((r) => r.status.days != null && r.status.days >= 0)
+            .sort((a, b) => (a.expiresAt || '').localeCompare(b.expiresAt || ''))
+            .slice(0, 4)
+            .map((r) => (
+              <button className="event-line" key={r.id} onClick={() => open(r)}>
+                <span className="list-icon">
+                  <CalendarDays size={17} />
+                </span>
+                <span className="list-grow">
+                  <strong>{r.title}</strong>
+                  <span className="micro">{vehicle(r.vehicleId)}</span>
+                </span>
+                <span className="micro">{date(r.expiresAt)}</span>
+              </button>
+            ))}
+          {!records.some((r) => r.status.days != null && r.status.days >= 0) && (
+            <p className="muted small">Nu ai activități viitoare înregistrate.</p>
+          )}
+        </section>
+      </div>
+      <div className="quick-actions">
+        {[
+          [Files, 'Document nou', 'document'],
+          [Wrench, 'Lucrare de service', 'service'],
+          [Wallet, 'Cheltuială nouă', 'expense'],
+        ].map(([Icon, title, kind]) => (
+          <button
+            key={String(kind)}
+            disabled={!cars.length}
+            onClick={() => add(kind as 'document' | 'service' | 'expense')}
+          >
+            {typeof Icon !== 'string' && <Icon size={21} />}
+            <span>{String(title)}</span>
+            <Plus size={17} />
+          </button>
+        ))}
+      </div>
+      <section className="card">
+        <div className="section-title">
+          <div>
+            <p className="eyebrow">JURNALUL GARAJULUI</p>
+            <h3>Ultimele înregistrări</h3>
+          </div>
+          <button className="close small" onClick={() => navigate('Istoric auto')}>
+            Vezi istoricul <ArrowUpRight size={16} />
+          </button>
+        </div>
+        {records.length ? (
+          records.slice(0, 5).map((r) => (
+            <button className="event-line" key={r.id} onClick={() => open(r)}>
+              <span className="list-icon">
+                {r.kind === 'document' ? (
+                  <Files size={19} />
+                ) : r.kind === 'service' ? (
+                  <Wrench size={19} />
+                ) : (
+                  <Wallet size={19} />
+                )}
+              </span>
+              <span className="list-grow">
+                <strong>{r.title}</strong>
+                <span className="small muted">
+                  {vehicle(r.vehicleId)} · {date(r.date)}
+                </span>
+              </span>
+              <span className="small">
+                {r.amountKnown === false
+                  ? 'Cost necunoscut'
+                  : r.amountBani
+                    ? money(r.amountBani)
+                    : kindNames[r.kind]}
+              </span>
+            </button>
+          ))
+        ) : (
+          <p className="muted">Istoricul va prinde contur odată cu prima înregistrare.</p>
+        )}
+      </section>
+    </div>
+  );
+}
+export function VehicleJournal({ data, open }: { data: Data; open: (record: Entry) => void }) {
+  const [car, setCar] = useState(''),
+    [kind, setKind] = useState(''),
+    [from, setFrom] = useState(''),
+    [to, setTo] = useState('');
+  const rows = data.records
+    .filter(
+      (r) =>
+        (!car || r.vehicleId === car) &&
+        (!kind || r.kind === kind) &&
+        (!from || (!!r.date && r.date >= from)) &&
+        (!to || (!!r.date && r.date <= to)),
+    )
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  return (
+    <section className="card">
+      <div className="toolbar">
+        <select aria-label="Mașină" value={car} onChange={(e) => setCar(e.target.value)}>
+          <option value="">Toate mașinile</option>
+          {data.vehicles.map((v) => (
+            <option key={v.id} value={v.id}>
+              {v.brand} {v.model} · {v.plate}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="Tip de activitate"
+          value={kind}
+          onChange={(e) => setKind(e.target.value)}
+        >
+          <option value="">Toate activitățile</option>
+          {Object.entries(kindNames).map(([key, label]) => (
+            <option value={key} key={key}>
+              {label}
+            </option>
+          ))}
+        </select>
+        <label>
+          De la
+          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+        </label>
+        <label>
+          Până la
+          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        </label>
+      </div>
+      <p className="micro">
+        Cronologia înregistrărilor existente, inclusiv cele arhivate. Fotografiile și citirile
+        separate de kilometraj nu sunt incluse în această listă.
+      </p>
+      {rows.length ? (
+        <div className="journal">
+          {rows.map((r) => {
+            const v = data.vehicles.find((v) => v.id === r.vehicleId);
+            return (
+              <button className="journal-entry" onClick={() => open(r)} key={r.id}>
+                <span className="journal-date">
+                  {date(r.date)}
+                  <small>{kindNames[r.kind]}</small>
+                </span>
+                <span className="list-grow">
+                  <strong>{r.title}</strong>
+                  <span className="muted small">
+                    {v?.brand} {v?.model} · {v?.plate}
+                  </span>
+                  <span className="small">
+                    {r.odometer != null ? r.odometer.toLocaleString('ro-RO') + ' km' : ''}
+                    {r.provider ? ' · ' + r.provider : ''}
+                  </span>
+                  {r.notes && <span className="small muted">{r.notes}</span>}
+                  {r.cancelled && <span className="pill archived">Arhivat</span>}
+                </span>
+                <strong>{r.amountKnown === false ? 'Cost necunoscut' : money(r.amountBani)}</strong>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="designed-empty">
+          <CalendarDays size={38} />
+          <h3>Nicio înregistrare în această perioadă.</h3>
+          <p>Schimbă filtrele sau adaugă documente, lucrări și cheltuieli.</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function VehicleSheet({
+  data,
+  id,
+  open,
+  edit,
+}: {
+  data: Data;
+  id: string;
+  open: (record: Entry) => void;
+  edit: () => void;
+}) {
+  const v = data.vehicles.find((v) => v.id === id);
+  if (!v) return null;
+  const entries = data.records.filter((r) => r.vehicleId === id);
+  const active = entries.filter((r) => !r.cancelled);
+  const cost = active.reduce((sum, r) => sum + r.amountBani, 0);
+  const readings = entries
+    .filter((r) => r.odometer != null)
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  return (
+    <div className="vehicle-sheet">
+      <div className="sheet-overview">
+        {data.photos.some((p) => p.vehicleId === id) ? (
+          <img
+            src={id.startsWith('design-') ? '/design-car.jpg' : '/api/v1/vehicles/' + id + '/photo'}
+            alt={v.brand + ' ' + v.model}
+          />
+        ) : (
+          <div className="vehicle-placeholder">
+            <CarFront size={65} />
+            <span>Adaugă o fotografie din garaj</span>
+          </div>
+        )}
+        <div>
+          <p className="eyebrow">
+            {v.year} · {v.fuel}
+          </p>
+          <h2>
+            {v.brand} {v.model}
+          </h2>
+          <span className="plate">{v.plate}</span>
+          <p className="muted small">
+            {v.engine || 'Motorizare necompletată'}
+            {v.capacity ? ' · ' + v.capacity + ' cm³' : ''}
+            <br />
+            VIN: {v.vin || 'Necompletat'}
+          </p>
+          <button onClick={edit}>Editează datele mașinii</button>
+        </div>
+      </div>
+      <div className="stats">
+        <div className="card">
+          <span className="micro">Kilometraj actual</span>
+          <h3>{v.odometer.toLocaleString('ro-RO')} km</h3>
+        </div>
+        <div className="card">
+          <span className="micro">Cost total înregistrat</span>
+          <h3>{money(cost)}</h3>
+        </div>
+        <div className="card">
+          <span className="micro">Documente active</span>
+          <h3>{active.filter((r) => r.kind === 'document').length}</h3>
+        </div>
+      </div>
+      {v.notes && (
+        <section className="card">
+          <h3>Notițe</h3>
+          <p className="small">{v.notes}</p>
+        </section>
+      )}
+      <section className="card">
+        <h3>Citiri de kilometraj din înregistrări</h3>
+        {readings.length ? (
+          readings.map((r) => (
+            <div className="between small list-row" key={r.id}>
+              <span>
+                {date(r.date)} · {r.title}
+              </span>
+              <strong>{r.odometer?.toLocaleString('ro-RO')} km</strong>
+            </div>
+          ))
+        ) : (
+          <p className="muted small">
+            Nu sunt disponibile citiri istorice în documente, lucrări sau cheltuieli.
+          </p>
+        )}
+      </section>
+      {(['document', 'service', 'expense'] as const).map((kind) => (
+        <section className="card" key={kind}>
+          <h3>
+            {kind === 'document'
+              ? 'Documente și atașamente'
+              : kind === 'service'
+                ? 'Istoric de service'
+                : 'Cheltuieli'}
+          </h3>
+          {entries.filter((r) => r.kind === kind).length ? (
+            entries
+              .filter((r) => r.kind === kind)
+              .map((r) => (
+                <div key={r.id}>
+                  <button className="event-line" onClick={() => open(r)}>
+                    <span className="list-grow">
+                      <strong>{r.title}</strong>
+                      <span className="micro">
+                        {date(r.date)}
+                        {r.expiresAt ? ' · Termen: ' + date(r.expiresAt) : ''}
+                      </span>
+                    </span>
+                    <span className="small">
+                      {r.cancelled
+                        ? 'Arhivat'
+                        : r.amountKnown === false
+                          ? 'Cost necunoscut'
+                          : money(r.amountBani)}
+                    </span>
+                    <ArrowRight size={15} />
+                  </button>
+                  {data.attachments
+                    .filter((f) => f.recordId === r.id)
+                    .map((f) => (
+                      <a
+                        className="attachment-link small"
+                        href={'/api/v1/files/' + f.id}
+                        key={f.id}
+                      >
+                        {f.name} <ArrowUpRight size={13} />
+                      </a>
+                    ))}
+                </div>
+              ))
+          ) : (
+            <p className="muted small">Nicio înregistrare în această secțiune.</p>
+          )}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+export function ReminderInbox({ data, open }: { data: Data; open: (record: Entry) => void }) {
+  const [view, setView] = useState('upcoming');
+  const rows = data.records
+    .filter(
+      (r) => r.kind !== 'expense' && data.vehicles.some((v) => v.id === r.vehicleId && !v.archived),
+    )
+    .filter((r) =>
+      view === 'archived'
+        ? r.cancelled
+        : !r.cancelled &&
+          (view === 'expired'
+            ? r.status.days != null && r.status.days < 0
+            : view === 'incomplete'
+              ? r.status.days == null
+              : r.status.days != null && r.status.days >= 0),
+    )
+    .sort((a, b) => (a.expiresAt || '9999').localeCompare(b.expiresAt || '9999'));
+  return (
+    <section className="card">
+      <div className="section-title">
+        <div>
+          <p className="eyebrow">DOCUMENTE ȘI SERVICE</p>
+          <h3>Centrul de termene</h3>
+        </div>
+        <CalendarDays size={22} />
+      </div>
+      <div className="filter-pills">
+        {[
+          ['upcoming', 'Viitoare'],
+          ['expired', 'Depășite'],
+          ['incomplete', 'De completat'],
+          ['archived', 'Arhivate'],
+        ].map(([key, label]) => (
+          <button key={key} aria-pressed={view === key} onClick={() => setView(key)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      {rows.length ? (
+        rows.map((r) => {
+          const v = data.vehicles.find((v) => v.id === r.vehicleId);
+          return (
+            <button className="event-line" key={r.id} onClick={() => open(r)}>
+              <span className="list-icon">
+                {r.kind === 'document' ? <Files size={18} /> : <Wrench size={18} />}
+              </span>
+              <span className="list-grow">
+                <strong>{r.title}</strong>
+                <span className="micro">
+                  {v?.brand} {v?.model} · {v?.plate}
+                </span>
+                <span className="micro">
+                  {r.expiresAt ? date(r.expiresAt) : 'Completează termenul din înregistrare'}
+                </span>
+              </span>
+              <span className={'pill ' + r.status.state}>
+                {r.cancelled
+                  ? 'Arhivat'
+                  : r.status.days == null
+                    ? 'Fără termen'
+                    : r.status.days < 0
+                      ? 'Termen depășit'
+                      : r.status.days <= 7
+                        ? 'Prioritar'
+                        : r.status.days <= 30
+                          ? 'În curând'
+                          : 'Planificat'}
+              </span>
+              <ArrowRight size={14} />
+            </button>
+          );
+        })
+      ) : (
+        <div className="designed-empty compact">
+          <CalendarDays size={30} />
+          <h3>Niciun termen în această categorie.</h3>
+          <p>Termenele apar după adăugarea documentelor și lucrărilor.</p>
+        </div>
+      )}
+      <p className="micro">
+        Deschide înregistrarea pentru a actualiza termenul. Arhivarea păstrează înregistrarea și
+        oprește alertele asociate. Livrările prin e-mail și push apar separat mai jos.
+      </p>
+    </section>
+  );
+}
