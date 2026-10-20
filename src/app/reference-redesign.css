@@ -275,3 +275,47 @@
 .app-shell .workspace-garage .add-car-tile strong{color:#fff!important;font-size:19px}
 .app-shell .workspace-garage .car-card img,.app-shell .workspace-garage .car-card input[type=file]{display:none!important}
 @media(max-width:760px){.app-shell .workspace-garage .grid3{grid-template-columns:1fr!important}.app-shell .workspace-garage .car-card,.app-shell .workspace-garage .add-car-tile{min-height:0!important}.app-shell .workspace-garage .car-card .row-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* AutoCare unified premium navy theme — all authenticated workspaces */
+.app-shell{--text:#eaf2ff;--muted:#a9bfdd;--line:#294466;--surface:#142947;--surface-2:#1b3456;--bg:#09172c;color:#eaf2ff!important;background:#09172c!important}
+.app-shell .main,.app-shell .main[class*="workspace-"]{background:radial-gradient(ellipse at 75% -10%,#1b3556 0%,#0c1d35 48%,#081528 100%)!important;color:#eaf2ff!important;min-height:calc(100vh - 66px)}
+.app-shell .app-header{background:#0c1b32!important;border-bottom:1px solid #294463!important;color:#eaf2ff!important;box-shadow:none!important}
+.app-shell .app-header .muted,.app-shell .app-header .muted span{color:#b7cce8!important}
+.app-shell .app-header .autocare-header-user{background:#1a3151!important;border:1px solid #385879!important;color:#fff!important;border-radius:12px!important}
+.app-shell .app-header .autocare-header-user:hover{background:#234368!important}
+.app-shell .app-header .autocare-header-identity strong{color:#fff!important}
+.app-shell .app-header .autocare-header-identity small{color:#b5c9e4!important}
+.app-shell .app-header .autocare-header-signout{background:#19304f!important;border:1px solid #385879!important;color:#c5d9f5!important;border-radius:10px!important}
+.app-shell .main .page-head h1,.app-shell .main h1,.app-shell .main h2,.app-shell .main h3,.app-shell .main h4,.app-shell .main .section-title h3{color:#f5f9ff!important}
+.app-shell .main .page-head p,.app-shell .main .muted,.app-shell .main .micro,.app-shell .main .eyebrow,.app-shell .main .subtle,.app-shell .main small{color:#b4c9e5!important}
+.app-shell .main .card,.app-shell .main .stat,.app-shell .main .for-you-card,.app-shell .main .mini-vehicle,.app-shell .main .event-line,.app-shell .main .record-line,.app-shell .main .activity-line,.app-shell .main .document-card,.app-shell .main .expense-card,.app-shell .main .settings-card,.app-shell .main .support-card,.app-shell .main .membership-card,.app-shell .main .timeline-card,.app-shell .main .next-step,.app-shell .main .panel,.app-shell .main .tile{background:linear-gradient(145deg,#182e4d,#10213b)!important;border-color:#304d70!important;color:#eaf2ff!important;box-shadow:0 12px 28px #020b1c28!important}
+.app-shell .main .card strong,.app-shell .main .stat strong,.app-shell .main .card b,.app-shell .main .card .value,.app-shell .main .stat .value{color:#f2f7ff!important}
+.app-shell .main .card p,.app-shell .main .card span,.app-shell .main .card label,.app-shell .main .card small,.app-shell .main .stat label,.app-shell .main .stat span{color:#c0d2e9}
+.app-shell .main .stat .value,.app-shell .main .stat strong{color:#8cb9ff!important}
+.app-shell .main .dashboard-secondary-stats>*,.app-shell .main .dashboard-secondary-stats button,.app-shell .main .overview-columns>.card,.app-shell .main .overview-stack>.card,.app-shell .main .for-you-grid>*{background:linear-gradient(145deg,#192f4e,#10223e)!important;border:1px solid #345275!important;color:#edf5ff!important;border-radius:16px!important}
+.app-shell .main .dashboard-secondary-stats button .value{color:#84b6ff!important}
+.app-shell .main .overview-columns .mini-vehicle,.app-shell .main .mini-vehicle{background:#193352!important;border:1px solid #385b82!important}
+.app-shell .main .mini-vehicle .mini-details h3,.app-shell .main .mini-vehicle strong{color:#fff!important}
+.app-shell .main .mini-vehicle .mini-details span{color:#b9cde6!important}
+.app-shell .main .mini-vehicle img{display:none!important}
+.app-shell .main .event-line,.app-shell .main .record-line,.app-shell .main .activity-line{background:#1b3454!important;border:1px solid #304e73!important;color:#f2f7ff!important}
+.app-shell .main .event-line strong,.app-shell .main .record-line strong{color:#fff!important}
+.app-shell .main .quick-actions button,.app-shell .main .quick-actions a,.app-shell .main .quick-action,.app-shell .main .action-tile,.app-shell .main .next-step-items button{background:#1a3354!important;border:1px solid #375679!important;color:#eaf3ff!important;border-radius:12px!important}
+.app-shell .main .quick-actions button:hover,.app-shell .main .quick-actions a:hover,.app-shell .main .next-step-items button:hover{background:#25466e!important}
+.app-shell .main .button:not(.primary):not(.danger),.app-shell .main button.secondary,.app-shell .main .close{background:#203b60!important;border:1px solid #3a5b82!important;color:#e6f1ff!important}
+.app-shell .main .button.primary,.app-shell .main button.primary{background:linear-gradient(110deg,#327af6,#245fd1)!important;color:#fff!important;border-color:#4c8dff!important}
+.app-shell .main input:not([type="checkbox"]):not([type="radio"]),.app-shell .main select,.app-shell .main textarea,.app-shell .main .search-field,.app-shell .main .search-input{background:#0e213b!important;color:#f0f6ff!important;border:1px solid #365779!important;border-radius:10px!important}
+.app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#8faaca!important}
+.app-shell .main input:focus-visible,.app-shell .main select:focus-visible,.app-shell .main textarea:focus-visible,.app-shell .main button:focus-visible,.app-shell .main a:focus-visible{outline:2px solid #78b2ff!important;outline-offset:2px}
+.app-shell .main table,.app-shell .main thead,.app-shell .main tbody,.app-shell .main tr,.app-shell .main th,.app-shell .main td{background:transparent!important;color:#e4f0ff!important;border-color:#314e70!important}
+.app-shell .main th{color:#b7cce7!important}
+.app-shell .main tr:hover td{background:#203b5c!important}
+.app-shell .main .divider,.app-shell .main hr{border-color:#314b6b!important}
+.app-shell .main .empty-state,.app-shell .main .empty,.app-shell .main .placeholder,.app-shell .main .add-car-tile{background:#122641!important;color:#bfd2eb!important;border-color:#3c5b7e!important}
+.app-shell .main .badge,.app-shell .main .pill,.app-shell .main .tag{border-color:#3b5e86}
+.app-shell .main .workspace-header,.app-shell .main .toolbar,.app-shell .main .filters,.app-shell .main .filter-bar{background:transparent!important;color:#e9f2ff!important}
+.app-shell .main .autocare-vehicle-monogram{display:grid;place-items:center;background:#234b7d!important;color:#9ac8ff!important;border:1px solid #4576ac!important;border-radius:16px!important}
+.app-shell .main .overview-columns .card,.app-shell .main .overview-columns .card *{border-color:#304e70}
+@media(prefers-reduced-motion:reduce){.app-shell *{transition-duration:0.01ms!important;animation-duration:0.01ms!important}}
+@media(max-width:760px){.app-shell .main{overflow-x:hidden}.app-shell .main .overview-columns,.app-shell .main .dashboard-secondary-stats{min-width:0}.app-shell .app-header .autocare-header-identity{max-width:115px;overflow:hidden}}
