@@ -11,6 +11,10 @@ import {
   CalendarDays,
   ArrowRight,
   Plus,
+  CheckCircle2,
+  AlertTriangle,
+  FileText,
+  ShieldAlert,
 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -53,6 +57,11 @@ export function GarageHome({
         ? '/design-car.jpg'
         : '/api/v1/vehicles/' + car.id + '/photo'
       : undefined;
+  const carDocuments = home.documents.filter((r) => r.vehicleId === car?.id);
+  const nextRecords = home.upcoming.filter((r) => r.vehicleId === car?.id);
+  const nearest = nextRecords[0];
+  const documentSoon = carDocuments.filter((r) => r.status.days !== null && r.status.days >= 0 && r.status.days <= 30).length;
+  const documentExpired = carDocuments.filter((r) => r.status.days !== null && r.status.days < 0).length;
   const vehicle = (id: string) => {
     const v = cars.find((v) => v.id === id);
     return v ? `${v.brand} ${v.model} · ${v.plate}` : 'Mașină';
@@ -71,26 +80,44 @@ export function GarageHome({
           </select>
         </label>
       )}
-      <div className="automotive-stage">
-        <AutomotiveHero
-          photo={photo}
-          vehicleName={car ? `${car.brand} ${car.model} · ${car.plate}` : undefined}
-          name={name}
-          hasCars={cars.length > 0}
-          navigate={navigate}
-          add={add}
-        />
-        {home.upcoming[0] && (
-          <button className="hero-next-deadline" onClick={() => open(home.upcoming[0])}>
-            <CalendarDays size={20} />
-            <span>
-              <small>URMĂTORUL TERMEN</small>
-              <strong>{home.upcoming[0].category || home.upcoming[0].title}</strong>
-              <span>{date(home.upcoming[0].expiresAt)}</span>
-            </span>
-            <ArrowUpRight size={17} />
-          </button>
-        )}
+      <div className="autocare-dashboard-feature">
+        <div className="automotive-stage">
+          <AutomotiveHero
+            photo={photo}
+            vehicleName={car ? `${car.brand} ${car.model}` : undefined}
+            vehicleYear={car?.year}
+            vehicleFuel={car?.fuel}
+            vehiclePlate={car?.plate}
+            vehicleKm={car?.odometer}
+            name={name}
+            hasCars={cars.length > 0}
+            navigate={navigate}
+            add={add}
+          />
+        </div>
+        <div className="autocare-dashboard-aside">
+          <div className="autocare-upcoming-panel">
+            <div className="autocare-panel-heading"><h3>Următoarele activități</h3><button onClick={() => navigate('Calendar')}>Vezi calendarul <ArrowUpRight size={16}/></button></div>
+            {nearest ? (
+              <button className="autocare-next-record" onClick={() => open(nearest)}>
+                <span className="autocare-next-icon"><CalendarDays size={22}/></span>
+                <span><strong>{nearest.category || nearest.title}</strong><small>{car?.brand} {car?.model} · {car?.plate}</small></span>
+                <time>{date(nearest.expiresAt)}</time><ArrowRight size={18}/>
+              </button>
+            ) : <p className="autocare-no-activity">Nu ai termene viitoare pentru această mașină. Adaugă RCA, ITP sau o revizie pentru a le urmări aici.</p>}
+          </div>
+          <div className="autocare-document-stats">
+            <button onClick={() => navigate('Documente')}><FileText size={23}/><strong>{carDocuments.length}</strong><span>Total documente</span></button>
+            <button onClick={() => navigate('Documente')}><CheckCircle2 size={23}/><strong>{carDocuments.filter((r) => r.status.state === 'valid').length}</strong><span>În termen</span></button>
+            <button onClick={() => navigate('Documente')}><AlertTriangle size={23}/><strong>{documentSoon}</strong><span>Expiră în 30 zile</span></button>
+            <button onClick={() => navigate('Documente')}><ShieldAlert size={23}/><strong>{documentExpired}</strong><span>Expirate</span></button>
+          </div>
+        </div>
+      </div>
+      <div className="autocare-quick-actions">
+        <button onClick={() => add('document')}><Files size={23}/><span><strong>Document nou</strong><small>Adaugă un document auto</small></span><ArrowRight size={21}/></button>
+        <button onClick={() => add('service')}><Wrench size={23}/><span><strong>Lucrare de service</strong><small>Înregistrează o revizie sau reparație</small></span><ArrowRight size={21}/></button>
+        <button onClick={() => add('expense')}><Wallet size={23}/><span><strong>Cheltuială nouă</strong><small>Adaugă o cheltuială</small></span><ArrowRight size={21}/></button>
       </div>
       <section className="for-you-section" aria-labelledby="for-you-title">
         <div className="section-title">
