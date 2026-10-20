@@ -280,23 +280,7 @@ export function GarageHome({
             <div className="mini-garage">
               {cars.slice(0, 4).map((v) => (
                 <button className="mini-vehicle" key={v.id} onClick={() => navigate('Garaj')}>
-                  <div className="vehicle-visual">
-                    {data.photos.some((p) => p.vehicleId === v.id) ? (
-                      <img
-                        src={
-                          v.id.startsWith('design-')
-                            ? '/design-car.jpg'
-                            : '/api/v1/vehicles/' + v.id + '/photo'
-                        }
-                        alt={v.brand + ' ' + v.model}
-                      />
-                    ) : (
-                      <>
-                        <CarFront size={48} strokeWidth={1} />
-                        <span>Adaugă fotografia ta</span>
-                      </>
-                    )}
-                  </div>
+                  <div className="vehicle-visual autocare-vehicle-monogram"><CarFront size={43} strokeWidth={1.5}/></div>
                   <div className="mini-details">
                     <span className="micro">
                       {v.year} · {v.fuel}
@@ -522,17 +506,7 @@ export function VehicleSheet({
   return (
     <div className="vehicle-sheet">
       <div className="sheet-overview">
-        {data.photos.some((p) => p.vehicleId === id) ? (
-          <img
-            src={id.startsWith('design-') ? '/design-car.jpg' : '/api/v1/vehicles/' + id + '/photo'}
-            alt={v.brand + ' ' + v.model}
-          />
-        ) : (
-          <div className="vehicle-placeholder">
-            <CarFront size={65} />
-            <span>Adaugă o fotografie din garaj</span>
-          </div>
-        )}
+        <div className="autocare-vehicle-sheet-symbol"><CarFront size={56} strokeWidth={1.5}/></div>
         <div>
           <p className="eyebrow">
             {v.year} · {v.fuel}
