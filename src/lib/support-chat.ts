@@ -236,6 +236,7 @@ export async function changeSupportThread(uid: string, id: string, input: unknow
       await tx.select().from(s.supportThreads).where(eq(s.supportThreads.id, id)).for('update')
     )[0];
     if (!thread || (!who.staff && thread.userId !== uid)) throw new AppError(404, 'Conversație inexistentă.');
+    if (who.staff && action === 'complete' && thread.assignedTo && thread.assignedTo !== uid) throw new AppError(409, 'Conversația este preluată de alt coleg.');
     const expected = {
       complete: 'open',
       trash: 'completed',
@@ -383,7 +384,7 @@ export async function markSupportRead(uid: string, id: string, input: unknown) {
 export async function supportUnread(uid: string) {
   const who = await actor(uid);
   const rows = await db().execute(
-    sql`SELECT count(*)::int AS n FROM support_chat_messages m JOIN support_threads t ON t.id=m."threadId" LEFT JOIN support_reads r ON r."threadId"=t.id AND r."userId"=${uid} WHERE t.status<>'trashed' AND (${who.staff} OR t."userId"=${uid}) AND m."authorId" IS DISTINCT FROM ${uid} AND m."createdAt">coalesce(r."lastReadAt",'epoch'::timestamptz)`,
+    sql`SELECT count(*)::int AS n FROM support_chat_messages m JOIN support_threads t ON t.id=m."threadId" LEFT JOIN support_reads r ON r."threadId"=t.id AND r."userId"=${uid} WHERE t.status<>'trashed' AND (${who.staff} AND (t."assignedTo" IS NULL OR t."assignedTo"=${uid}) OR NOT ${who.staff} AND t."userId"=${uid}) AND m."authorId" IS DISTINCT FROM ${uid} AND m."createdAt">coalesce(r."lastReadAt",'epoch'::timestamptz)`,
   );
   return { unread: Number(rows.rows[0]?.n || 0) };
 }
