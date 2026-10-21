@@ -25,6 +25,7 @@ type Thread = {
   name: string;
   email: string;
   updatedAt: string;
+  createdAt: string;
   workingAt?: string | null;
   assignedTo?: string | null;
   unreadCount?: number;
@@ -91,6 +92,7 @@ export default function SupportChat({
     [loading, setLoading] = useState(!preview),
     [mobileThread, setMobileThread] = useState(false),
     [entered, setEntered] = useState(false),
+    [clock, setClock] = useState(() => Date.now()),
     [olderBusy, setOlderBusy] = useState(false);
   const [team, setTeam] = useState<{ id: string; name: string; role: string }[]>([]);
   const [selfId, setSelfId] = useState('');
@@ -104,6 +106,7 @@ export default function SupportChat({
     follow = useRef(true),
     polling = useRef(false);
   statusRef.current = status;
+  useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10000); return () => clearInterval(timer); }, []);
   function merge(id: string, messages: Message[]) {
     const rows = Array.from(
       new Map([...(cache.current[id] || []), ...messages].map((m) => [m.id, m])).values(),
@@ -467,7 +470,7 @@ export default function SupportChat({
                         month: 'short',
                       })}
                     </time>
-                    {actions(thread)}
+                    <span className="support-thread-status">{thread.assignedTo ? 'Preluată' : 'În așteptare'}</span>
                   </div>
                 </article>
               ))
@@ -522,7 +525,7 @@ export default function SupportChat({
                     ? 'Finalizată'
                     : 'În coș'}
               </span>
-              {actions(current)}
+              <span className="support-header-role">{current.assignedTo ? 'Responsabil desemnat' : 'În așteptare'}</span>
             </div>
           ) : (
             <div className="support-header-actions">
@@ -548,41 +551,41 @@ export default function SupportChat({
             </div>
           )}
         </header>
-        {staff && current?.status === 'open' && (
+        {staff && current && (
           <div className="support-session-bar">
-            {!entered ? <button type="button" className="support-session-enter" disabled={busy || (!!current.assignedTo && current.assignedTo !== selfId)} onClick={async () => {
-              if (!current) return;
-              setBusy(true);
-              try {
-                await request('/' + current.id + '/join', 'POST');
-                joined.current.add(current.id);
-                setEntered(true);
-                setNotice('Ai intrat în conversație. Bine ai venit! Poți răspunde clientului.');
-                await refresh();
-              } catch (e) { setError((e as Error).message); }
-              finally { setBusy(false); }
-            }}><LogIn size={17}/> Intră în conversație</button>
-            : <button type="button" className="support-session-exit" onClick={() => { setEntered(false); setNotice('Ai ieșit din conversație. Solicitarea rămâne atribuită contului tău.'); }}><LogOut size={17}/> Ieși din conversație</button>}
-            <span>{current.assignedTo && current.assignedTo !== selfId ? 'Preluată de alt membru al echipei' : entered ? 'Sesiune activă · Bun venit în Centrul de suport AutoCare!' : 'Selectează Intră pentru a prelua solicitarea.'}</span>
+            <div className="support-session-status">
+              <strong>{current.status === 'open' ? current.assignedTo ? 'Conversație preluată' : 'Solicitare nouă' : current.status === 'completed' ? 'Conversație finalizată' : 'Conversație în coș'}</strong>
+              <span>{current.assignedTo ? 'Responsabil: ' + (team.find((person) => person.id === current.assignedTo)?.name || 'membru al echipei') : 'Niciun membru nu a preluat încă solicitarea.'}</span>
+            </div>
+            <div className="support-session-actions">
+              {current.status === 'open' && (!current.assignedTo || current.assignedTo === selfId) && (!entered ?
+                <button type="button" className="support-session-enter" disabled={busy || preview || !selfId} onClick={async () => {
+                  setBusy(true); setError('');
+                  try {
+                    await request('/' + current.id + '/join', 'POST');
+                    joined.current.add(current.id);
+                    setEntered(true);
+                    setNotice('Ai preluat conversația. Clientul este anunțat automat.');
+                    await refresh();
+                  } catch (e) { setError((e as Error).message); }
+                  finally { setBusy(false); }
+                }}><LogIn size={17}/> {current.assignedTo ? 'Intră în conversație' : 'Preia conversația'}</button>
+                : <button type="button" className="support-session-exit" onClick={() => { setEntered(false); setNotice('Ai ieșit din conversație. Responsabilul rămâne atribuit.'); }}><LogOut size={17}/> Ieși din conversație</button>
+              )}
+              {current.status === 'open' && current.assignedTo === selfId && (
+                <button type="button" className="support-session-finish" disabled={busy} onClick={() => void change(current, 'complete')}><CheckCheck size={17}/> Finalizează</button>
+              )}
+              {current.status === 'completed' && (
+                <>
+                  <button type="button" className="support-session-enter" disabled={busy} onClick={() => void change(current, 'reopen')}><RotateCcw size={17}/> Redeschide</button>
+                  <button type="button" className="support-session-delete" disabled={busy} onClick={() => { if (window.confirm('Muți conversația în coș? Va putea fi restaurată.')) void change(current, 'trash'); }}><Trash2 size={17}/> Șterge</button>
+                </>
+              )}
+              {current.status === 'trashed' && (
+                <button type="button" className="support-session-enter" disabled={busy} onClick={() => void change(current, 'restore')}><RotateCcw size={17}/> Restaurează</button>
+              )}
+            </div>
           </div>
-        )}
-        {staff && current?.status === 'open' && (
-          <label className="support-assignment">
-            Responsabil
-            <select
-              aria-label="Atribuie conversația"
-              disabled={busy || preview || (!!current.assignedTo && current.assignedTo !== selfId)}
-              value={detail?.thread.assignedTo || ''}
-              onChange={(e) => void assign(e.target.value)}
-            >
-              <option value="">Neatribuită</option>
-              {team.map((person) => (
-                <option key={person.id} value={person.id}>
-                  {roles[person.role]} · {person.name}
-                </option>
-              ))}
-            </select>
-          </label>
         )}
         {staff && current?.assignedTo && current.assignedTo !== selfId && (
           <div className="support-notice" role="status">Conversația este preluată de {team.find((person) => person.id === current.assignedTo)?.name || 'alt membru al echipei'}. O poți consulta, dar nu poți răspunde.</div>
@@ -610,6 +613,18 @@ export default function SupportChat({
             <button aria-label="Închide mesajul" onClick={() => setNotice('')}>
               <X size={14} />
             </button>
+          </div>
+        )}
+        {!staff && status !== 'trashed' && (
+          <div className="support-client-welcome" role="status">
+            <Headset size={19}/>
+            <div><strong>Bine ai venit la Centrul de suport AutoCare!</strong>
+              <p>{current?.assignedTo
+                ? 'Un membru al echipei a preluat solicitarea ta. Poți continua conversația aici.'
+                : current && current.status === 'open' && clock - new Date(current.createdAt).getTime() >= 60000
+                  ? 'În acest moment, colegii noștri sunt ocupați cu alte solicitări. Mesajul tău este în așteptare și un asistent îți va răspunde cât mai curând posibil. Îți mulțumim pentru răbdare!'
+                  : 'Scrie-ne mesajul tău. Echipa noastră îți va răspunde aici cât mai curând posibil.'}</p>
+            </div>
           </div>
         )}
         <div
