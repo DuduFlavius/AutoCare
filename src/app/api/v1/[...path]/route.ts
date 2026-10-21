@@ -588,7 +588,6 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
                     .filter((p) => supportChat.isSupportStaff(p.role)).map((p) => p.userId)
               : [thread.userId];
             const recipientIds = [...new Set(recipients)].filter((id) => id !== uid);
-            const target = thread.userId === uid ? 'Echipa AutoCare' : 'Client AutoCare';
             const title = thread.userId === uid ? 'AutoCare · Mesaj nou pentru suport' : 'AutoCare · Răspuns de la suport';
             const bodyText = thread.userId === uid
               ? 'A sosit un mesaj nou în Centrul de suport.'
@@ -607,7 +606,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               }));
               if (user.emailEnabled && user.verified) tasks.push(sendMail(
                 user.email, title,
-                bodyText + '\\n\\nDeschide AutoCare: https://autocare-garaj.vercel.app/cont?tab=Centru%20de%20suport\\n\\nPoți dezactiva notificările e-mail din Setări.',
+                bodyText + '\n\nDeschide AutoCare: https://autocare-garaj.vercel.app/cont?tab=Centru%20de%20suport\n\nPoți dezactiva notificările e-mail din Setări.',
                 'support/' + messageResult.message.id + '/' + user.id,
               ));
               return tasks;
