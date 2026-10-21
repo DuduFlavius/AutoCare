@@ -531,3 +531,24 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 .support-workspace .support-session-enter:disabled,.support-workspace .support-delete-client:disabled{opacity:.5!important;cursor:not-allowed}
 .support-workspace .support-readonly{background:#193452!important;color:#c9def6!important;border-top:1px solid #406286!important}
 @media(max-width:760px){.support-workspace .support-session-bar,.support-workspace .support-client-folders{padding:10px;gap:8px}.support-workspace .support-session-bar span{flex-basis:100%}}
+
+
+/* AutoCare support — compact premium action toolbar, no duplicate checkmark actions */
+.support-workspace .support-session-bar{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:18px!important;padding:16px 20px!important;background:linear-gradient(120deg,#1b3558,#132743)!important;border-bottom:1px solid #426389!important}
+.support-workspace .support-session-status{display:flex;flex-direction:column;gap:5px;min-width:0}
+.support-workspace .support-session-status strong{font-size:14px;color:#fff!important}
+.support-workspace .support-session-status span{font-size:12px;color:#bed2eb!important}
+.support-workspace .support-session-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.support-workspace .support-session-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px!important;border-radius:10px!important;font-size:13px;font-weight:700;min-height:40px}
+.support-workspace .support-session-finish{background:#17665c!important;color:#eafff8!important;border:1px solid #40a999!important}
+.support-workspace .support-session-delete{background:#5a3147!important;color:#fff1f5!important;border:1px solid #a86b84!important}
+.support-workspace .support-session-finish:hover{background:#207e70!important}
+.support-workspace .support-session-delete:hover{background:#81405a!important}
+.support-workspace .support-thread-status,.support-workspace .support-header-role{font-size:11px;color:#c0d4ee!important}
+.support-workspace .support-client-welcome{display:flex;gap:13px;align-items:flex-start;padding:16px 20px;background:#1a3b61!important;border-bottom:1px solid #456a93!important;color:#d8eaff!important}
+.support-workspace .support-client-welcome svg{color:#8ab7ff;flex-shrink:0}
+.support-workspace .support-client-welcome strong{display:block;color:#f6faff!important;font-size:14px;margin-bottom:5px}
+.support-workspace .support-client-welcome p{margin:0;color:#d5e6fa!important;font-size:13px;line-height:1.6}
+.support-workspace .support-row-actions button{border-radius:9px!important}
+.support-workspace .support-session-actions button:disabled{opacity:.5!important;cursor:not-allowed}
+@media(max-width:760px){.support-workspace .support-session-bar{align-items:stretch!important;flex-direction:column!important;padding:12px!important}.support-workspace .support-session-actions{width:100%}.support-workspace .support-session-actions button{flex:1}.support-workspace .support-client-welcome{padding:12px}}
