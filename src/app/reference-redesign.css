@@ -690,3 +690,40 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell .main .card,.app-shell .main .panel{padding:15px!important}
 .app-shell .main .inline>button{flex-basis:100%}
 }
+
+/* Support chat on phones: purpose-built single-column messenger layout */
+@media(max-width:760px){
+.app-shell .main:has(.support-workspace){background:#0c1b31!important;padding:14px 12px calc(98px + env(safe-area-inset-bottom,0px))!important;color:#f1f6ff!important}
+.app-shell .main:has(.support-workspace) .page-head{margin-bottom:14px!important}
+.app-shell .main:has(.support-workspace) .page-head h1{font-size:25px!important;color:#fff!important;line-height:1.15!important}
+.app-shell .main:has(.support-workspace) .page-head p{font-size:13px!important;color:#b8c9e0!important}
+.app-shell .main .support-workspace{display:block!important;width:100%!important;min-width:0!important;overflow:hidden!important;border:1px solid #345171!important;border-radius:20px!important;background:#132a46!important;box-shadow:0 12px 32px #020a1850!important}
+.app-shell .main .support-client .support-chat-panel{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;border:0!important;border-radius:0!important;overflow:hidden!important;background:#132a46!important}
+.app-shell .main .support-client-folders{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:12px!important;background:#142b49!important}
+.app-shell .main .support-client-folders button{width:100%!important;min-width:0!important;padding:10px 6px!important;min-height:44px!important;justify-content:center!important;font-size:12px!important;gap:6px!important;white-space:nowrap!important}
+.app-shell .main .support-client-folders button svg{width:16px!important;height:16px!important;flex-shrink:0!important}
+.app-shell .main .support-client .support-chat-header{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;gap:10px!important;padding:14px!important;align-items:center!important;background:#193555!important}
+.app-shell .main .support-client .support-chat-header .support-avatar{width:42px!important;height:42px!important;min-width:42px!important}
+.app-shell .main .support-client .support-header-title{min-width:0!important}
+.app-shell .main .support-client .support-header-title h3{font-size:15px!important;line-height:1.3!important;color:#fff!important}
+.app-shell .main .support-client .support-header-title p{font-size:12px!important;line-height:1.4!important;margin-top:3px!important}
+.app-shell .main .support-client .support-header-actions{grid-column:1/-1!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:8px!important;width:100%!important}
+.app-shell .main .support-client .support-delete-client{min-height:38px!important;padding:8px 12px!important;font-size:12px!important;max-width:100%!important}
+.app-shell .main .support-client .support-client-welcome{display:flex!important;align-items:flex-start!important;gap:10px!important;padding:12px 14px!important;margin:0!important;border-radius:0!important;background:#203e62!important}
+.app-shell .main .support-client .support-client-welcome strong{font-size:13px!important;line-height:1.45!important}
+.app-shell .main .support-client .support-client-welcome p{font-size:12px!important;line-height:1.5!important;margin:5px 0 0!important;color:#d5e5f9!important}
+.app-shell .main .support-client .support-messages{min-height:180px!important;max-height:42dvh!important;padding:16px 12px!important;overflow-y:auto!important;background:#0f223b!important}
+.app-shell .main .support-client .support-message{max-width:88%!important;min-width:0!important;overflow-wrap:anywhere!important;padding:12px!important;border-radius:15px!important}
+.app-shell .main .support-client .support-message p{font-size:14px!important;line-height:1.5!important}
+.app-shell .main .support-client .support-system-message{padding:11px!important;font-size:12px!important;line-height:1.5!important;gap:8px!important}
+.app-shell .main .support-client .support-composer{padding:12px!important;display:flex!important;flex-direction:column!important;gap:10px!important;background:#193555!important}
+.app-shell .main .support-client .support-upload{display:flex!important;flex-direction:column!important;gap:8px!important;font-size:12px!important;padding:0!important}
+.app-shell .main .support-client .support-upload input[type=file]{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:8px!important;font-size:12px!important;background:#0f223b!important;color:#e6f1ff!important;border:1px solid #36587e!important;border-radius:12px!important}
+.app-shell .main .support-client .support-upload input[type=file]::file-selector-button{background:#2b5486!important;color:#fff!important;border:0!important;border-radius:8px!important;padding:8px 10px!important;margin-right:8px!important;font-size:12px!important}
+.app-shell .main .support-client .support-composer>div{display:grid!important;grid-template-columns:minmax(0,1fr) 48px!important;align-items:end!important;gap:8px!important}
+.app-shell .main .support-client .support-composer textarea{width:100%!important;min-height:68px!important;max-height:160px!important;resize:vertical!important;padding:12px!important;font-size:16px!important;line-height:1.45!important;color:#fff!important;background:#0d223d!important;border:1px solid #46678c!important;border-radius:14px!important}
+.app-shell .main .support-client .support-composer button[type=submit]{width:48px!important;height:48px!important;min-height:48px!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:14px!important}
+.app-shell .main .support-client .support-composer button[type=submit] span{display:none!important}
+.app-shell .main .support-client .support-composer>p{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:6px!important;margin:0!important;font-size:11px!important}
+.app-shell .main .support-client .support-composer>p small{margin-left:auto!important}
+}
