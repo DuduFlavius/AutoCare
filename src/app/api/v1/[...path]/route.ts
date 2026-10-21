@@ -570,8 +570,27 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             new URL(req.url).searchParams.get('status') || 'open',
           ),
         );
-      if (path.length === 2 && method === 'POST')
-        return json(await supportChat.sendSupportMessage(uid, await body(req)), 201);
+      if (path.length === 2 && method === 'POST') {
+        const result = await supportChat.sendSupportMessage(uid, await body(req));
+        // Push is best-effort: never fail or duplicate a saved message because delivery failed.
+        try {
+          const messageResult = result as { thread?: { id: string; userId: string; assignedTo: string | null }; message?: { id: string } };
+          const thread = messageResult.thread;
+          if (thread) {
+            const recipients = thread.userId === uid
+              ? thread.assignedTo ? [thread.assignedTo] : (await db().select({ userId: s.profiles.userId, role: s.profiles.role }).from(s.profiles)).filter((p) => supportChat.isSupportStaff(p.role)).map((p) => p.userId)
+              : [thread.userId];
+            await Promise.allSettled([...new Set(recipients)].filter((id) => id !== uid).map((id) =>
+              sendPushNotification(id, {
+                id: 'support-' + (messageResult.message?.id || crypto.randomUUID()),
+                title: thread.userId === uid ? 'AutoCare · Solicitare de suport' : 'AutoCare · Răspuns nou',
+                body: thread.userId === uid ? 'Ai un mesaj nou în Centrul de suport.' : 'Echipa AutoCare ți-a răspuns. Deschide conversația.',
+              }),
+            ));
+          }
+        } catch { /* A push failure must not affect a successfully saved message. */ }
+        return json(result, 201);
+      }
       if (path.length === 3 && method === 'GET')
         return json(
           await supportChat.readSupportThread(
