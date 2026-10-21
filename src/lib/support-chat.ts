@@ -230,19 +230,19 @@ export async function changeSupportThread(uid: string, id: string, input: unknow
     .strict()
     .parse(input);
   const who = await actor(uid);
-  if (!who.staff) throw new AppError(403, 'Doar echipa poate administra conversațiile.');
+  if (!who.staff && action !== 'trash') throw new AppError(403, 'Acțiune indisponibilă pentru client.');
   return db().transaction(async (tx) => {
     const thread = (
       await tx.select().from(s.supportThreads).where(eq(s.supportThreads.id, id)).for('update')
     )[0];
-    if (!thread) throw new AppError(404, 'Conversație inexistentă.');
+    if (!thread || (!who.staff && thread.userId !== uid)) throw new AppError(404, 'Conversație inexistentă.');
     const expected = {
       complete: 'open',
       trash: 'completed',
       restore: 'trashed',
       reopen: 'completed',
     }[action];
-    if (thread.status !== expected)
+    if (thread.status !== expected && !(action === 'trash' && !who.staff && thread.status === 'open'))
       throw new AppError(409, 'Starea conversației s-a schimbat. Reîncarcă lista.');
     const status = {
       complete: 'completed',
