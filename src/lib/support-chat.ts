@@ -135,6 +135,8 @@ export async function joinSupportThread(uid: string, id: string) {
     )[0];
     if (!thread) throw new AppError(404, 'Conversație inexistentă.');
     if (thread.status !== 'open') throw new AppError(409, 'Conversația nu este activă.');
+    if (thread.assignedTo && thread.assignedTo !== uid) throw new AppError(409, 'Conversația este preluată de alt coleg.');
+    if (!thread.assignedTo) await tx.update(s.supportThreads).set({ assignedTo: uid, workingAt: new Date() }).where(eq(s.supportThreads.id, id));
     const joined = await tx
       .insert(s.supportParticipants)
       .values({ threadId: id, userId: uid })
@@ -194,6 +196,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
       throw new AppError(404, 'Conversație inexistentă.');
     if (thread && thread.status !== 'open')
       throw new AppError(409, 'Conversația este finalizată. Deschide o solicitare nouă.');
+    if (who.staff && thread?.assignedTo !== uid) throw new AppError(409, 'Conversația este atribuită altui coleg.');
     if (!thread)
       thread = (
         await tx
@@ -320,7 +323,7 @@ export async function assignSupportThread(uid: string, id: string, input: unknow
     )[0];
     if (!thread) throw new AppError(404, 'Conversație inexistentă.');
     if (thread.status !== 'open') throw new AppError(409, 'Conversația nu este activă.');
-    if (who.role === 'assistant' && thread.assignedTo && thread.assignedTo !== uid)
+    if (thread.assignedTo && thread.assignedTo !== uid)
       throw new AppError(403, 'Solicitarea este deja atribuită altui coleg.');
     await tx
       .update(s.supportThreads)
