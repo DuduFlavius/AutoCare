@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   Headset,
+  Paperclip,
   Search,
   Send,
   CheckCheck,
@@ -757,7 +758,7 @@ export default function SupportChat({
             )}
             {selected && detail?.thread.status === 'open' && (
               <label className="support-upload">
-                Atașează PDF sau imagine · max. 2 MB
+                <span className="support-upload-trigger"><Paperclip size={16} /> Atașează fișier <small>PDF sau imagine · max. 2 MB</small></span>
                 <input
                   type="file"
                   accept="application/pdf,image/png,image/jpeg"
