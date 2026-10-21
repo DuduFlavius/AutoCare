@@ -650,7 +650,7 @@ export default function SupportChat({
         {!staff && status !== 'trashed' && (
           <div className="support-client-welcome" role="status">
             <Headset size={19}/>
-            <div><strong>Bine ai venit la Centrul de suport AutoCare!</strong>
+            <div><strong>{detail?.messages.some((message) => message.authorRole === 'system' && message.body.startsWith('Bine ai venit')) ? 'Statusul conversației' : 'Bine ai venit la Centrul de suport AutoCare!'}</strong>
               <p>{current?.assignedTo
                 ? 'Un membru al echipei a preluat solicitarea ta. Poți continua conversația aici.'
                 : current && current.status === 'open' && clock - new Date(current.createdAt).getTime() >= 60000
