@@ -254,7 +254,7 @@ export default function SupportChat({
   }, [lastId, selected]);
   async function send(e: FormEvent) {
     e.preventDefault();
-    if (!text.trim() || busy) return;
+    if (!text.trim() || busy || (!staff && status === 'trashed')) return;
     if (preview) {
       setNotice('Previzualizare de design: mesajele nu sunt trimise.');
       return;
@@ -480,6 +480,16 @@ export default function SupportChat({
         </aside>
       )}
       <div className="support-chat-panel">
+        {!staff && (
+          <nav className="support-client-folders" aria-label="Arhiva conversațiilor">
+            <button type="button" aria-pressed={status !== 'trashed'} onClick={() => { setStatus('open'); setSelected(null); selectedRef.current = null; setDetail(null); }}>
+              <MessageSquare size={16}/> Conversație
+            </button>
+            <button type="button" aria-pressed={status === 'trashed'} onClick={() => { setStatus('trashed'); setSelected(null); selectedRef.current = null; setDetail(null); }}>
+              <Trash2 size={16}/> Coș de gunoi
+            </button>
+          </nav>
+        )}
         <header className="support-chat-header">
           {staff && (
             <button
@@ -516,7 +526,12 @@ export default function SupportChat({
             </div>
           ) : (
             <div className="support-header-actions">
-              {!staff && current && (
+              {!staff && current?.status === 'trashed' && (
+                <button type="button" className="support-delete-client" disabled={busy || preview} onClick={() => void change(current, 'restore')}>
+                  <RotateCcw size={16}/> Restaurează
+                </button>
+              )}
+              {!staff && current && current.status !== 'trashed' && (
                 <button
                   type="button"
                   className="support-delete-client"
@@ -679,7 +694,7 @@ export default function SupportChat({
             </div>
           )}
         </div>
-        {staff && !canWrite ? (
+        {(staff && !canWrite) || (!staff && status === 'trashed') ? (
           <footer className="support-readonly">
             <ShieldCheck size={16} />
             <span>
