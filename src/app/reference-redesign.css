@@ -514,3 +514,20 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 .support-workspace .support-notice{background:#204464!important;color:#e9f6ff!important;border:1px solid #487aa1!important}
 .support-workspace .support-composer button:disabled{opacity:.55!important;cursor:not-allowed!important}
 @media(max-width:760px){.support-workspace .support-notification-optin{justify-content:center}.support-workspace .support-notification-optin button{font-size:12px}.support-workspace .support-delete-client{font-size:12px}}
+
+
+/* Support premium conversation session, trash, restore and welcome controls */
+.support-workspace .support-session-bar,.support-workspace .support-client-folders{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:13px 17px;background:linear-gradient(110deg,#1c385e,#152b49)!important;border-bottom:1px solid #42668e!important;color:#c7dcf5!important}
+.support-workspace .support-session-bar span{font-size:12px;color:#c4d9f2!important}
+.support-workspace .support-session-enter,.support-workspace .support-session-exit,.support-workspace .support-client-folders button,.support-workspace .support-delete-client{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:10px 15px;border-radius:11px!important;font-weight:700;font-size:13px;transition:background .18s,border-color .18s}
+.support-workspace .support-session-enter{background:linear-gradient(115deg,#367bf1,#2859c6)!important;color:white!important;border:1px solid #80adff!important;box-shadow:0 5px 17px #081b3866}
+.support-workspace .support-session-enter:hover{background:#4d8eff!important}
+.support-workspace .support-session-exit{background:#243f61!important;color:#f1f7ff!important;border:1px solid #5c7fa6!important}
+.support-workspace .support-session-exit:hover{background:#35587f!important}
+.support-workspace .support-client-folders button{background:#233f64!important;color:#e6f1ff!important;border:1px solid #42688e!important}
+.support-workspace .support-client-folders button[aria-pressed=true]{background:#356cbd!important;border-color:#84b0f7!important;color:#fff!important}
+.support-workspace .support-delete-client{background:#294766!important;color:#f5f9ff!important;border:1px solid #6b8cac!important}
+.support-workspace .support-delete-client:hover{background:#694059!important;border-color:#c67d9c!important}
+.support-workspace .support-session-enter:disabled,.support-workspace .support-delete-client:disabled{opacity:.5!important;cursor:not-allowed}
+.support-workspace .support-readonly{background:#193452!important;color:#c9def6!important;border-top:1px solid #406286!important}
+@media(max-width:760px){.support-workspace .support-session-bar,.support-workspace .support-client-folders{padding:10px;gap:8px}.support-workspace .support-session-bar span{flex-basis:100%}}
