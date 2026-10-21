@@ -552,3 +552,34 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 .support-workspace .support-row-actions button{border-radius:9px!important}
 .support-workspace .support-session-actions button:disabled{opacity:.5!important;cursor:not-allowed}
 @media(max-width:760px){.support-workspace .support-session-bar{align-items:stretch!important;flex-direction:column!important;padding:12px!important}.support-workspace .support-session-actions{width:100%}.support-workspace .support-session-actions button{flex:1}.support-workspace .support-client-welcome{padding:12px}}
+
+/* AutoCare Mobile Premium: compact touch-friendly layout */
+@media (max-width:760px){
+.app-shell{background:#0b172b!important}
+.app-shell .app-header{background:#11213a!important;border-bottom:1px solid #304968!important;min-height:64px!important;gap:10px}
+.app-shell .app-header .muted{color:#c8d9ef!important;font-size:12px!important}
+.app-shell .autocare-header-identity{display:none!important}
+.app-shell .autocare-header-user{padding:5px!important;border-radius:50%!important;min-width:40px!important;min-height:40px!important}
+.app-shell .autocare-header-user>svg{display:none!important}
+.app-shell .autocare-header-signout{display:none!important}
+.app-shell .main{padding:20px 14px 110px!important;max-width:100vw!important;overflow-x:hidden!important;background:#0c1a30!important}
+.app-shell .main .page-head{gap:14px!important;flex-wrap:wrap!important}
+.app-shell .main .page-head h1{font-size:clamp(25px,7vw,33px)!important;line-height:1.12!important;letter-spacing:-.035em!important}
+.app-shell .main .page-head p{line-height:1.55!important}
+.app-shell .main .card,.app-shell .main .panel{border-radius:18px!important}
+.app-shell .main button,.app-shell .main input,.app-shell .main select,.app-shell .main textarea{font-size:14px}
+.app-shell .main button{min-height:40px}
+.app-shell .main input,.app-shell .main select{min-height:44px}
+.app-shell .main .autocare-dashboard-feature{grid-template-columns:minmax(0,1fr)!important}
+.app-shell .main .for-you-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.app-shell .main .for-you-card{min-width:0!important}
+.app-shell .main .settings-workspace{grid-template-columns:minmax(0,1fr)!important}
+.app-shell .main .settings-workspace>*{min-width:0!important}
+.app-shell .main .support-workspace{min-width:0!important}
+.app-shell .main .support-chat-panel{min-width:0!important}
+.app-shell .main .support-composer{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))!important}
+}
+@media(max-width:420px){
+.app-shell .main .for-you-grid{grid-template-columns:1fr!important}
+.app-shell .main{padding-inline:12px!important}
+}
