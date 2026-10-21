@@ -209,10 +209,18 @@ export default function Dashboard({ name, previewData }: { name: string; preview
   }, [tab]);
   useEffect(() => {
     if (previewData) return;
+    let lastUnread: number | null = null;
     const check = () => {
       if (!document.hidden)
         void api('support/unread')
-          .then((x) => setSupportUnread(x.unread))
+          .then((x) => {
+            const count = Number(x.unread || 0);
+            if (lastUnread !== null && count > lastUnread && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+              new Notification('AutoCare · Mesaje noi', { body: `Ai ${count} mesaje necitite în Centrul de suport.`, tag: 'autocare-support' });
+            }
+            lastUnread = count;
+            setSupportUnread(count);
+          })
           .catch(() => {});
     };
     const notifications = () => {
