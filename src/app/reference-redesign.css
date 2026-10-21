@@ -501,3 +501,16 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 .support-client .support-composer textarea::placeholder,.support-team .support-composer textarea::placeholder{color:#b9cde8!important}
 .support-client .support-composer button.primary,.support-team .support-composer button.primary{background:#3976e9!important;color:#fff!important}
 @media(max-width:760px){.support-client .support-composer,.support-team .support-composer{padding:10px!important}.support-client .support-messages,.support-team .support-messages{min-height:110px}}
+
+
+/* Premium support ownership, notifications and client privacy actions */
+.support-workspace .support-assignment{background:#1c3556!important;color:#dceaff!important;border:1px solid #43658c!important;padding:12px 18px!important}
+.support-workspace .support-assignment select{background:#112944!important;color:#edf5ff!important;border:1px solid #50749e!important;border-radius:9px!important}
+.support-workspace .support-notification-optin{display:flex;justify-content:flex-end;align-items:center;padding:9px 16px;background:#172f4d!important;border-bottom:1px solid #395a7c!important}
+.support-workspace .support-notification-optin button{background:#284b78!important;color:#f0f7ff!important;border:1px solid #5a80af!important;border-radius:9px!important;padding:9px 13px!important;font-weight:650}
+.support-workspace .support-notification-optin button:hover{background:#37639a!important}
+.support-workspace .support-delete-client{display:inline-flex;align-items:center;gap:8px;background:#233f64!important;color:#eaf3ff!important;border:1px solid #4c7097!important;border-radius:10px!important;padding:9px 12px!important}
+.support-workspace .support-delete-client:hover{background:#5d344c!important;border-color:#ae6483!important;color:#fff!important}
+.support-workspace .support-notice{background:#204464!important;color:#e9f6ff!important;border:1px solid #487aa1!important}
+.support-workspace .support-composer button:disabled{opacity:.55!important;cursor:not-allowed!important}
+@media(max-width:760px){.support-workspace .support-notification-optin{justify-content:center}.support-workspace .support-notification-optin button{font-size:12px}.support-workspace .support-delete-client{font-size:12px}}
