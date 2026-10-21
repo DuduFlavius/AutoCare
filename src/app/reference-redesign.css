@@ -458,3 +458,23 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 .app-shell .main .membership-workspace .list-row{background:#1b3455!important;border:1px solid #3b5b7f!important;border-radius:12px!important;color:#e9f4ff!important}
 .app-shell .main .membership-workspace .membership-access{background:#204164!important;color:#eaf4ff!important;border-color:#49719b!important}
 .app-shell .main .subscription-option .button:not(.primary),.app-shell .main .membership-workspace .button:not(.primary){background:#294d79!important;color:#f1f7ff!important;border:1px solid #5d84b1!important}
+
+
+/* Support chat: target the real component classes on both staff and client views */
+.support-team,.support-client{--color-bg:#0d1c33;--color-surface:#172c49;--color-text:#edf5ff;--color-muted:#bed1eb;--color-border:#3a5b7e;--color-primary-soft:#244b7c;background:#10223d!important;color:#eef5ff!important;color-scheme:dark}
+.support-team .support-sidebar,.support-team .support-chat-panel,.support-client .support-chat-panel{background:#152b49!important;color:#eef6ff!important;border-color:#3c5d81!important}
+.support-team .support-chat-header,.support-client .support-chat-header,.support-team .support-composer,.support-client .support-composer{background:#1b3556!important;color:#f1f7ff!important;border-color:#426387!important}
+.support-team .support-messages,.support-client .support-messages{background:#10223b!important;color:#eaf3ff!important}
+.support-team .support-empty,.support-client .support-empty{background:transparent!important;color:#d6e7fa!important}
+.support-team .support-empty h3,.support-client .support-empty h3,.support-team .support-sidebar h2{color:#f3f8ff!important}
+.support-team .support-sidebar-foot,.support-team .support-preview-text,.support-team .support-thread-foot,.support-team .support-header-title p,.support-client .support-header-title p{color:#b8cce6!important}
+.support-team .support-thread-select{background:#1b3555!important;color:#eaf4ff!important;border:1px solid #395a80!important}
+.support-team .support-thread-select:hover{background:#2a4c76!important}
+.support-team .support-search{background:#102440!important;border:1px solid #45678c!important;color:#b7d0ed!important}
+.support-team input,.support-team textarea,.support-client input,.support-client textarea{background:#10243f!important;color:#f2f8ff!important;border:1px solid #426489!important}
+.support-team input::placeholder,.support-team textarea::placeholder,.support-client input::placeholder,.support-client textarea::placeholder{color:#aec7e6!important}
+.support-team .support-message.from-client,.support-client .support-message.from-client{background:#243e60!important;color:#eef5ff!important;border-color:#436589!important}
+.support-team .support-message.from-team,.support-client .support-message.from-team{background:#1b4d85!important;color:#f7fbff!important;border-color:#4b83bd!important}
+.support-team .support-message time,.support-client .support-message time{color:#c5d9f1!important}
+.support-team .support-filters button,.support-team .support-row-actions button{background:#25466e!important;color:#eaf3ff!important;border:1px solid #4b719b!important}
+.support-team .support-notice,.support-client .support-notice{background:#1d4a65!important;color:#dcf2ff!important}
