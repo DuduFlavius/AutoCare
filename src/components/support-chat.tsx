@@ -90,6 +90,7 @@ export default function SupportChat({
     [mobileThread, setMobileThread] = useState(false),
     [olderBusy, setOlderBusy] = useState(false);
   const [team, setTeam] = useState<{ id: string; name: string; role: string }[]>([]);
+  const [selfId, setSelfId] = useState('');
   const selectedRef = useRef<string | null>(null),
     statusRef = useRef(status),
     epoch = useRef(0),
@@ -117,7 +118,7 @@ export default function SupportChat({
     setError('');
     follow.current = true;
     try {
-      if (announce && staff && thread.status === 'open' && !joined.current.has(thread.id)) {
+      if (announce && staff && thread.status === 'open' && (!thread.assignedTo || thread.assignedTo === selfId) && !joined.current.has(thread.id)) {
         await request('/' + thread.id + '/join', 'POST');
         joined.current.add(thread.id);
       }
@@ -191,7 +192,7 @@ export default function SupportChat({
     if (!staff || preview) return;
     void fetch('/api/v1/support/team')
       .then(async (r) => {
-        if (r.ok) setTeam((await r.json()).team);
+        if (r.ok) { const result = await r.json(); setTeam(result.team); setSelfId(result.selfId); }
       })
       .catch(() => {});
   }, [staff, preview]);
@@ -321,7 +322,7 @@ export default function SupportChat({
       .includes(query.toLocaleLowerCase('ro')),
   );
   const canWrite = staff
-    ? !!current && current.status === 'open' && detail?.thread.id === selected
+    ? !!current && current.status === 'open' && detail?.thread.id === selected && !!selfId && current.assignedTo === selfId
     : true;
   const actions = (thread: Thread) => (
     <div className="support-row-actions">
@@ -532,7 +533,7 @@ export default function SupportChat({
             Responsabil
             <select
               aria-label="Atribuie conversația"
-              disabled={busy || preview}
+              disabled={busy || preview || (!!current.assignedTo && current.assignedTo !== selfId)}
               value={detail?.thread.assignedTo || ''}
               onChange={(e) => void assign(e.target.value)}
             >
@@ -544,6 +545,18 @@ export default function SupportChat({
               ))}
             </select>
           </label>
+        )}
+        {staff && current?.assignedTo && current.assignedTo !== selfId && (
+          <div className="support-notice" role="status">Conversația este preluată de {team.find((person) => person.id === current.assignedTo)?.name || 'alt membru al echipei'}. O poți consulta, dar nu poți răspunde.</div>
+        )}
+        {staff && (
+          <div className="support-notification-optin">
+            <button type="button" onClick={async () => {
+              if (typeof Notification === 'undefined') { setNotice('Browserul nu permite notificări desktop.'); return; }
+              const permission = await Notification.requestPermission();
+              setNotice(permission === 'granted' ? 'Notificările pentru mesaje noi sunt activate în acest browser.' : 'Permite notificările din setările browserului pentru a primi alerte.');
+            }}>Activează notificări pentru mesaje noi</button>
+          </div>
         )}
         {error && (
           <div role="alert" className="support-error">
