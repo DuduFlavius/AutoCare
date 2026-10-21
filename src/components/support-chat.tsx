@@ -10,6 +10,8 @@ import {
   MessageSquare,
   ShieldCheck,
   ChevronLeft,
+  LogOut,
+  LogIn,
   LoaderCircle,
   RefreshCw,
   UserRound,
@@ -88,6 +90,7 @@ export default function SupportChat({
     [busy, setBusy] = useState(false),
     [loading, setLoading] = useState(!preview),
     [mobileThread, setMobileThread] = useState(false),
+    [entered, setEntered] = useState(false),
     [olderBusy, setOlderBusy] = useState(false);
   const [team, setTeam] = useState<{ id: string; name: string; role: string }[]>([]);
   const [selfId, setSelfId] = useState('');
@@ -118,7 +121,7 @@ export default function SupportChat({
     setError('');
     follow.current = true;
     try {
-      if (announce && staff && thread.status === 'open' && (!thread.assignedTo || thread.assignedTo === selfId) && !joined.current.has(thread.id)) {
+      if (announce && staff && thread.status === 'open' && entered && (!thread.assignedTo || thread.assignedTo === selfId) && !joined.current.has(thread.id)) {
         await request('/' + thread.id + '/join', 'POST');
         joined.current.add(thread.id);
       }
@@ -153,6 +156,7 @@ export default function SupportChat({
         return;
       }
       if (current.id !== selectedRef.current) {
+        setEntered(false);
         setMobileThread(false);
         await openThread(current, false);
         setMobileThread(false);
@@ -282,6 +286,7 @@ export default function SupportChat({
     setError('');
     try {
       await request('/' + thread.id, 'PATCH', { action });
+      if (action === 'trash' || action === 'restore') setEntered(false);
       setNotice(
         action === 'trash'
           ? 'Conversația a fost mutată în coș. O poți restaura.'
@@ -322,7 +327,7 @@ export default function SupportChat({
       .includes(query.toLocaleLowerCase('ro')),
   );
   const canWrite = staff
-    ? !!current && current.status === 'open' && detail?.thread.id === selected && !!selfId && current.assignedTo === selfId
+    ? !!current && current.status === 'open' && detail?.thread.id === selected && !!selfId && current.assignedTo === selfId && entered
     : true;
   const actions = (thread: Thread) => (
     <div className="support-row-actions">
@@ -442,7 +447,7 @@ export default function SupportChat({
                   className={'support-thread ' + (selected === thread.id ? 'selected' : '')}
                   key={thread.id}
                 >
-                  <button className="support-thread-select" onClick={() => void openThread(thread)}>
+                  <button className="support-thread-select" onClick={() => { setEntered(false); void openThread(thread, false); }}>
                     <span className="support-avatar">{initials(thread.name)}</span>
                     <span>
                       <strong>
@@ -528,6 +533,24 @@ export default function SupportChat({
             </div>
           )}
         </header>
+        {staff && current?.status === 'open' && (
+          <div className="support-session-bar">
+            {!entered ? <button type="button" className="support-session-enter" disabled={busy || (!!current.assignedTo && current.assignedTo !== selfId)} onClick={async () => {
+              if (!current) return;
+              setBusy(true);
+              try {
+                await request('/' + current.id + '/join', 'POST');
+                joined.current.add(current.id);
+                setEntered(true);
+                setNotice('Ai intrat în conversație. Bine ai venit! Poți răspunde clientului.');
+                await refresh();
+              } catch (e) { setError((e as Error).message); }
+              finally { setBusy(false); }
+            }}><LogIn size={17}/> Intră în conversație</button>
+            : <button type="button" className="support-session-exit" onClick={() => { setEntered(false); setNotice('Ai ieșit din conversație. Solicitarea rămâne atribuită contului tău.'); }}><LogOut size={17}/> Ieși din conversație</button>}
+            <span>{current.assignedTo && current.assignedTo !== selfId ? 'Preluată de alt membru al echipei' : entered ? 'Sesiune activă · Bun venit în Centrul de suport AutoCare!' : 'Selectează Intră pentru a prelua solicitarea.'}</span>
+          </div>
+        )}
         {staff && current?.status === 'open' && (
           <label className="support-assignment">
             Responsabil
