@@ -478,3 +478,26 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 .support-team .support-message time,.support-client .support-message time{color:#c5d9f1!important}
 .support-team .support-filters button,.support-team .support-row-actions button{background:#25466e!important;color:#eaf3ff!important;border:1px solid #4b719b!important}
 .support-team .support-notice,.support-client .support-notice{background:#1d4a65!important;color:#dcf2ff!important}
+
+
+/* Fix light-on-light checkboxes and empty panels in settings and notifications */
+.app-shell .settings-workspace .check,.app-shell .settings-workspace .offsets .check,.app-shell .main .offsets label.check{background:#203b5f!important;color:#f1f7ff!important;border:1px solid #47698e!important;border-radius:10px!important;padding:13px 15px!important;display:flex!important;align-items:center!important;gap:11px!important}
+.app-shell .settings-workspace .check input[type=checkbox],.app-shell .main .offsets input[type=checkbox]{accent-color:#6b9fff!important;width:17px;height:17px;flex-shrink:0}
+.app-shell .settings-workspace .check:has(input:disabled),.app-shell .main .offsets .check:has(input:disabled){opacity:.66!important;background:#1a304e!important}
+.app-shell .settings-workspace .check:has(input:disabled){color:#d5e4f8!important}
+.app-shell .main .empty,.app-shell .main .empty-state,.app-shell .main .notification-empty,.app-shell .main .deadlines-empty{background:#172c49!important;color:#dceafd!important;border:1px dashed #46688e!important;border-radius:14px!important}
+.app-shell .main .empty h3,.app-shell .main .empty strong,.app-shell .main .empty-state h3{color:#f4f9ff!important}
+.app-shell .main .empty p,.app-shell .main .empty-state p{color:#bfd4ee!important}
+.app-shell .main .notice,.app-shell .main .notification-permission,.app-shell .main .push-status{background:#204367!important;color:#eaf5ff!important;border:1px solid #4c719b!important;border-radius:11px!important}
+.app-shell .main .notice *, .app-shell .main .notification-permission *{color:inherit!important}
+.app-shell .main .card button:disabled{background:#2b4465!important;color:#b5c9e3!important}
+.app-shell .main .card button:not(:disabled):focus-visible{outline:2px solid #9ac8ff!important}
+/* Support chat: composer stays visible and input is readable */
+.support-client,.support-team{min-height:0;max-width:100%;overflow:hidden}
+.support-client .support-chat-panel,.support-team .support-chat-panel{min-height:0;display:flex;flex-direction:column}
+.support-client .support-messages,.support-team .support-messages{min-height:130px;flex:1 1 auto;overflow-y:auto}
+.support-client .support-composer,.support-team .support-composer{flex:0 0 auto;position:relative;z-index:2;border-top:1px solid #43688e!important;padding:14px!important}
+.support-client .support-composer textarea,.support-team .support-composer textarea{background:#10243e!important;color:#fff!important;border:1px solid #5478a1!important;border-radius:12px!important;min-height:64px}
+.support-client .support-composer textarea::placeholder,.support-team .support-composer textarea::placeholder{color:#b9cde8!important}
+.support-client .support-composer button.primary,.support-team .support-composer button.primary{background:#3976e9!important;color:#fff!important}
+@media(max-width:760px){.support-client .support-composer,.support-team .support-composer{padding:10px!important}.support-client .support-messages,.support-team .support-messages{min-height:110px}}
