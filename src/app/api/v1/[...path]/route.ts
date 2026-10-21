@@ -13,6 +13,7 @@ import * as s from '@/lib/schema';
 import * as svc from '@/lib/service';
 import { origin } from '@/lib/config';
 import { runJob, sendPushNotification } from '@/lib/reminders';
+import { sendMail } from '@/lib/mail';
 import { stripe, checkout, billingPortal, processStripeEvent } from '@/lib/billing';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 export const runtime = 'nodejs';
@@ -586,13 +587,31 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
                 : (await db().select({ userId: s.profiles.userId, role: s.profiles.role }).from(s.profiles))
                     .filter((p) => supportChat.isSupportStaff(p.role)).map((p) => p.userId)
               : [thread.userId];
-            await Promise.allSettled([...new Set(recipients)].filter((id) => id !== uid).map((id) =>
-              sendPushNotification(id, {
-                id: 'support-' + messageResult.message.id,
-                title: thread.userId === uid ? 'AutoCare · Solicitare de suport' : 'AutoCare · Răspuns nou',
-                body: thread.userId === uid ? 'Ai un mesaj nou în Centrul de suport.' : 'Echipa AutoCare ți-a răspuns. Deschide conversația.',
-              }),
-            ));
+            const recipientIds = [...new Set(recipients)].filter((id) => id !== uid);
+            const target = thread.userId === uid ? 'Echipa AutoCare' : 'Client AutoCare';
+            const title = thread.userId === uid ? 'AutoCare · Mesaj nou pentru suport' : 'AutoCare · Răspuns de la suport';
+            const bodyText = thread.userId === uid
+              ? 'A sosit un mesaj nou în Centrul de suport.'
+              : 'Echipa AutoCare ți-a răspuns în Centrul de suport.';
+            const users = recipientIds.length
+              ? await db().select({
+                  id: s.user.id, email: s.user.email, verified: s.user.emailVerified,
+                  emailEnabled: s.profiles.emailEnabled, pushEnabled: s.profiles.pushEnabled,
+                }).from(s.user).innerJoin(s.profiles, eq(s.user.id, s.profiles.userId))
+                  .where(sql`${s.user.id} IN (${sql.join(recipientIds.map((id) => sql`${id}`), sql`, `)})`)
+              : [];
+            await Promise.allSettled(users.flatMap((user) => {
+              const tasks: Promise<unknown>[] = [];
+              if (user.pushEnabled) tasks.push(sendPushNotification(user.id, {
+                id: 'support-' + messageResult.message.id, title, body: bodyText,
+              }));
+              if (user.emailEnabled && user.verified) tasks.push(sendMail(
+                user.email, title,
+                bodyText + '\\n\\nDeschide AutoCare: https://autocare-garaj.vercel.app/cont?tab=Centru%20de%20suport\\n\\nPoți dezactiva notificările e-mail din Setări.',
+                'support/' + messageResult.message.id + '/' + user.id,
+              ));
+              return tasks;
+            }));
           }
         } catch { /* A push failure must not affect a successfully saved message. */ }
         return json(result, 201);
