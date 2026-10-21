@@ -509,24 +509,24 @@ export default function Dashboard({ name, previewData }: { name: string; preview
         <div className="navigation-overlay">
           <Dialog title="Navigare AutoCare" onClose={() => setMenuOpen(false)}>
             <nav aria-label="Navigare mobil">
-              {tabs.map(([label, Icon]) => (
-                <button
-                  key={label}
-                  aria-current={tab === label ? 'page' : undefined}
-                  onClick={() => navigate(label)}
-                >
-                  <Icon size={20} />
-                  {label}
-                  {label === 'Notificări' &&
-                    !!data?.notifications.filter((n) => !n.readAt).length && (
-                      <span className="nav-unread">
-                        {data.notifications.filter((n) => !n.readAt).length}
-                      </span>
-                    )}
-                  {label === 'Centru de suport' && supportUnread > 0 && (
-                    <span className="nav-unread">{supportUnread}</span>
-                  )}
-                </button>
+              {([
+                ['ESENȚIAL', ['Dashboard', 'Garaj', 'Documente', 'Notificări']],
+                ['ORGANIZARE', ['Calendar', 'Întreținere', 'Cheltuieli', 'Istoric auto']],
+                ['CONT ȘI AJUTOR', ['Centru de suport', 'Abonament', 'Setări']],
+              ] as const).map(([group, labels]) => (
+                <div className="autocare-mobile-menu-group" key={group}>
+                  <span className="autocare-mobile-menu-heading">{group}</span>
+                  {tabs.filter(([label]) => (labels as readonly string[]).includes(label)).map(([label, Icon]) => (
+                    <button key={label} aria-current={tab === label ? 'page' : undefined} onClick={() => navigate(label)}>
+                      <Icon size={19} />
+                      <span>{label === 'Dashboard' ? 'Acasă' : label}</span>
+                      {label === 'Notificări' && !!data?.notifications.filter((n) => !n.readAt).length && (
+                        <span className="nav-unread">{data.notifications.filter((n) => !n.readAt).length}</span>
+                      )}
+                      {label === 'Centru de suport' && supportUnread > 0 && <span className="nav-unread">{supportUnread}</span>}
+                    </button>
+                  ))}
+                </div>
               ))}
               {data?.profile.role === 'founder' && (
                 <a href="/admin">
@@ -694,7 +694,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             <Icon size={20} /><span>{label === 'Dashboard' ? 'Acasă' : label === 'Documente' ? 'Acte' : label === 'Notificări' ? 'Alerte' : label}</span>
           </button>
         ))}
-        <button onClick={() => setMenuOpen(true)}><Menu size={20}/><span>Meniu</span></button>
+        <button className={!['Dashboard','Garaj','Documente','Notificări'].includes(tab) ? 'active' : ''} onClick={() => setMenuOpen(true)}><Menu size={20}/><span>Meniu</span></button>
       </nav>
       <main
         className={
