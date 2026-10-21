@@ -204,6 +204,24 @@ export async function sendSupportMessage(uid: string, input: unknown) {
           .values({ id: crypto.randomUUID(), userId: uid, title: data.message.slice(0, 80) })
           .returning()
       )[0];
+    // An actual welcome message in the conversation, not only a temporary banner.
+    // Create it once, for newly opened client conversations.
+    if (!who.staff && !data.conversationId) {
+      const previous = await tx.select({ id: s.supportChatMessages.id })
+        .from(s.supportChatMessages)
+        .where(eq(s.supportChatMessages.threadId, thread.id))
+        .limit(1);
+      if (!previous.length) {
+        await tx.insert(s.supportChatMessages).values({
+          id: crypto.randomUUID(),
+          threadId: thread.id,
+          authorId: null,
+          authorName: 'AutoCare',
+          authorRole: 'system',
+          body: 'Bine ai venit la Centrul de suport AutoCare! Am primit mesajul tău. Un membru al echipei îți va răspunde aici cât mai curând posibil. Îți mulțumim pentru răbdare!',
+        });
+      }
+    }
     const message = (
       await tx
         .insert(s.supportChatMessages)
