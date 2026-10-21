@@ -688,6 +688,14 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           </button>
         </div>
       </header>
+      <nav className="autocare-mobile-dock" aria-label="Navigare rapidă">
+        {tabs.filter(([label]) => ['Dashboard','Garaj','Documente','Notificări'].includes(label)).map(([label, Icon]) => (
+          <button key={label} className={tab === label ? 'active' : ''} onClick={() => navigate(label)}>
+            <Icon size={20} /><span>{label === 'Dashboard' ? 'Acasă' : label === 'Documente' ? 'Acte' : label === 'Notificări' ? 'Alerte' : label}</span>
+          </button>
+        ))}
+        <button onClick={() => setMenuOpen(true)}><Menu size={20}/><span>Meniu</span></button>
+      </nav>
       <main
         className={
           'main workspace-' +
