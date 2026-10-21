@@ -33,7 +33,7 @@ async function actor(uid: string) {
 async function threadFor(uid: string, id: string) {
   const who = await actor(uid);
   const thread = (await db().select().from(s.supportThreads).where(eq(s.supportThreads.id, id)))[0];
-  if (!thread || (!who.staff && (thread.userId !== uid || thread.status === 'trashed')))
+  if (!thread || (!who.staff && thread.userId !== uid))
     throw new AppError(404, 'Conversație inexistentă.');
   return { who, thread };
 }
@@ -59,7 +59,7 @@ export async function listSupportThreads(uid: string, status = 'open') {
     .where(
       who.staff
         ? eq(s.supportThreads.status, state)
-        : and(eq(s.supportThreads.userId, uid), sql`${s.supportThreads.status}<>'trashed'`),
+        : and(eq(s.supportThreads.userId, uid), state === 'trashed' ? eq(s.supportThreads.status, 'trashed') : sql`${s.supportThreads.status}<>'trashed'`),
     )
     .orderBy(desc(s.supportThreads.updatedAt), desc(s.supportThreads.id))
     .limit(200);
@@ -230,7 +230,7 @@ export async function changeSupportThread(uid: string, id: string, input: unknow
     .strict()
     .parse(input);
   const who = await actor(uid);
-  if (!who.staff && action !== 'trash') throw new AppError(403, 'Acțiune indisponibilă pentru client.');
+  if (!who.staff && !['trash', 'restore'].includes(action)) throw new AppError(403, 'Acțiune indisponibilă pentru client.');
   return db().transaction(async (tx) => {
     const thread = (
       await tx.select().from(s.supportThreads).where(eq(s.supportThreads.id, id)).for('update')
