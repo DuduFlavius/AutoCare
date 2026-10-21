@@ -207,36 +207,76 @@ export default function Dashboard({ name, previewData }: { name: string; preview
         .then(setAdmin)
         .catch((e) => setError(e.message));
   }, [tab]);
+  // Reconnect an already-authorized desktop/mobile device to Web Push after login.
+  useEffect(() => {
+    if (previewData || !data?.pushPublicKey || !data.notificationSetup.pushConfigured) return;
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    let cancelled = false;
+    const sync = async () => {
+      try {
+        const reg = await navigator.serviceWorker.register('/sw.js');
+        const key = data.pushPublicKey!;
+        const padding = '='.repeat((4 - (key.length % 4)) % 4);
+        const bytes = Uint8Array.from(atob((key + padding).replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+        let sub = await reg.pushManager.getSubscription();
+        const existing = sub?.options.applicationServerKey;
+        if (sub && (!existing || Array.from(new Uint8Array(existing)).join(',') !== Array.from(bytes).join(','))) {
+          await sub.unsubscribe();
+          sub = null;
+        }
+        sub ??= await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: bytes });
+        if (!cancelled) {
+          await api('push', 'POST', sub.toJSON());
+          if (!data.profile.pushEnabled) await api('profile', 'PUT', { ...profileValues(), pushEnabled: true });
+        }
+      } catch (error) {
+        console.warn('AutoCare: sincronizarea notificărilor nu a reușit.', error);
+      }
+    };
+    void sync();
+    return () => { cancelled = true; };
+  }, [previewData, data?.pushPublicKey, data?.notificationSetup.pushConfigured]);
+
   useEffect(() => {
     if (previewData) return;
     let lastUnread: number | null = null;
     const check = () => {
-      if (!document.hidden)
-        void api('support/unread')
-          .then((x) => {
-            const count = Number(x.unread || 0);
-            if (lastUnread !== null && count > lastUnread && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-              new Notification('AutoCare · Mesaje noi', { body: `Ai ${count} mesaje necitite în Centrul de suport.`, tag: 'autocare-support' });
+      void api('support/unread')
+        .then(async (x) => {
+          const count = Number(x.unread || 0);
+          if (lastUnread !== null && count > lastUnread && typeof Notification !== 'undefined' && Notification.permission === 'granted' && !document.hidden) {
+            const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration('/sw.js').catch(() => undefined) : undefined;
+            if (reg) {
+              await reg.showNotification('AutoCare · Mesaje noi', {
+                body: 'Ai mesaje noi în Centrul de suport.',
+                icon: '/icon-192.png',
+                tag: 'autocare-support-local',
+                data: { url: '/cont?tab=Centru%20de%20suport' },
+              });
+            } else {
+              new Notification('AutoCare · Mesaje noi', { body: 'Ai mesaje noi în Centrul de suport.', icon: '/icon-192.png' });
             }
-            lastUnread = count;
-            setSupportUnread(count);
-          })
-          .catch(() => {});
+          }
+          lastUnread = count;
+          setSupportUnread(count);
+        })
+        .catch(() => {});
     };
     const notifications = () => {
-      if (!document.hidden)
-        void api('dashboard')
-          .then(setData)
-          .catch(() => {});
+      if (!document.hidden) void api('dashboard').then(setData).catch(() => {});
+      void check();
     };
     const notificationTimer = setInterval(notifications, 30000);
     window.addEventListener('focus', notifications);
+    document.addEventListener('visibilitychange', notifications);
     check();
-    const timer = setInterval(check, 20000);
+    const timer = setInterval(check, 15000);
     return () => {
       clearInterval(timer);
       clearInterval(notificationTimer);
       window.removeEventListener('focus', notifications);
+      document.removeEventListener('visibilitychange', notifications);
     };
   }, [previewData]);
   useEffect(() => {
