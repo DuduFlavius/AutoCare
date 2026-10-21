@@ -509,7 +509,22 @@ export default function SupportChat({
               {actions(current)}
             </div>
           ) : (
-            <ShieldCheck size={19} className="support-shield" />
+            <div className="support-header-actions">
+              {!staff && current && (
+                <button
+                  type="button"
+                  className="support-delete-client"
+                  disabled={busy || preview}
+                  title="Elimină conversația"
+                  onClick={() => {
+                    if (window.confirm('Elimini această conversație din cont? Echipa o va putea recupera din coș.')) void change(current, 'trash');
+                  }}
+                >
+                  <Trash2 size={16} /> Șterge conversația
+                </button>
+              )}
+              <ShieldCheck size={19} className="support-shield" />
+            </div>
           )}
         </header>
         {staff && current?.status === 'open' && (
