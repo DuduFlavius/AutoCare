@@ -574,15 +574,21 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         const result = await supportChat.sendSupportMessage(uid, await body(req));
         // Push is best-effort: never fail or duplicate a saved message because delivery failed.
         try {
-          const messageResult = result as { thread?: { id: string; userId: string; assignedTo: string | null }; message?: { id: string } };
-          const thread = messageResult.thread;
+          const messageResult = result as { threadId: string; message: { id: string } };
+          const thread = (await db().select({
+            userId: s.supportThreads.userId,
+            assignedTo: s.supportThreads.assignedTo,
+          }).from(s.supportThreads).where(eq(s.supportThreads.id, messageResult.threadId)))[0];
           if (thread) {
             const recipients = thread.userId === uid
-              ? thread.assignedTo ? [thread.assignedTo] : (await db().select({ userId: s.profiles.userId, role: s.profiles.role }).from(s.profiles)).filter((p) => supportChat.isSupportStaff(p.role)).map((p) => p.userId)
+              ? thread.assignedTo
+                ? [thread.assignedTo]
+                : (await db().select({ userId: s.profiles.userId, role: s.profiles.role }).from(s.profiles))
+                    .filter((p) => supportChat.isSupportStaff(p.role)).map((p) => p.userId)
               : [thread.userId];
             await Promise.allSettled([...new Set(recipients)].filter((id) => id !== uid).map((id) =>
               sendPushNotification(id, {
-                id: 'support-' + (messageResult.message?.id || crypto.randomUUID()),
+                id: 'support-' + messageResult.message.id,
                 title: thread.userId === uid ? 'AutoCare · Solicitare de suport' : 'AutoCare · Răspuns nou',
                 body: thread.userId === uid ? 'Ai un mesaj nou în Centrul de suport.' : 'Echipa AutoCare ți-a răspuns. Deschide conversația.',
               }),
