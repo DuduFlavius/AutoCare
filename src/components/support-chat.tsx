@@ -524,6 +524,16 @@ export default function SupportChat({
             </button>
           </nav>
         )}
+        {!staff && status !== 'trashed' && (
+          <div className="support-client-intro" role="status">
+            <span className="support-intro-dot" />
+            <span>{current?.assignedTo
+              ? 'Un asistent este disponibil în conversație.'
+              : current && clock - new Date(current.createdAt).getTime() >= 60000
+                ? 'Mesajul tău este în așteptare. Revenim cât mai curând.'
+                : 'Bine ai venit! Suntem aici să te ajutăm.'}</span>
+          </div>
+        )}
         <header className="support-chat-header">
           {staff && (
             <button
@@ -560,25 +570,8 @@ export default function SupportChat({
             </div>
           ) : (
             <div className="support-header-actions">
-              {!staff && current?.status === 'trashed' && (
-                <button type="button" className="support-delete-client" disabled={busy || preview} onClick={() => void change(current, 'restore')}>
-                  <RotateCcw size={16}/> Restaurează
-                </button>
-              )}
-              {!staff && current && current.status !== 'trashed' && (
-                <button
-                  type="button"
-                  className="support-delete-client"
-                  disabled={busy || preview}
-                  title="Elimină conversația"
-                  onClick={() => {
-                    if (window.confirm('Elimini această conversație din cont? Echipa o va putea recupera din coș.')) void change(current, 'trash');
-                  }}
-                >
-                  <Trash2 size={16} /> Șterge conversația
-                </button>
-              )}
-              <ShieldCheck size={19} className="support-shield" />
+              <ShieldCheck size={18} className="support-shield" />
+              <span className="support-header-role">Conversație privată</span>
             </div>
           )}
         </header>
@@ -645,18 +638,6 @@ export default function SupportChat({
             <button aria-label="Închide mesajul" onClick={() => setNotice('')}>
               <X size={14} />
             </button>
-          </div>
-        )}
-        {!staff && status !== 'trashed' && (
-          <div className="support-client-welcome" role="status">
-            <Headset size={19}/>
-            <div><strong>{detail?.messages.some((message) => message.authorRole === 'system' && message.body.startsWith('Bine ai venit')) ? 'Statusul conversației' : 'Bine ai venit la Centrul de suport AutoCare!'}</strong>
-              <p>{current?.assignedTo
-                ? 'Un membru al echipei a preluat solicitarea ta. Poți continua conversația aici.'
-                : current && current.status === 'open' && clock - new Date(current.createdAt).getTime() >= 60000
-                  ? 'În acest moment, colegii noștri sunt ocupați cu alte solicitări. Mesajul tău este în așteptare și un asistent îți va răspunde cât mai curând posibil. Îți mulțumim pentru răbdare!'
-                  : 'Scrie-ne mesajul tău. Echipa noastră îți va răspunde aici cât mai curând posibil.'}</p>
-            </div>
           </div>
         )}
         <div
@@ -754,6 +735,21 @@ export default function SupportChat({
           </footer>
         ) : (
           <form className="support-composer" onSubmit={send}>
+            {!staff && current && (
+              <div className="support-conversation-management">
+                {current.status === 'trashed' ? (
+                  <button type="button" disabled={busy || preview} onClick={() => void change(current, 'restore')}>
+                    <RotateCcw size={15} /> Restaurează conversația
+                  </button>
+                ) : (
+                  <button type="button" disabled={busy || preview} onClick={() => {
+                    if (window.confirm('Muți conversația în coșul de gunoi? O poți restaura ulterior.')) void change(current, 'trash');
+                  }}>
+                    <Trash2 size={15} /> Mută conversația în coș
+                  </button>
+                )}
+              </div>
+            )}
             {!staff && detail?.thread.status === 'completed' && (
               <p className="support-composer-hint">
                 Solicitarea anterioară a fost finalizată. Un mesaj nou deschide o conversație nouă.
