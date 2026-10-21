@@ -623,3 +623,34 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 .app-shell .main :is(input,select,textarea){max-width:100%!important}
 .app-shell .main :is(.card,.panel,.record-item){box-shadow:0 10px 25px #020d1e20!important}
 }
+
+/* Refined mobile finish — calmer surfaces, hierarchy and readable content */
+@media(max-width:760px){
+.app-shell .main{background:#f3f6fb!important;color:#162842!important;padding:18px 14px calc(104px + env(safe-area-inset-bottom,0px))!important}
+.app-shell .app-header{background:#0c1d35!important;border-bottom:1px solid #294568!important}
+.app-shell .app-header .muted,.app-shell .app-header .muted span{color:#d8e6f8!important}
+.app-shell .main .page-head h1{color:#11243e!important;font-size:clamp(24px,6.5vw,31px)!important;line-height:1.18!important;font-weight:800!important}
+.app-shell .main .page-head p,.app-shell .main .page-head .muted{color:#596e8b!important}
+.app-shell .main :is(.card,.panel,.empty){background:#fff!important;border:1px solid #dce6f2!important;border-radius:18px!important;box-shadow:0 5px 20px #102f5810!important}
+.app-shell .main :is(.card,.panel,.empty) :is(h2,h3,strong){color:#142b48}
+.app-shell .main :is(.card,.panel,.empty) :is(p,small,.muted){line-height:1.55}
+.app-shell .main :is(input,select,textarea){border-radius:12px!important;min-height:46px;max-width:100%;font-size:16px!important}
+.app-shell .main :is(button,a){-webkit-tap-highlight-color:transparent}
+.app-shell .main button:focus-visible,.app-shell .main a:focus-visible{outline:3px solid #428bfa!important;outline-offset:2px}
+.app-shell .main .page-head{margin-bottom:18px!important}
+.app-shell .main .page-head .inline{width:100%;display:flex;flex-wrap:wrap;gap:8px}
+.app-shell .main .page-head .inline>*{min-width:0}
+.app-shell .main :is(.grid,.for-you-grid){gap:12px!important}
+.app-shell .main .autocare-dashboard-feature{gap:12px!important}
+.app-shell .main .autocare-dashboard-feature>*{min-width:0!important}
+.app-shell .main .autocare-upcoming-list{max-height:none!important}
+.app-shell .autocare-mobile-dock{background:#0b1d36!important;border-top:1px solid #2b496d!important;box-shadow:0 -6px 30px #081a3040!important}
+.app-shell .autocare-mobile-dock button{color:#bbcee7!important;font-size:11px!important;font-weight:650!important;letter-spacing:.005em}
+.app-shell .autocare-mobile-dock button.active{background:#224b83!important;color:#fff!important}
+.app-shell .autocare-mobile-dock button.active svg{color:#fff!important}
+.app-shell .navigation-overlay .dialog{overscroll-behavior:contain}
+}
+@media(max-width:420px){
+.app-shell .main{padding-inline:12px!important}
+.app-shell .autocare-mobile-dock{padding-inline:4px!important}
+}
