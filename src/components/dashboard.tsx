@@ -569,10 +569,15 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                 </div>
               ))}
               {data?.profile.role === 'founder' && (
-                <a href="/admin">
-                  <Shield size={20} />
-                  Panou Fondator
-                </a>
+                <div className="autocare-mobile-founder-card">
+                  <div className="autocare-mobile-founder-identity">
+                    <Shield size={20} />
+                    <span><strong>FONDATOR AUTOCARE</strong><small>Administrare și acces Premium gratuit</small></span>
+                  </div>
+                  <a className="autocare-mobile-founder-action" href="/admin">
+                    <Star size={18} /> Acordă Premium prietenilor <ArrowUpRight size={16} />
+                  </a>
+                </div>
               )}
               {data?.profile.role === 'admin' && (
                 <button onClick={() => navigate('Administrare')}>
