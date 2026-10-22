@@ -548,7 +548,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     <div className="app-shell">
       {menuOpen && (
         <div className="navigation-overlay">
-          <Dialog title="Navigare AutoCare" onClose={() => setMenuOpen(false)}>
+          <Dialog title={data?.profile.role === 'founder' ? 'AutoCare · Fondator' : 'Navigare AutoCare'} onClose={() => setMenuOpen(false)}>
             <nav aria-label="Navigare mobil">
               {([
                 ['ESENȚIAL', ['Dashboard', 'Garaj', 'Documente', 'Notificări']],
