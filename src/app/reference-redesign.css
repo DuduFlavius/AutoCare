@@ -817,3 +817,8 @@ html,body{max-width:100%;overflow-x:hidden}
 .autocare-mobile-founder-identity small{font-size:11px;font-weight:450;color:#c6d9ef;letter-spacing:0}
 .autocare-mobile-founder-action{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-height:46px!important;padding:11px 12px!important;border:1px solid #b99555!important;border-radius:12px!important;background:linear-gradient(135deg,#e8c786,#cba361)!important;color:#182940!important;font-weight:750!important;font-size:13px!important;text-decoration:none!important;text-align:center!important}
 .autocare-mobile-founder-action:hover,.autocare-mobile-founder-action:focus-visible{filter:brightness(1.08)}
+
+
+.autocare-mobile-account-actions{display:grid;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #cbd9ea}
+.autocare-mobile-account-actions button{display:flex!important;align-items:center!important;gap:12px!important;width:100%!important;min-height:46px!important;padding:12px 14px!important;border-radius:12px!important;text-align:left!important}
+.autocare-mobile-account-actions button:last-child{color:#a73646!important}
