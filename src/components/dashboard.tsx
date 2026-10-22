@@ -15,6 +15,7 @@ import {
   Settings,
   CreditCard,
   Shield,
+  Star,
   Gauge,
   Plus,
   ArrowUpRight,
@@ -585,6 +586,23 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   Administrare
                 </button>
               )}
+              <div className="autocare-mobile-account-actions">
+                <button type="button" onClick={() => navigate('Setări')}>
+                  <Settings size={19} /> <span>Contul meu și setări</span>
+                </button>
+                <button type="button" onClick={async () => {
+                  if (previewData) return;
+                  if (recordDirty && !window.confirm('Ai modificări nesalvate. Vrei să te deconectezi?')) return;
+                  try {
+                    await authClient.signOut();
+                    window.location.assign('/autentificare');
+                  } catch {
+                    window.alert('Deconectarea nu a reușit. Încearcă din nou.');
+                  }
+                }}>
+                  <LogOut size={19} /> <span>Deconectare</span>
+                </button>
+              </div>
             </nav>
           </Dialog>
           <button
