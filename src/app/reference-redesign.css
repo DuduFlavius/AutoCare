@@ -769,3 +769,41 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell .main .support-client .support-messages{scrollbar-width:thin}
 .app-shell .main .support-client .support-conversation-management button{min-height:34px!important}
 }
+
+
+/* Mobile premium palette: reduce blank white across dashboard, alerts, subscription and menus.
+   Keep dark support chat and form fields untouched for contrast/accessibility. */
+@media (max-width:760px) {
+  .app-shell .main {
+    background:linear-gradient(165deg,#dce9f8 0%,#e8f0fb 46%,#dce8f7 100%)!important;
+    min-height:calc(100dvh - 120px)!important;
+  }
+  .app-shell .main .page-head {
+    padding:4px 1px 0!important;
+  }
+  .app-shell .main .card,
+  .app-shell .main .stat,
+  .app-shell .main .for-you-card,
+  .app-shell .main .dashboard-secondary-stats button,
+  .app-shell .main .empty {
+    background:linear-gradient(150deg,#f3f7ff 0%,#e6effb 100%)!important;
+    border:1px solid #cbdcf1!important;
+    box-shadow:0 8px 22px #15395b12!important;
+  }
+  .app-shell .main .list-row {
+    border-bottom-color:#c8d9ed!important;
+  }
+  .app-shell .main .workspace-subscription .card,
+  .app-shell .main .workspace-membership .card,
+  .app-shell .main .membership-workspace .card,
+  .app-shell .main .subscription-option,
+  .app-shell .main .membership-current {
+    background:linear-gradient(145deg,#1b3659,#102540)!important;
+    border-color:#3a608a!important;
+    color:#edf5ff!important;
+  }
+  .app-shell .main .support-client .support-chat-panel,
+  .app-shell .main .support-team .support-chat-panel {
+    background:#132a47!important;
+  }
+}
