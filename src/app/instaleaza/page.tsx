@@ -8,9 +8,11 @@ export default function InstallPage() {
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null);
   const [platform, setPlatform] = useState<'ios' | 'android' | 'other'>('other');
   const [installed, setInstalled] = useState(false);
+  const [samsungBrowser, setSamsungBrowser] = useState(false);
   const [message, setMessage] = useState('');
   useEffect(() => {
     const ua = navigator.userAgent;
+    setSamsungBrowser(/SamsungBrowser/i.test(ua));
     setPlatform(/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'ios' : /Android/i.test(ua) ? 'android' : 'other');
     setInstalled(window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone)));
     const handler = (event: Event) => { event.preventDefault(); setPrompt(event as InstallPrompt); };
@@ -34,12 +36,13 @@ export default function InstallPage() {
         <h1 style={{ fontSize: 29, margin: '18px 0 8px' }}>AutoCare pe telefonul tău</h1>
         <p style={{ color: '#c5d8f1', lineHeight: 1.65 }}>Instalează gratuit aplicația, fără cont Google Play sau App Store. Mașinile și documentele tale rămân în același cont AutoCare.</p>
         {installed ? <p role="status" style={{ padding: 14, background: '#164b42', borderRadius: 12 }}>AutoCare este deja deschisă ca aplicație instalată.</p> :
-          prompt ? <button type="button" onClick={install} style={{ width: '100%', border: 0, borderRadius: 13, padding: 15, fontWeight: 750, background: '#77b7ff', color: '#081729', fontSize: 16 }}>Instalează AutoCare gratuit</button> : null}
+          prompt && !samsungBrowser ? <button type="button" onClick={install} style={{ width: '100%', border: 0, borderRadius: 13, padding: 15, fontWeight: 750, background: '#77b7ff', color: '#081729', fontSize: 16 }}>Instalează AutoCare gratuit</button> : null}
+        {samsungBrowser && !installed && <p role="status" style={{ padding: 14, background: '#443820', borderRadius: 12, lineHeight: 1.6 }}>Pe Samsung Internet, instalarea poate genera un pachet Android vechi, blocat de Play Protect. Nu alege «Install anyway». Pentru instalarea gratuită, deschide această pagină în Google Chrome și folosește «Adaugă pe ecranul principal».</p>}
         {message && <p role="status">{message}</p>}
       </div>
       <section style={{ padding: '22px 5px', lineHeight: 1.75 }}>
         <h2 style={{ fontSize: 19 }}>Android — Samsung, Xiaomi, Motorola și altele</h2>
-        <p>Deschide AutoCare în Chrome. Apasă meniul ⋮ și alege <strong>Instalează aplicația</strong> sau <strong>Adaugă pe ecranul principal</strong>. Confirmă instalarea.</p>
+        <p>Deschide AutoCare direct în Chrome (nu Samsung Internet). Apasă meniul ⋮ și alege <strong>Instalează aplicația</strong> sau <strong>Adaugă pe ecranul principal</strong>. Confirmă instalarea.</p>
         <h2 style={{ fontSize: 19, marginTop: 25 }}>iPhone — iOS</h2>
         <p>Deschide AutoCare în <strong>Safari</strong>. Apasă <strong>Partajare</strong>, apoi <strong>Adaugă la ecranul principal</strong> și <strong>Adaugă</strong>. Pe unele versiuni iOS, opțiunea se găsește în meniul de acțiuni.</p>
         <p style={{ color: '#abc4e2', fontSize: 13 }}>Instalarea PWA este gratuită. Pe iPhone nu se poate instala un APK Android; distribuirea unei aplicații iOS native are cerințe Apple separate. Unele funcții, inclusiv notificările, depind de sistem și de permisiunile acordate.</p>
