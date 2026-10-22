@@ -807,3 +807,13 @@ html,body{max-width:100%;overflow-x:hidden}
     background:#132a47!important;
   }
 }
+
+
+/* Founder mobile menu: privileged identity and shortcut to existing audited Premium grants. */
+.autocare-mobile-founder-card{display:grid;gap:12px;margin:14px 0;padding:17px;border:1px solid #5679a9;border-radius:18px;background:linear-gradient(140deg,#173455,#0b1e36);color:#f1f7ff;box-shadow:0 12px 28px #091c3430}
+.autocare-mobile-founder-identity{display:flex;align-items:center;gap:11px;color:#e5c68b}
+.autocare-mobile-founder-identity span{display:grid;gap:3px;min-width:0}
+.autocare-mobile-founder-identity strong{font-size:12px;letter-spacing:.08em}
+.autocare-mobile-founder-identity small{font-size:11px;font-weight:450;color:#c6d9ef;letter-spacing:0}
+.autocare-mobile-founder-action{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-height:46px!important;padding:11px 12px!important;border:1px solid #b99555!important;border-radius:12px!important;background:linear-gradient(135deg,#e8c786,#cba361)!important;color:#182940!important;font-weight:750!important;font-size:13px!important;text-decoration:none!important;text-align:center!important}
+.autocare-mobile-founder-action:hover,.autocare-mobile-founder-action:focus-visible{filter:brightness(1.08)}
