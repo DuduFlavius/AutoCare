@@ -822,3 +822,37 @@ html,body{max-width:100%;overflow-x:hidden}
 .autocare-mobile-account-actions{display:grid;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #cbd9ea}
 .autocare-mobile-account-actions button{display:flex!important;align-items:center!important;gap:12px!important;width:100%!important;min-height:46px!important;padding:12px 14px!important;border-radius:12px!important;text-align:left!important}
 .autocare-mobile-account-actions button:last-child{color:#a73646!important}
+
+
+/* AutoCare mobile dark surfaces — consistent across all authenticated sections. */
+@media (max-width:760px) {
+  .app-shell,.app-shell .main,.app-shell .app-header {
+    background:#0c1b30!important;color:#eaf3ff!important;
+  }
+  .app-shell .main {background:linear-gradient(155deg,#0d2039,#102947 60%,#0a1b30)!important}
+  .app-shell .main .page-head h1,.app-shell .main h1,.app-shell .main h2,.app-shell .main h3,
+  .app-shell .main .card h2,.app-shell .main .card h3 {color:#f0f6ff!important}
+  .app-shell .main .page-head .eyebrow,.app-shell .main .muted,.app-shell .main .small.muted {color:#b7cce7!important}
+  .app-shell .main .card,.app-shell .main .stat,.app-shell .main .for-you-card,
+  .app-shell .main .dashboard-secondary-stats button,.app-shell .main .empty,
+  .app-shell .main .list-row,.app-shell .main .calendar-day {
+    background:linear-gradient(145deg,#1a3657,#142b48)!important;
+    color:#eaf3ff!important;border-color:#36577c!important;
+    box-shadow:0 8px 22px #040e2038!important;
+  }
+  .app-shell .main .list-row{background:transparent!important;border-bottom:1px solid #36577c!important}
+  .app-shell .main input:not([type=checkbox]):not([type=radio]),.app-shell .main textarea,
+  .app-shell .main select {
+    background:#122b49!important;color:#f0f6ff!important;border-color:#45658b!important;
+  }
+  .app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#b5c9df!important}
+  .app-shell .main .dialog,.app-shell .dialog,.app-shell .mobile-menu-overlay .dialog,
+  .app-shell .autocare-mobile-menu-group {
+    background:#142c49!important;color:#eaf3ff!important;border-color:#36577c!important;
+  }
+  .app-shell .main th,.app-shell .main td{border-color:#36577c!important;color:#eaf3ff!important}
+  .app-shell .main .membership-workspace,.app-shell .main .workspace-membership,
+  .app-shell .main .subscription-option,.app-shell .main .membership-current{color:#eaf3ff!important}
+  .app-shell .main button:not(.primary):not(.button):not([type=submit]){border-color:#45658b}
+  .app-shell .main a:not(.button){color:#92c8ff}
+}
