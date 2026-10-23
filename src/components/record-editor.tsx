@@ -52,7 +52,7 @@ export default function RecordEditor({
 }) {
   const cars = data.vehicles.filter((v) => !v.archived || v.id === record?.vehicleId);
   const [car, setCar] = useState(
-      record?.vehicleId || vehicleId || (cars.length === 1 ? cars[0].id : ''),
+      record?.vehicleId || vehicleId || cars[0]?.id || '',
     ),
     [category, setCategory] = useState(
       record?.category ||
@@ -134,7 +134,7 @@ export default function RecordEditor({
           {kind === 'service'
             ? 'Înregistrează intervenția. Restul detaliilor pot aștepta.'
             : kind === 'document'
-              ? 'Actele mașinii, organizate fără complicații.'
+              ? 'Alege tipul actului, completează data expirării și apasă Salvează.'
               : 'Adaugă rapid un cost în istoricul mașinii.'}
         </p>
       </div>
@@ -144,7 +144,7 @@ export default function RecordEditor({
         </div>
       )}
       <label>
-        Mașina
+        Pentru ce mașină?
         <select name="vehicleId" value={car} required onChange={(e) => setCar(e.target.value)}>
           <option value="" disabled>
             Alege mașina
