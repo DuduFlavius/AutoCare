@@ -248,10 +248,10 @@
 
 /* Garage: entirely photo-free, premium and compact */
 .app-shell .main.workspace-garage{background:radial-gradient(ellipse at 70% 0%,#2f2f2f,#1e1e1e 60%,#1b1b1b)!important;color:#eef5ff!important;min-height:calc(100vh - 70px)}
-.app-shell:has(.workspace-garage) .app-header{background:#202020!important;border-bottom:1px solid #444444!important;color:#eaf3ff!important}
+.app-shell:has(.workspace-garage) .app-header{background:#e3ebf6!important;border-bottom:1px solid #444444!important;color:#eaf3ff!important}
 .app-shell:has(.workspace-garage) .app-header>.muted,.app-shell:has(.workspace-garage) .app-header .autocare-header-identity small{color:#bbbbbb!important}
 .app-shell:has(.workspace-garage) .app-header>.muted span,.app-shell:has(.workspace-garage) .app-header .autocare-header-identity strong{color:#f1f7ff!important}
-.app-shell:has(.workspace-garage) .app-header .autocare-header-user{background:#313131!important;border:1px solid #535353!important}
+.app-shell:has(.workspace-garage) .app-header .autocare-header-user{background:#dce8f7!important;border:1px solid #535353!important}
 .app-shell .workspace-garage .page-head h1{color:#fff!important}
 .app-shell .workspace-garage .page-head p,.app-shell .workspace-garage .page-head .muted{color:#c2c2c2!important}
 .app-shell .workspace-garage .grid3{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr))!important;gap:20px!important;align-items:stretch}
@@ -402,7 +402,7 @@
 .app-shell .main .card :is(input,textarea,select){background:#e3ebf6!important;color:#eef6ff!important;border-color:#676767!important}
 .app-shell .main .card input[type=checkbox]{background:initial!important}
 .app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace){background:#e3ebf6!important;color:#ecf5ff!important;border:1px solid #575757!important}
-.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(aside,header,footer,.sidebar,.chat-sidebar,.conversation-sidebar,.chat-main,.conversation-main,.chat-header,.conversation-header,.chat-body,.conversation-body,.empty-state){background:#343434!important;color:#ebebeb!important;border-color:#595959!important}
+.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(aside,header,footer,.sidebar,.chat-sidebar,.conversation-sidebar,.chat-main,.conversation-main,.chat-header,.conversation-header,.chat-body,.conversation-body,.empty-state){background:#e3ebf6!important;color:#ebebeb!important;border-color:#595959!important}
 .app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(h1,h2,h3,h4,strong,b,span,p,small){color:inherit}
 .app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(input,textarea){background:#e3ebf6!important;color:#f0f7ff!important}
 .app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) input::placeholder{color:#bdbdbd!important}
