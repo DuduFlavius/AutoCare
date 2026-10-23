@@ -1234,3 +1234,24 @@ html body .app-shell .main .autocare-simple-home .autocare-simple-actions > butt
 }
 html body .app-shell .main .autocare-simple-home .autocare-simple-actions > button:hover {background:#dceafd!important;border-color:#7aa5dd!important}
 html body .app-shell .main .autocare-simple-home .autocare-simple-actions > button:focus-visible {outline:3px solid #6294d5!important;outline-offset:2px}
+
+/* Consistent secondary pages: documents, calendar, service, expenses, history, alerts. */
+html body .app-shell .main :is(.page-head,.toolbar,.filter-pills,.calendar,.calendar-day,.table-scroll,.record-with-aside,.record-aside,.document-intro,.maintenance-overview,.section-title,.empty,.card,.stat,.notice,.record-list,.record-row){
+ color:#1e3d65!important;border-color:#cadbef!important;
+}
+html body .app-shell .main :is(.page-head,.toolbar,.filter-pills,.table-scroll,.record-aside,.document-intro,.maintenance-overview,.section-title,.empty,.card,.stat,.notice,.record-list,.record-row){
+ background:#f2f6fc!important;background-image:none!important;
+}
+html body .app-shell .main :is(.page-head,.toolbar,.filter-pills,.calendar,.calendar-day,.table-scroll,.record-with-aside,.record-aside,.document-intro,.maintenance-overview,.section-title,.empty,.card,.stat,.notice,.record-list,.record-row) :is(h1,h2,h3,h4,strong){color:#173c70!important}
+html body .app-shell .main :is(.page-head,.toolbar,.filter-pills,.calendar,.calendar-day,.table-scroll,.record-with-aside,.record-aside,.document-intro,.maintenance-overview,.section-title,.empty,.card,.stat,.notice,.record-list,.record-row) :is(p,small,label,span){color:#476382!important}
+html body .app-shell .main :is(.toolbar,.filter-pills,.calendar,.calendar-day,.record-aside,.document-intro,.maintenance-overview,.empty,.card,.table-scroll) button:not(.primary):not(.active):not([aria-pressed="true"]),
+html body .app-shell .main button:not(.primary):not(.active):not([aria-pressed="true"]):not(.autocare-simple-secondary):not(.autocare-header-user):not(.autocare-header-signout){
+ background:#e9f1fb!important;background-image:none!important;color:#19477e!important;border:1px solid #b8cee9!important;
+}
+html body .app-shell .main :is(.toolbar,.filter-pills,.calendar,.calendar-day,.record-aside,.document-intro,.maintenance-overview,.empty,.card,.table-scroll) button:not(.primary):not(.active):not([aria-pressed="true"]) :is(span,strong,small,svg){color:#19477e!important}
+html body .app-shell .main button.primary,html body .app-shell .main .primary{background:#1e5eb0!important;color:#fff!important;border-color:#1e5eb0!important}
+html body .app-shell .main :is(.toolbar,.filter-pills) button[aria-pressed="true"],html body .app-shell .main :is(.toolbar,.filter-pills) button.active{background:#1e5eb0!important;color:#fff!important}
+html body .app-shell .main :is(.calendar-day,.calendar-event){background:#edf4fd!important;color:#19477e!important;border-color:#bfd3eb!important}
+html body .app-shell .main :is(.empty,.card,.stat,.notice) :is(svg){color:#315f9e!important}
+html body .app-shell .main :is(input,select,textarea){background:#f8fafd!important;color:#1b385c!important;border-color:#b8cee9!important}
+@media(max-width:760px){html body .app-shell .main :is(.page-head,.toolbar,.filter-pills,.empty,.card,.record-aside,.document-intro,.maintenance-overview){background:#f2f6fc!important}}
