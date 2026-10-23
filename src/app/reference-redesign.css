@@ -1255,3 +1255,37 @@ html body .app-shell .main :is(.calendar-day,.calendar-event){background:#edf4fd
 html body .app-shell .main :is(.empty,.card,.stat,.notice) :is(svg){color:#315f9e!important}
 html body .app-shell .main :is(input,select,textarea){background:#f8fafd!important;color:#1b385c!important;border-color:#b8cee9!important}
 @media(max-width:760px){html body .app-shell .main :is(.page-head,.toolbar,.filter-pills,.empty,.card,.record-aside,.document-intro,.maintenance-overview){background:#f2f6fc!important}}
+
+/* 2026-10-23: fix the actual main canvas, not merely the cards inside it. */
+html body .app-shell > main.main,
+html body .app-shell main.main,
+html body .app-shell .main,
+html body .app-shell .main.workspace-garage,
+html body .app-shell .main.workspace-documents,
+html body .app-shell .main.workspace-service,
+html body .app-shell .main.workspace-expenses,
+html body .app-shell .main.workspace-general,
+html body .app-shell .main.workspace-membership,
+html body .app-shell .main.workspace-settings,
+html body .app-shell .main.workspace-dashboard {
+ background:#eaf0f8!important;background-color:#eaf0f8!important;background-image:none!important;color:#1a3c67!important;
+}
+html body .app-shell .main .record-search,
+html body .app-shell .main .record-search input,
+html body .app-shell .main .record-tools input,
+html body .app-shell .main .record-tools select,
+html body .app-shell .main input:not([type=checkbox]):not([type=radio]),
+html body .app-shell .main select,
+html body .app-shell .main textarea{
+ background:#f8fbff!important;background-color:#f8fbff!important;background-image:none!important;color:#183b66!important;border-color:#b9cfe9!important;
+}
+html body .app-shell .main :is(input,textarea)::placeholder{color:#7188a4!important;opacity:1}
+html body .app-shell .main :is(.support-workspace,.support-chat,.support-thread,.support-conversation,.support-messages,.support-composer,.support-header,.support-sidebar,.support-panel,.support-message,.support-chat-header,.support-chat-messages,.support-chat-composer){
+ background:#f0f5fc!important;background-color:#f0f5fc!important;background-image:none!important;color:#183b66!important;border-color:#c5d7ec!important;
+}
+html body .app-shell .main :is(.support-workspace,.support-chat,.support-thread,.support-conversation,.support-messages,.support-composer,.support-header,.support-sidebar,.support-panel,.support-message,.support-chat-header,.support-chat-messages,.support-chat-composer) :is(p,span,small,label,strong){color:#214a7b!important}
+html body .app-shell .main :is(.membership-summary,.membership-detail,.membership-grid,.membership-info,.subscription-summary,.subscription-details,.plan-features,.plan-card,.pricing-card,.premium-card,.subscription-card){
+ background:#f0f5fc!important;background-image:none!important;color:#193c69!important;border-color:#c5d7ec!important;
+}
+html body .app-shell .main :is(.membership-summary,.membership-detail,.membership-grid,.membership-info,.subscription-summary,.subscription-details,.plan-features,.plan-card,.pricing-card,.premium-card,.subscription-card) :is(span,small,p,strong){color:#214a7b!important}
+html body .app-shell .main :is(.eyebrow,.muted,.small){color:#526e90!important}
