@@ -1347,3 +1347,48 @@ html body .app-shell main.main :is(.subscription-summary,.subscription-details,.
 html body .app-shell .app-header :is(button,.autocare-header-user,.autocare-header-signout){background:#dfe9f7!important;color:#214e86!important;border-color:#b8cce5!important}
 html body .app-shell .app-header :is(button,.autocare-header-user,.autocare-header-signout) :is(span,small,strong,svg){color:#214e86!important}
 @media(max-width:760px){html body .app-shell main.main,html body .app-shell .main[class*="workspace-"]{background:#e7edf6!important}html body .app-shell main.main :is(.support-workspace,.support-client,.support-chat-panel,.support-composer){background:#e9f0f9!important}}
+
+/* Screenshot-verified fixes: exact selectors previously painted charcoal. */
+html body .app-shell main.main .support-workspace,
+html body .app-shell main.main .support-client .support-chat-panel,
+html body .app-shell main.main .support-client .support-chat-header,
+html body .app-shell main.main .support-client .support-client-welcome,
+html body .app-shell main.main .support-client .support-messages,
+html body .app-shell main.main .support-client .support-composer,
+html body .app-shell main.main .support-client-folders,
+html body .app-shell main.main .support-session-bar,
+html body .app-shell main.main .support-client-welcome,
+html body .app-shell main.main .support-client-intro,
+html body .app-shell main.main .support-conversation-management,
+html body .app-shell main.main .support-client .support-upload input[type=file],
+html body .app-shell main.main .support-upload-trigger,
+html body .app-shell main.main .autocare-advanced-settings,
+html body .app-shell main.main .autocare-advanced-settings > summary{
+ background:#e3ebf6!important;background-image:none!important;color:#20436c!important;border-color:#b6cbe5!important;color-scheme:light!important;
+}
+html body .app-shell main.main .support-client .support-messages{background:#e7eff9!important}
+html body .app-shell main.main .support-client .support-chat-header,
+html body .app-shell main.main .support-client .support-client-welcome,
+html body .app-shell main.main .support-client-intro{background:#dce8f7!important}
+html body .app-shell main.main .support-client .support-upload input[type=file]::file-selector-button,
+html body .app-shell main.main .support-upload-trigger,
+html body .app-shell main.main .support-conversation-management button,
+html body .app-shell main.main .support-client-folders button:not([aria-pressed=true]),
+html body .app-shell main.main .support-session-exit,
+html body .app-shell main.main .support-delete-client,
+html body .app-shell main.main .support-notification-optin button{
+ background:#d4e3f6!important;background-image:none!important;color:#214a7b!important;border:1px solid #a7c2e1!important;
+}
+html body .app-shell main.main .support-client .support-composer textarea,
+html body .app-shell main.main .support-client .support-upload input[type=file]{
+ background:#edf3fa!important;color:#20436c!important;border-color:#b6cbe5!important;
+}
+html body .app-shell main.main .autocare-advanced-settings > summary,
+html body .app-shell main.main .autocare-advanced-settings summary,
+html body .app-shell main.main .autocare-advanced-settings summary :is(span,strong,svg){
+ background:#d9e7f8!important;color:#214a7b!important;
+}
+html body .app-shell main.main .autocare-advanced-settings :is(div,p,span,label,strong,small){color:#214a7b!important}
+html body .app-shell main.main .support-workspace :is(.support-notice,.support-readonly,.support-system-message,.support-session-bar,.support-client-folders){background:#e0eaf7!important;color:#214a7b!important;border-color:#b6cbe5!important}
+html body .app-shell main.main .support-workspace :is(.support-session-enter,.support-session-finish,.support-client-folders button[aria-pressed=true]){background:#285eaa!important;color:#fff!important;border-color:#285eaa!important}
+html body .app-shell main.main .support-workspace :is(.support-session-enter,.support-session-finish,.support-client-folders button[aria-pressed=true]) :is(span,svg,strong){color:#fff!important}
