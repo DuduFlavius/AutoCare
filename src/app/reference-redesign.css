@@ -1168,3 +1168,26 @@ body{background:#f5f8fe!important;color:#182b45!important;font-family:var(--font
 .app-shell>.sidebar nav button,.app-shell>.sidebar nav a{font-size:14px!important;line-height:1.4!important}
 .app-shell .main .autocare-advanced-settings label{color:#e1efff!important}
 @media(max-width:760px){body{font-size:16px}.app-shell .main h1{font-size:clamp(26px,6vw,34px)!important}.app-shell .main h2{font-size:clamp(21px,5vw,28px)!important}.app-shell .main h3{font-size:18px!important}.app-shell .main p,.app-shell .main li{font-size:15px;line-height:1.6}.app-shell .main button{font-size:15px;min-height:44px}.app-shell .main .autocare-simple-home h2{color:#fff!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#164781!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#182b45!important}}
+
+/* Eye-comfort + calendar / all-workspace contrast repair */
+:root{--color-bg:#eaf0f8;--color-surface:#f7f9fd;--color-surface-muted:#eaf1fa;--color-text:#203754;--color-muted:#526b89}
+html,body,.app-shell,.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#eaf0f8!important}
+.app-shell .app-header{background:#f5f8fd!important}
+.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty,.app-shell .main .empty-state,.app-shell .main .for-you-card{background:#f5f8fc!important;color:#203754!important;border-color:#d3e0ef!important}
+.app-shell .main .empty,.app-shell .main .empty-state,.app-shell .main .notification-empty,.app-shell .main .deadlines-empty{background:#eef3fa!important;color:#344d6b!important;border:1px dashed #bccde2!important}
+.app-shell .main .empty :is(h2,h3,h4,strong),.app-shell .main .empty-state :is(h2,h3,h4,strong){color:#203754!important}
+.app-shell .main .empty :is(p,span,small),.app-shell .main .empty-state :is(p,span,small){color:#58708d!important}
+.app-shell .main :is(.workspace-header,.page-banner,.page-hero,.workspace-hero,.section-hero,.page-intro){background:#dfeaf8!important;color:#203754!important;border-color:#c5d7ed!important}
+.app-shell .main :is(.workspace-header,.page-banner,.page-hero,.workspace-hero,.section-hero,.page-intro) :is(h1,h2,h3,strong){color:#17385f!important}
+.app-shell .main :is(.workspace-header,.page-banner,.page-hero,.workspace-hero,.section-hero,.page-intro) :is(p,span,small){color:#435e80!important}
+.app-shell .main :is(.calendar,.calendar-day,.calendar-event){color:#203754!important}
+.app-shell .main .calendar-day{background:#f4f7fc!important;border:1px solid #cbd9e9!important}
+.app-shell .main .calendar-day.today{background:#e0ecfb!important;border:2px solid #3774bd!important}
+.app-shell .main .calendar-day :is(small,span,p),.app-shell .main .calendar-day .muted{color:#526b89!important}
+.app-shell .main .calendar-day button{color:#1a4c89!important}
+.app-shell .main .calendar-event{background:#dceafa!important;border-color:#a9c5e7!important;color:#214d83!important}
+.app-shell .main :is(.toolbar,.filters,.filter-bar){color:#344d6b!important}
+.app-shell .main :is(.toolbar,.filters,.filter-bar) :is(span,label,p,small){color:#526b89!important}
+.app-shell .main :is(input,select,textarea){background:#f8fafd!important;color:#203754!important}
+.app-shell .main :is(input[type=date],select){color-scheme:light}
+@media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#eaf0f8!important}.app-shell .main :is(.empty,.empty-state){background:#eef3fa!important;color:#344d6b!important}.app-shell .main .calendar-day{background:#f4f7fc!important}}
