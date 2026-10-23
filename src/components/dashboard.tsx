@@ -858,18 +858,18 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   className="primary"
                   disabled={!activeCars.length}
                   onClick={() =>
-                    setModal({
+                    setModal(activeCars.length ? {
                       kind:
                         tab === 'Documente'
                           ? 'document'
                           : tab === 'Întreținere'
                             ? 'service'
                             : 'expense',
-                    })
+                    } : { kind: 'vehicle' })
                   }
                 >
                   <Plus size={17} />
-                  {tab === 'Documente' ? 'Adaugă document' : tab === 'Întreținere' ? 'Adaugă lucrare' : 'Adaugă cheltuială'}
+                  {!activeCars.length ? 'Adaugă întâi o mașină' : tab === 'Documente' ? 'Adaugă document' : tab === 'Întreținere' ? 'Adaugă lucrare' : 'Adaugă cheltuială'}
                 </button>
               ) : tab === 'Calendar' ? (
                 <button
