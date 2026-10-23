@@ -1042,3 +1042,46 @@ html,body{background:#f3f5f4}
 .app-shell .main .autocare-car-open{background:#27544dcc!important;border-color:#75b3a6!important}
 .app-shell .main :focus-visible{outline:3px solid #17a998!important;outline-offset:3px}
 @media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#f3f5f4!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#213d3b!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#25302f!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#25302f!important;border-color:#bacbc5!important}}
+
+/* AutoCare MONO / ultra-premium architectural monochrome — no colored accents. */
+:root{--ac-ink:#191b20;--ac-blue:#34383e;--ac-line:#d9dce0;color-scheme:light}
+html,body{background:#f1f2f3!important}
+.app-shell,.app-shell .main,.app-shell .main:has(.autocare-simple-home),.app-shell .main:has(.autocare-dashboard-feature){background:#f1f2f3!important;color:#191b20!important}
+.app-shell>.sidebar{background:linear-gradient(170deg,#1b1d22,#101216)!important;border-right:1px solid #393b40!important}
+.app-shell>.sidebar nav button,.app-shell>.sidebar nav a{color:#d1d3d8!important}
+.app-shell>.sidebar nav button svg,.app-shell>.sidebar nav a svg{color:#c0c2c7!important}
+.app-shell>.sidebar nav button.active{background:#373a40!important;border-color:#74777e!important;color:#fff!important;box-shadow:inset 3px 0 0 #e4e5e7!important}
+.app-shell>.sidebar nav button.active svg{color:#fff!important}
+.app-shell>.sidebar nav button:hover{background:#303239!important}
+.app-shell>.sidebar .sidebar-tagline,.app-shell>.sidebar .sidebar-bottom .eyebrow{color:#d4d5d9!important}
+.app-shell>.sidebar .sidebar-bottom{background:#282b31!important;border-color:#4d5058!important}
+.app-shell>.sidebar .sidebar-bottom button{background:#e8e9eb!important;color:#17191e!important}
+.app-shell>.sidebar .profile-avatar{background:linear-gradient(135deg,#858991,#454950)!important;border-color:#b6b9bf!important}
+.app-shell .app-header{background:#fff!important;color:#202329!important;border-bottom:1px solid #dedfe2!important}
+.app-shell .main .page-head h1,.app-shell .main .section-title h2,.app-shell .main h1,.app-shell .main h2,.app-shell .main h3{color:#1d2025!important}
+.app-shell .main .page-head .eyebrow,.app-shell .main .eyebrow{color:#60636a!important}
+.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty,.app-shell .main .for-you-card,.app-shell .main .dashboard-secondary-stats button{background:#fff!important;color:#24262c!important;border:1px solid #dfe1e5!important;box-shadow:0 14px 35px #171a2010!important}
+.app-shell .main .card:hover,.app-shell .main .for-you-card:hover{border-color:#a4a8b0!important;box-shadow:0 18px 40px #171a2018!important}
+.app-shell .main .stat .value,.app-shell .main .for-you-card>svg:first-child{color:#42454d!important}
+.app-shell .main .for-you-card>svg:first-child{background:#eceef0!important}
+.app-shell .main .primary,.app-shell .main button.primary{background:linear-gradient(120deg,#383b42,#22252b)!important;color:#fff!important;border-color:#4c4f57!important;box-shadow:0 8px 20px #10121826!important}
+.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#24262c!important;border:1px solid #c9ccd2!important;color-scheme:light}
+.app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#737780!important}
+.app-shell .main .muted,.app-shell .main .micro,.app-shell .main small,.app-shell .main .for-you-card p{color:#5e636d!important}
+.app-shell .main .autocare-simple-home{color:#fff!important}
+.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(145deg,#303238,#1c1f25)!important;border:1px solid #53565e!important;box-shadow:0 18px 40px #1113182b!important}
+.app-shell .main .autocare-simple-home h1,.app-shell .main .autocare-simple-home h2,.app-shell .main .autocare-simple-home h3,.app-shell .main .autocare-simple-home strong,.app-shell .main .autocare-simple-home span,.app-shell .main .autocare-simple-home label{color:#f9f9fa!important}
+.app-shell .main .autocare-simple-home p,.app-shell .main .autocare-simple-home small,.app-shell .main .autocare-simple-home .muted{color:#d5d7db!important}
+.app-shell .main .autocare-simple-eyebrow,.app-shell .main .autocare-simple-secondary{color:#d7d9df!important}
+.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){background:#3a3d44!important;border:1px solid #6a6e77!important;color:#fff!important}
+.app-shell .main .autocare-simple-actions>button:hover,.app-shell .main .autocare-simple-due>button:hover{background:#4b4f57!important;border-color:#d2d5db!important}
+.app-shell .main .autocare-simple-home button.primary{background:linear-gradient(120deg,#666a72,#444850)!important;border-color:#90949c!important;color:#fff!important}
+.app-shell .main .autocare-advanced-settings{background:#303238!important;border-color:#62656d!important}
+.app-shell .main .autocare-advanced-settings summary,.app-shell .main .autocare-advanced-settings label{color:#fff!important}
+.app-shell .main .autocare-dashboard-feature .autocare-upcoming-panel,.app-shell .main .autocare-quick-actions button{background:#272b32!important;border-color:#535860!important}
+.app-shell .main .autocare-document-stats button,.app-shell .main .autocare-next-record{background:#373b43!important;border-color:#60646e!important}
+.app-shell .main .autocare-document-stats button strong,.app-shell .main .autocare-quick-actions button svg{color:#e0e2e7!important}
+.app-shell .main .autocare-car-showcase{background:#1b1e24!important}
+.app-shell .main .autocare-car-open{background:#41454dcc!important;border-color:#999da6!important}
+.app-shell .main :focus-visible{outline:3px solid #a4a8b1!important;outline-offset:3px}
+@media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#f1f2f3!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#303238!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#24262c!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#24262c!important;border-color:#c9ccd2!important}}
