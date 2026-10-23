@@ -60,6 +60,40 @@ export function GarageHome({
     const v = cars.find((v) => v.id === id);
     return v ? `${v.brand} ${v.model} · ${v.plate}` : 'Mașină';
   };
+  // The everyday view prioritizes the three actions drivers use most.
+  // The original detailed dashboard stays available in the code while the simplified view is tested.
+  if (cars.length >= 0) return (
+    <div className="autocare-simple-home">
+      <section className="autocare-simple-hero">
+        <span className="autocare-simple-eyebrow">AUTOCARE · GARAJUL TĂU</span>
+        <CarFront size={38} aria-hidden="true" />
+        <h2>{car ? `${car.brand} ${car.model}` : 'Bine ai venit în garajul tău!'}</h2>
+        <p>{car ? `Număr de înmatriculare: ${car.plate}` : 'Adaugă prima mașină. Apoi poți păstra aici actele și reviziile.'}</p>
+        <button className="primary" type="button" onClick={() => add('vehicle')}><Plus size={20}/> Adaugă o mașină</button>
+        {car && <button className="autocare-simple-secondary" type="button" onClick={() => navigate('Garaj')}>Vezi mașinile mele <ArrowRight size={18}/></button>}
+      </section>
+      {cars.length > 1 && <label className="dashboard-car-select">Alege mașina
+        <select value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
+          {cars.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>)}
+        </select>
+      </label>}
+      <section className="autocare-simple-actions" aria-label="Ce vrei să faci?">
+        <h3>Ce vrei să faci?</h3>
+        <button type="button" onClick={() => cars.length ? add('document') : add('vehicle')}><Files size={25}/><span><strong>Adaugă document</strong><small>RCA, ITP, rovinietă și alte acte</small></span><ArrowRight size={21}/></button>
+        <button type="button" onClick={() => cars.length ? add('service') : add('vehicle')}><Wrench size={25}/><span><strong>Adaugă o revizie</strong><small>Schimb ulei, reparații, anvelope</small></span><ArrowRight size={21}/></button>
+        <button type="button" onClick={() => cars.length ? add('expense') : add('vehicle')}><Wallet size={25}/><span><strong>Adaugă o cheltuială</strong><small>Combustibil și alte costuri</small></span><ArrowRight size={21}/></button>
+      </section>
+      <section className="autocare-simple-due">
+        <h3>Ce urmează să expire?</h3>
+        {!due.length ? <p>Nu ai documente sau lucrări care necesită atenție în următoarele 30 de zile.</p> :
+          due.slice(0,5).map(r => <button type="button" key={r.id} onClick={() => open(r)}>
+            <span><strong>{r.category || r.title}</strong><small>{vehicle(r.vehicleId)}</small></span>
+            <span>{r.status.days === null ? 'Verifică' : r.status.days < 0 ? 'Expirat' : r.status.days === 0 ? 'Expiră azi' : `În ${r.status.days} zile`}</span>
+          </button>)}
+        <button className="autocare-simple-secondary" type="button" onClick={() => navigate('Notificări')}>Vezi notificările <ArrowRight size={18}/></button>
+      </section>
+    </div>
+  );
   return (
     <div className="overview-stack">
       {cars.length > 1 && (
