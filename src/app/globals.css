@@ -1,14 +1,14 @@
 :root {
-  --bg: var(--color-nav);
-  --panel: var(--color-nav);
-  --panel2: var(--color-nav);
-  --border: var(--color-text);
-  --muted: var(--color-subtle);
-  --text: var(--color-bg);
-  --accent: var(--color-subtle);
-  --cyan: var(--color-subtle);
-  --danger: var(--color-border-strong);
-  --warning: var(--color-border-strong);
+  --bg: var(--color-bg);
+  --panel: var(--color-surface);
+  --panel2: var(--color-surface-muted);
+  --border: var(--color-border);
+  --muted: var(--color-muted);
+  --text: var(--color-text);
+  --accent: var(--color-primary);
+  --cyan: var(--color-primary);
+  --danger: var(--color-danger);
+  --warning: var(--color-warning);
 }
 * {
   box-sizing: border-box;
@@ -82,9 +82,9 @@ a:hover {
 input,
 select,
 textarea {
-  background: var(--color-nav);
-  color: var(--text);
-  border: 1px solid var(--color-text);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
   border-radius: 9px;
   padding: 12px;
   width: 100%;
