@@ -1429,3 +1429,26 @@ html body .app-shell main.main :is(.membership-workspace,.subscription-option,.m
 html body .app-shell main.main :is(.card,.stat,.empty,.support-workspace,.autocare-advanced-settings,.record-search,.calendar-day,.journal,.journal-row,.notification-panel,.subscription-option,.membership-workspace,.membership-current,.subscription-summary) :is(p,li,dt,dd,label,small,.muted,.micro){opacity:1!important;text-shadow:none!important}
 html body .app-shell main.main :is(.card,.stat,.empty,.support-workspace,.autocare-advanced-settings,.record-search,.calendar-day,.journal,.journal-row,.notification-panel) :is(p,li,dt,dd,label,small,.muted,.micro){color:#4d6888!important}
 html body .app-shell main.main :is(.card,.stat,.empty,.support-workspace,.autocare-advanced-settings,.record-search,.calendar-day,.journal,.journal-row,.notification-panel) :is(h1,h2,h3,h4,strong){color:#20446e!important}
+
+/* Dashboard visual balance: pale action surface instead of two giant saturated blue blocks. */
+html body .app-shell main.main .autocare-simple-home .autocare-simple-actions{
+ background:#e8f0fb!important;background-image:none!important;color:#1d426f!important;
+ border:1px solid #bfd2e9!important;border-radius:19px!important;box-shadow:0 8px 24px #315a8512!important;
+ padding:22px 24px!important;
+}
+html body .app-shell main.main .autocare-simple-home .autocare-simple-actions :is(h2,h3,p){color:#1b416d!important}
+html body .app-shell main.main .autocare-simple-home .autocare-simple-actions>button{
+ background:#fff!important;background-image:none!important;color:#204e89!important;
+ border:1px solid #c1d4eb!important;box-shadow:0 2px 7px #315a8510!important;border-radius:13px!important;
+}
+html body .app-shell main.main .autocare-simple-home .autocare-simple-actions>button:hover{background:#dceafd!important;border-color:#82ace0!important}
+html body .app-shell main.main .autocare-simple-home .autocare-simple-actions>button :is(span,strong,small,svg){color:#204e89!important}
+html body .app-shell main.main .autocare-simple-home .autocare-simple-hero{
+ background:linear-gradient(125deg,#315f9c,#244b83)!important;color:#fff!important;
+ border:1px solid #4775ae!important;border-radius:19px!important;box-shadow:0 10px 28px #21497622!important;
+}
+html body .app-shell main.main .autocare-simple-home .autocare-simple-hero :is(h1,h2,h3,p,small,strong,span,svg){color:#fff!important}
+html body .app-shell main.main .autocare-simple-home .autocare-simple-hero :is(button,.button){
+ background:#e5effe!important;color:#17477f!important;border:1px solid #b7d1f2!important;
+}
+html body .app-shell main.main .autocare-simple-home .autocare-simple-hero :is(button,.button) :is(span,strong,svg){color:#17477f!important}
