@@ -1137,3 +1137,34 @@ html,body{background:#f3f7fd!important}
 .app-shell .main .autocare-car-open{background:#1b4b85dd!important;border-color:#87b0e0!important}
 .app-shell .main button:focus-visible,.app-shell .main a:focus-visible,.app-shell .main :focus-visible{outline:3px solid #4688df!important;outline-offset:3px}
 @media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#f3f7fd!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#174c8b!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#1b304d!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#182e4b!important;border-color:#b9cde6!important}}
+
+/* FINAL POLISH / white-first sapphire, readable typography throughout the product */
+:root{--color-nav:#123a72;--color-nav-raised:#1d4f92;--color-primary:#1658b3;--color-primary-hover:#0d448f;--color-primary-soft:#eaf2ff;--color-primary-ink:#13498f;--color-bg:#f5f8fe;--color-surface:#fff;--color-surface-muted:#f1f6fd;--color-border:#dce6f3;--color-border-strong:#b6c9e2;--color-text:#182b45;--color-muted:#506784;--color-subtle:#607895;--bg:#f5f8fe;--panel:#fff;--panel2:#f1f6fd;--text:#182b45;--muted:#506784;--border:#dce6f3;--accent:#1658b3;--cyan:#1658b3;--font-ui:Inter,'Segoe UI',Arial,sans-serif}
+body{background:#f5f8fe!important;color:#182b45!important;font-family:var(--font-ui);font-size:15px;line-height:1.58;-webkit-font-smoothing:antialiased}
+.app-shell .main{color:#182b45!important}
+.app-shell .main .page-head h1{font-size:clamp(28px,3vw,39px)!important;line-height:1.16!important;letter-spacing:-.035em!important;font-weight:750!important}
+.app-shell .main h2{letter-spacing:-.025em!important;line-height:1.28!important}
+.app-shell .main h3{letter-spacing:-.015em!important;line-height:1.35!important}
+.app-shell .main p,.app-shell .main li,.app-shell .main td,.app-shell .main label{line-height:1.58}
+.app-shell .main label{color:#344e6f!important;font-size:14px!important;font-weight:600}
+.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty,.app-shell .main .for-you-card{background:#fff!important;color:#182b45!important}
+.app-shell .main .card p,.app-shell .main .card span,.app-shell .main .card label,.app-shell .main .stat span{color:#344e6f}
+.app-shell .main .muted,.app-shell .main .micro,.app-shell .main small{color:#506784!important}
+.app-shell .main input,.app-shell .main select,.app-shell .main textarea{background:#fff!important;color:#182b45!important;font-size:16px!important;line-height:1.4!important;border-color:#b6c9e2!important}
+.app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#657b98!important}
+.app-shell .main button{font-size:14px;line-height:1.4;font-weight:650}
+.app-shell .main button:not(.primary):not(.autocare-simple-secondary){color:#1b3658}
+.app-shell .main .primary,.app-shell .main button.primary{color:#fff!important}
+.app-shell .main .autocare-simple-home{color:#fff!important}
+.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(145deg,#1b5799,#103a71)!important;border-color:#6d9bd1!important}
+.app-shell .main .autocare-simple-home h2,.app-shell .main .autocare-simple-home h3,.app-shell .main .autocare-simple-home strong,.app-shell .main .autocare-simple-home span,.app-shell .main .autocare-simple-home label{color:#fff!important}
+.app-shell .main .autocare-simple-home p,.app-shell .main .autocare-simple-home small,.app-shell .main .autocare-simple-home .muted{color:#e1efff!important}
+.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){color:#fff!important;background:#2a64a6!important}
+.app-shell .main .autocare-simple-actions>button strong,.app-shell .main .autocare-simple-actions>button span{color:#fff!important}
+.app-shell .main .autocare-simple-home button.primary,.app-shell .main .autocare-simple-hero button.primary{background:#fff!important;color:#164d93!important;border-color:#fff!important;box-shadow:0 8px 25px #081f4230!important}
+.app-shell .main .autocare-simple-home button.primary svg,.app-shell .main .autocare-simple-home button.primary span{color:#164d93!important}
+.app-shell .main .autocare-simple-secondary{color:#e1efff!important}
+.app-shell>.sidebar .brand,.app-shell>.sidebar .brand *{color:#fff!important}
+.app-shell>.sidebar nav button,.app-shell>.sidebar nav a{font-size:14px!important;line-height:1.4!important}
+.app-shell .main .autocare-advanced-settings label{color:#e1efff!important}
+@media(max-width:760px){body{font-size:16px}.app-shell .main h1{font-size:clamp(26px,6vw,34px)!important}.app-shell .main h2{font-size:clamp(21px,5vw,28px)!important}.app-shell .main h3{font-size:18px!important}.app-shell .main p,.app-shell .main li{font-size:15px;line-height:1.6}.app-shell .main button{font-size:15px;min-height:44px}.app-shell .main .autocare-simple-home h2{color:#fff!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#164781!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#182b45!important}}
