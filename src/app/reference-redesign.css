@@ -1220,3 +1220,17 @@ html body .app-shell .main .autocare-simple-actions>button :is(span,strong,small
 html body .app-shell .main .autocare-simple-actions>button:hover{background:#e0edfd!important;border-color:#7eace4!important}
 html body .app-shell .main .autocare-simple-hero,html body .app-shell .main .autocare-simple-actions,html body .app-shell .main .autocare-simple-due{background:linear-gradient(135deg,#235b9f,#17447e)!important}
 @media(max-width:760px){html body .app-shell .app-header{background:#e1ecfa!important}html body .app-shell .main .autocare-simple-actions>button{background:#eef4fc!important}}
+
+/* Correct actual dashboard action buttons, including legacy non-primary overrides */
+html body .app-shell .main .autocare-simple-home .autocare-simple-actions button:not(.primary):not(.active),
+html body .app-shell .main .autocare-simple-home .autocare-simple-actions > button {
+  background:#edf4fd!important;background-color:#edf4fd!important;background-image:none!important;
+  color:#183d6d!important;border:1px solid #b9d0ec!important;box-shadow:0 3px 12px #0f37600f!important;
+}
+html body .app-shell .main .autocare-simple-home .autocare-simple-actions > button :is(span,strong,small,svg),
+html body .app-shell .main .autocare-simple-home .autocare-simple-actions > button span strong,
+html body .app-shell .main .autocare-simple-home .autocare-simple-actions > button span small {
+ color:#183d6d!important;fill:none!important;
+}
+html body .app-shell .main .autocare-simple-home .autocare-simple-actions > button:hover {background:#dceafd!important;border-color:#7aa5dd!important}
+html body .app-shell .main .autocare-simple-home .autocare-simple-actions > button:focus-visible {outline:3px solid #6294d5!important;outline-offset:2px}
