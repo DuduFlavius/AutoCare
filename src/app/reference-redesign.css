@@ -856,3 +856,13 @@ html,body{max-width:100%;overflow-x:hidden}
   .app-shell .main button:not(.primary):not(.button):not([type=submit]){border-color:#45658b}
   .app-shell .main a:not(.button){color:#92c8ff}
 }
+
+/* Clear, senior-friendly progressive disclosure across desktop and installed app. */
+.autocare-advanced-settings{margin:12px 0;padding:0;border:1px solid #355475;border-radius:14px;overflow:hidden;background:#152c48;color:#edf5ff}
+.autocare-advanced-settings>summary{list-style:none;cursor:pointer;min-height:52px;display:flex;align-items:center;padding:14px 17px;font-size:15px;font-weight:700;color:#e9f3ff}
+.autocare-advanced-settings>summary::-webkit-details-marker{display:none}
+.autocare-advanced-settings>summary::after{content:'+';margin-left:auto;font-size:22px;font-weight:400;color:#b9d9fb}
+.autocare-advanced-settings[open]>summary::after{content:'−'}
+.autocare-advanced-settings[open]{padding:0 16px 16px}
+.autocare-advanced-settings[open]>summary{margin:0 -16px 12px;border-bottom:1px solid #355475}
+@media(max-width:760px){.app-shell .main button.primary,.app-shell .main .button.primary{min-height:48px;font-size:15px}.app-shell .main input,.app-shell .main select{min-height:45px}.app-shell .main .toolbar{gap:12px}.app-shell .main .autocare-advanced-settings{background:#152c48!important;color:#edf5ff!important}}
