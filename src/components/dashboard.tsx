@@ -851,7 +851,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
               {['Dashboard', 'Garaj'].includes(tab) ? (
                 <button className="primary" onClick={() => setModal({ kind: 'vehicle' })}>
                   <Plus size={17} />
-                  Adaugă mașină
+                  Adaugă o mașină
                 </button>
               ) : ['Documente', 'Întreținere', 'Cheltuieli'].includes(tab) ? (
                 <button
@@ -869,7 +869,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   }
                 >
                   <Plus size={17} />
-                  Adaugă
+                  {tab === 'Documente' ? 'Adaugă document' : tab === 'Întreținere' ? 'Adaugă lucrare' : 'Adaugă cheltuială'}
                 </button>
               ) : tab === 'Calendar' ? (
                 <button
@@ -903,24 +903,24 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             {tab === 'Garaj' && (
               <>
                 <div className="toolbar">
-                  <input
+                  {data.vehicles.length > 1 && <input
                     aria-label="Caută o mașină"
                     placeholder="Caută marcă, model sau număr…"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                  />
-                  <label className="check">
+                  />}
+                  {data.vehicles.some((v) => v.archived) && <label className="check">
                     <input
                       type="checkbox"
                       checked={showArchived}
                       onChange={(e) => setShowArchived(e.target.checked)}
                     />{' '}
-                    Include arhivate
-                  </label>
+                    Arată și mașinile arhivate
+                  </label>}
                 </div>
                 {!data.vehicles.length ? (
                   <Empty
-                    text="Garajul tău este gol. Adaugă prima mașină."
+                    text="Bine ai venit în garaj! Adaugă o mașină ca să poți salva actele și reviziile ei."
                     action={() => setModal({ kind: 'vehicle' })}
                   />
                 ) : (
@@ -1037,10 +1037,10 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     <button className="add-car-tile" onClick={() => setModal({ kind: 'vehicle' })}>
                       <CarFront size={36} strokeWidth={1.3} />
                       <Plus size={23} />
-                      <strong>Adaugă încă o mașină</strong>
+                      <strong>Mai ai o mașină?</strong>
                       <span>Completează datele și gestionează totul dintr-un singur loc.</span>
                       <span className="button">
-                        Adaugă mașină <Plus size={15} />
+                        Adaugă o mașină <Plus size={15} />
                       </span>
                     </button>
                   </div>
@@ -1780,11 +1780,11 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     </span>
                     <div>
                       <p className="eyebrow">ALERTE ȘI TERMENE</p>
-                      <h3>Preferințele notificărilor</h3>
+                      <h3>Când vrei să primești notificări?</h3>
                     </div>
                   </div>
                   <p className="small muted">
-                    Alege canalele și momentul în care vrei să fii anunțat.
+                    Alege doar ce ai nevoie. Opțiunile avansate sunt ascunse mai jos.
                   </p>
                   <form
                     className="stack"
@@ -1803,6 +1803,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                       );
                     }}
                   >
+                    <details className="autocare-advanced-settings"><summary>Setări avansate pentru notificări</summary>
                     <label>
                       Fus orar
                       <input
@@ -1868,10 +1869,12 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                       />
                       Un memento după expirare (Premium)
                     </label>
+                    </details>
                     <button className="primary" disabled={busy}>
                       Salvează preferințele
                     </button>
                   </form>
+                  <details className="autocare-advanced-settings"><summary>Activare și administrare notificări push</summary>
                   <div className="actions">
                     <button onClick={push}>Activează push în browser</button>
                     <button
@@ -1891,7 +1894,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   <p className="micro">
                     Necesită HTTPS și browser compatibil. Nu se promite aceeași funcționare pe toate
                     dispozitivele.
-                  </p>
+                  </p></details>
                 </section>
                 <section className="card">
                   <div className="settings-section-title">
@@ -1919,6 +1922,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     </label>
                     <button>Salvează numele</button>
                   </form>
+                  <details className="autocare-advanced-settings"><summary>Schimbă parola</summary>
                   <form
                     className="stack"
                     style={{ marginTop: 25 }}
@@ -1956,6 +1960,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     </label>
                     <button>Schimbă parola</button>
                   </form>
+                  </details><details className="autocare-advanced-settings"><summary>Date personale și ștergerea contului</summary>
                   <h3 style={{ marginTop: 30 }}>Datele personale</h3>
                   <a className="button small" href="/api/v1/export?format=json">
                     <Download size={15} />
@@ -1966,7 +1971,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   </p>
                   <button className="danger" onClick={() => setDeleteOpen(true)}>
                     Șterge contul și datele
-                  </button>
+                  </button></details>
                 </section>
                 <section className="card support-area">
                   <div className="settings-section-title">
