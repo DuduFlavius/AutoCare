@@ -1191,3 +1191,14 @@ html,body,.app-shell,.app-shell .main,.app-shell .main:has(.autocare-simple-home
 .app-shell .main :is(input,select,textarea){background:#f8fafd!important;color:#203754!important}
 .app-shell .main :is(input[type=date],select){color-scheme:light}
 @media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#eaf0f8!important}.app-shell .main :is(.empty,.empty-state){background:#eef3fa!important;color:#344d6b!important}.app-shell .main .calendar-day{background:#f4f7fc!important}}
+
+/* Remove remaining near-black workspace bands; preserve dark sapphire navigation. */
+.app-shell .main{background:#eaf0f8!important}
+.app-shell .main>header,.app-shell .main>section:first-child:not(.autocare-simple-home),.app-shell .main :is(.workspace-heading,.workspace-title,.workspace-banner,.hero-banner,.hero-header,.page-heading,.page-title-banner,.section-banner,.calendar-header,.calendar-hero){background:#e0ebf9!important;color:#193a62!important;border-color:#c5d8ed!important}
+.app-shell .main :is(.workspace-heading,.workspace-title,.workspace-banner,.hero-banner,.hero-header,.page-heading,.page-title-banner,.section-banner,.calendar-header,.calendar-hero) :is(h1,h2,h3,p,span,small,strong){color:#193a62!important}
+.app-shell .main>header :is(h1,h2,h3,p,span,small,strong){color:#193a62!important}
+.app-shell .main :is(.calendar-toolbar,.calendar-controls,.calendar-filters,.calendar-view,.calendar-grid,.calendar-content){background:#edf3fb!important;color:#203754!important}
+.app-shell .main :is(.calendar-toolbar,.calendar-controls,.calendar-filters,.calendar-view,.calendar-grid,.calendar-content) :is(h1,h2,h3,p,span,small,label){color:#29496e!important}
+.app-shell .main :is(.calendar-toolbar,.calendar-controls,.calendar-filters,.calendar-view,.calendar-grid,.calendar-content) :is(button,select,input){background:#f7faff!important;color:#193a62!important;border:1px solid #b9cee8!important}
+.app-shell .main :is(.calendar-toolbar,.calendar-controls,.calendar-filters,.calendar-view,.calendar-grid,.calendar-content) button[aria-pressed=true],.app-shell .main :is(.calendar-toolbar,.calendar-controls,.calendar-filters,.calendar-view,.calendar-grid,.calendar-content) button.active{background:#1c5db0!important;color:#fff!important}
+.app-shell .main :is(.workspace-footer,.page-footer,.calendar-footer){background:#e0ebf9!important;color:#365677!important}
