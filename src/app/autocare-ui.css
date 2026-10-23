@@ -3444,44 +3444,7 @@ a:hover {
 }
 
 
-/* AutoCare 2026-10-20 — visual redesign v2: dark premium surfaces */
-.app-shell { background: #080f1e; color: #eaf2ff; }
-.app-shell > .sidebar { background: linear-gradient(165deg,#0d1a30 0%,#080f1e 72%,#101b33 100%); border-right: 1px solid #263652; box-shadow: 16px 0 55px #02071133; }
-.app-shell .main { background: radial-gradient(ellipse at 82% 0%,#152c4a 0%,#0b1425 46%,#080f1e 100%); color:#eaf2ff; min-height:calc(100vh - 72px); }
-.app-shell .app-header { background:#0c1729; border-bottom:1px solid #263652; color:#dbe8ff; }
-.app-shell .main h1,.app-shell .main h2,.app-shell .main h3,.app-shell .main strong { color:#f5f9ff; }
-.app-shell .main .small,.app-shell .main small,.app-shell .main .eyebrow { color:#9db0cf; }
-.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty,.app-shell .main .for-you-card,.app-shell .main .dashboard-secondary-stats button { background:linear-gradient(145deg,#14243b,#101c30);border:1px solid #2a3c59;color:#eaf2ff;box-shadow:0 12px 32px #00000026;border-radius:19px; }
-.app-shell .main .card:hover,.app-shell .main .for-you-card:hover,.app-shell .main .dashboard-secondary-stats button:hover { border-color:#4d7ad0;box-shadow:0 15px 38px #0005; }
-.app-shell .main input,.app-shell .main select,.app-shell .main textarea { background:#0e1a2d;color:#edf4ff;border-color:#344765; }
-.app-shell .main input::placeholder,.app-shell .main textarea::placeholder { color:#8a9fbd; }
-.app-shell .main button:not(.primary):not(.active),.app-shell .main .button:not(.primary) { border-color:#344765;color:#dce9ff;background:#15243a; }
-.app-shell .main .primary { background:linear-gradient(135deg,#3676ff,#2461dd);color:white;border-color:#578bff;box-shadow:0 8px 22px #2461dd44; }
-.app-shell .main .primary:hover { background:linear-gradient(135deg,#528bff,#3273f6); }
-.app-shell .main .stat .value,.app-shell .main .dashboard-secondary-stats .value { color:#fff;font-weight:750;letter-spacing:-.05em; }
-.app-shell .main .overview-columns,.app-shell .main .maintenance-overview { gap:20px; }
-.app-shell .main .panoramic-hero { border:1px solid #314769;border-radius:24px;overflow:hidden;min-height:500px;box-shadow:0 25px 65px #0008; }
-.app-shell .main .panoramic-hero .automotive-image:after { background:linear-gradient(90deg,#071224f2 0%,#08152cce 38%,#08152c45 72%,#07122466 100%); }
-.app-shell .main .panoramic-hero .automotive-copy h2 { color:#fff;font-size:clamp(30px,3.1vw,51px);letter-spacing:-.055em;line-height:1.12; }
-.app-shell .main .panoramic-hero .automotive-description { color:#d4e1f7; }
-.app-shell .main .hero-next-deadline { background:#0b1b33e8;border:1px solid #578bff77;backdrop-filter:blur(16px);box-shadow:0 12px 35px #0007;border-radius:16px; }
-.app-shell .main .featured-vehicle,.app-shell .main .featured-photo { border-radius:20px;overflow:hidden; }
-.app-shell .main .featured-photo img,.app-shell .main .workspace-garage .car-card img { object-fit:cover; }
-.app-shell .main .chart { color:#c2d6f6; }
-.app-shell .main .chart > * { border-color:#344b70; }
-.app-shell .main .empty { min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px; }
-.app-shell .main .page-head { margin-bottom:26px; }
-.app-shell .main .page-head h1 { font-size:clamp(27px,2.6vw,39px);letter-spacing:-.055em; }
-.app-shell .main .stats { gap:16px; }
-.app-shell .main .stat { padding:24px;min-height:128px; }
-.app-shell .main .stat .value { font-size:clamp(25px,2.2vw,37px); }
-.app-shell .main .for-you-card { padding:24px; }
-.app-shell .main .dashboard-secondary-stats button { padding:23px; }
-.app-shell .main .maintenance-overview > .card { min-height:220px; }
-@media(max-width:1000px) { .app-shell .main .panoramic-hero { min-height:410px; } .app-shell .main .stat { min-height:105px;padding:18px; } }
-@media(max-width:640px) { .app-shell .main .panoramic-hero { min-height:360px; } .app-shell .main .hero-next-deadline { position:static; } .app-shell .main .page-head h1 { font-size:28px; } }
-
-
+/* Removed obsolete dark premium v2 rules; light theme is authoritative. */
 /* AutoCare reference-aligned UI v3: dark navigation, luminous workspace */
 .app-shell { background:#f3f7fd;color:#101d35; }
 .app-shell .main { background:linear-gradient(155deg,#edf4ff 0%,#f7faff 42%,#f2f6fc 100%);color:#12213b; }
