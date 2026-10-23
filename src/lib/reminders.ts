@@ -36,7 +36,15 @@ export async function scheduleReminders(now = new Date()) {
         if (channel === 'email' && !u.emailVerified) continue;
         if ((channel === 'email' && !p.emailEnabled) || (channel === 'push' && !p.pushEnabled))
           continue;
-        const message = `${r.title} · ${v.brand} ${v.model} (${v.plate}) · ${offset === 'km' ? `prag de ${r.nextKm} km atins (kilometraj manual)` : days === 0 ? 'scadență astăzi' : days! < 0 ? 'termen depășit' : `scadență în ${days} zile`}. Date introduse de utilizator.`;
+        const subject = `${r.category || r.title}: ${v.brand} ${v.model} (${v.plate})`;
+        const reminder = offset === 'km'
+          ? `Ai atins ${r.nextKm} km. Verifică lucrarea programată.`
+          : days === 0
+            ? `Astăzi expiră ${r.category || r.title}.`
+            : days! < 0
+              ? `${r.category || r.title} a expirat de ${Math.abs(days!)} ${Math.abs(days!) === 1 ? 'zi' : 'zile'}.`
+              : `În ${days} ${days === 1 ? 'zi' : 'zile'} expiră ${r.category || r.title}.`;
+        const message = `${subject} — ${reminder}`;
         const out = await db()
           .insert(s.notifications)
           .values({
