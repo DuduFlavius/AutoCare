@@ -1392,3 +1392,27 @@ html body .app-shell main.main .autocare-advanced-settings :is(div,p,span,label,
 html body .app-shell main.main .support-workspace :is(.support-notice,.support-readonly,.support-system-message,.support-session-bar,.support-client-folders){background:#e0eaf7!important;color:#214a7b!important;border-color:#b6cbe5!important}
 html body .app-shell main.main .support-workspace :is(.support-session-enter,.support-session-finish,.support-client-folders button[aria-pressed=true]){background:#285eaa!important;color:#fff!important;border-color:#285eaa!important}
 html body .app-shell main.main .support-workspace :is(.support-session-enter,.support-session-finish,.support-client-folders button[aria-pressed=true]) :is(span,svg,strong){color:#fff!important}
+
+/* Final blue controls and consistent low-glare page polish. */
+html body .app-shell main.main{
+ --color-primary:#2467bd;--color-primary-hover:#1755a5;--color-primary-soft:#d9e9fc;
+ --accent:#2467bd;--cyan:#2467bd;
+}
+html body .app-shell main.main :is(button,.button,[role="button"]):not(.danger):not(.ghost):not(.close):not([aria-label*="Șterge"]):not([aria-label*="sterge"]):not(.support-session-delete){
+ background:#d5e6fa!important;background-image:none!important;color:#174d91!important;border:1px solid #9fbfe6!important;
+ box-shadow:0 2px 7px #234b7d12!important;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+html body .app-shell main.main :is(button,.button,[role="button"]):not(.danger):not(.ghost):not(.close):not(.support-session-delete):hover{background:#c6def8!important;border-color:#7ca9de!important}
+html body .app-shell main.main :is(button.primary,.button.primary,button.active,button[aria-pressed=true],button[type=submit],.support-session-enter,.support-session-finish){
+ background:#2467bd!important;background-image:none!important;color:#fff!important;border-color:#2467bd!important;box-shadow:0 4px 12px #2467bd24!important;
+}
+html body .app-shell main.main :is(button.primary,.button.primary,button.active,button[aria-pressed=true],button[type=submit],.support-session-enter,.support-session-finish):hover{background:#1755a5!important;border-color:#1755a5!important}
+html body .app-shell main.main :is(button.primary,.button.primary,button.active,button[aria-pressed=true],button[type=submit],.support-session-enter,.support-session-finish) :is(span,strong,small,svg){color:#fff!important}
+html body .app-shell main.main :is(.danger,.support-session-delete){background:#fae7ed!important;color:#9a2d51!important;border-color:#e6b8c8!important}
+html body .app-shell main.main :is(.card,.stat,.empty,.support-workspace,.support-chat-panel,.support-composer,.autocare-advanced-settings,.calendar-day,.record-search){
+ border-color:#bdd0e6!important;box-shadow:0 4px 18px #315a8510;
+}
+html body .app-shell main.main :is(.card,.stat,.empty,.support-workspace,.support-chat-panel,.support-composer,.autocare-advanced-settings) :is(h2,h3,h4,strong){color:#1c426f}
+html body .app-shell main.main :is(.support-upload-trigger,.autocare-advanced-settings>summary,.support-client-folders button){background:#d5e6fa!important;color:#174d91!important;border-color:#9fbfe6!important}
+html body .app-shell main.main :is(input,select,textarea):focus-visible{outline:2px solid #357bd0!important;outline-offset:2px!important}
+@media(max-width:760px){html body .app-shell main.main :is(button,.button){min-height:42px}html body .app-shell main.main :is(.support-workspace,.card,.autocare-advanced-settings){border-radius:13px!important}}
