@@ -1289,3 +1289,34 @@ html body .app-shell .main :is(.membership-summary,.membership-detail,.membershi
 }
 html body .app-shell .main :is(.membership-summary,.membership-detail,.membership-grid,.membership-info,.subscription-summary,.subscription-details,.plan-features,.plan-card,.pricing-card,.premium-card,.subscription-card) :is(span,small,p,strong){color:#214a7b!important}
 html body .app-shell .main :is(.eyebrow,.muted,.small){color:#526e90!important}
+
+/* Calm sapphire design tokens, shared by every content workspace. */
+html body .app-shell main.main{
+ --color-bg:#e9eff7!important;--color-surface:#edf3fa!important;--color-surface-muted:#e3ecf7!important;
+ --color-text:#1d3c64!important;--color-muted:#506c8b!important;--color-subtle:#6a819b!important;
+ --color-primary:#285fb0!important;--color-primary-soft:#dce9fa!important;
+ --color-border:#c3d4e8!important;--color-border-strong:#a9c3e2!important;
+ background:#e9eff7!important;background-image:none!important;color:#1d3c64!important;
+}
+html body .app-shell main.main :is(.page-head,.card,.stat,.empty,.support-workspace,.support-sidebar,.support-chat-panel,.support-chat-header,.support-messages,.support-composer,.support-thread,.support-message,.support-client,.support-team,.support-search,.support-thread-list,.support-chat,.support-chat-body,.support-chat-footer,.support-conversation,.support-toolbar,.support-filters,.support-header-actions,.support-readonly,.support-notice,.support-error){
+ background:#edf3fa!important;background-image:none!important;color:#1d3c64!important;border-color:#c3d4e8!important;
+}
+html body .app-shell main.main :is(.support-messages,.support-chat-body,.support-thread-list){background:#e5edf7!important}
+html body .app-shell main.main :is(.support-message,.support-thread,.support-composer,.support-chat-header,.support-sidebar){background:#edf3fa!important}
+html body .app-shell main.main :is(.support-workspace,.support-sidebar,.support-chat-panel,.support-chat-header,.support-messages,.support-composer,.support-thread,.support-message,.support-client,.support-team,.support-search,.support-thread-list) :is(h2,h3,h4,strong,p,span,small,label){color:#24486f!important}
+html body .app-shell main.main :is(.support-filters,.support-header-actions,.support-composer,.support-sidebar,.support-chat-panel,.support-workspace) button:not(.primary):not([aria-pressed=true]):not(.active),
+html body .app-shell main.main :is(.support-filters,.support-header-actions,.support-composer,.support-sidebar,.support-chat-panel,.support-workspace) .pill:not(.primary){
+ background:#dfeaf8!important;background-image:none!important;color:#204b83!important;border-color:#aac4e4!important;
+}
+html body .app-shell main.main :is(.support-filters,.support-header-actions,.support-composer,.support-sidebar,.support-chat-panel,.support-workspace) button[aria-pressed=true],
+html body .app-shell main.main :is(.support-filters,.support-header-actions,.support-composer,.support-sidebar,.support-chat-panel,.support-workspace) button.primary{
+ background:#285fb0!important;color:#fff!important;border-color:#285fb0!important;
+}
+html body .app-shell main.main :is(.support-workspace,.support-composer,.support-search) :is(textarea,input){
+ background:#f1f6fc!important;color:#1d3c64!important;border-color:#b4cbe5!important;
+}
+html body .app-shell main.main :is(.support-system-message,.support-notice,.support-sync,.support-thread.selected){background:#dce9fa!important;color:#214a7b!important}
+html body .app-shell main.main :is(.support-message time,.support-thread small,.support-composer-hint,.support-preview-text){color:#587392!important}
+html body .app-shell main.main :is(.membership-summary,.membership-detail,.membership-grid,.membership-info,.subscription-summary,.subscription-details,.plan-features,.plan-card,.pricing-card,.premium-card,.subscription-card) :is(div,span,p,small,strong){color:#24486f}
+html body .app-shell main.main :is(.membership-summary,.subscription-summary,.subscription-details,.plan-features) > div{background:#e2ecf8!important;color:#24486f!important}
+html body .app-shell main.main :is(.record-search,.record-search input,.record-tools input,.record-tools select){background:#f1f6fc!important;color:#1d3c64!important}
