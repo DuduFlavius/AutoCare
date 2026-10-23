@@ -1504,7 +1504,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                                     className="button small"
                                     style={{ padding: '6px 9px', cursor: 'pointer' }}
                                   >
-                                    Adaugă poză / PDF
+                                    Atașează document
                                     <input
                                       className="sr-only"
                                       type="file"
@@ -1512,6 +1512,15 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                                       onChange={async (e) => {
                                         const file = e.target.files?.[0];
                                         if (!file) return;
+                                        e.target.value = '';
+                                        if (file.size > 2097152) {
+                                          setError('Fișierul este prea mare. Alege o poză sau un PDF de maximum 2 MB.');
+                                          return;
+                                        }
+                                        if (!['application/pdf', 'image/jpeg', 'image/png'].includes(file.type)) {
+                                          setError('Format neacceptat. Alege un PDF, JPG sau PNG.');
+                                          return;
+                                        }
                                         const form = new FormData();
                                         form.set('file', file);
                                         form.set('recordId', r.id);
@@ -1520,10 +1529,11 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                                             method: 'POST',
                                             body: form,
                                           });
-                                          const out = await res.json();
-                                          if (!res.ok) throw new Error(out.error);
+                                          const out = await res.json().catch(() => ({}));
+                                          if (!res.ok) throw new Error(out.error || 'Încărcarea nu a reușit. Încearcă din nou.');
+                                          await refresh();
+                                          setNotice('Documentul a fost atașat cu succes.');
                                         });
-                                        e.target.value = '';
                                       }}
                                     />
                                   </label>
