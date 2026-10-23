@@ -1551,3 +1551,28 @@ html body .app-shell>.sidebar .sidebar-profile strong{color:#fff!important;font-
 html body .app-shell>.sidebar .sidebar-profile small{color:#bfd4ef!important;font-size:11px!important}
 html body .app-shell>.sidebar .sidebar-profile>svg{color:#b8d5fa!important;margin-left:auto!important}
 html body .app-shell>.sidebar .sidebar-profile:hover{background:linear-gradient(120deg,#254977,#28558d)!important}
+
+/* Founder panel: light premium workspace, retaining navy navigation. */
+html body .founder-shell{--bg:#edf2f9;--panel:#fff;--panel2:#e8f0fa;--border:#d0dfef;--text:#1d416d;--muted:#57718e;--accent:#2467bd;background:#edf2f9!important;color:#1d416d!important;color-scheme:light!important}
+html body .founder-shell .founder-main{background:#edf2f9!important;background-image:none!important;color:#1d416d!important;color-scheme:light!important}
+html body .founder-shell .founder-sidebar{background:#18375d!important;color:#fff!important;border-color:#294c78!important}
+html body .founder-shell .founder-sidebar a{color:#dce9fb!important}
+html body .founder-shell .founder-sidebar a:hover,html body .founder-shell .founder-sidebar a[aria-current="page"]{background:#2b5a99!important;color:#fff!important}
+html body .founder-shell .founder-main :is(h1,h2,h3,h4){color:#193f71!important}
+html body .founder-shell .founder-main :is(p,.muted,.micro,.small,.eyebrow,label){color:#4c6888!important}
+html body .founder-shell .founder-main :is(.card,.founder-user-list,.founder-table-wrap,.founder-user-details,.founder-team-entry,.panel,.stat){background:#fff!important;background-image:none!important;color:#1d416d!important;border:1px solid #d3e0ef!important;border-radius:16px!important;box-shadow:0 7px 22px #244f8110!important}
+html body .founder-shell .founder-main :is(.card strong,td strong,.value){color:#193f71!important}
+html body .founder-shell .founder-main :is(input,select,textarea){background:#f5f8fd!important;color:#193f71!important;border:1px solid #bfd1e8!important}
+html body .founder-shell .founder-main :is(input::placeholder,textarea::placeholder){color:#6d829c!important}
+html body .founder-shell .founder-main :is(button,.button):not(.primary):not(.danger){background:#dceafb!important;color:#204d85!important;border:1px solid #a9c5e7!important}
+html body .founder-shell .founder-main :is(button.primary,.button.primary){background:#2467bd!important;background-image:none!important;color:#fff!important;border-color:#2467bd!important}
+html body .founder-shell .founder-main :is(table,thead,tbody,tr,th,td){color:#21476f!important;border-color:#d6e3f0!important}
+html body .founder-shell .founder-main th{background:#e8f0fa!important;color:#244f7e!important}
+html body .founder-shell .founder-main :is(tr:hover td,tr.selected-user td){background:#e3effc!important}
+html body .founder-shell .founder-main :is(.role-badge,.founder-role-badge,.notice){background:#e3effc!important;color:#25548a!important;border-color:#bfd2e9!important}
+html body .founder-shell .founder-main .pill.valid{background:#d9f3e9!important;color:#167351!important}
+html body .founder-shell .founder-main :is(input,button,select,textarea,a):focus-visible{outline:2px solid #3176cc!important;outline-offset:2px}
+html body .app-shell>.sidebar .sidebar-profile{background:#23466f!important;border:1px solid #426d9e!important;border-radius:14px!important;padding:11px!important}
+html body .app-shell>.sidebar .sidebar-profile .profile-avatar{background:linear-gradient(145deg,#5a9cf0,#245b9e)!important;color:#fff!important;border:2px solid #a9d0ff!important;border-radius:50%!important;box-shadow:0 3px 10px #061f4055!important}
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{width:72px!important;height:60px!important;margin:13px 0 12px!important;background:#e7f0fc!important;background-image:none!important;border:1px solid #c6d9ef!important;border-radius:14px!important;box-shadow:none!important}
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{width:37px!important;height:37px!important;color:#285f9f!important;stroke:#285f9f!important}
