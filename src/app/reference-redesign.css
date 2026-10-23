@@ -1452,3 +1452,27 @@ html body .app-shell main.main .autocare-simple-home .autocare-simple-hero :is(b
  background:#e5effe!important;color:#17477f!important;border:1px solid #b7d1f2!important;
 }
 html body .app-shell main.main .autocare-simple-home .autocare-simple-hero :is(button,.button) :is(span,strong,svg){color:#17477f!important}
+
+/* Premium refinement 2026-10-23: subscriptions and shared workspaces. */
+html body .app-shell main.main{background:#edf2f9!important;color:#203b61!important}
+html body .app-shell main.main :is(.membership-workspace,.workspace-membership,.subscription-workspace){max-width:1440px;margin-inline:auto}
+html body .app-shell main.main :is(.subscription-option,.membership-current,.membership-summary,.subscription-summary,.pricing-card,.plan-card,.premium-card){
+ background:#fff!important;background-image:none!important;color:#203b61!important;
+ border:1px solid #d5e0ee!important;border-radius:20px!important;
+ box-shadow:0 10px 30px rgba(34,65,110,.075)!important;
+}
+html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card){padding:28px!important}
+html body .app-shell main.main :is(.subscription-option,.membership-current,.pricing-card,.plan-card,.premium-card) :is(h2,h3,.subscription-price,.price,.value){color:#183d73!important;opacity:1!important}
+html body .app-shell main.main :is(.subscription-option,.membership-current,.pricing-card,.plan-card,.premium-card) :is(p,li,small,.micro,.muted){color:#526b89!important;opacity:1!important;line-height:1.6}
+html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) :is(ul,ol){padding-block:12px}
+html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) li{padding-block:5px}
+html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) :is(button.primary,.button.primary,button[type=submit],a.primary){
+ background:#2467bd!important;color:#fff!important;border:1px solid #2467bd!important;
+ border-radius:11px!important;min-height:48px!important;font-weight:700!important;
+}
+html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) :is(button.primary,.button.primary,button[type=submit],a.primary) :is(span,strong,svg){color:#fff!important}
+html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) :is(button.primary,.button.primary,button[type=submit],a.primary):hover{background:#174f9c!important}
+html body .app-shell main.main :is(.membership-workspace,.workspace-membership,.subscription-workspace) :is(.micro,.muted,.caption){color:#57708f!important;opacity:1!important}
+html body .app-shell main.main :is(.membership-workspace,.workspace-membership,.subscription-workspace) :is(.invoice-history,.billing-history,.subscription-history,.table-scroll){background:#fff!important;border:1px solid #d5e0ee!important;border-radius:16px!important;padding:18px!important}
+html body .app-shell main.main :is(.card,.stat,.panel,.tile,.empty,.journal,.support-chat-panel,.autocare-advanced-settings){border-radius:16px;box-shadow:0 5px 22px rgba(35,67,105,.055)!important}
+@media(max-width:760px){html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card){padding:19px!important;border-radius:15px!important}}
