@@ -1476,3 +1476,25 @@ html body .app-shell main.main :is(.membership-workspace,.workspace-membership,.
 html body .app-shell main.main :is(.membership-workspace,.workspace-membership,.subscription-workspace) :is(.invoice-history,.billing-history,.subscription-history,.table-scroll){background:#fff!important;border:1px solid #d5e0ee!important;border-radius:16px!important;padding:18px!important}
 html body .app-shell main.main :is(.card,.stat,.panel,.tile,.empty,.journal,.support-chat-panel,.autocare-advanced-settings){border-radius:16px;box-shadow:0 5px 22px rgba(35,67,105,.055)!important}
 @media(max-width:760px){html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card){padding:19px!important;border-radius:15px!important}}
+
+/* Garage and shared premium cards: correct pale-on-pale text and oversized empty tiles. */
+html body .app-shell main.main.workspace-garage :is(.car-card,.add-car-tile){
+ background:#fff!important;background-image:none!important;border:1px solid #d3e0ef!important;
+ color:#1e426d!important;border-radius:18px!important;box-shadow:0 8px 25px #244f8114!important;
+}
+html body .app-shell main.main.workspace-garage .add-car-tile{background:#edf5ff!important;border:1px dashed #8eb4e3!important;min-height:320px!important;max-height:440px!important}
+html body .app-shell main.main.workspace-garage :is(.car-card,.add-car-tile) :is(h2,h3,h4,strong,span,p,small,label,svg){color:#214b7c!important;opacity:1!important;text-shadow:none!important}
+html body .app-shell main.main.workspace-garage .car-card .car-metrics{background:#edf3fa!important;border:1px solid #d2e1f1!important}
+html body .app-shell main.main.workspace-garage .car-card .car-metrics :is(span,small){color:#55718f!important}
+html body .app-shell main.main.workspace-garage .car-card .car-metrics strong{color:#204b7f!important}
+html body .app-shell main.main.workspace-garage .car-card .row-actions button.primary{background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
+html body .app-shell main.main.workspace-garage .car-card .row-actions button.primary :is(span,strong,svg){color:#fff!important}
+html body .app-shell main.main.workspace-garage .car-card .row-actions button.danger{background:#f9e9ed!important;color:#9d3452!important;border-color:#e6bfcb!important}
+html body .app-shell main.main.workspace-garage .add-car-tile button{background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
+html body .app-shell main.main.workspace-garage .add-car-tile button :is(span,strong,svg){color:#fff!important}
+html body .app-shell main.main.workspace-garage .car-card .row-actions{gap:9px!important}
+html body .app-shell main.main :is(.card,.panel,.tile,.stat,.empty,.journal,.journal-row,.notification-panel,.support-chat-panel,.autocare-advanced-settings) :is(.muted,.micro,small,dt,dd){color:#55718f!important;opacity:1!important}
+html body .app-shell main.main :is(.card,.panel,.tile,.stat,.empty,.journal,.journal-row,.notification-panel,.support-chat-panel,.autocare-advanced-settings) :is(h1,h2,h3,h4,p,label,li){color:#25466f!important;opacity:1!important}
+html body .app-shell main.main :is(.card,.panel,.tile,.stat,.empty,.journal,.journal-row,.notification-panel,.support-chat-panel,.autocare-advanced-settings) :is(button.primary,button[type=submit]) :is(span,strong,svg){color:#fff!important}
+@media(min-width:900px){html body .app-shell main.main.workspace-garage .grid3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))!important;align-items:start!important}}
+@media(max-width:760px){html body .app-shell main.main.workspace-garage .add-car-tile{min-height:230px!important}}
