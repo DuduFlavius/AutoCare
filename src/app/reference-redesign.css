@@ -866,3 +866,23 @@ html,body{max-width:100%;overflow-x:hidden}
 .autocare-advanced-settings[open]{padding:0 16px 16px}
 .autocare-advanced-settings[open]>summary{margin:0 -16px 12px;border-bottom:1px solid #355475}
 @media(max-width:760px){.app-shell .main button.primary,.app-shell .main .button.primary{min-height:48px;font-size:15px}.app-shell .main input,.app-shell .main select{min-height:45px}.app-shell .main .toolbar{gap:12px}.app-shell .main .autocare-advanced-settings{background:#152c48!important;color:#edf5ff!important}}
+
+/* AutoCare simple home — same touch-friendly experience on web and PWA */
+.autocare-simple-home{display:grid;gap:18px;max-width:1040px;margin:0 auto;color:#edf5ff}
+.autocare-simple-hero,.autocare-simple-actions,.autocare-simple-due{border:1px solid #355577;border-radius:22px;background:linear-gradient(145deg,#1c395a,#10253e);padding:24px;box-shadow:0 10px 32px #06132430}
+.autocare-simple-hero{display:flex;align-items:flex-start;flex-direction:column;gap:12px}
+.autocare-simple-eyebrow{font-size:12px;font-weight:750;letter-spacing:.1em;color:#9acaff}
+.autocare-simple-hero h2{font-size:clamp(25px,4vw,34px);line-height:1.18;color:#fff;margin:0}
+.autocare-simple-hero p,.autocare-simple-due p{color:#bfd3e8;margin:0 0 10px}
+.autocare-simple-hero .primary{display:flex;align-items:center;gap:10px;min-height:54px;padding:12px 22px;font-weight:750;font-size:17px}
+.autocare-simple-actions h3,.autocare-simple-due h3{color:#fff;font-size:22px;margin:0 0 16px}
+.autocare-simple-actions{display:grid;gap:12px}
+.autocare-simple-actions>button,.autocare-simple-due>button:not(.autocare-simple-secondary){display:flex;align-items:center;gap:16px;width:100%;min-height:78px;padding:15px 18px;border-radius:16px;border:1px solid #42648a;background:#1b3858;color:#f0f7ff;text-align:left;cursor:pointer}
+.autocare-simple-actions>button>span,.autocare-simple-due>button>span:first-child{display:flex;flex:1;flex-direction:column;gap:5px}
+.autocare-simple-actions strong,.autocare-simple-due strong{font-size:17px}
+.autocare-simple-actions small,.autocare-simple-due small{color:#b8cce4;font-size:13px}
+.autocare-simple-secondary{display:inline-flex;align-items:center;gap:9px;min-height:44px;border:0;background:transparent;color:#9dd0ff;font-weight:700;cursor:pointer}
+.autocare-simple-due{display:grid;gap:12px}
+.autocare-simple-due>button:not(.autocare-simple-secondary){min-height:64px;justify-content:space-between}
+.autocare-simple-actions button:hover,.autocare-simple-due button:hover{border-color:#8bc4ff}
+@media(max-width:760px){.autocare-simple-home{gap:13px}.autocare-simple-hero,.autocare-simple-actions,.autocare-simple-due{padding:18px;border-radius:18px;background:#162f4e!important}.autocare-simple-hero .primary{width:100%;justify-content:center}.autocare-simple-actions>button{min-height:83px}.autocare-simple-actions strong{font-size:16px}}
