@@ -3514,3 +3514,18 @@ a:hover {
 .app-shell .main .autocare-simple-actions>button :is(span,strong,small,svg){color:#194a84!important}
 .app-shell .main .autocare-simple-actions>button:hover{background:#dceafa!important}
 .app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(135deg,#245c9d,#194779)!important}
+
+/* Unified secondary-workspace surfaces; overrides dark legacy tiles at source. */
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) {
+ --color-bg:#eaf0f8;--color-surface:#f3f7fd;--color-surface-muted:#eaf2fc;--color-text:#19385f;--color-muted:#526d8b;--color-primary:#205eb0;--color-primary-soft:#e3efff;--color-border:#c8d9ec;
+ background:#eaf0f8!important;color:#19385f!important;
+}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.page-head,.toolbar,.card,.empty,.table-scroll,.record-search,.record-filter-panel>summary,.record-filter-fields,.document-gallery tbody tr,.calendar,.calendar-day,.calendar-event,.maintenance-overview,.record-aside,.record-tools,.section-title,.filter-pills,.list-item,.notice,.stat) {
+ background-color:#f2f6fc!important;background-image:none!important;color:#19385f!important;border-color:#c8d9ec!important;
+}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.page-head,.card,.empty,.table-scroll,.record-search,.record-filter-panel,.document-gallery,.calendar,.calendar-day,.maintenance-overview,.record-aside,.record-tools,.section-title,.filter-pills) :is(h1,h2,h3,h4,strong){color:#173b6b!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.page-head,.card,.empty,.table-scroll,.record-search,.record-filter-panel,.document-gallery,.calendar,.calendar-day,.maintenance-overview,.record-aside,.record-tools,.section-title,.filter-pills) :is(p,small,label){color:#476381!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.toolbar,.filter-pills,.row-actions,.record-tools,.calendar) button:not(.primary):not(.active):not([aria-pressed=true]){background:#e3eefc!important;background-image:none!important;color:#194678!important;border-color:#b8d0eb!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.toolbar,.filter-pills,.row-actions,.record-tools,.calendar) button:not(.primary):not(.active):not([aria-pressed=true]) :is(span,strong,small,svg){color:#194678!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.toolbar,.filter-pills,.calendar) button:is(.active,[aria-pressed=true]),.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general) button.primary{background:#205eb0!important;color:#fff!important;border-color:#205eb0!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(input,textarea,select){background:#f8fbff!important;color:#19385f!important;border-color:#b7cce6!important}
