@@ -55,7 +55,7 @@
 .app-shell .main:has(.autocare-dashboard-feature){background:#f4f7fc!important}
 .app-shell .main .autocare-dashboard-feature{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,1fr);gap:16px;align-items:stretch}
 .app-shell .main .autocare-dashboard-feature .automotive-stage{margin:0!important;min-width:0}
-.app-shell .main .autocare-car-showcase{height:100%;min-height:350px!important;position:relative;isolation:isolate;background:#1d1d1d!important;display:flex;align-items:stretch;padding:0!important;overflow:hidden}
+.app-shell .main .autocare-car-showcase{height:100%;min-height:350px!important;position:relative;isolation:isolate;background:#e3ebf6!important;display:flex;align-items:stretch;padding:0!important;overflow:hidden}
 .app-shell .main .autocare-car-showcase .autocare-car-image{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:-1;overflow:hidden}
 .app-shell .main .autocare-car-showcase .autocare-car-image img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important;filter:contrast(1.07) saturate(1.1);transform:none!important}
 .app-shell .main .autocare-car-showcase .autocare-car-image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#1b1b1be8 0%,#1b1b1ba6 33%,#1b1b1b12 74%,#1b1b1b52 100%)!important;pointer-events:none}
@@ -63,27 +63,27 @@
 .app-shell .main .autocare-car-details h2{font-size:clamp(25px,2.4vw,40px)!important;line-height:1.05;letter-spacing:-.045em;color:#fff!important;margin:0}
 .app-shell .main .autocare-car-year{font-size:13px;color:#dddddd}
 .app-shell .main .autocare-plate{display:inline-flex;align-items:center;gap:12px;background:#f6f9ff;color:#2c2c2c;border-radius:6px;padding:0 12px 0 0;overflow:hidden;font-weight:800;letter-spacing:.05em;min-height:34px}
-.app-shell .main .autocare-plate b{background:#6d6d6d;color:#fff;padding:10px 8px;font-size:10px}
+.app-shell .main .autocare-plate b{background:#e3ebf6;color:#fff;padding:10px 8px;font-size:10px}
 .app-shell .main .autocare-car-facts{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
 .app-shell .main .autocare-car-facts>span{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;color:#fff}
 .app-shell .main .autocare-car-facts svg{grid-row:span 2;color:#e0e0e0}
 .app-shell .main .autocare-car-facts strong{color:#fff!important;font-size:16px}
 .app-shell .main .autocare-car-facts small{color:#c2c2c2!important;font-size:11px}
-.app-shell .main .autocare-car-open{background:#3c3c3cbb!important;color:#fff!important;border:1px solid #82828277!important;border-radius:8px;display:flex;gap:8px;align-items:center;padding:8px 12px}
+.app-shell .main .autocare-car-open{background:#e3ebf6bb!important;color:#fff!important;border:1px solid #82828277!important;border-radius:8px;display:flex;gap:8px;align-items:center;padding:8px 12px}
 .app-shell .main .autocare-dashboard-aside{display:flex;flex-direction:column;gap:13px;min-width:0}
-.app-shell .main .autocare-upcoming-panel{background:linear-gradient(135deg,#2f2f2f,#212121);border:1px solid #454545;border-radius:17px;padding:18px 20px;flex:1;box-shadow:0 13px 35px #20202033}
+.app-shell .main .autocare-upcoming-panel{background:#e3ebf6;border:1px solid #454545;border-radius:17px;padding:18px 20px;flex:1;box-shadow:0 13px 35px #20202033}
 .app-shell .main .autocare-panel-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:17px}
 .app-shell .main .autocare-panel-heading h3{font-size:16px!important;color:#fff!important;margin:0}
 .app-shell .main .autocare-panel-heading button{background:transparent!important;border:0!important;color:#a5a5a5!important;font-size:12px;display:flex;gap:6px;align-items:center;white-space:nowrap}
-.app-shell .main .autocare-next-record{display:flex;align-items:center;gap:13px;width:100%;border:0!important;border-radius:12px!important;padding:15px!important;background:#373737!important;color:#fff!important;text-align:left}
+.app-shell .main .autocare-next-record{display:flex;align-items:center;gap:13px;width:100%;border:0!important;border-radius:12px!important;padding:15px!important;background:#e3ebf6!important;color:#fff!important;text-align:left}
 .app-shell .main .autocare-next-record>span:nth-child(2){display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
 .app-shell .main .autocare-next-record strong{color:#fff!important;font-size:15px}
 .app-shell .main .autocare-next-record small{color:#c4c4c4!important;font-size:12px}
 .app-shell .main .autocare-next-record time{font-size:12px;color:#e4e4e4;white-space:nowrap}
-.app-shell .main .autocare-next-icon{display:grid;place-items:center;padding:10px;border-radius:12px;background:#535353;color:#aeaeae}
+.app-shell .main .autocare-next-icon{display:grid;place-items:center;padding:10px;border-radius:12px;background:#e3ebf6;color:#aeaeae}
 .app-shell .main .autocare-no-activity{font-size:13px;color:#cbcbcb;line-height:1.6}
 .app-shell .main .autocare-document-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
-.app-shell .main .autocare-document-stats button{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px 10px!important;border:1px solid #3e3e3e!important;border-radius:13px!important;background:#272727!important;color:#fff!important;text-align:left}
+.app-shell .main .autocare-document-stats button{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px 10px!important;border:1px solid #3e3e3e!important;border-radius:13px!important;background:#e3ebf6!important;color:#fff!important;text-align:left}
 .app-shell .main .autocare-document-stats button svg{color:#868686}
 .app-shell .main .autocare-document-stats button:nth-child(2) svg,.app-shell .main .autocare-document-stats button:nth-child(2) strong{color:#32c995!important}
 .app-shell .main .autocare-document-stats button:nth-child(3) svg,.app-shell .main .autocare-document-stats button:nth-child(3) strong{color:#ffae32!important}
@@ -91,13 +91,13 @@
 .app-shell .main .autocare-document-stats button strong{font-size:24px;color:#9a9a9a!important;line-height:1}
 .app-shell .main .autocare-document-stats button span{font-size:10px;color:#c3c3c3;line-height:1.3}
 .app-shell .main .autocare-quick-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:16px 0 30px}
-.app-shell .main .autocare-quick-actions button{display:flex;align-items:center;gap:14px;padding:19px!important;border:1px solid #454545!important;border-radius:13px!important;background:linear-gradient(125deg,#353535,#272727)!important;color:#fff!important;text-align:left;box-shadow:0 10px 22px #30303020}
+.app-shell .main .autocare-quick-actions button{display:flex;align-items:center;gap:14px;padding:19px!important;border:1px solid #454545!important;border-radius:13px!important;background:#e3ebf6!important;color:#fff!important;text-align:left;box-shadow:0 10px 22px #30303020}
 .app-shell .main .autocare-quick-actions button>svg:first-child{color:#9a9a9a;flex-shrink:0}
 .app-shell .main .autocare-quick-actions button>svg:last-child{color:#9c9c9c;margin-left:auto;flex-shrink:0}
 .app-shell .main .autocare-quick-actions button span{display:flex;flex-direction:column;gap:4px}
 .app-shell .main .autocare-quick-actions button strong{color:#fff!important;font-size:13px}
 .app-shell .main .autocare-quick-actions button small{color:#c1c1c1!important;font-size:11px}
-.app-shell .main .autocare-quick-actions button:hover{background:#464646!important;transform:translateY(-2px)}
+.app-shell .main .autocare-quick-actions button:hover{background:#e3ebf6!important;transform:translateY(-2px)}
 @media(max-width:1200px){.app-shell .main .autocare-dashboard-feature{grid-template-columns:1fr}.app-shell .main .autocare-car-showcase{min-height:380px!important}.app-shell .main .autocare-dashboard-aside{display:grid;grid-template-columns:1fr 1fr}.app-shell .main .autocare-document-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.app-shell .main .autocare-dashboard-aside{grid-template-columns:1fr}.app-shell .main .autocare-document-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.app-shell .main .autocare-quick-actions{grid-template-columns:1fr}.app-shell .main .autocare-car-details{max-width:78%;padding:20px}.app-shell .main .autocare-car-showcase{min-height:335px!important}}
 @media(max-width:420px){.app-shell .main .autocare-document-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.app-shell .main .autocare-next-record time{display:none}}
@@ -255,21 +255,21 @@
 .app-shell .workspace-garage .page-head h1{color:#fff!important}
 .app-shell .workspace-garage .page-head p,.app-shell .workspace-garage .page-head .muted{color:#c2c2c2!important}
 .app-shell .workspace-garage .grid3{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr))!important;gap:20px!important;align-items:stretch}
-.app-shell .workspace-garage .car-card{background:linear-gradient(155deg,#333333,#262626)!important;color:#eaf3ff!important;border:1px solid #555555!important;border-radius:18px!important;padding:24px!important;box-shadow:0 16px 38px #13131340!important;display:flex;flex-direction:column;gap:13px;min-height:390px}
+.app-shell .workspace-garage .car-card{background:#e3ebf6!important;color:#eaf3ff!important;border:1px solid #555555!important;border-radius:18px!important;padding:24px!important;box-shadow:0 16px 38px #13131340!important;display:flex;flex-direction:column;gap:13px;min-height:390px}
 .app-shell .workspace-garage .car-card:hover{border-color:#868686!important;box-shadow:0 20px 45px #0005!important}
 .app-shell .workspace-garage .car-card .eyebrow,.app-shell .workspace-garage .car-card .small,.app-shell .workspace-garage .car-card .muted{color:#bdbdbd!important}
 .app-shell .workspace-garage .car-card h2{color:#fff!important;font-size:clamp(23px,2vw,30px)!important;margin:0!important}
 .app-shell .workspace-garage .autocare-garage-card-icon{display:grid!important;place-items:center;width:90px!important;height:90px!important;margin:6px 0 2px!important;background:radial-gradient(circle at 30% 20%,#5d5d5d,#303030)!important;border:1px solid #717171!important;border-radius:20px!important;color:#c3c3c3!important}
 .app-shell .workspace-garage .car-card .plate{background:#edf4ff!important;color:#2e2e2e!important;border-radius:6px!important;padding:7px 10px!important;font-weight:750!important}
-.app-shell .workspace-garage .car-card .car-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;border:1px solid #4e4e4e!important;background:#222222!important;border-radius:12px!important;padding:14px!important}
+.app-shell .workspace-garage .car-card .car-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;border:1px solid #4e4e4e!important;background:#e3ebf6!important;border-radius:12px!important;padding:14px!important}
 .app-shell .workspace-garage .car-card .car-metrics span{color:#b0b0b0!important}
 .app-shell .workspace-garage .car-card .car-metrics strong{color:#f1f7ff!important}
 .app-shell .workspace-garage .car-card .row-actions{margin-top:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.app-shell .workspace-garage .car-card .row-actions button{min-height:43px!important;border-radius:9px!important;border:1px solid #575757!important;background:#3e3e3e!important;color:#eaf3ff!important;font-weight:650!important;font-size:12px!important;padding:9px!important}
-.app-shell .workspace-garage .car-card .row-actions button.primary{grid-column:1/-1;background:linear-gradient(110deg,#737373,#575757)!important;border-color:#828282!important;color:#fff!important}
-.app-shell .workspace-garage .car-card .row-actions button.danger{background:#4b253b!important;border-color:#79445c!important;color:#ffc7d2!important}
-.app-shell .workspace-garage .add-car-tile{min-height:390px!important;border-radius:18px!important;border:1px dashed #656565!important;background:linear-gradient(140deg,#2d2d2d,#262626)!important;color:#eaeaea!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:17px!important;padding:28px!important}
-.app-shell .workspace-garage .add-car-tile:hover{border-color:#9f9f9f!important;background:#383838!important}
+.app-shell .workspace-garage .car-card .row-actions button{min-height:43px!important;border-radius:9px!important;border:1px solid #575757!important;background:#e3ebf6!important;color:#eaf3ff!important;font-weight:650!important;font-size:12px!important;padding:9px!important}
+.app-shell .workspace-garage .car-card .row-actions button.primary{grid-column:1/-1;background:#e3ebf6!important;border-color:#828282!important;color:#fff!important}
+.app-shell .workspace-garage .car-card .row-actions button.danger{background:#e3ebf6!important;border-color:#79445c!important;color:#ffc7d2!important}
+.app-shell .workspace-garage .add-car-tile{min-height:390px!important;border-radius:18px!important;border:1px dashed #656565!important;background:#e3ebf6!important;color:#eaeaea!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:17px!important;padding:28px!important}
+.app-shell .workspace-garage .add-car-tile:hover{border-color:#9f9f9f!important;background:#e3ebf6!important}
 .app-shell .workspace-garage .add-car-tile>svg{color:#afafaf!important}
 .app-shell .workspace-garage .add-car-tile span{color:#bdbdbd!important;max-width:240px}
 .app-shell .workspace-garage .add-car-tile strong{color:#fff!important;font-size:19px}
@@ -278,7 +278,7 @@
 
 
 /* AutoCare unified premium navy theme — all authenticated workspaces */
-.app-shell{--text:#eaf2ff;--muted:#b9b9b9;--line:#464646;--surface:#2e2e2e;--surface-2:#383838;--bg:#1e1e1e;color:#eaf2ff!important;background:#1e1e1e!important}
+.app-shell{--text:#eaf2ff;--muted:#b9b9b9;--line:#464646;--surface:#2e2e2e;--surface-2:#383838;--bg:#1e1e1e;color:#eaf2ff!important;background:#e3ebf6!important}
 .app-shell .main,.app-shell .main[class*="workspace-"]{background:radial-gradient(ellipse at 75% -10%,#393939 0%,#232323 48%,#1d1d1d 100%)!important;color:#eaf2ff!important;min-height:calc(100vh - 66px)}
 .app-shell .app-header{background:#212121!important;border-bottom:1px solid #464646!important;color:#eaf2ff!important;box-shadow:none!important}
 .app-shell .app-header .muted,.app-shell .app-header .muted span{color:#c6c6c6!important}
@@ -289,33 +289,33 @@
 .app-shell .app-header .autocare-header-signout{background:#343434!important;border:1px solid #585858!important;color:#d2d2d2!important;border-radius:10px!important}
 .app-shell .main .page-head h1,.app-shell .main h1,.app-shell .main h2,.app-shell .main h3,.app-shell .main h4,.app-shell .main .section-title h3{color:#f5f9ff!important}
 .app-shell .main .page-head p,.app-shell .main .muted,.app-shell .main .micro,.app-shell .main .eyebrow,.app-shell .main .subtle,.app-shell .main small{color:#c3c3c3!important}
-.app-shell .main .card,.app-shell .main .stat,.app-shell .main .for-you-card,.app-shell .main .mini-vehicle,.app-shell .main .event-line,.app-shell .main .record-line,.app-shell .main .activity-line,.app-shell .main .document-card,.app-shell .main .expense-card,.app-shell .main .settings-card,.app-shell .main .support-card,.app-shell .main .membership-card,.app-shell .main .timeline-card,.app-shell .main .next-step,.app-shell .main .panel,.app-shell .main .tile{background:linear-gradient(145deg,#333333,#272727)!important;border-color:#4e4e4e!important;color:#eaf2ff!important;box-shadow:0 12px 28px #13131328!important}
+.app-shell .main .card,.app-shell .main .stat,.app-shell .main .for-you-card,.app-shell .main .mini-vehicle,.app-shell .main .event-line,.app-shell .main .record-line,.app-shell .main .activity-line,.app-shell .main .document-card,.app-shell .main .expense-card,.app-shell .main .settings-card,.app-shell .main .support-card,.app-shell .main .membership-card,.app-shell .main .timeline-card,.app-shell .main .next-step,.app-shell .main .panel,.app-shell .main .tile{background:#e3ebf6!important;border-color:#4e4e4e!important;color:#eaf2ff!important;box-shadow:0 12px 28px #13131328!important}
 .app-shell .main .card strong,.app-shell .main .stat strong,.app-shell .main .card b,.app-shell .main .card .value,.app-shell .main .stat .value{color:#f2f7ff!important}
 .app-shell .main .card p,.app-shell .main .card span,.app-shell .main .card label,.app-shell .main .card small,.app-shell .main .stat label,.app-shell .main .stat span{color:#cbcbcb}
 .app-shell .main .stat .value,.app-shell .main .stat strong{color:#b1b1b1!important}
-.app-shell .main .dashboard-secondary-stats>*,.app-shell .main .dashboard-secondary-stats button,.app-shell .main .overview-columns>.card,.app-shell .main .overview-stack>.card,.app-shell .main .for-you-grid>*{background:linear-gradient(145deg,#343434,#282828)!important;border:1px solid #535353!important;color:#edf5ff!important;border-radius:16px!important}
+.app-shell .main .dashboard-secondary-stats>*,.app-shell .main .dashboard-secondary-stats button,.app-shell .main .overview-columns>.card,.app-shell .main .overview-stack>.card,.app-shell .main .for-you-grid>*{background:#e3ebf6!important;border:1px solid #535353!important;color:#edf5ff!important;border-radius:16px!important}
 .app-shell .main .dashboard-secondary-stats button .value{color:#afafaf!important}
-.app-shell .main .overview-columns .mini-vehicle,.app-shell .main .mini-vehicle{background:#373737!important;border:1px solid #5a5a5a!important}
+.app-shell .main .overview-columns .mini-vehicle,.app-shell .main .mini-vehicle{background:#e3ebf6!important;border:1px solid #5a5a5a!important}
 .app-shell .main .mini-vehicle .mini-details h3,.app-shell .main .mini-vehicle strong{color:#fff!important}
 .app-shell .main .mini-vehicle .mini-details span{color:#c7c7c7!important}
 .app-shell .main .mini-vehicle img{display:none!important}
-.app-shell .main .event-line,.app-shell .main .record-line,.app-shell .main .activity-line{background:#383838!important;border:1px solid #4f4f4f!important;color:#f2f7ff!important}
+.app-shell .main .event-line,.app-shell .main .record-line,.app-shell .main .activity-line{background:#e3ebf6!important;border:1px solid #4f4f4f!important;color:#f2f7ff!important}
 .app-shell .main .event-line strong,.app-shell .main .record-line strong{color:#fff!important}
-.app-shell .main .quick-actions button,.app-shell .main .quick-actions a,.app-shell .main .quick-action,.app-shell .main .action-tile,.app-shell .main .next-step-items button{background:#373737!important;border:1px solid #565656!important;color:#eaf3ff!important;border-radius:12px!important}
-.app-shell .main .quick-actions button:hover,.app-shell .main .quick-actions a:hover,.app-shell .main .next-step-items button:hover{background:#474747!important}
-.app-shell .main .button:not(.primary):not(.danger),.app-shell .main button.secondary,.app-shell .main .close{background:#3e3e3e!important;border:1px solid #5b5b5b!important;color:#e9e9e9!important}
-.app-shell .main .button.primary,.app-shell .main button.primary{background:linear-gradient(110deg,#767676,#5f5f5f)!important;color:#fff!important;border-color:#888888!important}
-.app-shell .main input:not([type="checkbox"]):not([type="radio"]),.app-shell .main select,.app-shell .main textarea,.app-shell .main .search-field,.app-shell .main .search-input{background:#272727!important;color:#f0f6ff!important;border:1px solid #565656!important;border-radius:10px!important}
+.app-shell .main .quick-actions button,.app-shell .main .quick-actions a,.app-shell .main .quick-action,.app-shell .main .action-tile,.app-shell .main .next-step-items button{background:#e3ebf6!important;border:1px solid #565656!important;color:#eaf3ff!important;border-radius:12px!important}
+.app-shell .main .quick-actions button:hover,.app-shell .main .quick-actions a:hover,.app-shell .main .next-step-items button:hover{background:#e3ebf6!important}
+.app-shell .main .button:not(.primary):not(.danger),.app-shell .main button.secondary,.app-shell .main .close{background:#e3ebf6!important;border:1px solid #5b5b5b!important;color:#e9e9e9!important}
+.app-shell .main .button.primary,.app-shell .main button.primary{background:#e3ebf6!important;color:#fff!important;border-color:#888888!important}
+.app-shell .main input:not([type="checkbox"]):not([type="radio"]),.app-shell .main select,.app-shell .main textarea,.app-shell .main .search-field,.app-shell .main .search-input{background:#e3ebf6!important;color:#f0f6ff!important;border:1px solid #565656!important;border-radius:10px!important}
 .app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#a5a5a5!important}
 .app-shell .main input:focus-visible,.app-shell .main select:focus-visible,.app-shell .main textarea:focus-visible,.app-shell .main button:focus-visible,.app-shell .main a:focus-visible{outline:2px solid #a9a9a9!important;outline-offset:2px}
 .app-shell .main table,.app-shell .main thead,.app-shell .main tbody,.app-shell .main tr,.app-shell .main th,.app-shell .main td{background:transparent!important;color:#e8e8e8!important;border-color:#4f4f4f!important}
 .app-shell .main th{color:#c5c5c5!important}
-.app-shell .main tr:hover td{background:#3e3e3e!important}
+.app-shell .main tr:hover td{background:#e3ebf6!important}
 .app-shell .main .divider,.app-shell .main hr{border-color:#4d4d4d!important}
-.app-shell .main .empty-state,.app-shell .main .empty,.app-shell .main .placeholder,.app-shell .main .add-car-tile{background:#2b2b2b!important;color:#cbcbcb!important;border-color:#5b5b5b!important}
+.app-shell .main .empty-state,.app-shell .main .empty,.app-shell .main .placeholder,.app-shell .main .add-car-tile{background:#e3ebf6!important;color:#cbcbcb!important;border-color:#5b5b5b!important}
 .app-shell .main .badge,.app-shell .main .pill,.app-shell .main .tag{border-color:#5d5d5d}
 .app-shell .main .workspace-header,.app-shell .main .toolbar,.app-shell .main .filters,.app-shell .main .filter-bar{background:transparent!important;color:#eaeaea!important}
-.app-shell .main .autocare-vehicle-monogram{display:grid;place-items:center;background:#4b4b4b!important;color:#bebebe!important;border:1px solid #717171!important;border-radius:16px!important}
+.app-shell .main .autocare-vehicle-monogram{display:grid;place-items:center;background:#e3ebf6!important;color:#bebebe!important;border:1px solid #717171!important;border-radius:16px!important}
 .app-shell .main .overview-columns .card,.app-shell .main .overview-columns .card *{border-color:#4f4f4f}
 @media(prefers-reduced-motion:reduce){.app-shell *{transition-duration:0.01ms!important;animation-duration:0.01ms!important}}
 @media(max-width:760px){.app-shell .main{overflow-x:hidden}.app-shell .main .overview-columns,.app-shell .main .dashboard-secondary-stats{min-width:0}.app-shell .app-header .autocare-header-identity{max-width:115px;overflow:hidden}}
@@ -340,71 +340,71 @@
 
 
 /* Accessibility pass: high contrast across records, calendar, maintenance and every workspace */
-.app-shell .main{--bg:#202020!important;--panel:#313131!important;--panel2:#3c3c3c!important;--border:#555555!important;--text:#edf5ff!important;--muted:#c8c8c8!important;--accent:#a2a2a2!important;--warning:#ffd48a!important;--danger:#ff9ea8!important;color-scheme:dark}
+.app-shell .main{--bg:#202020!important;--panel:#313131!important;--panel2:#3c3c3c!important;--border:#555555!important;--text:#edf5ff!important;--muted:#c8c8c8!important;--accent:#a2a2a2!important;--warning:#ffd48a!important;--danger:#ff9ea8!important;color-scheme:light}
 .app-shell .main button:not(.primary),.app-shell .main summary,.app-shell .main .button:not(.primary){color:#eaf3ff!important}
-.app-shell .main button:not(.primary):not(:disabled),.app-shell .main summary{background:#3f3f3f!important;border-color:#646464!important}
-.app-shell .main button:not(.primary):hover,.app-shell .main summary:hover{background:#4c4c4c!important}
+.app-shell .main button:not(.primary):not(:disabled),.app-shell .main summary{background:#e3ebf6!important;border-color:#646464!important}
+.app-shell .main button:not(.primary):hover,.app-shell .main summary:hover{background:#e3ebf6!important}
 .app-shell .main button:disabled{opacity:.52;cursor:not-allowed}
 .app-shell .main .record-tools{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
-.app-shell .main .record-search{background:#2f2f2f!important;border:1px solid #686868!important;color:#c2c2c2!important;border-radius:13px!important;display:flex;align-items:center;gap:12px;padding:0 14px;flex:1 1 340px;min-height:54px}
+.app-shell .main .record-search{background:#e3ebf6!important;border:1px solid #686868!important;color:#c2c2c2!important;border-radius:13px!important;display:flex;align-items:center;gap:12px;padding:0 14px;flex:1 1 340px;min-height:54px}
 .app-shell .main .record-search input{background:transparent!important;border:0!important;color:#f5f9ff!important;min-width:0;flex:1;box-shadow:none!important}
 .app-shell .main .record-search input::placeholder{color:#bfbfbf!important}
-.app-shell .main .record-filter-panel{background:#383838!important;border:1px solid #646464!important;border-radius:13px!important;flex:0 1 auto;min-width:220px}
+.app-shell .main .record-filter-panel{background:#e3ebf6!important;border:1px solid #646464!important;border-radius:13px!important;flex:0 1 auto;min-width:220px}
 .app-shell .main .record-filter-panel summary{background:transparent!important;color:#eaeaea!important;padding:15px!important;cursor:pointer;list-style:none;display:flex;align-items:center;gap:9px}
-.app-shell .main .record-filter-panel[open]{background:#383838!important}
-.app-shell .main .record-filter-fields{background:#323232!important;color:#eaf3ff!important;border-color:#646464!important;padding:15px!important}
+.app-shell .main .record-filter-panel[open]{background:#e3ebf6!important}
+.app-shell .main .record-filter-fields{background:#e3ebf6!important;color:#eaf3ff!important;border-color:#646464!important;padding:15px!important}
 .app-shell .main .record-filter-fields label{color:#d4d4d4!important}
-.app-shell .main .record-filter-panel .filter-count{background:#555555!important;color:#fff!important;border-radius:8px;padding:2px 7px}
+.app-shell .main .record-filter-panel .filter-count{background:#e3ebf6!important;color:#fff!important;border-radius:8px;padding:2px 7px}
 .app-shell .main .record-list,.app-shell .main .records-list,.app-shell .main .record-grid,.app-shell .main .record-item,.app-shell .main .record-entry{background:transparent!important;color:#eef5ff!important;border-color:#5c5c5c!important}
-.app-shell .main .record-item,.app-shell .main .record-entry{background:#353535!important;border:1px solid #5a5a5a!important;border-radius:15px!important}
+.app-shell .main .record-item,.app-shell .main .record-entry{background:#e3ebf6!important;border:1px solid #5a5a5a!important;border-radius:15px!important}
 .app-shell .main .record-item strong,.app-shell .main .record-entry strong{color:#fff!important}
 .app-shell .main .record-item small,.app-shell .main .record-entry small{color:#c7c7c7!important}
-.app-shell .main .calendar-day{background:#333333!important;color:#eaf4ff!important;border:1px solid #5b5b5b!important;border-radius:12px!important}
-.app-shell .main .calendar-day.today{border:2px solid #a8a8a8!important;background:#484848!important}
+.app-shell .main .calendar-day{background:#e3ebf6!important;color:#eaf4ff!important;border:1px solid #5b5b5b!important;border-radius:12px!important}
+.app-shell .main .calendar-day.today{border:2px solid #a8a8a8!important;background:#e3ebf6!important}
 .app-shell .main .calendar-day small{color:#ffd18a!important}
 .app-shell .main .calendar-day button{color:#eaf4ff!important}
 .app-shell .main .calendar-day .muted{color:#bfbfbf!important}
 .app-shell .main .toolbar{color:#eaf4ff!important;gap:12px}
 .app-shell .main .toolbar label{color:#d0d0d0!important}
-.app-shell .main .toolbar button[aria-pressed="true"]{background:#707070!important;color:#fff!important;border-color:#a8a8a8!important}
-.app-shell .main .toolbar button[aria-pressed="false"]{background:#3b3b3b!important;color:#e0e0e0!important}
-.app-shell .main input[type="month"],.app-shell .main input[type="date"]{color-scheme:dark;background:#2d2d2d!important;color:#ebebeb!important}
+.app-shell .main .toolbar button[aria-pressed="true"]{background:#e3ebf6!important;color:#fff!important;border-color:#a8a8a8!important}
+.app-shell .main .toolbar button[aria-pressed="false"]{background:#e3ebf6!important;color:#e0e0e0!important}
+.app-shell .main input[type="month"],.app-shell .main input[type="date"]{color-scheme:light;background:#e3ebf6!important;color:#ebebeb!important}
 .app-shell .main .status,.app-shell .main .status-badge,.app-shell .main .record-status,.app-shell .main .chip{font-weight:650!important}
-.app-shell .main .status.warning,.app-shell .main .status-badge.warning,.app-shell .main .chip.warning{background:#62451f!important;color:#ffe4a6!important;border-color:#a47735!important}
-.app-shell .main .status.valid,.app-shell .main .status-badge.valid{background:#173e3a!important;color:#a7f4cf!important;border-color:#317e65!important}
-.app-shell .main .status.expired,.app-shell .main .status-badge.expired{background:#582a3c!important;color:#ffc5d3!important;border-color:#a14c6a!important}
+.app-shell .main .status.warning,.app-shell .main .status-badge.warning,.app-shell .main .chip.warning{background:#e3ebf6!important;color:#ffe4a6!important;border-color:#a47735!important}
+.app-shell .main .status.valid,.app-shell .main .status-badge.valid{background:#e3ebf6!important;color:#a7f4cf!important;border-color:#317e65!important}
+.app-shell .main .status.expired,.app-shell .main .status-badge.expired{background:#e3ebf6!important;color:#ffc5d3!important;border-color:#a14c6a!important}
 .app-shell .main .record-tools button,.app-shell .main .record-tools summary,.app-shell .main .toolbar button{min-height:43px}
-.app-shell .main .card .button.small,.app-shell .main .card button.small{background:#484848!important;color:#f0f7ff!important;border-color:#727272!important}
-.app-shell .main .card .button.small:hover,.app-shell .main .card button.small:hover{background:#5f5f5f!important}
+.app-shell .main .card .button.small,.app-shell .main .card button.small{background:#e3ebf6!important;color:#f0f7ff!important;border-color:#727272!important}
+.app-shell .main .card .button.small:hover,.app-shell .main .card button.small:hover{background:#e3ebf6!important}
 .app-shell .main .card label.button.small{color:#eaf3ff!important}
 .app-shell .main .card .micro,.app-shell .main .card .small,.app-shell .main .card time{color:#d0d0d0!important}
 .app-shell .main .card .muted{color:#c7c7c7!important}
 .app-shell .main .card svg{flex-shrink:0}
-.app-shell .main .card .icon,.app-shell .main .record-icon{background:#565656!important;color:#dedede!important}
+.app-shell .main .card .icon,.app-shell .main .record-icon{background:#e3ebf6!important;color:#dedede!important}
 .app-shell .main .card :is(input,select,textarea):focus-visible{outline:2px solid #b3b3b3!important}
 
 
 /* AutoCare premium dark surfaces: alerts, preferences, support chat and founder administration */
-.app-shell .main .journal,.app-shell .main .journal-row,.app-shell .main .journal-item,.app-shell .main .deadline-row,.app-shell .main .alert-row,.app-shell .main .notification-row{background:#3e3e3e!important;color:#eaf3ff!important;border-color:#636363!important}
+.app-shell .main .journal,.app-shell .main .journal-row,.app-shell .main .journal-item,.app-shell .main .deadline-row,.app-shell .main .alert-row,.app-shell .main .notification-row{background:#e3ebf6!important;color:#eaf3ff!important;border-color:#636363!important}
 .app-shell .main .journal-row strong,.app-shell .main .journal-item strong,.app-shell .main .deadline-row strong,.app-shell .main .notification-row strong{color:#fff!important}
 .app-shell .main .journal-row small,.app-shell .main .journal-item small,.app-shell .main .deadline-row small{color:#cccccc!important}
 .app-shell .main :is(.card,.panel,.notification-panel,.settings-panel) :is(label,summary){color:#e9e9e9}
-.app-shell .main :is(.card,.panel) :is(.checkbox-row,.checkbox-option,.check-option,.toggle-row,.notification-option,.preference-option){background:#393939!important;color:#eaf3ff!important;border:1px solid #656565!important;border-radius:11px!important}
+.app-shell .main :is(.card,.panel) :is(.checkbox-row,.checkbox-option,.check-option,.toggle-row,.notification-option,.preference-option){background:#e3ebf6!important;color:#eaf3ff!important;border:1px solid #656565!important;border-radius:11px!important}
 .app-shell .main :is(.card,.panel) :is(.checkbox-row,.checkbox-option,.check-option,.toggle-row,.notification-option,.preference-option) label{color:#eaf3ff!important}
 .app-shell .main input[type=checkbox],.app-shell .main input[type=radio]{accent-color:#8e8e8e}
-.app-shell .main :is(.card,.panel) :is(.notice,.notice-box,.permission-banner,.info-banner,.status-banner){background:#414141!important;color:#eaeaea!important;border:1px solid #6b6b6b!important;border-radius:12px!important}
+.app-shell .main :is(.card,.panel) :is(.notice,.notice-box,.permission-banner,.info-banner,.status-banner){background:#e3ebf6!important;color:#eaeaea!important;border:1px solid #6b6b6b!important;border-radius:12px!important}
 .app-shell .main :is(.card,.panel) :is(.notice,.notice-box,.permission-banner,.info-banner,.status-banner) *{color:inherit}
-.app-shell .main .badge,.app-shell .main .status-badge,.app-shell .main .pill{background:#4e4e4e;color:#eaf3ff!important}
-.app-shell .main :is(.badge,.status-badge,.pill)[class*="warn"],.app-shell .main :is(.badge,.status-badge,.pill)[class*="soon"]{background:#694c20!important;color:#ffe2a0!important;border:1px solid #9b763b!important}
-.app-shell .main :is(.badge,.status-badge,.pill)[class*="success"],.app-shell .main :is(.badge,.status-badge,.pill)[class*="valid"]{background:#1b5149!important;color:#aff4d2!important}
+.app-shell .main .badge,.app-shell .main .status-badge,.app-shell .main .pill{background:#e3ebf6;color:#eaf3ff!important}
+.app-shell .main :is(.badge,.status-badge,.pill)[class*="warn"],.app-shell .main :is(.badge,.status-badge,.pill)[class*="soon"]{background:#e3ebf6!important;color:#ffe2a0!important;border:1px solid #9b763b!important}
+.app-shell .main :is(.badge,.status-badge,.pill)[class*="success"],.app-shell .main :is(.badge,.status-badge,.pill)[class*="valid"]{background:#e3ebf6!important;color:#aff4d2!important}
 .app-shell .main .card :is(button,label).button,.app-shell .main .card button:not(.primary){color:#eaf3ff!important}
-.app-shell .main .card :is(button,label).button:disabled,.app-shell .main .card button:disabled{background:#444444!important;color:#b6b6b6!important;opacity:.65}
-.app-shell .main .card :is(input,textarea,select){background:#2a2a2a!important;color:#eef6ff!important;border-color:#676767!important}
+.app-shell .main .card :is(button,label).button:disabled,.app-shell .main .card button:disabled{background:#e3ebf6!important;color:#b6b6b6!important;opacity:.65}
+.app-shell .main .card :is(input,textarea,select){background:#e3ebf6!important;color:#eef6ff!important;border-color:#676767!important}
 .app-shell .main .card input[type=checkbox]{background:initial!important}
-.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace){background:#2c2c2c!important;color:#ecf5ff!important;border:1px solid #575757!important}
+.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace){background:#e3ebf6!important;color:#ecf5ff!important;border:1px solid #575757!important}
 .app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(aside,header,footer,.sidebar,.chat-sidebar,.conversation-sidebar,.chat-main,.conversation-main,.chat-header,.conversation-header,.chat-body,.conversation-body,.empty-state){background:#343434!important;color:#ebebeb!important;border-color:#595959!important}
 .app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(h1,h2,h3,h4,strong,b,span,p,small){color:inherit}
-.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(input,textarea){background:#2a2a2a!important;color:#f0f7ff!important}
+.app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) :is(input,textarea){background:#e3ebf6!important;color:#f0f7ff!important}
 .app-shell .main :is(.support-chat,.support-inbox,.support-shell,.chat-shell,.chat-layout,.conversation-layout,.messaging-layout,.support-workspace) input::placeholder{color:#bdbdbd!important}
 /* Founder admin has its own root, independent of .app-shell */
 body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
@@ -446,18 +446,18 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 @media(max-width:760px){.app-shell .workspace-dashboard .autocare-upcoming-list .autocare-next-record{gap:8px;padding:10px}.app-shell .workspace-dashboard .autocare-upcoming-list time{font-size:11px}}
 /* Membership: unified premium subscription surfaces */
 .app-shell .workspace-subscription,.app-shell .workspace-membership,.app-shell .membership-workspace{color:#eaf3ff!important}
-.app-shell .main .membership-workspace .card,.app-shell .main .subscription-option,.app-shell .main .membership-current{background:linear-gradient(145deg,#393939,#2a2a2a)!important;border:1px solid #636363!important;border-radius:19px!important;color:#edf5ff!important;box-shadow:0 16px 38px #13131338!important}
-.app-shell .main .subscription-option.annual-option{background:linear-gradient(145deg,#464646,#313131)!important;border-color:#969696!important;box-shadow:0 0 0 1px #75757555,0 18px 45px #15151540!important}
+.app-shell .main .membership-workspace .card,.app-shell .main .subscription-option,.app-shell .main .membership-current{background:#e3ebf6!important;border:1px solid #636363!important;border-radius:19px!important;color:#edf5ff!important;box-shadow:0 16px 38px #13131338!important}
+.app-shell .main .subscription-option.annual-option{background:#e3ebf6!important;border-color:#969696!important;box-shadow:0 0 0 1px #75757555,0 18px 45px #15151540!important}
 .app-shell .main .subscription-option h2,.app-shell .main .membership-current h2,.app-shell .main .membership-workspace h2,.app-shell .main .membership-workspace h3{color:#fff!important}
 .app-shell .main .subscription-price{color:#f3f8ff!important;font-weight:800}
 .app-shell .main .subscription-price span,.app-shell .main .subscription-option p,.app-shell .main .subscription-option li,.app-shell .main .membership-workspace .micro,.app-shell .main .membership-workspace .muted{color:#d1d1d1!important}
 .app-shell .main .subscription-option li svg,.app-shell .main .membership-workspace .list-row svg{color:#b3b3b3!important}
-.app-shell .main .subscription-symbol,.app-shell .main .membership-workspace .list-icon{background:#535353!important;color:#dedede!important;border:1px solid #747474!important}
-.app-shell .main .subscription-option .best-plan{background:#6d6d6d!important;color:#fff!important;border:1px solid #a3a3a3!important}
-.app-shell .main .subscription-saving{background:#1d594f!important;color:#b8f8d7!important;border:1px solid #3a977d!important}
-.app-shell .main .membership-workspace .list-row{background:#383838!important;border:1px solid #5b5b5b!important;border-radius:12px!important;color:#ebebeb!important}
-.app-shell .main .membership-workspace .membership-access{background:#434343!important;color:#eaf4ff!important;border-color:#6e6e6e!important}
-.app-shell .main .subscription-option .button:not(.primary),.app-shell .main .membership-workspace .button:not(.primary){background:#4e4e4e!important;color:#f1f7ff!important;border:1px solid #808080!important}
+.app-shell .main .subscription-symbol,.app-shell .main .membership-workspace .list-icon{background:#e3ebf6!important;color:#dedede!important;border:1px solid #747474!important}
+.app-shell .main .subscription-option .best-plan{background:#e3ebf6!important;color:#fff!important;border:1px solid #a3a3a3!important}
+.app-shell .main .subscription-saving{background:#e3ebf6!important;color:#b8f8d7!important;border:1px solid #3a977d!important}
+.app-shell .main .membership-workspace .list-row{background:#e3ebf6!important;border:1px solid #5b5b5b!important;border-radius:12px!important;color:#ebebeb!important}
+.app-shell .main .membership-workspace .membership-access{background:#e3ebf6!important;color:#eaf4ff!important;border-color:#6e6e6e!important}
+.app-shell .main .subscription-option .button:not(.primary),.app-shell .main .membership-workspace .button:not(.primary){background:#e3ebf6!important;color:#f1f7ff!important;border:1px solid #808080!important}
 
 
 /* Support chat: target the real component classes on both staff and client views */
@@ -481,71 +481,71 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 
 
 /* Fix light-on-light checkboxes and empty panels in settings and notifications */
-.app-shell .settings-workspace .check,.app-shell .settings-workspace .offsets .check,.app-shell .main .offsets label.check{background:#3e3e3e!important;color:#f1f7ff!important;border:1px solid #676767!important;border-radius:10px!important;padding:13px 15px!important;display:flex!important;align-items:center!important;gap:11px!important}
+.app-shell .settings-workspace .check,.app-shell .settings-workspace .offsets .check,.app-shell .main .offsets label.check{background:#e3ebf6!important;color:#f1f7ff!important;border:1px solid #676767!important;border-radius:10px!important;padding:13px 15px!important;display:flex!important;align-items:center!important;gap:11px!important}
 .app-shell .settings-workspace .check input[type=checkbox],.app-shell .main .offsets input[type=checkbox]{accent-color:#9a9a9a!important;width:17px;height:17px;flex-shrink:0}
-.app-shell .settings-workspace .check:has(input:disabled),.app-shell .main .offsets .check:has(input:disabled){opacity:.66!important;background:#343434!important}
+.app-shell .settings-workspace .check:has(input:disabled),.app-shell .main .offsets .check:has(input:disabled){opacity:.66!important;background:#e3ebf6!important}
 .app-shell .settings-workspace .check:has(input:disabled){color:#dcdcdc!important}
-.app-shell .main .empty,.app-shell .main .empty-state,.app-shell .main .notification-empty,.app-shell .main .deadlines-empty{background:#313131!important;color:#e2e2e2!important;border:1px dashed #676767!important;border-radius:14px!important}
+.app-shell .main .empty,.app-shell .main .empty-state,.app-shell .main .notification-empty,.app-shell .main .deadlines-empty{background:#e3ebf6!important;color:#e2e2e2!important;border:1px dashed #676767!important;border-radius:14px!important}
 .app-shell .main .empty h3,.app-shell .main .empty strong,.app-shell .main .empty-state h3{color:#f4f9ff!important}
 .app-shell .main .empty p,.app-shell .main .empty-state p{color:#cccccc!important}
-.app-shell .main .notice,.app-shell .main .notification-permission,.app-shell .main .push-status{background:#444444!important;color:#eaf5ff!important;border:1px solid #6e6e6e!important;border-radius:11px!important}
+.app-shell .main .notice,.app-shell .main .notification-permission,.app-shell .main .push-status{background:#e3ebf6!important;color:#eaf5ff!important;border:1px solid #6e6e6e!important;border-radius:11px!important}
 .app-shell .main .notice *, .app-shell .main .notification-permission *{color:inherit!important}
-.app-shell .main .card button:disabled{background:#464646!important;color:#c3c3c3!important}
+.app-shell .main .card button:disabled{background:#e3ebf6!important;color:#c3c3c3!important}
 .app-shell .main .card button:not(:disabled):focus-visible{outline:2px solid #bebebe!important}
 /* Support chat: composer stays visible and input is readable */
 .support-client,.support-team{min-height:0;max-width:100%;overflow:hidden}
 .support-client .support-chat-panel,.support-team .support-chat-panel{min-height:0;display:flex;flex-direction:column}
 .support-client .support-messages,.support-team .support-messages{min-height:130px;flex:1 1 auto;overflow-y:auto}
 .support-client .support-composer,.support-team .support-composer{flex:0 0 auto;position:relative;z-index:2;border-top:1px solid #666666!important;padding:14px!important}
-.support-client .support-composer textarea,.support-team .support-composer textarea{background:#2a2a2a!important;color:#fff!important;border:1px solid #757575!important;border-radius:12px!important;min-height:64px}
+.support-client .support-composer textarea,.support-team .support-composer textarea{background:#e3ebf6!important;color:#fff!important;border:1px solid #757575!important;border-radius:12px!important;min-height:64px}
 .support-client .support-composer textarea::placeholder,.support-team .support-composer textarea::placeholder{color:#c7c7c7!important}
-.support-client .support-composer button.primary,.support-team .support-composer button.primary{background:#737373!important;color:#fff!important}
+.support-client .support-composer button.primary,.support-team .support-composer button.primary{background:#e3ebf6!important;color:#fff!important}
 @media(max-width:760px){.support-client .support-composer,.support-team .support-composer{padding:10px!important}.support-client .support-messages,.support-team .support-messages{min-height:110px}}
 
 
 /* Premium support ownership, notifications and client privacy actions */
-.support-workspace .support-assignment{background:#393939!important;color:#e3e3e3!important;border:1px solid #646464!important;padding:12px 18px!important}
-.support-workspace .support-assignment select{background:#2d2d2d!important;color:#edf5ff!important;border:1px solid #717171!important;border-radius:9px!important}
-.support-workspace .support-notification-optin{display:flex;justify-content:flex-end;align-items:center;padding:9px 16px;background:#333333!important;border-bottom:1px solid #595959!important}
-.support-workspace .support-notification-optin button{background:#4c4c4c!important;color:#f0f7ff!important;border:1px solid #7c7c7c!important;border-radius:9px!important;padding:9px 13px!important;font-weight:650}
-.support-workspace .support-notification-optin button:hover{background:#616161!important}
-.support-workspace .support-delete-client{display:inline-flex;align-items:center;gap:8px;background:#424242!important;color:#eaf3ff!important;border:1px solid #6e6e6e!important;border-radius:10px!important;padding:9px 12px!important}
-.support-workspace .support-delete-client:hover{background:#5d344c!important;border-color:#ae6483!important;color:#fff!important}
-.support-workspace .support-notice{background:#454545!important;color:#ededed!important;border:1px solid #747474!important}
+.support-workspace .support-assignment{background:#e3ebf6!important;color:#e3e3e3!important;border:1px solid #646464!important;padding:12px 18px!important}
+.support-workspace .support-assignment select{background:#e3ebf6!important;color:#edf5ff!important;border:1px solid #717171!important;border-radius:9px!important}
+.support-workspace .support-notification-optin{display:flex;justify-content:flex-end;align-items:center;padding:9px 16px;background:#e3ebf6!important;border-bottom:1px solid #595959!important}
+.support-workspace .support-notification-optin button{background:#e3ebf6!important;color:#f0f7ff!important;border:1px solid #7c7c7c!important;border-radius:9px!important;padding:9px 13px!important;font-weight:650}
+.support-workspace .support-notification-optin button:hover{background:#e3ebf6!important}
+.support-workspace .support-delete-client{display:inline-flex;align-items:center;gap:8px;background:#e3ebf6!important;color:#eaf3ff!important;border:1px solid #6e6e6e!important;border-radius:10px!important;padding:9px 12px!important}
+.support-workspace .support-delete-client:hover{background:#e3ebf6!important;border-color:#ae6483!important;color:#fff!important}
+.support-workspace .support-notice{background:#e3ebf6!important;color:#ededed!important;border:1px solid #747474!important}
 .support-workspace .support-composer button:disabled{opacity:.55!important;cursor:not-allowed!important}
 @media(max-width:760px){.support-workspace .support-notification-optin{justify-content:center}.support-workspace .support-notification-optin button{font-size:12px}.support-workspace .support-delete-client{font-size:12px}}
 
 
 /* Support premium conversation session, trash, restore and welcome controls */
-.support-workspace .support-session-bar,.support-workspace .support-client-folders{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:13px 17px;background:linear-gradient(110deg,#3b3b3b,#2f2f2f)!important;border-bottom:1px solid #646464!important;color:#d4d4d4!important}
+.support-workspace .support-session-bar,.support-workspace .support-client-folders{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:13px 17px;background:#e3ebf6!important;border-bottom:1px solid #646464!important;color:#d4d4d4!important}
 .support-workspace .support-session-bar span{font-size:12px;color:#d1d1d1!important}
 .support-workspace .support-session-enter,.support-workspace .support-session-exit,.support-workspace .support-client-folders button,.support-workspace .support-delete-client{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:10px 15px;border-radius:11px!important;font-weight:700;font-size:13px;transition:background .18s,border-color .18s}
-.support-workspace .support-session-enter{background:linear-gradient(115deg,#777777,#5a5a5a)!important;color:white!important;border:1px solid #a7a7a7!important;box-shadow:0 5px 17px #21212166}
+.support-workspace .support-session-enter{background:#e3ebf6!important;color:white!important;border:1px solid #a7a7a7!important;box-shadow:0 5px 17px #21212166}
 .support-workspace .support-session-enter:hover{background:#888888!important}
-.support-workspace .support-session-exit{background:#424242!important;color:#f1f7ff!important;border:1px solid #7b7b7b!important}
-.support-workspace .support-session-exit:hover{background:#575757!important}
-.support-workspace .support-client-folders button{background:#424242!important;color:#e9e9e9!important;border:1px solid #666666!important}
-.support-workspace .support-client-folders button[aria-pressed=true]{background:#696969!important;border-color:#aaaaaa!important;color:#fff!important}
-.support-workspace .support-delete-client{background:#484848!important;color:#f5f9ff!important;border:1px solid #888888!important}
-.support-workspace .support-delete-client:hover{background:#694059!important;border-color:#c67d9c!important}
+.support-workspace .support-session-exit{background:#e3ebf6!important;color:#f1f7ff!important;border:1px solid #7b7b7b!important}
+.support-workspace .support-session-exit:hover{background:#e3ebf6!important}
+.support-workspace .support-client-folders button{background:#e3ebf6!important;color:#e9e9e9!important;border:1px solid #666666!important}
+.support-workspace .support-client-folders button[aria-pressed=true]{background:#e3ebf6!important;border-color:#aaaaaa!important;color:#fff!important}
+.support-workspace .support-delete-client{background:#e3ebf6!important;color:#f5f9ff!important;border:1px solid #888888!important}
+.support-workspace .support-delete-client:hover{background:#e3ebf6!important;border-color:#c67d9c!important}
 .support-workspace .support-session-enter:disabled,.support-workspace .support-delete-client:disabled{opacity:.5!important;cursor:not-allowed}
-.support-workspace .support-readonly{background:#373737!important;color:#d6d6d6!important;border-top:1px solid #606060!important}
+.support-workspace .support-readonly{background:#e3ebf6!important;color:#d6d6d6!important;border-top:1px solid #606060!important}
 @media(max-width:760px){.support-workspace .support-session-bar,.support-workspace .support-client-folders{padding:10px;gap:8px}.support-workspace .support-session-bar span{flex-basis:100%}}
 
 
 /* AutoCare support — compact premium action toolbar, no duplicate checkmark actions */
-.support-workspace .support-session-bar{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:18px!important;padding:16px 20px!important;background:linear-gradient(120deg,#393939,#2c2c2c)!important;border-bottom:1px solid #626262!important}
+.support-workspace .support-session-bar{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:18px!important;padding:16px 20px!important;background:#e3ebf6!important;border-bottom:1px solid #626262!important}
 .support-workspace .support-session-status{display:flex;flex-direction:column;gap:5px;min-width:0}
 .support-workspace .support-session-status strong{font-size:14px;color:#fff!important}
 .support-workspace .support-session-status span{font-size:12px;color:#cbcbcb!important}
 .support-workspace .support-session-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
 .support-workspace .support-session-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px!important;border-radius:10px!important;font-size:13px;font-weight:700;min-height:40px}
-.support-workspace .support-session-finish{background:#17665c!important;color:#eafff8!important;border:1px solid #40a999!important}
-.support-workspace .support-session-delete{background:#5a3147!important;color:#fff1f5!important;border:1px solid #a86b84!important}
+.support-workspace .support-session-finish{background:#e3ebf6!important;color:#eafff8!important;border:1px solid #40a999!important}
+.support-workspace .support-session-delete{background:#e3ebf6!important;color:#fff1f5!important;border:1px solid #a86b84!important}
 .support-workspace .support-session-finish:hover{background:#207e70!important}
 .support-workspace .support-session-delete:hover{background:#81405a!important}
 .support-workspace .support-thread-status,.support-workspace .support-header-role{font-size:11px;color:#cdcdcd!important}
-.support-workspace .support-client-welcome{display:flex;gap:13px;align-items:flex-start;padding:16px 20px;background:#3d3d3d!important;border-bottom:1px solid #686868!important;color:#e2e2e2!important}
+.support-workspace .support-client-welcome{display:flex;gap:13px;align-items:flex-start;padding:16px 20px;background:#e3ebf6!important;border-bottom:1px solid #686868!important;color:#e2e2e2!important}
 .support-workspace .support-client-welcome svg{color:#b0b0b0;flex-shrink:0}
 .support-workspace .support-client-welcome strong{display:block;color:#f6faff!important;font-size:14px;margin-bottom:5px}
 .support-workspace .support-client-welcome p{margin:0;color:#dedede!important;font-size:13px;line-height:1.6}
@@ -555,14 +555,14 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 
 /* AutoCare Mobile Premium: compact touch-friendly layout */
 @media (max-width:760px){
-.app-shell{background:#1e1e1e!important}
+.app-shell{background:#e3ebf6!important}
 .app-shell .app-header{background:#272727!important;border-bottom:1px solid #4b4b4b!important;min-height:64px!important;gap:10px}
 .app-shell .app-header .muted{color:#d2d2d2!important;font-size:12px!important}
 .app-shell .autocare-header-identity{display:none!important}
 .app-shell .autocare-header-user{padding:5px!important;border-radius:50%!important;min-width:40px!important;min-height:40px!important}
 .app-shell .autocare-header-user>svg{display:none!important}
 .app-shell .autocare-header-signout{display:none!important}
-.app-shell .main{padding:20px 14px 110px!important;max-width:100vw!important;overflow-x:hidden!important;background:#212121!important}
+.app-shell .main{padding:20px 14px 110px!important;max-width:100vw!important;overflow-x:hidden!important;background:#e3ebf6!important}
 .app-shell .main .page-head{gap:14px!important;flex-wrap:wrap!important}
 .app-shell .main .page-head h1{font-size:clamp(25px,7vw,33px)!important;line-height:1.12!important;letter-spacing:-.035em!important}
 .app-shell .main .page-head p{line-height:1.55!important}
@@ -587,24 +587,24 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 /* Fixed premium mobile navigation, safe area aware */
 .autocare-mobile-dock{display:none}
 @media(max-width:760px){
-.app-shell .autocare-mobile-dock{position:fixed;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;bottom:0;left:0;right:0;z-index:100;background:linear-gradient(180deg,#313131,#1e1e1e)!important;border-top:1px solid #606060;box-shadow:0 -12px 36px #17171799;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));gap:2px;backdrop-filter:blur(20px)}
+.app-shell .autocare-mobile-dock{position:fixed;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;bottom:0;left:0;right:0;z-index:100;background:#e3ebf6!important;border-top:1px solid #606060;box-shadow:0 -12px 36px #17171799;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));gap:2px;backdrop-filter:blur(20px)}
 .app-shell .autocare-mobile-dock button{appearance:none;border:0!important;background:transparent!important;color:#bababa!important;min-width:0;min-height:56px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;border-radius:12px;font-size:10px;font-weight:650;line-height:1.15;position:relative}
 .app-shell .autocare-mobile-dock button svg{color:inherit}
-.app-shell .autocare-mobile-dock button.active{background:#4e4e4e!important;color:#fff!important;box-shadow:inset 0 0 0 1px #7a7a7a}
+.app-shell .autocare-mobile-dock button.active{background:#e3ebf6!important;color:#fff!important;box-shadow:inset 0 0 0 1px #7a7a7a}
 .app-shell .autocare-mobile-dock button:focus-visible{outline:2px solid #b0b0b0;outline-offset:-2px}
 .app-shell .autocare-mobile-dock button:active{transform:scale(.96)}
 }
 
 /* Mobile usability: one visual hierarchy, compact navigation, comfortable touch targets */
 @media(max-width:760px){
-.app-shell .navigation-overlay{position:fixed;inset:0;z-index:210;background:#131313b8;backdrop-filter:blur(8px)}
-.app-shell .navigation-overlay .dialog{width:min(440px,calc(100vw - 24px))!important;max-height:calc(100dvh - 32px)!important;margin:16px auto!important;overflow-y:auto!important;background:#2a2a2a!important;border:1px solid #646464!important;border-radius:22px!important;box-shadow:0 25px 80px #010715bb!important;padding:18px!important;color:#edf6ff!important}
+.app-shell .navigation-overlay{position:fixed;inset:0;z-index:210;background:#e3ebf6b8;backdrop-filter:blur(8px)}
+.app-shell .navigation-overlay .dialog{width:min(440px,calc(100vw - 24px))!important;max-height:calc(100dvh - 32px)!important;margin:16px auto!important;overflow-y:auto!important;background:#e3ebf6!important;border:1px solid #646464!important;border-radius:22px!important;box-shadow:0 25px 80px #010715bb!important;padding:18px!important;color:#edf6ff!important}
 .app-shell .navigation-overlay .dialog h2{font-size:20px!important;color:#fff!important;letter-spacing:-.02em}
 .app-shell .navigation-overlay nav[aria-label="Navigare mobil"]{display:flex!important;flex-direction:column!important;gap:12px!important}
-.app-shell .autocare-mobile-menu-group{display:flex;flex-direction:column;gap:5px;padding:11px;background:#333333;border:1px solid #515151;border-radius:16px}
+.app-shell .autocare-mobile-menu-group{display:flex;flex-direction:column;gap:5px;padding:11px;background:#e3ebf6;border:1px solid #515151;border-radius:16px}
 .app-shell .autocare-mobile-menu-heading{font-size:10px;font-weight:800;letter-spacing:.15em;color:#b0b0b0;padding:2px 10px 7px}
 .app-shell .autocare-mobile-menu-group button{display:flex;align-items:center;text-align:left;gap:12px;min-height:46px;width:100%;padding:10px 12px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#e5e5e5!important;font-weight:650;font-size:14px}
-.app-shell .autocare-mobile-menu-group button[aria-current="page"]{background:#555555!important;color:#fff!important}
+.app-shell .autocare-mobile-menu-group button[aria-current="page"]{background:#e3ebf6!important;color:#fff!important}
 .app-shell .autocare-mobile-menu-group button svg{color:#bdbdbd}
 .app-shell .autocare-mobile-menu-group button .nav-unread{margin-left:auto}
 .app-shell .main .page-head{margin-bottom:16px!important}
@@ -644,9 +644,9 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 .app-shell .main .autocare-dashboard-feature{gap:12px!important}
 .app-shell .main .autocare-dashboard-feature>*{min-width:0!important}
 .app-shell .main .autocare-upcoming-list{max-height:none!important}
-.app-shell .autocare-mobile-dock{background:#232323!important;border-top:1px solid #4a4a4a!important;box-shadow:0 -6px 30px #20202040!important}
+.app-shell .autocare-mobile-dock{background:#e3ebf6!important;border-top:1px solid #4a4a4a!important;box-shadow:0 -6px 30px #20202040!important}
 .app-shell .autocare-mobile-dock button{color:#c8c8c8!important;font-size:11px!important;font-weight:650!important;letter-spacing:.005em}
-.app-shell .autocare-mobile-dock button.active{background:#4b4b4b!important;color:#fff!important}
+.app-shell .autocare-mobile-dock button.active{background:#e3ebf6!important;color:#fff!important}
 .app-shell .autocare-mobile-dock button.active svg{color:#fff!important}
 .app-shell .navigation-overlay .dialog{overscroll-behavior:contain}
 }
@@ -693,35 +693,35 @@ html,body{max-width:100%;overflow-x:hidden}
 
 /* Support chat on phones: purpose-built single-column messenger layout */
 @media(max-width:760px){
-.app-shell .main:has(.support-workspace){background:#212121!important;padding:14px 12px calc(98px + env(safe-area-inset-bottom,0px))!important;color:#f1f6ff!important}
+.app-shell .main:has(.support-workspace){background:#e3ebf6!important;padding:14px 12px calc(98px + env(safe-area-inset-bottom,0px))!important;color:#f1f6ff!important}
 .app-shell .main:has(.support-workspace) .page-head{margin-bottom:14px!important}
 .app-shell .main:has(.support-workspace) .page-head h1{font-size:25px!important;color:#fff!important;line-height:1.15!important}
 .app-shell .main:has(.support-workspace) .page-head p{font-size:13px!important;color:#c3c3c3!important}
-.app-shell .main .support-workspace{display:block!important;width:100%!important;min-width:0!important;overflow:hidden!important;border:1px solid #525252!important;border-radius:20px!important;background:#2e2e2e!important;box-shadow:0 12px 32px #12121250!important}
-.app-shell .main .support-client .support-chat-panel{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;border:0!important;border-radius:0!important;overflow:hidden!important;background:#2e2e2e!important}
-.app-shell .main .support-client-folders{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:12px!important;background:#2f2f2f!important}
+.app-shell .main .support-workspace{display:block!important;width:100%!important;min-width:0!important;overflow:hidden!important;border:1px solid #525252!important;border-radius:20px!important;background:#e3ebf6!important;box-shadow:0 12px 32px #12121250!important}
+.app-shell .main .support-client .support-chat-panel{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;border:0!important;border-radius:0!important;overflow:hidden!important;background:#e3ebf6!important}
+.app-shell .main .support-client-folders{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:12px!important;background:#e3ebf6!important}
 .app-shell .main .support-client-folders button{width:100%!important;min-width:0!important;padding:10px 6px!important;min-height:44px!important;justify-content:center!important;font-size:12px!important;gap:6px!important;white-space:nowrap!important}
 .app-shell .main .support-client-folders button svg{width:16px!important;height:16px!important;flex-shrink:0!important}
-.app-shell .main .support-client .support-chat-header{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;gap:10px!important;padding:14px!important;align-items:center!important;background:#383838!important}
+.app-shell .main .support-client .support-chat-header{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;gap:10px!important;padding:14px!important;align-items:center!important;background:#e3ebf6!important}
 .app-shell .main .support-client .support-chat-header .support-avatar{width:42px!important;height:42px!important;min-width:42px!important}
 .app-shell .main .support-client .support-header-title{min-width:0!important}
 .app-shell .main .support-client .support-header-title h3{font-size:15px!important;line-height:1.3!important;color:#fff!important}
 .app-shell .main .support-client .support-header-title p{font-size:12px!important;line-height:1.4!important;margin-top:3px!important}
 .app-shell .main .support-client .support-header-actions{grid-column:1/-1!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:8px!important;width:100%!important}
 .app-shell .main .support-client .support-delete-client{min-height:38px!important;padding:8px 12px!important;font-size:12px!important;max-width:100%!important}
-.app-shell .main .support-client .support-client-welcome{display:flex!important;align-items:flex-start!important;gap:10px!important;padding:12px 14px!important;margin:0!important;border-radius:0!important;background:#404040!important}
+.app-shell .main .support-client .support-client-welcome{display:flex!important;align-items:flex-start!important;gap:10px!important;padding:12px 14px!important;margin:0!important;border-radius:0!important;background:#e3ebf6!important}
 .app-shell .main .support-client .support-client-welcome strong{font-size:13px!important;line-height:1.45!important}
 .app-shell .main .support-client .support-client-welcome p{font-size:12px!important;line-height:1.5!important;margin:5px 0 0!important;color:#dddddd!important}
-.app-shell .main .support-client .support-messages{min-height:180px!important;max-height:42dvh!important;padding:16px 12px!important;overflow-y:auto!important;background:#282828!important}
+.app-shell .main .support-client .support-messages{min-height:180px!important;max-height:42dvh!important;padding:16px 12px!important;overflow-y:auto!important;background:#e3ebf6!important}
 .app-shell .main .support-client .support-message{max-width:88%!important;min-width:0!important;overflow-wrap:anywhere!important;padding:12px!important;border-radius:15px!important}
 .app-shell .main .support-client .support-message p{font-size:14px!important;line-height:1.5!important}
 .app-shell .main .support-client .support-system-message{padding:11px!important;font-size:12px!important;line-height:1.5!important;gap:8px!important}
-.app-shell .main .support-client .support-composer{padding:12px!important;display:flex!important;flex-direction:column!important;gap:10px!important;background:#383838!important}
+.app-shell .main .support-client .support-composer{padding:12px!important;display:flex!important;flex-direction:column!important;gap:10px!important;background:#e3ebf6!important}
 .app-shell .main .support-client .support-upload{display:flex!important;flex-direction:column!important;gap:8px!important;font-size:12px!important;padding:0!important}
-.app-shell .main .support-client .support-upload input[type=file]{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:8px!important;font-size:12px!important;background:#282828!important;color:#e9e9e9!important;border:1px solid #585858!important;border-radius:12px!important}
-.app-shell .main .support-client .support-upload input[type=file]::file-selector-button{background:#535353!important;color:#fff!important;border:0!important;border-radius:8px!important;padding:8px 10px!important;margin-right:8px!important;font-size:12px!important}
+.app-shell .main .support-client .support-upload input[type=file]{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:8px!important;font-size:12px!important;background:#e3ebf6!important;color:#e9e9e9!important;border:1px solid #585858!important;border-radius:12px!important}
+.app-shell .main .support-client .support-upload input[type=file]::file-selector-button{background:#e3ebf6!important;color:#fff!important;border:0!important;border-radius:8px!important;padding:8px 10px!important;margin-right:8px!important;font-size:12px!important}
 .app-shell .main .support-client .support-composer>div{display:grid!important;grid-template-columns:minmax(0,1fr) 48px!important;align-items:end!important;gap:8px!important}
-.app-shell .main .support-client .support-composer textarea{width:100%!important;min-height:68px!important;max-height:160px!important;resize:vertical!important;padding:12px!important;font-size:16px!important;line-height:1.45!important;color:#fff!important;background:#272727!important;border:1px solid #666666!important;border-radius:14px!important}
+.app-shell .main .support-client .support-composer textarea{width:100%!important;min-height:68px!important;max-height:160px!important;resize:vertical!important;padding:12px!important;font-size:16px!important;line-height:1.45!important;color:#fff!important;background:#e3ebf6!important;border:1px solid #666666!important;border-radius:14px!important}
 .app-shell .main .support-client .support-composer button[type=submit]{width:48px!important;height:48px!important;min-height:48px!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:14px!important}
 .app-shell .main .support-client .support-composer button[type=submit] span{display:none!important}
 .app-shell .main .support-client .support-composer>p{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:6px!important;margin:0!important;font-size:11px!important}
@@ -731,7 +731,7 @@ html,body{max-width:100%;overflow-x:hidden}
 /* Mobile support hotfix: composer must remain visible and accessible */
 .support-conversation-management{display:flex;justify-content:flex-end;padding:7px 0 2px}
 .support-conversation-management button{display:inline-flex;align-items:center;gap:6px;background:transparent!important;color:#c6c6c6!important;border:0!important;font-size:12px!important;padding:7px 3px!important}
-.support-client-intro{display:flex;align-items:center;gap:9px;padding:12px 16px;background:#393939;color:#e6e6e6;font-size:13px;line-height:1.4}
+.support-client-intro{display:flex;align-items:center;gap:9px;padding:12px 16px;background:#e3ebf6;color:#e6e6e6;font-size:13px;line-height:1.4}
 .support-intro-dot{width:8px;height:8px;border-radius:50%;background:#50cda7;flex-shrink:0}
 @media(max-width:760px){
 .app-shell .main:has(.support-workspace){overflow:visible!important;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))!important}
@@ -756,7 +756,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 /* Final responsive polish: attachment affordance, focus, readable support controls */
 .support-upload{position:relative!important;display:block!important;cursor:pointer!important}
-.support-upload-trigger{display:inline-flex!important;align-items:center!important;flex-wrap:wrap!important;gap:7px!important;padding:8px 12px!important;border:1px solid #696969!important;border-radius:11px!important;background:#474747!important;color:#f4f9ff!important;font-size:13px!important;font-weight:650!important}
+.support-upload-trigger{display:inline-flex!important;align-items:center!important;flex-wrap:wrap!important;gap:7px!important;padding:8px 12px!important;border:1px solid #696969!important;border-radius:11px!important;background:#e3ebf6!important;color:#f4f9ff!important;font-size:13px!important;font-weight:650!important}
 .support-upload-trigger small{font-size:11px!important;font-weight:450!important;color:#cbcbcb!important}
 .support-upload input[type=file],.app-shell .main .support-client .support-upload input[type=file]{position:absolute!important;width:1px!important;height:1px!important;min-height:1px!important;padding:0!important;margin:0!important;opacity:0!important;overflow:hidden!important;clip-path:inset(50%)!important;pointer-events:none!important}
 .support-upload:focus-within .support-upload-trigger{outline:3px solid #a3a3a3!important;outline-offset:3px!important}
@@ -798,13 +798,13 @@ html,body{max-width:100%;overflow-x:hidden}
   .app-shell .main .membership-workspace .card,
   .app-shell .main .subscription-option,
   .app-shell .main .membership-current {
-    background:linear-gradient(145deg,#393939,#2a2a2a)!important;
+    background:#e3ebf6!important;
     border-color:#5f5f5f!important;
     color:#edf5ff!important;
   }
   .app-shell .main .support-client .support-chat-panel,
   .app-shell .main .support-team .support-chat-panel {
-    background:#2e2e2e!important;
+    background:#e3ebf6!important;
   }
 }
 
@@ -829,26 +829,26 @@ html,body{max-width:100%;overflow-x:hidden}
   .app-shell,.app-shell .main,.app-shell .app-header {
     background:#212121!important;color:#eaf3ff!important;
   }
-  .app-shell .main {background:linear-gradient(155deg,#262626,#2d2d2d 60%,#212121)!important}
+  .app-shell .main {background:#e3ebf6!important}
   .app-shell .main .page-head h1,.app-shell .main h1,.app-shell .main h2,.app-shell .main h3,
   .app-shell .main .card h2,.app-shell .main .card h3 {color:#f0f6ff!important}
   .app-shell .main .page-head .eyebrow,.app-shell .main .muted,.app-shell .main .small.muted {color:#c5c5c5!important}
   .app-shell .main .card,.app-shell .main .stat,.app-shell .main .for-you-card,
   .app-shell .main .dashboard-secondary-stats button,.app-shell .main .empty,
   .app-shell .main .list-row,.app-shell .main .calendar-day {
-    background:linear-gradient(145deg,#393939,#2f2f2f)!important;
+    background:#e3ebf6!important;
     color:#eaf3ff!important;border-color:#575757!important;
     box-shadow:0 8px 22px #16161638!important;
   }
   .app-shell .main .list-row{background:transparent!important;border-bottom:1px solid #575757!important}
   .app-shell .main input:not([type=checkbox]):not([type=radio]),.app-shell .main textarea,
   .app-shell .main select {
-    background:#2f2f2f!important;color:#f0f6ff!important;border-color:#646464!important;
+    background:#e3ebf6!important;color:#f0f6ff!important;border-color:#646464!important;
   }
   .app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#c2c2c2!important}
   .app-shell .main .dialog,.app-shell .dialog,.app-shell .mobile-menu-overlay .dialog,
   .app-shell .autocare-mobile-menu-group {
-    background:#303030!important;color:#eaf3ff!important;border-color:#575757!important;
+    background:#e3ebf6!important;color:#eaf3ff!important;border-color:#575757!important;
   }
   .app-shell .main th,.app-shell .main td{border-color:#575757!important;color:#eaf3ff!important}
   .app-shell .main .membership-workspace,.app-shell .main .workspace-membership,
@@ -891,7 +891,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell .main{line-height:1.55;color:#edf5ff}
 .app-shell .main p,.app-shell .main label,.app-shell .main li,.app-shell .main td{line-height:1.55}
 .app-shell .main .muted,.app-shell .main .micro,.app-shell .main small{color:#d0d0d0}
-.app-shell .main input,.app-shell .main select,.app-shell .main textarea{font-size:16px;color:#f2f8ff;background:#313131;border-color:#737373}
+.app-shell .main input,.app-shell .main select,.app-shell .main textarea{font-size:16px;color:#f2f8ff;background:#e3ebf6;border-color:#737373}
 .app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#c2c2c2;opacity:1}
 .app-shell .main button{font-size:15px;line-height:1.4;font-weight:650}
 .app-shell .main :focus-visible{outline:3px solid #bababa;outline-offset:2px}
@@ -910,7 +910,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell .main .autocare-advanced-settings,.app-shell .main .autocare-advanced-settings label,.app-shell .main .autocare-advanced-settings span{color:#21456f!important}
 .app-shell .main .autocare-advanced-settings{background:#dfeafa!important;color-scheme:light}
 .app-shell .main .autocare-advanced-settings summary{color:#21456f!important}
-.app-shell .main .autocare-simple-home input,.app-shell .main .autocare-simple-home select{background:#464646!important;color:#fff!important}
+.app-shell .main .autocare-simple-home input,.app-shell .main .autocare-simple-home select{background:#e3ebf6!important;color:#fff!important}
 @media(max-width:760px){.autocare-simple-home,.autocare-simple-home button,.autocare-simple-home strong{color:#fff!important}.autocare-simple-hero,.autocare-simple-actions,.autocare-simple-due{background:#353535!important}.autocare-simple-actions>button{background:#464646!important}}
 
 /* AutoCare Signature — warm porcelain, graphite and champagne bronze. */
@@ -938,12 +938,12 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#736f69!important}
 .app-shell .main .muted,.app-shell .main .small.muted,.app-shell .main .micro,.app-shell .main small{color:#605f59}
 .app-shell .main .autocare-simple-home{color:#f8f5ed!important}
-.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(145deg,#303936,#222b28)!important;border:1px solid #626658!important;box-shadow:0 15px 35px #2628201c!important}
+.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#e3ebf6!important;border:1px solid #626658!important;box-shadow:0 15px 35px #2628201c!important}
 .app-shell .main .autocare-simple-home h2,.app-shell .main .autocare-simple-home h3,.app-shell .main .autocare-simple-home strong,.app-shell .main .autocare-simple-home span{color:#fffaf0!important}
 .app-shell .main .autocare-simple-home p,.app-shell .main .autocare-simple-home small{color:#ddd9ce!important}
 .app-shell .main .autocare-simple-eyebrow{color:#e1c59b!important}
-.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){background:#3b4640!important;border:1px solid #747869!important;color:#fffaf0!important}
-.app-shell .main .autocare-simple-actions>button:hover,.app-shell .main .autocare-simple-due>button:hover{background:#4b574e!important;border-color:#d1b388!important}
+.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){background:#e3ebf6!important;border:1px solid #747869!important;color:#fffaf0!important}
+.app-shell .main .autocare-simple-actions>button:hover,.app-shell .main .autocare-simple-due>button:hover{background:#e3ebf6!important;border-color:#d1b388!important}
 .app-shell .main .autocare-simple-home button.primary{background:linear-gradient(120deg,#bd935c,#9e7544)!important;border-color:#b78c55!important;color:#fff!important}
 .app-shell .main .autocare-simple-secondary{color:#e9cfa4!important}
 .app-shell .main .autocare-advanced-settings{background:#dfeafa!important;border-color:#777365!important}
@@ -951,16 +951,16 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell .main :focus-visible{outline:3px solid #bf935a!important;outline-offset:3px}
 @media(max-width:760px){
 .app-shell .main{background:#f5f2ed!important}
-.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#303936!important}
+.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#e3ebf6!important}
 .app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fffefa!important;color:#272c2b!important;border-color:#d6cbbd!important}
-.app-shell .main .autocare-simple-home select{background:#3b4640!important;color:#fff!important;border-color:#747869!important}
+.app-shell .main .autocare-simple-home select{background:#e3ebf6!important;color:#fff!important;border-color:#747869!important}
 .app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{color:#282c2c!important}
 }
 
 /* AUT OCARE | Obsidian + Glacier: unified cool-neutral premium palette, no gold/brown. */
 :root{--ac-ink:#e9eef6;--ac-blue:#919191;--ac-line:#3f3f3f;color-scheme:dark}
 html,body{background:#0c1019}
-.app-shell,.app-shell .main,.app-shell .main:has(.autocare-simple-home),.app-shell .main:has(.autocare-dashboard-feature){background:#10151f!important;color:#e9eef6!important}
+.app-shell,.app-shell .main,.app-shell .main:has(.autocare-simple-home),.app-shell .main:has(.autocare-dashboard-feature){background:#e3ebf6!important;color:#e9eef6!important}
 .app-shell>.sidebar{background:linear-gradient(180deg,#10141e,#0b1018)!important;border-color:#383838!important}
 .app-shell>.sidebar nav button,.app-shell>.sidebar nav a{color:#cdcdcd!important}
 .app-shell>.sidebar nav button svg,.app-shell>.sidebar nav a svg{color:#b1b1b1!important}
@@ -974,31 +974,31 @@ html,body{background:#0c1019}
 .app-shell .app-header{background:#161c28!important;color:#eef2fa!important;border-bottom:1px solid #3e3e3e!important}
 .app-shell .main .page-head h1,.app-shell .main .section-title h2,.app-shell .main h1,.app-shell .main h2,.app-shell .main h3{color:#f3f6fd!important}
 .app-shell .main .page-head .eyebrow,.app-shell .main .eyebrow{color:#b5b5b5!important}
-.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty,.app-shell .main .for-you-card,.app-shell .main .dashboard-secondary-stats button{background:#292929!important;color:#eaf0fa!important;border:1px solid #434343!important;box-shadow:0 10px 30px #05081236!important}
+.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty,.app-shell .main .for-you-card,.app-shell .main .dashboard-secondary-stats button{background:#e3ebf6!important;color:#eaf0fa!important;border:1px solid #434343!important;box-shadow:0 10px 30px #05081236!important}
 .app-shell .main .card:hover,.app-shell .main .for-you-card:hover{border-color:#8f8f8f!important}
 .app-shell .main .stat .value,.app-shell .main .for-you-card>svg:first-child{color:#b2b2b2!important}
-.app-shell .main .for-you-card>svg:first-child{background:#393939!important}
+.app-shell .main .for-you-card>svg:first-child{background:#e3ebf6!important}
 .app-shell .main .primary,.app-shell .main button.primary{background:linear-gradient(120deg,#8c8c8c,#737373)!important;color:#fff!important;border-color:#9c9c9c!important;box-shadow:0 7px 22px #74747429!important}
-.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#333333!important;color:#f2f5fd!important;border:1px solid #626262!important;color-scheme:dark}
+.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#e3ebf6!important;color:#f2f5fd!important;border:1px solid #626262!important;color-scheme:light}
 .app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#bfbfbf!important;opacity:1}
 .app-shell .main .muted,.app-shell .main .micro,.app-shell .main small,.app-shell .main .for-you-card p{color:#bfbfbf!important}
 .app-shell .main .autocare-simple-home{color:#f3f6fd!important}
-.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(145deg,#313131,#292929)!important;border:1px solid #575757!important;box-shadow:0 16px 40px #03071244!important}
+.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#e3ebf6!important;border:1px solid #575757!important;box-shadow:0 16px 40px #03071244!important}
 .app-shell .main .autocare-simple-home h1,.app-shell .main .autocare-simple-home h2,.app-shell .main .autocare-simple-home h3,.app-shell .main .autocare-simple-home strong,.app-shell .main .autocare-simple-home span,.app-shell .main .autocare-simple-home label{color:#f5f7ff!important}
 .app-shell .main .autocare-simple-home p,.app-shell .main .autocare-simple-home small,.app-shell .main .autocare-simple-home .muted{color:#cdcdcd!important}
 .app-shell .main .autocare-simple-eyebrow,.app-shell .main .autocare-simple-secondary{color:#c0c0c0!important}
-.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){background:#3a3a3a!important;border:1px solid #676767!important;color:#f7f8ff!important}
-.app-shell .main .autocare-simple-actions>button:hover,.app-shell .main .autocare-simple-due>button:hover{background:#464646!important;border-color:#a8a8a8!important}
+.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){background:#e3ebf6!important;border:1px solid #676767!important;color:#f7f8ff!important}
+.app-shell .main .autocare-simple-actions>button:hover,.app-shell .main .autocare-simple-due>button:hover{background:#e3ebf6!important;border-color:#a8a8a8!important}
 .app-shell .main .autocare-simple-home button.primary{background:linear-gradient(120deg,#8c8c8c,#737373)!important;border-color:#9c9c9c!important;color:#fff!important}
 .app-shell .main .autocare-advanced-settings{background:#dfeafa!important;border-color:#575757!important}
 .app-shell .main .autocare-advanced-settings summary,.app-shell .main .autocare-advanced-settings label{color:#21456f!important}
-.app-shell .main .autocare-dashboard-feature .autocare-upcoming-panel,.app-shell .main .autocare-quick-actions button{background:#2c2c2c!important;border-color:#505050!important}
-.app-shell .main .autocare-document-stats button,.app-shell .main .autocare-next-record{background:#383838!important;border-color:#5b5b5b!important}
+.app-shell .main .autocare-dashboard-feature .autocare-upcoming-panel,.app-shell .main .autocare-quick-actions button{background:#e3ebf6!important;border-color:#505050!important}
+.app-shell .main .autocare-document-stats button,.app-shell .main .autocare-next-record{background:#e3ebf6!important;border-color:#5b5b5b!important}
 .app-shell .main .autocare-document-stats button strong,.app-shell .main .autocare-quick-actions button svg{color:#bbbbbb!important}
-.app-shell .main .autocare-car-showcase{background:#151d2a!important}
-.app-shell .main .autocare-car-open{background:#434343cc!important;border-color:#888888!important}
+.app-shell .main .autocare-car-showcase{background:#e3ebf6!important}
+.app-shell .main .autocare-car-open{background:#e3ebf6cc!important;border-color:#888888!important}
 .app-shell .main :focus-visible{outline:3px solid #b0b0b0!important;outline-offset:3px}
-@media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#10151f!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#313131!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#292929!important;color:#eaf0fa!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#333333!important;color:#f2f5fd!important;border-color:#626262!important}}
+@media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#e3ebf6!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#e3ebf6!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#e3ebf6!important;color:#eaf0fa!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#e3ebf6!important;color:#f2f5fd!important;border-color:#626262!important}}
 
 /* AutoCare / Titanium Studio — refined monochrome with cool emerald accents. */
 :root{--ac-ink:#222a2a;--ac-blue:#087f75;--ac-line:#dfe5e3;color-scheme:light}
@@ -1026,22 +1026,22 @@ html,body{background:#f3f5f4}
 .app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#657a74!important}
 .app-shell .main .muted,.app-shell .main .micro,.app-shell .main small,.app-shell .main .for-you-card p{color:#5a706a!important}
 .app-shell .main .autocare-simple-home{color:#f4fffc!important}
-.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(140deg,#213d3b,#162b2c)!important;border:1px solid #456964!important;box-shadow:0 15px 35px #152c2630!important}
+.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#e3ebf6!important;border:1px solid #456964!important;box-shadow:0 15px 35px #152c2630!important}
 .app-shell .main .autocare-simple-home h1,.app-shell .main .autocare-simple-home h2,.app-shell .main .autocare-simple-home h3,.app-shell .main .autocare-simple-home strong,.app-shell .main .autocare-simple-home span,.app-shell .main .autocare-simple-home label{color:#f4fffc!important}
 .app-shell .main .autocare-simple-home p,.app-shell .main .autocare-simple-home small,.app-shell .main .autocare-simple-home .muted{color:#c8e0d9!important}
 .app-shell .main .autocare-simple-eyebrow,.app-shell .main .autocare-simple-secondary{color:#99e0d1!important}
-.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){background:#30514e!important;border:1px solid #60867f!important;color:#f4fffc!important}
-.app-shell .main .autocare-simple-actions>button:hover,.app-shell .main .autocare-simple-due>button:hover{background:#38645e!important;border-color:#8de1cf!important}
+.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){background:#e3ebf6!important;border:1px solid #60867f!important;color:#f4fffc!important}
+.app-shell .main .autocare-simple-actions>button:hover,.app-shell .main .autocare-simple-due>button:hover{background:#e3ebf6!important;border-color:#8de1cf!important}
 .app-shell .main .autocare-simple-home button.primary{background:linear-gradient(120deg,#0d9184,#086b65)!important;border-color:#2cb3a3!important;color:#fff!important}
 .app-shell .main .autocare-advanced-settings{background:#dfeafa!important;border-color:#52766e!important}
 .app-shell .main .autocare-advanced-settings summary,.app-shell .main .autocare-advanced-settings label{color:#21456f!important}
-.app-shell .main .autocare-dashboard-feature .autocare-upcoming-panel,.app-shell .main .autocare-quick-actions button{background:#203d3b!important;border-color:#4d716a!important}
-.app-shell .main .autocare-document-stats button,.app-shell .main .autocare-next-record{background:#2c4c49!important;border-color:#527970!important}
+.app-shell .main .autocare-dashboard-feature .autocare-upcoming-panel,.app-shell .main .autocare-quick-actions button{background:#e3ebf6!important;border-color:#4d716a!important}
+.app-shell .main .autocare-document-stats button,.app-shell .main .autocare-next-record{background:#e3ebf6!important;border-color:#527970!important}
 .app-shell .main .autocare-document-stats button strong,.app-shell .main .autocare-quick-actions button svg{color:#9ee8d9!important}
-.app-shell .main .autocare-car-showcase{background:#162b2c!important}
-.app-shell .main .autocare-car-open{background:#27544dcc!important;border-color:#75b3a6!important}
+.app-shell .main .autocare-car-showcase{background:#e3ebf6!important}
+.app-shell .main .autocare-car-open{background:#e3ebf6cc!important;border-color:#75b3a6!important}
 .app-shell .main :focus-visible{outline:3px solid #17a998!important;outline-offset:3px}
-@media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#f3f5f4!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#213d3b!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#25302f!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#25302f!important;border-color:#bacbc5!important}}
+@media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#f3f5f4!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#e3ebf6!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#25302f!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#25302f!important;border-color:#bacbc5!important}}
 
 /* AutoCare MONO / ultra-premium architectural monochrome — no colored accents. */
 :root{--ac-ink:#191b20;--ac-blue:#34383e;--ac-line:#d9dce0;color-scheme:light}
@@ -1064,27 +1064,27 @@ html,body{background:#f1f2f3!important}
 .app-shell .main .card:hover,.app-shell .main .for-you-card:hover{border-color:#a4a8b0!important;box-shadow:0 18px 40px #171a2018!important}
 .app-shell .main .stat .value,.app-shell .main .for-you-card>svg:first-child{color:#42454d!important}
 .app-shell .main .for-you-card>svg:first-child{background:#eceef0!important}
-.app-shell .main .primary,.app-shell .main button.primary{background:linear-gradient(120deg,#383b42,#22252b)!important;color:#fff!important;border-color:#4c4f57!important;box-shadow:0 8px 20px #10121826!important}
+.app-shell .main .primary,.app-shell .main button.primary{background:#e3ebf6!important;color:#fff!important;border-color:#4c4f57!important;box-shadow:0 8px 20px #10121826!important}
 .app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#24262c!important;border:1px solid #c9ccd2!important;color-scheme:light}
 .app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:#737780!important}
 .app-shell .main .muted,.app-shell .main .micro,.app-shell .main small,.app-shell .main .for-you-card p{color:#5e636d!important}
 .app-shell .main .autocare-simple-home{color:#fff!important}
-.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(145deg,#303238,#1c1f25)!important;border:1px solid #53565e!important;box-shadow:0 18px 40px #1113182b!important}
+.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#e3ebf6!important;border:1px solid #53565e!important;box-shadow:0 18px 40px #1113182b!important}
 .app-shell .main .autocare-simple-home h1,.app-shell .main .autocare-simple-home h2,.app-shell .main .autocare-simple-home h3,.app-shell .main .autocare-simple-home strong,.app-shell .main .autocare-simple-home span,.app-shell .main .autocare-simple-home label{color:#f9f9fa!important}
 .app-shell .main .autocare-simple-home p,.app-shell .main .autocare-simple-home small,.app-shell .main .autocare-simple-home .muted{color:#d5d7db!important}
 .app-shell .main .autocare-simple-eyebrow,.app-shell .main .autocare-simple-secondary{color:#d7d9df!important}
-.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){background:#3a3d44!important;border:1px solid #6a6e77!important;color:#fff!important}
-.app-shell .main .autocare-simple-actions>button:hover,.app-shell .main .autocare-simple-due>button:hover{background:#4b4f57!important;border-color:#d2d5db!important}
-.app-shell .main .autocare-simple-home button.primary{background:linear-gradient(120deg,#666a72,#444850)!important;border-color:#90949c!important;color:#fff!important}
+.app-shell .main .autocare-simple-actions>button,.app-shell .main .autocare-simple-due>button:not(.autocare-simple-secondary){background:#e3ebf6!important;border:1px solid #6a6e77!important;color:#fff!important}
+.app-shell .main .autocare-simple-actions>button:hover,.app-shell .main .autocare-simple-due>button:hover{background:#e3ebf6!important;border-color:#d2d5db!important}
+.app-shell .main .autocare-simple-home button.primary{background:#e3ebf6!important;border-color:#90949c!important;color:#fff!important}
 .app-shell .main .autocare-advanced-settings{background:#dfeafa!important;border-color:#62656d!important}
 .app-shell .main .autocare-advanced-settings summary,.app-shell .main .autocare-advanced-settings label{color:#fff!important}
-.app-shell .main .autocare-dashboard-feature .autocare-upcoming-panel,.app-shell .main .autocare-quick-actions button{background:#272b32!important;border-color:#535860!important}
-.app-shell .main .autocare-document-stats button,.app-shell .main .autocare-next-record{background:#373b43!important;border-color:#60646e!important}
+.app-shell .main .autocare-dashboard-feature .autocare-upcoming-panel,.app-shell .main .autocare-quick-actions button{background:#e3ebf6!important;border-color:#535860!important}
+.app-shell .main .autocare-document-stats button,.app-shell .main .autocare-next-record{background:#e3ebf6!important;border-color:#60646e!important}
 .app-shell .main .autocare-document-stats button strong,.app-shell .main .autocare-quick-actions button svg{color:#e0e2e7!important}
-.app-shell .main .autocare-car-showcase{background:#1b1e24!important}
-.app-shell .main .autocare-car-open{background:#41454dcc!important;border-color:#999da6!important}
+.app-shell .main .autocare-car-showcase{background:#e3ebf6!important}
+.app-shell .main .autocare-car-open{background:#e3ebf6cc!important;border-color:#999da6!important}
 .app-shell .main :focus-visible{outline:3px solid #a4a8b1!important;outline-offset:3px}
-@media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#f1f2f3!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#303238!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#24262c!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#24262c!important;border-color:#c9ccd2!important}}
+@media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#f1f2f3!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#e3ebf6!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#24262c!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#24262c!important;border-color:#c9ccd2!important}}
 
 /* Global neutral polish: native links and focus treatments */
 .app-shell a:not(.primary){text-decoration-color:#969aa2}
@@ -1130,10 +1130,10 @@ html,body{background:#f3f7fd!important}
 .app-shell .main .autocare-simple-home button.primary span,.app-shell .main .autocare-simple-home button.primary strong{color:#124c93!important}
 .app-shell .main .autocare-advanced-settings{background:#dfeafa!important;border-color:#5b8ec4!important}
 .app-shell .main .autocare-advanced-settings summary,.app-shell .main .autocare-advanced-settings label{color:#fff!important}
-.app-shell .main .autocare-dashboard-feature .autocare-upcoming-panel,.app-shell .main .autocare-quick-actions button{background:#153b6b!important;border-color:#477cb9!important}
+.app-shell .main .autocare-dashboard-feature .autocare-upcoming-panel,.app-shell .main .autocare-quick-actions button{background:#e3ebf6!important;border-color:#477cb9!important}
 .app-shell .main .autocare-document-stats button,.app-shell .main .autocare-next-record{background:#1d4c84!important;border-color:#5985b8!important}
 .app-shell .main .autocare-document-stats button strong,.app-shell .main .autocare-quick-actions button svg{color:#cce5ff!important}
-.app-shell .main .autocare-car-showcase{background:#102e54!important}
+.app-shell .main .autocare-car-showcase{background:#e3ebf6!important}
 .app-shell .main .autocare-car-open{background:#1b4b85dd!important;border-color:#87b0e0!important}
 .app-shell .main button:focus-visible,.app-shell .main a:focus-visible,.app-shell .main :focus-visible{outline:3px solid #4688df!important;outline-offset:3px}
 @media(max-width:760px){.app-shell .main,.app-shell .main:has(.autocare-simple-home){background:#f3f7fd!important}.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:#174c8b!important}.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{background:#fff!important;color:#1b304d!important}.app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:#fff!important;color:#182e4b!important;border-color:#b9cde6!important}}
