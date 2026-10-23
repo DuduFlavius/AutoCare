@@ -3506,3 +3506,11 @@ a:hover {
 .app-shell .main .for-you-card {min-height:100px;}
 .app-shell .main .maintenance-overview > .card {min-height:190px;}
 @media(max-width:760px) { .app-shell > .sidebar {width:auto;} .app-shell .main .panoramic-hero {min-height:350px;} }
+
+/* Direct legacy dark-shell replacement: no black bands or charcoal actions. */
+.app-shell,.app-shell > header,.app-shell > .app-header,.app-shell .app-header,header.app-header{background:#e1ecfa!important;background-image:none!important;color:#1c416e!important;border-color:#c3d6ee!important}
+.app-shell .app-header :is(span,p,small,a,strong,button){color:#24476f!important}
+.app-shell .main .autocare-simple-actions>button{background:#edf4fc!important;background-image:none!important;color:#194a84!important;border:1px solid #bed3ec!important}
+.app-shell .main .autocare-simple-actions>button :is(span,strong,small,svg){color:#194a84!important}
+.app-shell .main .autocare-simple-actions>button:hover{background:#dceafa!important}
+.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(135deg,#245c9d,#194779)!important}
