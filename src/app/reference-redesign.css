@@ -1498,3 +1498,28 @@ html body .app-shell main.main :is(.card,.panel,.tile,.stat,.empty,.journal,.jou
 html body .app-shell main.main :is(.card,.panel,.tile,.stat,.empty,.journal,.journal-row,.notification-panel,.support-chat-panel,.autocare-advanced-settings) :is(button.primary,button[type=submit]) :is(span,strong,svg){color:#fff!important}
 @media(min-width:900px){html body .app-shell main.main.workspace-garage .grid3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))!important;align-items:start!important}}
 @media(max-width:760px){html body .app-shell main.main.workspace-garage .add-car-tile{min-height:230px!important}}
+
+/* Verified JSX selectors: add-car-tile is itself a BUTTON; its CTA is a SPAN. */
+html body .app-shell main.main.workspace-garage .grid3{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr))!important;gap:20px!important;align-items:stretch!important}
+html body .app-shell main.main.workspace-garage .grid3>.car-card,
+html body .app-shell main.main.workspace-garage .grid3>.add-car-tile{width:100%!important;min-width:0!important;max-width:none!important;margin:0!important}
+html body .app-shell main.main.workspace-garage button.add-car-tile{
+ display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+ gap:13px!important;min-height:310px!important;max-height:none!important;
+ background:#eef5fe!important;background-image:none!important;border:1px dashed #90b7e8!important;
+ border-radius:18px!important;color:#214d82!important;box-shadow:0 6px 22px #315a8510!important;
+ padding:28px!important;
+}
+html body .app-shell main.main.workspace-garage button.add-car-tile :is(svg,strong,span){color:#214d82!important;opacity:1!important}
+html body .app-shell main.main.workspace-garage button.add-car-tile>span.button{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;
+ width:auto!important;max-width:100%!important;margin-top:15px!important;padding:12px 19px!important;
+ background:#2467bd!important;background-image:none!important;color:#fff!important;border:1px solid #2467bd!important;
+ border-radius:11px!important;font-weight:750!important;box-shadow:0 5px 14px #2467bd25!important;
+}
+html body .app-shell main.main.workspace-garage button.add-car-tile>span.button :is(svg,strong,span){color:#fff!important}
+html body .app-shell main.main.workspace-garage .car-card .car-metrics :is(span,strong,small){color:#234b7c!important;opacity:1!important}
+html body .app-shell main.main.workspace-garage .car-card .row-actions :is(button,.button){color:#214d82!important}
+html body .app-shell main.main.workspace-garage .car-card .row-actions button.primary{color:#fff!important;background:#2467bd!important}
+html body .app-shell main.main.workspace-garage .car-card .row-actions button.danger{color:#9d3452!important;background:#f9e9ed!important}
+@media(max-width:760px){html body .app-shell main.main.workspace-garage .grid3{grid-template-columns:minmax(0,1fr)!important}html body .app-shell main.main.workspace-garage button.add-car-tile{min-height:245px!important}}
