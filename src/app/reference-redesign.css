@@ -1523,3 +1523,31 @@ html body .app-shell main.main.workspace-garage .car-card .row-actions :is(butto
 html body .app-shell main.main.workspace-garage .car-card .row-actions button.primary{color:#fff!important;background:#2467bd!important}
 html body .app-shell main.main.workspace-garage .car-card .row-actions button.danger{color:#9d3452!important;background:#f9e9ed!important}
 @media(max-width:760px){html body .app-shell main.main.workspace-garage .grid3{grid-template-columns:minmax(0,1fr)!important}html body .app-shell main.main.workspace-garage button.add-car-tile{min-height:245px!important}}
+
+/* Refined identity and vehicle iconography — replace dated charcoal square and profile badge. */
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{
+ width:76px!important;height:76px!important;margin:17px 0 16px!important;
+ display:grid!important;place-items:center!important;
+ background:linear-gradient(145deg,#e6f1ff,#d5e7fb)!important;background-image:linear-gradient(145deg,#e6f1ff,#d5e7fb)!important;
+ color:#2465af!important;border:1px solid #afccec!important;border-radius:22px!important;
+ box-shadow:inset 0 1px 0 #fff,0 6px 16px #265a9516!important;
+}
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{
+ color:#2465af!important;stroke:#2465af!important;width:42px!important;height:42px!important;
+}
+html body .app-shell>.sidebar .sidebar-account{border:1px solid #ffffff20!important;border-radius:16px!important;overflow:hidden!important;background:#ffffff0b!important}
+html body .app-shell>.sidebar .sidebar-profile{
+ display:flex!important;align-items:center!important;gap:12px!important;
+ padding:13px 12px!important;border-radius:15px!important;color:#f3f7ff!important;
+ background:linear-gradient(120deg,#1c3557,#203d64)!important;border:1px solid #ffffff16!important;
+}
+html body .app-shell>.sidebar .sidebar-profile .profile-avatar{
+ width:42px!important;height:42px!important;min-width:42px!important;border-radius:50%!important;
+ display:grid!important;place-items:center!important;font-size:17px!important;font-weight:800!important;
+ background:linear-gradient(135deg,#8ebaff,#3d77c5)!important;color:#fff!important;
+ border:2px solid #c5ddff!important;box-shadow:0 3px 11px #081b3640!important;
+}
+html body .app-shell>.sidebar .sidebar-profile strong{color:#fff!important;font-size:13px!important;line-height:1.35!important}
+html body .app-shell>.sidebar .sidebar-profile small{color:#bfd4ef!important;font-size:11px!important}
+html body .app-shell>.sidebar .sidebar-profile>svg{color:#b8d5fa!important;margin-left:auto!important}
+html body .app-shell>.sidebar .sidebar-profile:hover{background:linear-gradient(120deg,#254977,#28558d)!important}
