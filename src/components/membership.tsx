@@ -52,6 +52,19 @@ export function PriceCards({
           </a>
         )}
       </article>
+      <article className="card subscription-option">
+        <div className="subscription-symbol"><CreditCard size={23} /></div>
+        <p className="eyebrow">PREMIUM 3 LUNI</p>
+        <h2>Un trimestru fără griji.</h2>
+        <div className="subscription-price">{amount(monthlyBani * 3)} <span>lei / 3 luni</span></div>
+        <p className="small muted">Echivalent cu {amount(monthlyBani)} lei/lună, facturat la fiecare 3 luni.</p>
+        <ul>
+          <li><Check size={15} /> Toate funcțiile Premium</li>
+          <li><Check size={15} /> Facturare recurentă la 3 luni</li>
+          <li><Check size={15} /> Gestionare din portalul de facturare</li>
+        </ul>
+        {checkout ? <button className="button" disabled={busy} onClick={() => checkout('quarterly')}>Alege 3 luni <ArrowUpRight size={15} /></button> : <a className="button" href="/cont?tab=Abonament">Vezi în cont <ArrowUpRight size={15} /></a>}
+      </article>
       <article className="card subscription-option annual-option">
         <span className="best-plan">CEL MAI BUN RAPORT PREȚ–BENEFICII</span>
         <div className="subscription-symbol">
