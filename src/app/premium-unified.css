@@ -507,3 +507,7 @@ html body .app-shell>.sidebar .brandmark{background:#204a9e!important;box-shadow
 html body .app-shell .app-header{background:#f7f6f4!important;border-bottom:1px solid #e0ddd7!important}
 html body .ac-premium-dashboard .ac-premium-vehicle:before{background-image:linear-gradient(90deg,#071525c2 0%,#07152565 40%,transparent 82%),url("/images/autocare-cinematic-exact.svg")!important;background-size:cover!important;background-position:center!important}
 html body .ac-premium-dashboard .ac-premium-panel{box-shadow:0 10px 26px #1c344012!important}
+
+/* Image clarity: avoid extra enlargement, softening and stacked overlays */
+html body .ac-premium-dashboard .ac-premium-vehicle:before{background-image:linear-gradient(90deg,rgba(4,14,27,.89) 0%,rgba(4,14,27,.54) 35%,rgba(4,14,27,.03) 77%),url("/images/autocare-cinematic-exact.svg")!important;background-position:center center!important;background-size:cover!important;filter:none!important;transform:none!important;image-rendering:auto!important;opacity:1!important}
+html body .ac-premium-dashboard .ac-premium-vehicle{overflow:hidden!important;isolation:isolate!important}
