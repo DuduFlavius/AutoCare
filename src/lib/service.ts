@@ -88,10 +88,9 @@ export async function createVehicle(uid: string, input: unknown) {
           sql`${s.premiumGrants.revokedAt} IS NULL AND (${s.premiumGrants.expiresAt} IS NULL OR ${s.premiumGrants.expiresAt}>now())`,
         ),
       );
-    const settings = (await tx.select().from(s.settings).where(eq(s.settings.key, 'limits')))[0];
-    const premiumCars = (settings?.value as { premiumCars?: number } | undefined)?.premiumCars ?? 5;
-    const max = (sub?.subscriptionId && isPremium(sub)) || grants.length ? premiumCars : 1;
-    if (cars.length >= max) throw new AppError(403, `Planul permite ${max} mașini active.`);
+    const hasPremium = (sub?.subscriptionId && isPremium(sub)) || grants.length > 0;
+    if (!hasPremium && cars.length >= 1)
+      throw new AppError(403, 'Planul gratuit permite o singură mașină activă. Activează Premium pentru mașini nelimitate.');
     return (
       await tx
         .insert(s.vehicles)
