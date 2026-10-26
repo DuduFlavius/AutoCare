@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './design-system.css';
+import MobileInstall from '@/components/mobile-install';
 import './globals.css';
 import './premium.css';
 import './autocare-ui.css';
@@ -46,7 +47,7 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, them
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ro">
-      <body>{children}</body>
+      <body>{children}<MobileInstall /></body>
     </html>
   );
 }
