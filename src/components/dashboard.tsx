@@ -2,6 +2,7 @@
 import Membership from './membership';
 import PushSettings from './push-settings';
 import SmartDriveTrip from './smartdrive-trip';
+import SmartDriveHistory from './smartdrive-history';
 import RecordEditor from './record-editor';
 import { filterRecords, documentCounts, serviceStats } from '@/lib/record-filters';
 import SupportChat from './support-chat';
@@ -184,11 +185,7 @@ function MileagePlanner({ data, preview, onUpdated, onError }: {
     if (preview) { onError('În previzualizare nu se salvează date.'); return; }
     setSaving(true);
     try {
-      await api('vehicles/' + v.id, 'PATCH', {
-        brand:v.brand, model:v.model, year:v.year, plate:v.plate, vin:v.vin,
-        engine:v.engine, fuel:v.fuel, capacity:v.capacity, odometer:value,
-        purchasedAt:v.purchasedAt, notes:v.notes,
-      });
+      await api('smartdrive/vehicles/' + v.id + '/readings', 'POST', { odometer: value });
       await onUpdated();
       setEditing(null);
     } catch (e) { onError(e instanceof Error ? e.message : 'Nu s-a putut actualiza kilometrajul.'); }
@@ -202,7 +199,8 @@ function MileagePlanner({ data, preview, onUpdated, onError }: {
         <span className="mileage-planner-icon"><Gauge size={27}/></span>
       </div>
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
-      <SmartDriveTrip preview={preview} />
+      <SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} />
+      <SmartDriveTrip preview={preview} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model }))} />
       <div className="mileage-planner-grid">
         {cars.map(v => {
           const due = services.filter(r => r.vehicleId === v.id).sort((a,b) => Number(a.nextKm)-Number(b.nextKm));
