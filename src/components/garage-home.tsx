@@ -122,7 +122,21 @@ export function GarageHome({
         <section className="ac-premium-odometer ac-premium-panel">
           <span className="ac-premium-kicker"><Gauge size={18}/> URMĂTORUL SCHIMB DE ULEI</span>
           <div className="ac-oil-hero">
-            <div className="ac-oil-bottle" aria-hidden="true"><span>OIL</span><strong>AutoCare</strong></div>
+            <div className="ac-oil-product" aria-hidden="true">
+              <svg viewBox="0 0 82 108" role="img" focusable="false">
+                <defs><linearGradient id="oilCanBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#48525c"/><stop offset=".32" stopColor="#151c26"/><stop offset=".8" stopColor="#080c13"/><stop offset="1" stopColor="#343e48"/></linearGradient><linearGradient id="oilCanLabel" x1="0" x2="1"><stop stopColor="#b98527"/><stop offset=".5" stopColor="#f4bd52"/><stop offset="1" stopColor="#a56a1d"/></linearGradient></defs>
+                <ellipse cx="40" cy="103" rx="30" ry="4" fill="#09182d" opacity=".19"/>
+                <path d="M20 13h31l7 8v9h8q7 0 7 7v57q0 6-7 6H18q-7 0-7-7V27q0-8 9-8z" fill="url(#oilCanBody)" stroke="#202c39" strokeWidth="2"/>
+                <path d="M51 19l9 8v17h-8z" fill="#606974"/><path d="M53 29h9v13h-9z" fill="#121a23"/>
+                <rect x="24" y="6" width="24" height="10" rx="2" fill="#111923"/><rect x="22" y="3" width="28" height="5" rx="2" fill="#303a45"/>
+                <rect x="17" y="42" width="47" height="42" rx="4" fill="#0d131d" stroke="#7b6337" strokeWidth=".8"/>
+                <path d="M20 47h41M20 78h41" stroke="#b48938" strokeWidth="1.5"/>
+                <path d="M38 49c-6 10-10 13-10 18a10 10 0 0 0 20 0c0-5-4-8-10-18z" fill="url(#oilCanLabel)"/>
+                <text x="40" y="75" textAnchor="middle" fontSize="9" fontWeight="900" fill="#f8d77c">OIL</text>
+                <text x="40" y="91" textAnchor="middle" fontSize="7" fontWeight="800" fill="#edc87b">AutoCare</text>
+                <path d="M17 28v61" stroke="#81909a" strokeWidth="2" opacity=".32"/>
+              </svg>
+            </div>
             <div className="ac-oil-info">
               <strong className="ac-oil-next">{nextOilKm === null ? 'Neconfigurat' : `La ${nextOilKm.toLocaleString('ro-RO')} km`}</strong>
               <span>{oilKmRemaining === null ? 'Setează intervalul de schimb' : oilKmRemaining < 0 ? `Depășit cu ${Math.abs(oilKmRemaining).toLocaleString('ro-RO')} km` : `${oilKmRemaining.toLocaleString('ro-RO')} km rămași`}</span>
