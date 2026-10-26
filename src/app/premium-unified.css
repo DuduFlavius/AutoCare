@@ -115,17 +115,15 @@ html body .ac-install-banner .ac-mobile-install{margin:0}
 @media(max-width:440px){.ac-smartdrive-live{grid-template-columns:1fr 1fr;gap:8px}.ac-smartdrive-live>div{padding:12px}.ac-smartdrive-live strong{font-size:18px}}
 
 
-/* Automotive Luxury dashboard */
-html body .app-shell main.main:has(.ac-premium-dashboard){background:#e9e8e4!important}
-html body .ac-premium-dashboard{--acp-ink:#282d30;--acp-muted:#77746e;--acp-line:#dfddd7;--acp-blue:#476d9c}
-html body .ac-premium-dashboard .ac-premium-panel{background:#f9f8f5!important;border:1px solid #dedbd4!important;border-radius:19px!important;box-shadow:0 7px 20px #282d3010!important;color:#282d30!important;min-height:0}
-html body .ac-premium-dashboard .ac-premium-vehicle{background:linear-gradient(140deg,#faf9f6,#eeeae3)!important}
-html body .ac-premium-dashboard .ac-premium-car-visual{background:#e6e3dc!important;color:#515c60!important}
-html body .ac-premium-dashboard .ac-premium-status{background:#e2ede5!important;color:#286647!important}
-html body .ac-premium-dashboard .ac-premium-overview>:nth-child(2){background:#eceeea!important}
-html body .ac-premium-dashboard .ac-premium-overview>:nth-child(3){background:#f1ede6!important}
-html body .ac-premium-dashboard .ac-premium-kicker{color:#5d605e!important}
-html body .ac-premium-dashboard :is(h2,h3,strong){color:#292d30}
-html body .ac-premium-dashboard :is(p,small,.micro){color:#77746e}
-html body .ac-premium-dashboard button:not(.primary):not(.danger){background:#e9e7e0!important;color:#343c41!important;border-color:#d1cec6!important}
-@media(max-width:700px){html body .ac-premium-dashboard .ac-premium-panel{border-radius:15px!important}}
+
+
+/* Premium vehicle showcase; restore original AutoCare blue/white palette */
+.ac-premium-vehicle .ac-lux-car-visual{position:relative;isolation:isolate;overflow:hidden;min-height:174px;background:linear-gradient(150deg,#e7f1ff 0%,#d8e8fc 52%,#f6faff 100%)!important;border:1px solid #d0e2f9;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#1c5096!important}
+.ac-lux-car-glow{position:absolute;inset:-45%;z-index:-1;background:radial-gradient(circle at 45% 42%,#ffffff 0%,#e5f1ff 34%,transparent 65%)}
+.ac-lux-car-emblem{position:relative;z-index:1;filter:drop-shadow(0 9px 9px #244d7c28);transform:translateY(-6px)}
+.ac-lux-car-floor{position:absolute;bottom:32px;left:21%;width:58%;height:10px;border-radius:100%;background:#28568a20;filter:blur(7px)}
+.ac-lux-car-label{position:absolute;bottom:12px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.14em;color:#4772a5}
+.ac-lux-car-eyebrow{display:block;color:#587aab;font-size:10px;font-weight:800;letter-spacing:.12em;margin-bottom:7px}
+.ac-premium-vehicle .ac-premium-car-description h2{font-size:clamp(23px,2.4vw,31px);letter-spacing:-.035em}
+.ac-premium-vehicle .ac-premium-vehicle-footer{border-top:1px solid #dce8f7}
+@media(max-width:600px){.ac-premium-vehicle .ac-lux-car-visual{min-height:145px}.ac-lux-car-eyebrow{font-size:9px}}
