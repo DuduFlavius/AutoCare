@@ -239,3 +239,25 @@ html body .ac-premium-dashboard .ac-premium-list .ac-premium-empty{font-size:13p
 @media(max-width:1200px){html body .ac-premium-dashboard .ac-premium-overview{grid-template-columns:minmax(0,1.3fr) minmax(250px,1fr)!important}html body .ac-premium-dashboard .ac-premium-next{grid-column:1/-1;min-height:220px!important}}
 @media(max-width:780px){html body .ac-premium-dashboard .ac-premium-overview{grid-template-columns:minmax(0,1fr)!important}html body .ac-premium-dashboard .ac-premium-overview>.ac-premium-panel{min-height:0!important}html body .ac-premium-dashboard .ac-premium-vehicle{min-height:375px!important}html body .ac-premium-dashboard .ac-premium-next{grid-column:auto}html body .ac-premium-dashboard .ac-premium-bottom-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}html body .ac-premium-dashboard .ac-premium-quick{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:520px){html body .ac-premium-dashboard .ac-premium-bottom-grid{grid-template-columns:minmax(0,1fr)!important}html body .ac-premium-dashboard .ac-premium-quick{grid-template-columns:minmax(0,1fr)!important}html body .ac-premium-dashboard .ac-premium-vehicle{padding:17px!important;min-height:355px!important}html body .ac-premium-dashboard .ac-premium-vehicle-footer{grid-template-columns:1fr 1fr!important}html body .ac-premium-dashboard .ac-premium-vehicle-footer button{grid-column:1/-1}html body .ac-premium-dashboard .ac-premium-car-description h2{font-size:29px!important}}
+
+
+/* Approved visual reference — sidebar, heading and compact layout refinements */
+html body .app-shell>.sidebar{background:#f8f7f5!important;border-right:1px solid #e0ddd8!important}
+html body .app-shell>.sidebar .brand{filter:none!important;opacity:1!important}
+html body .app-shell>.sidebar nav{gap:4px!important}
+html body .app-shell>.sidebar nav button{font-size:14px!important;font-weight:600!important;min-height:43px!important;padding:10px 14px!important}
+html body .app-shell>.sidebar nav button.active{background:#155ac9!important;color:#fff!important}
+html body .app-shell>.sidebar nav button:not(.active){color:#23374f!important}
+html body .app-shell>.sidebar .sidebar-tagline{display:none!important}
+html body .app-shell main.main .page-head h1{font-size:clamp(29px,3.2vw,42px)!important;letter-spacing:-.045em!important;color:#0e213b!important;line-height:1.12!important}
+html body .app-shell main.main .page-head .eyebrow{color:#233e5e!important;font-size:15px!important;letter-spacing:0!important;text-transform:none!important}
+html body .app-shell main.main .page-head .muted{color:#586a7d!important;font-size:14px!important}
+html body .app-shell main.main.workspace-dashboard{background:#eeece9!important}
+html body .ac-premium-dashboard .ac-premium-panel{border:1px solid #e7e3dc!important;border-radius:16px!important}
+html body .ac-premium-dashboard .ac-premium-vehicle{border-color:#12253d!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-kicker{color:#fff!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-status{background:#16835b!important;color:#fff!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid>.ac-premium-panel{box-shadow:0 12px 27px #1c293c10!important}
+html body .ac-premium-dashboard .ac-premium-quick{align-items:stretch}
+html body .ac-premium-dashboard .ac-premium-quick>button{border-radius:12px!important;background:linear-gradient(130deg,#f1f5fb,#e5ecf5)!important}
+@media(max-width:780px){html body .app-shell main.main .page-head h1{font-size:30px!important}html body .ac-premium-dashboard .ac-premium-overview{gap:13px!important}html body .ac-premium-dashboard .ac-premium-bottom-grid{gap:12px!important}}
