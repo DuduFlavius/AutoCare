@@ -131,7 +131,7 @@ html body .ac-install-banner .ac-mobile-install{margin:0}
 
 /* Automotive photo showcase and richer dashboard surfaces */
 html body .ac-premium-dashboard .ac-premium-vehicle{background:#101c2b!important;color:#fff!important;border:1px solid #263c55!important;overflow:hidden;position:relative}
-html body .ac-premium-dashboard .ac-premium-vehicle:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#071626ee 0%,#0d1e32d9 42%,#0b1a2a55 100%),url("https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1200&q=85") center/cover no-repeat;opacity:.98;pointer-events:none}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#071626ee 0%,#0d1e32d9 42%,#0b1a2a55 100%),url("/images/autocare-universal-hero.svg") center/cover no-repeat;opacity:.98;pointer-events:none}
 html body .ac-premium-dashboard .ac-premium-vehicle>*{position:relative;z-index:1}
 html body .ac-premium-dashboard .ac-premium-vehicle :is(h2,.ac-premium-kicker,.ac-lux-car-eyebrow,.ac-premium-vehicle-footer strong){color:#fff!important}
 html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description p{color:#d6e3f4!important}
