@@ -71,3 +71,14 @@ html body .record-form-footer button:disabled { opacity: .55 !important; cursor:
 .ac-mobile-install-help>button{float:right;border:0;background:transparent;color:#19365b;font-size:23px}
 .ac-mobile-install-help p{margin:8px 0}
 }
+
+
+/* Installation is part of the page layout, never a floating overlay. */
+html body .ac-mobile-install{display:block;position:relative;right:auto;bottom:auto;z-index:auto;max-width:100%;margin:12px 0;font-family:inherit}
+html body .ac-mobile-install-trigger{background:#1268e5!important;color:#fff!important;border:1px solid #1268e5!important;border-radius:11px!important;padding:11px 16px!important;min-height:44px;font-weight:700;font-size:14px;box-shadow:none}
+html body .ac-mobile-install-help{position:relative;right:auto;bottom:auto;width:100%;max-width:540px;box-sizing:border-box;margin-top:12px;padding:16px;background:#f4f8ff;color:#19365b;border:1px solid #c7d9ef;border-radius:12px;box-shadow:none;line-height:1.5}
+html body .ac-mobile-install-help>button{float:right;border:0;background:transparent;color:#19365b;font-size:23px}
+html body .ac-mobile-install-help p{margin:8px 0}
+html body .footer .ac-mobile-install{margin:18px 0 22px}
+html body .ac-install-settings{grid-column:1/-1}
+@media(max-width:800px){html body .ac-mobile-install{position:relative;right:auto;bottom:auto;z-index:auto;max-width:100%}html body .ac-mobile-install-help{position:relative;right:auto;bottom:auto;width:100%;box-shadow:none}}
