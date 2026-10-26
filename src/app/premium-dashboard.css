@@ -1,0 +1,57 @@
+/* AutoCare Premium 2026 — scoped dashboard and garage components.
+   Imported after legacy layers to avoid destructive global overrides. */
+.ac-premium-dashboard{display:grid;gap:18px;min-width:0;color:#17345a}
+.ac-premium-dashboard *{box-sizing:border-box}
+.ac-premium-car-selector{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:650}
+.ac-premium-car-selector select{width:min(100%,350px)}
+.ac-premium-overview{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(220px,1fr) minmax(220px,1fr);gap:16px;align-items:stretch}
+.ac-premium-panel{background:#fff;border:1px solid #dce8f5;border-radius:17px;box-shadow:0 7px 24px rgba(16,58,110,.06);padding:20px;min-width:0}
+.ac-premium-kicker{display:inline-flex;align-items:center;gap:8px;color:#174d8f;font-size:12px;font-weight:800;letter-spacing:.035em}
+.ac-premium-vehicle{display:flex;flex-direction:column;gap:15px}
+.ac-premium-vehicle-top,.ac-premium-section-heading{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ac-premium-status{background:#e0f8ef;color:#087d60;padding:6px 11px;border-radius:99px;font-size:12px;font-weight:750}
+.ac-premium-vehicle-content{display:grid;grid-template-columns:minmax(105px,43%) 1fr;align-items:center;gap:15px;flex:1}
+.ac-premium-car-visual{display:grid;place-items:center;min-height:132px;background:radial-gradient(ellipse at center,#d8eafb 0%,#f5f9ff 65%);border-radius:14px;color:#175ca9}
+.ac-premium-car-description h2{font-size:clamp(18px,1.6vw,25px);margin:0 0 5px;font-weight:800}
+.ac-premium-car-description p{font-size:13px;margin:0 0 12px;color:#667e9c}
+.ac-premium-plate{display:inline-flex;border:1px solid #b8cde6;background:#f8fbff;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:.06em}
+.ac-premium-car-description button,.ac-premium-vehicle-footer button,.ac-premium-next>button:not(.ac-premium-next-record){display:flex;align-items:center;gap:7px;margin-top:12px;font-size:12px;font-weight:750}
+.ac-premium-vehicle-footer{display:flex;align-items:center;gap:18px;border-top:1px solid #e5edf7;padding-top:15px;flex-wrap:wrap}
+.ac-premium-vehicle-footer>div{display:grid;gap:4px;flex:1;min-width:100px}
+.ac-premium-vehicle-footer span{font-size:11px;color:#69819d}
+.ac-premium-vehicle-footer strong{font-size:16px}
+.ac-premium-odometer,.ac-premium-next{display:flex;flex-direction:column;gap:14px}
+.ac-premium-big-number{font-size:clamp(28px,2.8vw,43px);letter-spacing:-.04em;color:#0c3973;line-height:1.15}
+.ac-premium-big-number small{font-size:14px;letter-spacing:0}
+.ac-premium-odometer p,.ac-premium-empty{font-size:13px;color:#6b819b;line-height:1.55;margin:0}
+.ac-premium-metric-strip{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:auto;padding:12px;background:#f2f7fd;border-radius:10px}
+.ac-premium-metric-strip span{display:grid;gap:5px;font-size:11px;color:#68809d}
+.ac-premium-metric-strip strong{font-size:15px;color:#123f77}
+.ac-premium-dashboard button.ac-premium-primary{background:#1268e5!important;color:#fff!important;border:0!important;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:750;margin-top:auto}
+.ac-premium-next-record{display:grid;gap:8px;text-align:left;padding:14px!important;background:#f4f8ff!important;border:1px solid #dce9f8!important;border-radius:12px}
+.ac-premium-next-record strong{font-size:15px}.ac-premium-next-record span{color:#1268e5;font-weight:750}.ac-premium-next-record small{display:flex;align-items:center;gap:5px;color:#657f9e}
+.ac-premium-bottom-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:stretch}
+.ac-premium-list,.ac-premium-quick{display:flex;flex-direction:column;gap:12px}
+.ac-premium-section-heading h3,.ac-premium-quick h3{margin:0;font-size:15px;font-weight:800}
+.ac-premium-section-heading>button{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:750;white-space:nowrap}
+.ac-premium-list-row{width:100%;display:flex;align-items:center;gap:9px;text-align:left;min-width:0;padding:11px 8px!important;background:#f7faff!important;border:1px solid #e3edf9!important;border-radius:10px}
+.ac-premium-list-row>svg{flex-shrink:0;color:#1268e5}
+.ac-premium-list-row>span{display:grid;gap:4px;min-width:0;flex:1}
+.ac-premium-list-row strong{font-size:12px;overflow-wrap:anywhere}
+.ac-premium-list-row small{font-size:11px;color:#7185a0}
+.ac-premium-list-row em{font-style:normal;font-size:10px;color:#426c9d;text-align:right;max-width:82px;overflow-wrap:anywhere}
+.ac-premium-month-total{margin-top:auto;border-top:1px solid #e6edf6;padding-top:12px;display:flex;gap:6px;justify-content:space-between;flex-wrap:wrap;font-size:12px}
+.ac-premium-month-total small{flex-basis:100%;color:#7b6a46}
+.ac-premium-quick>button{display:flex;align-items:center;gap:9px;justify-content:flex-start;text-align:left;background:#edf5ff!important;border:1px solid #d4e6fb!important;border-radius:10px;padding:11px!important;color:#164d8b!important;font-size:12px;font-weight:750}
+.ac-premium-quick>button svg:last-child{margin-left:auto}
+.workspace-garage .car-card{display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.workspace-garage .car-card .autocare-garage-card-icon{width:100%!important;height:142px!important;display:grid;place-items:center;background:radial-gradient(ellipse,#d7e9fa,#f5f9ff 75%)!important;border:1px solid #e0eaf5!important;border-radius:12px!important}
+.workspace-garage .car-card .autocare-garage-card-icon svg{width:108px;height:108px}
+.workspace-garage .car-card h2{font-size:20px;letter-spacing:-.02em;margin:0}
+.workspace-garage .car-card .car-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:13px;border-radius:11px}
+.workspace-garage .car-card .car-metrics>div{min-width:0;overflow-wrap:anywhere}
+.workspace-garage .car-card .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.workspace-garage .car-card .row-actions button{flex:1 1 auto;min-height:42px}
+@media(max-width:1200px){.ac-premium-overview{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}.ac-premium-next{grid-column:1/-1}.ac-premium-bottom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.ac-premium-dashboard{gap:12px}.ac-premium-overview,.ac-premium-bottom-grid{grid-template-columns:minmax(0,1fr);gap:12px}.ac-premium-next{grid-column:auto}.ac-premium-panel{padding:15px;border-radius:14px}.ac-premium-vehicle-content{grid-template-columns:minmax(0,1fr)}.ac-premium-car-visual{min-height:125px}.ac-premium-vehicle-footer{gap:12px}.ac-premium-car-description h2{font-size:21px}.ac-premium-big-number{font-size:34px}.workspace-garage .car-card .row-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.workspace-garage .car-card .row-actions button{min-width:0}}
+@media(max-width:360px){.ac-premium-vehicle-footer>div{min-width:75px}.ac-premium-section-heading{align-items:flex-start}.ac-premium-list-row em{max-width:64px}.workspace-garage .car-card .row-actions{grid-template-columns:1fr}}
