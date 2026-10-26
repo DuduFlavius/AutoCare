@@ -97,3 +97,11 @@ html body .ac-premium-comparison>[role=row]:first-child{background:#eaf3ff;color
 html body .ac-premium-comparison>[role=row]:last-child{border-bottom:0}
 html body .ac-premium-comparison>[role=row]>:not(:first-child){text-align:center}
 @media(max-width:650px){html body .ac-premium-benefit-grid{grid-template-columns:1fr}html body .ac-premium-comparison>[role=row]{font-size:12px;gap:6px;padding:11px 8px}}
+
+
+/* Clearly discoverable installation section without overlays. */
+html body .ac-install-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin:24px 0 30px;padding:22px 26px;background:#edf5ff;border:1px solid #c9dff9;border-radius:18px;color:#19365b}
+html body .ac-install-banner strong{font-size:19px;color:#163f78}
+html body .ac-install-banner p{margin:6px 0 0;color:#4d6685}
+html body .ac-install-banner .ac-mobile-install{margin:0}
+@media(max-width:650px){html body .ac-install-banner{padding:17px;align-items:stretch}html body .ac-install-banner .ac-mobile-install-trigger{width:100%}}
