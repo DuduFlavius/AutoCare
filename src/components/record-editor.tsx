@@ -91,18 +91,20 @@ export default function RecordEditor({
     const str = (k: string) => String(f.get(k) || '').trim();
     const num = (k: string) => (str(k) === '' ? null : Number(str(k)));
     const computedNextKm = kind === 'service' && category === 'Schimb ulei' && num('nextKm') === null && num('odometer') !== null && Number(serviceKmInterval) > 0 ? Number(num('odometer')) + Number(serviceKmInterval) : num('nextKm');
+    const computedExpiry = kind === 'service' && category === 'ITP' && str('ac_expirareITP') ? str('ac_expirareITP') : str('expiresAt');
     const partsTotal = ['ac_costPiese','ac_costLabor','ac_costOther'].reduce((sum,k)=>sum+(num(k)||0),0);
     const finalAmount = kind === 'service' && costEdited ? partsTotal : (num('amount') ?? 0);
     const hasCost = kind === 'service' && costEdited ? ['ac_costPiese','ac_costLabor','ac_costOther'].some(k => str(k) !== '') : str('amount') !== '';
     const filterCost = category === 'Filtre' ? Array.from(f.entries()).filter(([key]) => /^ac_filtru\d+Cost$/.test(key)).reduce((total,[,value]) => total + (Number(value) || 0),0) : 0;
     // Filter line-item prices are informational when a total or parts breakdown is supplied: never add them twice.
     const effectiveTotal = kind === 'service' && !hasCost && filterCost > 0 ? filterCost : finalAmount;
-    const effectiveKnown = hasCost || (kind === 'service' && filterCost > 0) || (Boolean(record?.amountKnown) && !costEdited && str('amount') !== '');
-    if (kind === 'service' && category === 'Filtre' && costEdited && filterCost > 0 && str('ac_costPiese') === '') {
+    const effectiveKnown = hasCost || (kind === 'service' && filterCost > 0);
+    if (kind === 'service' && category === 'Filtre' && costEdited && filterCost > 0 && str('ac_costPiese') === '' && Math.abs(partsTotal-filterCost)>0.01) {
       setError('Ai introdus costuri pentru filtre. Completează costul pieselor cu suma lor sau lasă defalcarea necompletată pentru a evita neconcordanțele.');
       return;
     }
     setError('');
+    if (unknownCost && (hasCost || filterCost > 0)) {setError('Pentru cost necunoscut, șterge mai întâi sumele introduse.');return;}
     if (!unknownCost && (!Number.isFinite(effectiveTotal) || effectiveTotal < 0 || effectiveTotal > 1000000)) {setError('Costul trebuie să fie între 0 și 1.000.000 RON.');return;}
     if (num('odometer') !== null && (!Number.isInteger(num('odometer')) || Number(num('odometer')) < 0)) {setError('Kilometrajul trebuie să fie un număr întreg pozitiv.');return;}
     if (computedNextKm !== null && num('odometer') !== null && computedNextKm < Number(num('odometer'))) {setError('Următorul kilometraj nu poate fi mai mic decât kilometrajul intervenției.');return;}
@@ -110,7 +112,7 @@ export default function RecordEditor({
       setError('Alege mașina căreia îi aparține înregistrarea.');
       return;
     }
-    if (str('date') && str('expiresAt') && str('expiresAt') < str('date')) {
+    if (str('date') && computedExpiry && computedExpiry < str('date')) {
       setError('Data expirării nu poate fi înaintea datei emiterii sau intervenției.');
       return;
     }
@@ -131,7 +133,7 @@ export default function RecordEditor({
           category,
           title: custom ? str('title') : str('title') || category,
           date: str('date') || null,
-          expiresAt: str('expiresAt') || null,
+          expiresAt: computedExpiry || null,
           nextKm: computedNextKm,
           odometer: num('odometer'),
           amountBani: unknownCost ? 0 : Math.round(effectiveTotal * 100),
