@@ -82,3 +82,18 @@ html body .ac-mobile-install-help p{margin:8px 0}
 html body .footer .ac-mobile-install{margin:18px 0 22px}
 html body .ac-install-settings{grid-column:1/-1}
 @media(max-width:800px){html body .ac-mobile-install{position:relative;right:auto;bottom:auto;z-index:auto;max-width:100%}html body .ac-mobile-install-help{position:relative;right:auto;bottom:auto;width:100%;box-shadow:none}}
+
+
+/* Premium subscription benefits and plan comparison */
+html body .ac-premium-benefits{padding:clamp(20px,3vw,32px);background:linear-gradient(145deg,#f5f9ff,#fff)!important;border:1px solid #d5e4f7!important}
+html body .ac-premium-benefits h2{font-size:clamp(22px,2.5vw,30px);margin:10px 0}
+html body .ac-premium-benefit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0 24px}
+html body .ac-premium-benefit-grid>div{padding:17px;border-radius:14px;background:#fff;border:1px solid #dbe7f6}
+html body .ac-premium-benefit-grid strong{color:#164c91;font-size:16px}
+html body .ac-premium-benefit-grid p{color:#4c5f78;line-height:1.55;margin:8px 0 0}
+html body .ac-premium-comparison{overflow-x:auto;border:1px solid #dbe7f6;border-radius:12px;margin:15px 0}
+html body .ac-premium-comparison>[role=row]{display:grid;grid-template-columns:minmax(120px,2fr) minmax(75px,1fr) minmax(105px,1.5fr);gap:10px;padding:12px 14px;border-bottom:1px solid #e7edf6;align-items:center}
+html body .ac-premium-comparison>[role=row]:first-child{background:#eaf3ff;color:#174b85}
+html body .ac-premium-comparison>[role=row]:last-child{border-bottom:0}
+html body .ac-premium-comparison>[role=row]>:not(:first-child){text-align:center}
+@media(max-width:650px){html body .ac-premium-benefit-grid{grid-template-columns:1fr}html body .ac-premium-comparison>[role=row]{font-size:12px;gap:6px;padding:11px 8px}}
