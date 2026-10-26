@@ -8,6 +8,8 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  foreignKey,
+  unique,
 } from 'drizzle-orm/pg-core';
 export const user = pgTable('app_user', {
   id: text().primaryKey(),
@@ -94,30 +96,36 @@ export const vehicles = pgTable(
     archived: boolean().notNull().default(false),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('vehicle_owner').on(t.userId)],
+  (t) => [index('vehicle_owner').on(t.userId), unique('vehicle_owner_pair').on(t.id, t.userId)],
 );
 // SmartDrive history is independent of the vehicle's confirmed odometer.
 export const mileageReadings = pgTable('mileage_readings', {
   id: text().primaryKey(),
   userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),
-  vehicleId: text().notNull().references(() => vehicles.id, { onDelete: 'cascade' }),
+  vehicleId: text().notNull(),
   odometer: integer().notNull(),
   source: text().notNull().default('manual'),
   recordedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-}, (t) => [index('mileage_readings_owner_vehicle').on(t.userId, t.vehicleId, t.recordedAt)]);
+}, (t) => [
+  index('mileage_readings_owner_vehicle').on(t.userId, t.vehicleId, t.recordedAt),
+  foreignKey({ name: 'mileage_reading_owner_vehicle_fk', columns: [t.vehicleId, t.userId], foreignColumns: [vehicles.id, vehicles.userId] }).onDelete('cascade'),
+]);
 
 export const gpsTrips = pgTable('gps_trips', {
   id: text().primaryKey(),
   userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),
-  vehicleId: text().notNull().references(() => vehicles.id, { onDelete: 'cascade' }),
+  vehicleId: text().notNull(),
   distanceMeters: integer().notNull(),
   durationSeconds: integer().notNull(),
   startedAt: timestamp({ withTimezone: true }).notNull(),
   endedAt: timestamp({ withTimezone: true }).notNull(),
   source: text().notNull().default('browser-gps'),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-}, (t) => [index('gps_trips_owner_vehicle').on(t.userId, t.vehicleId, t.startedAt)]);
+}, (t) => [
+  index('gps_trips_owner_vehicle').on(t.userId, t.vehicleId, t.startedAt),
+  foreignKey({ name: 'gps_trip_owner_vehicle_fk', columns: [t.vehicleId, t.userId], foreignColumns: [vehicles.id, vehicles.userId] }).onDelete('cascade'),
+]);
 
 export const mileageReminderPreferences = pgTable('mileage_reminder_preferences', {
   userId: text().primaryKey().references(() => user.id, { onDelete: 'cascade' }),
