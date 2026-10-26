@@ -94,7 +94,9 @@ export default function RecordEditor({
     const finalAmount = kind === 'service' && costEdited ? partsTotal : (num('amount') ?? 0);
     const hasCost = kind === 'service' && costEdited ? ['ac_costPiese','ac_costLabor','ac_costOther'].some(k => str(k) !== '') : str('amount') !== '';
     const filterCost = category === 'Filtre' ? Array.from(f.entries()).filter(([key]) => /^ac_filtru\d+Cost$/.test(key)).reduce((total,[,value]) => total + (Number(value) || 0),0) : 0;
-    const effectiveTotal = kind === 'service' && costEdited ? finalAmount + filterCost : finalAmount;
+    // Filter line-item prices are informational when a total or parts breakdown is supplied: never add them twice.
+    const effectiveTotal = kind === 'service' && !hasCost && filterCost > 0 ? filterCost : finalAmount;
+    const effectiveKnown = hasCost || (kind === 'service' && filterCost > 0);
     setError('');
     if (!unknownCost && (!Number.isFinite(effectiveTotal) || effectiveTotal < 0 || effectiveTotal > 1000000)) {setError('Costul trebuie să fie între 0 și 1.000.000 RON.');return;}
     if (num('odometer') !== null && (!Number.isInteger(num('odometer')) || Number(num('odometer')) < 0)) {setError('Kilometrajul trebuie să fie un număr întreg pozitiv.');return;}
@@ -128,7 +130,7 @@ export default function RecordEditor({
           nextKm: computedNextKm,
           odometer: num('odometer'),
           amountBani: unknownCost ? 0 : Math.round(effectiveTotal * 100),
-          amountKnown: !unknownCost && hasCost,
+          amountKnown: !unknownCost && effectiveKnown,
           provider: str('provider'),
           number: str('number'),
           parts: kind === 'service' ? serializeServiceDetails(str('parts'),f) : str('parts'),
