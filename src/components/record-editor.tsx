@@ -97,6 +97,10 @@ export default function RecordEditor({
     // Filter line-item prices are informational when a total or parts breakdown is supplied: never add them twice.
     const effectiveTotal = kind === 'service' && !hasCost && filterCost > 0 ? filterCost : finalAmount;
     const effectiveKnown = hasCost || (kind === 'service' && filterCost > 0) || (Boolean(record?.amountKnown) && !costEdited && str('amount') !== '');
+    if (kind === 'service' && category === 'Filtre' && costEdited && filterCost > 0 && str('ac_costPiese') === '') {
+      setError('Ai introdus costuri pentru filtre. Completează costul pieselor cu suma lor sau lasă defalcarea necompletată pentru a evita neconcordanțele.');
+      return;
+    }
     setError('');
     if (!unknownCost && (!Number.isFinite(effectiveTotal) || effectiveTotal < 0 || effectiveTotal > 1000000)) {setError('Costul trebuie să fie între 0 și 1.000.000 RON.');return;}
     if (num('odometer') !== null && (!Number.isInteger(num('odometer')) || Number(num('odometer')) < 0)) {setError('Kilometrajul trebuie să fie un număr întreg pozitiv.');return;}
@@ -147,7 +151,7 @@ export default function RecordEditor({
     }
   }
   return (
-    <form className="quick-record-form" onSubmit={submit} onChange={(e)=>{mark();const f=new FormData(e.currentTarget);setLive({date:String(f.get("date")||""),km:String(f.get("odometer")||""),next:String(f.get("nextKm")||""),due:String(f.get("expiresAt")||""),amount:String(f.get("amount")||"")})}}>
+    <form className="quick-record-form" onSubmit={submit} onChange={(e)=>{mark();const f=new FormData(e.currentTarget);setLive({date:String(f.get("date")||""),km:String(f.get("odometer")||""),next:String(f.get("nextKm")||""),due:String(f.get("expiresAt")||""),amount:String(f.get("amount")||"")});setFilterCostLive(Array.from(f.entries()).filter(([k])=>/^ac_filtru\d+Cost$/.test(k)).reduce((n,[,v])=>n+(Number(v)||0),0))}}>
       <div className="record-editor-intro">
         <span>
           <CarFront size={21} />
@@ -313,7 +317,7 @@ export default function RecordEditor({
       {kind !== 'document' && (
         <div className="cost-field ac-cost-breakdown">
           <h3>Costurile intervenției</h3>
-          <p className="micro">Poți introduce suma totală direct sau costurile defalcate. Dacă modifici defalcarea, totalul se calculează automat.</p>
+          <p className="micro">Completează suma totală sau defalcarea. Pentru filtre, costurile individuale sunt incluse în total o singură dată.</p>
           {kind === 'service' && <div className="form-grid">
             <label>Cost piese / materiale · RON<input name="ac_costPiese" type="number" min="0" max="1000000" step="0.01" inputMode="decimal" disabled={unknownCost} value={costParts} onChange={e=>{setCostParts(e.target.value);setCostEdited(true)}} placeholder="Opțional"/></label>
             <label>Cost manoperă · RON<input name="ac_costLabor" type="number" min="0" max="1000000" step="0.01" inputMode="decimal" disabled={unknownCost} value={costLabor} onChange={e=>{setCostLabor(e.target.value);setCostEdited(true)}} placeholder="Opțional"/></label>
@@ -325,6 +329,7 @@ export default function RecordEditor({
               defaultValue={kind==='service'&&costEdited ? undefined : record && record.amountKnown !== false ? record.amountBani / 100 : ''}
               placeholder="Introdu suma sau completează defalcarea"/>
           </label>
+          {kind==='service'&&category==='Filtre'&&filterCostLive>0&&<p className="micro">Total filtre introduse: {filterCostLive.toFixed(2)} RON. Nu adăuga aceeași sumă de două ori.</p>}
           <label className="check"><input type="checkbox" checked={unknownCost} onChange={e=>setUnknownCost(e.target.checked)}/>Costul nu este cunoscut încă</label>
           <p className="micro">Dacă intervenția a fost gratuită, introdu 0 RON. Dacă nu cunoști costul, bifează opțiunea de mai sus.</p>
         </div>
@@ -445,8 +450,9 @@ export default function RecordEditor({
         <div><span>Operațiune</span><strong>{category}</strong></div>
         <div><span>Data</span><strong>{live.date||'Necompletată'}</strong></div>
         <div><span>Kilometraj</span><strong>{live.km?Number(live.km).toLocaleString('ro-RO')+' km':'Necompletat'}</strong></div>
-        <div><span>Cost</span><strong>{unknownCost?'Necunoscut':costEdited?(Number(costParts||0)+Number(costLabor||0)+Number(costOther||0)).toFixed(2)+' RON':live.amount!==''?Number(live.amount).toFixed(2)+' RON':'Cost necompletat'}</strong></div>
-        <div><span>Următorul termen</span><strong>{live.due|| (live.next?Number(live.next).toLocaleString('ro-RO')+' km':'Nesetat')}</strong></div>
+        <div><span>Cost</span><strong>{unknownCost?'Necunoscut':costEdited?(Number(costParts||0)+Number(costLabor||0)+Number(costOther||0)).toFixed(2)+' RON':live.amount!==''?Number(live.amount).toFixed(2)+' RON':filterCostLive>0?filterCostLive.toFixed(2)+' RON':'Cost necompletat'}</strong></div>
+        <div><span>Următorul termen</span><strong>{live.due|| (live.next?Number(live.next).toLocaleString('ro-RO')+' km':category==='Schimb ulei'&&serviceKmInterval&&live.km?(Number(live.km)+Number(serviceKmInterval)).toLocaleString('ro-RO')+' km':'Nesetat')}</strong></div>
+        <div><span>Memento</span><strong>{live.due||live.next||category==='Schimb ulei'&&serviceKmInterval&&live.km?'Termen configurat':'Fără termen configurat'}</strong></div>
       </aside>}
       <footer className="record-form-footer">
         <button type="button" onClick={onCancel} disabled={busy}>
