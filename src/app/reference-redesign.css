@@ -1903,3 +1903,9 @@ html body .app-shell>.sidebar .sidebar-profile{background:#203d67!important;bord
 html body .app-shell>.sidebar .sidebar-profile .profile-avatar{background:linear-gradient(135deg,#e4f1ff,#b9d7fb)!important;color:#17467c!important;border:2px solid #90b8e9!important;border-radius:50%!important;box-shadow:0 2px 8px #0b244633!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{width:64px!important;height:52px!important;background:linear-gradient(140deg,#edf5ff,#d8e8fa)!important;border:1px solid #c1d8f0!important;border-radius:14px!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{width:35px!important;height:35px!important;color:#2366b9!important;stroke:#2366b9!important}
+
+/* Location consent: header control, responsive on desktop and installed PWA. */
+html body .app-shell .app-header .autocare-location-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;min-height:38px!important;padding:8px 12px!important;border:1px solid #a9c5e8!important;border-radius:11px!important;background:#e7f1ff!important;color:#1b528f!important;font-size:12px!important;font-weight:700!important;white-space:nowrap!important}
+html body .app-shell .app-header .autocare-location-button:hover{background:#d6e9ff!important;border-color:#83afe2!important}
+html body .app-shell .app-header .autocare-location-accuracy{font-size:11px;color:#4f6c8e;white-space:nowrap}
+@media(max-width:760px){html body .app-shell .app-header .autocare-location-button{min-height:36px!important;padding:7px 9px!important;font-size:11px!important}html body .app-shell .app-header .autocare-location-accuracy{display:none}}
