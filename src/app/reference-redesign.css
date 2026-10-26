@@ -1730,3 +1730,17 @@ html body .app-shell>.sidebar .sidebar-profile .profile-avatar{background:#e3eff
 html body .app-shell>.sidebar .sidebar-profile :is(strong,small){color:#fff!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{background:#e8f2ff!important;background-image:none!important;border:1px solid #b6d1f0!important;border-radius:50%!important;width:58px!important;height:58px!important;box-shadow:none!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{color:#2467bd!important;stroke:#2467bd!important}
+
+/* Service editor and founder panel: light premium controls and legible fields. */
+html body .app-shell .quick-record-form,html body .app-shell .quick-record-form :is(.operation-picker,.record-extra,.service-reminder-box,.service-oil-planner,.cost-field,.record-editor-intro){background:#f1f6fd!important;color:#20446e!important;border-color:#c5d7ed!important;color-scheme:light!important}
+html body .app-shell .quick-record-form :is(label,legend,p,small,h3,summary,strong,span){color:#24476e!important;opacity:1!important}
+html body .app-shell .quick-record-form :is(input,select,textarea){background:#fff!important;color:#193f6f!important;border:1px solid #b6cbe5!important;min-height:43px}
+html body .app-shell .quick-record-form .operation-picker button{background:#e3eefb!important;color:#20518c!important;border:1px solid #b2cbe9!important}
+html body .app-shell .quick-record-form .operation-picker button[aria-pressed=true]{background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
+html body .app-shell .quick-record-form .operation-picker button[aria-pressed=true] svg{color:#fff!important}
+html body .app-shell .quick-record-form .service-oil-planner{padding:18px;border:1px solid #c5d7ed;border-radius:14px;margin-block:14px}
+html body .app-shell .quick-record-form .service-oil-planner output{display:block;padding:12px;background:#e0ecfa;color:#174b86;font-weight:750;border-radius:10px}
+html body .app-shell .quick-record-form .record-form-footer button.primary{background:#2467bd!important;color:#fff!important}
+html body .app-shell main.main :is(.founder-workspace,.founder-panel,.founder-dashboard,.admin-workspace,.admin-panel,.admin-dashboard,.founder-card,.admin-card){background:#edf3fb!important;color:#20446e!important;color-scheme:light!important;border-color:#c4d6ea!important}
+html body .app-shell main.main :is(.founder-workspace,.founder-panel,.founder-dashboard,.admin-workspace,.admin-panel,.admin-dashboard,.founder-card,.admin-card) :is(h1,h2,h3,p,label,small,span,strong){color:#20446e!important;opacity:1!important}
+html body .app-shell main.main :is(.founder-workspace,.founder-panel,.founder-dashboard,.admin-workspace,.admin-panel,.admin-dashboard) :is(input,textarea,select){background:#fff!important;color:#20446e!important;border-color:#b8cee8!important}
