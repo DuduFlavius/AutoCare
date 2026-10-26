@@ -827,6 +827,7 @@ test('SmartDrive: GPS trips validate payload and never modify dashboard odometer
   for (const invalid of [
     { ...valid, distanceMeters: -1 },
     { ...valid, distanceMeters: 3000000 },
+    { ...valid, distanceMeters: 50000, durationSeconds: 600 },
     { ...valid, durationSeconds: -10 },
     { ...valid, endedAt: '2030-03-10T09:00:00.000Z' },
     { ...valid, durationSeconds: 200 },
