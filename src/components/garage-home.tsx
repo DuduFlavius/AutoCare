@@ -36,7 +36,6 @@ const kindNames: Record<string, string> = {
 };
 export function GarageHome({
   data,
-  name,
   navigate,
   add,
   open,
@@ -48,7 +47,7 @@ export function GarageHome({
   open: (record: Entry) => void;
 }) {
   const home = dashboardHome(data);
-  const { cars, records, attention: due } = home;
+  const { cars, records } = home;
   const [selectedCar, setSelectedCar] = useState('');
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
   const carDocuments = home.documents.filter((r) => r.vehicleId === car?.id);
