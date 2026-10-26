@@ -702,7 +702,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
               onClick={() => navigate(label)}
             >
               <Icon size={18} />
-              {label}
+              {label === 'Dashboard' ? 'Acasă' : label === 'Garaj' ? 'Garajul meu' : label === 'Întreținere' ? 'Intervenții' : label === 'Plan întreținere' ? 'SmartDrive GPS' : label === 'Centru de suport' ? 'Centru de suport' : label === 'Abonament' ? 'Premium' : label}
               {label === 'Notificări' && !!data?.notifications.filter((n) => !n.readAt).length && (
                 <span className="nav-unread">
                   {data.notifications.filter((n) => !n.readAt).length}
