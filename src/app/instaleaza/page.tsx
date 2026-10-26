@@ -6,14 +6,12 @@ type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<
 
 export default function InstallPage() {
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null);
-  const [platform, setPlatform] = useState<'ios' | 'android' | 'other'>('other');
   const [installed, setInstalled] = useState(false);
   const [samsungBrowser, setSamsungBrowser] = useState(false);
   const [message, setMessage] = useState('');
   useEffect(() => {
     const ua = navigator.userAgent;
     setSamsungBrowser(/SamsungBrowser/i.test(ua));
-    setPlatform(/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'ios' : /Android/i.test(ua) ? 'android' : 'other');
     setInstalled(window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone)));
     const handler = (event: Event) => { event.preventDefault(); setPrompt(event as InstallPrompt); };
     const onInstalled = () => { setInstalled(true); setPrompt(null); };
