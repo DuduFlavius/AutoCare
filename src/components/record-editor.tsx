@@ -96,7 +96,7 @@ export default function RecordEditor({
     const filterCost = category === 'Filtre' ? Array.from(f.entries()).filter(([key]) => /^ac_filtru\d+Cost$/.test(key)).reduce((total,[,value]) => total + (Number(value) || 0),0) : 0;
     // Filter line-item prices are informational when a total or parts breakdown is supplied: never add them twice.
     const effectiveTotal = kind === 'service' && !hasCost && filterCost > 0 ? filterCost : finalAmount;
-    const effectiveKnown = hasCost || (kind === 'service' && filterCost > 0);
+    const effectiveKnown = hasCost || (kind === 'service' && filterCost > 0) || (Boolean(record?.amountKnown) && !costEdited && str('amount') !== '');
     setError('');
     if (!unknownCost && (!Number.isFinite(effectiveTotal) || effectiveTotal < 0 || effectiveTotal > 1000000)) {setError('Costul trebuie să fie între 0 și 1.000.000 RON.');return;}
     if (num('odometer') !== null && (!Number.isInteger(num('odometer')) || Number(num('odometer')) < 0)) {setError('Kilometrajul trebuie să fie un număr întreg pozitiv.');return;}
@@ -133,7 +133,7 @@ export default function RecordEditor({
           amountKnown: !unknownCost && effectiveKnown,
           provider: str('provider'),
           number: str('number'),
-          parts: kind === 'service' ? serializeServiceDetails(str('parts'),f) : str('parts'),
+          parts: kind === 'service' ? serializeServiceDetails(str('parts') || record?.parts || '',f) : str('parts'),
           notes: str('notes'),
         },
         file,
@@ -361,7 +361,7 @@ export default function RecordEditor({
               </label>
               <label>
                 Piese și materiale
-                <textarea name="parts" maxLength={4000} defaultValue={record?.parts || ''} />
+                <textarea name="parts" maxLength={4000} defaultValue={(record?.parts || '').split('\n').filter(line => !line.startsWith('AutoCare · ')).join('\n')} />
               </label>
             </>
           )}
@@ -445,7 +445,7 @@ export default function RecordEditor({
         <div><span>Operațiune</span><strong>{category}</strong></div>
         <div><span>Data</span><strong>{live.date||'Necompletată'}</strong></div>
         <div><span>Kilometraj</span><strong>{live.km?Number(live.km).toLocaleString('ro-RO')+' km':'Necompletat'}</strong></div>
-        <div><span>Cost</span><strong>{unknownCost?'Necunoscut':costEdited?(Number(costParts||0)+Number(costLabor||0)+Number(costOther||0)).toFixed(2)+' RON':live.amount!==''?Number(live.amount).toFixed(2)+' RON':'Completează costul'}</strong></div>
+        <div><span>Cost</span><strong>{unknownCost?'Necunoscut':costEdited?(Number(costParts||0)+Number(costLabor||0)+Number(costOther||0)).toFixed(2)+' RON':live.amount!==''?Number(live.amount).toFixed(2)+' RON':'Cost necompletat'}</strong></div>
         <div><span>Următorul termen</span><strong>{live.due|| (live.next?Number(live.next).toLocaleString('ro-RO')+' km':'Nesetat')}</strong></div>
       </aside>}
       <footer className="record-form-footer">
