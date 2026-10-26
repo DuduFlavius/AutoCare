@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Gauge, History, Bell } from 'lucide-react';
+import { mileageMetrics } from '@/lib/smartdrive-metrics';
 type Vehicle = { id: string; brand: string; model: string; odometer: number };
 type Reading = { id: string; odometer: number; recordedAt: string; source: string };
 type Trip = { id: string; distanceMeters: number; durationSeconds: number; startedAt: string };
@@ -30,11 +31,7 @@ export default function SmartDriveHistory({ vehicles, preview }: { vehicles: Veh
       .catch(e => { if (!cancelled) setError(e instanceof Error ? e.message : 'Eroare SmartDrive.'); });
     return () => { cancelled = true; };
   }, [vehicleId, preview, vehicles.map(v => v.odometer).join(',')]);
-  const asc = [...readings].sort((a,b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
-  const first = asc[0], last = asc[asc.length - 1];
-  const days = first && last ? (new Date(last.recordedAt).getTime() - new Date(first.recordedAt).getTime()) / 86400000 : 0;
-  const delta = first && last ? Math.max(0,last.odometer - first.odometer) : 0;
-  const daily = days >= 1 ? delta / days : null;
+  const { deltaKm, dailyKm, monthlyKm } = mileageMetrics(readings);
   const save = async () => {
     if (preview) return;
     setBusy(true);
@@ -46,9 +43,9 @@ export default function SmartDriveHistory({ vehicles, preview }: { vehicles: Veh
     <div className="ac-smartdrive-history-head"><div><span className="ac-premium-kicker"><History size={17}/> SMARTDRIVE · ISTORIC</span><h3>Citiri confirmate și călătorii</h3></div>
       {vehicles.length > 1 && <label>Mașina <select value={vehicleId} onChange={e => setSelected(e.target.value)}>{vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}</div>
     <div className="ac-smartdrive-history-metrics">
-      <div><Gauge size={19}/><span>Diferență între citiri</span><strong>{asc.length >= 2 ? delta.toLocaleString('ro-RO') + ' km' : '—'}</strong></div>
-      <div><span>Medie zilnică</span><strong>{daily === null ? 'Date insuficiente' : daily.toLocaleString('ro-RO',{maximumFractionDigits:1}) + ' km/zi'}</strong></div>
-      <div><span>Medie lunară estimată (30 zile)</span><strong>{daily === null ? 'Date insuficiente' : (daily*30).toLocaleString('ro-RO',{maximumFractionDigits:0}) + ' km'}</strong></div>
+      <div><Gauge size={19}/><span>Diferență între citiri</span><strong>{deltaKm !== null ? deltaKm.toLocaleString('ro-RO') + ' km' : '—'}</strong></div>
+      <div><span>Medie zilnică</span><strong>{dailyKm === null ? 'Date insuficiente' : dailyKm.toLocaleString('ro-RO',{maximumFractionDigits:1}) + ' km/zi'}</strong></div>
+      <div><span>Medie lunară estimată (30 zile)</span><strong>{monthlyKm === null ? 'Date insuficiente' : monthlyKm.toLocaleString('ro-RO',{maximumFractionDigits:0}) + ' km'}</strong></div>
     </div>
     <p className="ac-smartdrive-history-note">Mediile folosesc numai citirile confirmate, nu distanțele GPS. Pentru calcul sunt necesare două citiri la cel puțin o zi distanță.</p>
     <div className="ac-smartdrive-history-columns">
