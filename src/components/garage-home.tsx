@@ -16,6 +16,8 @@ import {
   FileText,
   ShieldAlert,
   Sparkles,
+  Zap,
+  MapPin,
 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -120,7 +122,7 @@ export function GarageHome({
         <section className="ac-premium-odometer ac-premium-panel">
           <span className="ac-premium-kicker"><Gauge size={18}/> URMĂTORUL SCHIMB DE ULEI</span>
           <div className="ac-oil-hero">
-            <div className="ac-oil-bottle" aria-hidden="true"><span>OIL</span><strong>5W-30</strong></div>
+            <div className="ac-oil-bottle" aria-hidden="true"><span>OIL</span><strong>AutoCare</strong></div>
             <div className="ac-oil-info">
               <strong className="ac-oil-next">{nextOilKm === null ? 'Neconfigurat' : `La ${nextOilKm.toLocaleString('ro-RO')} km`}</strong>
               <span>{oilKmRemaining === null ? 'Setează intervalul de schimb' : oilKmRemaining < 0 ? `Depășit cu ${Math.abs(oilKmRemaining).toLocaleString('ro-RO')} km` : `${oilKmRemaining.toLocaleString('ro-RO')} km rămași`}</span>
@@ -135,14 +137,14 @@ export function GarageHome({
           <button type="button" className="ac-premium-primary" onClick={() => navigate('Întreținere')}>Vezi istoricul intervențiilor <ArrowRight size={16}/></button>
         </section>
         <section className="ac-premium-next ac-premium-panel">
-          <span className="ac-premium-kicker"><Wrench size={17}/> URMĂTORUL TERMEN</span>
+          <span className="ac-premium-kicker"><CalendarDays size={17}/> URMĂTORUL TERMEN</span>
           {(() => {
             const next = nextRecords.find(r => r.vehicleId === car?.id);
             return next ? <button className="ac-premium-next-record" type="button" onClick={() => open(next)}>
               <strong>{next.category || next.title}</strong>
               <span>{date(next.expiresAt)}</span>
               <small>Deschide înregistrarea <ArrowRight size={13}/></small>
-            </button> : <p className="ac-premium-empty">Nu există un termen viitor înregistrat pentru această mașină.</p>;
+            </button> : <div className="ac-term-empty"><CalendarDays size={40} strokeWidth={1.5}/><strong>Nu există un termen viitor</strong><span>Înregistrează intervenții pentru a vedea următoarele termene.</span></div>;
           })()}
           <div className="ac-premium-metric-strip"><span>Documente în atenție <strong>{documentSoon + documentExpired}</strong></span><span>Termene prioritare <strong>{due.length}</strong></span></div>
           <button type="button" onClick={() => navigate('Calendar')}>Vezi calendarul <ArrowRight size={16}/></button>
@@ -172,11 +174,11 @@ export function GarageHome({
           <div className="ac-premium-month-total">Total luna curentă <strong>{money(home.monthBani)}</strong>{home.unknownCosts > 0 && <small> + {home.unknownCosts} costuri necunoscute</small>}</div>
         </section>
         <section className="ac-premium-panel ac-premium-quick">
-          <h3>Acțiuni rapide</h3>
+          <h3><Zap size={18}/> Acțiuni rapide</h3>
           <button type="button" onClick={() => add(cars.length ? 'service' : 'vehicle')}><Wrench size={19}/> Adaugă intervenție <Plus size={16}/></button>
           <button type="button" onClick={() => add(cars.length ? 'document' : 'vehicle')}><Files size={19}/> Adaugă document <Plus size={16}/></button>
           <button type="button" onClick={() => add(cars.length ? 'expense' : 'vehicle')}><Wallet size={19}/> Adaugă cheltuială <Plus size={16}/></button>
-          <button type="button" onClick={() => navigate('Notificări')}><CalendarDays size={19}/> Notificări <ArrowRight size={16}/></button>
+          <button type="button" onClick={() => navigate('Plan întreținere')}><MapPin size={19}/> SmartDrive GPS <ArrowRight size={16}/></button>
         </section>
       </div>
     </div>
