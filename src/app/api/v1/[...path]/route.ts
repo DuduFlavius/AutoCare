@@ -182,6 +182,57 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       return json({ ok: true });
     }
 
+    // Authenticated SmartDrive history; every read/write is scoped to the session user.
+    if (route === 'smartdrive/preferences') {
+      if (method === 'GET') {
+        const row = (await db().select().from(s.mileageReminderPreferences).where(eq(s.mileageReminderPreferences.userId, uid)))[0];
+        return json(row || { frequencyDays: 3, enabled: true, lastSentAt: null });
+      }
+      if (method === 'PUT') {
+        const value = z.object({ frequencyDays: z.number().int().min(1).max(90), enabled: z.boolean() }).parse(await body(req));
+        const row = (await db().insert(s.mileageReminderPreferences).values({ userId: uid, ...value })
+          .onConflictDoUpdate({ target: s.mileageReminderPreferences.userId, set: { ...value, updatedAt: new Date() } }).returning())[0];
+        return json(row);
+      }
+    }
+    if (path[0] === 'smartdrive' && path[1] === 'vehicles' && path[2] && path.length === 4) {
+      const vehicleId = uuid.parse(path[2]);
+      await svc.ownedVehicle(uid, vehicleId);
+      if (path[3] === 'readings') {
+        if (method === 'GET') return json(await db().select().from(s.mileageReadings)
+          .where(and(eq(s.mileageReadings.userId, uid), eq(s.mileageReadings.vehicleId, vehicleId)))
+          .orderBy(desc(s.mileageReadings.recordedAt)).limit(200));
+        if (method === 'POST') {
+          const value = z.object({ odometer: z.number().int().min(0).max(99999999) }).parse(await body(req));
+          const result = await db().transaction(async tx => {
+            const current = (await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id, vehicleId), eq(s.vehicles.userId, uid))).for('update'))[0];
+            if (!current) throw new svc.AppError(404, 'Mașina nu există.');
+            if (value.odometer < current.odometer) throw new svc.AppError(400, 'Kilometrajul nu poate fi mai mic decât citirea confirmată.');
+            const updated = (await tx.update(s.vehicles).set({ odometer: value.odometer }).where(and(eq(s.vehicles.id, vehicleId), eq(s.vehicles.userId, uid))).returning())[0];
+            const reading = (await tx.insert(s.mileageReadings).values({ id: crypto.randomUUID(), userId: uid, vehicleId, odometer: value.odometer, source: 'manual' }).returning())[0];
+            return { vehicle: updated, reading };
+          });
+          return json(result, 201);
+        }
+      }
+      if (path[3] === 'trips') {
+        if (method === 'GET') return json(await db().select().from(s.gpsTrips)
+          .where(and(eq(s.gpsTrips.userId, uid), eq(s.gpsTrips.vehicleId, vehicleId)))
+          .orderBy(desc(s.gpsTrips.startedAt)).limit(100));
+        if (method === 'POST') {
+          const value = z.object({
+            distanceMeters: z.number().int().min(0).max(2000000),
+            durationSeconds: z.number().int().min(1).max(604800),
+            startedAt: z.string().datetime(),
+            endedAt: z.string().datetime(),
+          }).parse(await body(req));
+          const startedAt = new Date(value.startedAt), endedAt = new Date(value.endedAt);
+          if (endedAt < startedAt || Math.abs((endedAt.getTime() - startedAt.getTime()) / 1000 - value.durationSeconds) > 60)
+            throw new svc.AppError(400, 'Durata călătoriei este invalidă.');
+          return json((await db().insert(s.gpsTrips).values({ id: crypto.randomUUID(), userId: uid, vehicleId, distanceMeters: value.distanceMeters, durationSeconds: value.durationSeconds, startedAt, endedAt }).returning())[0], 201);
+        }
+      }
+    }
     if (path[0] === 'vehicles' && path[2] === 'photo') {
       const id = uuid.parse(path[1]);
       await svc.ownedVehicle(uid, id);
