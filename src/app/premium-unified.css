@@ -324,3 +324,44 @@ html body .ac-premium-dashboard .ac-premium-vehicle{background:#071526!important
 html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description h2{color:#fff!important}
 html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description button{background:#145fd6!important;color:#fff!important}
 html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-vehicle-footer{background:#08152577!important}
+
+
+/* AutoCare luxury dashboard v2: warm premium palette, contrast and editorial polish */
+html body .app-shell{background:#eeece9!important;color:#10213a!important}
+html body .app-shell>.sidebar{background:linear-gradient(165deg,#faf9f7 0%,#f1efeb 100%)!important;border-right:1px solid #e5e1dc!important}
+html body .app-shell>.sidebar nav button{color:#263a53!important;border-radius:10px!important}
+html body .app-shell>.sidebar nav button.active{background:linear-gradient(125deg,#1766d9,#204bb3)!important;color:#fff!important;box-shadow:0 7px 18px #1b55b82c!important}
+html body .app-shell main.workspace-dashboard{background:radial-gradient(ellipse at 63% -10%,#e2e7ef 0%,transparent 46%),linear-gradient(140deg,#f2f0ed,#e9e6e1)!important}
+html body .app-shell main.workspace-dashboard .page-head h1{color:#102039!important;text-shadow:none!important}
+html body .ac-premium-dashboard .ac-premium-overview>.ac-premium-panel{background:#f9f8f6!important;border:1px solid #e4e1dc!important;box-shadow:0 13px 32px #26364912!important}
+html body .ac-premium-dashboard .ac-premium-vehicle{background:#0b1828!important;border:1px solid #1b293a!important;box-shadow:0 18px 35px #0a162b32!important}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{background-image:linear-gradient(90deg,#071221a6 0%,#09152447 44%,#08132010 80%),url("/images/autocare-cinematic-exact.svg")!important;background-position:center!important;background-size:cover!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description h2{font-weight:850!important;letter-spacing:-.05em!important;text-shadow:0 3px 15px #0008}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description button{background:linear-gradient(125deg,#2574e7,#1351c5)!important;border:1px solid #528be7!important;border-radius:11px!important;box-shadow:0 8px 22px #07142952!important;font-weight:750!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-plate{background:#f9fbff!important;border:1px solid #d8e2f0!important;color:#0e2341!important;box-shadow:0 3px 10px #0002!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-vehicle-footer{border-top:1px solid #ffffff55!important;background:linear-gradient(90deg,#0714238c,#07142342)!important;backdrop-filter:blur(3px);border-radius:9px!important;padding:12px!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-vehicle-footer>div strong{font-size:21px!important;letter-spacing:-.035em!important}
+html body .ac-premium-dashboard .ac-premium-odometer{background:linear-gradient(145deg,#fcfaf7,#f3f0eb)!important}
+html body .ac-premium-dashboard .ac-premium-next{background:linear-gradient(145deg,#fcfaf7,#f2efea)!important}
+html body .ac-premium-dashboard .ac-premium-kicker{color:#142a4a!important;font-size:12px!important;font-weight:850!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-kicker{color:#fff!important}
+html body .ac-premium-dashboard .ac-oil-hero{background:linear-gradient(110deg,#f4eee5,#eee7dc)!important;border:1px solid #eee5d8!important;border-radius:13px!important;box-shadow:inset 0 1px 0 #fff9!important}
+html body .ac-premium-dashboard .ac-oil-next{color:#0b2343!important;font-weight:850!important;letter-spacing:-.04em!important}
+html body .ac-premium-dashboard .ac-oil-info>span{color:#294360!important}
+html body .ac-premium-dashboard .ac-oil-progress{background:#d4d8dc!important}
+html body .ac-premium-dashboard .ac-oil-progress i{background:linear-gradient(90deg,#1b75e7,#1a4fc4)!important}
+html body .ac-premium-dashboard .ac-oil-detail{border-bottom:1px solid #e4dfd8!important;padding:13px 0!important}
+html body .ac-premium-dashboard .ac-oil-detail strong{font-weight:800!important}
+html body .ac-premium-dashboard .ac-term-empty{background:linear-gradient(145deg,#ebe8e3,#f0ede8)!important}
+html body .ac-premium-dashboard .ac-premium-metric-strip{background:#f0efed!important;border:1px solid #e4e1dc!important;border-radius:12px!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid>.ac-premium-panel{background:linear-gradient(145deg,#fdfbf8,#f2f0ec)!important;border:1px solid #e7e2db!important;box-shadow:0 12px 27px #2a384c12!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid>.ac-premium-panel:nth-child(2){background:linear-gradient(145deg,#fafbfb,#e9edf0)!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid>.ac-premium-panel:nth-child(3){background:linear-gradient(145deg,#fdfbf7,#eee9e2)!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid>.ac-premium-panel:not(.ac-premium-quick):before{opacity:.48!important;background:radial-gradient(ellipse at center,#c2d0df 0%,transparent 71%)!important}
+html body .ac-premium-dashboard .ac-premium-section-heading h3{font-weight:850!important;color:#14243e!important}
+html body .ac-premium-dashboard .ac-premium-section-heading button{background:#dce8f9!important;color:#124ca3!important;border:1px solid #c5d8f3!important;border-radius:10px!important}
+html body .ac-premium-dashboard .ac-premium-quick{background:linear-gradient(135deg,#fcfbf9,#f2f0ed)!important}
+html body .ac-premium-dashboard .ac-premium-quick>button{background:linear-gradient(145deg,#f0f5fb,#e6edf7)!important;border:1px solid #d5e1f0!important;border-radius:12px!important;box-shadow:0 2px 6px #203d6410!important}
+html body .ac-premium-dashboard .ac-premium-quick>button:hover{background:#dceafb!important;transform:translateY(-1px)}
+html body .ac-premium-dashboard .ac-premium-primary{background:linear-gradient(125deg,#dfebfb,#d2e3f9)!important;color:#174e9b!important;border:1px solid #bdd2ee!important;border-radius:10px!important;font-weight:800!important}
+@media(max-width:700px){html body .ac-premium-dashboard .ac-premium-vehicle:before{background-position:65% center!important}html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-vehicle-footer{padding:10px!important}html body .ac-premium-dashboard .ac-premium-bottom-grid>.ac-premium-panel{min-height:145px!important}}
