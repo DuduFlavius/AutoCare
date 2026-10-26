@@ -1,5 +1,6 @@
 'use client';
 import Membership from './membership';
+import MobileInstall from './mobile-install';
 import PushSettings from './push-settings';
 import SmartDriveTrip from './smartdrive-trip';
 import SmartDriveHistory from './smartdrive-history';
@@ -1887,6 +1888,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             )}
             {tab === 'Setări' && (
               <div className="grid2 settings-workspace">
+                <section className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /></section>
                 <section className="card">
                   <div className="settings-section-title">
                     <span className="list-icon">
