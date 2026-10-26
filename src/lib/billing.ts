@@ -13,11 +13,12 @@ export function stripe() {
   return new Stripe(key, { timeout: 12000, maxNetworkRetries: 1 });
 }
 export async function checkout(uid: string, interval: string) {
-  if (!['monthly', 'annual'].includes(interval)) throw new AppError(400, 'Interval invalid.');
+  if (!['monthly', 'quarterly', 'annual'].includes(interval)) throw new AppError(400, 'Interval invalid.');
   const configured = await pricing();
-  const price =
-    interval === 'annual'
-      ? configured.annualPriceId || process.env.STRIPE_ANNUAL_PRICE_ID
+  const price = interval === 'annual'
+    ? configured.annualPriceId || process.env.STRIPE_ANNUAL_PRICE_ID
+    : interval === 'quarterly'
+      ? process.env.STRIPE_QUARTERLY_PRICE_ID
       : configured.monthlyPriceId || process.env.STRIPE_MONTHLY_PRICE_ID;
   if (!price)
     throw new AppError(
@@ -26,13 +27,15 @@ export async function checkout(uid: string, interval: string) {
     );
   const client = stripe();
   const remote = await client.prices.retrieve(price);
+  const expectedAmount = interval === 'annual' ? configured.annualBani : interval === 'quarterly' ? configured.monthlyBani * 3 : configured.monthlyBani;
+  const expectedInterval = interval === 'annual' ? 'year' : 'month';
+  const expectedCount = interval === 'quarterly' ? 3 : 1;
   if (
     !remote.active ||
     remote.currency !== 'ron' ||
-    remote.unit_amount !==
-      (interval === 'annual' ? configured.annualBani : configured.monthlyBani) ||
-    remote.recurring?.interval !== (interval === 'annual' ? 'year' : 'month') ||
-    remote.recurring.interval_count !== 1
+    remote.unit_amount !== expectedAmount ||
+    remote.recurring?.interval !== expectedInterval ||
+    remote.recurring.interval_count !== expectedCount
   )
     throw new AppError(
       503,
