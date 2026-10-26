@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { appName } from '@/lib/config';
 import { Brand } from './brand';
+import MobileInstall from './mobile-install';
 export { Brand } from './brand';
 export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
@@ -20,6 +21,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         </header>
         {children}
         <footer className="footer">
+          <MobileInstall />
           <div className="between">
             <span>
               © {new Date().getFullYear()} {appName}. Mai mult control. Mai puține griji.
