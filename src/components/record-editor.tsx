@@ -68,6 +68,7 @@ export default function RecordEditor({
     [costLabor, setCostLabor] = useState(parseServiceDetails(record?.parts||'').costLabor||''),
     [costOther, setCostOther] = useState(parseServiceDetails(record?.parts||'').costOther||''),
     [costEdited, setCostEdited] = useState(false),
+    [filterCostLive, setFilterCostLive] = useState(0),
     [live, setLive] = useState({date:record?.date||'',km:record?.odometer?.toString()||'',next:record?.nextKm?.toString()||'',due:record?.expiresAt||'',amount:record?.amountKnown!==false&&record?.amountBani!=null?(record.amountBani/100).toString():''}),
     [unknownCost, setUnknownCost] = useState(
       kind === 'document' ? false : record ? record.amountKnown === false : false,
