@@ -227,8 +227,8 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             endedAt: z.string().datetime(),
           }).parse(await body(req));
           const startedAt = new Date(value.startedAt), endedAt = new Date(value.endedAt);
-          if (endedAt < startedAt || Math.abs((endedAt.getTime() - startedAt.getTime()) / 1000 - value.durationSeconds) > 60)
-            throw new svc.AppError(400, 'Durata călătoriei este invalidă.');
+          if (endedAt < startedAt || Math.abs((endedAt.getTime() - startedAt.getTime()) / 1000 - value.durationSeconds) > 60 || value.distanceMeters / value.durationSeconds > 65)
+            throw new svc.AppError(400, 'Durata sau distanța călătoriei este invalidă.');
           return json((await db().insert(s.gpsTrips).values({ id: crypto.randomUUID(), userId: uid, vehicleId, distanceMeters: value.distanceMeters, durationSeconds: value.durationSeconds, startedAt, endedAt }).returning())[0], 201);
         }
       }
