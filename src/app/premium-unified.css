@@ -113,3 +113,19 @@ html body .ac-install-banner .ac-mobile-install{margin:0}
 .ac-smartdrive-live span{font-size:13px;color:#54708f}
 .ac-smartdrive-live strong{font-size:clamp(19px,2.5vw,27px);color:#174c91;font-variant-numeric:tabular-nums}
 @media(max-width:440px){.ac-smartdrive-live{grid-template-columns:1fr 1fr;gap:8px}.ac-smartdrive-live>div{padding:12px}.ac-smartdrive-live strong{font-size:18px}}
+
+
+/* Automotive Luxury dashboard */
+html body .app-shell main.main:has(.ac-premium-dashboard){background:#e9e8e4!important}
+html body .ac-premium-dashboard{--acp-ink:#282d30;--acp-muted:#77746e;--acp-line:#dfddd7;--acp-blue:#476d9c}
+html body .ac-premium-dashboard .ac-premium-panel{background:#f9f8f5!important;border:1px solid #dedbd4!important;border-radius:19px!important;box-shadow:0 7px 20px #282d3010!important;color:#282d30!important;min-height:0}
+html body .ac-premium-dashboard .ac-premium-vehicle{background:linear-gradient(140deg,#faf9f6,#eeeae3)!important}
+html body .ac-premium-dashboard .ac-premium-car-visual{background:#e6e3dc!important;color:#515c60!important}
+html body .ac-premium-dashboard .ac-premium-status{background:#e2ede5!important;color:#286647!important}
+html body .ac-premium-dashboard .ac-premium-overview>:nth-child(2){background:#eceeea!important}
+html body .ac-premium-dashboard .ac-premium-overview>:nth-child(3){background:#f1ede6!important}
+html body .ac-premium-dashboard .ac-premium-kicker{color:#5d605e!important}
+html body .ac-premium-dashboard :is(h2,h3,strong){color:#292d30}
+html body .ac-premium-dashboard :is(p,small,.micro){color:#77746e}
+html body .ac-premium-dashboard button:not(.primary):not(.danger){background:#e9e7e0!important;color:#343c41!important;border-color:#d1cec6!important}
+@media(max-width:700px){html body .ac-premium-dashboard .ac-premium-panel{border-radius:15px!important}}
