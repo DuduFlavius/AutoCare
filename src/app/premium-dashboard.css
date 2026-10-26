@@ -67,3 +67,20 @@
 .workspace-garage .car-card .autocare-garage-card-icon svg{height:91px}
 .ac-premium-garage-visual-caption{font-size:11px;font-weight:800;color:#3269a7;letter-spacing:.03em}
 @media(max-width:480px){.ac-premium-garage-intro{align-items:flex-start;padding:15px}.ac-premium-garage-counter{min-width:75px}.ac-premium-garage-counter strong{font-size:23px}}
+
+/* Accessible premium vehicle editor, scoped to the existing save workflow. */
+.ac-premium-vehicle-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;min-width:0}
+.ac-premium-vehicle-form .full{grid-column:1/-1}
+.ac-premium-vehicle-form label{display:flex;flex-direction:column;gap:7px;min-width:0;color:#254469;font-size:13px;font-weight:700}
+.ac-premium-vehicle-form input,.ac-premium-vehicle-form select,.ac-premium-vehicle-form textarea{width:100%;min-width:0;min-height:46px;padding:10px 12px;border:1px solid #d5e2f1;border-radius:10px;background:#fff;color:#17345a;font-size:16px}
+.ac-premium-vehicle-form textarea{min-height:100px;resize:vertical}
+.ac-premium-vehicle-form :is(input,select,textarea):focus-visible{outline:2px solid #1268e5;outline-offset:2px}
+.ac-premium-form-intro{display:flex;align-items:center;gap:13px;background:linear-gradient(110deg,#eff6ff,#fff);border:1px solid #dae9fa;border-radius:14px;padding:15px}
+.ac-premium-form-symbol{display:grid;place-items:center;flex-shrink:0;width:54px;height:54px;background:#dcecff;border-radius:12px;color:#1268e5}
+.ac-premium-form-intro strong{display:block;font-size:17px;color:#133b73}
+.ac-premium-form-intro p{margin:5px 0 0;font-size:12px;color:#68819e;line-height:1.5}
+.ac-premium-form-section{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:800;color:#154d91;border-bottom:1px solid #e4edf7;padding:10px 0}
+.ac-premium-form-section span{display:grid;place-items:center;background:#e5f0ff;border-radius:9px;width:30px;height:30px;color:#1268e5}
+.ac-premium-vehicle-form .actions{display:flex;gap:10px;flex-wrap:wrap}
+.ac-premium-vehicle-form .actions button{min-height:46px;flex:1}
+@media(max-width:560px){.ac-premium-vehicle-form{grid-template-columns:minmax(0,1fr);gap:12px}.ac-premium-form-intro{padding:12px}.ac-premium-vehicle-form .actions{display:grid;grid-template-columns:1fr}.ac-premium-vehicle-form .actions button{width:100%}}
