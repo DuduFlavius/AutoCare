@@ -789,7 +789,7 @@ test('SmartDrive: manual readings persist, reject regressions, and isolate owner
   let r = await call('smartdrive/vehicles/' + id + '/readings', 'GET', undefined, '');
   assert.equal(r.status, 401, 'missing session');
   r = await call('smartdrive/vehicles/' + id + '/readings', 'POST', { odometer: start + 100 });
-  assert.equal(r.status, 201, await r.text().catch(() => ''));
+  assert.equal(r.status, 201);
   const saved = await r.json();
   assert.equal(saved.reading.source, 'manual');
   assert.equal(saved.vehicle.odometer, start + 100);
