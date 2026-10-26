@@ -411,26 +411,26 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 
 
 /* Founder control center — same navy premium design, independent of garage app */
-.founder-shell{--bg:#202020;--panel:#323232;--panel2:#3d3d3d;--border:#5a5a5a;--text:#edf5ff;--muted:#c6c6c6;--accent:#a3a3a3;background:#202020!important;color:#eaf3ff!important;color-scheme:dark}
+.founder-shell{--bg:#202020;--panel:#323232;--panel2:#3d3d3d;--border:#5a5a5a;--text:#edf5ff;--muted:#c6c6c6;--accent:#a3a3a3;background:#f3f7fc!important;color:#eaf3ff!important;color-scheme:light}
 .founder-shell .founder-main{background:radial-gradient(ellipse at 72% -15%,#3a3a3a 0%,#222222 52%,#1e1e1e 100%)!important;color:#eaf3ff!important}
 .founder-shell .founder-sidebar{background:#1e1e1e!important;border-right:1px solid #4c4c4c!important;color:#f2f7ff!important}
 .founder-shell .founder-sidebar a{color:#dadada!important}
 .founder-shell .founder-sidebar a:hover,.founder-shell .founder-sidebar a[aria-current="page"]{background:#404040!important;color:#fff!important}
 .founder-shell .founder-page-header h1,.founder-shell .founder-main h1,.founder-shell .founder-main h2,.founder-shell .founder-main h3,.founder-shell .founder-main h4{color:#f5f9ff!important}
 .founder-shell .founder-main p,.founder-shell .founder-main .muted,.founder-shell .founder-main .micro,.founder-shell .founder-main .small,.founder-shell .founder-main .eyebrow{color:#cacaca!important}
-.founder-shell .founder-main .card,.founder-shell .founder-user-list,.founder-shell .founder-table-wrap,.founder-shell .founder-user-details,.founder-shell .founder-team-entry{background:linear-gradient(145deg,#353535,#2b2b2b)!important;border:1px solid #585858!important;color:#eaf3ff!important;box-shadow:0 14px 32px #13131325!important;border-radius:16px!important}
+.founder-shell .founder-main .card,.founder-shell .founder-user-list,.founder-shell .founder-table-wrap,.founder-shell .founder-user-details,.founder-shell .founder-team-entry{background:#f3f7fc!important;border:1px solid #585858!important;color:#eaf3ff!important;box-shadow:0 14px 32px #13131325!important;border-radius:16px!important}
 .founder-shell .founder-main .card strong,.founder-shell .founder-main td strong,.founder-shell .founder-main .value{color:#fff!important}
-.founder-shell .founder-main input,.founder-shell .founder-main select,.founder-shell .founder-main textarea{background:#282828!important;color:#f0f7ff!important;border:1px solid #666666!important;border-radius:10px!important}
+.founder-shell .founder-main input,.founder-shell .founder-main select,.founder-shell .founder-main textarea{background:#f3f7fc!important;color:#f0f7ff!important;border:1px solid #666666!important;border-radius:10px!important}
 .founder-shell .founder-main input::placeholder,.founder-shell .founder-main textarea::placeholder{color:#bababa!important}
 .founder-shell .founder-main label{color:#dddddd!important}
-.founder-shell .founder-main button:not(.primary):not(.danger),.founder-shell .founder-main .button:not(.primary){background:#454545!important;color:#edf6ff!important;border:1px solid #6a6a6a!important;border-radius:10px!important}
+.founder-shell .founder-main button:not(.primary):not(.danger),.founder-shell .founder-main .button:not(.primary){background:#f3f7fc!important;color:#edf6ff!important;border:1px solid #6a6a6a!important;border-radius:10px!important}
 .founder-shell .founder-main button.primary{background:linear-gradient(110deg,#787878,#606060)!important;color:#fff!important;border:1px solid #989898!important}
 .founder-shell .founder-main table,.founder-shell .founder-main thead,.founder-shell .founder-main tbody,.founder-shell .founder-main tr,.founder-shell .founder-main th,.founder-shell .founder-main td{background:transparent!important;color:#eaf3ff!important;border-color:#5a5a5a!important}
-.founder-shell .founder-main th{background:#414141!important;color:#dadada!important}
-.founder-shell .founder-main tr:hover td,.founder-shell .founder-main tr.selected-user td{background:#444444!important}
-.founder-shell .founder-main .pill.valid{background:#194d42!important;color:#b3f5d7!important}
-.founder-shell .founder-main .role-badge,.founder-shell .founder-main .founder-role-badge{background:#4f4f4f!important;color:#eaf3ff!important}
-.founder-shell .founder-main .notice{background:#454545!important;color:#e1e1e1!important;border-color:#707070!important}
+.founder-shell .founder-main th{background:#f3f7fc!important;color:#dadada!important}
+.founder-shell .founder-main tr:hover td,.founder-shell .founder-main tr.selected-user td{background:#f3f7fc!important}
+.founder-shell .founder-main .pill.valid{background:#f3f7fc!important;color:#b3f5d7!important}
+.founder-shell .founder-main .role-badge,.founder-shell .founder-main .founder-role-badge{background:#f3f7fc!important;color:#eaf3ff!important}
+.founder-shell .founder-main .notice{background:#f3f7fc!important;color:#e1e1e1!important;border-color:#707070!important}
 .founder-shell .founder-main button:disabled{opacity:.55}
 .founder-shell .founder-main :is(input,button,select,textarea,a):focus-visible{outline:2px solid #b0b0b0!important;outline-offset:2px}
 
@@ -1565,7 +1565,7 @@ html body .founder-shell .founder-main :is(.card strong,td strong,.value){color:
 html body .founder-shell .founder-main :is(input,select,textarea){background:#f5f8fd!important;color:#193f71!important;border:1px solid #bfd1e8!important}
 html body .founder-shell .founder-main :is(input::placeholder,textarea::placeholder){color:#6d829c!important}
 html body .founder-shell .founder-main :is(button,.button):not(.primary):not(.danger){background:#dceafb!important;color:#204d85!important;border:1px solid #a9c5e7!important}
-html body .founder-shell .founder-main :is(button.primary,.button.primary){background:#2467bd!important;background-image:none!important;color:#fff!important;border-color:#2467bd!important}
+html body .founder-shell .founder-main :is(button.primary,.button.primary){background:#f3f7fc!important;background-image:none!important;color:#fff!important;border-color:#2467bd!important}
 html body .founder-shell .founder-main :is(table,thead,tbody,tr,th,td){color:#21476f!important;border-color:#d6e3f0!important}
 html body .founder-shell .founder-main th{background:#e8f0fa!important;color:#244f7e!important}
 html body .founder-shell .founder-main :is(tr:hover td,tr.selected-user td){background:#e3effc!important}
@@ -1620,7 +1620,7 @@ html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.founder-use
 html body .founder-shell .founder-main :is(h1,h2,h3,h4,strong,p,span,label,small,td,th){color:#25466f!important;opacity:1!important}
 html body .founder-shell .founder-main :is(input,select,textarea){background:#f6f9fe!important;color:#213f65!important;border:1px solid #b7cce5!important}
 html body .founder-shell .founder-main :is(button,.button):not(.primary):not(.danger){background:#dceafb!important;color:#204d85!important;border:1px solid #a9c5e7!important}
-html body .founder-shell .founder-main :is(button.primary,.button.primary,button[type=submit]){background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
+html body .founder-shell .founder-main :is(button.primary,.button.primary,button[type=submit]){background:#f3f7fc!important;color:#fff!important;border-color:#2467bd!important}
 html body .founder-shell .founder-main :is(button.primary,.button.primary,button[type=submit]) :is(span,strong,svg){color:#fff!important}
 html body .founder-shell .founder-main :is(th,thead){background:#e8f0fa!important;color:#244f7e!important}
 html body .founder-shell .founder-main tr:hover td{background:#edf4fd!important}
@@ -1640,7 +1640,7 @@ html body .founder-shell .founder-main{background:#edf3fa!important;color:#203e6
 html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.table-scroll,section,article){color:#23446e}
 html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.table-scroll){background:#fff!important;background-image:none!important;border-color:#cbdced!important;box-shadow:0 5px 20px #315a8510!important}
 html body .founder-shell .founder-main :is(h1,h2,h3,h4,p,li,label,td,th,small,strong,span){color:#25466f!important;opacity:1!important}
-html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:#2467bd!important;color:#fff!important}
+html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:#f3f7fc!important;color:#fff!important}
 html body .founder-shell .founder-main :is(button.primary,button[type=submit]) :is(span,strong,svg){color:#fff!important}
 html body .founder-shell .founder-main :is(input,select,textarea){background:#fff!important;color:#203e66!important;border:1px solid #bdd0e6!important}
 @media(max-width:760px){
@@ -1709,5 +1709,24 @@ html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) 
  background:#fff!important;background-image:none!important;border-color:#d1e0ef!important;color:#23466f!important;
 }
 html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) :is(h1,h2,h3,h4,p,li,td,th,small,label,strong,span){color:#23466f!important;opacity:1!important}
-html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) :is(button.primary,button[type=submit]){background:#2467bd!important;color:#fff!important}
+html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) :is(button.primary,button[type=submit]){background:#f3f7fc!important;color:#fff!important}
 html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) :is(button.primary,button[type=submit]) :is(span,strong,svg){color:#fff!important}
+
+/* Founder dashboard: readable light premium workspace, navy navigation only. */
+html body .founder-shell{background:#edf3fa!important;color:#1c3c66!important;color-scheme:light!important}
+html body .founder-shell .founder-main{background:#edf3fa!important;color:#1c3c66!important}
+html body .founder-shell .founder-main :is(.card,.stat,.founder-user-list,.founder-table-wrap,.founder-user-details,.founder-team-entry,.founder-response,.founder-config,.founder-pricing,.founder-overview-note){background:#fff!important;background-image:none!important;border:1px solid #d3e0ef!important;border-radius:16px!important;color:#23466f!important;box-shadow:0 7px 22px #244f8110!important}
+html body .founder-shell .founder-main :is(h1,h2,h3,h4,p,td,th,span,strong,small,label,li){color:#25466e!important;opacity:1!important}
+html body .founder-shell .founder-main :is(input,select,textarea){background:#fff!important;color:#23466f!important;border:1px solid #bcd0e7!important}
+html body .founder-shell .founder-main :is(button,.button):not(.primary):not(.danger){background:#dceafa!important;color:#214d83!important;border:1px solid #a6c4e6!important}
+html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
+html body .founder-shell .founder-main :is(button.primary,button[type=submit]) :is(span,svg,strong){color:#fff!important}
+html body .founder-shell .founder-main th{background:#e6effa!important;color:#23466f!important}
+html body .founder-shell .founder-main tr:hover td{background:#edf5fe!important}
+html body .app-shell .app-header{background:#f8fbff!important;background-image:none!important;border-bottom:1px solid #d1e0f0!important;box-shadow:0 2px 12px #315a850d!important;color:#1e436f!important}
+html body .app-shell .app-header :is(.muted,span,strong,a){color:#284d78!important}
+html body .app-shell>.sidebar .sidebar-profile{background:#234b80!important;border:1px solid #4d75a8!important;border-radius:14px!important;box-shadow:none!important}
+html body .app-shell>.sidebar .sidebar-profile .profile-avatar{background:#e3efff!important;color:#1b528f!important;border:1px solid #a8c9ee!important;border-radius:50%!important}
+html body .app-shell>.sidebar .sidebar-profile :is(strong,small){color:#fff!important}
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{background:#e8f2ff!important;background-image:none!important;border:1px solid #b6d1f0!important;border-radius:50%!important;width:58px!important;height:58px!important;box-shadow:none!important}
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{color:#2467bd!important;stroke:#2467bd!important}
