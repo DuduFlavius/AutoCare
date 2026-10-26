@@ -62,7 +62,7 @@ export default function RecordEditor({
     [serviceKmInterval, setServiceKmInterval] = useState(''),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
-    [details, setDetails] = useState(false),
+    [details, setDetails] = useState(Boolean(record)),
     [file, setFile] = useState<File | null>(null),
     [costParts, setCostParts] = useState(parseServiceDetails(record?.parts||'').costPiese||''),
     [costLabor, setCostLabor] = useState(parseServiceDetails(record?.parts||'').costLabor||''),
@@ -100,11 +100,12 @@ export default function RecordEditor({
     const effectiveTotal = kind === 'service' && !hasCost && filterCost > 0 ? filterCost : finalAmount;
     const effectiveKnown = hasCost || (kind === 'service' && filterCost > 0);
     if (kind === 'service' && category === 'Filtre' && costEdited && filterCost > 0 && str('ac_costPiese') === '' && Math.abs(partsTotal-filterCost)>0.01) {
-      setError('Ai introdus costuri pentru filtre. Completează costul pieselor cu suma lor sau lasă defalcarea necompletată pentru a evita neconcordanțele.');
+      setError('Introdu suma filtrelor la costul pieselor, pentru a păstra corect totalul.');
       return;
     }
     setError('');
     if (unknownCost && (hasCost || filterCost > 0)) {setError('Pentru cost necunoscut, șterge mai întâi sumele introduse.');return;}
+    if (kind === 'service' && category === 'Filtre' && costEdited && filterCost > 0 && str('ac_costPiese') !== '' && Number(str('ac_costPiese')) + 0.01 < filterCost) {setError('Costul pieselor nu poate fi mai mic decât suma filtrelor introduse.');return;}
     if (!unknownCost && (!Number.isFinite(effectiveTotal) || effectiveTotal < 0 || effectiveTotal > 1000000)) {setError('Costul trebuie să fie între 0 și 1.000.000 RON.');return;}
     if (num('odometer') !== null && (!Number.isInteger(num('odometer')) || Number(num('odometer')) < 0)) {setError('Kilometrajul trebuie să fie un număr întreg pozitiv.');return;}
     if (computedNextKm !== null && num('odometer') !== null && computedNextKm < Number(num('odometer'))) {setError('Următorul kilometraj nu poate fi mai mic decât kilometrajul intervenției.');return;}
@@ -161,7 +162,7 @@ export default function RecordEditor({
         </span>
         <p>
           {kind === 'service'
-            ? 'Înregistrează intervenția. Restul detaliilor pot aștepta.'
+            ? 'Ține evidența întreținerii și a costurilor mașinii tale. Completează rapid datele esențiale și, opțional, detaliile tehnice.'
             : kind === 'document'
               ? 'Alege tipul actului, completează data expirării și apasă Salvează.'
               : 'Adaugă rapid un cost în istoricul mașinii.'}
@@ -333,7 +334,7 @@ export default function RecordEditor({
               placeholder="Introdu suma sau completează defalcarea"/>
           </label>
           {kind==='service'&&category==='Filtre'&&filterCostLive>0&&<p className="micro">Total filtre introduse: {filterCostLive.toFixed(2)} RON. Nu adăuga aceeași sumă de două ori.</p>}
-          <label className="check"><input type="checkbox" checked={unknownCost} onChange={e=>setUnknownCost(e.target.checked)}/>Costul nu este cunoscut încă</label>
+          <label className="check"><input type="checkbox" checked={unknownCost} onChange={e=>{setUnknownCost(e.target.checked);mark()}}/>Costul nu este cunoscut încă</label>
           <p className="micro">Dacă intervenția a fost gratuită, introdu 0 RON. Dacă nu cunoști costul, bifează opțiunea de mai sus.</p>
         </div>
       )}
@@ -465,7 +466,7 @@ export default function RecordEditor({
           {busy
             ? 'Se salvează…'
             : kind === 'service'
-              ? 'Salvează operațiunea'
+              ? 'Salvează intervenția'
               : kind === 'document'
                 ? 'Salvează documentul'
                 : 'Salvează cheltuiala'}
