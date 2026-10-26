@@ -411,8 +411,8 @@ body:has(a[href="/admin"]) .founder-admin{color:#edf5ff}
 
 
 /* Founder control center — same navy premium design, independent of garage app */
-.founder-shell{--bg:#202020;--panel:#323232;--panel2:#3d3d3d;--border:#5a5a5a;--text:#edf5ff;--muted:#c6c6c6;--accent:#a3a3a3;background:#f3f7fc!important;color:#eaf3ff!important;color-scheme:light}
-.founder-shell .founder-main{background:radial-gradient(ellipse at 72% -15%,#3a3a3a 0%,#222222 52%,#1e1e1e 100%)!important;color:#eaf3ff!important}
+.founder-shell{--bg:#edf3fa;--panel:#fff;--panel2:#f1f6fd;--border:#d1e0ef;--text:#213f65;--muted:#55718f;--accent:#a3a3a3;background:#f3f7fc!important;color:#eaf3ff!important;color-scheme:light}
+.founder-shell .founder-main{background:#edf3fa!important;color:#eaf3ff!important}
 .founder-shell .founder-sidebar{background:#1e1e1e!important;border-right:1px solid #4c4c4c!important;color:#f2f7ff!important}
 .founder-shell .founder-sidebar a{color:#dadada!important}
 .founder-shell .founder-sidebar a:hover,.founder-shell .founder-sidebar a[aria-current="page"]{background:#404040!important;color:#fff!important}
@@ -1553,7 +1553,7 @@ html body .app-shell>.sidebar .sidebar-profile>svg{color:#b8d5fa!important;margi
 html body .app-shell>.sidebar .sidebar-profile:hover{background:linear-gradient(120deg,#254977,#28558d)!important}
 
 /* Founder panel: light premium workspace, retaining navy navigation. */
-html body .founder-shell{--bg:#edf2f9;--panel:#fff;--panel2:#e8f0fa;--border:#d0dfef;--text:#1d416d;--muted:#57718e;--accent:#2467bd;background:#edf2f9!important;color:#1d416d!important;color-scheme:light!important}
+html body .founder-shell{--bg:#edf3fa;--panel:#fff;--panel2:#f1f6fd;--border:#d1e0ef;--text:#213f65;--muted:#55718f;--accent:#2467bd;background:#edf2f9!important;color:#1d416d!important;color-scheme:light!important}
 html body .founder-shell .founder-main{background:#edf2f9!important;background-image:none!important;color:#1d416d!important;color-scheme:light!important}
 html body .founder-shell .founder-sidebar{background:#18375d!important;color:#fff!important;border-color:#294c78!important}
 html body .founder-shell .founder-sidebar a{color:#dce9fb!important}
@@ -1719,7 +1719,7 @@ html body .founder-shell .founder-main :is(.card,.stat,.founder-user-list,.found
 html body .founder-shell .founder-main :is(h1,h2,h3,h4,p,td,th,span,strong,small,label,li){color:#25466e!important;opacity:1!important}
 html body .founder-shell .founder-main :is(input,select,textarea){background:#fff!important;color:#23466f!important;border:1px solid #bcd0e7!important}
 html body .founder-shell .founder-main :is(button,.button):not(.primary):not(.danger){background:#dceafa!important;color:#214d83!important;border:1px solid #a6c4e6!important}
-html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
+html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:#edf3fa!important;color:#fff!important;border-color:#2467bd!important}
 html body .founder-shell .founder-main :is(button.primary,button[type=submit]) :is(span,svg,strong){color:#fff!important}
 html body .founder-shell .founder-main th{background:#e6effa!important;color:#23466f!important}
 html body .founder-shell .founder-main tr:hover td{background:#edf5fe!important}
@@ -1744,3 +1744,13 @@ html body .app-shell .quick-record-form .record-form-footer button.primary{backg
 html body .app-shell main.main :is(.founder-workspace,.founder-panel,.founder-dashboard,.admin-workspace,.admin-panel,.admin-dashboard,.founder-card,.admin-card){background:#edf3fb!important;color:#20446e!important;color-scheme:light!important;border-color:#c4d6ea!important}
 html body .app-shell main.main :is(.founder-workspace,.founder-panel,.founder-dashboard,.admin-workspace,.admin-panel,.admin-dashboard,.founder-card,.admin-card) :is(h1,h2,h3,p,label,small,span,strong){color:#20446e!important;opacity:1!important}
 html body .app-shell main.main :is(.founder-workspace,.founder-panel,.founder-dashboard,.admin-workspace,.admin-panel,.admin-dashboard) :is(input,textarea,select){background:#fff!important;color:#20446e!important;border-color:#b8cee8!important}
+
+/* Identity and vehicle icon: small, intentional premium accents. */
+html body .app-shell>.sidebar .sidebar-account{margin:12px 10px 14px!important}
+html body .app-shell>.sidebar .sidebar-profile{display:flex!important;align-items:center!important;gap:12px!important;padding:12px!important;background:#173b69!important;border:1px solid #365e90!important;border-radius:15px!important;box-shadow:0 6px 18px #081b3630!important}
+html body .app-shell>.sidebar .sidebar-profile .profile-avatar{width:42px!important;height:42px!important;min-width:42px!important;display:grid!important;place-items:center!important;background:#dceaff!important;background-image:none!important;color:#1e528e!important;border:1px solid #a8c8ef!important;border-radius:50%!important;box-shadow:none!important;font-weight:800!important}
+html body .app-shell>.sidebar .sidebar-profile :is(strong,small){color:#fff!important;opacity:1!important}
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{width:48px!important;height:48px!important;display:grid!important;place-items:center!important;margin:12px 0 16px!important;background:#edf4ff!important;background-image:none!important;border:1px solid #c5d9f0!important;border-radius:13px!important;box-shadow:none!important}
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{width:27px!important;height:27px!important;color:#2467bd!important;stroke:#2467bd!important}
+html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
+html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.table-scroll,.founder-user-list,.founder-table-wrap){background:#fff!important;color:#213f65!important;border-color:#d1e0ef!important}
