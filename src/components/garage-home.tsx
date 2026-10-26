@@ -152,21 +152,21 @@ export function GarageHome({
       </div>
       <div className="ac-premium-bottom-grid">
         <section className="ac-premium-panel ac-premium-list">
-          <div className="ac-premium-section-heading"><h3>Documente care expiră</h3><button type="button" onClick={() => navigate('Documente')}>Vezi toate <ArrowRight size={15}/></button></div>
+          <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Files size={22}/></span> Documente care expiră</h3><button type="button" onClick={() => navigate('Documente')}>Vezi toate <ArrowRight size={15}/></button></div>
           {home.documents.filter(r => r.status.days !== null && r.status.days <= 30).slice(0,3).map(r =>
             <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Files size={19}/><span><strong>{r.category || r.title}</strong><small>{vehicle(r.vehicleId)}</small></span><em>{r.status.days !== null && r.status.days < 0 ? 'Expirat' : `În ${r.status.days} zile`}</em></button>
           )}
           {!home.documentAttention && <p className="ac-premium-empty">Niciun document care necesită atenție.</p>}
         </section>
         <section className="ac-premium-panel ac-premium-list">
-          <div className="ac-premium-section-heading"><h3>Ultimele intervenții</h3><button type="button" onClick={() => navigate('Întreținere')}>Vezi toate <ArrowRight size={15}/></button></div>
+          <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Wrench size={22}/></span> Ultimele intervenții</h3><button type="button" onClick={() => navigate('Întreținere')}>Vezi toate <ArrowRight size={15}/></button></div>
           {[...home.services].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3).map(r =>
             <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wrench size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.odometer === null ? '—' : `${r.odometer.toLocaleString('ro-RO')} km`}</em></button>
           )}
           {!home.services.length && <p className="ac-premium-empty">Nu ai înregistrat încă intervenții.</p>}
         </section>
         <section className="ac-premium-panel ac-premium-list">
-          <div className="ac-premium-section-heading"><h3>Cheltuieli recente</h3><button type="button" onClick={() => navigate('Cheltuieli')}>Vezi toate <ArrowRight size={15}/></button></div>
+          <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Wallet size={22}/></span> Cheltuieli recente</h3><button type="button" onClick={() => navigate('Cheltuieli')}>Vezi toate <ArrowRight size={15}/></button></div>
           {[...records].filter(r => ['expense','service'].includes(r.kind)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3).map(r =>
             <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wallet size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.amountKnown === false ? 'Necunoscut' : money(r.amountBani)}</em></button>
           )}
@@ -175,10 +175,10 @@ export function GarageHome({
         </section>
         <section className="ac-premium-panel ac-premium-quick">
           <h3><Zap size={18}/> Acțiuni rapide</h3>
-          <button type="button" onClick={() => add(cars.length ? 'service' : 'vehicle')}><Wrench size={19}/> Adaugă intervenție <Plus size={16}/></button>
-          <button type="button" onClick={() => add(cars.length ? 'document' : 'vehicle')}><Files size={19}/> Adaugă document <Plus size={16}/></button>
-          <button type="button" onClick={() => add(cars.length ? 'expense' : 'vehicle')}><Wallet size={19}/> Adaugă cheltuială <Plus size={16}/></button>
-          <button type="button" onClick={() => navigate('Plan întreținere')}><MapPin size={19}/> SmartDrive GPS <ArrowRight size={16}/></button>
+          <button type="button" onClick={() => add(cars.length ? 'service' : 'vehicle')}><Wrench size={19}/><span><strong>Adaugă intervenție</strong><small>Înregistrează o nouă intervenție</small></span> <ArrowRight size={16}/></button>
+          <button type="button" onClick={() => add(cars.length ? 'document' : 'vehicle')}><Files size={19}/><span><strong>Adaugă document</strong><small>Încarcă un document important</small></span> <ArrowRight size={16}/></button>
+          <button type="button" onClick={() => add(cars.length ? 'expense' : 'vehicle')}><Wallet size={19}/><span><strong>Adaugă cheltuială</strong><small>Notează o nouă cheltuială</small></span> <ArrowRight size={16}/></button>
+          <button type="button" onClick={() => navigate('Plan întreținere')}><MapPin size={19}/><span><strong>SmartDrive GPS</strong><small>Urmărește și înregistrează trasee</small></span> <ArrowRight size={16}/></button>
         </section>
       </div>
     </div>
