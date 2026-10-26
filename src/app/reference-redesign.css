@@ -1947,3 +1947,26 @@ html body .quick-record-form .record-extra>summary{cursor:pointer;padding:6px!im
 html body .quick-record-form .ac-service-advice{background:#eaf3ff!important;border:1px solid #d0e2f8!important;border-radius:12px!important;padding:14px!important}
 html body .quick-record-form .ac-service-advice :is(strong,p){color:#244d7e!important}
 @media(max-width:760px){html body .quick-record-form :is(.ac-service-details,.ac-cost-breakdown,.ac-service-summary,.record-extra,.service-reminder-box,.ac-filter-item){padding:13px!important}html body .quick-record-form .form-grid{grid-template-columns:minmax(0,1fr)!important}html body .quick-record-form .operation-picker>div{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}html body .quick-record-form .operation-picker button{min-width:0!important;white-space:normal!important}}
+
+/* Founder panel and service modal — explicit standalone roots, no inherited charcoal. */
+html body .founder-shell,html body .founder-shell .founder-main{background:#edf2f9!important;color:#203f68!important;color-scheme:light!important}
+html body .founder-shell .founder-main :is(.card,.stat,.founder-response,.founder-user-list,.founder-user-details,.founder-team-entry,.founder-table-wrap,.founder-search,.founder-overview-note){
+ background:#fff!important;background-image:none!important;color:#203f68!important;border:1px solid #d1e0ef!important;border-radius:16px!important;box-shadow:0 6px 22px #234a7a12!important;
+}
+html body .founder-shell .founder-main :is(h1,h2,h3,h4,p,span,small,label,strong,td,th,.muted,.micro,.value){color:#24496f!important;opacity:1!important}
+html body .founder-shell .founder-main :is(input,select,textarea){background:#fff!important;color:#20446e!important;border:1px solid #b8cee8!important;color-scheme:light!important}
+html body .founder-shell .founder-main button:not(.danger):not(.primary){background:#dceafa!important;color:#214d83!important;border-color:#aac5e5!important}
+html body .founder-shell .founder-main button.primary{background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
+html body .founder-shell .founder-main button.primary :is(span,strong,svg){color:#fff!important}
+html body .founder-shell .founder-main :is(.founder-role-badge,.role-badge,.pill.valid){background:#dceafa!important;color:#214d83!important}
+html body .founder-shell .founder-sidebar{background:#18375d!important;color:#fff!important}
+html body .founder-shell .founder-sidebar :is(a,button,span,strong,small,svg){color:#e8f2ff!important}
+html body .app-shell .sidebar-profile{display:flex!important;align-items:center!important;gap:12px!important;border-radius:14px!important;padding:11px 12px!important;background:#203d64!important;border:1px solid #40638f!important}
+html body .app-shell .sidebar-profile .profile-avatar{display:grid!important;place-items:center!important;width:41px!important;height:41px!important;min-width:41px!important;border-radius:50%!important;background:linear-gradient(145deg,#4d91e5,#2864b2)!important;color:#fff!important;font-weight:800!important;font-size:17px!important;border:2px solid #86b6ed!important;box-shadow:0 3px 12px #0b264a35!important}
+html body .app-shell .sidebar-profile :is(strong,small,svg){color:#eff6ff!important}
+html body .app-shell .quick-record-form .ac-service-details,html body .app-shell .quick-record-form .ac-service-summary,html body .app-shell .quick-record-form .cost-field,html body .app-shell .quick-record-form .record-extra{background:#f6f9fe!important;color:#1f426d!important;border:1px solid #d1e0ef!important;border-radius:16px!important;padding:18px!important}
+html body .app-shell .quick-record-form :is(input,select,textarea){background:#fff!important;color:#1e426d!important;border:1px solid #bbd0e9!important;min-height:43px!important;border-radius:10px!important}
+html body .app-shell .quick-record-form textarea{min-height:100px!important;resize:vertical!important}
+html body .app-shell .quick-record-form .operation-picker button[aria-pressed=true]{background:#dceafa!important;color:#1559aa!important;border:2px solid #2467bd!important}
+html body .app-shell .quick-record-form .record-form-footer button.primary{background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
+@media(max-width:760px){html body .app-shell .quick-record-form .ac-service-details,html body .app-shell .quick-record-form .ac-service-summary{padding:14px!important}html body .app-shell .quick-record-form .form-grid{grid-template-columns:minmax(0,1fr)!important}}
