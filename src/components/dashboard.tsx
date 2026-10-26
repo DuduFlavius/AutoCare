@@ -995,6 +995,14 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             )}
             {tab === 'Garaj' && (
               <>
+                <div className="ac-premium-garage-intro">
+                  <div>
+                    <span className="ac-premium-kicker"><CarFront size={17}/> GARAJUL MEU</span>
+                    <h2>Mașinile tale, organizate într-un singur loc</h2>
+                    <p>Documente, kilometraj și întreținere — informații din contul tău.</p>
+                  </div>
+                  <div className="ac-premium-garage-counter"><strong>{data.vehicles.filter(v => !v.archived).length}</strong><span>mașini active</span></div>
+                </div>
                 <div className="toolbar">
                   {data.vehicles.length > 1 && <input
                     aria-label="Caută o mașină"
@@ -1038,7 +1046,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                               {v.archived ? 'Arhivată' : 'Activă'}
                             </span>
                           </div>
-                          <div className="autocare-garage-card-icon" aria-hidden="true"><CarFront size={37} strokeWidth={1.5}/></div>
+                          <div className="autocare-garage-card-icon" aria-hidden="true"><CarFront size={74} strokeWidth={1.15}/><span className="ac-premium-garage-visual-caption">{v.brand} {v.model}</span></div>
                           <h2>
                             {v.brand} {v.model}
                           </h2>
