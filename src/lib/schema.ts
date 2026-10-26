@@ -96,6 +96,37 @@ export const vehicles = pgTable(
   },
   (t) => [index('vehicle_owner').on(t.userId)],
 );
+// SmartDrive history is independent of the vehicle's confirmed odometer.
+export const mileageReadings = pgTable('mileage_readings', {
+  id: text().primaryKey(),
+  userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),
+  vehicleId: text().notNull().references(() => vehicles.id, { onDelete: 'cascade' }),
+  odometer: integer().notNull(),
+  source: text().notNull().default('manual'),
+  recordedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index('mileage_readings_owner_vehicle').on(t.userId, t.vehicleId, t.recordedAt)]);
+
+export const gpsTrips = pgTable('gps_trips', {
+  id: text().primaryKey(),
+  userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),
+  vehicleId: text().notNull().references(() => vehicles.id, { onDelete: 'cascade' }),
+  distanceMeters: integer().notNull(),
+  durationSeconds: integer().notNull(),
+  startedAt: timestamp({ withTimezone: true }).notNull(),
+  endedAt: timestamp({ withTimezone: true }).notNull(),
+  source: text().notNull().default('browser-gps'),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index('gps_trips_owner_vehicle').on(t.userId, t.vehicleId, t.startedAt)]);
+
+export const mileageReminderPreferences = pgTable('mileage_reminder_preferences', {
+  userId: text().primaryKey().references(() => user.id, { onDelete: 'cascade' }),
+  frequencyDays: integer().notNull().default(3),
+  enabled: boolean().notNull().default(true),
+  lastSentAt: timestamp({ withTimezone: true }),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
 export const records = pgTable(
   'records',
   {
