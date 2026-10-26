@@ -859,3 +859,20 @@ test('SmartDrive: reminder preferences validate frequency and persist', async ()
   r = await call('smartdrive/preferences');
   assert.deepEqual({ frequencyDays: (await r.json()).frequencyDays }, { frequencyDays: 7 });
 });
+
+
+test('SmartDrive: expired authenticated session cannot read or write readings', async () => {
+  const sessions = await db().select().from(s.session).where(eq(s.session.userId, uid));
+  assert.ok(sessions.length > 0);
+  const original = sessions.map(x => ({ id: x.id, expiresAt: x.expiresAt }));
+  try {
+    await db().update(s.session).set({ expiresAt: new Date('2000-01-01T00:00:00Z') }).where(eq(s.session.userId, uid));
+    let response = await call('smartdrive/vehicles/' + car.id + '/readings');
+    assert.equal(response.status, 401);
+    response = await call('smartdrive/vehicles/' + car.id + '/readings', 'POST', { odometer: 999999 });
+    assert.equal(response.status, 401);
+  } finally {
+    for (const row of original)
+      await db().update(s.session).set({ expiresAt: row.expiresAt }).where(eq(s.session.id, row.id));
+  }
+});
