@@ -783,6 +783,17 @@ test('21 Direct auth deletion cannot bypass billing guard; authenticated deletio
 });
 
 
+test('SmartDrive: refresh session after password/session lifecycle tests', async () => {
+  await db().delete(s.rateLimit);
+  const response = await authReq('sign-in/email', {
+    email: 'alice@example.invalid',
+    password: 'another-test-password-123',
+  });
+  assert.equal(response.status, 200);
+  cookie = response.headers.getSetCookie().map(x => x.split(';')[0]).join('; ');
+  assert.ok(cookie);
+  assert.equal((await call('dashboard')).status, 200);
+});
 test('SmartDrive: manual readings persist, reject regressions, and isolate owner', async () => {
   const id = car.id;
   const start = (await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer;
