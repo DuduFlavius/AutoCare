@@ -131,7 +131,7 @@ html body .ac-install-banner .ac-mobile-install{margin:0}
 
 /* Automotive photo showcase and richer dashboard surfaces */
 html body .ac-premium-dashboard .ac-premium-vehicle{background:#101c2b!important;color:#fff!important;border:1px solid #263c55!important;overflow:hidden;position:relative}
-html body .ac-premium-dashboard .ac-premium-vehicle:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#071626ee 0%,#0d1e32d9 42%,#0b1a2a55 100%),url("/images/autocare-universal-hero.svg") center/cover no-repeat;opacity:.98;pointer-events:none}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#071626ee 0%,#0d1e32d9 42%,#0b1a2a55 100%),url("/images/autocare-cinematic-exact.svg") center/cover no-repeat;opacity:.98;pointer-events:none}
 html body .ac-premium-dashboard .ac-premium-vehicle>*{position:relative;z-index:1}
 html body .ac-premium-dashboard .ac-premium-vehicle :is(h2,.ac-premium-kicker,.ac-lux-car-eyebrow,.ac-premium-vehicle-footer strong){color:#fff!important}
 html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description p{color:#d6e3f4!important}
@@ -172,7 +172,7 @@ html body .app-shell main.main.workspace-garage .car-metrics{background:#e6ecf3!
 html body .app-shell main.main :is(.record-editor-intro,.ac-service-summary,.ac-service-advice,.record-extra,.record-form-footer,.ac-cost-breakdown){background:linear-gradient(145deg,#f6f4f0,#e9edf3)!important;border-color:#e0e2e6!important}
 html body .ac-premium-dashboard .ac-premium-panel{background:linear-gradient(150deg,#faf8f5,#edeae5)!important;border:1px solid #e5e0d8!important;border-radius:18px!important;box-shadow:0 12px 30px #303f5112!important}
 html body .ac-premium-dashboard .ac-premium-vehicle{background:#0b1b2e!important;border-color:#21364e!important}
-html body .ac-premium-dashboard .ac-premium-vehicle:before{background:linear-gradient(90deg,#071525ed 0%,#0b1a2dc2 40%,#08172536 100%),url("/images/autocare-universal-hero.svg") center/cover no-repeat!important}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{background:linear-gradient(90deg,#071525ed 0%,#0b1a2dc2 40%,#08172536 100%),url("/images/autocare-cinematic-exact.svg") center/cover no-repeat!important}
 html body .ac-premium-dashboard .ac-premium-vehicle :is(h2,.ac-premium-kicker,.ac-lux-car-eyebrow,.ac-premium-vehicle-footer strong){color:#fff!important}
 html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description p{color:#dce5ef!important}
 html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-vehicle-footer{background:#0a1727a3!important}
@@ -194,7 +194,7 @@ html body .ac-premium-dashboard{width:100%;max-width:none!important}
 html body .ac-premium-dashboard .ac-premium-overview{display:grid!important;grid-template-columns:minmax(0,1.85fr) minmax(270px,1fr) minmax(270px,1fr)!important;gap:17px!important;align-items:stretch}
 html body .ac-premium-dashboard .ac-premium-overview>.ac-premium-panel{min-width:0;min-height:410px;padding:20px!important;display:flex;flex-direction:column}
 html body .ac-premium-dashboard .ac-premium-vehicle{padding:25px!important;min-height:410px!important}
-html body .ac-premium-dashboard .ac-premium-vehicle:before{background:linear-gradient(90deg,#081422ed 0%,#0a1724bc 38%,#09132113 85%),url("/images/autocare-universal-hero.svg") center/cover no-repeat!important}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{background:linear-gradient(90deg,#081422ed 0%,#0a1724bc 38%,#09132113 85%),url("/images/autocare-cinematic-exact.svg") center/cover no-repeat!important}
 html body .ac-premium-dashboard .ac-premium-vehicle-top{display:flex;align-items:center;justify-content:space-between}
 html body .ac-premium-dashboard .ac-premium-vehicle-content{display:block!important;flex:1;position:relative;padding-top:27px}
 html body .ac-premium-dashboard .ac-premium-car-visual{display:none!important}
@@ -270,7 +270,7 @@ html body .app-shell main.workspace-dashboard .page-head h1{font-weight:850!impo
 html body .ac-premium-dashboard .ac-premium-overview{grid-template-columns:minmax(0,1.85fr) minmax(0,.98fr) minmax(0,.98fr)!important;gap:17px!important}
 html body .ac-premium-dashboard .ac-premium-overview>.ac-premium-panel{min-height:410px!important}
 html body .ac-premium-dashboard .ac-premium-vehicle{box-shadow:0 18px 33px #06162b2e!important}
-html body .ac-premium-dashboard .ac-premium-vehicle:before{background:linear-gradient(90deg,#071525ef 0%,#091a2bbb 43%,#07132118 85%),url("/images/autocare-universal-hero.svg") center/cover no-repeat!important}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{background:linear-gradient(90deg,#071525ef 0%,#091a2bbb 43%,#07132118 85%),url("/images/autocare-cinematic-exact.svg") center/cover no-repeat!important}
 html body .ac-premium-dashboard .ac-premium-next .ac-term-empty{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;min-height:180px;background:linear-gradient(150deg,#eae7e2,#f0ede8);border-radius:12px;padding:16px;text-align:center}
 html body .ac-premium-dashboard .ac-term-empty svg{color:#294362}
 html body .ac-premium-dashboard .ac-term-empty strong{font-size:15px!important;color:#14243c}
@@ -293,7 +293,7 @@ html body .ac-premium-dashboard .ac-premium-vehicle-footer>div strong{font-varia
 
 /* Photographic dashboard hero — replace flat illustration with real cinematic car photography */
 html body .ac-premium-dashboard .ac-premium-vehicle:before{
- background-image:linear-gradient(90deg,rgba(4,13,26,.94) 0%,rgba(6,19,33,.77) 32%,rgba(8,21,34,.2) 69%,rgba(6,16,27,.13) 100%),url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=85")!important;
+ background-image:linear-gradient(90deg,rgba(4,13,26,.94) 0%,rgba(6,19,33,.77) 32%,rgba(8,21,34,.2) 69%,rgba(6,16,27,.13) 100%),url("/images/autocare-cinematic-exact.svg")!important;
  background-position:center,center center!important;
  background-size:cover!important;
  opacity:1!important;
@@ -312,3 +312,15 @@ html body .ac-premium-dashboard .ac-oil-detail:nth-of-type(2){margin-top:4px}
 html body .ac-premium-dashboard .ac-oil-info .ac-oil-progress{height:9px!important}
 html body .ac-premium-dashboard .ac-oil-info .ac-oil-progress i{background:#0965d9!important}
 @media(max-width:700px){html body .ac-premium-dashboard .ac-premium-vehicle:before{background-position:center,62% center!important}}
+
+/* Production reference: exact approved cinematic image, no third-party placeholder */
+html body .ac-premium-dashboard .ac-premium-vehicle:before{
+ background-image:url("/images/autocare-cinematic-exact.svg")!important;
+ background-size:cover!important;
+ background-position:center!important;
+ opacity:1!important;
+}
+html body .ac-premium-dashboard .ac-premium-vehicle{background:#071526!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description h2{color:#fff!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description button{background:#145fd6!important;color:#fff!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-vehicle-footer{background:#08152577!important}
