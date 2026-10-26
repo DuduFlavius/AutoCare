@@ -29,6 +29,7 @@ import {
   SlidersHorizontal,
   Search,
   Menu,
+  MapPin,
 } from 'lucide-react';
 import { Brand } from './public-shell';
 import { GarageHome, VehicleJournal, VehicleSheet, ReminderInbox } from './garage-home';
@@ -168,6 +169,8 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [supportUnread, setSupportUnread] = useState(0),
+    [locationStatus, setLocationStatus] = useState<'idle'|'loading'|'active'|'denied'|'unavailable'>('idle'),
+    [locationAccuracy, setLocationAccuracy] = useState<number | null>(null),
     [menuOpen, setMenuOpen] = useState(false),
     [busy, setBusy] = useState(false),
     [modal, setModal] = useState<Modal>(null),
@@ -728,6 +731,27 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           <span style={{ color: 'var(--text)' }}>{tab}</span>
         </span>
         <div className="inline autocare-header-actions">
+          <button
+            type="button"
+            className="autocare-location-button"
+            title={locationStatus === 'active' ? 'Locație permisă în această sesiune. Nu este salvată pe server.' : 'Activează locația pentru AutoCare'}
+            aria-label="Permisiune locație AutoCare"
+            disabled={locationStatus === 'loading'}
+            onClick={() => {
+              if (!('geolocation' in navigator) || !window.isSecureContext) { setLocationStatus('unavailable'); return; }
+              setLocationStatus('loading');
+              navigator.geolocation.getCurrentPosition(
+                (position) => { setLocationAccuracy(Math.round(position.coords.accuracy)); setLocationStatus('active'); },
+                (err) => setLocationStatus(err.code === 1 ? 'denied' : 'unavailable'),
+                { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
+              );
+            }}
+          >
+            <MapPin size={16}/>
+            <span>{locationStatus === 'active' ? 'Locație activă' : locationStatus === 'loading' ? 'Se verifică…' : locationStatus === 'denied' ? 'Locație refuzată' : locationStatus === 'unavailable' ? 'Locație indisponibilă' : 'Activează locația'}</span>
+          </button>
+          {locationStatus === 'active' && locationAccuracy !== null && <span className="autocare-location-accuracy" title="Precizia estimată a localizării">±{locationAccuracy} m</span>}
+
           <button className="autocare-header-user" onClick={() => navigate('Setări')} aria-label="Deschide profilul și preferințele">
             <span className="autocare-header-avatar">{name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}</span>
             <span className="autocare-header-identity">
