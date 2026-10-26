@@ -49,3 +49,14 @@ html body .app-shell main.main .dialog{background:#fff!important;color:var(--acp
 html body .app-shell main.main .autocare-advanced-settings>summary{background:#eef5ff!important;color:#174b85!important}
 @media(max-width:900px){html body .app-shell main.main{padding:17px!important}html body .app-shell main.main :is(.grid2,.overview-columns){grid-template-columns:minmax(0,1fr)!important}}
 @media(max-width:760px){html body .app-shell main.main{padding:12px!important}html body .app-shell main.main .grid3{grid-template-columns:minmax(0,1fr)!important}html body .app-shell main.main :is(.card,.stat,.car-card,.subscription-option){padding:16px!important;border-radius:14px!important}html body .app-shell main.main :is(button,.button){min-height:42px}html body .app-shell main.main .autocare-simple-actions{padding:15px!important}}
+
+
+/* Keep edit modal controls visible and usable on narrow phones. */
+html body .dialog:has(.record-form-footer) { max-height: min(92dvh, 960px); overflow-y: auto; overscroll-behavior: contain; }
+html body .record-form-footer { position: sticky; bottom: 0; z-index: 15; display: flex; gap: 12px; flex-wrap: wrap; padding: 14px 16px max(14px, env(safe-area-inset-bottom)); background: #fff !important; border-top: 1px solid #d9e6f6; box-shadow: 0 -8px 24px rgba(15, 37, 72, .09); }
+html body .record-form-footer button { min-height: 48px; min-width: 120px; flex: 1 1 160px; opacity: 1 !important; font-weight: 700; border-radius: 12px; }
+html body .record-form-footer button[type="submit"] { background: #1268e5 !important; color: #fff !important; border: 1px solid #1268e5 !important; }
+html body .record-form-footer button[type="button"] { background: #eef5ff !important; color: #174b85 !important; border: 1px solid #adc9eb !important; }
+html body .record-form-footer button:focus-visible { outline: 3px solid #ffbd59; outline-offset: 2px; }
+html body .record-form-footer button:disabled { opacity: .55 !important; cursor: not-allowed; }
+@media (max-width: 600px) { html body .dialog:has(.record-form-footer) { max-height: 94dvh; width: calc(100vw - 16px); } html body .record-form-footer { padding: 12px; gap: 8px; } html body .record-form-footer button { min-width: 0; flex-basis: calc(50% - 4px); font-size: 14px; } }
