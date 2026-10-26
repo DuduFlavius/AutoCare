@@ -1932,3 +1932,18 @@ html body .app-shell .app-header .autocare-location-accuracy{font-size:11px;colo
 .mileage-planner-empty{padding:18px;background:#f0f5fb;border-radius:12px;color:#5b718d}
 .mileage-planner-card .micro{color:#5d7390!important;line-height:1.5}
 @media(max-width:760px){.mileage-planner-card{padding:18px}.mileage-planner-heading{align-items:start}.mileage-planner-icon{width:46px;height:46px;flex-shrink:0}.mileage-planner-edit button{flex:1 1 100%}}
+
+/* Intervention editor: legible premium controls on desktop and installed PWA. */
+html body .quick-record-form{color:#203d64!important;background:#fff!important;max-width:100%;min-width:0}
+html body .quick-record-form :is(.ac-service-details,.ac-cost-breakdown,.ac-service-summary,.record-extra,.service-reminder-box,.ac-filter-item){background:#f6f9fe!important;border:1px solid #d7e4f2!important;border-radius:15px!important;box-shadow:0 3px 12px #244d7910!important;padding:18px!important}
+html body .quick-record-form :is(h2,h3,legend,label,strong,summary){color:#1d426f!important}
+html body .quick-record-form :is(p,small,.micro,.muted){color:#536f91!important;opacity:1!important}
+html body .quick-record-form :is(input,select,textarea){background:#fff!important;color:#183e6b!important;border:1px solid #b8cfe9!important;border-radius:10px!important;min-width:0!important;max-width:100%!important}
+html body .quick-record-form textarea{min-height:96px!important;resize:vertical!important}
+html body .quick-record-form .operation-picker button[aria-pressed=true]{background:#e1eeff!important;border:2px solid #2876d6!important;color:#1757a0!important}
+html body .quick-record-form .operation-picker button[aria-pressed=true] :is(svg,span){color:#1757a0!important}
+html body .quick-record-form :is(.record-form-footer button.primary,.ac-add-filter){background:#2467bd!important;color:#fff!important;border:1px solid #2467bd!important;border-radius:11px!important}
+html body .quick-record-form .record-extra>summary{cursor:pointer;padding:6px!important}
+html body .quick-record-form .ac-service-advice{background:#eaf3ff!important;border:1px solid #d0e2f8!important;border-radius:12px!important;padding:14px!important}
+html body .quick-record-form .ac-service-advice :is(strong,p){color:#244d7e!important}
+@media(max-width:760px){html body .quick-record-form :is(.ac-service-details,.ac-cost-breakdown,.ac-service-summary,.record-extra,.service-reminder-box,.ac-filter-item){padding:13px!important}html body .quick-record-form .form-grid{grid-template-columns:minmax(0,1fr)!important}html body .quick-record-form .operation-picker>div{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}html body .quick-record-form .operation-picker button{min-width:0!important;white-space:normal!important}}
