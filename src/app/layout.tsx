@@ -5,6 +5,7 @@ import './premium.css';
 import './autocare-ui.css';
 import './reference-redesign.css';
 import './premium-unified.css';
+import './premium-dashboard.css';
 import { siteDescription } from '@/lib/seo';
 import { appName, origin } from '@/lib/config';
 export const metadata: Metadata = {
