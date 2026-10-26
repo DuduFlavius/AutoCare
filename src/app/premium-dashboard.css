@@ -55,3 +55,15 @@
 @media(max-width:1200px){.ac-premium-overview{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}.ac-premium-next{grid-column:1/-1}.ac-premium-bottom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.ac-premium-dashboard{gap:12px}.ac-premium-overview,.ac-premium-bottom-grid{grid-template-columns:minmax(0,1fr);gap:12px}.ac-premium-next{grid-column:auto}.ac-premium-panel{padding:15px;border-radius:14px}.ac-premium-vehicle-content{grid-template-columns:minmax(0,1fr)}.ac-premium-car-visual{min-height:125px}.ac-premium-vehicle-footer{gap:12px}.ac-premium-car-description h2{font-size:21px}.ac-premium-big-number{font-size:34px}.workspace-garage .car-card .row-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.workspace-garage .car-card .row-actions button{min-width:0}}
 @media(max-width:360px){.ac-premium-vehicle-footer>div{min-width:75px}.ac-premium-section-heading{align-items:flex-start}.ac-premium-list-row em{max-width:64px}.workspace-garage .car-card .row-actions{grid-template-columns:1fr}}
+
+/* Garage overview is a real component, not a static mock-up. */
+.ac-premium-garage-intro{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px;margin-bottom:17px;border:1px solid #dbe8f8;border-radius:16px;background:linear-gradient(115deg,#fff,#f0f7ff)}
+.ac-premium-garage-intro h2{font-size:clamp(18px,2vw,24px);margin:8px 0 6px;letter-spacing:-.02em}
+.ac-premium-garage-intro p{margin:0;color:#67809e;font-size:13px}
+.ac-premium-garage-counter{display:grid;place-items:center;gap:4px;min-width:112px;padding:13px;background:#e7f1ff;border-radius:13px;color:#135bb7}
+.ac-premium-garage-counter strong{font-size:30px;line-height:1}
+.ac-premium-garage-counter span{font-size:11px;font-weight:700}
+.workspace-garage .car-card .autocare-garage-card-icon{position:relative;display:flex;flex-direction:column;gap:0}
+.workspace-garage .car-card .autocare-garage-card-icon svg{height:91px}
+.ac-premium-garage-visual-caption{font-size:11px;font-weight:800;color:#3269a7;letter-spacing:.03em}
+@media(max-width:480px){.ac-premium-garage-intro{align-items:flex-start;padding:15px}.ac-premium-garage-counter{min-width:75px}.ac-premium-garage-counter strong{font-size:23px}}
