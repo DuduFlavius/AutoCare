@@ -124,7 +124,8 @@ test('Support: clients cannot finalize/trash/restore; trash requires completion 
     status(409),
   );
   await chat.changeSupportThread(founder, threadId, { action: 'trash' });
-  await assert.rejects(() => chat.readSupportThread(customer, threadId), status(404));
+  assert.equal((await chat.readSupportThread(customer, threadId)).thread.status, 'trashed');
+  await assert.rejects(() => chat.readSupportThread(other, threadId), status(404));
   assert.equal((await chat.listSupportThreads(admin, 'trashed')).threads[0].id, threadId);
   const rowsBefore = (await chat.readSupportThread(admin, threadId)).messages.length;
   await chat.changeSupportThread(founder, threadId, { action: 'restore' });
@@ -135,7 +136,7 @@ test('Support: clients cannot finalize/trash/restore; trash requires completion 
   assert.ok((await db().select().from(s.audit)).some((a) => a.action === 'support.trash'));
 });
 test('Support: a new customer message after completion starts a new thread, concurrent sends reuse it', async () => {
-  await chat.changeSupportThread(admin, threadId, { action: 'complete' });
+  await chat.changeSupportThread(founder, threadId, { action: 'complete' });
   const replies = await Promise.all([
     chat.sendSupportMessage(customer, { message: 'O solicitare nouă' }),
     chat.sendSupportMessage(customer, { message: 'Un detaliu suplimentar' }),
@@ -143,7 +144,7 @@ test('Support: a new customer message after completion starts a new thread, conc
   assert.equal(replies[0].threadId, replies[1].threadId);
   assert.notEqual(replies[0].threadId, threadId);
   assert.equal((await chat.readSupportThread(customer, threadId)).thread.status, 'completed');
-  assert.equal((await chat.readSupportThread(customer, replies[0].threadId)).messages.length, 2);
+  assert.equal((await chat.readSupportThread(customer, replies[0].threadId)).messages.length, 3);
 });
 test('Support: history pagination preserves tied timestamps without duplicates', async () => {
   const out = await chat.sendSupportMessage(other, { message: 'Conversație pentru paginare' });
