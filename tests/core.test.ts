@@ -781,3 +781,80 @@ test('21 Direct auth deletion cannot bypass billing guard; authenticated deletio
   assert.equal(r.status, 200);
   assert.equal((await db().select().from(s.user).where(eq(s.user.id, u.id))).length, 0);
 });
+
+
+test('SmartDrive: manual readings persist, reject regressions, and isolate owner', async () => {
+  const id = car.id;
+  const start = (await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer;
+  let r = await call('smartdrive/vehicles/' + id + '/readings', 'GET', undefined, '');
+  assert.equal(r.status, 401, 'missing session');
+  r = await call('smartdrive/vehicles/' + id + '/readings', 'POST', { odometer: start + 100 });
+  assert.equal(r.status, 201, await r.text().catch(() => ''));
+  const saved = await r.json();
+  assert.equal(saved.reading.source, 'manual');
+  assert.equal(saved.vehicle.odometer, start + 100);
+  r = await call('smartdrive/vehicles/' + id + '/readings', 'POST', { odometer: start + 100 });
+  assert.equal(r.status, 201, 'equal odometer is an allowed repeated reading');
+  r = await call('smartdrive/vehicles/' + id + '/readings', 'POST', { odometer: start });
+  assert.equal(r.status, 400, 'odometer regression rejected');
+  r = await call('smartdrive/vehicles/' + id + '/readings', 'POST', { odometer: -1 });
+  assert.equal(r.status, 400);
+  r = await call('smartdrive/vehicles/' + id + '/readings');
+  assert.equal(r.status, 200);
+  const rows = await r.json();
+  assert.ok(rows.length >= 2);
+  assert.ok(rows.every((x: { userId: string; vehicleId: string }) => x.userId === uid && x.vehicleId === id));
+  assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer, start + 100);
+  const foreignId = crypto.randomUUID();
+  await db().insert(s.vehicles).values({ id: foreignId, userId: other, brand: 'Test', model: 'Isolated', year: 2022, plate: 'OTHERTEST', fuel: 'Benzină', odometer: 500 });
+  for (const method of ['GET', 'POST']) {
+    const resp = await call('smartdrive/vehicles/' + foreignId + '/readings', method, method === 'POST' ? { odometer: 600 } : undefined);
+    assert.equal(resp.status, 404, 'foreign vehicle must be invisible');
+  }
+  assert.equal((await db().select().from(s.mileageReadings).where(eq(s.mileageReadings.vehicleId, foreignId))).length, 0);
+});
+test('SmartDrive: GPS trips validate payload and never modify dashboard odometer', async () => {
+  const id = car.id;
+  const initial = (await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer;
+  const startedAt = '2030-03-10T10:00:00.000Z', endedAt = '2030-03-10T10:10:00.000Z';
+  const route = 'smartdrive/vehicles/' + id + '/trips';
+  const valid = { distanceMeters: 3200, durationSeconds: 600, startedAt, endedAt };
+  let r = await call(route, 'POST', valid);
+  assert.equal(r.status, 201);
+  const trip = await r.json();
+  assert.equal(trip.distanceMeters, 3200);
+  assert.equal(trip.durationSeconds, 600);
+  for (const invalid of [
+    { ...valid, distanceMeters: -1 },
+    { ...valid, distanceMeters: 3000000 },
+    { ...valid, durationSeconds: -10 },
+    { ...valid, endedAt: '2030-03-10T09:00:00.000Z' },
+    { ...valid, durationSeconds: 200 },
+    { ...valid, startedAt: 'not-a-date' },
+  ]) {
+    r = await call(route, 'POST', invalid);
+    assert.equal(r.status, 400, JSON.stringify(invalid));
+  }
+  r = await call(route);
+  assert.equal(r.status, 200);
+  assert.ok((await r.json()).some((x: { id: string }) => x.id === trip.id));
+  assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer, initial);
+  r = await call(route, 'GET', undefined, '');
+  assert.equal(r.status, 401);
+});
+test('SmartDrive: reminder preferences validate frequency and persist', async () => {
+  let r = await call('smartdrive/preferences');
+  assert.equal(r.status, 200);
+  r = await call('smartdrive/preferences', 'PUT', { frequencyDays: 3, enabled: true });
+  assert.equal(r.status, 200);
+  r = await call('smartdrive/preferences');
+  assert.equal((await r.json()).frequencyDays, 3);
+  for (const frequencyDays of [0, 91, 2.5, '3']) {
+    r = await call('smartdrive/preferences', 'PUT', { frequencyDays, enabled: true });
+    assert.equal(r.status, 400);
+  }
+  r = await call('smartdrive/preferences', 'PUT', { frequencyDays: 7, enabled: false });
+  assert.equal(r.status, 200);
+  r = await call('smartdrive/preferences');
+  assert.deepEqual({ frequencyDays: (await r.json()).frequencyDays }, { frequencyDays: 7 });
+});
