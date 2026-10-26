@@ -1576,3 +1576,38 @@ html body .app-shell>.sidebar .sidebar-profile{background:#23466f!important;bord
 html body .app-shell>.sidebar .sidebar-profile .profile-avatar{background:linear-gradient(145deg,#5a9cf0,#245b9e)!important;color:#fff!important;border:2px solid #a9d0ff!important;border-radius:50%!important;box-shadow:0 3px 10px #061f4055!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{width:72px!important;height:60px!important;margin:13px 0 12px!important;background:#e7f0fc!important;background-image:none!important;border:1px solid #c6d9ef!important;border-radius:14px!important;box-shadow:none!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{width:37px!important;height:37px!important;color:#285f9f!important;stroke:#285f9f!important}
+
+/* Mobile navigation repair: real overlay markup, strong contrast and accessible tap targets. */
+@media(max-width:800px){
+ html body .app-shell .navigation-overlay .dialog-backdrop{background:rgba(13,29,52,.6)!important;align-items:stretch!important;justify-content:flex-start!important;padding:0!important}
+ html body .app-shell .navigation-overlay .dialog{
+  width:min(370px,91vw)!important;max-width:91vw!important;height:100dvh!important;max-height:100dvh!important;
+  margin:0!important;padding:24px 18px 35px!important;border-radius:0 22px 22px 0!important;
+  background:#f0f5fc!important;background-image:none!important;color:#1b416e!important;
+  border:0!important;box-shadow:16px 0 50px #0b234550!important;overflow-y:auto!important;
+ }
+ html body .app-shell .navigation-overlay .dialog :is(h2,h3,.autocare-mobile-menu-heading){color:#214977!important;opacity:1!important;text-shadow:none!important}
+ html body .app-shell .navigation-overlay .dialog h2{font-size:20px!important;font-weight:800!important;padding-right:35px!important}
+ html body .app-shell .navigation-overlay .autocare-mobile-menu-group{
+  background:#fff!important;color:#244c79!important;border:1px solid #d4e1f1!important;border-radius:16px!important;
+  padding:14px 11px!important;box-shadow:0 3px 14px #234b7810!important;
+ }
+ html body .app-shell .navigation-overlay .autocare-mobile-menu-heading{display:block!important;font-size:11px!important;letter-spacing:.1em!important;font-weight:800!important;color:#5b7390!important;margin:0 0 9px 9px!important}
+ html body .app-shell .navigation-overlay nav[aria-label="Navigare mobil"]{gap:13px!important}
+ html body .app-shell .navigation-overlay nav[aria-label="Navigare mobil"] button{
+  width:100%!important;min-height:49px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  gap:13px!important;padding:11px 13px!important;background:transparent!important;background-image:none!important;
+  color:#264e7e!important;border:0!important;border-radius:11px!important;font-size:15px!important;font-weight:650!important;
+  text-align:left!important;opacity:1!important;text-shadow:none!important;
+ }
+ html body .app-shell .navigation-overlay nav[aria-label="Navigare mobil"] button :is(span,svg){color:#264e7e!important;opacity:1!important}
+ html body .app-shell .navigation-overlay nav[aria-label="Navigare mobil"] button[aria-current="page"]{background:#dceafa!important;color:#15539a!important}
+ html body .app-shell .navigation-overlay nav[aria-label="Navigare mobil"] button[aria-current="page"] :is(span,svg){color:#15539a!important}
+ html body .app-shell .navigation-overlay .nav-unread{background:#d73555!important;color:#fff!important;margin-left:auto!important}
+ html body .app-shell .navigation-overlay .dialog button[aria-label*="Închide"],html body .app-shell .navigation-overlay .dialog button[aria-label*="inchide"]{color:#214977!important}
+ html body .app-shell .app-header .autocare-header-user{background:transparent!important;border:0!important;box-shadow:none!important;padding:4px!important}
+ html body .app-shell .app-header .autocare-header-avatar{display:grid!important;place-items:center!important;width:43px!important;height:43px!important;border-radius:50%!important;background:#d5e6fa!important;color:#16477f!important;border:2px solid #aac7e9!important;font-weight:800!important}
+ html body .app-shell .app-header .muted{color:#47688b!important;opacity:1!important}
+ html body .app-shell .app-header .mobile-menu-toggle{background:#e0ebfa!important;color:#214e85!important;border:1px solid #b9cee9!important}
+ html body .app-shell .app-header .mobile-menu-toggle svg{color:#214e85!important}
+}
