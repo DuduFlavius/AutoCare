@@ -118,3 +118,15 @@
 @media(max-width:1180px){.app-shell .ac-premium-service-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.app-shell .ac-premium-service-stats{gap:10px}.app-shell .ac-premium-service-stat{padding:14px;gap:7px}.app-shell .ac-premium-service-stat .value{font-size:19px}.app-shell .ac-premium-record-tools{display:grid;grid-template-columns:minmax(0,1fr)}.app-shell .ac-premium-record-tools .record-search,.app-shell .ac-premium-record-tools .record-filter-panel{width:100%;min-width:0}.app-shell .ac-premium-record-table{overflow-x:visible}.app-shell .ac-premium-record-table table,.app-shell .ac-premium-record-table tbody{display:block;width:100%}.app-shell .ac-premium-record-table thead{display:none}.app-shell .ac-premium-record-table tr{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:15px;border-bottom:1px solid #e6eef8}.app-shell .ac-premium-record-table td{display:block;padding:0!important;border:0!important;min-width:0;overflow-wrap:anywhere}.app-shell .ac-premium-record-table td::before{content:attr(data-label);display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#7086a0;font-weight:800;margin-bottom:4px}.app-shell .ac-premium-record-actions{gap:7px}.app-shell .ac-premium-record-actions>button,.app-shell .ac-premium-record-actions>label{flex:1 1 120px}}
 @media(max-width:370px){.app-shell .ac-premium-service-stats{grid-template-columns:minmax(0,1fr)}.app-shell .ac-premium-record-actions>button,.app-shell .ac-premium-record-actions>label{flex:1 1 100%}}
+
+.ac-smartdrive-trip{display:grid;gap:13px;padding:20px;margin:16px 0 22px;border:1px solid #dce8f5;border-radius:16px;background:linear-gradient(115deg,#fff,#f2f8ff);box-shadow:0 7px 22px rgba(15,59,112,.05)}
+.ac-smartdrive-trip-heading h3{margin:9px 0 0;font-size:19px;color:#133b73}
+.ac-smartdrive-trip-metric{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ac-smartdrive-trip-metric strong{font-size:clamp(30px,4vw,43px);color:#1268e5;line-height:1}
+.ac-smartdrive-trip-metric span{font-size:13px;color:#627c99}
+.ac-smartdrive-trip>p{font-size:12px;color:#627c99;line-height:1.6;margin:0}
+.ac-smartdrive-trip-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ac-smartdrive-trip-controls button{display:flex;align-items:center;gap:8px;min-height:43px;padding:10px 16px;border-radius:10px}
+.ac-smartdrive-trip-controls>span{display:flex;align-items:center;gap:5px;font-size:12px;color:#597391}
+.ac-smartdrive-trip .ac-smartdrive-trip-error{color:#a62f32;font-weight:650}
+@media(max-width:460px){.ac-smartdrive-trip{padding:14px}.ac-smartdrive-trip-controls button{width:100%;justify-content:center}}
