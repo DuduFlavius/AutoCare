@@ -812,6 +812,16 @@ test('SmartDrive: manual readings persist, reject regressions, and isolate owner
     assert.equal(resp.status, 404, 'foreign vehicle must be invisible');
   }
   assert.equal((await db().select().from(s.mileageReadings).where(eq(s.mileageReadings.vehicleId, foreignId))).length, 0);
+  // Bypass the API intentionally: PostgreSQL must reject mismatched owner/vehicle pairs.
+  await assert.rejects(db().insert(s.mileageReadings).values({
+    id: crypto.randomUUID(), userId: uid, vehicleId: foreignId, odometer: 600, source: 'manual',
+  }));
+  await assert.rejects(db().insert(s.gpsTrips).values({
+    id: crypto.randomUUID(), userId: uid, vehicleId: foreignId, distanceMeters: 100,
+    durationSeconds: 20, startedAt: new Date('2030-03-10T10:00:00Z'),
+    endedAt: new Date('2030-03-10T10:00:20Z'),
+  }));
+  assert.equal((await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId, foreignId))).length, 0);
 });
 test('SmartDrive: GPS trips validate payload and never modify dashboard odometer', async () => {
   const id = car.id;
