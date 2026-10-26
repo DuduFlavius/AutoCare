@@ -581,3 +581,17 @@ color:#fff!important;
 html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel::before{display:none!important}
 html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel .ac-premium-vehicle-footer{position:relative!important;z-index:1!important}
 @media(max-width:820px){html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel{background-position:center,64% center!important}}
+
+
+/* DOM image is the source of truth: avoid fragile CSS background/pseudo-element layering. */
+html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel{position:relative!important;isolation:isolate!important;background:#081522!important;overflow:hidden!important}
+html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel::before{content:none!important;display:none!important}
+html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel>.ac-premium-hero-photo{
+position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;display:block!important;object-fit:cover!important;object-position:center!important;opacity:1!important;visibility:visible!important;z-index:0!important;pointer-events:none!important;transform:none!important;filter:none!important}
+html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel>.ac-premium-hero-shade{
+position:absolute!important;inset:0!important;display:block!important;background:linear-gradient(90deg,rgba(4,15,29,.89),rgba(4,15,29,.48) 37%,rgba(4,15,29,.04) 79%),linear-gradient(0deg,rgba(4,15,29,.5),transparent 35%)!important;z-index:1!important;pointer-events:none!important}
+html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel>:not(.ac-premium-hero-photo):not(.ac-premium-hero-shade){position:relative!important;z-index:2!important}
+html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel .ac-premium-vehicle-footer{background:rgba(5,17,31,.65)!important;backdrop-filter:blur(5px)!important}
+@media(max-width:820px){html body .ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel>.ac-premium-hero-photo{object-position:63% center!important}}
+/* Prevent left navigation from being cropped or shifted by old transforms. */
+@media(min-width:821px){html body .app-shell>.sidebar{transform:none!important;translate:none!important;left:0!important;right:auto!important;overflow-x:hidden!important;box-sizing:border-box!important}html body .app-shell>.sidebar nav{width:100%!important;box-sizing:border-box!important}html body .app-shell>.sidebar nav button{width:100%!important;box-sizing:border-box!important;white-space:normal!important}}
