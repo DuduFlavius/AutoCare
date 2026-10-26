@@ -149,3 +149,41 @@ html body .ac-premium-dashboard .ac-premium-overview .ac-premium-panel{box-shado
 html body .ac-premium-dashboard .ac-premium-metric-strip{background:#e3ebf5!important;border-radius:12px}
 html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-status{background:#dff5e9!important;color:#1a6b45!important}
 @media(max-width:680px){html body .ac-premium-dashboard .ac-premium-vehicle:before{background-position:60% center}html body .ac-premium-dashboard .ac-premium-vehicle .ac-lux-car-visual{min-height:95px}}
+
+
+/* AutoCare premium visual system — screenshot-inspired, shared across all workspaces */
+html body .app-shell{--acp-page:#efede9;--acp-ink:#15253d;--acp-muted:#66758a;--acp-line:#e3e0da;background:#efede9!important}
+html body .app-shell>.sidebar{background:linear-gradient(170deg,#faf9f7,#eceae6)!important;border-right:1px solid #dddcd9!important;box-shadow:2px 0 14px #23354a0a!important}
+html body .app-shell>.sidebar :is(.brand,.sidebar-tagline){color:#15253d!important}
+html body .app-shell>.sidebar nav :is(button,a){color:#293b52!important;background:transparent!important;border-color:transparent!important}
+html body .app-shell>.sidebar nav :is(button,a).active{background:linear-gradient(110deg,#2671de,#1c4eb9)!important;color:#fff!important;box-shadow:0 5px 14px #1757b52a!important}
+html body .app-shell>.sidebar nav :is(button,a):hover:not(.active){background:#e0e7f2!important;color:#173e7a!important}
+html body .app-shell>.sidebar :is(.sidebar-bottom,.sidebar-account){background:#f6f4f0!important;border:1px solid #e5ded4!important;color:#26364a!important}
+html body .app-shell main.main{background:linear-gradient(145deg,#f0eeeb 0%,#e9e7e3 100%)!important}
+html body .app-shell .app-header{background:#f9f8f6!important;border-bottom:1px solid #e2dfdb!important}
+html body .app-shell main.main :is(.card,.stat,.panel,.tile,.mini-vehicle,.for-you-card,.next-step,.car-card,.membership-current,.subscription-option,.calendar,.journal,.table-scroll,.support-chat-panel,.autocare-advanced-settings){background:linear-gradient(155deg,#fcfbf9,#f4f1ed)!important;border:1px solid #e4e0d9!important;border-radius:17px!important;box-shadow:0 9px 24px #3342570e!important}
+html body .app-shell main.main :is(.card,.stat,.panel,.tile,.car-card,.subscription-option):hover{box-shadow:0 13px 29px #34455b1a!important}
+html body .app-shell main.main :is(.card,.stat,.panel,.tile,.car-card) :is(h2,h3,h4,strong){color:#17263e!important}
+html body .app-shell main.main .page-head{background:transparent!important}
+html body .app-shell main.main .workspace-garage .grid3{gap:16px!important}
+html body .app-shell main.main.workspace-garage .car-card{background:linear-gradient(140deg,#fdfbf8,#e9eef5)!important}
+html body .app-shell main.main.workspace-garage .autocare-garage-card-icon{background:linear-gradient(140deg,#d9e8fb,#edf3f9)!important}
+html body .app-shell main.main.workspace-garage .car-metrics{background:#e6ecf3!important;border-color:#d9e1ea!important}
+html body .app-shell main.main :is(.record-editor-intro,.ac-service-summary,.ac-service-advice,.record-extra,.record-form-footer,.ac-cost-breakdown){background:linear-gradient(145deg,#f6f4f0,#e9edf3)!important;border-color:#e0e2e6!important}
+html body .ac-premium-dashboard .ac-premium-panel{background:linear-gradient(150deg,#faf8f5,#edeae5)!important;border:1px solid #e5e0d8!important;border-radius:18px!important;box-shadow:0 12px 30px #303f5112!important}
+html body .ac-premium-dashboard .ac-premium-vehicle{background:#0b1b2e!important;border-color:#21364e!important}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{background:linear-gradient(90deg,#071525ed 0%,#0b1a2dc2 40%,#08172536 100%),url("/images/autocare-universal-hero.svg") center/cover no-repeat!important}
+html body .ac-premium-dashboard .ac-premium-vehicle :is(h2,.ac-premium-kicker,.ac-lux-car-eyebrow,.ac-premium-vehicle-footer strong){color:#fff!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description p{color:#dce5ef!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-vehicle-footer{background:#0a1727a3!important}
+html body .ac-premium-dashboard .ac-premium-odometer{background:linear-gradient(145deg,#f8f5f0,#e9edf2)!important}
+html body .ac-premium-dashboard .ac-premium-next{background:linear-gradient(145deg,#faf8f4,#eeeae5)!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid .ac-premium-panel{background:linear-gradient(135deg,#fcfaf7,#f0ede8)!important;min-height:0!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid .ac-premium-panel:nth-child(2){background:linear-gradient(135deg,#f8f9f9,#e8edf1)!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid .ac-premium-panel:nth-child(3){background:linear-gradient(135deg,#fcfaf7,#eee9e1)!important}
+html body .ac-premium-dashboard .ac-premium-quick{background:linear-gradient(135deg,#f8f7f5,#e8edf5)!important}
+html body .ac-premium-dashboard .ac-premium-metric-strip{background:#e5eaf0!important}
+html body .ac-premium-dashboard .ac-premium-list-row{border-color:#e2dfda!important}
+html body .app-shell main.main :is(.stats,.grid2,.grid3,.overview-columns){gap:15px}
+@media(max-width:900px){html body .app-shell main.main{background:#efede9!important}html body .ac-premium-dashboard .ac-premium-vehicle:before{background-position:58% center!important}}
+@media(max-width:640px){html body .app-shell main.main{padding:12px!important}html body .ac-premium-dashboard .ac-premium-panel{border-radius:15px!important}html body .ac-premium-dashboard .ac-premium-vehicle:before{background-position:65% center!important}html body .app-shell main.main :is(.card,.stat,.panel,.car-card){border-radius:15px!important}}
