@@ -1754,3 +1754,26 @@ html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{width:27px!important;height:27px!important;color:#2467bd!important;stroke:#2467bd!important}
 html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:#2467bd!important;color:#fff!important;border-color:#2467bd!important}
 html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.table-scroll,.founder-user-list,.founder-table-wrap){background:#fff!important;color:#213f65!important;border-color:#d1e0ef!important}
+
+/* Stable record editing, maintenance timeline and founder console. */
+html body .dialog-backdrop{position:fixed!important;inset:0!important;z-index:9999!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:20px!important;background:rgba(15,32,57,.55)!important}
+html body .dialog-backdrop>.dialog{box-sizing:border-box!important;width:min(760px,100%)!important;max-width:760px!important;min-width:0!important;max-height:calc(100dvh - 40px)!important;overflow-y:auto!important;overflow-x:hidden!important;resize:none!important;position:relative!important;inset:auto!important;margin:auto!important;background:#f8fbff!important;color:#1c416e!important;border:1px solid #c7d9ee!important;border-radius:20px!important;box-shadow:0 25px 85px #0c244a44!important}
+html body .dialog .quick-record-form,html body .dialog .quick-record-form *{box-sizing:border-box}
+html body .dialog .quick-record-form{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important}
+html body .dialog .quick-record-form :is(input,select,textarea){width:100%!important;max-width:100%!important;min-width:0!important;resize:none!important;background:#fff!important;color:#193c66!important;border:1px solid #b9cde7!important;border-radius:10px!important}
+html body .dialog .quick-record-form textarea{min-height:110px!important;line-height:1.6!important;padding:12px!important;overflow-y:auto!important}
+html body .dialog .quick-record-form :is(label,legend,h3,summary){color:#1b426f!important;opacity:1!important}
+html body .dialog .quick-record-form :is(p,small,.micro){color:#4c6b90!important;opacity:1!important}
+html body .dialog .quick-record-form :is(.form-grid,.record-extra .stack){min-width:0!important;max-width:100%!important}
+html body .dialog .quick-record-form .form-grid>*{min-width:0!important}
+html body .dialog .quick-record-form :is(.record-extra,.service-brake-details,.service-oil-planner,.service-reminder-box){background:#eef5fd!important;color:#1e456f!important;border:1px solid #c9dbef!important;border-radius:14px!important;padding:17px!important;min-width:0!important}
+html body .dialog .quick-record-form .record-extra>summary{cursor:pointer!important;font-weight:750!important;color:#1d4e88!important}
+html body .dialog .quick-record-form .service-brake-details{display:grid!important;gap:12px!important;margin:14px 0!important}
+html body .dialog .quick-record-form .record-form-footer{position:sticky!important;bottom:0!important;background:#f8fbff!important;border-top:1px solid #d5e2f1!important;padding:14px 0!important;z-index:2!important}
+html body .app-shell main.main :is(.timeline,.timeline-item,.timeline-card,.maintenance-overview,.record-line,.journal-row){color:#234b79!important}
+html body .app-shell main.main :is(.timeline-card,.maintenance-overview,.record-line,.journal-row){background:#fff!important;border-color:#d4e1f0!important}
+html body .app-shell main.main :is(.timeline,.timeline-item,.timeline-card,.maintenance-overview) :is(p,small,span,label){color:#4b6c91!important;opacity:1!important}
+html body .app-shell main.main :is(.founder-panel,.founder-dashboard,.founder-workspace,.founder-console,.admin-panel,.admin-dashboard,.admin-workspace){background:#edf3fb!important;color:#1e416e!important;color-scheme:light!important}
+html body .app-shell main.main :is(.founder-panel,.founder-dashboard,.founder-workspace,.founder-console,.admin-panel,.admin-dashboard,.admin-workspace) :is(.card,.panel,.stat,.tile,section,article){background:#fff!important;color:#1d416e!important;border-color:#d1e0f0!important}
+html body .app-shell main.main :is(.founder-panel,.founder-dashboard,.founder-workspace,.founder-console,.admin-panel,.admin-dashboard,.admin-workspace) :is(p,span,small,label,td,th){color:#355b83!important}
+@media(max-width:760px){html body .dialog-backdrop{padding:8px!important;align-items:center!important}html body .dialog-backdrop>.dialog{width:100%!important;max-height:calc(100dvh - 16px)!important;border-radius:14px!important;padding:17px!important}html body .dialog .quick-record-form .form-grid{grid-template-columns:minmax(0,1fr)!important}}
