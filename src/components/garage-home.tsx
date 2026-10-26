@@ -118,15 +118,21 @@ export function GarageHome({
           </div>
         </section>
         <section className="ac-premium-odometer ac-premium-panel">
-          <span className="ac-premium-kicker"><Gauge size={17}/> KILOMETRAJ</span>
-          <strong className="ac-premium-big-number">{car ? car.odometer.toLocaleString('ro-RO') : '—'} <small>km</small></strong>
-          <p>Valoare înregistrată pentru mașina selectată</p>
-          <div className="ac-premium-metric-strip" role="status" aria-live="polite">
-            <span>Următorul schimb de ulei <strong>{nextOilKm === null ? 'Neconfigurat' : nextOilKm.toLocaleString('ro-RO') + ' km'}</strong></span>
-            <span>{oilKmRemaining === null ? 'Adaugă un schimb de ulei cu următorul kilometraj' : oilKmRemaining < 0 ? 'Schimb depășit cu' : oilKmRemaining === 0 ? 'Schimb scadent acum' : 'Mai ai până la schimb'} <strong>{oilKmRemaining === null ? '—' : Math.abs(oilKmRemaining).toLocaleString('ro-RO') + ' km'}</strong></span>
+          <span className="ac-premium-kicker"><Gauge size={18}/> URMĂTORUL SCHIMB DE ULEI</span>
+          <div className="ac-oil-hero">
+            <div className="ac-oil-bottle" aria-hidden="true"><span>OIL</span><strong>5W-30</strong></div>
+            <div className="ac-oil-info">
+              <strong className="ac-oil-next">{nextOilKm === null ? 'Neconfigurat' : `La ${nextOilKm.toLocaleString('ro-RO')} km`}</strong>
+              <span>{oilKmRemaining === null ? 'Setează intervalul de schimb' : oilKmRemaining < 0 ? `Depășit cu ${Math.abs(oilKmRemaining).toLocaleString('ro-RO')} km` : `${oilKmRemaining.toLocaleString('ro-RO')} km rămași`}</span>
+              <div className="ac-oil-progress" role="progressbar" aria-label="Progres până la schimbul de ulei" aria-valuemin={0} aria-valuemax={100} aria-valuenow={lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, Math.round((car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100))) : 0}>
+                <i style={{width: `${lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, (car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100)) : 0}%`}}/>
+              </div>
+            </div>
           </div>
-          <div className="ac-premium-metric-strip"><span>Mașini active <strong>{cars.length}</strong></span><span>Intervenții <strong>{home.services.filter(r => r.vehicleId === car?.id).length}</strong></span></div>
-          <button type="button" className="ac-premium-primary" onClick={() => navigate('Plan întreținere')}>Actualizează kilometrajul <ArrowRight size={16}/></button>
+          <div className="ac-oil-detail"><span>Ultimul schimb</span><strong>{lastOil?.odometer != null ? `${lastOil.odometer.toLocaleString('ro-RO')} km` : 'Neconfigurat'}</strong></div>
+          <div className="ac-oil-detail"><span>Interval setat</span><strong>{lastOil?.odometer != null && nextOilKm !== null ? `${(nextOilKm - lastOil.odometer).toLocaleString('ro-RO')} km` : 'Neconfigurat'}</strong></div>
+          <div className="ac-oil-detail"><span>Kilometraj actual</span><strong>{car ? `${car.odometer.toLocaleString('ro-RO')} km` : '—'}</strong></div>
+          <button type="button" className="ac-premium-primary" onClick={() => navigate('Întreținere')}>Vezi istoricul intervențiilor <ArrowRight size={16}/></button>
         </section>
         <section className="ac-premium-next ac-premium-panel">
           <span className="ac-premium-kicker"><Wrench size={17}/> URMĂTORUL TERMEN</span>
