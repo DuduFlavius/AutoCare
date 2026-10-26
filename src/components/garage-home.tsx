@@ -5,6 +5,8 @@ import {
   ArrowUpRight,
   CarFront,
   Gauge,
+  Droplet,
+  Clock3,
   Files,
   Wrench,
   Wallet,
@@ -120,7 +122,7 @@ export function GarageHome({
           </div>
         </section>
         <section className="ac-premium-odometer ac-premium-panel">
-          <span className="ac-premium-kicker"><Gauge size={18}/> URMĂTORUL SCHIMB DE ULEI</span>
+          <span className="ac-premium-kicker"><Droplet size={19}/> URMĂTORUL SCHIMB DE ULEI</span>
           <div className="ac-oil-hero">
             <div className="ac-oil-product" aria-hidden="true">
               <svg viewBox="0 0 82 108" role="img" focusable="false">
@@ -145,9 +147,9 @@ export function GarageHome({
               </div><b>{lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, Math.round((car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100))) : 0}%</b></div>
             </div>
           </div>
-          <div className="ac-oil-detail"><span>Ultimul schimb</span><strong>{lastOil?.odometer != null ? `${lastOil.odometer.toLocaleString('ro-RO')} km` : 'Neconfigurat'}</strong></div>
-          <div className="ac-oil-detail"><span>Interval setat</span><strong>{lastOil?.odometer != null && nextOilKm !== null ? `${(nextOilKm - lastOil.odometer).toLocaleString('ro-RO')} km` : 'Neconfigurat'}</strong></div>
-          <div className="ac-oil-detail"><span>Ulei utilizat</span><strong>{lastOil?.parts?.match(/(?:^|\\n)\\[ac:tipUlei\\]:\\s*([^\\n]+)/)?.[1] || 'Neconfigurat'}</strong></div>
+          <div className="ac-oil-detail"><span><Clock3 size={16}/> Ultimul schimb</span><strong>{lastOil?.odometer != null ? <>{lastOil.odometer.toLocaleString('ro-RO')} km{lastOil.date && <small>{date(lastOil.date)}</small>}</> : 'Neconfigurat'}</strong></div>
+          <div className="ac-oil-detail"><span><Clock3 size={16}/> Interval setat</span><strong>{lastOil?.odometer != null && nextOilKm !== null ? `${(nextOilKm - lastOil.odometer).toLocaleString('ro-RO')} km` : 'Neconfigurat'}</strong></div>
+          <div className="ac-oil-detail"><span><Droplet size={16}/> Ulei utilizat</span><strong>{lastOil?.parts?.match(/(?:^|\\n)\\[ac:tipUlei\\]:\\s*([^\\n]+)/)?.[1] || 'Neconfigurat'}</strong></div>
           <button type="button" className="ac-premium-primary" onClick={() => navigate('Întreținere')}>Vezi istoricul intervențiilor <ArrowRight size={16}/></button>
         </section>
         <section className="ac-premium-next ac-premium-panel">
