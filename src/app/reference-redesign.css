@@ -1834,3 +1834,47 @@ html body .app-shell .main .quick-record-form .ac-service-summary>div{display:fl
 html body .app-shell .main .quick-record-form .ac-service-summary>div span{font-size:12px;color:#5c7290!important}
 html body .app-shell .main .quick-record-form .ac-service-summary>div strong{font-size:14px;color:#214776!important;overflow-wrap:anywhere}
 @media(max-width:500px){html body .app-shell .main .quick-record-form .ac-service-summary{grid-template-columns:minmax(0,1fr)}}
+
+/* AutoCare Intervention Studio — design-only, scoped to the real RecordEditor markup. */
+html body .dialog:has(> .quick-record-form),html body .dialog:has(.quick-record-form){width:min(940px,calc(100vw - 32px))!important;max-width:940px!important;max-height:min(92dvh,1050px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;background:#fff!important;background-image:none!important;border:1px solid #d6e3f3!important;border-radius:22px!important;box-shadow:0 28px 85px #102f5760!important;color:#193d70!important}
+html body .dialog:has(.quick-record-form) .dialog-header{background:#fff!important;border-bottom:1px solid #e2eaf5!important;color:#173c70!important;padding:19px 26px!important}
+html body .dialog:has(.quick-record-form) .dialog-header :is(h2,h3,strong,span){color:#173c70!important}
+html body .quick-record-form{display:grid!important;gap:19px!important;padding:23px 26px 27px!important;background:#fff!important;color:#193d70!important;font-size:14px!important}
+html body .quick-record-form .record-editor-intro{display:flex!important;align-items:center!important;gap:15px!important;background:#f1f6fd!important;background-image:none!important;border:1px solid #dae7f7!important;border-radius:15px!important;padding:15px 18px!important;margin:0!important}
+html body .quick-record-form .record-editor-intro>span{width:46px!important;height:46px!important;flex:none!important;display:grid!important;place-items:center!important;background:#dcecff!important;border-radius:12px!important;color:#2263b6!important}
+html body .quick-record-form .record-editor-intro p{margin:0!important;color:#486787!important;line-height:1.55!important}
+html body .quick-record-form label{display:flex!important;flex-direction:column!important;gap:8px!important;color:#234a7b!important;font-size:13px!important;font-weight:650!important;min-width:0!important}
+html body .quick-record-form :is(input:not([type=checkbox]):not([type=file]),select,textarea){box-sizing:border-box!important;width:100%!important;min-height:46px!important;background:#fff!important;background-image:none!important;color:#183c6c!important;border:1px solid #cbdcf0!important;border-radius:10px!important;padding:10px 13px!important;box-shadow:0 1px 3px #1744790a!important;font:inherit!important;font-weight:500!important;opacity:1!important}
+html body .quick-record-form textarea{min-height:100px!important;resize:vertical!important}
+html body .quick-record-form :is(input,select,textarea)::placeholder{color:#8194ac!important;opacity:1!important}
+html body .quick-record-form :is(input,select,textarea):focus{outline:2px solid #91baf1!important;outline-offset:1px!important;border-color:#2d70c8!important}
+html body .quick-record-form .form-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:15px!important}
+html body .quick-record-form .operation-picker{border:0!important;padding:0!important;margin:0!important;min-width:0!important}
+html body .quick-record-form .operation-picker legend{color:#193f73!important;font-weight:800!important;font-size:15px!important;padding:0 0 12px!important}
+html body .quick-record-form .operation-picker>div{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:10px!important}
+html body .quick-record-form .operation-picker button{min-height:76px!important;padding:12px 8px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:8px!important;line-height:1.2!important;text-align:center!important;white-space:normal!important;background:#fff!important;background-image:none!important;color:#244b7e!important;border:1px solid #d2e1f3!important;border-radius:12px!important;box-shadow:none!important;font-size:12px!important;font-weight:700!important;transition:background .16s,border-color .16s,transform .16s!important}
+html body .quick-record-form .operation-picker button svg{width:22px!important;height:22px!important;color:#285d9f!important;flex:none!important}
+html body .quick-record-form .operation-picker button:hover{background:#edf5ff!important;border-color:#87b2eb!important;transform:translateY(-1px)!important}
+html body .quick-record-form .operation-picker button[aria-pressed=true]{background:#e8f2ff!important;background-image:none!important;color:#1559b1!important;border:2px solid #2875d8!important;box-shadow:0 0 0 2px #e6f1ff!important}
+html body .quick-record-form .operation-picker button[aria-pressed=true] svg{color:#1b69d0!important}
+html body .quick-record-form :is(.ac-service-details,.service-detail-fields,.cost-field,.record-extra,.service-reminder-box,.ac-service-summary){background:#f8fbff!important;background-image:none!important;border:1px solid #dbe7f5!important;border-radius:15px!important;padding:19px!important;color:#234a7b!important;box-shadow:none!important}
+html body .quick-record-form :is(.cost-field,.service-reminder-box,.ac-service-summary) :is(h3,h4){color:#173d72!important;font-size:17px!important;font-weight:800!important;margin:0 0 14px!important}
+html body .quick-record-form :is(.cost-field,.service-reminder-box,.record-extra) :is(p,small,.micro){color:#617b98!important;line-height:1.5!important;opacity:1!important}
+html body .quick-record-form .cost-field .check{display:flex!important;flex-direction:row!important;align-items:center!important;gap:9px!important;font-weight:550!important}
+html body .quick-record-form input[type=checkbox]{width:17px!important;height:17px!important;accent-color:#246bc6!important;flex:none!important}
+html body .quick-record-form .record-extra>summary{display:flex!important;align-items:center!important;justify-content:space-between!important;cursor:pointer!important;color:#1e4c84!important;font-weight:800!important;font-size:15px!important;background:transparent!important;padding:0!important}
+html body .quick-record-form .record-extra[open]>summary{margin-bottom:17px!important}
+html body .quick-record-form .record-extra .stack{display:grid!important;gap:15px!important}
+html body .quick-record-form .ac-service-summary{background:#edf5ff!important}
+html body .quick-record-form .ac-service-summary>div{display:flex!important;align-items:baseline!important;justify-content:space-between!important;gap:14px!important;padding:9px 0!important;border-bottom:1px solid #dbe7f5!important}
+html body .quick-record-form .ac-service-summary>div:last-child{border-bottom:0!important}
+html body .quick-record-form .ac-service-summary>div span{color:#617b98!important;font-size:13px!important}
+html body .quick-record-form .ac-service-summary>div strong{color:#194779!important;text-align:right!important}
+html body .quick-record-form .record-form-footer{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:12px!important;position:sticky!important;bottom:-27px!important;z-index:3!important;margin:0 -26px -27px!important;padding:16px 26px!important;background:#fff!important;border-top:1px solid #dfe8f4!important;box-shadow:0 -8px 20px #1b4c800b!important}
+html body .quick-record-form .record-form-footer button{min-height:46px!important;padding:11px 22px!important;border-radius:10px!important;font-weight:750!important;background:#edf3fb!important;color:#255486!important;border:1px solid #c9daee!important}
+html body .quick-record-form .record-form-footer button.primary{background:#2169c7!important;background-image:none!important;color:#fff!important;border-color:#2169c7!important;box-shadow:0 5px 15px #2169c72b!important}
+html body .quick-record-form .record-form-footer button.primary:hover{background:#1558af!important}
+html body .quick-record-form .error{background:#fff0f2!important;color:#a22c43!important;border:1px solid #f0bcc8!important;border-radius:10px!important;padding:12px!important}
+@media(max-width:700px){html body .dialog:has(.quick-record-form){width:calc(100vw - 16px)!important;max-height:96dvh!important;border-radius:16px!important}html body .quick-record-form{padding:16px!important;gap:15px!important}html body .quick-record-form .operation-picker>div{grid-template-columns:repeat(2,minmax(0,1fr))!important}html body .quick-record-form .operation-picker button{min-height:68px!important}html body .quick-record-form .form-grid{grid-template-columns:minmax(0,1fr)!important}html body .quick-record-form :is(.ac-service-details,.service-detail-fields,.cost-field,.record-extra,.service-reminder-box,.ac-service-summary){padding:15px!important}html body .quick-record-form .record-form-footer{margin:0 -16px -16px!important;padding:12px 16px!important;bottom:-16px!important}html body .quick-record-form .record-form-footer button{flex:1!important;padding:10px!important}}
+@media(min-width:701px) and (max-width:980px){html body .quick-record-form .operation-picker>div{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(prefers-reduced-motion:reduce){html body .quick-record-form .operation-picker button{transition:none!important;transform:none!important}}
