@@ -1,0 +1,38 @@
+name: SmartDrive isolated validation
+on:
+  push:
+    branches:
+      - feature/autocare-premium-rebuild
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: ''
+      LOCAL_DATABASE_PATH: memory
+      BETTER_AUTH_SECRET: autocare-ci-only-secret-not-for-production-123456
+      APP_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify no external database connection
+        run: |
+          test -z "$DATABASE_URL"
+          test "$LOCAL_DATABASE_PATH" = memory
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Isolated PGlite tests
+        run: npm test
+      - name: Build
+        run: npm run build
