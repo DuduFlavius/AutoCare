@@ -127,3 +127,25 @@ html body .ac-install-banner .ac-mobile-install{margin:0}
 .ac-premium-vehicle .ac-premium-car-description h2{font-size:clamp(23px,2.4vw,31px);letter-spacing:-.035em}
 .ac-premium-vehicle .ac-premium-vehicle-footer{border-top:1px solid #dce8f7}
 @media(max-width:600px){.ac-premium-vehicle .ac-lux-car-visual{min-height:145px}.ac-lux-car-eyebrow{font-size:9px}}
+
+
+/* Automotive photo showcase and richer dashboard surfaces */
+html body .ac-premium-dashboard .ac-premium-vehicle{background:#101c2b!important;color:#fff!important;border:1px solid #263c55!important;overflow:hidden;position:relative}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#071626ee 0%,#0d1e32d9 42%,#0b1a2a55 100%),url("https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1200&q=85") center/cover no-repeat;opacity:.98;pointer-events:none}
+html body .ac-premium-dashboard .ac-premium-vehicle>*{position:relative;z-index:1}
+html body .ac-premium-dashboard .ac-premium-vehicle :is(h2,.ac-premium-kicker,.ac-lux-car-eyebrow,.ac-premium-vehicle-footer strong){color:#fff!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-car-description p{color:#d6e3f4!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-vehicle-footer{border-top:1px solid #ffffff35;background:#0715258c;border-radius:12px;padding:14px}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-vehicle-footer span{color:#c3d4ea!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-lux-car-visual{background:transparent!important;border:0!important;box-shadow:none!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-lux-car-emblem{display:none}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-lux-car-glow{display:none}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-lux-car-floor{display:none}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-lux-car-label{color:#d5e5f8}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-plate{background:#f6f8fc!important;color:#172f4f!important}
+html body .ac-premium-dashboard .ac-premium-odometer{background:linear-gradient(150deg,#f2f6fc,#e7eef8)!important}
+html body .ac-premium-dashboard .ac-premium-next{background:linear-gradient(150deg,#f7f5f1,#eeeae4)!important}
+html body .ac-premium-dashboard .ac-premium-overview .ac-premium-panel{box-shadow:0 10px 30px #20395714!important}
+html body .ac-premium-dashboard .ac-premium-metric-strip{background:#e3ebf5!important;border-radius:12px}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-status{background:#dff5e9!important;color:#1a6b45!important}
+@media(max-width:680px){html body .ac-premium-dashboard .ac-premium-vehicle:before{background-position:60% center}html body .ac-premium-dashboard .ac-premium-vehicle .ac-lux-car-visual{min-height:95px}}
