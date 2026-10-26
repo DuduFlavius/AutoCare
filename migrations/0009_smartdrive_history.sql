@@ -2,7 +2,8 @@
 CREATE TABLE IF NOT EXISTS mileage_readings (
   id text PRIMARY KEY,
   "userId" text NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
-  "vehicleId" text NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+  "vehicleId" text NOT NULL,
+  CONSTRAINT mileage_reading_owner_vehicle_fk FOREIGN KEY ("vehicleId", "userId") REFERENCES vehicles("id", "userId") ON DELETE CASCADE,
   odometer integer NOT NULL CHECK (odometer >= 0),
   source text NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'vehicle-edit', 'initial')),
   "recordedAt" timestamptz NOT NULL DEFAULT now(),
@@ -14,7 +15,8 @@ CREATE INDEX IF NOT EXISTS mileage_readings_owner_vehicle ON mileage_readings("u
 CREATE TABLE IF NOT EXISTS gps_trips (
   id text PRIMARY KEY,
   "userId" text NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
-  "vehicleId" text NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+  "vehicleId" text NOT NULL,
+  CONSTRAINT gps_trip_owner_vehicle_fk FOREIGN KEY ("vehicleId", "userId") REFERENCES vehicles("id", "userId") ON DELETE CASCADE,
   "distanceMeters" integer NOT NULL CHECK ("distanceMeters" >= 0),
   "durationSeconds" integer NOT NULL CHECK ("durationSeconds" >= 0),
   "startedAt" timestamptz NOT NULL,
