@@ -91,8 +91,14 @@ export default function RecordEditor({
     const num = (k: string) => (str(k) === '' ? null : Number(str(k)));
     const computedNextKm = kind === 'service' && category === 'Schimb ulei' && num('nextKm') === null && num('odometer') !== null && Number(serviceKmInterval) > 0 ? Number(num('odometer')) + Number(serviceKmInterval) : num('nextKm');
     const partsTotal = ['ac_costPiese','ac_costLabor','ac_costOther'].reduce((sum,k)=>sum+(num(k)||0),0);
-    const finalAmount = kind === 'service' && costEdited ? partsTotal : (num('amount')||0);
+    const finalAmount = kind === 'service' && costEdited ? partsTotal : (num('amount') ?? 0);
+    const hasCost = kind === 'service' && costEdited ? ['ac_costPiese','ac_costLabor','ac_costOther'].some(k => str(k) !== '') : str('amount') !== '';
+    const filterCost = category === 'Filtre' ? Array.from(f.entries()).filter(([key]) => /^ac_filtru\d+Cost$/.test(key)).reduce((total,[,value]) => total + (Number(value) || 0),0) : 0;
+    const effectiveTotal = kind === 'service' && costEdited ? finalAmount + filterCost : finalAmount;
     setError('');
+    if (!unknownCost && (!Number.isFinite(effectiveTotal) || effectiveTotal < 0 || effectiveTotal > 1000000)) {setError('Costul trebuie să fie între 0 și 1.000.000 RON.');return;}
+    if (num('odometer') !== null && (!Number.isInteger(num('odometer')) || Number(num('odometer')) < 0)) {setError('Kilometrajul trebuie să fie un număr întreg pozitiv.');return;}
+    if (computedNextKm !== null && num('odometer') !== null && computedNextKm < Number(num('odometer'))) {setError('Următorul kilometraj nu poate fi mai mic decât kilometrajul intervenției.');return;}
     if (!car) {
       setError('Alege mașina căreia îi aparține înregistrarea.');
       return;
@@ -121,8 +127,8 @@ export default function RecordEditor({
           expiresAt: str('expiresAt') || null,
           nextKm: computedNextKm,
           odometer: num('odometer'),
-          amountBani: unknownCost ? 0 : Math.round(finalAmount * 100),
-          amountKnown: !unknownCost && (costEdited || str('amount') !== ''),
+          amountBani: unknownCost ? 0 : Math.round(effectiveTotal * 100),
+          amountKnown: !unknownCost && hasCost,
           provider: str('provider'),
           number: str('number'),
           parts: kind === 'service' ? serializeServiceDetails(str('parts'),f) : str('parts'),
@@ -305,6 +311,7 @@ export default function RecordEditor({
       {kind !== 'document' && (
         <div className="cost-field ac-cost-breakdown">
           <h3>Costurile intervenției</h3>
+          <p className="micro">Poți introduce suma totală direct sau costurile defalcate. Dacă modifici defalcarea, totalul se calculează automat.</p>
           {kind === 'service' && <div className="form-grid">
             <label>Cost piese / materiale · RON<input name="ac_costPiese" type="number" min="0" max="1000000" step="0.01" inputMode="decimal" disabled={unknownCost} value={costParts} onChange={e=>{setCostParts(e.target.value);setCostEdited(true)}} placeholder="Opțional"/></label>
             <label>Cost manoperă · RON<input name="ac_costLabor" type="number" min="0" max="1000000" step="0.01" inputMode="decimal" disabled={unknownCost} value={costLabor} onChange={e=>{setCostLabor(e.target.value);setCostEdited(true)}} placeholder="Opțional"/></label>
