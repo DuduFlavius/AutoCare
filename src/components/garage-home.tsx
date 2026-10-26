@@ -126,14 +126,14 @@ export function GarageHome({
             <div className="ac-oil-info">
               <strong className="ac-oil-next">{nextOilKm === null ? 'Neconfigurat' : `La ${nextOilKm.toLocaleString('ro-RO')} km`}</strong>
               <span>{oilKmRemaining === null ? 'Setează intervalul de schimb' : oilKmRemaining < 0 ? `Depășit cu ${Math.abs(oilKmRemaining).toLocaleString('ro-RO')} km` : `${oilKmRemaining.toLocaleString('ro-RO')} km rămași`}</span>
-              <div className="ac-oil-progress" role="progressbar" aria-label="Progres până la schimbul de ulei" aria-valuemin={0} aria-valuemax={100} aria-valuenow={lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, Math.round((car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100))) : 0}>
+              <div className="ac-oil-progress-line"><div className="ac-oil-progress" role="progressbar" aria-label="Progres până la schimbul de ulei" aria-valuemin={0} aria-valuemax={100} aria-valuenow={lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, Math.round((car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100))) : 0}>
                 <i style={{width: `${lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, (car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100)) : 0}%`}}/>
-              </div>
+              </div><b>{lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, Math.round((car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100))) : 0}%</b></div>
             </div>
           </div>
           <div className="ac-oil-detail"><span>Ultimul schimb</span><strong>{lastOil?.odometer != null ? `${lastOil.odometer.toLocaleString('ro-RO')} km` : 'Neconfigurat'}</strong></div>
           <div className="ac-oil-detail"><span>Interval setat</span><strong>{lastOil?.odometer != null && nextOilKm !== null ? `${(nextOilKm - lastOil.odometer).toLocaleString('ro-RO')} km` : 'Neconfigurat'}</strong></div>
-          <div className="ac-oil-detail"><span>Kilometraj actual</span><strong>{car ? `${car.odometer.toLocaleString('ro-RO')} km` : '—'}</strong></div>
+          <div className="ac-oil-detail"><span>Ulei utilizat</span><strong>{lastOil?.parts?.match(/(?:^|\\n)\\[ac:tipUlei\\]:\\s*([^\\n]+)/)?.[1] || 'Neconfigurat'}</strong></div>
           <button type="button" className="ac-premium-primary" onClick={() => navigate('Întreținere')}>Vezi istoricul intervențiilor <ArrowRight size={16}/></button>
         </section>
         <section className="ac-premium-next ac-premium-panel">
