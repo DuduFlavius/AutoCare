@@ -2263,7 +2263,13 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                 }}
               />
             ) : (
-              <form className="form-grid" onChange={() => setRecordDirty(true)} onSubmit={saveForm}>
+              <form className="form-grid ac-premium-vehicle-form" onChange={() => setRecordDirty(true)} onSubmit={saveForm}>
+                <div className="ac-premium-form-intro full">
+                  <div className="ac-premium-form-symbol"><CarFront size={31}/></div>
+                  <div><strong>{modal.vehicle ? 'Actualizează datele mașinii' : 'Configurează noua mașină'}</strong>
+                  <p>Completează informațiile reale. Le poți modifica ulterior din Garaj.</p></div>
+                </div>
+                <div className="ac-premium-form-section full"><span>01</span> Identificare și înmatriculare</div>
                 <>
                   <label>
                     Marcă
@@ -2293,6 +2299,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                       defaultValue={modal.vehicle?.plate}
                     />
                   </label>
+                  <div className="ac-premium-form-section full"><span>02</span> Date tehnice și kilometraj</div>
                   <label>
                     Kilometraj actual
                     <input
@@ -2300,7 +2307,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                       type="number"
                       min={0}
                       required
-                      defaultValue={modal.vehicle?.odometer || 0}
+                      defaultValue={modal.vehicle?.odometer ?? 0}
                     />
                   </label>
                   <label>
@@ -2328,6 +2335,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                       defaultValue={modal.vehicle?.capacity || ''}
                     />
                   </label>
+                  <div className="ac-premium-form-section full"><span>03</span> Alte informații</div>
                   <label>
                     Data achiziției
                     <input
@@ -2353,9 +2361,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     Renunță
                   </button>
                 </div>
-                <p className="micro full">
-                  Atașamentele se adaugă după salvare, din lista de înregistrări.
-                </p>
+                <p className="micro full">Datele sunt salvate în contul tău. Documentele se pot adăuga ulterior în secțiunea Documente.</p>
               </form>
             )}
           </Dialog>
