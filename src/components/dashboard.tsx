@@ -1,6 +1,7 @@
 'use client';
 import Membership from './membership';
 import PushSettings from './push-settings';
+import SmartDriveTrip from './smartdrive-trip';
 import RecordEditor from './record-editor';
 import { filterRecords, documentCounts, serviceStats } from '@/lib/record-filters';
 import SupportChat from './support-chat';
@@ -201,6 +202,7 @@ function MileagePlanner({ data, preview, onUpdated, onError }: {
         <span className="mileage-planner-icon"><Gauge size={27}/></span>
       </div>
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
+      <SmartDriveTrip preview={preview} />
       <div className="mileage-planner-grid">
         {cars.map(v => {
           const due = services.filter(r => r.vehicleId === v.id).sort((a,b) => Number(a.nextKm)-Number(b.nextKm));
