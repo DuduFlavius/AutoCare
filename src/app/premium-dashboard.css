@@ -84,3 +84,37 @@
 .ac-premium-vehicle-form .actions{display:flex;gap:10px;flex-wrap:wrap}
 .ac-premium-vehicle-form .actions button{min-height:46px;flex:1}
 @media(max-width:560px){.ac-premium-vehicle-form{grid-template-columns:minmax(0,1fr);gap:12px}.ac-premium-form-intro{padding:12px}.ac-premium-vehicle-form .actions{display:grid;grid-template-columns:1fr}.ac-premium-vehicle-form .actions button{width:100%}}
+
+/* Premium maintenance records: scoped to real data and existing actions. */
+.app-shell .ac-premium-service-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.app-shell .ac-premium-service-stat{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:20px;border:1px solid #dce8f5!important;border-radius:16px!important;background:#fff!important;box-shadow:0 7px 22px rgba(15,59,112,.055)!important}
+.app-shell .ac-premium-service-stat-icon{display:grid;place-items:center;width:40px;height:40px;background:#e9f2ff;color:#1268e5;border-radius:11px}
+.app-shell .ac-premium-service-stat .value{font-size:clamp(18px,1.7vw,26px);font-weight:850;letter-spacing:-.025em;line-height:1.25;color:#123b71;overflow-wrap:anywhere}
+.app-shell .ac-premium-service-stat .small{font-size:12px;color:#6a809c}
+.app-shell .ac-premium-record-tools{display:flex;align-items:stretch;gap:12px;flex-wrap:wrap;margin:0 0 15px;min-width:0}
+.app-shell .ac-premium-record-tools .record-search{flex:1 1 290px;min-width:0;min-height:46px;border:1px solid #dce7f5!important;border-radius:11px!important;background:#fff!important;display:flex;align-items:center;gap:9px;padding:0 13px}
+.app-shell .ac-premium-record-tools .record-search input{min-height:44px;width:100%;min-width:0;border:0!important;box-shadow:none!important;background:transparent!important;font-size:14px}
+.app-shell .ac-premium-record-tools .record-filter-panel{flex:0 1 auto;min-width:180px;border:1px solid #dce7f5!important;border-radius:11px!important;background:#fff!important}
+.app-shell .ac-premium-record-tools .record-filter-panel summary{min-height:46px;display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:750}
+.app-shell .ac-premium-record-tools .record-filter-fields{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px}
+.app-shell .ac-premium-record-tools .record-filter-fields select,.app-shell .ac-premium-record-tools .record-filter-fields a{min-height:42px;border-radius:9px}
+.app-shell .ac-premium-record-switch{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:12px 0 18px}
+.app-shell .ac-premium-record-switch>div{display:flex;gap:4px;padding:4px;background:#eef4fc;border-radius:10px}
+.app-shell .ac-premium-record-switch button{border:0!important;border-radius:8px!important;padding:9px 13px!important;min-height:38px}
+.app-shell .ac-premium-record-switch button[aria-pressed=true]{background:#fff!important;color:#1157b2!important;box-shadow:0 2px 9px rgba(17,61,109,.12)}
+.app-shell .ac-premium-maintenance-overview .card{border:1px solid #dce8f5!important;border-radius:16px!important;background:#fff!important;box-shadow:0 7px 22px rgba(15,59,112,.055)!important;padding:20px}
+.app-shell .ac-premium-record-table{padding:0!important;overflow-x:auto;border:1px solid #dce8f5!important;border-radius:16px!important;box-shadow:0 7px 22px rgba(15,59,112,.055)!important;background:#fff!important}
+.app-shell .ac-premium-record-table table{width:100%;border-collapse:separate;border-spacing:0}
+.app-shell .ac-premium-record-table thead{background:#f3f8ff}
+.app-shell .ac-premium-record-table th{font-size:11px;font-weight:800;letter-spacing:.03em;color:#56728f;padding:15px;text-align:left;border-bottom:1px solid #e1eaf6}
+.app-shell .ac-premium-record-table td{padding:16px 15px;border-bottom:1px solid #edf2f9;vertical-align:middle;font-size:13px;line-height:1.5}
+.app-shell .ac-premium-record-table tbody tr:last-child td{border-bottom:0}
+.app-shell .ac-premium-record-table td strong{font-weight:800;color:#183e6e}
+.app-shell .ac-premium-record-table td .micro,.app-shell .ac-premium-record-table td .muted{color:#7386a0}
+.app-shell .ac-premium-record-actions{display:flex;align-items:center;justify-content:flex-start;gap:7px;flex-wrap:wrap;min-width:0}
+.app-shell .ac-premium-record-actions>button,.app-shell .ac-premium-record-actions>label,.app-shell .ac-premium-record-actions>details>summary{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 11px!important;border:1px solid #d8e6f6!important;background:#f5f9ff!important;color:#174c89!important;border-radius:9px!important;font-size:12px!important;font-weight:750;white-space:normal;line-height:1.2;cursor:pointer}
+.app-shell .ac-premium-record-actions>details>summary{min-width:39px}
+.ac-premium-location-help{max-width:320px;font-size:11px;line-height:1.4;color:#a65d16;background:#fff5e5;border:1px solid #f3dfb8;border-radius:8px;padding:7px 9px}
+@media(max-width:1180px){.app-shell .ac-premium-service-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.app-shell .ac-premium-service-stats{gap:10px}.app-shell .ac-premium-service-stat{padding:14px;gap:7px}.app-shell .ac-premium-service-stat .value{font-size:19px}.app-shell .ac-premium-record-tools{display:grid;grid-template-columns:minmax(0,1fr)}.app-shell .ac-premium-record-tools .record-search,.app-shell .ac-premium-record-tools .record-filter-panel{width:100%;min-width:0}.app-shell .ac-premium-record-table{overflow-x:visible}.app-shell .ac-premium-record-table table,.app-shell .ac-premium-record-table tbody{display:block;width:100%}.app-shell .ac-premium-record-table thead{display:none}.app-shell .ac-premium-record-table tr{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:15px;border-bottom:1px solid #e6eef8}.app-shell .ac-premium-record-table td{display:block;padding:0!important;border:0!important;min-width:0;overflow-wrap:anywhere}.app-shell .ac-premium-record-table td::before{content:attr(data-label);display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#7086a0;font-weight:800;margin-bottom:4px}.app-shell .ac-premium-record-actions{gap:7px}.app-shell .ac-premium-record-actions>button,.app-shell .ac-premium-record-actions>label{flex:1 1 120px}}
+@media(max-width:370px){.app-shell .ac-premium-service-stats{grid-template-columns:minmax(0,1fr)}.app-shell .ac-premium-record-actions>button,.app-shell .ac-premium-record-actions>label{flex:1 1 100%}}
