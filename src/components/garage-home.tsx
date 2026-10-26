@@ -169,21 +169,24 @@ export function GarageHome({
         </section>
       </div>
       <div className="ac-premium-bottom-grid">
-        <section className="ac-premium-panel ac-premium-list">
+        <section className="ac-premium-panel ac-premium-list ac-premium-illustrated ac-premium-illustrated-1">
+          <img className="ac-premium-card-art" src="/images/autocare-documents-premium.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Files size={22}/></span> Documente care expiră</h3><button type="button" onClick={() => navigate('Documente')}>Vezi toate <ArrowRight size={15}/></button></div>
           {home.documents.filter(r => r.status.days !== null && r.status.days <= 30).slice(0,3).map(r =>
             <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Files size={19}/><span><strong>{r.category || r.title}</strong><small>{vehicle(r.vehicleId)}</small></span><em>{r.status.days !== null && r.status.days < 0 ? 'Expirat' : `În ${r.status.days} zile`}</em></button>
           )}
           {!home.documentAttention && <p className="ac-premium-empty">Niciun document care necesită atenție.</p>}
         </section>
-        <section className="ac-premium-panel ac-premium-list">
+        <section className="ac-premium-panel ac-premium-list ac-premium-illustrated ac-premium-illustrated-2">
+          <img className="ac-premium-card-art" src="/images/autocare-tools-premium.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Wrench size={22}/></span> Ultimele intervenții</h3><button type="button" onClick={() => navigate('Întreținere')}>Vezi toate <ArrowRight size={15}/></button></div>
           {[...home.services].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3).map(r =>
             <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wrench size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.odometer === null ? '—' : `${r.odometer.toLocaleString('ro-RO')} km`}</em></button>
           )}
           {!home.services.length && <p className="ac-premium-empty">Nu ai înregistrat încă intervenții.</p>}
         </section>
-        <section className="ac-premium-panel ac-premium-list">
+        <section className="ac-premium-panel ac-premium-list ac-premium-illustrated ac-premium-illustrated-3">
+          <img className="ac-premium-card-art" src="/images/autocare-coins-premium.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Wallet size={22}/></span> Cheltuieli recente</h3><button type="button" onClick={() => navigate('Cheltuieli')}>Vezi toate <ArrowRight size={15}/></button></div>
           {[...records].filter(r => ['expense','service'].includes(r.kind)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3).map(r =>
             <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wallet size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.amountKnown === false ? 'Necunoscut' : money(r.amountBani)}</em></button>
