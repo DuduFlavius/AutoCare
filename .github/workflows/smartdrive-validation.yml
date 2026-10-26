@@ -29,10 +29,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Lint
+        id: lint
+        if: always()
+        continue-on-error: true
         run: npm run lint
       - name: TypeScript
+        id: typecheck
+        if: always()
+        continue-on-error: true
         run: npm run typecheck
       - name: Isolated PGlite tests
+        id: tests
+        if: always()
+        continue-on-error: true
         run: npm test
       - name: Build
+        id: build
+        if: always()
+        continue-on-error: true
         run: npm run build
+      - name: Enforce all verification results
+        if: always()
+        run: |
+          echo 'lint=${{ steps.lint.outcome }}'
+          echo 'typecheck=${{ steps.typecheck.outcome }}'
+          echo 'tests=${{ steps.tests.outcome }}'
+          echo 'build=${{ steps.build.outcome }}'
+          test '${{ steps.lint.outcome }}' = success
+          test '${{ steps.typecheck.outcome }}' = success
+          test '${{ steps.tests.outcome }}' = success
+          test '${{ steps.build.outcome }}' = success
