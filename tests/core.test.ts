@@ -307,7 +307,7 @@ test('08 Mileage uses manual odometer and timezone/hour preferences are respecte
   const n = await scheduleReminders(now);
   assert.equal(n, 1);
   const km = (await db().select().from(s.notifications).where(eq(s.notifications.offset, 'km')))[0];
-  assert.ok(km.message.includes('manual'));
+  assert.ok(km.message.includes('Ai atins 14000 km'));
   await svc.saveProfile(uid, {
     timezone: 'America/New_York',
     emailEnabled: true,
