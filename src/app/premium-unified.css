@@ -511,3 +511,58 @@ html body .ac-premium-dashboard .ac-premium-panel{box-shadow:0 10px 26px #1c3440
 /* Image clarity: avoid extra enlargement, softening and stacked overlays */
 html body .ac-premium-dashboard .ac-premium-vehicle:before{background-image:linear-gradient(90deg,rgba(4,14,27,.89) 0%,rgba(4,14,27,.54) 35%,rgba(4,14,27,.03) 77%),url("/images/autocare-cinematic-exact.svg")!important;background-position:center center!important;background-size:cover!important;filter:none!important;transform:none!important;image-rendering:auto!important;opacity:1!important}
 html body .ac-premium-dashboard .ac-premium-vehicle{overflow:hidden!important;isolation:isolate!important}
+
+
+/* AUTOCARE REFERENCE 1727x884 — consolidated visual fidelity overrides.
+   The desktop sidebar and content offset are kept equal to prevent black gutters. */
+@media(min-width:821px){
+html body .app-shell{padding-left:242px!important;background:#f0eeeb!important}
+html body .app-shell>.sidebar{width:242px!important;min-width:242px!important;left:0!important;background:linear-gradient(160deg,#fff 0%,#faf9f7 65%,#f5f2ee 100%)!important;border-right:1px solid #e8e5df!important;padding:14px 15px!important}
+html body .app-shell>.app-header,html body .app-shell>main{margin-left:0!important;width:100%!important;box-sizing:border-box!important}
+html body .app-shell>.sidebar nav{gap:3px!important;margin-top:22px!important}
+html body .app-shell>.sidebar nav button{min-height:46px!important;font-size:14px!important;border-radius:10px!important}
+html body .app-shell main.workspace-dashboard{padding:16px 24px 24px!important}
+}
+html body .app-shell>.sidebar .brand .brand-word,html body .app-shell>.sidebar .brand .brand-word .accent{color:#0d2041!important;-webkit-text-fill-color:#0d2041!important;opacity:1!important;font-weight:900!important;font-size:22px!important;letter-spacing:-.035em!important}
+html body .app-shell>.sidebar .brand .brandmark{background:#173e87!important;border-radius:11px!important}
+html body .app-shell>.sidebar nav button.active{background:linear-gradient(110deg,#1169ef,#1754d3)!important;color:#fff!important}
+html body .app-shell main.workspace-dashboard{background:radial-gradient(ellipse at 50% 5%,#f6f4f1 0%,#efede9 70%,#eae7e2 100%)!important}
+html body .app-shell main.workspace-dashboard .page-head{margin-bottom:14px!important;align-items:center!important}
+html body .app-shell main.workspace-dashboard .page-head h1{color:#0b1f40!important;font-weight:850!important;letter-spacing:-.045em!important}
+html body .app-shell main.workspace-dashboard .page-head .muted{color:#52657c!important}
+html body .ac-premium-dashboard .ac-premium-overview{grid-template-columns:minmax(0,1.85fr) minmax(0,1fr) minmax(0,1fr)!important;gap:16px!important}
+html body .ac-premium-dashboard .ac-premium-overview>.ac-premium-panel{min-height:395px!important;height:395px!important;padding:16px!important;border-radius:15px!important}
+html body .ac-premium-dashboard .ac-premium-vehicle{padding:22px 24px!important}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{background-image:linear-gradient(90deg,rgba(5,16,31,.82) 0%,rgba(5,16,31,.40) 35%,rgba(5,16,31,.01) 75%),url("/images/autocare-cinematic-exact.svg")!important;background-size:cover!important;background-position:center!important}
+html body .ac-premium-dashboard .ac-premium-vehicle-content{padding-top:22px!important}
+html body .ac-premium-dashboard .ac-premium-car-description h2{font-size:clamp(28px,2.6vw,39px)!important}
+html body .ac-premium-dashboard .ac-premium-car-description button{background:linear-gradient(120deg,#1474ff,#1154dc)!important;border:0!important;color:#fff!important;min-height:52px!important;padding:12px 22px!important;border-radius:10px!important;font-size:15px!important}
+html body .ac-premium-dashboard .ac-premium-plate{background:#fff!important;color:#0c2344!important;border:1px solid #dce6f4!important;box-shadow:0 3px 9px #081a3030!important}
+html body .ac-premium-dashboard .ac-premium-vehicle-footer{margin-top:auto!important;background:linear-gradient(90deg,#061526c7,#0716288f)!important;border-top:1px solid #ffffff3a!important;padding:14px 4px!important}
+html body .ac-premium-dashboard .ac-premium-vehicle-footer>button{background:#172a41d9!important;color:#fff!important;border-radius:9px!important}
+html body .ac-premium-dashboard .ac-premium-odometer,html body .ac-premium-dashboard .ac-premium-next{background:linear-gradient(155deg,#fffdfb,#f7f5f1)!important}
+html body .ac-premium-dashboard .ac-premium-kicker{font-size:12px!important;font-weight:850!important;letter-spacing:.012em!important;color:#102443!important;display:flex!important;align-items:center!important;gap:9px!important}
+html body .ac-premium-dashboard .ac-premium-vehicle .ac-premium-kicker{color:#fff!important}
+html body .ac-premium-dashboard .ac-oil-hero{background:#f8f0e5!important;border:1px solid #f1e2ce!important;border-radius:12px!important;min-height:110px!important;margin:12px 0 8px!important}
+html body .ac-premium-dashboard .ac-oil-next{font-size:clamp(18px,1.5vw,22px)!important;color:#0a2143!important}
+html body .ac-premium-dashboard .ac-oil-info>span{color:#385473!important;font-size:13px!important}
+html body .ac-premium-dashboard .ac-oil-progress{background:#e1e5e8!important}
+html body .ac-premium-dashboard .ac-oil-progress i{background:linear-gradient(90deg,#187bff,#1754d5)!important}
+html body .ac-premium-dashboard .ac-oil-detail{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:8px!important;border-bottom:1px solid #eae6e1!important;padding:10px 0!important}
+html body .ac-premium-dashboard .ac-oil-detail>span{display:flex!important;align-items:center!important;gap:9px!important;color:#526783!important}
+html body .ac-premium-dashboard .ac-oil-detail>strong{text-align:right!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;color:#0e2443!important}
+html body .ac-premium-dashboard .ac-oil-detail>strong small{font-size:11px!important;color:#65758c!important;font-weight:500!important}
+html body .ac-premium-dashboard .ac-premium-primary,html body .ac-premium-dashboard .ac-premium-next>button:last-child{background:#dce9ff!important;border:1px solid #b9d2f8!important;color:#1251aa!important;border-radius:10px!important;min-height:47px!important;margin-top:auto!important}
+html body .ac-premium-dashboard .ac-term-empty{background:#f0eeeb!important;border-radius:12px!important;color:#102443!important}
+html body .ac-premium-dashboard .ac-premium-metric-strip{background:transparent!important;gap:12px!important}
+html body .ac-premium-dashboard .ac-premium-metric-strip>span{background:#faf9f7!important;border:1px solid #e7e4df!important;border-radius:10px!important;padding:12px!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid{gap:16px!important;margin-top:16px!important}
+html body .ac-premium-dashboard .ac-premium-bottom-grid>.ac-premium-panel:not(.ac-premium-quick){min-height:165px!important;height:165px!important;padding:15px!important;background:linear-gradient(125deg,#fffdfb,#f5f3ef)!important}
+html body .ac-premium-dashboard .ac-premium-list .ac-premium-section-heading h3{font-size:13px!important}
+html body .ac-premium-dashboard .ac-premium-list .ac-premium-section-heading button{background:#deebff!important;border:1px solid #c3d8fa!important;border-radius:9px!important}
+html body .ac-premium-dashboard .ac-premium-quick{background:linear-gradient(125deg,#fffdfb,#f8f7f5)!important;border-radius:15px!important;min-height:130px!important}
+html body .ac-premium-dashboard .ac-premium-quick>button{background:#edf4ff!important;border:1px solid #d2e1fa!important;border-radius:10px!important}
+html body .ac-premium-dashboard .ac-premium-quick>button:hover{background:#e1edff!important;transform:translateY(-1px)}
+@media(max-width:1200px) and (min-width:821px){html body .ac-premium-dashboard .ac-premium-overview{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)!important}html body .ac-premium-dashboard .ac-premium-next{grid-column:1/-1!important}html body .ac-premium-dashboard .ac-premium-overview>.ac-premium-panel{height:auto!important;min-height:320px!important}}
+@media(max-width:820px){html body .app-shell{padding-left:0!important}html body .ac-premium-dashboard .ac-premium-overview{grid-template-columns:1fr!important}html body .ac-premium-dashboard .ac-premium-overview>.ac-premium-panel{height:auto!important;min-height:0!important}html body .ac-premium-dashboard .ac-premium-vehicle{min-height:365px!important}html body .ac-premium-dashboard .ac-premium-next{grid-column:auto!important}}
+@media(max-width:540px){html body .ac-premium-dashboard .ac-premium-bottom-grid{grid-template-columns:1fr!important}html body .ac-premium-dashboard .ac-premium-bottom-grid>.ac-premium-panel:not(.ac-premium-quick){height:auto!important;min-height:160px!important}html body .ac-premium-dashboard .ac-premium-quick{grid-template-columns:1fr!important}html body .ac-premium-dashboard .ac-premium-vehicle:before{background-position:64% center!important}}
