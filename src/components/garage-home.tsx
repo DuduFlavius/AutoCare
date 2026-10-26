@@ -52,6 +52,10 @@ export function GarageHome({
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
   const carDocuments = home.documents.filter((r) => r.vehicleId === car?.id);
   const nextRecords = home.upcoming;
+  const oilChanges = home.services.filter((r) => r.vehicleId === car?.id && /schimb\s+ulei|ulei\s+motor/i.test(r.category || r.title || '') && r.nextKm != null).sort((a, b) => (b.odometer ?? 0) - (a.odometer ?? 0));
+  const nextOilKm = oilChanges[0]?.nextKm ?? null;
+  const oilKmRemaining = nextOilKm === null || !car ? null : nextOilKm - car.odometer;
+
 
   const documentSoon = carDocuments.filter((r) => r.status.days !== null && r.status.days >= 0 && r.status.days <= 30).length;
   const documentExpired = carDocuments.filter((r) => r.status.days !== null && r.status.days < 0).length;
@@ -97,6 +101,10 @@ export function GarageHome({
           <span className="ac-premium-kicker"><Gauge size={17}/> KILOMETRAJ</span>
           <strong className="ac-premium-big-number">{car ? car.odometer.toLocaleString('ro-RO') : '—'} <small>km</small></strong>
           <p>Valoare înregistrată pentru mașina selectată</p>
+          <div className="ac-premium-metric-strip" role="status" aria-live="polite">
+            <span>Următorul schimb de ulei <strong>{nextOilKm === null ? 'Neconfigurat' : nextOilKm.toLocaleString('ro-RO') + ' km'}</strong></span>
+            <span>{oilKmRemaining === null ? 'Adaugă un schimb de ulei cu următorul kilometraj' : oilKmRemaining < 0 ? 'Schimb depășit cu' : oilKmRemaining === 0 ? 'Schimb scadent acum' : 'Mai ai până la schimb'} <strong>{oilKmRemaining === null ? '—' : Math.abs(oilKmRemaining).toLocaleString('ro-RO') + ' km'}</strong></span>
+          </div>
           <div className="ac-premium-metric-strip"><span>Mașini active <strong>{cars.length}</strong></span><span>Intervenții <strong>{home.services.filter(r => r.vehicleId === car?.id).length}</strong></span></div>
           <button type="button" className="ac-premium-primary" onClick={() => navigate('Plan întreținere')}>Actualizează kilometrajul <ArrowRight size={16}/></button>
         </section>
