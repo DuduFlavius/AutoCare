@@ -53,8 +53,21 @@ export function GarageHome({
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
   const carDocuments = home.documents.filter((r) => r.vehicleId === car?.id);
   const nextRecords = home.upcoming;
-  const oilChanges = home.services.filter((r) => r.vehicleId === car?.id && /schimb\s+ulei|ulei\s+motor/i.test(r.category || r.title || '') && r.nextKm != null).sort((a, b) => (b.odometer ?? 0) - (a.odometer ?? 0));
-  const nextOilKm = oilChanges[0]?.nextKm ?? null;
+  // Keep dashboard in sync with existing service records, including oil intervals
+  // entered in the detailed intervention form before nextKm was persisted.
+  const oilChanges = home.services.filter((r) => {
+    if (r.vehicleId !== car?.id) return false;
+    const label = [r.category, r.title].filter(Boolean).join(' ').toLocaleLowerCase('ro-RO');
+    return /ulei/.test(label) && /(schimb|motor|revizie)/.test(label);
+  }).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.odometer ?? 0) - (a.odometer ?? 0));
+  const lastOil = oilChanges[0];
+  const savedOilInterval = lastOil?.parts?.match(/(?:^|\\n)\\[ac:intervalUlei\\]:\\s*(\\d+(?:[.,]\\d+)?)/)?.[1];
+  const parsedOilInterval = savedOilInterval ? Number(savedOilInterval.replace(',', '.')) : null;
+  const nextOilKm = lastOil?.nextKm ?? (
+    lastOil?.odometer != null && parsedOilInterval !== null && Number.isFinite(parsedOilInterval) && parsedOilInterval > 0
+      ? lastOil.odometer + parsedOilInterval
+      : null
+  );
   const oilKmRemaining = nextOilKm === null || !car ? null : nextOilKm - car.odometer;
 
 
