@@ -489,3 +489,21 @@ html body .ac-premium-dashboard .ac-premium-vehicle-footer{background:linear-gra
 html body .ac-premium-dashboard .ac-premium-panel{border-radius:16px!important}
 html body .ac-premium-dashboard .ac-premium-next,html body .ac-premium-dashboard .ac-premium-odometer{box-shadow:0 10px 25px #182c4110!important}
 @media(max-width:820px){html body .app-shell>.app-header{min-height:52px!important}html body .app-shell>.app-header .autocare-header-user{padding:5px!important}html body .app-shell>.sidebar .brand .brand-word{font-size:20px!important}}
+
+
+/* Structural repair: sidebar is 222px; content offset MUST match. Eliminates 16px black gutter. */
+@media(min-width:821px){
+html body .app-shell{padding-left:222px!important;background:#efede9!important}
+html body .app-shell>.sidebar{left:0!important;right:auto!important;width:222px!important;min-width:222px!important;box-sizing:border-box!important;border-right:1px solid #e1ded8!important;background:#f7f6f4!important;box-shadow:none!important}
+html body .app-shell>.app-header{margin-left:0!important;width:100%!important;box-sizing:border-box!important}
+html body .app-shell>main{margin-left:0!important;box-sizing:border-box!important}
+}
+@media(max-width:820px){html body .app-shell{padding-left:0!important}}
+/* Final high-contrast navigation and restrained premium finishes */
+html body .app-shell>.sidebar .brand-word,html body .app-shell>.sidebar .brand-word .accent{color:#101e34!important;-webkit-text-fill-color:#101e34!important;font-size:21px!important;font-weight:850!important;opacity:1!important}
+html body .app-shell>.sidebar nav button:not(.active){color:#243957!important;font-weight:600!important}
+html body .app-shell>.sidebar nav button.active{background:linear-gradient(120deg,#175ad4,#3456bf)!important;color:#fff!important}
+html body .app-shell>.sidebar .brandmark{background:#204a9e!important;box-shadow:0 3px 10px #1e4d9d2b!important}
+html body .app-shell .app-header{background:#f7f6f4!important;border-bottom:1px solid #e0ddd7!important}
+html body .ac-premium-dashboard .ac-premium-vehicle:before{background-image:linear-gradient(90deg,#071525c2 0%,#07152565 40%,transparent 82%),url("/images/autocare-cinematic-exact.svg")!important;background-size:cover!important;background-position:center!important}
+html body .ac-premium-dashboard .ac-premium-panel{box-shadow:0 10px 26px #1c344012!important}
