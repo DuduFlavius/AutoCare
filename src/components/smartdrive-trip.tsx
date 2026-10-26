@@ -20,6 +20,8 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
   const [samples, setSamples] = useState(0);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const [trackingSeconds, setTrackingSeconds] = useState(0);
+  const [clock, setClock] = useState('');
+  const [startedAt, setStartedAt] = useState<number | null>(null);
   const watcher = useRef<number | null>(null);
   const previous = useRef<Sample | null>(null);
   const started = useRef<number | null>(null);
@@ -38,8 +40,9 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
     if (preview) { setError('GPS-ul nu este activ în modul demonstrativ.'); return; }
     if (!window.isSecureContext || !('geolocation' in navigator)) { setError('GPS-ul necesită HTTPS și un browser cu localizare.'); return; }
     if (watcher.current !== null) return;
+    setStartedAt(Date.now()); setClock(new Date().toLocaleTimeString('ro-RO'));
     setDistance(0); distanceRef.current = 0; setSamples(0); setAccuracy(null); setTrackingSeconds(0); setError(''); setNotice(''); previous.current = null; started.current = Date.now();
-    tick.current = setInterval(() => setTrackingSeconds(Math.floor((Date.now() - (started.current ?? Date.now())) / 1000)), 1000);
+    tick.current = setInterval(() => { setTrackingSeconds(Math.floor((Date.now() - (started.current ?? Date.now())) / 1000)); setClock(new Date().toLocaleTimeString('ro-RO')); }, 1000);
     watcher.current = navigator.geolocation.watchPosition(
       ({ coords, timestamp }) => {
         const next: Sample = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, timestamp };
@@ -79,7 +82,13 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Estimarea distanței unei călătorii</h3></div>
     <div className="ac-smartdrive-trip-metric"><strong>{(distance / 1000).toLocaleString('ro-RO', { maximumFractionDigits: 2 })}</strong><span>km estimați prin GPS</span></div>
-    <p role="status">Durată: {Math.floor(trackingSeconds / 60)} min {trackingSeconds % 60} sec · Precizie GPS: {accuracy === null ? 'în așteptare' : `±${accuracy} m`} · Citiri valide: {samples}</p>
+    <div className="ac-smartdrive-live" aria-live="off">
+      <div><span>Distanță parcursă</span><strong>{(distance / 1000).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km</strong></div>
+      <div><span>Ora actuală</span><strong>{clock || '--:--:--'}</strong></div>
+      <div><span>Timp de la pornire</span><strong>{String(Math.floor(trackingSeconds / 3600)).padStart(2, '0')}:{String(Math.floor(trackingSeconds % 3600 / 60)).padStart(2, '0')}:{String(trackingSeconds % 60).padStart(2, '0')}</strong></div>
+      <div><span>Început urmărire</span><strong>{startedAt === null ? '—' : new Date(startedAt).toLocaleTimeString('ro-RO')}</strong></div>
+    </div>
+    <p role="status">Precizie GPS: {accuracy === null ? 'în așteptare' : `±${accuracy} m`} · Citiri valide: {samples} · {active ? 'Urmărire în desfășurare' : 'Urmărire oprită'}</p>
     <p>GPS-ul funcționează numai cât pagina rămâne activă și browserul permite localizarea. Distanța este estimativă și nu modifică kilometrajul real de pe bord. Poți salva separat distanța și durata după oprire; coordonatele GPS nu sunt trimise la server.</p>
     {vehicles.length > 0 && <label>Mașina pentru călătorie <select value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}
     <div className="ac-smartdrive-trip-controls">
