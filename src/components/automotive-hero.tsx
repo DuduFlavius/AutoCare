@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ArrowUpRight, CarFront, Gauge, Fuel, Plus } from 'lucide-react';
 
 export default function AutomotiveHero({
-  name, photo, vehicleName, vehicleYear, vehicleFuel, vehiclePlate, vehicleKm, hasCars, navigate, add,
+  photo, vehicleName, vehicleYear, vehicleFuel, vehiclePlate, vehicleKm, hasCars, navigate, add,
 }: {
   name: string;
   photo?: string;
