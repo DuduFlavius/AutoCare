@@ -1630,3 +1630,33 @@ html body .app-shell>.sidebar .sidebar-profile strong{color:#fff!important}
 html body .app-shell>.sidebar .sidebar-profile small{color:#c5d8f1!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{width:62px!important;height:52px!important;margin:12px 0!important;background:#eaf3ff!important;background-image:none!important;border:1px solid #c8dbf2!important;border-radius:13px!important;box-shadow:none!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{width:32px!important;height:32px!important;color:#2467bd!important;stroke:#2467bd!important}
+
+/* Mobile usability + founder contrast + profile and vehicle icon polish. */
+html body .app-shell>.sidebar .sidebar-profile{display:flex!important;align-items:center!important;gap:12px!important;background:#234b80!important;border:1px solid #426fa6!important;border-radius:15px!important;padding:12px!important}
+html body .app-shell>.sidebar .sidebar-profile .profile-avatar{display:grid!important;place-items:center!important;width:43px!important;height:43px!important;min-width:43px!important;border-radius:50%!important;background:#3877c2!important;background-image:none!important;border:2px solid #90b8e7!important;color:#fff!important;font-weight:800!important;box-shadow:0 3px 12px #0d284d40!important}
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{display:grid!important;place-items:center!important;width:56px!important;height:56px!important;margin:14px 0!important;border-radius:50%!important;background:#e3efff!important;border:1px solid #b8d2f0!important;box-shadow:none!important}
+html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{width:30px!important;height:30px!important;color:#2866b0!important;stroke:#2866b0!important}
+html body .founder-shell .founder-main{background:#edf3fa!important;color:#203e66!important;color-scheme:light!important}
+html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.table-scroll,section,article){color:#23446e}
+html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.table-scroll){background:#fff!important;background-image:none!important;border-color:#cbdced!important;box-shadow:0 5px 20px #315a8510!important}
+html body .founder-shell .founder-main :is(h1,h2,h3,h4,p,li,label,td,th,small,strong,span){color:#25466f!important;opacity:1!important}
+html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:#2467bd!important;color:#fff!important}
+html body .founder-shell .founder-main :is(button.primary,button[type=submit]) :is(span,strong,svg){color:#fff!important}
+html body .founder-shell .founder-main :is(input,select,textarea){background:#fff!important;color:#203e66!important;border:1px solid #bdd0e6!important}
+@media(max-width:760px){
+ html body .app-shell .autocare-mobile-dock{display:flex!important;align-items:stretch!important;justify-content:space-around!important;background:#173f77!important;background-image:none!important;border-top:1px solid #3b70b5!important;box-shadow:0 -5px 22px #122f5b35!important;gap:3px!important;padding:7px 6px calc(9px + env(safe-area-inset-bottom,0px))!important}
+ html body .app-shell .autocare-mobile-dock button{flex:1 1 0!important;min-width:0!important;min-height:58px!important;background:transparent!important;background-image:none!important;color:#e7f2ff!important;border:1px solid transparent!important;border-radius:12px!important;box-shadow:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important}
+ html body .app-shell .autocare-mobile-dock button :is(svg,span){color:#e7f2ff!important;opacity:1!important}
+ html body .app-shell .autocare-mobile-dock button.active{background:#3174c6!important;color:#fff!important;border-color:#70a8ed!important}
+ html body .app-shell .autocare-mobile-dock button.active :is(svg,span){color:#fff!important}
+ html body .app-shell .autocare-mobile-dock button span{font-size:11px!important;font-weight:700!important;white-space:nowrap!important}
+ html body .app-shell main.main{min-width:0!important;overflow-x:hidden!important;padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))!important}
+ html body .app-shell main.main .table-scroll{width:100%!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;background:#fff!important;border:1px solid #d3e0ee!important;border-radius:14px!important}
+ html body .app-shell main.main .table-scroll table{width:100%!important;min-width:580px!important;border-collapse:collapse!important;table-layout:auto!important}
+ html body .app-shell main.main .table-scroll :is(th,td){white-space:normal!important;overflow-wrap:anywhere!important;padding:12px 10px!important;color:#27466d!important;vertical-align:top!important}
+ html body .app-shell main.main .table-scroll th{background:#e8f1fc!important;color:#214d83!important;font-weight:750!important}
+ html body .app-shell main.main .table-scroll td{background:#fff!important;border-bottom:1px solid #e0e9f4!important}
+ html body .app-shell main.main .table-scroll .pill{white-space:nowrap!important}
+ html body .app-shell main.main .card>.between{flex-wrap:wrap!important;gap:10px!important}
+ html body .founder-shell .founder-main{min-width:0!important;overflow-x:auto!important}
+}
