@@ -47,7 +47,7 @@ export function GarageHome({
   open: (record: Entry) => void;
 }) {
   const home = dashboardHome(data);
-  const { cars, records } = home;
+  const { cars, records, attention: due } = home;
   const [selectedCar, setSelectedCar] = useState('');
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
   const carDocuments = home.documents.filter((r) => r.vehicleId === car?.id);
@@ -110,7 +110,7 @@ export function GarageHome({
               <small>Deschide înregistrarea <ArrowRight size={13}/></small>
             </button> : <p className="ac-premium-empty">Nu există un termen viitor înregistrat pentru această mașină.</p>;
           })()}
-          <div className="ac-premium-metric-strip"><span>Documente în atenție <strong>{documentSoon + documentExpired}</strong></span></div>
+          <div className="ac-premium-metric-strip"><span>Documente în atenție <strong>{documentSoon + documentExpired}</strong></span><span>Termene prioritare <strong>{due.length}</strong></span></div>
           <button type="button" onClick={() => navigate('Calendar')}>Vezi calendarul <ArrowRight size={16}/></button>
         </section>
       </div>
