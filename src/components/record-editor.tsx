@@ -1,6 +1,6 @@
 'use client';
 import { useRef, useState, type FormEvent } from 'react';
-import ServiceDetailFields, { serializeServiceDetails } from './service-detail-fields';
+import ServiceDetailFields, { serializeServiceDetails, parseServiceDetails } from './service-detail-fields';
 import { CarFront, Files, Wrench, Paperclip, Check, ChevronDown } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -64,9 +64,9 @@ export default function RecordEditor({
     [error, setError] = useState(''),
     [details, setDetails] = useState(false),
     [file, setFile] = useState<File | null>(null),
-    [costParts, setCostParts] = useState(''),
-    [costLabor, setCostLabor] = useState(''),
-    [costOther, setCostOther] = useState(''),
+    [costParts, setCostParts] = useState(parseServiceDetails(record?.parts||'').costPiese||''),
+    [costLabor, setCostLabor] = useState(parseServiceDetails(record?.parts||'').costLabor||''),
+    [costOther, setCostOther] = useState(parseServiceDetails(record?.parts||'').costOther||''),
     [costEdited, setCostEdited] = useState(false),
     [unknownCost, setUnknownCost] = useState(
       kind === 'document' ? false : record ? record.amountKnown === false : false,
@@ -310,7 +310,7 @@ export default function RecordEditor({
             <label>Alte costuri · RON<input name="ac_costOther" type="number" min="0" max="1000000" step="0.01" inputMode="decimal" disabled={unknownCost} value={costOther} onChange={e=>{setCostOther(e.target.value);setCostEdited(true)}} placeholder="Opțional"/></label>
           </div>}
           <label>{kind === 'service' ? 'Cost total · RON' : 'Cost · RON'}
-            <input type="number" inputMode="decimal" name="amount" min={0} max={1000000} step="0.01" disabled={unknownCost || (kind==='service'&&costEdited)}
+            <input key={costEdited ? "computed-cost" : "manual-cost"} type="number" inputMode="decimal" name="amount" min={0} max={1000000} step="0.01" disabled={unknownCost || (kind==='service'&&costEdited)}
               value={kind==='service'&&costEdited ? (Number(costParts||0)+Number(costLabor||0)+Number(costOther||0)).toFixed(2) : undefined}
               defaultValue={kind==='service'&&costEdited ? undefined : record && record.amountKnown !== false ? record.amountBani / 100 : ''}
               placeholder="Introdu suma sau completează defalcarea"/>
