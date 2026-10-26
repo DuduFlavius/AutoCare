@@ -51,6 +51,7 @@ const tabs = [
   ['Documente', Files],
   ['Calendar', CalendarDays],
   ['Întreținere', Wrench],
+  ['Plan întreținere', Gauge],
   ['Cheltuieli', Wallet],
   ['Centru de suport', MessageSquare],
   ['Istoric auto', Gauge],
@@ -163,6 +164,72 @@ function Dialog({
     </div>
   );
 }
+
+function MileagePlanner({ data, preview, onUpdated, onError }: {
+  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void;
+}) {
+  const [editing, setEditing] = useState<string | null>(null);
+  const [km, setKm] = useState('');
+  const [saving, setSaving] = useState(false);
+  const cars = data.vehicles.filter(v => !v.archived);
+  const services = data.records.filter(r => r.kind === 'service' && !r.cancelled && r.nextKm != null && Number(r.nextKm) > 0);
+  const fmt = (n: number) => n.toLocaleString('ro-RO') + ' km';
+  async function saveKm(v: Vehicle) {
+    const value = Number(km);
+    if (!Number.isSafeInteger(value) || value < 0 || value < v.odometer) {
+      onError('Introdu un kilometraj valid, cel puțin egal cu cel înregistrat anterior.');
+      return;
+    }
+    if (preview) { onError('În previzualizare nu se salvează date.'); return; }
+    setSaving(true);
+    try {
+      await api('vehicles/' + v.id, 'PATCH', {
+        brand:v.brand, model:v.model, year:v.year, plate:v.plate, vin:v.vin,
+        engine:v.engine, fuel:v.fuel, capacity:v.capacity, odometer:value,
+        purchasedAt:v.purchasedAt, notes:v.notes,
+      });
+      await onUpdated();
+      setEditing(null);
+    } catch (e) { onError(e instanceof Error ? e.message : 'Nu s-a putut actualiza kilometrajul.'); }
+    finally { setSaving(false); }
+  }
+  return (
+    <section className="mileage-planner">
+      <div className="mileage-planner-heading">
+        <div><span className="eyebrow">AUTOCARE · PLANIFICARE</span><h2>Următoarea întreținere</h2>
+          <p>Calcule bazate pe kilometrajul introdus și termenele salvate în istoricul mașinii. Nu sunt estimări GPS.</p></div>
+        <span className="mileage-planner-icon"><Gauge size={27}/></span>
+      </div>
+      {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
+      <div className="mileage-planner-grid">
+        {cars.map(v => {
+          const due = services.filter(r => r.vehicleId === v.id).sort((a,b) => Number(a.nextKm)-Number(b.nextKm));
+          return <article key={v.id} className="mileage-planner-card">
+            <div className="between"><div><span className="eyebrow">{v.plate}</span><h3>{v.brand} {v.model}</h3></div><CarFront size={28}/></div>
+            <div className="mileage-planner-odometer"><span>Kilometraj înregistrat</span><strong>{fmt(v.odometer)}</strong></div>
+            {editing === v.id ? <div className="mileage-planner-edit">
+              <label>Kilometraj actual (km)<input type="number" min={v.odometer} step="1" value={km} onChange={e => setKm(e.target.value)} /></label>
+              <button className="primary" disabled={saving} onClick={() => void saveKm(v)}>{saving ? 'Se salvează…' : 'Actualizează km'}</button>
+              <button disabled={saving} onClick={() => setEditing(null)}>Anulează</button>
+            </div> : <button onClick={() => {setEditing(v.id);setKm(String(v.odometer));}}>Actualizează kilometrajul</button>}
+            {!due.length ? <p className="mileage-planner-empty">Nu există încă o intervenție cu kilometrajul următorului schimb. Adaugă termenul în secțiunea Întreținere.</p> :
+              <div className="mileage-planner-items">{due.map(r => {
+                const left = Number(r.nextKm) - v.odometer;
+                return <div className="mileage-planner-item" key={r.id}>
+                  <div><strong>{r.title || r.category || 'Intervenție'}</strong><small>Termen: {fmt(Number(r.nextKm))}</small></div>
+                  <span className={left <= 0 ? 'mileage-overdue' : left <= 1000 ? 'mileage-soon' : 'mileage-ok'}>
+                    {left <= 0 ? 'Depășit cu ' + fmt(Math.abs(left)) : 'Mai sunt ' + fmt(left)}
+                  </span>
+                </div>;
+              })}</div>}
+            <p className="micro">Recomandare AutoCare: actualizează kilometrajul periodic. Intervalele se stabilesc după manualul producătorului și condițiile de utilizare.</p>
+          </article>;
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function Dashboard({ name, previewData }: { name: string; previewData?: Data }) {
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState('Dashboard'),
@@ -555,7 +622,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             <nav aria-label="Navigare mobil">
               {([
                 ['ESENȚIAL', ['Dashboard', 'Garaj', 'Documente', 'Notificări']],
-                ['ORGANIZARE', ['Calendar', 'Întreținere', 'Cheltuieli', 'Istoric auto']],
+                ['ORGANIZARE', ['Calendar', 'Întreținere', 'Plan întreținere', 'Cheltuieli', 'Istoric auto']],
                 ['CONT ȘI AJUTOR', ['Centru de suport', 'Abonament', 'Setări']],
               ] as const).map(([group, labels]) => (
                 <div className="autocare-mobile-menu-group" key={group}>
@@ -794,6 +861,8 @@ export default function Dashboard({ name, previewData }: { name: string; preview
               ? 'service'
               : tab === 'Garaj'
                 ? 'garage'
+                : tab === 'Plan întreținere'
+                  ? 'service'
                 : tab === 'Abonament'
                   ? 'membership'
                   : tab === 'Setări'
@@ -1684,6 +1753,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                 )}
               </section>
             )}
+            {tab === 'Plan întreținere' && <MileagePlanner data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
             {tab === 'Notificări' && (
               <div className="overview-stack">
                 <PushSettings
