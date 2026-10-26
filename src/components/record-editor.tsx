@@ -1,5 +1,6 @@
 'use client';
 import { useRef, useState, type FormEvent } from 'react';
+import ServiceDetailFields, { serializeServiceDetails } from './service-detail-fields';
 import { CarFront, Files, Wrench, Paperclip, Check, ChevronDown } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -58,11 +59,15 @@ export default function RecordEditor({
       record?.category ||
         (kind === 'document' ? 'RCA' : kind === 'service' ? 'Schimb ulei' : 'Combustibil'),
     ),
-    [serviceKmInterval, setServiceKmInterval] = useState('10000'),
+    [serviceKmInterval, setServiceKmInterval] = useState(''),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [details, setDetails] = useState(false),
     [file, setFile] = useState<File | null>(null),
+    [costParts, setCostParts] = useState(''),
+    [costLabor, setCostLabor] = useState(''),
+    [costOther, setCostOther] = useState(''),
+    [costEdited, setCostEdited] = useState(false),
     [unknownCost, setUnknownCost] = useState(
       kind === 'document' ? false : record ? record.amountKnown === false : false,
     );
@@ -84,6 +89,8 @@ export default function RecordEditor({
     const str = (k: string) => String(f.get(k) || '').trim();
     const num = (k: string) => (str(k) === '' ? null : Number(str(k)));
     const computedNextKm = kind === 'service' && category === 'Schimb ulei' && num('nextKm') === null && num('odometer') !== null && Number(serviceKmInterval) > 0 ? Number(num('odometer')) + Number(serviceKmInterval) : num('nextKm');
+    const partsTotal = ['ac_costPiese','ac_costLabor','ac_costOther'].reduce((sum,k)=>sum+(num(k)||0),0);
+    const finalAmount = kind === 'service' && costEdited ? partsTotal : (num('amount')||0);
     setError('');
     if (!car) {
       setError('Alege mașina căreia îi aparține înregistrarea.');
@@ -113,21 +120,11 @@ export default function RecordEditor({
           expiresAt: str('expiresAt') || null,
           nextKm: computedNextKm,
           odometer: num('odometer'),
-          amountBani: unknownCost ? 0 : Math.round((num('amount') || 0) * 100),
-          amountKnown: !unknownCost && str('amount') !== '',
+          amountBani: unknownCost ? 0 : Math.round(finalAmount * 100),
+          amountKnown: !unknownCost && (costEdited || str('amount') !== ''),
           provider: str('provider'),
           number: str('number'),
-          parts: kind === 'service' && category === 'Frâne'
-            ? [
-                str('parts').split('\\n').filter((line) => !/^(Piese frână|Producător frână|Preț piese frână|Manoperă frână): /.test(line)).join('\\n').trim(),
-                ...([
-                  ['Piese frână', str('brakePart')],
-                  ['Producător frână', str('brakeMaker')],
-                  ['Preț piese frână', str('brakePartsPrice') ? str('brakePartsPrice') + ' RON' : ''],
-                  ['Manoperă frână', str('brakeLabor') ? str('brakeLabor') + ' RON' : ''],
-                ] as const).filter(([, value]) => value).map(([label, value]) => label + ': ' + value),
-              ].filter(Boolean).join('\\n')
-            : str('parts'),
+          parts: kind === 'service' ? serializeServiceDetails(str('parts'),f) : str('parts'),
           notes: str('notes'),
         },
         file,
@@ -291,62 +288,13 @@ export default function RecordEditor({
           </label>
         )}
       </div>
-      {kind === 'service' && category === 'Schimb ulei' && (
-        <section className="service-oil-planner" aria-label="Planificare schimb ulei">
-          <h3>Planifică următorul schimb de ulei</h3>
-          <p className="micro">Alege intervalul recomandat pentru motorul tău. Nu este o recomandare automată a producătorului.</p>
-          <div className="form-grid">
-            <label>Interval în kilometri
-              <select value={serviceKmInterval} onChange={(e) => { setServiceKmInterval(e.target.value); mark(); }}>
-                <option value="5000">5.000 km</option>
-                <option value="7500">7.500 km</option>
-                <option value="10000">10.000 km</option>
-                <option value="15000">15.000 km</option>
-                <option value="20000">20.000 km</option>
-                <option value="30000">30.000 km</option>
-              </select>
-            </label>
-            <label>Următorul schimb (km)
-              <output>{Number((record?.odometer ?? data.vehicles.find(v => v.id === car)?.odometer ?? 0) + Number(serviceKmInterval)).toLocaleString('ro-RO')} km estimativ</output>
-            </label>
-          </div>
-          <p className="micro">Introdu kilometrajul real al intervenției mai sus pentru calcul corect. Poți suprascrie pragul în „Detalii suplimentare”.</p>
-        </section>
-      )}
-      {kind === 'service' && category === 'Frâne' && (
-        <section className="service-brake-details" aria-label="Detalii intervenție frâne">
-          <h3>Detalii frâne</h3>
-          <p className="micro">Completează piesele schimbate, producătorul și costurile. Datele se păstrează în istoricul lucrării.</p>
-          <div className="form-grid">
-            <label>Ce piese ai schimbat?
-              <select name="brakePart" defaultValue={brakeValue('Piese frână')}>
-                <option value="">Selectează piesele</option>
-                <option value="Plăcuțe față">Plăcuțe față</option>
-                <option value="Plăcuțe spate">Plăcuțe spate</option>
-                <option value="Discuri față">Discuri față</option>
-                <option value="Discuri spate">Discuri spate</option>
-                <option value="Discuri și plăcuțe față">Discuri și plăcuțe față</option>
-                <option value="Discuri și plăcuțe spate">Discuri și plăcuțe spate</option>
-                <option value="Lichid de frână">Lichid de frână</option>
-                <option value="Altă intervenție la frâne">Altă intervenție la frâne</option>
-              </select>
-            </label>
-            <label>Producător / marcă piese
-              <input name="brakeMaker" maxLength={120} defaultValue={brakeValue('Producător frână')} placeholder="Ex.: ATE, Brembo, TRW" />
-            </label>
-            <label>Preț piese (RON)
-              <input name="brakePartsPrice" type="number" min="0" max="1000000" step="0.01" defaultValue={brakeValue('Preț piese frână').replace(' RON', '')} placeholder="0,00" />
-            </label>
-            <label>Manoperă (RON)
-              <input name="brakeLabor" type="number" min="0" max="1000000" step="0.01" defaultValue={brakeValue('Manoperă frână').replace(' RON', '')} placeholder="0,00" />
-            </label>
-          </div>
-          <p className="micro">Costul total al lucrării se introduce în câmpul „Cost · RON” de mai jos.</p>
-        </section>
-      )}
-      {kind === 'service' && category === 'Baterie' && (
-        <p className="micro service-oil-planner">Pentru baterie, notează marca, modelul, capacitatea (Ah) și garanția în „Piese și materiale”. Costul și kilometrajul rămân disponibile.</p>
-      )}
+      {kind === 'service' && <>
+        <ServiceDetailFields key={category} category={category} parts={record?.category===category ? record?.parts||'' : ''}/>
+        {category === 'Schimb ulei' && <label className="ac-oil-interval">Interval pentru următorul schimb · opțional, în km
+          <input type="number" min="1" step="1" value={serviceKmInterval} onChange={e=>{setServiceKmInterval(e.target.value);mark()}} placeholder="Conform recomandării producătorului"/>
+          <small>Se calculează doar dacă ai introdus kilometrajul intervenției. Poți stabili manual următorul termen mai jos.</small>
+        </label>}
+      </>}
       {kind === 'document' && (
         <label>
           Număr sau serie · opțional
@@ -354,32 +302,24 @@ export default function RecordEditor({
         </label>
       )}
       {kind !== 'document' && (
-        <div className="cost-field">
-          <label>
-            Cost · RON
-            <input
-              type="number"
-              inputMode="decimal"
-              name="amount"
-              min={0}
-              max={1000000}
-              step="0.01"
-              disabled={unknownCost}
-              defaultValue={record && record.amountKnown !== false ? record.amountBani / 100 : ''}
-              placeholder="0,00"
-            />
+        <div className="cost-field ac-cost-breakdown">
+          <h3>Costurile intervenției</h3>
+          {kind === 'service' && <div className="form-grid">
+            <label>Cost piese / materiale · RON<input name="ac_costPiese" type="number" min="0" max="1000000" step="0.01" inputMode="decimal" disabled={unknownCost} value={costParts} onChange={e=>{setCostParts(e.target.value);setCostEdited(true)}} placeholder="Opțional"/></label>
+            <label>Cost manoperă · RON<input name="ac_costLabor" type="number" min="0" max="1000000" step="0.01" inputMode="decimal" disabled={unknownCost} value={costLabor} onChange={e=>{setCostLabor(e.target.value);setCostEdited(true)}} placeholder="Opțional"/></label>
+            <label>Alte costuri · RON<input name="ac_costOther" type="number" min="0" max="1000000" step="0.01" inputMode="decimal" disabled={unknownCost} value={costOther} onChange={e=>{setCostOther(e.target.value);setCostEdited(true)}} placeholder="Opțional"/></label>
+          </div>}
+          <label>{kind === 'service' ? 'Cost total · RON' : 'Cost · RON'}
+            <input type="number" inputMode="decimal" name="amount" min={0} max={1000000} step="0.01" disabled={unknownCost || (kind==='service'&&costEdited)}
+              value={kind==='service'&&costEdited ? (Number(costParts||0)+Number(costLabor||0)+Number(costOther||0)).toFixed(2) : undefined}
+              defaultValue={kind==='service'&&costEdited ? undefined : record && record.amountKnown !== false ? record.amountBani / 100 : ''}
+              placeholder="Introdu suma sau completează defalcarea"/>
           </label>
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={unknownCost}
-              onChange={(e) => setUnknownCost(e.target.checked)}
-            />
-            Costul nu este cunoscut încă
-          </label>
-          <p className="micro">Pentru o operațiune gratuită, debifează și introdu 0.</p>
+          <label className="check"><input type="checkbox" checked={unknownCost} onChange={e=>setUnknownCost(e.target.checked)}/>Costul nu este cunoscut încă</label>
+          <p className="micro">Dacă intervenția a fost gratuită, introdu 0 RON. Dacă nu cunoști costul, bifează opțiunea de mai sus.</p>
         </div>
       )}
+
       <details
         open={details}
         onToggle={(e) => setDetails(e.currentTarget.open)}
