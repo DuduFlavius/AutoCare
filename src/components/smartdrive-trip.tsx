@@ -18,30 +18,42 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
   const [distance, setDistance] = useState(0);
   const [error, setError] = useState('');
   const [samples, setSamples] = useState(0);
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+  const [trackingSeconds, setTrackingSeconds] = useState(0);
   const watcher = useRef<number | null>(null);
   const previous = useRef<Sample | null>(null);
   const started = useRef<number | null>(null);
+  const tick = useRef<ReturnType<typeof setInterval> | null>(null);
+  const distanceRef = useRef(0);
   const stop = () => {
     if (watcher.current !== null && typeof navigator !== 'undefined' && 'geolocation' in navigator) navigator.geolocation.clearWatch(watcher.current);
     watcher.current = null;
+    if (tick.current) clearInterval(tick.current);
+    tick.current = null;
     previous.current = null;
     setActive(false);
   };
-  useEffect(() => () => { if (watcher.current !== null) navigator.geolocation.clearWatch(watcher.current); }, []);
+  useEffect(() => () => { if (watcher.current !== null) navigator.geolocation.clearWatch(watcher.current); if (tick.current) clearInterval(tick.current); }, []);
   const start = () => {
     if (preview) { setError('GPS-ul nu este activ în modul demonstrativ.'); return; }
     if (!window.isSecureContext || !('geolocation' in navigator)) { setError('GPS-ul necesită HTTPS și un browser cu localizare.'); return; }
     if (watcher.current !== null) return;
-    setDistance(0); setSamples(0); setError(''); setNotice(''); previous.current = null; started.current = Date.now();
+    setDistance(0); distanceRef.current = 0; setSamples(0); setAccuracy(null); setTrackingSeconds(0); setError(''); setNotice(''); previous.current = null; started.current = Date.now();
+    tick.current = setInterval(() => setTrackingSeconds(Math.floor((Date.now() - (started.current ?? Date.now())) / 1000)), 1000);
     watcher.current = navigator.geolocation.watchPosition(
       ({ coords, timestamp }) => {
         const next: Sample = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, timestamp };
         // Reject inaccurate points and implausible GPS jumps; never change the odometer.
         if (!Number.isFinite(next.accuracy) || next.accuracy > 60) return;
+        setAccuracy(Math.round(next.accuracy));
         if (previous.current) {
           const seconds = (next.timestamp - previous.current.timestamp) / 1000;
           const meters = segmentMeters(previous.current, next);
-          if (seconds > 0 && meters > Math.max(10, next.accuracy, previous.current.accuracy) && meters / seconds < 65) setDistance(v => v + meters);
+          // Avoid counting stationary GPS drift, old fixes and implausible jumps.
+          if (seconds > 0 && seconds <= 90 && meters > Math.max(12, next.accuracy, previous.current.accuracy) && meters / seconds < 55) {
+            distanceRef.current += meters;
+            setDistance(distanceRef.current);
+          }
         }
         previous.current = next; setSamples(v => v + 1);
       },
@@ -52,20 +64,22 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
   };
   const saveTrip = async () => {
     const id = vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0]?.id;
-    if (!id || !started.current || distance <= 0 || preview) { setError('Selectează o mașină și înregistrează o distanță validă.'); return; }
+    if (active) { setError('Oprește urmărirea înainte de salvare.'); return; }
+    if (!id || !started.current || distanceRef.current <= 0 || preview) { setError('Selectează o mașină și înregistrează o distanță validă.'); return; }
     const ended = Date.now();
     setSaving(true);
     try {
-      const res = await fetch('/api/v1/smartdrive/vehicles/' + id + '/trips', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ distanceMeters: Math.round(distance), durationSeconds: Math.max(1, Math.round((ended - started.current) / 1000)), startedAt: new Date(started.current).toISOString(), endedAt: new Date(ended).toISOString() }) });
+      const res = await fetch('/api/v1/smartdrive/vehicles/' + id + '/trips', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ distanceMeters: Math.round(distanceRef.current), durationSeconds: Math.max(1, Math.round((ended - started.current) / 1000)), startedAt: new Date(started.current).toISOString(), endedAt: new Date(ended).toISOString() }) });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || 'Salvarea călătoriei a eșuat.');
-      setNotice('Călătoria estimată a fost salvată. Actualizează pagina pentru a vedea istoricul.'); setError('');
+      setNotice('Călătoria GPS a fost salvată. Istoricul se actualizează după reîncărcarea paginii. Kilometrajul de bord nu este modificat automat.'); setError('');
     } catch(e) { setError(e instanceof Error ? e.message : 'Salvarea a eșuat.'); }
     finally { setSaving(false); }
   };
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Estimarea distanței unei călătorii</h3></div>
     <div className="ac-smartdrive-trip-metric"><strong>{(distance / 1000).toLocaleString('ro-RO', { maximumFractionDigits: 2 })}</strong><span>km estimați prin GPS</span></div>
+    <p role="status">Durată: {Math.floor(trackingSeconds / 60)} min {trackingSeconds % 60} sec · Precizie GPS: {accuracy === null ? 'în așteptare' : `±${accuracy} m`} · Citiri valide: {samples}</p>
     <p>GPS-ul funcționează numai cât pagina rămâne activă și browserul permite localizarea. Distanța este estimativă și nu modifică kilometrajul real de pe bord. Poți salva separat distanța și durata după oprire; coordonatele GPS nu sunt trimise la server.</p>
     {vehicles.length > 0 && <label>Mașina pentru călătorie <select value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}
     <div className="ac-smartdrive-trip-controls">
