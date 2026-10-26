@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   FileText,
   ShieldAlert,
+  Sparkles,
 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -81,8 +82,14 @@ export function GarageHome({
             <span className="ac-premium-status">{car ? 'Activă' : 'Garaj gol'}</span>
           </div>
           <div className="ac-premium-vehicle-content">
-            <div className="ac-premium-car-visual"><CarFront size={100} strokeWidth={1.05}/></div>
+            <div className="ac-premium-car-visual ac-lux-car-visual">
+              <div className="ac-lux-car-glow" aria-hidden="true"/>
+              <div className="ac-lux-car-emblem"><CarFront size={84} strokeWidth={1.25}/></div>
+              <div className="ac-lux-car-floor" aria-hidden="true"/>
+              <span className="ac-lux-car-label"><Sparkles size={13}/> AUTOCARE GARAGE</span>
+            </div>
             <div className="ac-premium-car-description">
+              <span className="ac-lux-car-eyebrow">GARAJ PERSONAL · VEHICUL SELECTAT</span>
               <h2>{car ? `${car.brand} ${car.model}` : 'Bine ai venit în AutoCare'}</h2>
               <p>{car ? [car.year,car.fuel].filter(Boolean).join(' · ') : 'Adaugă prima mașină pentru a începe.'}</p>
               {car && <span className="ac-premium-plate">{car.plate}</span>}
