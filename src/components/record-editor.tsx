@@ -68,7 +68,7 @@ export default function RecordEditor({
     [costLabor, setCostLabor] = useState(parseServiceDetails(record?.parts||'').costLabor||''),
     [costOther, setCostOther] = useState(parseServiceDetails(record?.parts||'').costOther||''),
     [costEdited, setCostEdited] = useState(false),
-    [live, setLive] = useState({date:record?.date||'',km:record?.odometer?.toString()||'',next:record?.nextKm?.toString()||'',due:record?.expiresAt||''}),
+    [live, setLive] = useState({date:record?.date||'',km:record?.odometer?.toString()||'',next:record?.nextKm?.toString()||'',due:record?.expiresAt||'',amount:record?.amountKnown!==false&&record?.amountBani!=null?(record.amountBani/100).toString():''}),
     [unknownCost, setUnknownCost] = useState(
       kind === 'document' ? false : record ? record.amountKnown === false : false,
     );
@@ -139,7 +139,7 @@ export default function RecordEditor({
     }
   }
   return (
-    <form className="quick-record-form" onSubmit={submit} onChange={(e)=>{mark();const f=new FormData(e.currentTarget);setLive({date:String(f.get("date")||""),km:String(f.get("odometer")||""),next:String(f.get("nextKm")||""),due:String(f.get("expiresAt")||"")})}}>
+    <form className="quick-record-form" onSubmit={submit} onChange={(e)=>{mark();const f=new FormData(e.currentTarget);setLive({date:String(f.get("date")||""),km:String(f.get("odometer")||""),next:String(f.get("nextKm")||""),due:String(f.get("expiresAt")||""),amount:String(f.get("amount")||"")})}}>
       <div className="record-editor-intro">
         <span>
           <CarFront size={21} />
@@ -436,7 +436,7 @@ export default function RecordEditor({
         <div><span>Operațiune</span><strong>{category}</strong></div>
         <div><span>Data</span><strong>{live.date||'Necompletată'}</strong></div>
         <div><span>Kilometraj</span><strong>{live.km?Number(live.km).toLocaleString('ro-RO')+' km':'Necompletat'}</strong></div>
-        <div><span>Cost</span><strong>{unknownCost?'Necunoscut':costEdited?(Number(costParts||0)+Number(costLabor||0)+Number(costOther||0)).toFixed(2)+' RON':record?.amountKnown!==false&&record?.amountBani!=null?(record.amountBani/100).toFixed(2)+' RON':'Completează costul'}</strong></div>
+        <div><span>Cost</span><strong>{unknownCost?'Necunoscut':costEdited?(Number(costParts||0)+Number(costLabor||0)+Number(costOther||0)).toFixed(2)+' RON':live.amount!==''?Number(live.amount).toFixed(2)+' RON':'Completează costul'}</strong></div>
         <div><span>Următorul termen</span><strong>{live.due|| (live.next?Number(live.next).toLocaleString('ro-RO')+' km':'Nesetat')}</strong></div>
       </aside>}
       <footer className="record-form-footer">
