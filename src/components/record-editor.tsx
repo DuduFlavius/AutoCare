@@ -58,6 +58,7 @@ export default function RecordEditor({
       record?.category ||
         (kind === 'document' ? 'RCA' : kind === 'service' ? 'Schimb ulei' : 'Combustibil'),
     ),
+    [serviceKmInterval, setServiceKmInterval] = useState('10000'),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [details, setDetails] = useState(false),
@@ -78,6 +79,7 @@ export default function RecordEditor({
     const f = new FormData(e.currentTarget);
     const str = (k: string) => String(f.get(k) || '').trim();
     const num = (k: string) => (str(k) === '' ? null : Number(str(k)));
+    const computedNextKm = kind === 'service' && category === 'Schimb ulei' && num('nextKm') === null && num('odometer') !== null && Number(serviceKmInterval) > 0 ? Number(num('odometer')) + Number(serviceKmInterval) : num('nextKm');
     setError('');
     if (!car) {
       setError('Alege mașina căreia îi aparține înregistrarea.');
@@ -105,7 +107,7 @@ export default function RecordEditor({
           title: custom ? str('title') : str('title') || category,
           date: str('date') || null,
           expiresAt: str('expiresAt') || null,
-          nextKm: num('nextKm'),
+          nextKm: computedNextKm,
           odometer: num('odometer'),
           amountBani: unknownCost ? 0 : Math.round((num('amount') || 0) * 100),
           amountKnown: !unknownCost && str('amount') !== '',
@@ -275,6 +277,31 @@ export default function RecordEditor({
           </label>
         )}
       </div>
+      {kind === 'service' && category === 'Schimb ulei' && (
+        <section className="service-oil-planner" aria-label="Planificare schimb ulei">
+          <h3>Planifică următorul schimb de ulei</h3>
+          <p className="micro">Alege intervalul recomandat pentru motorul tău. Nu este o recomandare automată a producătorului.</p>
+          <div className="form-grid">
+            <label>Interval în kilometri
+              <select value={serviceKmInterval} onChange={(e) => { setServiceKmInterval(e.target.value); mark(); }}>
+                <option value="5000">5.000 km</option>
+                <option value="7500">7.500 km</option>
+                <option value="10000">10.000 km</option>
+                <option value="15000">15.000 km</option>
+                <option value="20000">20.000 km</option>
+                <option value="30000">30.000 km</option>
+              </select>
+            </label>
+            <label>Următorul schimb (km)
+              <output>{Number((record?.odometer ?? data.vehicles.find(v => v.id === car)?.odometer ?? 0) + Number(serviceKmInterval)).toLocaleString('ro-RO')} km estimativ</output>
+            </label>
+          </div>
+          <p className="micro">Introdu kilometrajul real al intervenției mai sus pentru calcul corect. Poți suprascrie pragul în „Detalii suplimentare”.</p>
+        </section>
+      )}
+      {kind === 'service' && category === 'Baterie' && (
+        <p className="micro service-oil-planner">Pentru baterie, notează marca, modelul, capacitatea (Ah) și garanția în „Piese și materiale”. Costul și kilometrajul rămân disponibile.</p>
+      )}
       {kind === 'document' && (
         <label>
           Număr sau serie · opțional
@@ -372,12 +399,11 @@ export default function RecordEditor({
                   <input name="expiresAt" type="date" defaultValue={record?.expiresAt || ''} />
                 </label>
                 <label>
-                  Prag kilometraj {data.premium ? '' : '· Premium'}
+                  Prag kilometraj · opțional
                   <input
                     name="nextKm"
                     type="number"
                     min={0}
-                    disabled={!data.premium}
                     defaultValue={record?.nextKm ?? ''}
                   />
                 </label>
