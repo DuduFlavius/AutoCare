@@ -60,3 +60,14 @@ html body .record-form-footer button[type="button"] { background: #eef5ff !impor
 html body .record-form-footer button:focus-visible { outline: 3px solid #ffbd59; outline-offset: 2px; }
 html body .record-form-footer button:disabled { opacity: .55 !important; cursor: not-allowed; }
 @media (max-width: 600px) { html body .dialog:has(.record-form-footer) { max-height: 94dvh; width: calc(100vw - 16px); } html body .record-form-footer { padding: 12px; gap: 8px; } html body .record-form-footer button { min-width: 0; flex-basis: calc(50% - 4px); font-size: 14px; } }
+
+
+/* Small nonintrusive PWA install entry, visible on mobile only. */
+.ac-mobile-install{display:none}
+@media(max-width:800px){
+.ac-mobile-install{display:block;position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:1000;max-width:min(340px,calc(100vw - 24px));font-family:inherit}
+.ac-mobile-install-trigger{background:#1268e5!important;color:#fff!important;border:1px solid #1268e5!important;border-radius:999px!important;padding:10px 15px!important;min-height:42px;box-shadow:0 5px 18px #0d408044;font-weight:700;font-size:13px}
+.ac-mobile-install-help{position:absolute;right:0;bottom:calc(100% + 10px);width:min(340px,calc(100vw - 24px));padding:17px;background:#fff;color:#19365b;border:1px solid #c7d9ef;border-radius:16px;box-shadow:0 12px 38px #142d4b33;line-height:1.5}
+.ac-mobile-install-help>button{float:right;border:0;background:transparent;color:#19365b;font-size:23px}
+.ac-mobile-install-help p{margin:8px 0}
+}
