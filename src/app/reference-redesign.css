@@ -1677,3 +1677,37 @@ html body .app-shell main.main.workspace-documents table tbody td[data-label="Co
 html body .app-shell main.main.workspace-documents table tbody tr{background:#fff!important}
 html body .app-shell main.main.workspace-documents table tbody tr:nth-child(even){background:#f3f7fd!important}
 @media(max-width:760px){html body .app-shell main.main.workspace-documents table tbody td:first-child{min-width:0!important}html body .app-shell main.main.workspace-documents table tbody td[data-label="Dată și termen"]{min-width:0!important}}
+
+/* Accessible expiration indicators and polished account / founder controls. */
+html body .app-shell main.main :is(.status.warning,.status-badge.warning,.chip.warning,.pill.warning,.status.soon,.status-badge.soon,.pill.soon,.expiring-soon,.expires-soon){
+ background:#fff0ce!important;background-image:none!important;color:#805015!important;border:1px solid #e6c37d!important;text-shadow:none!important;opacity:1!important;
+}
+html body .app-shell main.main :is(.status.expired,.status-badge.expired,.chip.expired,.pill.expired){
+ background:#fde8e8!important;color:#922e3c!important;border:1px solid #edb5be!important;opacity:1!important;
+}
+html body .app-shell main.main :is(.status.valid,.status-badge.valid,.chip.valid,.pill.valid){
+ background:#e4f5ec!important;color:#206848!important;border:1px solid #a5d8bc!important;opacity:1!important;
+}
+html body .app-shell main.main :is(.status.warning,.status-badge.warning,.chip.warning,.pill.warning,.status.soon,.status-badge.soon,.pill.soon) :is(span,strong,small,svg){color:#805015!important}
+html body .app-shell main.main.workspace-documents :is(.stat,.card,.record-line,.document-row,.document-card) :is(.small,.muted,small,span,label){opacity:1!important}
+html body .app-shell main.main.workspace-documents :is(.stat,.card,.record-line,.document-row,.document-card) :is(h2,h3,strong){color:#234b7c!important}
+html body .app-shell>.sidebar .sidebar-profile{
+ background:#254a76!important;background-image:none!important;border:1px solid #547eac!important;
+ border-radius:16px!important;padding:12px!important;box-shadow:0 5px 16px #061c3d28!important;
+}
+html body .app-shell>.sidebar .sidebar-profile .profile-avatar{
+ width:44px!important;height:44px!important;min-width:44px!important;display:grid!important;place-items:center!important;
+ background:#d9e9ff!important;background-image:none!important;color:#194d87!important;
+ border:2px solid #9fc6f3!important;border-radius:50%!important;box-shadow:none!important;
+ font-size:18px!important;font-weight:800!important;
+}
+html body .app-shell>.sidebar .sidebar-profile strong{color:#fff!important;font-weight:750!important}
+html body .app-shell>.sidebar .sidebar-profile small{color:#d6e5f8!important}
+html body .founder-shell{color-scheme:light!important}
+html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace){background:#edf3fa!important;color:#23466f!important}
+html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) :is(.card,.panel,.stat,.tile,.table-scroll,article,section){
+ background:#fff!important;background-image:none!important;border-color:#d1e0ef!important;color:#23466f!important;
+}
+html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) :is(h1,h2,h3,h4,p,li,td,th,small,label,strong,span){color:#23466f!important;opacity:1!important}
+html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) :is(button.primary,button[type=submit]){background:#2467bd!important;color:#fff!important}
+html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) :is(button.primary,button[type=submit]) :is(span,strong,svg){color:#fff!important}
