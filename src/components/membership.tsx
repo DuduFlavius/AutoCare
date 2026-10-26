@@ -188,7 +188,7 @@ export default function Membership({
         <h2>Mai mult control asupra fiecărei mașini.</h2>
         <p className="small muted">Premium deblochează funcții suplimentare pentru organizarea, urmărirea și analiza întreținerii. Toate planurile Premium au aceleași funcții; diferă doar perioada de facturare.</p>
         <div className="ac-premium-benefit-grid">
-          <div><strong>Mai multe mașini</strong><p>Gestionează până la limita Premium configurată în garaj, față de o singură mașină în planul gratuit.</p></div>
+          <div><strong>Mai multe mașini</strong><p>Adaugă oricâte mașini dorești în garaj, față de o singură mașină în planul gratuit.</p></div>
           <div><strong>Istoric și exporturi</strong><p>Urmărește intervențiile, costurile și exportă datele disponibile în format CSV.</p></div>
           <div><strong>Mai multă flexibilitate</strong><p>Configurează ora locală preferată pentru mementouri și gestionează termenele de întreținere.</p></div>
           <div><strong>Documente și cheltuieli</strong><p>Păstrează în același loc documentele, intervențiile și costurile pentru mașinile tale.</p></div>
@@ -196,7 +196,7 @@ export default function Membership({
         <h3>Gratuit sau Premium?</h3>
         <div className="ac-premium-comparison" role="table" aria-label="Comparație planuri">
           <div role="row"><strong role="columnheader">Funcție</strong><strong role="columnheader">Gratuit</strong><strong role="columnheader">Premium</strong></div>
-          <div role="row"><span>Mașini active</span><span>1</span><span>Până la limita Premium</span></div>
+          <div role="row"><span>Mașini active</span><span>1</span><span>Nelimitate</span></div>
           <div role="row"><span>Documente și istoric de bază</span><span>Inclus</span><span>Inclus</span></div>
           <div role="row"><span>Export CSV Premium</span><span>Nu</span><span>Da</span></div>
           <div role="row"><span>Ora preferată a alertelor</span><span>Standard</span><span>Configurabilă</span></div>
