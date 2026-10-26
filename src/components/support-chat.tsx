@@ -247,7 +247,7 @@ export default function SupportChat({
       return;
     void request('/' + selected + '/read', 'POST', { messageId: lastId }).catch(() => {});
   }, [selected, lastId, preview, staff, mobileThread]);
-  async function assign(assigneeId: string) {
+  async function _assign(assigneeId: string) {
     if (!selected || preview) return;
     setBusy(true);
     setError('');
@@ -364,7 +364,7 @@ export default function SupportChat({
   const canWrite = staff
     ? !!current && current.status === 'open' && detail?.thread.id === selected && !!selfId && current.assignedTo === selfId && entered
     : true;
-  const actions = (thread: Thread) => (
+  const _actions = (thread: Thread) => (
     <div className="support-row-actions">
       {thread.status === 'open' && (
         <button
