@@ -1660,3 +1660,20 @@ html body .founder-shell .founder-main :is(input,select,textarea){background:#ff
  html body .app-shell main.main .card>.between{flex-wrap:wrap!important;gap:10px!important}
  html body .founder-shell .founder-main{min-width:0!important;overflow-x:auto!important}
 }
+
+/* Document table: icon must not overlay the record title; due dates must stay legible. */
+html body .app-shell main.main.workspace-documents table tbody td:first-child{position:relative!important;padding-left:19px!important;min-width:220px!important}
+html body .app-shell main.main.workspace-documents table tbody td:first-child>.record-kind-mark{
+ position:static!important;float:none!important;display:inline-flex!important;vertical-align:middle!important;
+ width:30px!important;height:30px!important;min-width:30px!important;margin:0 9px 4px 0!important;
+ padding:5px!important;border-radius:9px!important;background:#e4effc!important;border:1px solid #c2d7f0!important;
+ color:#2462ac!important;box-shadow:none!important;transform:none!important;
+}
+html body .app-shell main.main.workspace-documents table tbody td:first-child>.record-kind-mark svg{width:18px!important;height:18px!important;color:#2462ac!important}
+html body .app-shell main.main.workspace-documents table tbody td:first-child>strong{position:relative!important;display:inline!important;vertical-align:middle!important;color:#1d416d!important;line-height:1.5!important;overflow-wrap:anywhere!important}
+html body .app-shell main.main.workspace-documents table tbody td[data-label="Dată și termen"]{color:#1c456f!important;font-weight:650!important;line-height:1.65!important;min-width:155px!important}
+html body .app-shell main.main.workspace-documents table tbody td[data-label="Dată și termen"]>.muted{color:#275e9b!important;font-size:13px!important;font-weight:650!important;opacity:1!important;white-space:normal!important}
+html body .app-shell main.main.workspace-documents table tbody td[data-label="Cost și statut"] :is(.pill,.badge,span){opacity:1!important}
+html body .app-shell main.main.workspace-documents table tbody tr{background:#fff!important}
+html body .app-shell main.main.workspace-documents table tbody tr:nth-child(even){background:#f3f7fd!important}
+@media(max-width:760px){html body .app-shell main.main.workspace-documents table tbody td:first-child{min-width:0!important}html body .app-shell main.main.workspace-documents table tbody td[data-label="Dată și termen"]{min-width:0!important}}
