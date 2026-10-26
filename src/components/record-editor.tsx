@@ -90,7 +90,8 @@ export default function RecordEditor({
     const f = new FormData(e.currentTarget);
     const str = (k: string) => String(f.get(k) || '').trim();
     const num = (k: string) => (str(k) === '' ? null : Number(str(k)));
-    const computedNextKm = kind === 'service' && category === 'Schimb ulei' && num('nextKm') === null && num('odometer') !== null && Number(serviceKmInterval) > 0 ? Number(num('odometer')) + Number(serviceKmInterval) : num('nextKm');
+    const oilInterval = Number(serviceKmInterval) > 0 ? Number(serviceKmInterval) : Number(str('ac_intervalUlei'));
+    const computedNextKm = kind === 'service' && category === 'Schimb ulei' && num('nextKm') === null && num('odometer') !== null && Number.isFinite(oilInterval) && oilInterval > 0 ? Number(num('odometer')) + oilInterval : num('nextKm');
     const categoryDate = category === 'ITP' ? str('ac_expirareITP') : category === 'Frâne' ? str('ac_verificareFrane') : category === 'Baterie' ? str('ac_verificareBaterie') : category === 'Distribuție' ? str('ac_urmatoareaDataDistributie') : '';
     const computedExpiry = kind === 'service' && !str('expiresAt') && categoryDate ? categoryDate : str('expiresAt');
     const partsTotal = ['ac_costPiese','ac_costLabor','ac_costOther'].reduce((sum,k)=>sum+(num(k)||0),0);
