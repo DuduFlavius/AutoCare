@@ -802,23 +802,47 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           <button
             type="button"
             className="autocare-location-button"
-            title={locationStatus === 'active' ? 'Locație permisă în această sesiune. Nu este salvată pe server.' : locationStatus === 'denied' ? 'Permisiunea a fost refuzată. Activeaz-o din setările site-ului în browser și reîncarcă pagina.' : 'Activează locația pentru AutoCare'}
-            aria-label="Permisiune locație AutoCare"
+            title={locationStatus === 'active' ? 'Locația este activă pe acest dispozitiv.' : 'Verifică sau activează permisiunea de localizare pentru AutoCare'}
+            aria-label="Verifică locația AutoCare"
             disabled={locationStatus === 'loading'}
-            onClick={() => {
-              if (!('geolocation' in navigator) || !window.isSecureContext) { setLocationStatus('unavailable'); return; }
+            onClick={async () => {
+              if (!('geolocation' in navigator) || !window.isSecureContext) {
+                setLocationStatus('unavailable');
+                setNotice('Locația necesită HTTPS și un browser cu suport GPS.');
+                return;
+              }
               setLocationStatus('loading');
+              try {
+                if ('permissions' in navigator && navigator.permissions.query) {
+                  const permission = await navigator.permissions.query({ name: 'geolocation' });
+                  if (permission.state === 'denied') {
+                    setLocationStatus('denied');
+                    setNotice('Locația este blocată în browser. Permite accesul din setările site-ului, apoi încearcă din nou.');
+                    return;
+                  }
+                }
+              } catch { /* Some browsers do not expose geolocation permission state. */ }
               navigator.geolocation.getCurrentPosition(
-                (position) => { setLocationAccuracy(Math.round(position.coords.accuracy)); setLocationStatus('active'); },
-                (err) => setLocationStatus(err.code === 1 ? 'denied' : 'unavailable'),
-                { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
+                (position) => {
+                  setLocationAccuracy(Math.round(position.coords.accuracy));
+                  setLocationStatus('active');
+                  setNotice('Locația a fost activată pe acest dispozitiv.');
+                },
+                (err) => {
+                  setLocationStatus(err.code === 1 ? 'denied' : 'unavailable');
+                  setNotice(err.code === 1
+                    ? 'Accesul la locație a fost refuzat de browser sau de telefon. Permite-l în setările site-ului și ale telefonului.'
+                    : err.code === 3
+                      ? 'Localizarea a durat prea mult. Verifică GPS-ul și conexiunea, apoi reîncearcă.'
+                      : 'Locația nu este disponibilă. Activează serviciile de localizare ale telefonului și reîncearcă.');
+                },
+                { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 },
               );
-            }}
-          >
+            }}          >
             <MapPin size={16}/>
             <span>{locationStatus === 'active' ? 'Locație activă' : locationStatus === 'loading' ? 'Se verifică…' : locationStatus === 'denied' ? 'Locație refuzată' : locationStatus === 'unavailable' ? 'Locație indisponibilă' : 'Activează locația'}</span>
           </button>
-          {locationStatus === 'denied' && <span className="ac-premium-location-help" role="status">Locația este blocată. Deschide setările site-ului din browser, permite accesul la locație și reîncarcă pagina. GPS-ul nu modifică kilometrajul de pe bord.</span>}
+          {locationStatus === 'denied' && <span className="ac-premium-location-help" role="status">Locația este blocată pe dispozitiv. Samsung: Setări site în Chrome → Locație → Permite; verifică și Locație în setările telefonului. iPhone: Configurări → Confidențialitate și securitate → Servicii de localizare și Safari → Locație → Permite. Reîncarcă apoi AutoCare. Permisiunea nu poate fi forțată de aplicație.</span>}
           {locationStatus === 'active' && locationAccuracy !== null && <span className="autocare-location-accuracy" title="Precizia estimată a localizării">±{locationAccuracy} m</span>}
 
           <button className="autocare-header-user" onClick={() => navigate('Setări')} aria-label="Deschide profilul și preferințele">
