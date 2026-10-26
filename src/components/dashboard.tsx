@@ -801,7 +801,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           <button
             type="button"
             className="autocare-location-button"
-            title={locationStatus === 'active' ? 'Locație permisă în această sesiune. Nu este salvată pe server.' : 'Activează locația pentru AutoCare'}
+            title={locationStatus === 'active' ? 'Locație permisă în această sesiune. Nu este salvată pe server.' : locationStatus === 'denied' ? 'Permisiunea a fost refuzată. Activeaz-o din setările site-ului în browser și reîncarcă pagina.' : 'Activează locația pentru AutoCare'}
             aria-label="Permisiune locație AutoCare"
             disabled={locationStatus === 'loading'}
             onClick={() => {
@@ -817,6 +817,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             <MapPin size={16}/>
             <span>{locationStatus === 'active' ? 'Locație activă' : locationStatus === 'loading' ? 'Se verifică…' : locationStatus === 'denied' ? 'Locație refuzată' : locationStatus === 'unavailable' ? 'Locație indisponibilă' : 'Activează locația'}</span>
           </button>
+          {locationStatus === 'denied' && <span className="ac-premium-location-help" role="status">Locația este blocată. Deschide setările site-ului din browser, permite accesul la locație și reîncarcă pagina. GPS-ul nu modifică kilometrajul de pe bord.</span>}
           {locationStatus === 'active' && locationAccuracy !== null && <span className="autocare-location-accuracy" title="Precizia estimată a localizării">±{locationAccuracy} m</span>}
 
           <button className="autocare-header-user" onClick={() => navigate('Setări')} aria-label="Deschide profilul și preferințele">
@@ -1174,7 +1175,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   </>
                 )}
                 {tab === 'Întreținere' && (
-                  <div className="stats maintenance-statistics">
+                  <div className="stats maintenance-statistics ac-premium-service-stats">
                     {[
                       ['Cost înregistrat', money(maintenanceStats.totalBani)],
                       ['Operațiuni', maintenanceStats.count],
@@ -1189,14 +1190,15 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                           : maintenanceStats.lastOdometer.toLocaleString('ro-RO') + ' km',
                       ],
                     ].map(([label, value]) => (
-                      <section key={label} className="card stat">
+                      <section key={label} className="card stat ac-premium-service-stat">
+                        <span className="ac-premium-service-stat-icon" aria-hidden="true">{label === 'Cost înregistrat' ? <Wallet size={19}/> : label === 'Operațiuni' ? <Wrench size={19}/> : label === 'Următoarea intervenție' ? <CalendarDays size={19}/> : <Gauge size={19}/>}</span>
                         <span className="small muted">{label}</span>
                         <div className="value">{value}</div>
                       </section>
                     ))}
                   </div>
                 )}
-                <div className="record-tools">
+                <div className="record-tools ac-premium-record-tools">
                   <div className="record-search">
                     <Search size={18} aria-hidden="true" />
                     <input
@@ -1297,7 +1299,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   </details>
                 </div>
                 {tab === 'Întreținere' && (
-                  <div className="between record-view-switch">
+                  <div className="between record-view-switch ac-premium-record-switch">
                     <p className="micro">
                       {maintenanceStats.unknownCosts > 0
                         ? maintenanceStats.unknownCosts +
@@ -1325,7 +1327,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     (r) =>
                       r.kind === 'service' && !r.cancelled && (r.expiresAt || r.nextKm != null),
                   ) && (
-                    <div className="maintenance-overview">
+                    <div className="maintenance-overview ac-premium-maintenance-overview">
                       <section className="card">
                         <p className="eyebrow">ÎNGRIJIRE LA TIMP</p>
                         <h3>Următoarele intervenții</h3>
@@ -1501,7 +1503,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                             : '')
                     }
                   >
-                    <div className="card table-scroll">
+                    <div className="card table-scroll ac-premium-record-table">
                       <table>
                         <thead>
                           <tr>
@@ -1590,7 +1592,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                                 )}
                               </td>
                               <td data-label="Acțiuni">
-                                <div className="row-actions">
+                                <div className="row-actions ac-premium-record-actions">
                                   <button
                                     onClick={() =>
                                       setModal({
@@ -1603,7 +1605,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                                   </button>
                                   <label
                                     className="button small"
-                                    style={{ padding: '6px 9px', cursor: 'pointer' }}
+                                    style={{ cursor: 'pointer' }}
                                   >
                                     Atașează document
                                     <input
