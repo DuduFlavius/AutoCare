@@ -1415,8 +1415,8 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                             <tr key={r.id}>
                               <td data-label="Înregistrare">
                                 {tab === 'Documente' && (
-                                  <span className="record-kind-mark">
-                                    <Files size={22} strokeWidth={1.5} />
+                                  <span className="record-kind-mark" aria-hidden="true">
+                                    <Files size={20} strokeWidth={1.6} />
                                   </span>
                                 )}
                                 <strong>{r.title}</strong>
