@@ -72,6 +72,10 @@ export default function RecordEditor({
     category === 'Alt document' ||
     category === 'Altă operațiune' ||
     kind === 'expense';
+  const brakeValue = (label: string) => {
+    const line = (record?.parts || '').split('\\n').find((item) => item.startsWith(label + ': '));
+    return line ? line.slice(label.length + 2) : '';
+  };
   const mark = () => onDirty(true);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -113,7 +117,17 @@ export default function RecordEditor({
           amountKnown: !unknownCost && str('amount') !== '',
           provider: str('provider'),
           number: str('number'),
-          parts: str('parts'),
+          parts: kind === 'service' && category === 'Frâne'
+            ? [
+                str('parts').split('\\n').filter((line) => !/^(Piese frână|Producător frână|Preț piese frână|Manoperă frână): /.test(line)).join('\\n').trim(),
+                ...([
+                  ['Piese frână', str('brakePart')],
+                  ['Producător frână', str('brakeMaker')],
+                  ['Preț piese frână', str('brakePartsPrice') ? str('brakePartsPrice') + ' RON' : ''],
+                  ['Manoperă frână', str('brakeLabor') ? str('brakeLabor') + ' RON' : ''],
+                ] as const).filter(([, value]) => value).map(([label, value]) => label + ': ' + value),
+              ].filter(Boolean).join('\\n')
+            : str('parts'),
           notes: str('notes'),
         },
         file,
@@ -297,6 +311,37 @@ export default function RecordEditor({
             </label>
           </div>
           <p className="micro">Introdu kilometrajul real al intervenției mai sus pentru calcul corect. Poți suprascrie pragul în „Detalii suplimentare”.</p>
+        </section>
+      )}
+      {kind === 'service' && category === 'Frâne' && (
+        <section className="service-brake-details" aria-label="Detalii intervenție frâne">
+          <h3>Detalii frâne</h3>
+          <p className="micro">Completează piesele schimbate, producătorul și costurile. Datele se păstrează în istoricul lucrării.</p>
+          <div className="form-grid">
+            <label>Ce piese ai schimbat?
+              <select name="brakePart" defaultValue={brakeValue('Piese frână')}>
+                <option value="">Selectează piesele</option>
+                <option value="Plăcuțe față">Plăcuțe față</option>
+                <option value="Plăcuțe spate">Plăcuțe spate</option>
+                <option value="Discuri față">Discuri față</option>
+                <option value="Discuri spate">Discuri spate</option>
+                <option value="Discuri și plăcuțe față">Discuri și plăcuțe față</option>
+                <option value="Discuri și plăcuțe spate">Discuri și plăcuțe spate</option>
+                <option value="Lichid de frână">Lichid de frână</option>
+                <option value="Altă intervenție la frâne">Altă intervenție la frâne</option>
+              </select>
+            </label>
+            <label>Producător / marcă piese
+              <input name="brakeMaker" maxLength={120} defaultValue={brakeValue('Producător frână')} placeholder="Ex.: ATE, Brembo, TRW" />
+            </label>
+            <label>Preț piese (RON)
+              <input name="brakePartsPrice" type="number" min="0" max="1000000" step="0.01" defaultValue={brakeValue('Preț piese frână').replace(' RON', '')} placeholder="0,00" />
+            </label>
+            <label>Manoperă (RON)
+              <input name="brakeLabor" type="number" min="0" max="1000000" step="0.01" defaultValue={brakeValue('Manoperă frână').replace(' RON', '')} placeholder="0,00" />
+            </label>
+          </div>
+          <p className="micro">Costul total al lucrării se introduce în câmpul „Cost · RON” de mai jos.</p>
         </section>
       )}
       {kind === 'service' && category === 'Baterie' && (
