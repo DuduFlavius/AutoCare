@@ -1777,3 +1777,33 @@ html body .app-shell main.main :is(.founder-panel,.founder-dashboard,.founder-wo
 html body .app-shell main.main :is(.founder-panel,.founder-dashboard,.founder-workspace,.founder-console,.admin-panel,.admin-dashboard,.admin-workspace) :is(.card,.panel,.stat,.tile,section,article){background:#fff!important;color:#1d416e!important;border-color:#d1e0f0!important}
 html body .app-shell main.main :is(.founder-panel,.founder-dashboard,.founder-workspace,.founder-console,.admin-panel,.admin-dashboard,.admin-workspace) :is(p,span,small,label,td,th){color:#355b83!important}
 @media(max-width:760px){html body .dialog-backdrop{padding:8px!important;align-items:center!important}html body .dialog-backdrop>.dialog{width:100%!important;max-height:calc(100dvh - 16px)!important;border-radius:14px!important;padding:17px!important}html body .dialog .quick-record-form .form-grid{grid-template-columns:minmax(0,1fr)!important}}
+
+/* Mobile record editor: viewport-locked, single-column, no sideways scroll or focus zoom. */
+@media(max-width:760px){
+ html,body{max-width:100%!important;overflow-x:clip!important}
+ html body .dialog-backdrop{
+  position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
+  padding:0!important;margin:0!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;
+  overflow:hidden!important;overscroll-behavior:contain!important;z-index:1000!important;
+ }
+ html body .dialog-backdrop>.dialog{
+  box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;
+  height:100dvh!important;max-height:100dvh!important;margin:0!important;padding:18px 16px max(22px,env(safe-area-inset-bottom))!important;
+  border:0!important;border-radius:0!important;overflow-x:hidden!important;overflow-y:auto!important;
+  overscroll-behavior-x:none!important;-webkit-overflow-scrolling:touch!important;
+  background:#f4f8fe!important;color:#1d426e!important;
+ }
+ html body .dialog :is(form,.quick-record-form,.form-grid,.stack,fieldset,label,.record-extra,.service-brake-details,.service-oil-planner,.service-reminder-box){
+  box-sizing:border-box!important;min-width:0!important;max-width:100%!important;
+ }
+ html body .dialog .quick-record-form .form-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important}
+ html body .dialog :is(input,select,textarea){
+  box-sizing:border-box!important;display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;
+  font-size:16px!important;line-height:1.45!important;background:#fff!important;color:#203f68!important;
+ }
+ html body .dialog :is(input[type=checkbox],input[type=radio]){display:inline-block!important;width:auto!important;max-width:100%!important}
+ html body .dialog :is(button,.button){max-width:100%!important;white-space:normal!important}
+ html body .dialog .between{min-width:0!important;max-width:100%!important}
+ html body .dialog .quick-record-form .record-form-footer{position:sticky!important;bottom:0!important;padding:12px 0 max(8px,env(safe-area-inset-bottom))!important;background:#f4f8fe!important}
+ html body .dialog :is(h2,h3,p,small,label){overflow-wrap:break-word!important}
+}
