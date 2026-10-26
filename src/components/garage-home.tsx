@@ -99,7 +99,7 @@ export function GarageHome({
           <strong className="ac-premium-big-number">{car ? car.odometer.toLocaleString('ro-RO') : '—'} <small>km</small></strong>
           <p>Valoare înregistrată pentru mașina selectată</p>
           <div className="ac-premium-metric-strip"><span>Mașini active <strong>{cars.length}</strong></span><span>Intervenții <strong>{home.services.filter(r => r.vehicleId === car?.id).length}</strong></span></div>
-          <button type="button" className="ac-premium-primary" onClick={() => navigate('Garaj')}>Actualizează kilometrajul <ArrowRight size={16}/></button>
+          <button type="button" className="ac-premium-primary" onClick={() => navigate('Plan întreținere')}>Actualizează kilometrajul <ArrowRight size={16}/></button>
         </section>
         <section className="ac-premium-next ac-premium-panel">
           <span className="ac-premium-kicker"><Wrench size={17}/> URMĂTORUL TERMEN</span>
