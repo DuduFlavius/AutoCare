@@ -79,7 +79,7 @@ export default function RecordEditor({
     category === 'Alt document' ||
     category === 'Altă operațiune' ||
     kind === 'expense';
-  const brakeValue = (label: string) => {
+  const _brakeValue = (label: string) => {
     const line = (record?.parts || '').split('\\n').find((item) => item.startsWith(label + ': '));
     return line ? line.slice(label.length + 2) : '';
   };
