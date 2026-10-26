@@ -91,7 +91,8 @@ export default function RecordEditor({
     const str = (k: string) => String(f.get(k) || '').trim();
     const num = (k: string) => (str(k) === '' ? null : Number(str(k)));
     const computedNextKm = kind === 'service' && category === 'Schimb ulei' && num('nextKm') === null && num('odometer') !== null && Number(serviceKmInterval) > 0 ? Number(num('odometer')) + Number(serviceKmInterval) : num('nextKm');
-    const computedExpiry = kind === 'service' && category === 'ITP' && str('ac_expirareITP') ? str('ac_expirareITP') : str('expiresAt');
+    const categoryDate = category === 'ITP' ? str('ac_expirareITP') : category === 'Frâne' ? str('ac_verificareFrane') : category === 'Baterie' ? str('ac_verificareBaterie') : category === 'Distribuție' ? str('ac_urmatoareaDataDistributie') : '';
+    const computedExpiry = kind === 'service' && !str('expiresAt') && categoryDate ? categoryDate : str('expiresAt');
     const partsTotal = ['ac_costPiese','ac_costLabor','ac_costOther'].reduce((sum,k)=>sum+(num(k)||0),0);
     const finalAmount = kind === 'service' && costEdited ? partsTotal : (num('amount') ?? 0);
     const hasCost = kind === 'service' && costEdited ? ['ac_costPiese','ac_costLabor','ac_costOther'].some(k => str(k) !== '') : str('amount') !== '';
