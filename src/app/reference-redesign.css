@@ -1807,3 +1807,23 @@ html body .app-shell main.main :is(.founder-panel,.founder-dashboard,.founder-wo
  html body .dialog .quick-record-form .record-form-footer{position:sticky!important;bottom:0!important;padding:12px 0 max(8px,env(safe-area-inset-bottom))!important;background:#f4f8fe!important}
  html body .dialog :is(h2,h3,p,small,label){overflow-wrap:break-word!important}
 }
+
+/* AutoCare maintenance: focused, responsive category-specific form. */
+html body .app-shell .main .quick-record-form .ac-service-details{background:#f7faff!important;border:1px solid #c9dbee!important;border-radius:18px!important;padding:20px!important;display:grid;gap:16px;box-shadow:0 5px 18px #1745780b!important}
+html body .app-shell .main .quick-record-form .ac-service-heading{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+html body .app-shell .main .quick-record-form .ac-service-heading h3{margin:0;color:#173e70!important;font-size:19px}
+html body .app-shell .main .quick-record-form .ac-service-heading>span{font-size:12px;color:#54708d!important}
+html body .app-shell .main .quick-record-form .ac-service-details .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+html body .app-shell .main .quick-record-form .ac-service-details label{display:flex;flex-direction:column;gap:7px;color:#21466e!important;font-weight:650;font-size:13px}
+html body .app-shell .main .quick-record-form .ac-service-details :is(input,select,textarea){width:100%;min-width:0;background:#fff!important;color:#203f68!important;border:1px solid #c2d5eb!important;border-radius:10px!important;padding:11px!important}
+html body .app-shell .main .quick-record-form .ac-service-advice{background:#e8f1ff!important;border:1px solid #c5dcfa!important;border-radius:13px;padding:13px 16px}
+html body .app-shell .main .quick-record-form .ac-service-advice strong{color:#174a87!important}
+html body .app-shell .main .quick-record-form .ac-service-advice p{margin:5px 0 0;font-size:13px;color:#456485!important;line-height:1.55}
+html body .app-shell .main .quick-record-form .ac-filter-list{display:grid;gap:12px}
+html body .app-shell .main .quick-record-form .ac-filter-item{background:#fff!important;border:1px solid #d3e2f2;border-radius:12px;padding:14px}
+html body .app-shell .main .quick-record-form .ac-filter-item>strong{display:block;margin-bottom:10px;color:#234a78!important}
+html body .app-shell .main .quick-record-form .ac-cost-breakdown{background:#f2f7fe!important;border:1px solid #ccddf1;border-radius:15px;padding:17px}
+html body .app-shell .main .quick-record-form .ac-cost-breakdown h3{margin:0 0 14px;color:#1c477a!important}
+html body .app-shell .main .quick-record-form .ac-oil-interval{display:grid;gap:8px}
+html body .app-shell .main .quick-record-form .ac-oil-interval small{color:#56718e!important}
+@media(max-width:680px){html body .app-shell .main .quick-record-form .ac-service-details{padding:14px!important}html body .app-shell .main .quick-record-form .ac-service-details .form-grid{grid-template-columns:minmax(0,1fr)}}
