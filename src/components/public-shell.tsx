@@ -20,8 +20,11 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           </Link>
         </header>
         {children}
-        <footer className="footer">
+        <section className="ac-install-banner" aria-label="Instalează AutoCare pe telefon">
+          <div><strong>AutoCare, direct pe telefonul tău</strong><p>Instalează aplicația pe iPhone sau Samsung și accesează-ți garajul mai rapid.</p></div>
           <MobileInstall />
+        </section>
+        <footer className="footer">
           <div className="between">
             <span>
               © {new Date().getFullYear()} {appName}. Mai mult control. Mai puține griji.
