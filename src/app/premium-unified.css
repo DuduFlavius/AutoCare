@@ -105,3 +105,11 @@ html body .ac-install-banner strong{font-size:19px;color:#163f78}
 html body .ac-install-banner p{margin:6px 0 0;color:#4d6685}
 html body .ac-install-banner .ac-mobile-install{margin:0}
 @media(max-width:650px){html body .ac-install-banner{padding:17px;align-items:stretch}html body .ac-install-banner .ac-mobile-install-trigger{width:100%}}
+
+
+/* SmartDrive live tracking dashboard */
+.ac-smartdrive-live{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.ac-smartdrive-live>div{background:#f1f7ff;border:1px solid #d5e5fa;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.ac-smartdrive-live span{font-size:13px;color:#54708f}
+.ac-smartdrive-live strong{font-size:clamp(19px,2.5vw,27px);color:#174c91;font-variant-numeric:tabular-nums}
+@media(max-width:440px){.ac-smartdrive-live{grid-template-columns:1fr 1fr;gap:8px}.ac-smartdrive-live>div{padding:12px}.ac-smartdrive-live strong{font-size:18px}}
