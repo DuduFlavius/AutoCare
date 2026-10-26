@@ -805,40 +805,32 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             title={locationStatus === 'active' ? 'Locația este activă pe acest dispozitiv.' : 'Verifică sau activează permisiunea de localizare pentru AutoCare'}
             aria-label="Verifică locația AutoCare"
             disabled={locationStatus === 'loading'}
-            onClick={async () => {
-              if (!('geolocation' in navigator) || !window.isSecureContext) {
+            onClick={() => {
+              // Geolocation must be called directly from the user gesture.
+              if (!window.isSecureContext || !('geolocation' in navigator)) {
                 setLocationStatus('unavailable');
-                setNotice('Locația necesită HTTPS și un browser cu suport GPS.');
+                setNotice('Locația necesită HTTPS și un browser compatibil.');
                 return;
               }
               setLocationStatus('loading');
-              try {
-                if ('permissions' in navigator && navigator.permissions.query) {
-                  const permission = await navigator.permissions.query({ name: 'geolocation' });
-                  if (permission.state === 'denied') {
-                    setLocationStatus('denied');
-                    setNotice('Locația este blocată în browser. Permite accesul din setările site-ului, apoi încearcă din nou.');
-                    return;
-                  }
-                }
-              } catch { /* Some browsers do not expose geolocation permission state. */ }
+              setNotice('');
               navigator.geolocation.getCurrentPosition(
                 (position) => {
                   setLocationAccuracy(Math.round(position.coords.accuracy));
                   setLocationStatus('active');
-                  setNotice('Locația a fost activată pe acest dispozitiv.');
+                  setNotice('Locația a fost permisă și activată.');
                 },
                 (err) => {
                   setLocationStatus(err.code === 1 ? 'denied' : 'unavailable');
                   setNotice(err.code === 1
-                    ? 'Accesul la locație a fost refuzat de browser sau de telefon. Permite-l în setările site-ului și ale telefonului.'
-                    : err.code === 3
-                      ? 'Localizarea a durat prea mult. Verifică GPS-ul și conexiunea, apoi reîncearcă.'
-                      : 'Locația nu este disponibilă. Activează serviciile de localizare ale telefonului și reîncearcă.');
+                    ? 'Browserul blochează locația. Dacă nu apare fereastra de permisiune, permite locația din setările site-ului și apasă din nou.'
+                    : err.code === 3 ? 'GPS-ul nu a răspuns la timp. Încearcă din nou.'
+                    : 'Activează localizarea pe telefon și încearcă din nou.');
                 },
-                { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 },
+                { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
               );
-            }}          >
+            }}
+          >
             <MapPin size={16}/>
             <span>{locationStatus === 'active' ? 'Locație activă' : locationStatus === 'loading' ? 'Se verifică…' : locationStatus === 'denied' ? 'Locație refuzată' : locationStatus === 'unavailable' ? 'Locație indisponibilă' : 'Activează locația'}</span>
           </button>
