@@ -794,9 +794,8 @@ export default function Dashboard({ name, previewData }: { name: string; preview
         >
           <Menu size={23} />
         </button>
-        <span className="muted">
-          Garaj personal <span aria-hidden="true"> / </span>
-          <span style={{ color: 'var(--text)' }}>{tab}</span>
+        <span className="autocare-header-breadcrumb" aria-label={`Garaj personal, ${tab}`}>
+          <span>Garaj personal</span><span className="autocare-header-divider" aria-hidden="true">/</span><strong>{tab === 'Dashboard' ? 'Acasă' : tab}</strong>
         </span>
         <div className="inline autocare-header-actions">
           <button
