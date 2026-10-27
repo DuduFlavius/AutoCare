@@ -14,7 +14,8 @@ export default function PushSettings({
   onActivate: () => Promise<void>;
   onTest: () => Promise<void>;
 }) {
-  const [permission, setPermission] = useState('loading'),
+  const [feedback, setFeedback] = useState(''),
+    [permission, setPermission] = useState('loading'),
     [busy, setBusy] = useState(false),
     [needsInstall, setNeedsInstall] = useState(false);
   useEffect(() => {
@@ -31,9 +32,26 @@ export default function PushSettings({
         : 'unsupported',
     );
   }, []);
+  async function localTest() {
+    setFeedback('');
+    if (!('Notification' in window)) { setFeedback('Browserul nu suportă notificările.'); return; }
+    try {
+      const allowed = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+      setPermission(allowed);
+      if (allowed !== 'granted') { setFeedback('Permisiunea nu a fost acordată. Verifică setările site-ului.'); return; }
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.register('/sw.js');
+        await reg.showNotification('AutoCare · Notificare de test', { body: 'Notificările funcționează pe acest dispozitiv când AutoCare este deschis.', icon: '/icon-192.png', tag: 'autocare-local-test' });
+      } else {
+        new Notification('AutoCare · Notificare de test', { body: 'Test local de notificare.' });
+      }
+      setFeedback('Test local trimis către dispozitiv. Pentru notificări în fundal trebuie configurat serviciul Web Push.');
+    } catch (error) { setFeedback(error instanceof Error ? error.message : 'Testul local nu a reușit.'); }
+  }
   async function activate() {
     setBusy(true);
     try {
+      if (!configured) { await localTest(); return; }
       await onActivate();
       if ('Notification' in window) setPermission(Notification.permission);
     } finally {
@@ -76,20 +94,20 @@ export default function PushSettings({
             preview ||
             needsInstall ||
             busy ||
-            !configured ||
             ['loading', 'denied', 'unsupported'].includes(permission)
           }
           onClick={() => void activate()}
         >
           <BellRing size={16} />
-          {busy ? 'Se activează…' : 'Activează notificările'}
+          {busy ? 'Se activează…' : configured ? 'Activează notificările' : 'Permite notificările pe dispozitiv'}
         </button>
         <button
-          disabled={preview || needsInstall || busy || !configured || permission !== 'granted'}
+          disabled={preview || needsInstall || busy || permission === 'unsupported'}
           onClick={async () => {
             setBusy(true);
             try {
-              await onTest();
+              if (configured) await onTest();
+              else await localTest();
             } finally {
               setBusy(false);
             }
@@ -99,12 +117,13 @@ export default function PushSettings({
           Trimite notificare de test
         </button>
       </div>
+      {feedback && <p className="push-state" role="status">{feedback}</p>}
       <p className="micro">
         Pe Android folosește Chrome. Pe PC permite notificările pentru acest site și verifică
         setările de notificări ale sistemului, inclusiv modul Nu deranjați. Dacă permisiunea este
         blocată, schimb-o din setările site-ului și reîncarcă pagina.
       </p>
-      {!configured && <p className="small muted">Serviciul push trebuie configurat pe server.</p>}
+      {!configured && <p className="small muted">Web Push în fundal nu este încă configurat pe server. Poți testa notificările locale pe dispozitiv, dar nu se vor trimite automat când aplicația este închisă.</p>}
       {!emailConfigured && (
         <p className="micro">
           Notificările pe dispozitiv sunt separate de e-mail. Trimiterea e-mailurilor necesită
