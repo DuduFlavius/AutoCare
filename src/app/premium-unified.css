@@ -608,3 +608,13 @@ html body .ac-premium-dashboard .ac-premium-illustrated>.ac-premium-empty{max-wi
 html body .ac-premium-dashboard .ac-premium-illustrated>.ac-premium-list-row{background:#e1ecffdf!important;backdrop-filter:blur(4px)!important}
 html body .ac-premium-dashboard .ac-premium-illustrated>.ac-premium-month-total{background:linear-gradient(90deg,#ffffffd9,#ffffffa6)!important;border-top:1px solid #e7e6e2!important}
 @media(max-width:540px){html body .ac-premium-dashboard .ac-premium-illustrated>.ac-premium-card-art{width:58%!important;opacity:.68!important}}
+
+
+/* High-contrast breadcrumb, legible in light and dark system modes */
+html body .app-shell .app-header .autocare-header-breadcrumb{display:inline-flex!important;align-items:center!important;gap:10px!important;color:#28466c!important;font-size:13px!important;font-weight:650!important;letter-spacing:.005em!important;opacity:1!important;text-shadow:none!important}
+html body .app-shell .app-header .autocare-header-breadcrumb strong{color:#0b2854!important;font-weight:800!important}
+html body .app-shell .app-header .autocare-header-breadcrumb .autocare-header-divider{color:#7d91ac!important;font-weight:700!important}
+html body .app-shell .app-header{background:#e4edfb!important;border-bottom:1px solid #c7d7ef!important}
+html body .app-shell .push-settings .push-state{color:#17395d!important;background:#edf4ff!important;border:1px solid #d1e2fb!important;border-radius:10px!important;padding:11px 14px!important}
+html body .app-shell .push-settings .inline button{min-height:42px!important}
+@media(max-width:540px){html body .app-shell .app-header .autocare-header-breadcrumb{font-size:11px!important;gap:5px!important;max-width:42vw!important;overflow:hidden!important;white-space:nowrap!important}html body .app-shell .app-header .autocare-header-breadcrumb strong{overflow:hidden!important;text-overflow:ellipsis!important}}
