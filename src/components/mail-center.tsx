@@ -135,6 +135,24 @@ export default function MailCenter() {
             {' '}Deschide secțiunea „Conectare Gmail”, reconectează dacă este necesar și trimite un email de test.
           </p>
         )}
+        {gmailStatus?.connected && !gmailStatus.testedAt && (
+          <div className="card stack">
+            <strong>Activează trimiterea manuală Gmail</strong>
+            <p>Este necesar un singur email de test către adresa Gmail conectată. Nu se trimit mesaje către utilizatori în această etapă.</p>
+            <button type="button" className="primary" disabled={busy}
+              onClick={() => void run(async () => {
+                const response = await fetch('/api/v1/mail/google/test', { method: 'POST' });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Testul Gmail a eșuat.');
+                const statusResponse = await fetch('/api/v1/mail/google/status', { cache: 'no-store' });
+                if (!statusResponse.ok) throw new Error('Testul a fost acceptat, dar starea Gmail nu a putut fi actualizată.');
+                setGmailStatus(await statusResponse.json());
+                setNotice('Gmail a acceptat emailul de test. Verifică Inbox și Spam. Trimiterea manuală poate fi folosită acum.');
+              })}>
+              Trimite email de test și activează trimiterea
+            </button>
+          </div>
+        )}
         <p className="notice">
           Automatizări: {data.automation.enabled ? 'activate' : 'dezactivate'}. Activarea necesită
           testare completă, aprobarea explicită a Fondatorului și configurare separată pe server.
