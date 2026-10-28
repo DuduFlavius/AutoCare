@@ -859,6 +859,22 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         400,
       );
     if (e instanceof svc.AppError) return json({ error: e.message }, e.status);
+    if (e instanceof Error && e.name.startsWith('Stripe')) {
+      const stripeError = e as Error & { code?: string; statusCode?: number; type?: string };
+      const trace = crypto.randomUUID();
+      console.error(JSON.stringify({
+        event: 'stripe_api_error', trace, type: stripeError.name,
+        code: stripeError.code || null, statusCode: stripeError.statusCode || null,
+      }));
+      const message = stripeError.code === 'resource_missing'
+        ? 'Prețul Stripe configurat nu există în contul LIVE. Verifică ID-urile price_ din Vercel.'
+        : stripeError.code === 'api_key_expired' || stripeError.code === 'invalid_api_key'
+          ? 'Cheia Stripe LIVE este invalidă sau expirată.'
+          : stripeError.statusCode === 403
+            ? 'Cheia Stripe nu are permisiunile necesare pentru Checkout.'
+            : 'Stripe nu a putut iniția plata. Verifică înregistrarea erorii în Vercel.';
+      return json({ error: message, trace }, stripeError.statusCode === 401 || stripeError.statusCode === 403 ? 503 : 502);
+    }
     if (e instanceof SyntaxError) return json({ error: 'Cerere invalidă.' }, 400);
     const trace = crypto.randomUUID();
     console.error(
