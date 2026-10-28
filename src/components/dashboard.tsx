@@ -1890,9 +1890,19 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                 busy={busy}
                 checkout={(interval) =>
                   void act(async () => {
-                    const out = await api('billing/checkout', 'POST', { interval });
-                    window.location.assign(out.url);
-                  })
+                    setNotice('Se pregătește plata securizată Stripe…');
+                    try {
+                      const out = await api('billing/checkout', 'POST', { interval });
+                      if (typeof out?.url !== 'string' || !out.url.startsWith('https://checkout.stripe.com/')) {
+                        throw new Error('Stripe nu a returnat un link valid pentru plată. Încearcă din nou sau contactează suportul.');
+                      }
+                      window.location.assign(out.url);
+                    } catch (e) {
+                      const reason = (e as Error).message || 'Eroare necunoscută la inițierea plății.';
+                      window.alert('Plata nu a putut fi inițiată.\\n\\n' + reason);
+                      throw e;
+                    }
+                  }, '')
                 }
                 portal={() =>
                   void act(async () => {
