@@ -50,6 +50,7 @@ export async function checkout(uid: string, interval: string) {
   const session = await client.checkout.sessions.create(
     {
       mode: 'subscription',
+      payment_method_types: ['card'],
       line_items: [{ price, quantity: 1 }],
       client_reference_id: uid,
       metadata: { userId: uid },
