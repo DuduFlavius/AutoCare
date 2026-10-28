@@ -270,6 +270,10 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
   }, []);
   useEffect(() => {
+    if (previewData || tab !== 'Notificări' || !data?.notifications.some(n => !n.readAt)) return;
+    void api('notifications/read', 'POST').then(refresh).catch(e => setError(e.message));
+  }, [tab, previewData, data?.notifications]);
+  useEffect(() => {
     if (previewData) return;
     if (tab === 'Abonament')
       api('billing/invoices')
@@ -1801,80 +1805,23 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })
                   }
                 />
-                <section className="card">
-                  <div className="between">
-                    <h3>Istoricul alertelor</h3>
-                    <button
-                      disabled={busy || !data.notifications.some((n) => !n.readAt)}
-                      onClick={() => void act(() => api('notifications/read', 'POST'))}
-                    >
-                      Marchează toate ca citite
-                    </button>
-                    <button className="small" onClick={() => navigate('Setări')}>
-                      Preferințe
-                    </button>
+                <section className="card autocare-notifications">
+                  <div className="autocare-notifications-header">
+                    <div><h3>Notificările tale</h3><p>Apasă pe o notificare pentru a o elimina din listă.</p></div>
+                    <button type="button" className="autocare-notifications-settings" onClick={() => navigate('Setări')}>Preferințe</button>
                   </div>
-                  <p className="micro">
-                    „Acceptat” înseamnă acceptat de furnizor, nu confirmarea citirii sau livrării.
-                    Emailul necesită configurarea furnizorului.
-                  </p>
-                  {!data.notifications.length ? (
-                    <Empty text="Alertele trimise sau programate vor apărea aici." />
-                  ) : (
-                    <div className="table-scroll">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Memento</th>
-                            <th>Canal</th>
-                            <th>Status</th>
-                            <th>Încercări</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {data.notifications.map((n) => (
-                            <tr key={n.id}>
-                              <td>
-                                {n.message}
-                                <div className="micro">{n.localDate}</div>
-                              </td>
-                              <td>{n.channel}</td>
-                              <td>
-                                <span className={'pill ' + n.status}>
-                                  {(
-                                    {
-                                      accepted: 'Acceptat',
-                                      delivered: 'Livrat',
-                                      failed: 'Eșuat',
-                                      retry: 'Reîncercare',
-                                      pending: 'În așteptare',
-                                      sending: 'Se trimite',
-                                      cancelled: 'Anulat',
-                                    } as Record<string, string>
-                                  )[n.status] || n.status}
-                                </span>
-                                {n.error && <div className="micro">{n.error}</div>}
-                              </td>
-                              <td>
-                                {n.attempts}/4{' '}
-                                <button
-                                  className="small"
-                                  disabled={busy}
-                                  onClick={() =>
-                                    void act(() =>
-                                      api('notifications/' + n.id + '/read', 'PATCH', {
-                                        read: !n.readAt,
-                                      }),
-                                    )
-                                  }
-                                >
-                                  {n.readAt ? 'Marchează necitită' : 'Marchează citită'}
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                  {!data.notifications.length ? <Empty text="Nu ai notificări. Ești la zi!" /> : (
+                    <div className="autocare-notifications-list">
+                      {data.notifications.map(n => (
+                        <button key={n.id} type="button" className="autocare-notification" disabled={busy}
+                          onClick={() => void act(() => api('notifications/' + n.id, 'DELETE'))}
+                          aria-label={`Elimină notificarea: ${n.message}`}>
+                          <span className="autocare-notification-content">
+                            <strong>{n.message}</strong><small>{n.localDate} · {n.channel}</small>
+                          </span>
+                          <span className="autocare-notification-remove">Elimină <X size={16} /></span>
+                        </button>
+                      ))}
                     </div>
                   )}
                 </section>
