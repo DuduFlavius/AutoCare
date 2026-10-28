@@ -356,12 +356,18 @@ export default function MailCenter() {
                 onClick={() =>
                   void run(async () => {
                     const result = await api(`/campaigns/${draftId}/send`, 'POST');
-                    setDetail(await api(`/campaigns/${draftId}`));
+                    const latest = await api(`/campaigns/${draftId}`);
+                    setDetail(latest);
                     setData(await api());
+                    const failed = latest.deliveries.filter((d: { status: string }) =>
+                      ['failed', 'unknown', 'suppressed'].includes(d.status)
+                    );
+                    if (failed.length) {
+                      setError(`Nu toate emailurile au fost trimise. ${failed.length} destinatari au status eșuat, incert sau omis. Verifică istoricul înainte de a reîncerca.`);
+                    }
                     setNotice(
-                      result.remaining
-                        ? 'Lot procesat. Apasă din nou pentru următorii destinatari.'
-                        : 'Procesare încheiată. Consultă statusul fiecărui destinatar.',
+                      `${result.accepted || 0} emailuri acceptate de Gmail în acest lot.` +
+                      (result.remaining ? ' Mai există destinatari în așteptare.' : ' Procesare încheiată.')
                     );
                   })
                 }
