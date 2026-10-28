@@ -350,10 +350,12 @@ export default function MailCenter() {
           </button>
           <button
             type="button"
-            className="primary mail-send-action"
-            style={{ width: '100%', minHeight: 52, fontWeight: 700, background: '#2563eb', color: '#fff' }}
-            disabled={busy || security || !recipients.length || !subject.trim() || !message.trim()}
-            onClick={() => void run(async () => {
+            className="mail-send-action"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', minHeight: 60, padding: '16px 20px', border: '2px solid #102e61', borderRadius: 10, fontSize: 16, fontWeight: 800, backgroundColor: '#153e7a', color: '#ffffff', WebkitTextFillColor: '#ffffff', opacity: 1, cursor: busy || security || !recipients.length || !subject.trim() || !message.trim() ? 'not-allowed' : 'pointer' }}
+            aria-disabled={busy || security || !recipients.length || !subject.trim() || !message.trim()}
+            onClick={() => {
+              if (busy || security || !recipients.length || !subject.trim() || !message.trim()) return;
+              void run(async () => {
               if (gmailStatus && !gmailStatus.connected) {
                 throw new Error('Contul Gmail nu este conectat. Apasă „Conectează Gmail” din Panoul Fondator.');
               }
@@ -387,7 +389,8 @@ export default function MailCenter() {
               const issues = latest.deliveries.filter((d) => ['failed', 'unknown', 'suppressed'].includes(d.status));
               setNotice(`${total} emailuri acceptate de Gmail.${remaining ? ' Mai sunt destinatari în așteptare: apasă din nou Trimite.' : ' Trimiterea a fost procesată.'}`);
               if (issues.length) setError(`${issues.length} emailuri au status eșuat, incert sau omis. Verifică detaliile înainte de orice retrimitere.`);
-            })}
+              });
+            }}
           >
             <Send size={17} /> {busy ? 'Se trimit emailurile…' : saved ? 'Continuă trimiterea emailurilor' : recipients.length ? `Trimite emailul către ${recipients.length} destinatari` : 'Bifează un destinatar pentru trimitere'}
           </button>
