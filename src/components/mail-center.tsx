@@ -305,7 +305,7 @@ export default function MailCenter() {
           </button>
           {!saved ? (
             <button
-              className="primary"
+              className="primary mail-action-contrast"
               disabled={busy || security || !preview || !recipients.length}
               onClick={() =>
                 void run(async () => {
