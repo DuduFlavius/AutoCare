@@ -11,7 +11,7 @@ export async function communicationPreference(uid: string) {
   )[0];
   return { transactional: row?.transactional ?? true, promotional: row?.promotional ?? false };
 }
-export async function recipientAllowed(uid: string, category: string) {
+export async function recipientAllowed(uid: string, category: string, manual = false) {
   const [user, profile, restrictions, preferences] = await Promise.all([
     db().select().from(s.user).where(eq(s.user.id, uid)),
     db().select().from(s.profiles).where(eq(s.profiles.userId, uid)),
@@ -19,7 +19,7 @@ export async function recipientAllowed(uid: string, category: string) {
     communicationPreference(uid),
   ]);
   return (
-    !!user[0]?.emailVerified &&
+    !!user[0] && (user[0].emailVerified || (manual && category === 'transactional')) &&
     !restrictions[0]?.suspendedAt &&
     profile[0]?.emailEnabled !== false &&
     (category === 'promotional' ? preferences.promotional : preferences.transactional)
