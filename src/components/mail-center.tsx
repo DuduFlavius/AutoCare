@@ -348,66 +348,38 @@ export default function MailCenter() {
             <Eye size={16} />
             Previzualizează emailul
           </button>
-          {!saved ? (
-            <button
-              className="primary mail-action-contrast"
-              disabled={busy || security || !preview || !recipients.length}
-              onClick={() =>
-                void run(async () => {
-                  await api('/campaigns', 'POST', {
-                    id: draftId,
-                    template,
-                    category,
-                    subject,
-                    message,
-                    ctaLabel,
-                    ctaPath,
-                    recipients,
-                  });
-                  setSaved(true);
-                  setData(await api());
-                  setNotice('Ciornă salvată. Verifică destinatarii și confirmă trimiterea.');
-                })
+          <button
+            type="button"
+            className="primary mail-action-contrast"
+            style={{ width: '100%', minHeight: 52, fontWeight: 700, background: '#2563eb', color: '#fff' }}
+            disabled={busy || security || !recipients.length || !subject.trim() || !message.trim() || (gmailStatus !== null && (!gmailStatus.connected || !gmailStatus.testedAt))}
+            onClick={() => void run(async () => {
+              if (!saved) {
+                await api('/campaigns', 'POST', {
+                  id: draftId, template, category, subject, message, ctaLabel, ctaPath, recipients,
+                });
+                setSaved(true);
               }
-            >
-              Salvează ciorna verificată
-            </button>
-          ) : (
-            <>
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={confirmed}
-                  onChange={(e) => setConfirmed(e.target.checked)}
-                />
-                Am verificat conținutul, categoria și destinatarii.
-              </label>
-              <button
-                className="primary"
-                disabled={busy || !confirmed || (gmailStatus !== null && (!gmailStatus.connected || !gmailStatus.testedAt))}
-                onClick={() =>
-                  void run(async () => {
-                    const result = await api(`/campaigns/${draftId}/send`, 'POST');
-                    const latest = await api(`/campaigns/${draftId}`);
-                    setDetail(latest);
-                    setData(await api());
-                    const failed = latest.deliveries.filter((d: { status: string }) =>
-                      ['failed', 'unknown', 'suppressed'].includes(d.status)
-                    );
-                    if (failed.length) {
-                      setError(`Nu toate emailurile au fost trimise. ${failed.length} destinatari au status eșuat, incert sau omis. Verifică istoricul înainte de a reîncerca.`);
-                    }
-                    setNotice(
-                      `${result.accepted || 0} emailuri acceptate de Gmail în acest lot.` +
-                      (result.remaining ? ' Mai există destinatari în așteptare.' : ' Procesare încheiată.')
-                    );
-                  })
-                }
-              >
-                <Send size={16} />
-                Trimite următorul lot (max. 2)
-              </button>
-            </>
+              let total = 0;
+              let remaining = true;
+              for (let batch = 0; batch < 15 && remaining; batch++) {
+                const result = await api(`/campaigns/${draftId}/send`, 'POST');
+                total += result.accepted || 0;
+                remaining = !!result.remaining;
+                if (remaining) await new Promise((resolve) => setTimeout(resolve, 4100));
+              }
+              const latest: Detail = await api(`/campaigns/${draftId}`);
+              setDetail(latest);
+              setData(await api());
+              const issues = latest.deliveries.filter((d) => ['failed', 'unknown', 'suppressed'].includes(d.status));
+              setNotice(`${total} emailuri acceptate de Gmail.${remaining ? ' Mai sunt destinatari în așteptare: apasă din nou Trimite.' : ' Trimiterea a fost procesată.'}`);
+              if (issues.length) setError(`${issues.length} emailuri au status eșuat, incert sau omis. Verifică detaliile înainte de orice retrimitere.`);
+            })}
+          >
+            <Send size={17} /> {busy ? 'Se trimit emailurile…' : saved ? 'Continuă trimiterea emailurilor' : `Trimite emailul către ${recipients.length} destinatari`}
+          </button>
+          {gmailStatus && (!gmailStatus.connected || !gmailStatus.testedAt) && (
+            <p className="error" role="alert">Pentru activarea butonului, folosește „Trimite email de test și activează trimiterea” de mai sus.</p>
           )}
         </section>
         <section className="card mail-preview">
