@@ -1,1 +1,10 @@
-{ "crons": [{ "path": "/api/v1/jobs/reminders", "schedule": "*/15 * * * *" }] }
+{
+  "crons": [
+    {
+      "path": "/api/v1/jobs/reminders",
+      "schedule": "*/15 * * * *"
+    }
+  ],
+  "framework": "nextjs",
+  "buildCommand": "npm run build && npm run db:mail-center"
+}

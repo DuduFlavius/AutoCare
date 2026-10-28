@@ -1,4 +1,5 @@
 'use client';
+import CommunicationPreferences from './communication-preferences';
 import Membership from './membership';
 import MobileInstall from './mobile-install';
 import PushSettings from './push-settings';
@@ -1917,6 +1918,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   <p className="small muted">
                     Alege doar ce ai nevoie. Opțiunile avansate sunt ascunse mai jos.
                   </p>
+                  <CommunicationPreferences />
                   <form
                     className="stack"
                     onSubmit={async (e) => {

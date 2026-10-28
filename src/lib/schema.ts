@@ -444,3 +444,37 @@ export const supportMessages = pgTable(
   },
   (t) => [index('support_messages_thread').on(t.threadId, t.createdAt, t.id)],
 );
+
+export const communicationPreferences = pgTable('communication_preferences', {
+  userId: text().primaryKey().references(() => user.id, { onDelete: 'cascade' }),
+  transactional: boolean().notNull().default(true),
+  promotional: boolean().notNull().default(false),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+export const mailCampaigns = pgTable('mail_campaigns', {
+  id: text().primaryKey(),
+  actorId: text().references(() => user.id, { onDelete: 'set null' }),
+  source: text().notNull().default('manual'),
+  template: text().notNull(),
+  category: text().notNull(),
+  subject: text().notNull(),
+  message: text().notNull(),
+  ctaLabel: text().notNull(),
+  ctaPath: text().notNull(),
+  fingerprint: text().notNull(),
+  status: text().notNull().default('draft'),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+}, t => [index('mail_campaigns_created').on(t.createdAt)]);
+export const mailDeliveries = pgTable('mail_deliveries', {
+  id: text().primaryKey(),
+  campaignId: text().notNull().references(() => mailCampaigns.id, { onDelete: 'cascade' }),
+  userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),
+  dedupeKey: text().notNull().unique(),
+  recipientEmail: text(),
+  status: text().notNull().default('draft'),
+  error: text(),
+  providerId: text(),
+  context: jsonb().$type<{ subscriptionId?: string; periodEnd?: string; invoiceId?: string; grantId?: string }>().notNull().default({}),
+  attemptedAt: timestamp({ withTimezone: true }),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+}, t => [index('mail_delivery_campaign_status').on(t.campaignId,t.status), index('mail_delivery_provider').on(t.providerId)]);

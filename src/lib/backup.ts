@@ -36,6 +36,9 @@ const tables = {
   audit: s.audit,
   requestLimits: s.requestLimits,
   emailEvents: s.emailEvents,
+  communicationPreferences: s.communicationPreferences,
+  mailCampaigns: s.mailCampaigns,
+  mailDeliveries: s.mailDeliveries,
 };
 export async function encryptedBackup(key: Buffer) {
   if (key.length !== 32) throw new Error('BACKUP_KEY must be 32 bytes');
@@ -89,6 +92,9 @@ export async function restoreEncrypted(bytes: Buffer, key: Buffer) {
       'premiumGrants',
       'accountRestrictions',
       'billingPrices',
+      'communicationPreferences',
+      'mailCampaigns',
+      'mailDeliveries',
     ])
       if (!(key in backup.tables)) backup.tables[key] = [];
   if (backup.version !== 1 || Object.keys(tables).some((k) => !Array.isArray(backup.tables[k])))

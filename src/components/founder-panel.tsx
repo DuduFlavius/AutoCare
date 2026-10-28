@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, type FormEvent } from 'react';
 import {
   LayoutDashboard,
+  Mail,
   Users,
   Shield,
   Star,
@@ -19,6 +20,7 @@ import {
 import SupportChat from './support-chat';
 import SearchConsoleSettings from './search-console-settings';
 import GoogleMailSettings from './google-mail-settings';
+import MailCenter from './mail-center';
 import { savings } from '@/lib/pricing-display';
 import type { founderOverview, founderUsers, founderUserDetail, founderAudit } from '@/lib/founder';
 type Overview = Awaited<ReturnType<typeof founderOverview>>;
@@ -34,6 +36,7 @@ const nav = [
   ['Prețuri', Tag],
   ['Chat și suport', MessageSquare],
   ['Jurnal de audit', ScrollText],
+  ['Mail Center', Mail],
   ['Setări administrative', Settings],
 ] as const;
 const money = (b: number) =>
@@ -949,6 +952,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
             )}
           </section>
         )}
+        {tab === 'Mail Center' && <MailCenter />}
         {tab === 'Setări administrative' && (
           <>
             <GoogleMailSettings />

@@ -5,6 +5,7 @@ import * as s from './schema';
 import { AppError } from './service';
 import { pricing } from './pricing';
 import { origin } from './config';
+import { queueAutomatedMail } from './mail-automation';
 export function stripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new AppError(503, 'Plățile nu sunt configurate.');
@@ -201,6 +202,10 @@ export async function processStripeEvent(event: Stripe.Event, client: Stripe) {
           target: s.invoices.id,
           set: { status: invoice.status || 'unknown', amountBani: invoice.amount_paid },
         });
+    if (invoice && event.type === 'invoice.paid' && invoice.billing_reason === 'subscription_cycle' && status === 'active')
+      await queueAutomatedMail(uid, 'renewal', `renewal:${invoice.id}`, { subscriptionId: sub.id, invoiceId: invoice.id, periodEnd: end ? new Date(end * 1000).toISOString() : undefined }, tx);
+    if (invoice && event.type === 'invoice.payment_failed' && ['past_due','unpaid','incomplete','pending_payment'].includes(status))
+      await queueAutomatedMail(uid, 'payment_failed', `payment-failed:${invoice.id}:${invoice.attempt_count}`, { subscriptionId: sub.id, invoiceId: invoice.id, periodEnd: end ? new Date(end * 1000).toISOString() : undefined }, tx);
     return { processed: true };
   });
 }

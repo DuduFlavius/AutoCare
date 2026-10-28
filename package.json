@@ -13,7 +13,8 @@
     "backup": "node --import tsx scripts/backup.ts",
     "admin:grant": "node --import tsx scripts/set-admin.ts",
     "lint": "eslint src scripts tests",
-    "founder:identify": "node --import tsx scripts/identify-founder.ts"
+    "founder:identify": "node --import tsx scripts/identify-founder.ts",
+    "db:mail-center": "node --import tsx scripts/migrate-mail-center.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "latest",

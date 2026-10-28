@@ -189,6 +189,9 @@ test('Test email refreshes server-side and sends only to configured mailbox, wit
     'https://gmail.googleapis.com/gmail/v1/users/contactautocare9%40gmail.com/messages/send',
   );
   const raw = Buffer.from(JSON.parse(String(send.init!.body)).raw, 'base64url').toString();
+  assert.match(raw, /multipart\/alternative/);
+  assert.match(raw, /Content-Type: text\/html/);
+  assert.match(raw, /Content-Type: text\/plain/);
   assert.match(raw, /To: contactautocare9@gmail.com/);
   assert.match(raw, /From: AutoCare <contactautocare9@gmail.com>/);
   assert.equal(result.automaticEnabled, false);

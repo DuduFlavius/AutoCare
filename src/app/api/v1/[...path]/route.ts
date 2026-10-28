@@ -15,6 +15,8 @@ import { origin } from '@/lib/config';
 import { runJob, sendPushNotification } from '@/lib/reminders';
 import { sendMail } from '@/lib/mail';
 import * as googleMail from '@/lib/google-mail';
+import * as mailCenter from '@/lib/mail-center';
+import { renderEmail } from '@/lib/email-templates';
 import { stripe, checkout, billingPortal, processStripeEvent } from '@/lib/billing';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 export const runtime = 'nodejs';
@@ -153,7 +155,20 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         return json(await googleMail.testGoogleMail(uid));
       return json({ error: 'Rută inexistentă.' }, 404);
     }
+    if (route === 'communication-preferences') {
+      if (method === 'GET') return json(await mailCenter.getCommunicationPreference(uid));
+      if (method === 'PUT') return json(await mailCenter.saveCommunicationPreference(uid, await body(req)));
+    }
     if (path[0] === 'founder') {
+      if (route === 'founder/mail' && method === 'GET') return json(await mailCenter.mailCenterOverview(uid));
+      if (route === 'founder/mail/approve' && method === 'POST') return json(await mailCenter.approveMailAutomation(uid, await body(req)));
+      if (route === 'founder/mail/preview' && method === 'POST') return json(await mailCenter.previewMail(uid, await body(req)));
+      if (route === 'founder/mail/campaigns' && method === 'POST') return json(await mailCenter.saveCampaign(uid, await body(req)));
+      if (path[1] === 'mail' && path[2] === 'campaigns' && path[3]) {
+        if (path.length === 4 && method === 'GET') return json(await mailCenter.campaignDetail(uid, path[3]));
+        if (path.length === 5 && path[4] === 'send' && method === 'POST') return json(await mailCenter.sendCampaign(uid, path[3]));
+      }
+
       if (route === 'founder/seo' && method === 'GET') return json(await founder.founderSeo(uid));
       if (route === 'founder/seo' && method === 'PUT') {
         const result = await founder.saveFounderSeo(uid, await body(req));
@@ -452,6 +467,8 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           })
           .from(s.session)
           .where(eq(s.session.userId, uid));
+        const communicationPreferences = await mailCenter.getCommunicationPreference(uid);
+        const emailHistory = await db().select({status:s.mailDeliveries.status,attemptedAt:s.mailDeliveries.attemptedAt,subject:s.mailCampaigns.subject,category:s.mailCampaigns.category}).from(s.mailDeliveries).innerJoin(s.mailCampaigns,eq(s.mailDeliveries.campaignId,s.mailCampaigns.id)).where(eq(s.mailDeliveries.userId,uid));
         const pushSubscriptions = await db()
           .select({ endpoint: s.pushes.endpoint })
           .from(s.pushes)
@@ -469,6 +486,8 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               invoices,
               photos,
               sessions,
+              communicationPreferences,
+              emailHistory,
               pushSubscriptions,
             },
             null,
@@ -675,7 +694,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               : 'Echipa AutoCare ți-a răspuns în Centrul de suport.';
             const users = recipientIds.length
               ? await db().select({
-                  id: s.user.id, email: s.user.email, verified: s.user.emailVerified,
+                  id: s.user.id, name: s.user.name, email: s.user.email, verified: s.user.emailVerified,
                   emailEnabled: s.profiles.emailEnabled, pushEnabled: s.profiles.pushEnabled,
                 }).from(s.user).innerJoin(s.profiles, eq(s.user.id, s.profiles.userId))
                   .where(sql`${s.user.id} IN (${sql.join(recipientIds.map((id) => sql`${id}`), sql`, `)})`)
@@ -687,8 +706,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               }));
               if (user.emailEnabled && user.verified) tasks.push(sendMail(
                 user.email, title,
-                bodyText + '\n\nDeschide AutoCare: https://autocare-garaj.vercel.app/cont?tab=Centru%20de%20suport\n\nPoți dezactiva notificările e-mail din Setări.',
+                bodyText + '\n\nDeschide AutoCare: ' + origin() + '/cont?tab=Centru%20de%20suport\n\nPoți dezactiva notificările e-mail din Setări.',
                 'support/' + messageResult.message.id + '/' + user.id,
+                renderEmail('administrative', {name:user.name,subject:title,message:bodyText,ctaLabel:'Vezi mesajul de suport',ctaPath:'/cont?tab=Centru%20de%20suport'}),
               ));
               return tasks;
             }));

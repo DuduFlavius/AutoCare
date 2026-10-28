@@ -100,6 +100,7 @@ export function AuthForm({ mode }: { mode: string }) {
             : 'Documentele și istoricul mașinii tale, la îndemână.'}
         </p>
         <form
+          method="post"
           className="stack"
           onSubmit={submit}
           onInvalidCapture={(event) => {

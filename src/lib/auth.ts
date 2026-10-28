@@ -6,6 +6,8 @@ import { toNextJsHandler } from 'better-auth/next-js';
 import { db } from './db';
 import * as schema from './schema';
 import { sendMail } from './mail';
+import { renderEmail } from './email-templates';
+import { queueAutomatedMail } from './mail-automation';
 import { origin } from './config';
 import { createHash } from 'node:crypto';
 let cached: ReturnType<typeof makeAuth> | undefined;
@@ -30,6 +32,8 @@ function makeAuth() {
           'Resetează parola AutoCare',
           url,
           createHash('sha256').update(url).digest('hex'),
+          renderEmail('password_reset', { name: user.name, actionUrl: url }),
+          { userId: user.id, template: 'password_reset' },
         );
       },
     },
@@ -42,6 +46,8 @@ function makeAuth() {
           'Confirmă adresa de email AutoCare',
           url,
           createHash('sha256').update(url).digest('hex'),
+          renderEmail('verification', { name: user.name, actionUrl: url }),
+          { userId: user.id, template: 'verification' },
         );
       },
     },
@@ -85,6 +91,15 @@ function makeAuth() {
         },
       },
       user: {
+        create: {
+          after: async (u) => {
+            try {
+              await queueAutomatedMail(u.id, 'welcome', `welcome:${u.id}`);
+            } catch {
+              console.error(JSON.stringify({ event: 'welcome_queue_failed' }));
+            }
+          },
+        },
         delete: {
           before: async (u) => {
             const ids = (

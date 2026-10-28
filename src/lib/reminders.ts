@@ -4,7 +4,11 @@ import * as s from './schema';
 import { daysRemaining, localDate } from './config';
 import { premium } from './service';
 import { sendMail } from './mail';
+import { renderEmail } from './email-templates';
+import { userEmailName } from './mail-log';
 import webpush from 'web-push';
+import { scheduleSubscriptionMail } from './mail-automation';
+import { deliverAutomatedMail } from './mail-center';
 export async function scheduleReminders(now = new Date()) {
   const rows = await db()
     .select({ r: s.records, v: s.vehicles, p: s.profiles, u: s.user, sub: s.subscriptions })
@@ -72,7 +76,7 @@ export type Transport = (
 ) => Promise<string>;
 export const realTransport: Transport = async (n, email) => {
   if (n.channel === 'email')
-    return sendMail(email, 'AutoCare — memento pentru mașina ta', n.message, `reminder/${n.id}`);
+    return sendMail(email, 'AutoCare — memento pentru mașina ta', n.message, `reminder/${n.id}`, renderEmail('reminder', { message: n.message, name: await userEmailName(n.userId) }));
   return sendPushNotification(n.userId, { id: n.id, title: 'AutoCare', body: n.message });
 };
 
@@ -251,6 +255,8 @@ export async function runJob(now = new Date()) {
     await db()
       .delete(s.audit)
       .where(lte(s.audit.createdAt, new Date(now.getTime() - 90 * 86400000)));
+    await scheduleSubscriptionMail(now);
+    await deliverAutomatedMail();
     const queued = await scheduleReminders(now);
     const sent = await deliverReminders(now);
     await db()

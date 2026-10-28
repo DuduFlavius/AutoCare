@@ -26,7 +26,7 @@ process.env.STRIPE_SECRET_KEY = 'sk_test_placeholder';
 process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_placeholder';
 process.env.STRIPE_MONTHLY_PRICE_ID = 'price_monthly';
 const realFetch = globalThis.fetch;
-const mail: Array<{ to: string[]; text: string }> = [];
+const mail: Array<{ to: string[]; text: string; html: string }> = [];
 let uid: string, other: string, cookie: string, car: typeof s.vehicles.$inferSelect;
 const now = new Date('2030-03-10T10:00:00Z');
 async function call(path: string, method = 'GET', body?: unknown, session = cookie) {
@@ -91,7 +91,9 @@ test('01 Registration, email verification, login, session and wrong password', a
     password: 'correct-test-password-123',
   });
   assert.equal(r.status, 403);
-  const url = mail[0].text;
+  const url = mail[0].text.match(/http:\/\/localhost:3000\/api\/auth\/verify-email[^\s]+/)![0];
+  assert.ok(mail[0].html.includes('text/html') || mail[0].html.includes('<!doctype html>'));
+  assert.ok(mail[0].html.includes('Confirmă adresa de email'));
   r = await auth().handler(new Request(url));
   assert.ok([200, 302].includes(r.status));
   r = await authReq('sign-in/email', {
@@ -125,7 +127,9 @@ test('02 Password recovery token is required and can reset a password', async ()
     redirectTo: 'http://localhost:3000/resetare-parola',
   });
   assert.equal(r.status, 200);
-  const reset = mail[mail.length - 1].text;
+  const reset = mail[mail.length - 1].text.match(
+    /http:\/\/localhost:3000\/api\/auth\/reset-password[^\s]+/,
+  )![0];
   const token = new URL(reset).pathname.split('/').pop();
   r = await authReq('reset-password', { token, newPassword: 'another-test-password-123' });
   assert.equal(r.status, 200);
@@ -695,6 +699,65 @@ test('19aa Founder team API rejects anonymous users and authenticated clients', 
     403,
   );
 });
+test('Mail Center API rejects anonymous users, clients and foreign origins; Founder can preview and save safely', async () => {
+  for (const route of ['founder/mail', 'founder/mail/campaigns/nonexistent']) {
+    assert.equal((await call(route, 'GET', undefined, '')).status, 401);
+    assert.equal((await call(route)).status, 403);
+  }
+  for (const route of ['founder/mail/preview', 'founder/mail/campaigns', 'founder/mail/approve'])
+    assert.equal((await call(route, 'POST', {})).status, 403);
+  const original = process.env.AUTOCARE_FOUNDER_USER_ID;
+  process.env.AUTOCARE_FOUNDER_USER_ID = uid;
+  try {
+    const preview = await call('founder/mail/preview', 'POST', {
+      template: 'welcome',
+      name: 'Alice',
+    });
+    assert.equal(preview.status, 200);
+    const content = await preview.json();
+    assert.match(content.html, /Salut, Alice/);
+    const id = crypto.randomUUID();
+    const input = {
+      id,
+      template: 'administrative',
+      category: 'transactional',
+      subject: 'Actualizare pentru cont',
+      message: 'O informație administrativă pentru contul tău.',
+      ctaLabel: 'Deschide contul',
+      ctaPath: '/cont',
+      recipients: [uid],
+    };
+    assert.equal((await call('founder/mail/campaigns', 'POST', input)).status, 200);
+    assert.equal((await call('founder/mail/campaigns', 'POST', input)).status, 200);
+    assert.equal((await call('founder/mail/campaigns/' + id)).status, 200);
+    assert.notEqual((await call('founder/mail/campaigns/' + id + '/send', 'POST', {})).status, 200);
+    const foreign = await POST(
+      new Request('http://localhost:3000/api/v1/founder/mail/preview', {
+        method: 'POST',
+        headers: {
+          Origin: 'https://example.invalid',
+          Cookie: cookie,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ template: 'welcome' }),
+      }),
+      { params: Promise.resolve({ path: ['founder', 'mail', 'preview'] }) },
+    );
+    assert.equal(foreign.status, 403);
+    assert.equal(
+      (await call('communication-preferences', 'PUT', { transactional: false, promotional: false }))
+        .status,
+      200,
+    );
+    const prefs = await (await call('communication-preferences')).json();
+    assert.deepEqual(prefs, { transactional: false, promotional: false });
+    const rows = await db().select().from(s.mailCampaigns);
+    assert.ok(!JSON.stringify(rows).includes('token='));
+  } finally {
+    if (original) process.env.AUTOCARE_FOUNDER_USER_ID = original;
+    else delete process.env.AUTOCARE_FOUNDER_USER_ID;
+  }
+});
 test('19b Logo resolves a verified session without exposing data; anonymous stays public', async () => {
   const logged = await logoGET(
     new Request('http://localhost:3000/start', { headers: { Cookie: cookie } }),
@@ -737,7 +800,13 @@ test('21 Direct auth deletion cannot bypass billing guard; authenticated deletio
     password: 'remove-test-password-123',
   });
   assert.equal(r.status, 200);
-  await auth().handler(new Request(mail[mail.length - 1].text));
+  await auth().handler(
+    new Request(
+      mail[mail.length - 1].text.match(
+        /http:\/\/localhost:3000\/api\/auth\/verify-email[^\s]+/,
+      )![0],
+    ),
+  );
   r = await authReq('sign-in/email', {
     email: 'remove@example.invalid',
     password: 'remove-test-password-123',
@@ -782,7 +851,6 @@ test('21 Direct auth deletion cannot bypass billing guard; authenticated deletio
   assert.equal((await db().select().from(s.user).where(eq(s.user.id, u.id))).length, 0);
 });
 
-
 test('SmartDrive: refresh session after password/session lifecycle tests', async () => {
   await db().delete(s.rateLimit);
   const response = await authReq('sign-in/email', {
@@ -790,7 +858,10 @@ test('SmartDrive: refresh session after password/session lifecycle tests', async
     password: 'another-test-password-123',
   });
   assert.equal(response.status, 200);
-  cookie = response.headers.getSetCookie().map(x => x.split(';')[0]).join('; ');
+  cookie = response.headers
+    .getSetCookie()
+    .map((x) => x.split(';')[0])
+    .join('; ');
   assert.ok(cookie);
   assert.equal((await call('dashboard')).status, 200);
 });
@@ -814,30 +885,72 @@ test('SmartDrive: manual readings persist, reject regressions, and isolate owner
   assert.equal(r.status, 200);
   const rows = await r.json();
   assert.ok(rows.length >= 2);
-  assert.ok(rows.every((x: { userId: string; vehicleId: string }) => x.userId === uid && x.vehicleId === id));
-  assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer, start + 100);
+  assert.ok(
+    rows.every(
+      (x: { userId: string; vehicleId: string }) => x.userId === uid && x.vehicleId === id,
+    ),
+  );
+  assert.equal(
+    (await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer,
+    start + 100,
+  );
   const foreignId = crypto.randomUUID();
-  await db().insert(s.vehicles).values({ id: foreignId, userId: other, brand: 'Test', model: 'Isolated', year: 2022, plate: 'OTHERTEST', fuel: 'Benzină', odometer: 500 });
+  await db().insert(s.vehicles).values({
+    id: foreignId,
+    userId: other,
+    brand: 'Test',
+    model: 'Isolated',
+    year: 2022,
+    plate: 'OTHERTEST',
+    fuel: 'Benzină',
+    odometer: 500,
+  });
   for (const method of ['GET', 'POST']) {
-    const resp = await call('smartdrive/vehicles/' + foreignId + '/readings', method, method === 'POST' ? { odometer: 600 } : undefined);
+    const resp = await call(
+      'smartdrive/vehicles/' + foreignId + '/readings',
+      method,
+      method === 'POST' ? { odometer: 600 } : undefined,
+    );
     assert.equal(resp.status, 404, 'foreign vehicle must be invisible');
   }
-  assert.equal((await db().select().from(s.mileageReadings).where(eq(s.mileageReadings.vehicleId, foreignId))).length, 0);
+  assert.equal(
+    (await db().select().from(s.mileageReadings).where(eq(s.mileageReadings.vehicleId, foreignId)))
+      .length,
+    0,
+  );
   // Bypass the API intentionally: PostgreSQL must reject mismatched owner/vehicle pairs.
-  await assert.rejects(db().insert(s.mileageReadings).values({
-    id: crypto.randomUUID(), userId: uid, vehicleId: foreignId, odometer: 600, source: 'manual',
-  }));
-  await assert.rejects(db().insert(s.gpsTrips).values({
-    id: crypto.randomUUID(), userId: uid, vehicleId: foreignId, distanceMeters: 100,
-    durationSeconds: 20, startedAt: new Date('2030-03-10T10:00:00Z'),
-    endedAt: new Date('2030-03-10T10:00:20Z'),
-  }));
-  assert.equal((await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId, foreignId))).length, 0);
+  await assert.rejects(
+    db().insert(s.mileageReadings).values({
+      id: crypto.randomUUID(),
+      userId: uid,
+      vehicleId: foreignId,
+      odometer: 600,
+      source: 'manual',
+    }),
+  );
+  await assert.rejects(
+    db()
+      .insert(s.gpsTrips)
+      .values({
+        id: crypto.randomUUID(),
+        userId: uid,
+        vehicleId: foreignId,
+        distanceMeters: 100,
+        durationSeconds: 20,
+        startedAt: new Date('2030-03-10T10:00:00Z'),
+        endedAt: new Date('2030-03-10T10:00:20Z'),
+      }),
+  );
+  assert.equal(
+    (await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId, foreignId))).length,
+    0,
+  );
 });
 test('SmartDrive: GPS trips validate payload and never modify dashboard odometer', async () => {
   const id = car.id;
   const initial = (await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer;
-  const startedAt = '2030-03-10T10:00:00.000Z', endedAt = '2030-03-10T10:10:00.000Z';
+  const startedAt = '2030-03-10T10:00:00.000Z',
+    endedAt = '2030-03-10T10:10:00.000Z';
   const route = 'smartdrive/vehicles/' + id + '/trips';
   const valid = { distanceMeters: 3200, durationSeconds: 600, startedAt, endedAt };
   let r = await call(route, 'POST', valid);
@@ -860,7 +973,10 @@ test('SmartDrive: GPS trips validate payload and never modify dashboard odometer
   r = await call(route);
   assert.equal(r.status, 200);
   assert.ok((await r.json()).some((x: { id: string }) => x.id === trip.id));
-  assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer, initial);
+  assert.equal(
+    (await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer,
+    initial,
+  );
   r = await call(route, 'GET', undefined, '');
   assert.equal(r.status, 401);
 });
@@ -881,19 +997,26 @@ test('SmartDrive: reminder preferences validate frequency and persist', async ()
   assert.deepEqual({ frequencyDays: (await r.json()).frequencyDays }, { frequencyDays: 7 });
 });
 
-
 test('SmartDrive: expired authenticated session cannot read or write readings', async () => {
   const sessions = await db().select().from(s.session).where(eq(s.session.userId, uid));
   assert.ok(sessions.length > 0);
-  const original = sessions.map(x => ({ id: x.id, expiresAt: x.expiresAt }));
+  const original = sessions.map((x) => ({ id: x.id, expiresAt: x.expiresAt }));
   try {
-    await db().update(s.session).set({ expiresAt: new Date('2000-01-01T00:00:00Z') }).where(eq(s.session.userId, uid));
+    await db()
+      .update(s.session)
+      .set({ expiresAt: new Date('2000-01-01T00:00:00Z') })
+      .where(eq(s.session.userId, uid));
     let response = await call('smartdrive/vehicles/' + car.id + '/readings');
     assert.equal(response.status, 401);
-    response = await call('smartdrive/vehicles/' + car.id + '/readings', 'POST', { odometer: 999999 });
+    response = await call('smartdrive/vehicles/' + car.id + '/readings', 'POST', {
+      odometer: 999999,
+    });
     assert.equal(response.status, 401);
   } finally {
     for (const row of original)
-      await db().update(s.session).set({ expiresAt: row.expiresAt }).where(eq(s.session.id, row.id));
+      await db()
+        .update(s.session)
+        .set({ expiresAt: row.expiresAt })
+        .where(eq(s.session.id, row.id));
   }
 });

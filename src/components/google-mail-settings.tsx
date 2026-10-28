@@ -134,9 +134,9 @@ export default function GoogleMailSettings() {
         </p>
       )}
       <p className="small muted">
-        Notificările automate Gmail sunt dezactivate. Emailurile existente continuă prin serviciul
-        configurat anterior. Deconectarea elimină autorizarea locală; accesul Google poate fi
-        revocat și din contul Google.
+        Notificările automate Gmail sunt controlate separat din Mail Center și prin configurarea
+        serverului. Emailurile existente continuă prin serviciul configurat anterior. Deconectarea
+        elimină autorizarea locală; accesul Google poate fi revocat și din contul Google.
       </p>
     </section>
   );

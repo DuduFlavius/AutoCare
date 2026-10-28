@@ -11,6 +11,10 @@ import { db } from './db';
 import * as s from './schema';
 import { requireFounder } from './founder';
 import { AppError } from './service';
+import { origin } from './config';
+import { safeSystemMailLog } from './mail-log';
+import { automationState } from './mail-automation';
+import { renderEmail, type EmailContent } from './email-templates';
 
 export const GOOGLE_MAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
 export const GOOGLE_MAIL_CALLBACK = 'https://project-sxage.vercel.app/api/v1/mail/google/callback';
@@ -131,7 +135,7 @@ export async function googleMailStatus(uid: string) {
       from: c.from,
       connectedAt: value.connectedAt,
       testedAt: value.testedAt,
-      automaticEnabled: false,
+      automaticEnabled: !!value.testedAt && (await automationState()).enabled,
     };
   } catch {
     return {
@@ -265,21 +269,90 @@ export async function testGoogleMail(uid: string) {
       .returning()
   )[0];
   if (limit.count > 1) throw new AppError(429, 'Poți trimite un singur email de test pe minut.');
-  const tokens = await tokenRequest({ grant_type: 'refresh_token', refresh_token: value.refresh });
+  try {
+    const providerId = await sendGoogleMail(c.from, renderEmail('gmail_test'), 'test-' + key);
+    await safeSystemMailLog(uid, 'gmail_test', key, c.from, 'accepted', providerId);
+  } catch (e) {
+    await safeSystemMailLog(
+      uid,
+      'gmail_test',
+      key,
+      c.from,
+      e instanceof GoogleDeliveryError ? e.deliveryStatus : 'unknown',
+      undefined,
+      e instanceof GoogleDeliveryError ? e.code : 'GMAIL_DELIVERY_UNCONFIRMED',
+    );
+    throw new AppError(
+      502,
+      'Emailul de test nu a putut fi confirmat. Verifică autorizarea și Inbox înainte de reîncercare.',
+    );
+  }
+  const testedAt = new Date().toISOString();
+  await db()
+    .update(s.settings)
+    .set({ value: seal({ ...value, testedAt }) })
+    .where(and(eq(s.settings.key, row.key), eq(s.settings.value, row.value)));
+  return { ok: true, to: c.from, testedAt, automaticEnabled: (await automationState()).enabled };
+}
+export async function disconnectGoogleMail(uid: string) {
+  await requireFounder(uid);
+  await db().delete(s.settings).where(eq(s.settings.key, CONNECTION));
+  await db()
+    .delete(s.settings)
+    .where(eq(s.settings.key, STATE_PREFIX + uid));
+  return { ok: true };
+}
+
+export class GoogleDeliveryError extends Error {
+  constructor(
+    public deliveryStatus: 'failed' | 'unknown',
+    public code: string,
+  ) {
+    super(code);
+  }
+}
+export async function gmailReady() {
+  const { value } = await connection();
+  return !!value.testedAt;
+}
+export async function sendGoogleMail(to: string, content: EmailContent, deliveryId: string) {
+  const { value, c } = await connection();
+  if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(to) || /[\r\n]/.test(to + content.subject))
+    throw new GoogleDeliveryError('failed', 'INVALID_EMAIL_HEADERS');
+  let tokens;
+  try {
+    tokens = await tokenRequest({ grant_type: 'refresh_token', refresh_token: value.refresh });
+  } catch {
+    throw new GoogleDeliveryError('failed', 'GMAIL_AUTHORIZATION_FAILED');
+  }
+  const boundary = 'autocare_' + randomBytes(16).toString('hex');
+  const encode = (text: string) =>
+    Buffer.from(text)
+      .toString('base64')
+      .match(/.{1,76}/g)
+      ?.join('\r\n') || '';
   const message = [
     `From: AutoCare <${c.from}>`,
-    `To: ${c.from}`,
-    'Subject: AutoCare - test Gmail API',
+    `To: ${to}`,
+    `Subject: =?UTF-8?B?${Buffer.from(content.subject).toString('base64')}?=`,
+    `Message-ID: <${hash(deliveryId)}@${new URL(origin()).hostname}>`,
     'MIME-Version: 1.0',
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    '',
+    `--${boundary}`,
     'Content-Type: text/plain; charset=UTF-8',
     'Content-Transfer-Encoding: base64',
     '',
-    Buffer.from(
-      'Conexiunea Gmail API AutoCare funcționează. Acesta este un test manual solicitat de Fondator. Notificările automate Gmail sunt dezactivate.',
-    ).toString('base64'),
+    encode(content.text),
+    `--${boundary}`,
+    'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: base64',
+    '',
+    encode(content.html),
+    `--${boundary}--`,
+    '',
   ].join('\r\n');
   try {
-    // The configured Gmail address, rather than "me", rejects authorizations for another mailbox.
     const response = await fetch(
       `https://gmail.googleapis.com/gmail/v1/users/${encodeURIComponent(c.from)}/messages/send`,
       {
@@ -294,25 +367,17 @@ export async function testGoogleMail(uid: string) {
         cache: 'no-store',
       },
     );
-    if (!response.ok) throw new Error();
-  } catch {
-    throw new AppError(
-      502,
-      'Emailul de test nu a putut fi confirmat. Verifică expeditorul și autorizarea Gmail înainte de reîncercare.',
-    );
+    if (!response.ok)
+      throw new GoogleDeliveryError(
+        response.status >= 400 && response.status < 500 ? 'failed' : 'unknown',
+        `GMAIL_HTTP_${response.status}`,
+      );
+    const out = await response.json();
+    if (typeof out.id !== 'string')
+      throw new GoogleDeliveryError('unknown', 'GMAIL_RESPONSE_UNCONFIRMED');
+    return out.id as string;
+  } catch (e) {
+    if (e instanceof GoogleDeliveryError) throw e;
+    throw new GoogleDeliveryError('unknown', 'GMAIL_DELIVERY_UNCONFIRMED');
   }
-  const testedAt = new Date().toISOString();
-  await db()
-    .update(s.settings)
-    .set({ value: seal({ ...value, testedAt }) })
-    .where(and(eq(s.settings.key, row.key), eq(s.settings.value, row.value)));
-  return { ok: true, to: c.from, testedAt, automaticEnabled: false };
-}
-export async function disconnectGoogleMail(uid: string) {
-  await requireFounder(uid);
-  await db().delete(s.settings).where(eq(s.settings.key, CONNECTION));
-  await db()
-    .delete(s.settings)
-    .where(eq(s.settings.key, STATE_PREFIX + uid));
-  return { ok: true };
 }

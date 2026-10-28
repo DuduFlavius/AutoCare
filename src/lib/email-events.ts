@@ -49,5 +49,10 @@ export async function emailWebhook(raw: string, headers: Headers) {
           sql`${s.notifications.status} IN ('accepted','delivered')`,
         ),
       );
+  if (['email.delivered', 'email.bounced', 'email.failed'].includes(event.type))
+    await db().update(s.mailDeliveries).set({
+      status: event.type === 'email.delivered' ? 'delivered' : 'failed',
+      error: event.type === 'email.delivered' ? null : 'EMAIL_DELIVERY_FAILED',
+    }).where(and(eq(s.mailDeliveries.providerId, event.data.email_id), sql`${s.mailDeliveries.status} IN ('accepted','delivered')`));
   return { ok: true };
 }

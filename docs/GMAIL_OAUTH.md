@@ -55,8 +55,8 @@ Only the configured sender is accepted as the test recipient; no arbitrary conte
 ## Existing email and release checks
 
 `src/lib/mail.ts`, password reset, verification email, Resend webhooks, reminders and cron
-configuration retain their existing behavior. Gmail has no automatic-send path and status
-always reports `automaticEnabled: false`, even after a successful manual test.
+configuration retain their existing behavior. New Gmail automations require both explicit Founder
+approval after testing and a separately enabled deployment gate; both remain closed in this release.
 
 Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` with isolated local
 configuration before production deployment. The OAuth tests mock Google and use in-memory
@@ -64,3 +64,7 @@ PGlite; they do not send email or access production data. After deployment, chec
 status/connect/test/callback requests are denied and mutating cross-origin requests fail.
 Complete real consent and inspect a real test email from the Founder session before any
 future decision about automatic Gmail delivery.
+
+## Mail Center extension
+
+See [MAIL_CENTER.md](MAIL_CENTER.md) for HTML/plain-text MIME, manual campaigns, consent, history, additive migration and the two closed automation gates. This pilot does not enable automatic Gmail delivery.
