@@ -203,6 +203,14 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       return json({ error: 'Rută inexistentă.' }, 404);
     }
     if (route === 'dashboard' && method === 'GET') return json(await svc.dashboard(uid));
+    if (path.length === 2 && path[0] === 'notifications' && method === 'DELETE') {
+      const id = uuid.parse(path[1]);
+      const removed = await db().delete(s.notifications)
+        .where(and(eq(s.notifications.id, id), eq(s.notifications.userId, uid)))
+        .returning({ id: s.notifications.id });
+      if (!removed.length) throw new svc.AppError(404, 'Notificare inexistentă.');
+      return json({ ok: true });
+    }
     if (route === 'notifications/read' && method === 'POST') {
       await db()
         .update(s.notifications)
