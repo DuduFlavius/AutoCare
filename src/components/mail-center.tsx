@@ -244,6 +244,19 @@ export default function MailCenter() {
             Caută destinatari
             <input value={search} onChange={(e) => setSearch(e.target.value)} />
           </label>
+          <div className="inline" style={{ flexWrap: 'wrap', gap: 10 }}>
+            <button type="button" disabled={busy || saved} onClick={() => {
+              const matching = data.users.filter((u) =>
+                (u.name + ' ' + u.email).toLowerCase().includes(search.toLowerCase()) && eligible(u)
+              );
+              setRecipients((old) => [...new Set([...old, ...matching.map((u) => u.id)])].slice(0, 50));
+              setPreview(null);
+            }}>Bifează utilizatorii afișați</button>
+            <button type="button" disabled={busy || saved || recipients.length === 0} onClick={() => {
+              setRecipients([]);
+              setPreview(null);
+            }}>Debifează toți</button>
+          </div>
           <div className="mail-recipients" role="group" aria-label="Destinatari">
             <p>
               {recipients.length}/50 selectați ·{' '}
