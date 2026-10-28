@@ -617,7 +617,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       return json(
         await checkout(
           uid,
-          z.object({ interval: z.enum(['monthly', 'annual']) }).parse(await body(req)).interval,
+          z.object({ interval: z.enum(['monthly', 'quarterly', 'annual']) }).parse(await body(req)).interval,
         ),
       );
     if (route === 'billing/portal' && method === 'POST') return json(await billingPortal(uid));
