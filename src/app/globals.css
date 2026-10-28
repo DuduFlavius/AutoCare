@@ -897,3 +897,25 @@ summary + p {
   cursor: not-allowed;
 }
 .mail-center .mail-send-action svg { color: inherit !important; opacity: 1 !important; }
+
+/* Always legible, even with no recipient selected. */
+.mail-center button.mail-send-action,
+.mail-center button.mail-send-action:disabled {
+  background: #174ea6 !important;
+  border: 2px solid #0b3476 !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #fff !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
+}
+.mail-center button.mail-send-action:disabled {
+  background: #36577f !important;
+  border-color: #243f63 !important;
+  cursor: not-allowed !important;
+}
+.mail-center button.mail-send-action:disabled svg {
+  color: #fff !important;
+  opacity: 1 !important;
+}

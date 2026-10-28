@@ -389,7 +389,7 @@ export default function MailCenter() {
               if (issues.length) setError(`${issues.length} emailuri au status eșuat, incert sau omis. Verifică detaliile înainte de orice retrimitere.`);
             })}
           >
-            <Send size={17} /> {busy ? 'Se trimit emailurile…' : saved ? 'Continuă trimiterea emailurilor' : `Trimite emailul către ${recipients.length} destinatari`}
+            <Send size={17} /> {busy ? 'Se trimit emailurile…' : saved ? 'Continuă trimiterea emailurilor' : recipients.length ? `Trimite emailul către ${recipients.length} destinatari` : 'Bifează un destinatar pentru trimitere'}
           </button>
           {!recipients.length && <p className="small muted">Bifează cel puțin un destinatar pentru a activa trimiterea.</p>}
           {gmailStatus && !gmailStatus.testedAt && (
