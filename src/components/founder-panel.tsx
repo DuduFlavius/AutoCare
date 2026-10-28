@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import SupportChat from './support-chat';
 import SearchConsoleSettings from './search-console-settings';
+import GoogleMailSettings from './google-mail-settings';
 import { savings } from '@/lib/pricing-display';
 import type { founderOverview, founderUsers, founderUserDetail, founderAudit } from '@/lib/founder';
 type Overview = Awaited<ReturnType<typeof founderOverview>>;
@@ -105,6 +106,9 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [duration, setDuration] = useState('1');
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has('gmail')) setTab('Setări administrative');
+  }, []);
   const detailsRef = useRef<HTMLElement>(null);
   const userPane = ['Utilizatori', 'Roluri și permisiuni', 'Abonamente'].includes(tab);
   async function loadUsers() {
@@ -947,6 +951,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
         )}
         {tab === 'Setări administrative' && (
           <>
+            <GoogleMailSettings />
             <SearchConsoleSettings />
             <section className="card founder-config">
               <LockKeyhole size={29} />

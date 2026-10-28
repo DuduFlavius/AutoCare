@@ -217,6 +217,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
           threadId: thread.id,
           authorId: null,
           authorName: 'AutoCare',
+          createdAt: sql`clock_timestamp()`,
           authorRole: 'system',
           body: 'Bine ai venit la Centrul de suport AutoCare! Am primit mesajul tău. Un membru al echipei îți va răspunde aici cât mai curând posibil. Îți mulțumim pentru răbdare!',
         });
@@ -230,6 +231,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
           threadId: thread.id,
           authorId: uid,
           authorName: who.name,
+          createdAt: sql`clock_timestamp()`,
           authorRole: who.role,
           body: data.message,
         })

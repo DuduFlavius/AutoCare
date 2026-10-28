@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
-import { getTableColumns, sql } from 'drizzle-orm';
+import { getTableColumns, notLike, sql } from 'drizzle-orm';
 import { db } from './db';
 import * as s from './schema';
 // Explicit dependency order. No credentials or environment configuration are exported.
@@ -42,7 +42,14 @@ export async function encryptedBackup(key: Buffer) {
   const data = await db().transaction(async (tx) => {
     await tx.execute(sql`SET TRANSACTION ISOLATION LEVEL REPEATABLE READ`);
     const dump: Record<string, unknown[]> = {};
-    for (const [name, table] of Object.entries(tables)) dump[name] = await tx.select().from(table);
+    for (const [name, table] of Object.entries(tables))
+      dump[name] =
+        name === 'settings'
+          ? await tx
+              .select()
+              .from(s.settings)
+              .where(notLike(s.settings.key, 'private:google-mail:%'))
+          : await tx.select().from(table);
     return dump;
   });
   const iv = randomBytes(12),

@@ -14,6 +14,7 @@ import * as svc from '@/lib/service';
 import { origin } from '@/lib/config';
 import { runJob, sendPushNotification } from '@/lib/reminders';
 import { sendMail } from '@/lib/mail';
+import * as googleMail from '@/lib/google-mail';
 import { stripe, checkout, billingPortal, processStripeEvent } from '@/lib/billing';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 export const runtime = 'nodejs';
@@ -123,6 +124,35 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     const uid = sess.user.id;
     await svc.assertActiveAccount(uid);
     await rate(uid);
+    if (path[0] === 'mail' && path[1] === 'google') {
+      await founder.requireFounder(uid);
+      if (route === 'mail/google/status' && method === 'GET')
+        return json(await googleMail.googleMailStatus(uid));
+      if (route === 'mail/google/disconnect' && method === 'POST')
+        return json(await googleMail.disconnectGoogleMail(uid));
+      if (new URL(req.url).origin !== new URL(googleMail.GOOGLE_MAIL_CALLBACK).origin)
+        return json({ error: 'Conectarea și testarea Gmail sunt disponibile pe domeniul de producție configurat.' }, 403);
+      if (route === 'mail/google/connect' && method === 'POST') {
+        const result = await googleMail.beginGoogleMail(uid, sess.session.id);
+        return Response.json({ url: result.url }, { headers: {
+          'Cache-Control': 'private, no-store', 'Set-Cookie': result.cookie,
+          'Referrer-Policy': 'no-referrer', 'X-Robots-Tag': 'noindex, nofollow',
+        } });
+      }
+      if (route === 'mail/google/callback' && method === 'GET') {
+        let outcome = 'connected';
+        try { await googleMail.completeGoogleMail(uid, sess.session.id, req); }
+        catch { outcome = 'failed'; }
+        return new Response(null, { status: 303, headers: {
+          Location: '/admin?gmail=' + outcome, 'Cache-Control': 'private, no-store',
+          'Referrer-Policy': 'no-referrer', 'Set-Cookie': googleMail.clearGoogleMailCookie,
+          'X-Robots-Tag': 'noindex, nofollow',
+        } });
+      }
+      if (route === 'mail/google/test' && method === 'POST')
+        return json(await googleMail.testGoogleMail(uid));
+      return json({ error: 'Rută inexistentă.' }, 404);
+    }
     if (path[0] === 'founder') {
       if (route === 'founder/seo' && method === 'GET') return json(await founder.founderSeo(uid));
       if (route === 'founder/seo' && method === 'PUT') {
