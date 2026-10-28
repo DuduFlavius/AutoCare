@@ -19,10 +19,10 @@ export async function checkout(uid: string, interval: string) {
   if (!['monthly', 'quarterly', 'annual'].includes(interval)) throw new AppError(400, 'Interval invalid.');
   const configured = await pricing();
   const price = interval === 'annual'
-    ? configured.annualPriceId || process.env.STRIPE_ANNUAL_PRICE_ID
+    ? process.env.STRIPE_ANNUAL_PRICE_ID || configured.annualPriceId
     : interval === 'quarterly'
       ? process.env.STRIPE_QUARTERLY_PRICE_ID
-      : configured.monthlyPriceId || process.env.STRIPE_MONTHLY_PRICE_ID;
+      : process.env.STRIPE_MONTHLY_PRICE_ID || configured.monthlyPriceId;
   if (!price)
     throw new AppError(
       503,
