@@ -919,3 +919,19 @@ summary + p {
   color: #fff !important;
   opacity: 1 !important;
 }
+
+/* Readable notification inbox */
+.autocare-notifications{background:#fff;color:#17243b}
+.autocare-notifications-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:18px}
+.autocare-notifications-header h3{color:#14233d;font-size:1.25rem;font-weight:750;margin:0 0 5px}
+.autocare-notifications-header p{color:#46566f;font-size:.94rem;margin:0;line-height:1.5}
+.autocare-notifications-settings{background:#155eef!important;color:#fff!important;border:1px solid #155eef!important;border-radius:11px;padding:11px 17px;font-weight:700;min-height:44px}
+.autocare-notifications-list{display:grid;gap:12px}
+.autocare-notification{width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;text-align:left;background:#f7faff!important;border:1px solid #dbe5f5!important;border-radius:14px;padding:17px 18px;color:#17243b!important;min-height:78px;cursor:pointer}
+.autocare-notification:hover{background:#edf4ff!important;border-color:#90b5f7!important}
+.autocare-notification:focus-visible,.autocare-notifications-settings:focus-visible{outline:3px solid #4e91ff;outline-offset:3px}
+.autocare-notification-content{display:grid;gap:7px;min-width:0}
+.autocare-notification-content strong{color:#17243b!important;font-size:1rem;line-height:1.55;font-weight:650;overflow-wrap:anywhere}
+.autocare-notification-content small{color:#46566f!important;font-size:.83rem;line-height:1.4}
+.autocare-notification-remove{display:inline-flex;gap:6px;align-items:center;flex-shrink:0;background:#e5efff;color:#174ea6!important;border-radius:9px;padding:9px 12px;font-size:.85rem;font-weight:750}
+@media(max-width:600px){.autocare-notification{padding:14px;align-items:flex-start;flex-direction:column}.autocare-notification-remove{align-self:flex-end}}
