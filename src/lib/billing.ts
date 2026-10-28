@@ -58,7 +58,7 @@ export async function checkout(uid: string, interval: string) {
       customer: old?.customerId || undefined,
       success_url: origin() + '/cont?tab=Abonament',
       cancel_url: origin() + '/cont?tab=Abonament',
-    },
+    } as unknown as Stripe.Checkout.SessionCreateParams,
     { idempotencyKey: `checkout-${uid}-${interval}-${Math.floor(Date.now() / 600000)}` },
   );
   return { url: session.url };
