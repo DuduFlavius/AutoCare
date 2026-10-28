@@ -97,7 +97,7 @@ export default function MailCenter() {
   const security = ['verification', 'password_reset', 'gmail_test'].includes(template);
   const selectedName = data?.users.find((u) => u.id === recipients[0])?.name || 'prietene';
   const eligible = (u: Overview['users'][number]) =>
-    u.emailVerified &&
+    (u.emailVerified || category === 'transactional') &&
     u.emailEnabled !== false &&
     (category === 'promotional' ? u.promotional === true : u.transactional !== false);
   if (!data)

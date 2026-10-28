@@ -264,7 +264,7 @@ export async function deliverCampaign(
         (campaign.source === 'automation' &&
           campaign.template === 'welcome' &&
           now.getTime() - campaign.createdAt.getTime() > 86400000) ||
-        !(await recipientAllowed(candidate.userId, campaign.category)) ||
+        !(await recipientAllowed(candidate.userId, campaign.category, campaign.source === 'manual')) ||
         !(await billingMailValid(candidate.userId, campaign.template, candidate.context, now))
       ) {
         await db()
