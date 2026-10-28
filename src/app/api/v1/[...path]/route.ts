@@ -878,7 +878,14 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     if (e instanceof SyntaxError) return json({ error: 'Cerere invalidă.' }, 400);
     const trace = crypto.randomUUID();
     console.error(
-      JSON.stringify({ event: 'api_error', trace, type: e instanceof Error ? e.name : 'unknown' }),
+      JSON.stringify({
+        event: 'api_error', trace, type: e instanceof Error ? e.name : 'unknown',
+        message: e instanceof Error
+          ? e.message.replace(/(?:sk|rk|whsec)_(?:live|test)?_[A-Za-z0-9]+/g, '[redacted]')
+              .replace(/(?:postgres(?:ql)?|https?):\\/\\/[^\\s]+/gi, '[redacted-url]').slice(0, 400)
+          : 'unknown',
+        route: route === 'billing/checkout' ? 'billing/checkout' : 'other',
+      }),
     );
     return json(
       { error: 'Operațiunea nu a reușit. Verifică configurarea serviciilor.', trace },
