@@ -9,8 +9,8 @@ import { queueAutomatedMail } from './mail-automation';
 export function stripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new AppError(503, 'Plățile nu sunt configurate.');
-  if (process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS === 'true' && !key.startsWith('sk_live_'))
-    throw new AppError(503, 'Stripe nu are o cheie LIVE validă. Configurează STRIPE_SECRET_KEY (sk_live_) înainte de a încasa bani reali.');
+  if (process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS === 'true' && !['sk_live_', 'rk_live_'].some((prefix) => key.startsWith(prefix)))
+    throw new AppError(503, 'Stripe necesită o cheie LIVE validă (sk_live_ sau rk_live_) cu permisiunile API necesare.');
   if (!key.startsWith('sk_test_') && process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS !== 'true')
     throw new AppError(503, 'Plățile reale sunt dezactivate în această versiune.');
   return new Stripe(key, { timeout: 12000, maxNetworkRetries: 1 });
