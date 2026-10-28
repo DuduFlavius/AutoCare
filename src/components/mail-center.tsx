@@ -352,8 +352,21 @@ export default function MailCenter() {
             type="button"
             className="primary mail-action-contrast"
             style={{ width: '100%', minHeight: 52, fontWeight: 700, background: '#2563eb', color: '#fff' }}
-            disabled={busy || security || !recipients.length || !subject.trim() || !message.trim() || (gmailStatus !== null && (!gmailStatus.connected || !gmailStatus.testedAt))}
+            disabled={busy || security || !recipients.length || !subject.trim() || !message.trim()}
             onClick={() => void run(async () => {
+              if (gmailStatus && !gmailStatus.connected) {
+                throw new Error('Contul Gmail nu este conectat. Apasă „Conectează Gmail” din Panoul Fondator.');
+              }
+              if (gmailStatus && !gmailStatus.testedAt) {
+                const testResponse = await fetch('/api/v1/mail/google/test', { method: 'POST' });
+                const testResult = await testResponse.json();
+                if (!testResponse.ok) throw new Error(testResult.error || 'Testul Gmail a eșuat. Emailurile nu au fost trimise.');
+                const statusResponse = await fetch('/api/v1/mail/google/status', { cache: 'no-store' });
+                if (!statusResponse.ok) throw new Error('Testul Gmail a fost acceptat, dar starea nu a putut fi verificată.');
+                const updated = await statusResponse.json();
+                setGmailStatus(updated);
+                if (!updated.testedAt) throw new Error('Gmail nu a confirmat activarea. Nu au fost trimise mesaje către destinatari.');
+              }
               if (!saved) {
                 await api('/campaigns', 'POST', {
                   id: draftId, template, category, subject, message, ctaLabel, ctaPath, recipients,
@@ -378,8 +391,9 @@ export default function MailCenter() {
           >
             <Send size={17} /> {busy ? 'Se trimit emailurile…' : saved ? 'Continuă trimiterea emailurilor' : `Trimite emailul către ${recipients.length} destinatari`}
           </button>
-          {gmailStatus && (!gmailStatus.connected || !gmailStatus.testedAt) && (
-            <p className="error" role="alert">Pentru activarea butonului, folosește „Trimite email de test și activează trimiterea” de mai sus.</p>
+          {!recipients.length && <p className="small muted">Bifează cel puțin un destinatar pentru a activa trimiterea.</p>}
+          {gmailStatus && !gmailStatus.testedAt && (
+            <p className="small muted">La prima trimitere, AutoCare verifică automat Gmail. Dacă testul eșuează, nu expediază mesajele către destinatari.</p>
           )}
         </section>
         <section className="card mail-preview">
