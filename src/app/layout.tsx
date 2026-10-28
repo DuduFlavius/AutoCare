@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(origin()),
   title: { default: `${appName} — Mașina ta, fără griji`, template: `%s | ${appName}` },
   description: siteDescription,
+  keywords: ['AutoCare', 'aplicație întreținere auto', 'garaj digital', 'expirare RCA', 'expirare ITP', 'rovinietă', 'istoric service auto', 'revizie auto', 'cheltuieli auto', 'evidență mașină', 'documente auto', 'notificări auto'],
+  category: 'technology',
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
   ...(process.env.GOOGLE_SITE_VERIFICATION
     ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
     : {}),
