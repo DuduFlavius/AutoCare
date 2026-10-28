@@ -884,7 +884,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           ? e.message.replace(/(?:sk|rk|whsec)_(?:live|test)?_[A-Za-z0-9]+/g, '[redacted]')
               .replace(/:\/\/[^\s]+/g, '[redacted-url]').slice(0, 400)
           : 'unknown',
-        route: route === 'billing/checkout' ? 'billing/checkout' : 'other',
+        route: new URL(req.url).pathname.endsWith('/billing/checkout') ? 'billing/checkout' : 'other',
       }),
     );
     return json(
