@@ -2,8 +2,8 @@ import { eq } from 'drizzle-orm';
 import { db } from './db';
 import { settings } from './schema';
 export const DEFAULT_PRICING = {
-  monthlyBani: 5000,
-  annualBani: 50000,
+  monthlyBani: 15000,
+  annualBani: 170000,
   currency: 'ron' as const,
   monthlyPriceId: null as string | null,
   annualPriceId: null as string | null,
@@ -15,6 +15,12 @@ export async function pricing() {
     ...DEFAULT_PRICING,
     ...((row?.value as Partial<typeof DEFAULT_PRICING>) || {}),
     currency: 'ron' as const,
+    ...(process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS === 'true' ? {
+      monthlyBani: 15000,
+      annualBani: 170000,
+      monthlyPriceId: process.env.STRIPE_MONTHLY_PRICE_ID || null,
+      annualPriceId: process.env.STRIPE_ANNUAL_PRICE_ID || null,
+    } : {}),
   };
 }
 export { savings } from './pricing-display';
