@@ -30,6 +30,7 @@ const labels: Record<string, string> = {
 };
 export default function MailCenter() {
   const [approvalConfirmed, setApprovalConfirmed] = useState(false);
+  const [gmailStatus, setGmailStatus] = useState<{connected: boolean; testedAt?: string | null; reconnectRequired?: boolean} | null>(null);
   const [data, setData] = useState<Overview | null>(null),
     [template, setTemplate] = useState<EmailTemplate>('administrative');
   const [subject, setSubject] = useState(''),
@@ -50,6 +51,11 @@ export default function MailCenter() {
     [search, setSearch] = useState('');
   useEffect(() => {
     let active = true;
+    void fetch('/api/v1/mail/google/status', { cache: 'no-store' })
+      .then((r) => r.ok ? r.json() : null)
+      .then((v) => { if (active) setGmailStatus(v); })
+      .catch(() => {});
+
     void api()
       .then((d: Overview) => {
         if (!active) return;
@@ -121,6 +127,14 @@ export default function MailCenter() {
           Redactează, verifică și trimite manual. Fiecare destinatar primește un email separat,
           personalizat.
         </p>
+        {gmailStatus && (!gmailStatus.connected || !gmailStatus.testedAt) && (
+          <p className="error" role="alert">
+            Trimiterea manuală este blocată: {gmailStatus.connected
+              ? 'Gmail este conectat, dar lipsește testul de trimitere.'
+              : 'Gmail nu este conectat sau necesită reconectare.'}
+            {' '}Deschide secțiunea „Conectare Gmail”, reconectează dacă este necesar și trimite un email de test.
+          </p>
+        )}
         <p className="notice">
           Automatizări: {data.automation.enabled ? 'activate' : 'dezactivate'}. Activarea necesită
           testare completă, aprobarea explicită a Fondatorului și configurare separată pe server.
@@ -352,7 +366,7 @@ export default function MailCenter() {
               </label>
               <button
                 className="primary"
-                disabled={busy || !confirmed}
+                disabled={busy || !confirmed || (gmailStatus !== null && (!gmailStatus.connected || !gmailStatus.testedAt))}
                 onClick={() =>
                   void run(async () => {
                     const result = await api(`/campaigns/${draftId}/send`, 'POST');
