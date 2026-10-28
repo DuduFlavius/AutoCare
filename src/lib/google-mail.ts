@@ -284,7 +284,9 @@ export async function testGoogleMail(uid: string) {
     );
     throw new AppError(
       502,
-      'Emailul de test nu a putut fi confirmat. Verifică autorizarea și Inbox înainte de reîncercare.',
+      e instanceof GoogleDeliveryError
+        ? `Testul Gmail a eșuat: ${e.code}. Verifică autorizarea contului Gmail și încearcă din nou.`
+        : 'Emailul de test nu a putut fi confirmat. Verifică autorizarea și Inbox înainte de reîncercare.',
     );
   }
   const testedAt = new Date().toISOString();

@@ -350,7 +350,7 @@ export default function MailCenter() {
           </button>
           <button
             type="button"
-            className="primary mail-action-contrast"
+            className="primary mail-send-action"
             style={{ width: '100%', minHeight: 52, fontWeight: 700, background: '#2563eb', color: '#fff' }}
             disabled={busy || security || !recipients.length || !subject.trim() || !message.trim()}
             onClick={() => void run(async () => {

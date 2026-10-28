@@ -870,3 +870,30 @@ summary + p {
 .mail-center button.primary:hover:not(:disabled){background:#09244d!important}
 .mail-center button.primary:disabled{background:#d7e0ee!important;color:#263a56!important;border-color:#b6c6dc!important}
 .mail-center button:focus-visible{outline:3px solid #f5b82e;outline-offset:3px}
+
+/* Mail Center: high-contrast primary sending action, including disabled state */
+.mail-center .mail-send-action {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-height: 58px !important;
+  padding: 15px 20px !important;
+  background: #175cd3 !important;
+  border: 2px solid #124aa8 !important;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+  box-shadow: 0 6px 18px rgba(20, 78, 164, .24) !important;
+}
+.mail-center .mail-send-action:disabled {
+  background: #e4eaf4 !important;
+  border-color: #bdcbe1 !important;
+  color: #304563 !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+.mail-center .mail-send-action svg { color: inherit !important; opacity: 1 !important; }
