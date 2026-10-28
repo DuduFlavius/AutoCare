@@ -882,7 +882,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         event: 'api_error', trace, type: e instanceof Error ? e.name : 'unknown',
         message: e instanceof Error
           ? e.message.replace(/(?:sk|rk|whsec)_(?:live|test)?_[A-Za-z0-9]+/g, '[redacted]')
-              .replace(/(?:postgres(?:ql)?|https?):\\/\\/[^\\s]+/gi, '[redacted-url]').slice(0, 400)
+              .replace(/:\/\/[^\s]+/g, '[redacted-url]').slice(0, 400)
           : 'unknown',
         route: route === 'billing/checkout' ? 'billing/checkout' : 'other',
       }),
