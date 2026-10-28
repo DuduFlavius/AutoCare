@@ -137,6 +137,7 @@ export async function processStripeEvent(event: Stripe.Event, client: Stripe) {
   const historical = await db().select({ id: s.billingPrices.id }).from(s.billingPrices);
   const prices = [
     process.env.STRIPE_MONTHLY_PRICE_ID,
+    process.env.STRIPE_QUARTERLY_PRICE_ID,
     process.env.STRIPE_ANNUAL_PRICE_ID,
     configured.monthlyPriceId,
     configured.annualPriceId,
