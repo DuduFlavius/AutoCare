@@ -865,3 +865,8 @@ summary + p {
     }
   }
 }
+
+.mail-center button.primary{background:#12366f!important;color:#fff!important;border-color:#12366f!important;opacity:1!important;font-weight:700}
+.mail-center button.primary:hover:not(:disabled){background:#09244d!important}
+.mail-center button.primary:disabled{background:#d7e0ee!important;color:#263a56!important;border-color:#b6c6dc!important}
+.mail-center button:focus-visible{outline:3px solid #f5b82e;outline-offset:3px}
