@@ -7,3 +7,6 @@ test('earliest of time or mileage is used',()=>{const x=forecastService({current
 test('does not invent a date without usage history',()=>{const x=forecastService({currentKm:95000,nextKm:100000,today});assert.equal(x?.days,null);assert.equal(x?.estimatedDate,null);assert.equal(x?.remainingKm,5000);});
 test('already due means zero remaining',()=>{const x=forecastService({currentKm:101000,nextKm:100000,today});assert.equal(x?.days,0);assert.equal(x?.remainingKm,0);});
 test('rejects invalid odometers',()=>{assert.equal(forecastService({currentKm:-1,nextKm:1000}),null);});
+test('calendar-only maintenance works without inventing a mileage threshold',()=>{const x=forecastService({currentKm:100000,nextKm:null,dueDate:'2026-11-08',today});assert.equal(x?.remainingKm,null);assert.equal(x?.days,10);assert.equal(x?.basis,'time');});
+test('invalid calendar dates are not silently normalized',()=>{assert.equal(forecastService({currentKm:100000,nextKm:110000,dueDate:'2026-02-31',today})?.days,null);});
+test('local timezone chooses the correct calendar day around midnight',()=>{assert.equal(forecastService({currentKm:100000,nextKm:null,dueDate:'2026-10-30',today:new Date('2026-10-29T23:30:00Z'),timezone:'Europe/Bucharest'})?.days,0);});

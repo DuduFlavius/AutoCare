@@ -1,40 +1,193 @@
 'use client';
-import {useApplicationLocale} from './application-locale';
+import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import { useEffect, useState } from 'react';
 import { CalendarClock, TrendingUp } from 'lucide-react';
-import { mileageMetrics } from '@/lib/smartdrive-metrics';
-import { forecastService } from '@/lib/service-forecast';
-type Reading = { odometer: number; recordedAt: string };
-type Due = { id: string; title: string; nextKm: number; expiresAt?: string | Date | null };
-export default function ServiceForecastCards({vehicleId,currentKm,services,preview}:{vehicleId:string;currentKm:number;services:Due[];preview:boolean}) {
-
-  const locale=useApplicationLocale();
-const [dailyKm,setDailyKm]=useState<number|null>(null);
- const [loading,setLoading]=useState(!preview);
- const [manualDailyKm,setManualDailyKm]=useState('');
- useEffect(()=>{if(preview){setLoading(false);return;}let cancelled=false;setLoading(true);
- const timeout = new AbortController();
- const timer = setTimeout(()=>timeout.abort(),9000);
- fetch('/api/v1/smartdrive/vehicles/'+encodeURIComponent(vehicleId)+'/readings',{cache:'no-store',signal:timeout.signal}).then(async r=>{if(!r.ok)throw Error('Citirile nu sunt disponibile');return r.json() as Promise<Reading[]>}).then(rows=>{if(!cancelled)setDailyKm(mileageMetrics(rows).dailyKm)}).catch(()=>{if(!cancelled)setDailyKm(null)}).finally(()=>{clearTimeout(timer);if(!cancelled)setLoading(false)});
- return()=>{cancelled=true;clearTimeout(timer);timeout.abort()};
- },[vehicleId,currentKm,preview]);
- const manualRate = Number(manualDailyKm.replace(',','.'));
- const effectiveRate = Number.isFinite(manualRate) && manualRate>0 && manualRate<=2000 ? manualRate : dailyKm;
- if(!services.length)return null;
- return <section className="ac-forecast-list" aria-label="Estimări revizii" style={{display:'grid',gap:10,margin:'16px 0'}}>
-  <div style={{display:'flex',alignItems:'center',gap:8,color:'#163e77',fontWeight:750}}><CalendarClock size={19}/> Estimare timp până la revizie</div>
-  <label style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap',fontSize:13,color:'#254568'}}>Kilometri parcurși pe zi (opțional): <input type="number" min="1" max="2000" step="1" value={manualDailyKm} onChange={e=>setManualDailyKm(e.target.value)} placeholder={dailyKm!==null?dailyKm.toFixed(0):'ex. 40'} aria-label="Kilometri pe zi pentru estimare" style={{width:115,padding:'9px 11px',border:'1px solid #c9d8ec',borderRadius:9,background:'#fff',color:'#14345e'}}/><span style={{fontSize:12,color:'#64748b'}}>Poți introduce media zilnică pentru a calcula zilele imediat.</span></label>
-  {services.map(service=>{const date=service.expiresAt?new Date(service.expiresAt):null;const dueDate=date&&!Number.isNaN(date.getTime())?date.toISOString().slice(0,10):null;
-  const estimate=forecastService({currentKm,nextKm:Number(service.nextKm),averageKmPerDay:effectiveRate,dueDate});
-  if(!estimate)return null;
-  return <article key={service.id} style={{padding:'15px',border:'1px solid #dbe7f6',borderRadius:14,background:'linear-gradient(125deg,#f7fbff,#eef5ff)'}}>
-   <strong style={{display:'block',color:'#163251',marginBottom:8}}>{service.title||'Revizie programată'}</strong>
-   <div style={{display:'flex',flexWrap:'wrap',gap:10,alignItems:'center'}}>
-    <span style={{fontSize:20,fontWeight:800,color:estimate.remainingKm===0?'#b42318':'#1354b5'}}>{estimate.remainingKm.toLocaleString(locale)} km rămași</span>
-    <span style={{padding:'6px 10px',borderRadius:999,background:'#fff',color:'#244365',fontSize:13,fontWeight:700}}>{loading && effectiveRate===null?'Se verifică istoricul…':estimate.days===null?'Timp necunoscut':estimate.days===0?'Revizie scadentă':estimate.days+' zile estimate'}</span>
-   </div>
-   <p style={{margin:'9px 0 0',fontSize:12,lineHeight:1.55,color:'#536681'}}><TrendingUp size={13} style={{verticalAlign:'middle',marginRight:4}}/>{effectiveRate!==null&&effectiveRate>0?(manualRate>0?'Medie introdusă: ':'Medie calculată: ')+effectiveRate.toFixed(1)+' km/zi. ':'Sunt necesare două citiri de bord în zile diferite pentru estimarea după kilometri. '}{estimate.estimatedDate?'Dată probabilă: '+new Date(estimate.estimatedDate+'T12:00:00Z').toLocaleDateString(locale,{timeZone:'UTC'}):'Kilometrajul rămâne vizibil chiar fără o dată estimată.'}</p>
-  </article>})}
-  <p style={{margin:0,fontSize:12,color:'#52627b'}}>Estimare orientativă, nu termen garantat. Respectă recomandarea producătorului și termenul calendaristic, dacă există. GPS-ul nu modifică kilometrajul confirmat.</p>
- </section>;
+import { recentMileageUsage, type OdometerReading } from '@/lib/smartdrive-metrics';
+import { forecastService, forecastDuration } from '@/lib/service-forecast';
+type Due = { id: string; title: string; nextKm: number | null; expiresAt?: string | Date | null };
+export default function ServiceForecastCards({
+  vehicleId,
+  currentKm,
+  services,
+  preview,
+  timezone = 'Europe/Bucharest',
+}: {
+  vehicleId: string;
+  currentKm: number;
+  services: Due[];
+  preview: boolean;
+  timezone?: string;
+}) {
+  const language = useApplicationLanguage(),
+    locale = useApplicationLocale(),
+    en = language === 'en';
+  const key = vehicleId + ':' + currentKm;
+  const [usage, setUsage] = useState<{
+    key: string;
+    value: ReturnType<typeof recentMileageUsage>;
+  } | null>(null);
+  const [settled, setSettled] = useState('');
+  const [manual, setManual] = useState({ vehicleId, value: '' });
+  useEffect(() => {
+    if (preview) {
+      setSettled(key);
+      return;
+    }
+    let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 9000);
+    fetch('/api/v1/smartdrive/vehicles/' + encodeURIComponent(vehicleId) + '/readings', {
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+      .then(async (r) => {
+        if (!r.ok) throw Error('Readings unavailable');
+        return r.json() as Promise<OdometerReading[]>;
+      })
+      .then((rows) => {
+        if (!cancelled) setUsage({ key, value: recentMileageUsage(rows, new Date()) });
+      })
+      .catch(() => {
+        if (!cancelled) setUsage(null);
+      })
+      .finally(() => {
+        clearTimeout(timer);
+        if (!cancelled) setSettled(key);
+      });
+    return () => {
+      cancelled = true;
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [key, vehicleId, preview]);
+  const value = manual.vehicleId === vehicleId ? manual.value : '';
+  const parsed = Number(value.replace(',', '.'));
+  const invalid = value !== '' && (!Number.isFinite(parsed) || parsed <= 0 || parsed > 2000);
+  const confirmed = usage?.key === key ? usage.value : null;
+  const dailyKm = value !== '' && !invalid ? parsed : (confirmed?.dailyKm ?? null);
+  const loading = !preview && settled !== key;
+  if (!services.length) return null;
+  return (
+    <section
+      className="ac-forecast-list"
+      data-workspace-ui
+      aria-label={en ? 'Maintenance estimates' : 'Estimări revizii'}
+    >
+      <header>
+        <CalendarClock size={20} />
+        <div>
+          <h4>{en ? 'When is the next service due?' : 'Când urmează întreținerea?'}</h4>
+          <p>
+            {en
+              ? 'The earlier of your mileage threshold and calendar deadline.'
+              : 'Primul termen atins: kilometrajul sau data calendaristică.'}
+          </p>
+        </div>
+      </header>
+      <label className="forecast-daily-input">
+        {en
+          ? 'Typical kilometers per day · optional'
+          : 'Kilometri parcurși într-o zi obișnuită · opțional'}
+        <input
+          type="number"
+          min="1"
+          max="2000"
+          value={value}
+          onChange={(e) => setManual({ vehicleId, value: e.target.value })}
+          aria-invalid={invalid || undefined}
+          placeholder={confirmed?.dailyKm ? Math.round(confirmed.dailyKm).toString() : '40'}
+        />
+      </label>
+      {invalid && (
+        <p role="alert">
+          {en
+            ? 'Enter a daily average between 1 and 2,000 km.'
+            : 'Introdu o medie zilnică între 1 și 2.000 km.'}
+        </p>
+      )}
+      {services.map((service) => {
+        const raw =
+          service.expiresAt instanceof Date
+            ? service.expiresAt.toISOString().slice(0, 10)
+            : service.expiresAt;
+        const estimate = forecastService({
+          currentKm,
+          nextKm: service.nextKm,
+          averageKmPerDay: invalid ? null : dailyKm,
+          dueDate: raw,
+          timezone,
+        });
+        if (!estimate) return null;
+        return (
+          <article className="forecast-service-card" key={service.id}>
+            <strong data-user-content>
+              {service.title || (en ? 'Scheduled maintenance' : 'Revizie programată')}
+            </strong>
+            <div className="forecast-result">
+              <span>
+                {loading && value === ''
+                  ? en
+                    ? 'Updating estimate…'
+                    : 'Se actualizează estimarea…'
+                  : forecastDuration(estimate.days, language)}
+              </span>
+              {estimate.remainingKm !== null && (
+                <small>
+                  {new Intl.NumberFormat(locale).format(estimate.remainingKm)}{' '}
+                  {en ? 'km remaining' : 'km rămași'}
+                </small>
+              )}
+            </div>
+            {estimate.estimatedDate && (
+              <p>
+                {en ? 'Estimated date: ' : 'Dată estimată: '}
+                {new Date(estimate.estimatedDate + 'T12:00:00Z').toLocaleDateString(locale, {
+                  timeZone: 'UTC',
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </p>
+            )}
+            <small>
+              {estimate.days === null
+                ? en
+                  ? 'No reliable date yet.'
+                  : 'Data nu poate fi estimată încă.'
+                : estimate.basis === 'both'
+                  ? en
+                    ? 'Based on the earlier mileage or calendar deadline.'
+                    : 'Se ia în calcul termenul care apare primul: kilometraj sau dată.'
+                  : estimate.basis === 'time'
+                    ? en
+                      ? 'Based on the saved calendar deadline.'
+                      : 'Pe baza datei calendaristice salvate.'
+                    : en
+                      ? 'Based on confirmed mileage and daily usage.'
+                      : 'Pe baza kilometrilor confirmați și a utilizării zilnice.'}
+            </small>
+          </article>
+        );
+      })}
+      <p className="forecast-source">
+        <TrendingUp size={14} />
+        {value !== '' && !invalid
+          ? en
+            ? 'Using your daily average.'
+            : 'Se folosește media introdusă de tine.'
+          : confirmed?.dailyKm != null
+            ? en
+              ? `Based on ${confirmed.samples} readings over ${Math.round(confirmed.sampleDays)} days.`
+              : `Pe baza a ${confirmed.samples} citiri, pe ${Math.round(confirmed.sampleDays)} zile.`
+            : en
+              ? 'Two consistent readings at least a day apart are needed. You can enter your own daily average.'
+              : 'Sunt necesare două citiri coerente, la cel puțin o zi distanță. Poți introduce propria medie zilnică.'}
+      </p>
+      <p className="micro">
+        {en
+          ? 'Approximate planning only. Follow the manufacturer’s schedule and any calendar deadline. GPS never changes your odometer.'
+          : 'Estimare pentru planificare. Respectă recomandările producătorului și termenul calendaristic. GPS-ul nu modifică kilometrajul de bord.'}
+      </p>
+    </section>
+  );
 }

@@ -191,7 +191,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   const [confirmedJump, setConfirmedJump] = useState<string | null>(null);
   useEffect(() => { if (preview) return; let cancelled=false; Promise.all(data.vehicles.filter(v=>!v.archived).map(async v=>{try{const rows=await api('smartdrive/vehicles/'+v.id+'/readings') as {odometer:number;recordedAt:string}[];return [v.id,rows[0]] as const}catch{return [v.id,undefined] as const}})).then(entries=>{if(!cancelled)setLastReadings(Object.fromEntries(entries.filter((e): e is readonly [string,{odometer:number;recordedAt:string}] => e[1] !== undefined))) });return()=>{cancelled=true}; },[preview,data.vehicles.map(v=>v.id+':'+v.odometer).join('|')]);
   const cars = data.vehicles.filter(v => !v.archived);
-  const services = data.records.filter(r => r.kind === 'service' && !r.cancelled && r.nextKm != null && Number(r.nextKm) > 0);
+  const services = data.records.filter(r => r.kind === 'service' && !r.cancelled && (r.nextKm != null && Number(r.nextKm) > 0 || !!r.expiresAt));
   const fmt = (n: number) => n.toLocaleString(locale) + ' km';
   async function saveKm(v: Vehicle) {
     const value = Number(km);
@@ -226,7 +226,8 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
       {!mileageOnly && <SmartDriveTrip preview={preview} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model }))} />}
       <div className="mileage-planner-grid" id="ac-mileage-editor">
         {cars.map(v => {
-          const due = services.filter(r => r.vehicleId === v.id).sort((a,b) => Number(a.nextKm)-Number(b.nextKm));
+          const planned = services.filter(r=>r.vehicleId===v.id);
+          const due = planned.filter(r=>r.nextKm!=null).sort((a,b) => Number(a.nextKm)-Number(b.nextKm));
           return <article key={v.id} className="mileage-planner-card">
             <div className="between"><div><span data-user-content className="eyebrow">{v.plate}</span><h3 data-user-content>{v.brand} {v.model}</h3></div><CarFront size={28}/></div>
             <div className="mileage-planner-odometer"><span>Kilometraj înregistrat</span><strong>{fmt(v.odometer)}</strong></div>
@@ -246,7 +247,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
                   </span>
                 </div>;
               })}</div>}
-            <ServiceForecastCards vehicleId={v.id} currentKm={v.odometer} preview={preview} services={due.map(r => ({id:r.id,title:r.title || r.category || 'Intervenție',nextKm:Number(r.nextKm),expiresAt:r.expiresAt}))} />
+            <ServiceForecastCards vehicleId={v.id} currentKm={v.odometer} preview={preview} timezone={data.profile.timezone} services={planned.map(r => ({id:r.id,title:r.title || r.category || 'Intervenție',nextKm:r.nextKm==null?null:Number(r.nextKm),expiresAt:r.expiresAt}))} />
             <p className="micro">Recomandare AutoCare: actualizează kilometrajul periodic. Intervalele se stabilesc după manualul producătorului și condițiile de utilizare.</p>
           </article>;
         })}

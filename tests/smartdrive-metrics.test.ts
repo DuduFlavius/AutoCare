@@ -28,3 +28,4 @@ test('SmartDrive mileage: insufficient interval and regressions are not extrapol
     { odometer: 900, recordedAt: '2030-01-10T00:00:00Z' },
   ]), missing);
 });
+test('SmartDrive mileage: a short normal trip does not invalidate a multi-day average',()=>{const m=mileageMetrics([{odometer:1000,recordedAt:'2030-01-01T00:00:00Z'},{odometer:1300,recordedAt:'2030-01-11T00:00:00Z'},{odometer:1400,recordedAt:'2030-01-11T01:00:00Z'}]);assert.ok(m.dailyKm!==null&&m.dailyKm>30&&m.dailyKm<50);});

@@ -1,4 +1,5 @@
 'use client';
+import {repairCategories} from '@/lib/record-categories';
 import { useState } from 'react';
 type Field = { key: string; label: string; type?: 'number'|'date'|'select'|'textarea'; options?: string[]; unit?: string; placeholder?: string };
 const field = (key:string,label:string,type?:Field['type'],options?:string[],unit?:string):Field=>({key,label,type,options,unit});
@@ -14,16 +15,15 @@ const definitions: Record<string,{heading:string;advice:string;fields:Field[]}> 
  'ITP':{heading:'Detalii ITP',advice:'Introdu data expirării la „Următoarea intervenție” pentru a putea primi notificări potrivit setărilor contului.',fields:[field('rezultatITP','Rezultat','select',['Admis','Respins','În așteptare']),field('statieITP','Stația ITP'),field('mentiuniITP','Mențiuni / observații','textarea'),field('expirareITP','Data expirării ITP','date')]},
  'Altă operațiune':{heading:'Detalii operațiune',advice:'Poți salva rapid operațiunea și completa ulterior detaliile.',fields:[field('categorieAlta','Categorie'),field('descriereAlta','Descriere','textarea'),field('mementoAlta','Doresc să urmăresc această operațiune','select',['Da','Nu'])]}
 };
-const prefix='AutoCare · ';
-export function parseServiceDetails(parts:string){const out:Record<string,string>={};for(const line of parts.split('\n')){if(line.startsWith(prefix)){const i=line.indexOf(': ',prefix.length);if(i>0)out[line.slice(prefix.length,i)]=line.slice(i+2)}}return out}
-export function serializeServiceDetails(parts:string,form:FormData){
- const old=parts.split('\n').filter(x=>!x.startsWith(prefix)).join('\n').trim();
- const lines:string[]=[];
- for(const [key,value] of form.entries()){if(!key.startsWith('ac_'))continue;const v=String(value).trim();if(v)lines.push(prefix+key.slice(3)+': '+v.replace(/\r?\n/g,' / '))}
- return [old,...lines].filter(Boolean).join('\n');
-}
+export {parseServiceDetails,serializeServiceDetails} from '@/lib/service-details';
+import {parseServiceDetails} from '@/lib/service-details';
 export default function ServiceDetailFields({category,parts}:{category:string;parts:string}){
- const config=definitions[category];const saved=parseServiceDetails(parts);
+ const specific=repairCategories.has(category)&&category!=='Reparație'?{
+ heading:'Detalii '+category.toLocaleLowerCase('ro'),
+ advice:'Descrie lucrarea efectuată și urmează intervalele recomandate de producător pentru mașina ta.',
+ fields:[field('diagnostic','Diagnostic / simptome','textarea'),field('lucrareEfectuata','Lucrarea efectuată','textarea'),field('pieseInlocuite','Piese înlocuite','textarea'),...(category==='Cutie de viteze și transmisie'?[field('tipTransmisie','Tip cutie de viteze','select',['Manuală','Automată','CVT','Dublu ambreiaj','Alt tip']),field('uleiTransmisie','Ulei / specificație'),field('cantitateTransmisie','Cantitate utilizată','number',undefined,'litri')]:category==='Sistem de răcire'?[field('lichidRacire','Lichid / specificație'),field('cantitateRacire','Cantitate utilizată','number',undefined,'litri')]:category==='Aer condiționat'?[field('agentFrigorific','Agent frigorific'),field('cantitateAgent','Cantitate utilizată','number',undefined,'g')]:category==='Caroserie și vopsitorie'?[field('elementeCaroserie','Elemente reparate'),field('codCuloare','Cod culoare')]:[]),field('garantieLucrare','Garanție / termen'),field('urmatoareaVerificare','Următoarea verificare','date')]
+ }:undefined;
+ const config=specific||definitions[category];const saved=parseServiceDetails(parts);
  const [filters,setFilters]=useState(()=>Math.max(1,...Object.keys(saved).filter(x=>/^filtru\d+Tip$/.test(x)).map(x=>Number(x.match(/\d+/)?.[0]||0)+1)));
  if(!config)return null;
  const render=(f:Field)=> <label key={f.key}>{f.label}{f.unit?' · '+f.unit:''}
@@ -32,7 +32,7 @@ export default function ServiceDetailFields({category,parts}:{category:string;pa
  :<input name={'ac_'+f.key} type={f.type||'text'} step={f.type==='number'?'0.01':undefined} min={f.type==='number'?0:undefined} defaultValue={saved[f.key]||''} placeholder={f.placeholder||'Opțional'}/>}</label>;
  return <section className="ac-service-details" aria-label={config.heading}>
  <div className="ac-service-heading"><h3>{config.heading}</h3><span>Completează ce cunoști</span></div>
- {category==='Filtre'&&<div className="ac-filter-list">{Array.from({length:filters},(_,i)=><div className="ac-filter-item" key={i}><strong>Filtrul {i+1}</strong><div className="form-grid">
+ {['Filtre','Schimb ulei'].includes(category)&&<div className="ac-filter-list">{Array.from({length:filters},(_,i)=><div className="ac-filter-item" key={i}><strong>Filtrul {i+1}</strong><div className="form-grid">
  {render(field('filtru'+i+'Tip','Tip filtru','select',['Ulei','Aer','Habitaclu','Combustibil','Alt filtru']))}
  {render(field('filtru'+i+'Marca','Marcă / cod piesă'))}
  {render(field('filtru'+i+'Cod','Cod piesă (opțional)'))}
@@ -42,7 +42,7 @@ export default function ServiceDetailFields({category,parts}:{category:string;pa
  {render(field('filtru'+i+'Data','Data următoarei schimbări','date'))}
  </div></div>)}
  <button type="button" className="ac-add-filter" onClick={()=>setFilters(x=>Math.min(x+1,8))} disabled={filters>=8}>+ Adaugă încă un filtru</button></div>}
- {config.fields.length>0&&<div className="form-grid">{config.fields.map(render)}</div>}
+ {config.fields.length>0&&<div className="form-grid">{config.fields.filter(f=>!(category==='Schimb ulei'&&f.key==='intervalUlei')).map(render)}</div>}
  <div className="ac-service-advice"><strong>Recomandare AutoCare</strong><p>{config.advice}</p></div>
  </section>
 }
