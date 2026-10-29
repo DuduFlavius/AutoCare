@@ -52,3 +52,14 @@
  html body .app-shell>.sidebar nav button.active svg{color:white!important}
  html body .app-shell>.sidebar nav button:not(.active):hover,html body .app-shell>.sidebar nav a.founder-nav-link:hover{background:#eef4ff!important;color:#194da2!important}
 }
+
+/* Compact, fully readable language and currency selectors in the top bar. */
+html body .app-shell>.app-header .autocare-header-actions select[aria-label="Language / Limbă"],
+html body .app-shell>.app-header .autocare-header-actions select[aria-label="Currency / Monedă"]{
+ box-sizing:border-box!important;flex:0 0 auto!important;width:62px!important;min-width:62px!important;max-width:62px!important;height:36px!important;min-height:36px!important;padding:5px 16px 5px 9px!important;border-radius:9px!important;font-size:11px!important;line-height:1.1!important;font-weight:700!important;letter-spacing:0!important;overflow:visible!important;appearance:auto!important;-webkit-appearance:menulist!important;color:#173e76!important;background:#f4f8ff!important
+}
+html body .app-shell>.app-header .autocare-header-actions select[aria-label="Currency / Monedă"]{width:68px!important;min-width:68px!important;max-width:68px!important}
+@media(max-width:760px){
+ html body .app-shell>.app-header .autocare-header-actions select[aria-label="Language / Limbă"]{width:53px!important;min-width:53px!important;max-width:53px!important;padding:4px 12px 4px 6px!important;font-size:11px!important}
+ html body .app-shell>.app-header .autocare-header-actions select[aria-label="Currency / Monedă"]{width:61px!important;min-width:61px!important;max-width:61px!important;padding:4px 12px 4px 6px!important;font-size:11px!important}
+}
