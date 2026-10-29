@@ -976,5 +976,6 @@ export const applicationCopy: Record<string, string> = {
   "Detalii caroserie și vopsitorie": "Bodywork & paint details",
  "Adaugă intervenție":"Add maintenance",
  "Detalii tehnice și piese · opțional":"Technical details & parts · optional",
- "Defalcare cost: piese și manoperă · opțional":"Cost breakdown: parts & labor · optional"
+ "Defalcare cost: piese și manoperă · opțional":"Cost breakdown: parts & labor · optional",
+ "Termen după kilometraj":"Mileage-based deadline"
 };

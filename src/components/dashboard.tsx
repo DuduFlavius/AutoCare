@@ -1585,7 +1585,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                         </thead>
                         <tbody>
                           {rows.map((r) => (
-                            <tr key={r.id}>
+                            <tr className="ac-maintenance-record" key={r.id}>
                               <td data-label="Înregistrare">
                                 {tab === 'Documente' && (
                                   <span className="record-kind-mark" aria-hidden="true">
@@ -1637,10 +1637,10 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                 <div className="muted small">
                                   {r.expiresAt
                                     ? 'Expiră la ' + displayDate(r.expiresAt)
-                                    : 'Fără scadență'}
+                                    : r.nextKm!=null?'Termen după kilometraj':'Fără scadență'}
                                 </div>
                                 {r.nextKm != null && (
-                                  <div className="small">Următorul prag: {r.nextKm} km</div>
+                                  <div className="small ac-record-km-deadline">Următorul prag: {r.nextKm.toLocaleString(locale)} km</div>
                                 )}
                               </td>
                               <td data-label="Cost și statut">
