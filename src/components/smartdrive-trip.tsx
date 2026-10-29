@@ -99,13 +99,10 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
       {routePoints.length ? (() => {
         const p = routePoints[routePoints.length - 1];
         const mapUrl = 'https://maps.google.com/maps?q=' + encodeURIComponent(p.latitude.toFixed(6) + ',' + p.longitude.toFixed(6)) + '&z=' + mapZoom + '&output=embed';
-        const openUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.latitude.toFixed(6) + ',' + p.longitude.toFixed(6));
         return <div style={{position:'relative',height:'clamp(340px,56vh,540px)',overflow:'hidden',borderRadius:16,border:'1px solid #d6e3f0',background:'#edf2f7'}}>
           <iframe key={mapUrl} title="Google Maps · poziție GPS" src={mapUrl} loading="lazy" referrerPolicy="no-referrer-when-downgrade" style={{width:'100%',height:'100%',border:0}} allowFullScreen />
           <span style={{position:'absolute',left:12,top:12,padding:'8px 12px',borderRadius:10,background:'#fff',color:'#173a70',fontWeight:750,fontSize:12,boxShadow:'0 2px 12px #0b254020'}}>GPS {signal === 'lost' ? '· SEMNAL PIERDUT' : '· LIVE'} · ±{accuracy??'?'} m</span>
-          <div style={{position:'absolute',right:12,bottom:12,display:'flex',gap:8,alignItems:'center'}}>
-            <a href={openUrl} target="_blank" rel="noopener noreferrer" style={{background:'#fff',color:'#173a70',padding:'10px 14px',borderRadius:10,fontWeight:700,fontSize:13,boxShadow:'0 2px 12px #0b254020'}}>Deschide în Google Maps ↗</a>
-          </div>
+          <span style={{position:'absolute',right:12,bottom:12,padding:'8px 12px',borderRadius:10,background:'#fff',color:'#173a70',fontWeight:750,fontSize:12}}>{active ? (routePoints.length > 1 && routePoints[routePoints.length - 1].timestamp - routePoints[routePoints.length - 2].timestamp < 15000 && segmentMeters(routePoints[routePoints.length - 2],routePoints[routePoints.length - 1]) > 12 ? '● ÎN MIȘCARE' : '● STAȚIONARE / GPS ÎN AȘTEPTARE') : '● CURSĂ OPRITĂ'}</span>
         </div>;
       })() : <div style={{padding:'48px 16px',textAlign:'center',background:'#f4f7fc',borderRadius:12,color:'#536681'}}>Pornește urmărirea și permite localizarea pentru a vedea poziția pe Google Maps.</div>}
       <p style={{fontSize:12,color:'#536681',margin:'9px 0 0'}}>Google Maps afișează drumurile și poziția GPS actualizată la fiecare citire validă. Traseul complet nu este desenat în această versiune Google Maps; coordonatele nu sunt salvate pe server. Păstrează aplicația deschisă.</p>

@@ -10,13 +10,18 @@ export function PriceCards({
   annualBani,
   checkout,
   busy = false,
+  language = 'ro',
 }: {
   monthlyBani: number;
   annualBani: number;
   checkout?: (interval: string) => void;
   busy?: boolean;
+  language?: 'ro' | 'en';
 }) {
   const s = savings(monthlyBani, annualBani);
+  const en = language === 'en';
+  const euro = (b: number) => new Intl.NumberFormat('en-IE',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(b / 500);
+  const price = (b: number) => en ? euro(b) : amount(b);
   return (
     <div className="subscription-options">
       <article className="card subscription-option">
@@ -26,10 +31,10 @@ export function PriceCards({
         <p className="eyebrow">PREMIUM LUNAR</p>
         <h2>Flexibil, lună de lună.</h2>
         <div className="subscription-price">
-          {amount(monthlyBani)} <span>lei/lună</span>
+          {price(monthlyBani)} <span>{en ? '/month' : 'lei/lună'}</span>
         </div>
         <p className="small muted">
-          {amount(s.annualMonthlyBani)} lei pentru 12 luni de plată lunară.
+          {en ? `${euro(s.annualMonthlyBani)} for 12 monthly payments.` : `${amount(s.annualMonthlyBani)} lei pentru 12 luni de plată lunară.`}
         </p>
         <ul>
           <li>
@@ -56,8 +61,8 @@ export function PriceCards({
         <div className="subscription-symbol"><CreditCard size={23} /></div>
         <p className="eyebrow">PREMIUM 3 LUNI</p>
         <h2>Un trimestru fără griji.</h2>
-        <div className="subscription-price">{amount(monthlyBani * 3)} <span>lei / 3 luni</span></div>
-        <p className="small muted">Echivalent cu {amount(monthlyBani)} lei/lună, facturat la fiecare 3 luni.</p>
+        <div className="subscription-price">{price(monthlyBani * 3)} <span>{en ? '/3 months' : 'lei / 3 luni'}</span></div>
+        <p className="small muted">{en ? `Equivalent to ${euro(monthlyBani)}/month, billed every 3 months.` : `Echivalent cu ${amount(monthlyBani)} lei/lună, facturat la fiecare 3 luni.`}</p>
         <ul>
           <li><Check size={15} /> Toate funcțiile Premium</li>
           <li><Check size={15} /> Facturare recurentă la 3 luni</li>
@@ -73,16 +78,16 @@ export function PriceCards({
         <p className="eyebrow">PREMIUM ANUAL</p>
         <h2>Mai multă valoare.</h2>
         <div className="subscription-price">
-          {amount(annualBani)} <span>lei/an</span>
+          {price(annualBani)} <span>{en ? '/year' : 'lei/an'}</span>
         </div>
         <p className="subscription-saving">
           {s.savingBani > 0 ? (
             <>
-              Economisești {amount(s.savingBani)} lei/an ·{' '}
+              {en ? `Save ${euro(s.savingBani)}/year` : `Economisești ${amount(s.savingBani)} lei/an`} ·{' '}
               {s.savingPercent.toLocaleString('ro-RO', { maximumFractionDigits: 1 })}%
             </>
           ) : (
-            'Plată anuală într-o singură tranșă.'
+            (en ? 'One annual payment.' : 'Plată anuală într-o singură tranșă.')
           )}
         </p>
         <ul>
@@ -210,8 +215,10 @@ export default function Membership({
         annualBani={data.pricing.annualBani}
         busy={busy}
         checkout={checkout}
+        language={language}
       />
       <p className="micro">
+        {language === 'en' && <strong>EUR amounts are indicative at 1 EUR ≈ 5 RON. Checkout is billed in RON at the confirmed Stripe price. </strong>}
         Tarife în RON. Plata se deschide numai dacă prețul procesatorului corespunde sumei afișate.
         Accesul manual nu declanșează plăți. Abonamentele existente își păstrează condițiile din
         portal.
