@@ -178,6 +178,9 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   useEffect(() => { if (window.location.hash === '#actualizeaza-km' && data.vehicles.length) { setEditing(data.vehicles[0].id); setKm(String(data.vehicles[0].odometer)); setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 150); } }, []);
   const [km, setKm] = useState('');
   const [saving, setSaving] = useState(false);
+  const [lastReadings, setLastReadings] = useState<Record<string,{odometer:number;recordedAt:string}>>({});
+  const [confirmedJump, setConfirmedJump] = useState<string | null>(null);
+  useEffect(() => { if (preview) return; let cancelled=false; Promise.all(data.vehicles.filter(v=>!v.archived).map(async v=>{try{const rows=await api('smartdrive/vehicles/'+v.id+'/readings') as {odometer:number;recordedAt:string}[];return [v.id,rows[0]] as const}catch{return [v.id,undefined] as const}})).then(entries=>{if(!cancelled)setLastReadings(Object.fromEntries(entries.filter(e=>e[1]))) });return()=>{cancelled=true}; },[preview,data.vehicles.map(v=>v.id+':'+v.odometer).join('|')]);
   const cars = data.vehicles.filter(v => !v.archived);
   const services = data.records.filter(r => r.kind === 'service' && !r.cancelled && r.nextKm != null && Number(r.nextKm) > 0);
   const fmt = (n: number) => n.toLocaleString('ro-RO') + ' km';
@@ -187,12 +190,18 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
       onError('Introdu un kilometraj valid, cel puțin egal cu cel înregistrat anterior.');
       return;
     }
+    const previous = lastReadings[v.id];
+    const days = previous ? Math.max(1,(Date.now()-Date.parse(previous.recordedAt))/86400000) : null;
+    const delta = value-v.odometer;
+    const daily = days ? delta/days : 0;
+    const suspicious = delta > 0 && (delta >= 1500 || daily > 450);
+    if (suspicious && confirmedJump !== v.id+':'+value) { setConfirmedJump(v.id+':'+value); return; }
     if (preview) { onError('În previzualizare nu se salvează date.'); return; }
     setSaving(true);
     try {
       await api('smartdrive/vehicles/' + v.id + '/readings', 'POST', { odometer: value });
       await onUpdated();
-      setEditing(null);
+      setEditing(null); setConfirmedJump(null);
     } catch (e) { onError(e instanceof Error ? e.message : 'Nu s-a putut actualiza kilometrajul.'); }
     finally { setSaving(false); }
   }
@@ -213,10 +222,11 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
             <div className="between"><div><span className="eyebrow">{v.plate}</span><h3>{v.brand} {v.model}</h3></div><CarFront size={28}/></div>
             <div className="mileage-planner-odometer"><span>Kilometraj înregistrat</span><strong>{fmt(v.odometer)}</strong></div>
             {editing === v.id ? <div className="mileage-planner-edit">
-              <label>Kilometraj actual (km)<input type="number" min={v.odometer} step="1" value={km} onChange={e => setKm(e.target.value)} /></label>
+              <label>Kilometraj actual (km)<input type="number" min={v.odometer} step="1" value={km} onChange={e => {setKm(e.target.value);setConfirmedJump(null)}} /></label>
+              {confirmedJump === v.id+':'+Number(km) && <div role="alert" style={{padding:16,border:'1px solid #f0c68b',background:'linear-gradient(125deg,#fffaf0,#fff2dd)',color:'#6e410c',borderRadius:14,margin:'12px 0'}}><strong style={{display:'block',fontSize:16}}>Ești sigur că ai parcurs atât?</strong><p style={{margin:'7px 0'}}>Ai introdus o creștere de <b>{(Number(km)-v.odometer).toLocaleString('ro-RO')} km</b> față de ultima valoare confirmată. Verifică cifra de pe bord înainte de salvare.</p><p style={{fontSize:12,margin:0}}>Poți corecta valoarea în câmpul de mai sus sau confirma înregistrarea. Nu modificăm automat kilometrajul.</p></div>}
               <button className="primary" disabled={saving} onClick={() => void saveKm(v)}>{saving ? 'Se salvează…' : 'Actualizează km'}</button>
               <button disabled={saving} onClick={() => setEditing(null)}>Anulează</button>
-            </div> : <button onClick={() => {setEditing(v.id);setKm(String(v.odometer));}}>Actualizează kilometrajul</button>}
+            </div> : <button onClick={() => {setEditing(v.id);setKm(String(v.odometer));setConfirmedJump(null);}}>Actualizează kilometrajul</button>}
             {!due.length ? <p className="mileage-planner-empty">Nu există încă o intervenție cu kilometrajul următorului schimb. Adaugă termenul în secțiunea Întreținere.</p> :
               <div className="mileage-planner-items">{due.map(r => {
                 const left = Number(r.nextKm) - v.odometer;
