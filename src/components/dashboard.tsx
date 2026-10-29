@@ -174,6 +174,7 @@ function MileagePlanner({ data, preview, onUpdated, onError }: {
   data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void;
 }) {
   const [editing, setEditing] = useState<string | null>(null);
+  useEffect(() => { if (window.location.hash === '#actualizeaza-km' && data.vehicles.length) { setEditing(data.vehicles[0].id); setKm(String(data.vehicles[0].odometer)); setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 150); } }, []);
   const [km, setKm] = useState('');
   const [saving, setSaving] = useState(false);
   const cars = data.vehicles.filter(v => !v.archived);
@@ -204,7 +205,7 @@ function MileagePlanner({ data, preview, onUpdated, onError }: {
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
       <SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} />
       <SmartDriveTrip preview={preview} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model }))} />
-      <div className="mileage-planner-grid">
+      <div className="mileage-planner-grid" id="ac-mileage-editor">
         {cars.map(v => {
           const due = services.filter(r => r.vehicleId === v.id).sort((a,b) => Number(a.nextKm)-Number(b.nextKm));
           return <article key={v.id} className="mileage-planner-card">
@@ -690,6 +691,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           />
         </div>
       )}
+      <button type="button" className="autocare-km-mobile-shortcut" onClick={() => { navigate('Plan întreținere'); window.location.hash = 'actualizeaza-km'; setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 200); }} aria-label="Actualizează kilometrajul"><Gauge size={22}/><span>Introdu km</span></button>
       <button type="button" className="autocare-gps-mobile-shortcut" onClick={() => navigate('Plan întreținere')} aria-label="Deschide SmartDrive GPS"><MapPin size={23}/><span>SmartDrive GPS</span></button>
       <aside className="sidebar">
         <Brand
