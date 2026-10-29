@@ -245,6 +245,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     [locationStatus, setLocationStatus] = useState<'idle'|'loading'|'active'|'denied'|'unavailable'>('idle'),
     [locationAccuracy, setLocationAccuracy] = useState<number | null>(null),
     [menuOpen, setMenuOpen] = useState(false),
+    [language, setLanguage] = useState<'ro' | 'en'>('ro'),
     [busy, setBusy] = useState(false),
     [modal, setModal] = useState<Modal>(null),
     [filter, setFilter] = useState(''),
@@ -807,6 +808,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           <span>Garaj personal</span><span className="autocare-header-divider" aria-hidden="true">/</span><strong>{tab === 'Dashboard' ? 'Acasă' : tab}</strong>
         </span>
         <div className="inline autocare-header-actions">
+          <select aria-label="Language / Limbă" value={language} onChange={e => { const next = e.target.value === 'en' ? 'en' : 'ro'; setLanguage(next); try { localStorage.setItem('autocare-language',next); document.documentElement.lang = next; } catch {} }} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff',maxWidth:76}}><option value="ro">RO</option><option value="en">EN</option></select>
           <button
             type="button"
             className="autocare-location-button"
@@ -1002,6 +1004,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             </div>
             {tab === 'Dashboard' && (
               <GarageHome
+                language={language}
                 data={data}
                 name={name}
                 navigate={navigate}
@@ -1837,6 +1840,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             )}
             {tab === 'Abonament' && (
               <Membership
+                language={language}
                 data={data}
                 invoices={invoices}
                 busy={busy}
