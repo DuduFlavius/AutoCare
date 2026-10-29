@@ -1,4 +1,5 @@
 'use client';
+import SiteLanguage from './site-language';
 import CommunicationPreferences from './communication-preferences';
 import Membership from './membership';
 import MobileInstall from './mobile-install';
@@ -805,6 +806,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           </div>
         </details>
       </aside>
+      <SiteLanguage language={language} />
       <header className="app-header between">
         <button
           className="mobile-menu-toggle"
