@@ -1,3 +1,4 @@
+import { normalizeWorkspaceTab } from '@/lib/workspace';
 import { notFound } from 'next/navigation';
 import Dashboard from '@/components/dashboard';
 import type { dashboard } from '@/lib/service';
@@ -7,10 +8,11 @@ export const metadata = { title: 'Previzualizare design', robots: { index: false
 export default async function DesignPreview({
   searchParams,
 }: {
-  searchParams: Promise<{ echipa?: string }>;
+  searchParams: Promise<{ echipa?: string; device?:string; tab?:string }>;
 }) {
   const previewOptions = await searchParams;
   if (process.env.VERCEL_ENV === 'production') notFound();
+
   const now = new Date(),
     today = now.toISOString().slice(0, 10);
   const future = (days: number) =>
@@ -117,5 +119,7 @@ export default async function DesignPreview({
     summary: { monthBani: 0, annualBani: 0, monthly: [], categories: {}, costPerKm: null, km: 0 },
     pushPublicKey: null,
   };
-  return <Dashboard name="Vizitator" previewData={data} />;
+  const application=<Dashboard name="Vizitator" previewData={data} initialTab={normalizeWorkspaceTab(previewOptions.tab)} />;
+  if(previewOptions.device==='phone') return <div style={{padding:24,background:'#eaf0f8',minHeight:'100vh'}}><p style={{textAlign:'center'}}>AutoCare · Verificare mobilă · Date fictive · 390px</p><div style={{width:390,maxWidth:'100%',height:844,overflow:'auto',margin:'20px auto',border:'1px solid #cedaeb',borderRadius:22,background:'white',transform:'translateZ(0)',containerName:'workspace-preview',containerType:'inline-size'}}>{application}</div></div>;
+  return application;
 }

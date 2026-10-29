@@ -1,4 +1,7 @@
 'use client';
+import './app-workspace.css';
+import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspaceOverview, WorkspacePreferences } from './app-workspace';
+import { normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
 import SiteLanguage from './site-language';
 import CommunicationPreferences from './communication-preferences';
 import Membership from './membership';
@@ -49,7 +52,7 @@ type Modal = {
   vehicle?: Vehicle;
   record?: RecordItem;
 } | null;
-const money = (b: number) =>
+const _money = (b: number) =>
   new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(b / 100);
 const tabs = [
   ['Dashboard', LayoutDashboard],
@@ -67,12 +70,13 @@ const tabs = [
   ['Setări', Settings],
 ] as const;
 async function api(path: string, method = 'GET', data?: unknown) {
+  if(method!=='GET' && typeof navigator!=='undefined' && !navigator.onLine) throw new Error('Ești offline. Reconectează-te înainte de a salva.');
   const r = await fetch('/api/v1/' + path, {
     method,
     headers: data ? { 'Content-Type': 'application/json' } : undefined,
     body: data ? JSON.stringify(data) : undefined,
   });
-  const result = await r.json();
+  const result = await r.json().catch(()=>({error:'Serviciul nu a răspuns corect. Încearcă din nou.'}));
   if (r.status === 401)
     throw new Error(
       'Sesiunea a expirat. Reconectează-te pentru a continua; datele nesalvate rămân în formular.',
@@ -123,12 +127,12 @@ function Dialog({
   closeRef.current = onClose;
   useEffect(() => {
     const previous = document.activeElement as HTMLElement;
-    ref.current?.querySelector<HTMLElement>('button,input,select')?.focus();
+    (ref.current?.querySelector<HTMLElement>('input[type=search]') || ref.current?.querySelector<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled)'))?.focus();
     function key(e: KeyboardEvent) {
       if (e.key === 'Escape') closeRef.current();
       if (e.key === 'Tab') {
         const nodes = ref.current?.querySelectorAll<HTMLElement>(
-          'button,input,select,textarea,a[href]',
+          'button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]',
         );
         if (!nodes?.length) return;
         const first = nodes[0],
@@ -247,15 +251,18 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   );
 }
 
-export default function Dashboard({ name, previewData }: { name: string; previewData?: Data }) {
+export default function Dashboard({ name, previewData, initialTab='Dashboard' }: { name: string; previewData?: Data; initialTab?:string }) {
   const [data, setData] = useState<Data | null>(previewData || null),
-    [tab, setTab] = useState('Dashboard'),
+    [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [supportUnread, setSupportUnread] = useState(0),
     [locationStatus, setLocationStatus] = useState<'idle'|'loading'|'active'|'denied'|'unavailable'>('idle'),
     [locationAccuracy, setLocationAccuracy] = useState<number | null>(null),
     [menuOpen, setMenuOpen] = useState(false),
+    [launcherOpen,setLauncherOpen] = useState(false),
+    [offline,setOffline] = useState(false),
+    [settingsPanel,setSettingsPanel] = useState('account'),
     [language, setLanguage] = useState<'ro' | 'en'>('ro'),
     [currency, setCurrency] = useState<'RON' | 'EUR'>('RON'),
     [busy, setBusy] = useState(false),
@@ -285,7 +292,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
       const savedCurrency = window.localStorage.getItem('autocare-currency');
       if (savedCurrency === 'EUR' || savedCurrency === 'RON') setCurrency(savedCurrency); } catch { /* Storage may be unavailable. */ }
     const t = new URLSearchParams(window.location.search).get('tab');
-    if (t) setTab(t);
+    if (t) setTab(normalizeWorkspaceTab(t));
     refresh();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
   }, []);
@@ -413,27 +420,33 @@ export default function Dashboard({ name, previewData }: { name: string; preview
       setBusy(false);
     }
   }
+  const workspaceViews = useRef(new Map<string,{filter:string;query:string;recordState:string;categoryFilter:string;period:string;showArchived:boolean;scroll:number}>());
   function navigate(t: string, historyMode: 'push' | 'none' = 'push') {
+    t=normalizeWorkspaceTab(t);
+
     if (recordSaving) return false;
     if (recordDirty && !window.confirm('Ai modificări nesalvate. Vrei să le abandonezi?'))
       return false;
+    workspaceViews.current.set(tab,{filter,query,recordState,categoryFilter,period,showArchived,scroll:window.scrollY});
+    const view=workspaceViews.current.get(t);
+    setLauncherOpen(false);
     setModal(null);
     setRecordDirty(false);
     setTab(t);
     setMenuOpen(false);
-    setFilter('');
-    setQuery('');
-    setRecordState('');
-    setCategoryFilter('');
-    setPeriod('all');
-    setShowArchived(false);
+    setFilter(view?.filter||'');
+    setQuery(view?.query||'');
+    setRecordState(view?.recordState||'');
+    setCategoryFilter(view?.categoryFilter||'');
+    setPeriod(view?.period||'all');
+    setShowArchived(view?.showArchived||false);
     setError('');
     setNotice('');
     if (historyMode === 'push' && new URLSearchParams(window.location.search).get('tab') !== t)
       window.history.pushState(
         null,
         '',
-        (previewData ? '/previzualizare?tab=' : '/cont?tab=') + encodeURIComponent(t),
+        workspaceHref(window.location.pathname+window.location.search,t),
       );
     return true;
   }
@@ -453,6 +466,35 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     window.addEventListener('popstate', back);
     return () => window.removeEventListener('popstate', back);
   }, []);
+  useEffect(()=>{
+    setOffline(!navigator.onLine);
+    const online=()=>{setOffline(false);void refresh();};
+    const offline=()=>setOffline(true);
+    window.addEventListener('online',online);window.addEventListener('offline',offline);
+    return()=>{window.removeEventListener('online',online);window.removeEventListener('offline',offline);};
+  },[]);
+  useEffect(()=>{
+    const label=workspaceSections.find(s=>s.id===tab)?.[language]||tab;
+    document.title=label+' | AutoCare';
+    const frame=requestAnimationFrame(()=>{
+      document.getElementById('workspace-page-title')?.focus({preventScroll:true});
+      window.scrollTo({top:workspaceViews.current.get(tab)?.scroll||0,behavior:'instant'});
+    });
+    return()=>cancelAnimationFrame(frame);
+  },[tab,language]);
+  useEffect(()=>{
+    const shortcut=(event:KeyboardEvent)=>{
+      if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'&&!modal&&!recordDirty&&!recordSaving&&!menuOpen){event.preventDefault();setLauncherOpen(v=>!v);}
+    };
+    window.addEventListener('keydown',shortcut);return()=>window.removeEventListener('keydown',shortcut);
+  },[modal,recordDirty,recordSaving,menuOpen]);
+  function changeLanguage(next:'ro'|'en'){
+    setLanguage(next);setCurrency(next==='en'?'EUR':'RON');
+    try{localStorage.setItem('autocare-language',next);localStorage.setItem('autocare-currency',next==='en'?'EUR':'RON');}catch{ /* Storage may be unavailable. */ }
+  }
+  function changeCurrency(next:'EUR'|'RON'){
+    setCurrency(next);try{localStorage.setItem('autocare-currency',next);}catch{ /* Storage may be unavailable. */ }
+  }
   const activeCars = data?.vehicles.filter((v) => !v.archived) || [];
   const visible =
     data?.records.filter(
@@ -644,30 +686,14 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     }, 'Notificările push au fost activate pentru acest browser.');
   }
   return (
-    <div className="app-shell">
+    <div className="app-shell ac-workspace" data-language={language} data-settings-panel={settingsPanel}>
+      <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
+      {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>{if(navigate('Garaj'))setVehicleDetail(id);}} /></Dialog>}
       {menuOpen && (
         <div className="navigation-overlay">
           <Dialog title={data?.profile.role === 'founder' ? 'AutoCare · Fondator' : 'Navigare AutoCare'} onClose={() => setMenuOpen(false)}>
             <nav aria-label="Navigare mobil">
-              {([
-                ['ESENȚIAL', ['Dashboard', 'Garaj', 'Documente', 'Notificări']],
-                ['ORGANIZARE', ['Kilometraj', 'Plan întreținere', 'Calendar', 'Întreținere', 'Cheltuieli', 'Istoric auto']],
-                ['CONT ȘI AJUTOR', ['Centru de suport', 'Abonament', 'Setări']],
-              ] as const).map(([group, labels]) => (
-                <div className="autocare-mobile-menu-group" key={group}>
-                  <span className="autocare-mobile-menu-heading">{group}</span>
-                  {tabs.filter(([label]) => (labels as readonly string[]).includes(label)).map(([label, Icon]) => (
-                    <button key={label} aria-current={tab === label ? 'page' : undefined} onClick={() => navigate(label)}>
-                      <Icon size={19} />
-                      <span>{label === 'Dashboard' ? 'Acasă' : label === 'Plan întreținere' ? 'SmartDrive GPS' : label === 'Kilometraj' ? 'Kilometraj & revizii' : label}</span>
-                      {label === 'Notificări' && !!data?.notifications.filter((n) => !n.readAt).length && (
-                        <span className="nav-unread">{data.notifications.filter((n) => !n.readAt).length}</span>
-                      )}
-                      {label === 'Centru de suport' && supportUnread > 0 && <span className="nav-unread">{supportUnread}</span>}
-                    </button>
-                  ))}
-                </div>
-              ))}
+              <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} path={previewData?'/previzualizare':'/cont'} />
               {data?.profile.role === 'founder' && (
                 <div className="autocare-mobile-founder-card">
                   <div className="autocare-mobile-founder-identity">
@@ -721,26 +747,9 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           }}
         />
         <span className="sidebar-tagline">GARAJUL TĂU DIGITAL</span>
-        <nav aria-label="Navigare cont">
-          {tabs.map(([label, Icon]) => (
-            <button
-              key={label}
-              className={tab === label ? 'active' : ''}
-              aria-current={tab === label ? 'page' : undefined}
-              onClick={() => navigate(label)}
-            >
-              <Icon size={18} />
-              {label === 'Dashboard' ? 'Acasă' : label === 'Garaj' ? 'Garajul meu' : label === 'Întreținere' ? 'Intervenții' : label === 'Plan întreținere' ? 'SmartDrive GPS' : label === 'Centru de suport' ? 'Centru de suport' : label === 'Abonament' ? 'Premium' : label}
-              {label === 'Notificări' && !!data?.notifications.filter((n) => !n.readAt).length && (
-                <span className="nav-unread">
-                  {data.notifications.filter((n) => !n.readAt).length}
-                </span>
-              )}
-              {label === 'Centru de suport' && supportUnread > 0 && (
-                <span className="nav-unread">{supportUnread}</span>
-              )}
-            </button>
-          ))}
+        <button type="button" className="ws-sidebar-search" data-workspace-ui onClick={()=>setLauncherOpen(true)} disabled={!!modal}><Search size={18}/><span>{language==='en'?'Search & actions':'Căutare și acțiuni'}</span><kbd>⌘ K</kbd></button>
+        <div className="ws-sidebar-sections">
+          <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} path={previewData?'/previzualizare':'/cont'} />
           {data?.profile.role === 'founder' && (
             <a className="founder-nav-link" href="/admin">
               <Shield size={18} /> Panou Fondator <ArrowUpRight size={13} />
@@ -755,7 +764,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
               Administrare
             </button>
           )}
-        </nav>
+        </div>
         {data?.profile.role !== 'founder' && (
           <div
             className={
@@ -827,8 +836,9 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           <span>Garaj personal</span><span className="autocare-header-divider" aria-hidden="true">/</span><strong>{tab === 'Dashboard' ? 'Acasă' : tab}</strong>
         </span>
         <div className="inline autocare-header-actions">
-          <select aria-label="Language / Limbă" value={language} onChange={e => { const next = e.target.value === 'en' ? 'en' : 'ro'; setLanguage(next); setCurrency(next === 'en' ? 'EUR' : 'RON'); try { localStorage.setItem('autocare-currency',next === 'en' ? 'EUR' : 'RON'); localStorage.setItem('autocare-language',next); document.documentElement.lang = next; } catch {} }} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff',maxWidth:76}}><option value="ro">RO</option><option value="en">EN</option></select>
-          <select aria-label="Currency / Monedă" title={language === 'en' ? 'Display currency (estimated conversion)' : 'Moneda de afișare (conversie estimativă)'} value={currency} onChange={e => {const next = e.target.value === 'EUR' ? 'EUR' : 'RON';setCurrency(next);try{localStorage.setItem('autocare-currency',next)}catch{}}} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff'}}><option value="RON">RON</option><option value="EUR">EUR</option></select>
+          <button type="button" className="ws-header-search" data-workspace-ui disabled={!!modal} onClick={()=>setLauncherOpen(true)} aria-label={language==='en'?'Search application':'Caută în aplicație'}><Search size={19}/><span>{language==='en'?'Search':'Caută'}</span><kbd>Ctrl K</kbd></button>
+          <select className="ws-header-locale" aria-label="Language / Limbă" value={language} onChange={e => { const next = e.target.value === 'en' ? 'en' : 'ro'; setLanguage(next); setCurrency(next === 'en' ? 'EUR' : 'RON'); try { localStorage.setItem('autocare-currency',next === 'en' ? 'EUR' : 'RON'); localStorage.setItem('autocare-language',next); document.documentElement.lang = next; } catch { /* Display preferences remain active for this page. */ } }} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff',maxWidth:76}}><option value="ro">RO</option><option value="en">EN</option></select>
+          <select className="ws-header-locale" aria-label="Currency / Monedă" title={language === 'en' ? 'Display currency (estimated conversion)' : 'Moneda de afișare (conversie estimativă)'} value={currency} onChange={e => {const next = e.target.value === 'EUR' ? 'EUR' : 'RON';setCurrency(next);try{localStorage.setItem('autocare-currency',next)}catch{ /* Storage may be unavailable. */ }}} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff'}}><option value="RON">RON</option><option value="EUR">EUR</option></select>
           <button
             type="button"
             className="autocare-location-button"
@@ -898,7 +908,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
         ))}
         <button className={!['Dashboard','Garaj','Documente','Notificări'].includes(tab) ? 'active' : ''} onClick={() => setMenuOpen(true)}><Menu size={20}/><span>Meniu</span></button>
       </nav>
-      <main
+      <main id="workspace-main" tabIndex={-1} aria-busy={busy||!data}
         className={
           'main workspace-' +
           (tab === 'Dashboard'
@@ -920,6 +930,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                       : 'general')
         }
       >
+        {offline && <div className="ws-offline" role="status" data-workspace-ui>{language==='en'?'You are offline. Displayed data may be out of date. Reconnect before saving.':'Ești offline. Datele afișate pot fi neactualizate. Reconectează-te înainte de a salva.'}</div>}
         {previewData && (
           <div className="preview-note" role="status">
             PREVIZUALIZARE DESIGN · Date fictive, separate de conturile reale. Navigarea este
@@ -938,8 +949,9 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           </div>
         )}
         {!data ? (
-          <div className="spinner" role="status">
-            Se încarcă garajul…{error && <button onClick={refresh}>Reîncearcă</button>}
+          <div className="ws-loading" role="status">
+            <p>{language==='en'?'Loading your workspace…':'Se încarcă spațiul tău de lucru…'}</p>
+            {error ? <button type="button" onClick={refresh}>{language==='en'?'Try again':'Reîncearcă'}</button> : <div className="ws-loading-grid" aria-hidden="true"><span/><span/><span/><span/></div>}
           </div>
         ) : (
           <>
@@ -950,7 +962,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     ? `Bună, ${name.split(' ')[0]} 👋`
                     : 'GARAJUL TĂU DIGITAL'}
                 </p>
-                <h1>
+                <h1 id="workspace-page-title" tabIndex={-1}>
                   {tab === 'Dashboard'
                     ? 'Acasă, în garaj.'
                     : tab === 'Garaj'
@@ -1022,6 +1034,8 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                 </button>
               ) : null}
             </div>
+            <WorkspaceContext tab={tab} language={language} navigate={navigate} />
+            {tab==='Dashboard'&&<WorkspaceOverview data={data} language={language} currency={currency} navigate={navigate}/>}
             {tab === 'Dashboard' && (
               <GarageHome
                 currency={currency}
@@ -1876,7 +1890,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                       window.location.assign(out.url);
                     } catch (e) {
                       const reason = (e as Error).message || 'Eroare necunoscută la inițierea plății.';
-                      window.alert('Plata nu a putut fi inițiată.\\n\\n' + reason);
+                      setError('Plata nu a putut fi inițiată. ' + reason);
                       throw e;
                     }
                   }, '')
@@ -1890,9 +1904,11 @@ export default function Dashboard({ name, previewData }: { name: string; preview
               />
             )}
             {tab === 'Setări' && (
+              <div className="ws-settings-layout">
+              <nav className="ws-settings-nav" aria-label={language==='en'?'Settings categories':'Categorii setări'} data-workspace-ui>{([['account','Profil și securitate','Profile & security'],['alerts','Notificări și email','Notifications & email'],['device','Aplicație și afișare','App & display'],['help','Ajutor','Help']] as const).map(([id,ro,en])=><button type="button" key={id} aria-current={settingsPanel===id?'page':undefined} onClick={()=>setSettingsPanel(id)}>{language==='en'?en:ro}<ArrowUpRight size={15}/></button>)}</nav>
               <div className="grid2 settings-workspace">
-                <section className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /></section>
-                <section className="card">
+                <section hidden={settingsPanel!=='device'} className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /><WorkspacePreferences language={language} currency={currency} onLanguage={changeLanguage} onCurrency={changeCurrency}/></section>
+                <section hidden={settingsPanel!=='alerts'} className="card">
                   <div className="settings-section-title">
                     <span className="list-icon">
                       <BellRing size={22} />
@@ -2016,7 +2032,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     dispozitivele.
                   </p></details>
                 </section>
-                <section className="card">
+                <section hidden={settingsPanel!=='account'} className="card">
                   <div className="settings-section-title">
                     <span className="profile-avatar">{name.slice(0, 1).toUpperCase()}</span>
                     <div>
@@ -2093,7 +2109,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     Șterge contul și datele
                   </button></details>
                 </section>
-                <section className="card support-area">
+                <section hidden={settingsPanel!=='help'} className="card support-area">
                   <div className="settings-section-title">
                     <span className="list-icon">
                       <MessageSquare size={22} />
@@ -2110,7 +2126,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     Deschide centrul de suport <ArrowUpRight size={15} />
                   </button>
                 </section>
-              </div>
+              </div></div>
             )}
             {tab === 'Administrare' &&
               (admin ? (

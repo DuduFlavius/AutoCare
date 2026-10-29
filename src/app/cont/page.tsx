@@ -1,3 +1,4 @@
+import { normalizeWorkspaceTab } from '@/lib/workspace';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
@@ -5,7 +6,8 @@ import Dashboard from '@/components/dashboard';
 import { PublicShell } from '@/components/public-shell';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Garajul meu', robots: { index: false, follow: false } };
-export default async function Account() {
+export default async function Account({searchParams}:{searchParams:Promise<{tab?:string}>}) {
+  const params=await searchParams;
   let sess;
   try {
     sess = await auth().api.getSession({ headers: await headers() });
@@ -27,5 +29,5 @@ export default async function Account() {
     (process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION === 'true' && !sess.user.emailVerified)
   )
     redirect('/autentificare');
-  return <Dashboard name={sess.user.name} />;
+  return <Dashboard name={sess.user.name} initialTab={normalizeWorkspaceTab(params.tab)} />;
 }

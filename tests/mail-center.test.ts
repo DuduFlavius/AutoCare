@@ -10,7 +10,7 @@ import {
   automationState,
   scheduleSubscriptionMail,
 } from '../src/lib/mail-automation';
-import { billingMailValid } from '../src/lib/mail-policy';
+import { billingMailValid, recipientAllowed } from '../src/lib/mail-policy';
 import { emailTemplates, renderEmail, appLink } from '../src/lib/email-templates';
 import { GoogleDeliveryError } from '../src/lib/google-mail';
 process.env.LOCAL_DATABASE_PATH = 'memory';
@@ -50,7 +50,7 @@ const input = (overrides: Record<string, unknown> = {}) => ({
   recipients: [client],
   ...overrides,
 });
-test('Every email template has escaped personalized HTML, responsive raster banner, CTA and plain text', () => {
+test('Every email template has escaped personalized HTML, responsive editorial header, CTA and plain text', () => {
   for (const id of Object.keys(emailTemplates) as (keyof typeof emailTemplates)[]) {
     const mail = renderEmail(id, {
       name: 'Ana <script>alert(1)</script>',
@@ -58,7 +58,7 @@ test('Every email template has escaped personalized HTML, responsive raster bann
     });
     assert.match(mail.html, /@media only screen/);
     assert.match(mail.html, /width="600"/);
-    assert.match(mail.html, /https:\/\/project-sxage.vercel.app\/design-car.jpg/);
+    assert.match(mail.html, /AUTOCARE · GARAJUL TĂU DIGITAL/);
     assert.match(mail.html, /&lt;script&gt;/);
     assert.ok(!mail.html.includes('<script>'));
     assert.match(mail.html, /role="presentation"/);
@@ -147,7 +147,7 @@ test('Promotional opt-in defaults off, opt-out after drafting is honored and cli
     }),
   );
 });
-test('Global email opt-out, unverified accounts and suspension suppress manual delivery', async () => {
+test('Global email opt-out, unverified accounts and suspension suppress promotional delivery', async () => {
   let sent = 0;
   const transport = async () => {
     sent++;
@@ -163,13 +163,20 @@ test('Global email opt-out, unverified accounts and suspension suppress manual d
       await db().update(s.user).set({ emailVerified: false }).where(eq(s.user.id, other));
     if (state === 'suspended')
       await db().insert(s.accountRestrictions).values({ userId: other, suspendedAt: now });
-    const campaign = await center.saveCampaign(founder, input({ recipients: [other] }));
+    const campaign = await center.saveCampaign(founder, input({ recipients: [other], category:'promotional' }));
     await center.deliverCampaign(campaign.id, transport);
     assert.equal(sent, 0);
     await db().update(s.profiles).set({ emailEnabled: true }).where(eq(s.profiles.userId, other));
     await db().update(s.user).set({ emailVerified: true }).where(eq(s.user.id, other));
   }
   await db().delete(s.accountRestrictions).where(eq(s.accountRestrictions.userId, other));
+});
+test('Manual transactional exception preserves existing delivery rules for unverified accounts', async()=>{
+  await db().update(s.user).set({emailVerified:false}).where(eq(s.user.id,other));
+  assert.equal(await recipientAllowed(other,'transactional',true),true);
+  assert.equal(await recipientAllowed(other,'transactional',false),false);
+  assert.equal(await recipientAllowed(other,'promotional',true),false);
+  await db().update(s.user).set({emailVerified:true}).where(eq(s.user.id,other));
 });
 test('Ambiguous Gmail outcomes and interrupted workers are never automatically retried', async () => {
   const c = await center.saveCampaign(founder, input());

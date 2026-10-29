@@ -1,5 +1,6 @@
 'use client';
 import {useEffect} from 'react';
+import {translationSource} from '@/lib/workspace';
 const dictionary:Record<string,string>={
 'Acasă':'Home','Garaj personal':'Personal garage','Garajul meu':'My garage','Garaj':'Garage','Documente':'Documents','Calendar':'Calendar','Intervenții':'Maintenance','Întreținere':'Maintenance','Plan întreținere':'Maintenance planner','SmartDrive GPS':'SmartDrive GPS','Kilometraj':'Mileage','Cheltuieli':'Expenses','Centru de suport':'Support center','Istoric auto':'Vehicle history','Notificări':'Notifications','Premium':'Premium','Setări':'Settings','Abonament':'Subscription','Administrare':'Administration','Deconectare':'Sign out','Deschide meniul':'Open menu','Activează locația':'Enable location','Adaugă o mașină':'Add a vehicle','Adaugă prima mașină':'Add your first vehicle','Mașina ta':'Your vehicle','MAȘINA TA':'YOUR VEHICLE','Activă':'Active','Activ':'Active','Benzină':'Petrol','Motorină':'Diesel','Electric':'Electric','Hibrid':'Hybrid','Deschide garajul':'Open garage','Kilometraj actual':'Current mileage','Kilometraj înregistrat':'Recorded mileage','Documente înregistrate':'Saved documents','Vezi detalii':'View details','Următorul schimb de ulei':'Next oil change','URMĂTORUL SCHIMB DE ULEI':'NEXT OIL CHANGE','URMĂTORUL TERMEN':'NEXT DEADLINE','Nu există un termen viitor':'No upcoming deadline','Documente în atenție':'Documents needing attention','Termene prioritare':'Priority deadlines','Vezi calendarul':'View calendar','Vezi toate':'View all','Documente care expiră':'Expiring documents','Ultimele intervenții':'Recent maintenance','Cheltuieli recente':'Recent expenses','Ultimul schimb':'Last change','Interval setat':'Configured interval','Ulei utilizat':'Oil used','Neconfigurat':'Not configured','Vezi istoricul intervențiilor':'View maintenance history','Plan gratuit':'Free plan','ACCESUL TĂU ACTUAL':'YOUR CURRENT ACCESS','Facturare recurentă lunară':'Monthly recurring billing','Facturare recurentă anuală':'Annual recurring billing','Alege lunar':'Choose monthly','Alege anual':'Choose annual','Vezi în cont':'View in account','PREMIUM LUNAR':'MONTHLY PREMIUM','PREMIUM ANUAL':'ANNUAL PREMIUM','PREMIUM 3 LUNI':'3-MONTH PREMIUM','CEL MAI BUN RAPORT PREȚ–BENEFICII':'BEST VALUE','Flexibil, lună de lună.':'Flexible, month to month.','Mai multă valoare.':'More value.','Un trimestru fără griji.':'Three months of peace of mind.','Toate funcțiile Premium':'All Premium features','Gestionare din portalul de facturare':'Manage in billing portal','Următoarea întreținere':'Upcoming maintenance','Kilometrajul mașinilor':'Vehicle mileage','Actualizează kilometrajul':'Update mileage','Actualizează km':'Update mileage','Kilometraj actual (km)':'Current mileage (km)','Anulează':'Cancel','Se salvează…':'Saving…','AUTOCARE · PLANIFICARE':'AUTOCARE · PLANNING','Ești sigur că ai parcurs atât?':'Are you sure you drove this far?','Introdu km acum':'Enter mileage now','Următoarea citire de kilometraj':'Next mileage reading','Revizie scadentă':'Maintenance due','Timp necunoscut':'Time unknown','Estimare timp până la revizie':'Estimated time until maintenance','Se calculează…':'Calculating…','km rămași':'km remaining','Înregistrează intervenția':'Record maintenance','Adaugă document':'Add document','Salvează':'Save','Editează':'Edit','Șterge':'Delete','Caută':'Search','Închide':'Close','Confirmă':'Confirm','Profil':'Profile','Preferințe':'Preferences','Ajutor':'Help','Autentificare':'Sign in','Înregistrare':'Sign up','Parolă':'Password','Email':'Email','Nume':'Name','Data':'Date','Status':'Status','Descriere':'Description','Observații':'Notes','Sumă':'Amount','Preț':'Price','Valoare':'Value','Încarcă':'Upload','Trimite':'Send','Înapoi':'Back','Continuă':'Continue','Detalii':'Details','Istoric':'History','Atenție':'Attention','ESENȚIAL':'ESSENTIAL','ORGANIZARE':'ORGANIZATION','CONT ȘI AJUTOR':'ACCOUNT & HELP'};
 Object.assign(dictionary,{
@@ -238,19 +239,46 @@ Object.assign(dictionary,{
   "km estimați prin GPS · actualizare la fiecare citire validă": "km estimated by GPS · updated with each valid reading"
 });
 Object.assign(dictionary,{"Total despre mașinile tale, într-un singur loc.":"All your vehicle information in one place.","Caută titlu, categorie sau service…":"Search title, category or workshop…","Caută o înregistrare":"Search records","Panou Fondator":"Founder dashboard","Ai introdus o creștere de":"You entered an increase of","față de ultima valoare confirmată. Verifică cifra de pe bord înainte de salvare.":"compared with the last confirmed reading. Check your odometer before saving.","Nicio cheltuială înregistrată":"No expenses recorded","Necunoscut":"Unknown","Necompletat":"Not provided","costuri necunoscute":"unknown costs","costuri necunoscute, excluse din total.":"unknown costs, excluded from the total.","Cheltuieli · luna curentă":"Expenses · this month","Căutare":"Search","Schimbă limba":"Change language","Nu există cheltuieli înregistrate.":"No expenses recorded.","Revizii":"Service","Alerte":"Alerts","Înregistrare nouă":"New record","Următorul prag: 94987 km":"Next threshold: 94987 km","Fără dată scadentă":"No due date","Schimb de ulei":"Oil change","Costuri necunoscute":"Unknown costs"});
-const originals=new WeakMap<Text,string>();
+
+Object.assign(dictionary,{
+ 'Totul despre mașinile tale, într-un singur loc.':'Everything about your vehicles, all in one place.',
+ 'Garajul tău':'Your garage','Întreținere și service':'Maintenance & service','Documente auto':'Vehicle documents','Cheltuielile garajului':'Garage expenses','Centrul de notificări':'Notification center','Calendar auto':'Vehicle calendar','Abonamentul tău':'Your subscription','Profil și preferințe':'Profile & preferences',
+ 'Alege cum primești mementourile și gestionează datele contului.':'Choose how you receive reminders and manage your account.',
+ 'Toate mașinile tale, într-un singur loc.':'All your vehicles, in one place.','Toate actele mașinilor tale, organizate și ușor de găsit.':'All your vehicle documents, organized and easy to find.','Păstrează un istoric clar și planifică următoarele intervenții.':'Keep a clear history and plan upcoming maintenance.','Toate termenele și lucrările programate, la îndemână.':'All deadlines and scheduled maintenance, within reach.','Vezi costurile înregistrate și cum se împart în timp.':'View recorded costs and how they change over time.','Documente și lucrări care au nevoie de atenția ta.':'Documents and maintenance that need your attention.','Planul actual, beneficiile și istoricul facturării.':'Your current plan, benefits and billing history.',
+ 'AutoCare pe telefon':'AutoCare on your phone','Acte':'Documents','Meniu':'Menu','GARAJUL TĂU DIGITAL':'YOUR DIGITAL GARAGE','Verifică locația AutoCare':'Check AutoCare location','Deschide profilul și preferințele':'Open profile and preferences','Profil și securitate':'Profile & security','Actualizează numele, parola și datele personale.':'Update your name, password and personal data.','Salvează numele':'Save name','Schimbă parola':'Change password','Date personale și ștergerea contului':'Personal data and account deletion','Datele personale':'Personal data','Descarcă datele personale':'Download personal data',
+ 'PREVIZUALIZARE DESIGN · Date fictive, separate de conturile reale. Navigarea este disponibilă; modificările nu se salvează.':'DESIGN PREVIEW · Fictitious data, separate from real accounts. Navigation is available; changes are not saved.'
+});
+Object.assign(dictionary,{
+ 'Editează înregistrarea':'Edit record','Adaugă lucrare':'Add maintenance','Salvează documentul':'Save document','Salvează intervenția':'Save maintenance','Salvează cheltuiala':'Save expense','Pentru ce mașină?':'Vehicle','Alege mașina':'Select a vehicle','Tipul documentului':'Document type','Tipul operațiunii':'Maintenance type','Categoria cheltuielii':'Expense category','Rovinietă':'Road vignette','Permis':'Driving licence','Înmatriculare':'Registration','Alt document':'Other document','Alege tipul actului, completează data expirării și apasă Salvează.':'Choose the document type, enter its expiry date and save.','Data emiterii · opțional':'Issue date · optional','Data expirării · dacă este cazul':'Expiry date · if applicable','Lasă liber dacă documentul nu are termen de expirare.':'Leave blank if the document does not expire.','Număr sau serie · opțional':'Number or series · optional','Furnizor sau emitent':'Provider or issuer','Cost document · RON, opțional':'Document cost · RON, optional','Atașează documentul · opțional':'Attach document · optional','Notițe':'Notes','Data intervenției':'Maintenance date','Kilometraj · opțional':'Mileage · optional','Costurile intervenției':'Maintenance costs','Cost total · RON':'Total cost · RON','Rezumatul intervenției':'Maintenance summary','Următorul termen':'Next deadline','Detalii suplimentare':'Additional details'
+});
+const textStates=new WeakMap<Text,{source:string;rendered:string}>();
+const attributeStates=new WeakMap<Element,Record<string,{source:string;rendered:string}>>();
 export default function SiteLanguage({language}:{language:'ro'|'en'}){
  useEffect(()=>{
   const root=document.querySelector('.app-shell')||document.body;
-  const translate=()=>{const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node:Node|null;
-   while((node=walker.nextNode())){const t=node as Text;const parent=t.parentElement;if(!parent||parent.closest('script,style,textarea,code,[contenteditable="true"]'))continue;
-    const raw=originals.get(t)??t.nodeValue??'';if(!originals.has(t))originals.set(t,raw);
-    const trimmed=raw.trim();const translated=language==='en'?(dictionary[trimmed] || trimmed.replace(/^(Bună,)(.*)$/,(all,a,b)=>'Hello,'+b).replace(/^(Dată nestabilită)(.*)$/,(all,a,b)=>'Date not set'+b).replace(/^(Următorul prag:)(.*)$/,(all,a,b)=>'Next threshold:'+b)):trimmed;
-    const replacement=raw.replace(trimmed,translated);if(t.nodeValue!==replacement)t.nodeValue=replacement;
+  const apply=(source:string)=>language==='en'?(dictionary[source]||source.replace(/^(Bună,)(.*)$/,(all,a,b)=>'Hello,'+b).replace(/^(Dată nestabilită)(.*)$/,(all,a,b)=>'Date not set'+b).replace(/^(Următorul prag:)(.*)$/,(all,a,b)=>'Next threshold:'+b)):source;
+  const translate=()=>{
+   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node:Node|null;
+   while((node=walker.nextNode())){
+    const text=node as Text;const parent=text.parentElement;
+    if(!parent||parent.closest('script,style,textarea,code,[contenteditable="true"],[data-workspace-ui]'))continue;
+    const raw=translationSource(text.nodeValue||'',textStates.get(text));
+    const trimmed=raw.trim();const rendered=raw.replace(trimmed,apply(trimmed));
+    textStates.set(text,{source:raw,rendered});
+    if(text.nodeValue!==rendered)text.nodeValue=rendered;
    }
+   root.querySelectorAll('input[placeholder],textarea[placeholder],button[aria-label],input[aria-label]').forEach(element=>{
+    if(element.closest('[data-workspace-ui]'))return;
+    const states=attributeStates.get(element)||{};
+    for(const key of ['placeholder','aria-label']){
+     const value=element.getAttribute(key);if(value===null)continue;
+     const source=translationSource(value,states[key]);const rendered=apply(source);
+     states[key]={source,rendered};if(value!==rendered)element.setAttribute(key,rendered);
+    }
+    attributeStates.set(element,states);
+   });
   };
   translate();document.documentElement.lang=language;
-  const attrs=()=>{root.querySelectorAll('input[placeholder],textarea[placeholder],button[aria-label],input[aria-label]').forEach(el=>{for(const key of ['placeholder','aria-label']){const originalKey='data-autocare-original-'+key;const val=el.getAttribute(originalKey)??el.getAttribute(key);if(!val)continue;if(!el.hasAttribute(originalKey))el.setAttribute(originalKey,val);el.setAttribute(key,language==='en'?(dictionary[val]||val):val);}})};
-  attrs();const observer=new MutationObserver(()=>{translate();attrs()});observer.observe(root,{subtree:true,childList:true,characterData:true});return()=>observer.disconnect();
+  const observer=new MutationObserver(translate);observer.observe(root,{subtree:true,childList:true,characterData:true});return()=>observer.disconnect();
  },[language]);return null;
 }

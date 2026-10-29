@@ -123,13 +123,13 @@ test('Suspension denies protected operations and founder remains protected', asy
 });
 test('RON prices and exact yearly savings are server-derived', async () => {
   const p = await pricing();
-  assert.equal(p.monthlyBani, 5000);
-  assert.equal(p.annualBani, 50000);
+  assert.equal(p.monthlyBani, 15000);
+  assert.equal(p.annualBani, 170000);
   assert.equal(p.currency, 'ron');
   const save = savings(p.monthlyBani, p.annualBani);
-  assert.equal(save.annualMonthlyBani, 60000);
+  assert.equal(save.annualMonthlyBani, 180000);
   assert.equal(save.savingBani, 10000);
-  assert.equal(save.savingPercent.toFixed(1), '16.7');
+  assert.equal(save.savingPercent.toFixed(1), '5.6');
   await assert.rejects(() => f.changePricing(admin, { ...p, confirm: true }), denied);
 });
 test('Calendar extension clamps month end and document validation rejects reversed dates', () => {
