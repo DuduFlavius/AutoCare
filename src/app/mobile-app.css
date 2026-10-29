@@ -2,3 +2,8 @@
 
 /* Premium editorial artwork, no car image */
 .ac-premium-vehicle{position:relative!important;background:#081627!important}.ac-premium-vehicle .ac-premium-hero-photo{display:none!important}.ac-premium-vehicle::before{content:'';position:absolute;inset:0;background-image:url('/images/autocare-editorial-premium.svg');background-position:center right;background-size:cover;opacity:.8;pointer-events:none}.ac-premium-vehicle .ac-premium-hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,#071324 0%,#071324ed 38%,#07132470 100%);pointer-events:none}.ac-premium-vehicle .ac-premium-vehicle-top,.ac-premium-vehicle .ac-premium-vehicle-content,.ac-premium-vehicle .ac-premium-vehicle-footer{position:relative;z-index:1}
+
+/* Dashboard hero artwork: image is on the card itself, not an obscured pseudo-element */
+.ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel{background:#091727 url('/images/autocare-editorial-premium.svg') center right/cover no-repeat!important;isolation:isolate}
+.ac-premium-dashboard .ac-premium-vehicle.ac-premium-panel::before{display:none!important}
+.ac-premium-dashboard .ac-premium-vehicle .ac-premium-hero-shade{background:linear-gradient(90deg,rgba(5,15,30,.98),rgba(5,15,30,.8) 44%,rgba(5,15,30,.18))!important}
