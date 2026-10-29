@@ -12,3 +12,21 @@
 .ac-premium-vehicle .ac-premium-hero-photo{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:right center!important;opacity:1!important;z-index:0!important}
 .ac-premium-vehicle .ac-premium-hero-shade{position:absolute!important;inset:0!important;background:linear-gradient(90deg,rgba(5,15,30,.96) 0%,rgba(5,15,30,.84) 35%,rgba(5,15,30,.12) 100%)!important;z-index:1!important}
 .ac-premium-vehicle .ac-premium-vehicle-top,.ac-premium-vehicle .ac-premium-vehicle-content,.ac-premium-vehicle .ac-premium-vehicle-footer{position:relative!important;z-index:2!important}
+
+/* Mobile header: prevent overlapping language, GPS and profile controls. */
+@media(max-width:760px){
+ .app-shell>.app-header{display:flex!important;align-items:center!important;gap:8px!important;min-width:0!important;padding:10px 12px!important;min-height:64px!important;overflow:visible!important}
+ .app-shell>.app-header .autocare-header-breadcrumb{display:none!important}
+ .app-shell>.app-header .mobile-menu-toggle{flex:0 0 44px!important;width:44px!important;height:44px!important;padding:8px!important}
+ .app-shell>.app-header .autocare-header-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;flex:1 1 auto!important;min-width:0!important;width:auto!important;margin-left:auto!important}
+ .app-shell>.app-header select[aria-label="Language / Limbă"]{display:block!important;flex:0 0 76px!important;width:76px!important;min-width:76px!important;max-width:76px!important;height:44px!important;padding:8px 23px 8px 10px!important;appearance:auto!important;-webkit-appearance:menulist!important;font-size:14px!important;font-weight:800!important;line-height:1.2!important;color:#173e76!important;background:#fff!important;border:1px solid #a9c5ec!important;border-radius:12px!important;opacity:1!important;position:relative!important;z-index:2!important}
+ .app-shell>.app-header .autocare-location-button{flex:0 1 auto!important;min-width:0!important;max-width:160px!important;min-height:44px!important;padding:8px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+ .app-shell>.app-header .autocare-location-button span{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+ .app-shell>.app-header .autocare-header-actions>button:last-child{flex-shrink:0!important}
+}
+@media(max-width:390px){
+ .app-shell>.app-header{gap:5px!important;padding:8px!important}
+ .app-shell>.app-header .autocare-header-actions{gap:5px!important}
+ .app-shell>.app-header .autocare-location-button{max-width:52px!important;width:48px!important;padding:8px!important}
+ .app-shell>.app-header .autocare-location-button span{display:none!important}
+}
