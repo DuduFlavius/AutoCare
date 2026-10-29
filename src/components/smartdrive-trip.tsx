@@ -19,6 +19,8 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
   const [error, setError] = useState('');
   const [samples, setSamples] = useState(0);
   const [accuracy, setAccuracy] = useState<number | null>(null);
+  const [signal, setSignal] = useState<'waiting'|'ok'|'lost'>('waiting');
+  const lastFix = useRef<number>(0);
   const [routePoints, setRoutePoints] = useState<Sample[]>([]);
   const [trackingSeconds, setTrackingSeconds] = useState(0);
   const [clock, setClock] = useState('');
@@ -28,6 +30,7 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
   const started = useRef<number | null>(null);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
   const distanceRef = useRef(0);
+  useEffect(() => { if (!active) return; const check = setInterval(() => { if (lastFix.current && Date.now() - lastFix.current > 25000) setSignal('lost'); }, 4000); return () => clearInterval(check); }, [active]);
   const stop = () => {
     if (watcher.current !== null && typeof navigator !== 'undefined' && 'geolocation' in navigator) navigator.geolocation.clearWatch(watcher.current);
     watcher.current = null;
@@ -42,14 +45,14 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
     if (!window.isSecureContext || !('geolocation' in navigator)) { setError('GPS-ul necesită HTTPS și un browser cu localizare.'); return; }
     if (watcher.current !== null) return;
     setStartedAt(Date.now()); setClock(new Date().toLocaleTimeString('ro-RO'));
-    setDistance(0); distanceRef.current = 0; setSamples(0); setRoutePoints([]); setAccuracy(null); setTrackingSeconds(0); setError(''); setNotice(''); previous.current = null; started.current = Date.now();
+    setDistance(0); distanceRef.current = 0; setSamples(0); setRoutePoints([]); setAccuracy(null); setSignal('waiting'); lastFix.current = 0; setTrackingSeconds(0); setError(''); setNotice(''); previous.current = null; started.current = Date.now();
     tick.current = setInterval(() => { setTrackingSeconds(Math.floor((Date.now() - (started.current ?? Date.now())) / 1000)); setClock(new Date().toLocaleTimeString('ro-RO')); }, 1000);
     watcher.current = navigator.geolocation.watchPosition(
       ({ coords, timestamp }) => {
         const next: Sample = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, timestamp };
         // Reject inaccurate points and implausible GPS jumps; never change the odometer.
         if (!Number.isFinite(next.accuracy) || next.accuracy > 60) return;
-        setAccuracy(Math.round(next.accuracy));
+        setAccuracy(Math.round(next.accuracy)); lastFix.current = Date.now(); setSignal('ok');
         if (previous.current) {
           const seconds = (next.timestamp - previous.current.timestamp) / 1000;
           const meters = segmentMeters(previous.current, next);
@@ -62,7 +65,7 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
         previous.current = next; setSamples(v => v + 1);
         setRoutePoints(points => points.length >= 600 ? [...points.filter((_, i) => i % 2 === 0), next] : [...points, next]);
       },
-      e => { setError(e.code === 1 ? 'Permisiune refuzată. Permite locația din setările site-ului și reîncarcă pagina.' : 'Semnal GPS indisponibil. Verifică localizarea și conexiunea.'); stop(); },
+      e => { setSignal('lost'); setError(e.code === 1 ? 'Permisiune refuzată. Permite locația din setările site-ului și reîncarcă pagina.' : 'Semnal GPS indisponibil. Verifică localizarea și conexiunea.'); stop(); },
       { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 },
     );
     setActive(true);
@@ -83,7 +86,7 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
   };
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Estimarea distanței unei călătorii</h3></div>
-    <div className="ac-smartdrive-trip-metric"><strong>{(distance / 1000).toLocaleString('ro-RO', { maximumFractionDigits: 2 })}</strong><span>km estimați prin GPS</span></div>
+    <div className="ac-smartdrive-trip-metric"><strong>{(distance / 1000).toLocaleString('ro-RO', { maximumFractionDigits: 2 })}</strong><span>km estimați prin GPS · actualizare la fiecare citire validă</span></div>
     <div className="ac-smartdrive-live" aria-live="off">
       <div><span>Distanță parcursă</span><strong>{(distance / 1000).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km</strong></div>
       <div><span>Ora actuală</span><strong>{clock || '--:--:--'}</strong></div>
@@ -92,12 +95,22 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
     </div>
     <div className="ac-smartdrive-map" style={{margin:'18px 0',padding:12,background:'#fff',border:'1px solid #dbe5f3',borderRadius:18}}>
       <strong style={{display:'block',marginBottom:8,color:'#172b48'}}>Hartă GPS · Poziție live</strong>
-      {routePoints.length ? <>
-        <iframe title="Poziția GPS pe OpenStreetMap" loading="lazy" referrerPolicy="no-referrer" style={{display:'block',width:'100%',height:280,border:0,borderRadius:12}}
-          src={(() => { const p=routePoints[routePoints.length-1];const lat=p.latitude,lon=p.longitude;const d=.009;return 'https://www.openstreetmap.org/export/embed.html?bbox='+[lon-d,lat-d,lon+d,lat+d].join('%2C')+'&layer=mapnik&marker='+lat+'%2C'+lon; })()} />
-        <p style={{fontSize:12,color:'#536681',margin:'9px 0 0'}}>Poziție aproximativă (±{accuracy ?? '?'} m). Harta indică ultima poziție validă; traseul complet nu este încă desenat pe hartă. Datele GPS nu se salvează pe server.</p>
-      </> : <div style={{padding:'48px 16px',textAlign:'center',background:'#f4f7fc',borderRadius:12,color:'#536681'}}>Pornește urmărirea și permite localizarea pentru a vedea poziția pe hartă.</div>}
+      {routePoints.length ? (() => {
+        const p=routePoints[routePoints.length-1]; const zoom=16; const scale=256*Math.pow(2,zoom);
+        const project=(lat:number,lon:number)=>({x:(lon+180)/360*scale,y:(1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*scale});
+        const center=project(p.latitude,p.longitude); const tileX=Math.floor(center.x/256),tileY=Math.floor(center.y/256);
+        const path=routePoints.map((q,i)=>{const v=project(q.latitude,q.longitude);return (i?'L':'M')+(v.x-center.x+450).toFixed(1)+' '+(v.y-center.y+280).toFixed(1)}).join(' ');
+        return <div style={{position:'relative',height:330,overflow:'hidden',borderRadius:14,background:'#e9f0f7'}}>
+          {Array.from({length:25},(_,i)=>{const dx=i%5-2,dy=Math.floor(i/5)-2,x=tileX+dx,y=tileY+dy;return <img key={i} alt="" loading="eager" src={'https://tile.openstreetmap.org/'+zoom+'/'+x+'/'+y+'.png'} style={{position:'absolute',width:256,height:256,maxWidth:'none',left:450+(x*256-center.x),top:280+(y*256-center.y),pointerEvents:'none'}}/>})}
+          <svg viewBox="0 0 900 560" preserveAspectRatio="xMidYMid slice" style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none'}} aria-label="Traseul GPS parcurs"><path d={path} fill="none" stroke="#fff" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/><path d={path} fill="none" stroke="#1664e8" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/><circle cx="450" cy="280" r="16" fill="#fff"/><circle cx="450" cy="280" r="10" fill="#1664e8" stroke="#fff" strokeWidth="3"/></svg>
+          <span style={{position:'absolute',left:10,top:10,padding:'7px 10px',borderRadius:10,background:'#fff',color:'#173a70',fontWeight:750,fontSize:12}}>● GPS LIVE · ±{accuracy??'?'} m</span>
+          <span style={{position:'absolute',bottom:6,right:8,background:'#ffffffd9',fontSize:10,color:'#334155',padding:'3px 5px'}}>© OpenStreetMap contributors</span>
+        </div>;
+      })() : <div style={{padding:'48px 16px',textAlign:'center',background:'#f4f7fc',borderRadius:12,color:'#536681'}}>Pornește urmărirea și permite localizarea pentru a vedea poziția pe hartă.</div>}
+      <p style={{fontSize:12,color:'#536681',margin:'9px 0 0'}}>Harta urmărește poziția și trasează parcursul în sesiunea curentă. Datele de localizare nu sunt salvate pe server. Păstrează aplicația deschisă.</p>
     </div>
+    {active && signal === 'lost' && <div role="alert" style={{background:'#fff3df',color:'#8a4600',border:'1px solid #ffd18a',borderRadius:12,padding:13,margin:'12px 0',fontWeight:700}}>Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și menține aplicația în prim-plan. Distanța nu crește fără puncte valide.</div>}
+    {active && signal === 'waiting' && <p role="status" style={{color:'#815500'}}>Se caută semnal GPS de precizie…</p>}
     <p role="status">Precizie GPS: {accuracy === null ? 'în așteptare' : `±${accuracy} m`} · Citiri valide: {samples} · {active ? 'Urmărire în desfășurare' : 'Urmărire oprită'}</p>
     <p>GPS-ul funcționează numai cât pagina rămâne activă și browserul permite localizarea. Distanța este estimativă și nu modifică kilometrajul real de pe bord. Poți salva separat distanța și durata după oprire; coordonatele GPS nu sunt trimise la server.</p>
     {vehicles.length > 0 && <label>Mașina pentru călătorie <select value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}
