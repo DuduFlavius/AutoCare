@@ -111,12 +111,14 @@ export function PriceCards({
   );
 }
 export default function Membership({
+  language = 'ro',
   data,
   busy,
   checkout,
   portal,
   invoices,
 }: {
+  language?: 'ro' | 'en';
   data: Data;
   busy: boolean;
   checkout: (interval: string) => void;
@@ -138,8 +140,8 @@ export default function Membership({
             <ShieldCheck size={24} />
           </span>
           <div>
-            <p className="eyebrow">ACCESUL TĂU ACTUAL</p>
-            <h2>{data.premium ? 'AutoCare Premium' : 'Plan gratuit'}</h2>
+            <p className="eyebrow">{language === 'en' ? 'YOUR CURRENT ACCESS' : 'ACCESUL TĂU ACTUAL'}</p>
+            <h2>{data.premium ? 'AutoCare Premium' : (language === 'en' ? 'Free plan' : 'Plan gratuit')}</h2>
           </div>
         </div>
         <div className="membership-access">
