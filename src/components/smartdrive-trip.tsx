@@ -22,6 +22,7 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
   const [signal, setSignal] = useState<'waiting'|'ok'|'lost'>('waiting');
   const lastFix = useRef<number>(0);
   const [routePoints, setRoutePoints] = useState<Sample[]>([]);
+  const [mapZoom, setMapZoom] = useState(16);
   const [trackingSeconds, setTrackingSeconds] = useState(0);
   const [clock, setClock] = useState('');
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -94,20 +95,20 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
       <div><span>Început urmărire</span><strong>{startedAt === null ? '—' : new Date(startedAt).toLocaleTimeString('ro-RO')}</strong></div>
     </div>
     <div className="ac-smartdrive-map" style={{margin:'18px 0',padding:12,background:'#fff',border:'1px solid #dbe5f3',borderRadius:18}}>
-      <strong style={{display:'block',marginBottom:8,color:'#172b48'}}>Hartă GPS · Poziție live</strong>
+      <strong style={{display:'block',marginBottom:8,color:'#172b48'}}>Hartă rutieră · GPS în timp real</strong>
       {routePoints.length ? (() => {
-        const p=routePoints[routePoints.length-1]; const zoom=16; const scale=256*Math.pow(2,zoom);
+        const p=routePoints[routePoints.length-1]; const zoom=mapZoom; const scale=256*Math.pow(2,zoom);
         const project=(lat:number,lon:number)=>({x:(lon+180)/360*scale,y:(1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*scale});
         const center=project(p.latitude,p.longitude); const tileX=Math.floor(center.x/256),tileY=Math.floor(center.y/256);
         const path=routePoints.map((q,i)=>{const v=project(q.latitude,q.longitude);return (i?'L':'M')+(v.x-center.x+450).toFixed(1)+' '+(v.y-center.y+280).toFixed(1)}).join(' ');
-        return <div style={{position:'relative',height:330,overflow:'hidden',borderRadius:14,background:'#e9f0f7'}}>
-          {Array.from({length:25},(_,i)=>{const dx=i%5-2,dy=Math.floor(i/5)-2,x=tileX+dx,y=tileY+dy;return <img key={i} alt="" loading="eager" src={'https://tile.openstreetmap.org/'+zoom+'/'+x+'/'+y+'.png'} style={{position:'absolute',width:256,height:256,maxWidth:'none',left:450+(x*256-center.x),top:280+(y*256-center.y),pointerEvents:'none'}}/>})}
-          <svg viewBox="0 0 900 560" preserveAspectRatio="xMidYMid slice" style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none'}} aria-label="Traseul GPS parcurs"><path d={path} fill="none" stroke="#fff" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/><path d={path} fill="none" stroke="#1664e8" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/><circle cx="450" cy="280" r="16" fill="#fff"/><circle cx="450" cy="280" r="10" fill="#1664e8" stroke="#fff" strokeWidth="3"/></svg>
+        return <div style={{position:'relative',height:'clamp(320px,55vh,510px)',overflow:'hidden',borderRadius:16,background:'#dbe7f0',border:'1px solid #d6e3f0',isolation:'isolate'}}>\n          <div style={{position:'absolute',width:900,height:560,left:'50%',top:'50%',transform:'translate(-50%,-50%)'}}>
+          {Array.from({length:25},(_,i)=>{const dx=i%5-2,dy=Math.floor(i/5)-2,x=tileX+dx,y=tileY+dy;return <img key={i} alt="" loading="lazy" src={'https://tile.openstreetmap.org/'+zoom+'/'+x+'/'+y+'.png'} style={{position:'absolute',width:256,height:256,maxWidth:'none',left:450+(x*256-center.x),top:280+(y*256-center.y),pointerEvents:'none'}}/>})}
+          <svg viewBox="0 0 900 560" style={{position:'absolute',inset:0,width:900,height:560,pointerEvents:'none'}} aria-label="Traseul GPS parcurs"><path d={path} fill="none" stroke="#fff" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/><path d={path} fill="none" stroke="#1664e8" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/><circle cx="450" cy="280" r="16" fill="#fff"/><circle cx="450" cy="280" r="10" fill="#1664e8" stroke="#fff" strokeWidth="3"/></svg>
           <span style={{position:'absolute',left:10,top:10,padding:'7px 10px',borderRadius:10,background:'#fff',color:'#173a70',fontWeight:750,fontSize:12}}>● GPS LIVE · ±{accuracy??'?'} m</span>
-          <span style={{position:'absolute',bottom:6,right:8,background:'#ffffffd9',fontSize:10,color:'#334155',padding:'3px 5px'}}>© OpenStreetMap contributors</span>
+          <div style={{position:'absolute',right:12,top:12,display:'grid',gap:5}}><button type="button" aria-label="Mărește harta" onClick={()=>setMapZoom(z=>Math.min(18,z+1))} style={{background:'#fff',color:'#17365d',border:'1px solid #c6d5e6',borderRadius:9,width:40,height:40,fontSize:23,fontWeight:700,boxShadow:'0 2px 9px #09234420'}}>+</button><button type="button" aria-label="Micșorează harta" onClick={()=>setMapZoom(z=>Math.max(12,z-1))} style={{background:'#fff',color:'#17365d',border:'1px solid #c6d5e6',borderRadius:9,width:40,height:40,fontSize:23,fontWeight:700,boxShadow:'0 2px 9px #09234420'}}>−</button></div>\n          <span style={{position:'absolute',bottom:6,right:8,background:'#ffffffd9',fontSize:10,color:'#334155',padding:'3px 5px'}}>© OpenStreetMap contributors</span>
         </div>;
       })() : <div style={{padding:'48px 16px',textAlign:'center',background:'#f4f7fc',borderRadius:12,color:'#536681'}}>Pornește urmărirea și permite localizarea pentru a vedea poziția pe hartă.</div>}
-      <p style={{fontSize:12,color:'#536681',margin:'9px 0 0'}}>Harta urmărește poziția și trasează parcursul în sesiunea curentă. Datele de localizare nu sunt salvate pe server. Păstrează aplicația deschisă.</p>
+      <p style={{fontSize:12,color:'#536681',margin:'9px 0 0'}}>Harta rutieră OpenStreetMap afișează străzile și drumurile reale, urmărește poziția și trasează parcursul în sesiunea curentă. Datele de localizare nu sunt salvate pe server. Păstrează aplicația deschisă.</p>
     </div>
     {active && signal === 'lost' && <div role="alert" style={{background:'#fff3df',color:'#8a4600',border:'1px solid #ffd18a',borderRadius:12,padding:13,margin:'12px 0',fontWeight:700}}>Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și menține aplicația în prim-plan. Distanța nu crește fără puncte valide.</div>}
     {active && signal === 'waiting' && <p role="status" style={{color:'#815500'}}>Se caută semnal GPS de precizie…</p>}
