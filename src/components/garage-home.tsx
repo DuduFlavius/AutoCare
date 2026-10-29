@@ -54,9 +54,9 @@ export function GarageHome({
   open: (record: Entry) => void;
 }) {
   const home = dashboardHome(data);
-  const moneyDisplay = (bani: number) => language === 'en'
+  const moneyDisplay = (bani: number): string => language === 'en'
     ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR',maximumFractionDigits:2}).format(bani / 500)
-    : moneyDisplay(bani);
+    : new Intl.NumberFormat('ro-RO', {style:'currency',currency:'RON'}).format(bani / 100);
   const { cars, records, attention: due } = home;
   const [selectedCar, setSelectedCar] = useState('');
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
