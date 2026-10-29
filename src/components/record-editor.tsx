@@ -185,7 +185,7 @@ const cars = data.vehicles.filter((v) => !v.archived || v.id === record?.vehicle
             Alege mașina
           </option>
           {cars.map((v) => (
-            <option key={v.id} value={v.id}>
+            <option data-user-content key={v.id} value={v.id}>
               {v.brand} {v.model} · {v.plate}
             </option>
           ))}

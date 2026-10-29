@@ -261,13 +261,14 @@ const normalizedDictionary=Object.fromEntries(Object.entries(dictionary).map(([r
  [/^Depășit cu ([\d.,\s]+) km$/,(_,n)=>'Overdue by '+n+' km'],
  [/^([\d.,\s]+) km rămași$/,(_,n)=>n+' km remaining'],
  [/^(\d+) zile estimate$/,(_,n)=>n+' estimated '+(n==='1'?'day':'days')],
- [/^(\d+) zile$/,(_,n)=>n+' '+(n==='1'?'day':'days')],
+ [/^(\d+) (?:zi|zile)$/,(_,n)=>n+' '+(n==='1'?'day':'days')],
  [/^Reintrodu kilometrii în jurul datei de (.+)$/,(_,date)=>'Update your odometer reading around '+date],
  [/^Dată probabilă: (.+)$/,(_,date)=>'Estimated date: '+date],
  [/^(Medie introdusă:|Medie calculată:) ([\d.,]+) km\/zi\.(.*)$/,(_,label,n,tail)=>(label==='Medie introdusă:'?'Entered average: ':'Calculated average: ')+n+' km/day.'+tail],
  [/^Dată nestabilită(.*)$/,(_,tail)=>'Date not set'+tail],
  ];
  const extras: [RegExp,(...parts:string[])=>string][]=[
+ [/^Expiră la (.+)$/,(_,date)=>'Expires on '+date],
  [/^În (\d+) zile$/,(_,n)=>'In '+n+' '+(n==='1'?'day':'days')],
  [/^Acorzi rolul (.+) contului (.+)\?$/,(_,role,email)=>'Grant the '+translateApplicationCopy(role,'en')+' role to '+email+'?'],
  [/^Schimbi rolul lui (.+) în (.+)\?$/,(_,name,role)=>'Change '+name+"'s role to "+translateApplicationCopy(role,'en')+'?'],

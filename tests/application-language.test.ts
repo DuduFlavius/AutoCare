@@ -14,6 +14,7 @@ test('dynamic mileage messages preserve the actual values',()=>{
  assert.equal(t('15,000 km rămași','en'),'15,000 km remaining');
  assert.equal(t('Mai sunt 15,000 km','en'),'15,000 km remaining');
  assert.equal(t('Depășit cu 1,500 km','en'),'Overdue by 1,500 km');
+ assert.equal(t('1 zi','en'),'1 day');
  assert.equal(t('23 zile estimate','en'),'23 estimated days');
  assert.equal(t('Medie calculată: 42.5 km/zi.','en'),'Calculated average: 42.5 km/day.');
  assert.equal(t('Reintrodu kilometrii în jurul datei de 12/11/2026','en'),'Update your odometer reading around 12/11/2026');

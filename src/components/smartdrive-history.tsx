@@ -44,7 +44,7 @@ const [selected, setSelected] = useState('');
   };
   return <section className="ac-smartdrive-history">
     <div className="ac-smartdrive-history-head"><div><span className="ac-premium-kicker"><History size={17}/> SMARTDRIVE · ISTORIC</span><h3>Citiri confirmate și călătorii</h3></div>
-      {vehicles.length > 1 && <label>Mașina <select value={vehicleId} onChange={e => setSelected(e.target.value)}>{vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}</div>
+      {vehicles.length > 1 && <label>Mașina <select value={vehicleId} onChange={e => setSelected(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}</div>
     <div style={{background:'linear-gradient(120deg,#edf5ff,#ffffff)',border:'1px solid #cbdff9',borderRadius:16,padding:'15px 17px',margin:'14px 0',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}><div><strong style={{color:'#143c70',fontSize:15}}>Următoarea citire de kilometraj</strong><p style={{margin:'5px 0 0',color:'#536681',fontSize:13}}>{readings.length && Number.isFinite(Date.parse(readings[0].recordedAt)) ? (()=>{const d=new Date(readings[0].recordedAt);d.setDate(d.getDate()+Math.max(1,prefs.frequencyDays));return d.getTime()<=Date.now()?'E timpul să introduci kilometrajul actual.':'Reintrodu kilometrii în jurul datei de '+d.toLocaleDateString(locale);})() : 'Introdu o primă citire pentru a calcula data următoarei actualizări.'}</p></div><button type="button" className="ac-mileage-reading-action" disabled={!vehicleId} onClick={()=>onUpdateMileage(vehicleId)} style={{background:'#124ba6',color:'#ffffff',border:'2px solid #124ba6',boxShadow:'0 3px 10px #124ba633',display:'inline-flex',alignItems:'center',justifyContent:'center',minHeight:46,padding:'12px 18px',borderRadius:11,fontWeight:750,fontSize:13,textDecoration:'none'}}>Introdu km acum</button></div>
     <div className="ac-smartdrive-history-metrics">
       <div><Gauge size={19}/><span>Diferență între citiri</span><strong>{deltaKm !== null ? deltaKm.toLocaleString(locale) + ' km' : '—'}</strong></div>
@@ -58,7 +58,7 @@ const [selected, setSelected] = useState('');
     </div>
     <div className="ac-smartdrive-reminder"><div><span className="ac-premium-kicker"><Bell size={17}/> REMINDER KILOMETRAJ</span><p>Preferința este salvată în cont. Livrarea periodică necesită activarea jobului pe baza de date configurată.</p></div>
       <label><input type="checkbox" checked={prefs.enabled} onChange={e => setPrefs(p => ({...p,enabled:e.target.checked}))}/> Activ</label>
-      <label>La fiecare <select value={prefs.frequencyDays} onChange={e => setPrefs(p => ({...p,frequencyDays:Number(e.target.value)}))}>{[1,2,3,5,7,14,30].map(n => <option key={n} value={n}>{n} zile</option>)}</select></label>
+      <label>La fiecare <select value={prefs.frequencyDays} onChange={e => setPrefs(p => ({...p,frequencyDays:Number(e.target.value)}))}>{[1,2,3,5,7,14,30].map(n => <option key={n} value={n}>{n===1?'1 zi':n+' zile'}</option>)}</select></label>
       <button type="button" disabled={busy || preview} onClick={save}>{busy ? 'Se salvează…' : 'Salvează preferința'}</button>
     </div>
     {error && <p role="alert" className="ac-smartdrive-history-error">{error}</p>}

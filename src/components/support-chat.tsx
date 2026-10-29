@@ -487,16 +487,16 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
                   key={thread.id}
                 >
                   <button className="support-thread-select" onClick={() => { setEntered(false); void openThread(thread, false); }}>
-                    <span className="support-avatar">{initials(thread.name)}</span>
+                    <span data-user-content className="support-avatar">{initials(thread.name)}</span>
                     <span>
-                      <strong>
+                      <strong data-user-content>
                         {thread.name}{' '}
                         {!!thread.unreadCount && (
                           <span className="pill soon">{thread.unreadCount} noi</span>
                         )}
                       </strong>
                       <small>{thread.email}</small>
-                      <span className="support-preview-text">{thread.title}</span>
+                      <span data-user-content className="support-preview-text">{thread.title}</span>
                     </span>
                   </button>
                   <div className="support-thread-foot">
@@ -666,7 +666,7 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
               message.authorRole === 'system' ? (
                 <div className="support-system-message" key={message.id}>
                   <ShieldCheck size={14} />
-                  <span>{message.body}</span>
+                  <span data-user-content>{message.body}</span>
                   <time>
                     {new Date(message.createdAt).toLocaleTimeString(locale, {
                       hour: '2-digit',
@@ -688,7 +688,7 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
                       {roles[message.authorRole] || 'Client'}
                     </span>
                   </div>
-                  <p>{message.body}</p>
+                  <p data-user-content>{message.body}</p>
                   {detail.attachments
                     ?.filter((f) => f.messageId === message.id)
                     .map((f) => (

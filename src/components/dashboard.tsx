@@ -228,7 +228,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
         {cars.map(v => {
           const due = services.filter(r => r.vehicleId === v.id).sort((a,b) => Number(a.nextKm)-Number(b.nextKm));
           return <article key={v.id} className="mileage-planner-card">
-            <div className="between"><div><span className="eyebrow">{v.plate}</span><h3>{v.brand} {v.model}</h3></div><CarFront size={28}/></div>
+            <div className="between"><div><span data-user-content className="eyebrow">{v.plate}</span><h3 data-user-content>{v.brand} {v.model}</h3></div><CarFront size={28}/></div>
             <div className="mileage-planner-odometer"><span>Kilometraj înregistrat</span><strong>{fmt(v.odometer)}</strong></div>
             {editing === v.id ? <div className="mileage-planner-edit">
               <label>Kilometraj actual (km)<input id={'ac-mileage-'+v.id} type="number" min={v.odometer} step="1" value={km} onChange={e => {setKm(e.target.value);setConfirmedJump(null)}} /></label>
@@ -240,7 +240,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
               <div className="mileage-planner-items">{due.map(r => {
                 const left = Number(r.nextKm) - v.odometer;
                 return <div className="mileage-planner-item" key={r.id}>
-                  <div><strong>{r.title || r.category || 'Intervenție'}</strong><small>Termen: {fmt(Number(r.nextKm))}</small></div>
+                  <div><strong data-user-content>{r.title || r.category || 'Intervenție'}</strong><small>Termen: {fmt(Number(r.nextKm))}</small></div>
                   <span className={left <= 0 ? 'mileage-overdue' : left <= 1000 ? 'mileage-soon' : 'mileage-ok'}>
                     {left <= 0 ? 'Depășit cu ' + fmt(Math.abs(left)) : 'Mai sunt ' + fmt(left)}
                   </span>
@@ -292,6 +292,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     [invoices, setInvoices] = useState<any[]>([]),
     [calendarMonth, setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
   const locale=language==='en'?'en-GB':'ro-RO';
+  const displayDate=(value:string)=>new Date(value+'T12:00:00').toLocaleDateString(locale);
   useEffect(() => {
     try { if (window.localStorage.getItem('autocare-language') === 'en') {setLanguage('en');setCurrency('EUR');}
       const savedCurrency = window.localStorage.getItem('autocare-currency');
@@ -842,8 +843,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         </span>
         <div className="inline autocare-header-actions">
           <button type="button" className="ws-header-search" data-workspace-ui disabled={!!modal} onClick={()=>setLauncherOpen(true)} aria-label={language==='en'?'Search application':'Caută în aplicație'}><Search size={19}/><span>{language==='en'?'Search':'Caută'}</span><kbd>Ctrl K</kbd></button>
-          <select className="ws-header-locale" aria-label="Language / Limbă" value={language} onChange={e => { const next = e.target.value === 'en' ? 'en' : 'ro'; setLanguage(next); setCurrency(next === 'en' ? 'EUR' : 'RON'); try { localStorage.setItem('autocare-currency',next === 'en' ? 'EUR' : 'RON'); localStorage.setItem('autocare-language',next); document.documentElement.lang = next; } catch { /* Display preferences remain active for this page. */ } }} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff',maxWidth:76}}><option value="ro">RO</option><option value="en">EN</option></select>
-          <select className="ws-header-locale" aria-label="Currency / Monedă" title={language === 'en' ? 'Display currency (estimated conversion)' : 'Moneda de afișare (conversie estimativă)'} value={currency} onChange={e => {const next = e.target.value === 'EUR' ? 'EUR' : 'RON';setCurrency(next);try{localStorage.setItem('autocare-currency',next)}catch{ /* Storage may be unavailable. */ }}} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff'}}><option value="RON">RON</option><option value="EUR">EUR</option></select>
+          <select className="ws-header-locale" aria-label={language==='en'?'App language':'Limba aplicației'} value={language} onChange={e => { const next = e.target.value === 'en' ? 'en' : 'ro'; setLanguage(next); setCurrency(next === 'en' ? 'EUR' : 'RON'); try { localStorage.setItem('autocare-currency',next === 'en' ? 'EUR' : 'RON'); localStorage.setItem('autocare-language',next); document.documentElement.lang = next; } catch { /* Display preferences remain active for this page. */ } }} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff',maxWidth:76}}><option value="ro">RO</option><option value="en">EN</option></select>
+          <select className="ws-header-locale" aria-label={language==='en'?'Display currency':'Moneda de afișare'} title={language === 'en' ? 'Display currency (estimated conversion)' : 'Moneda de afișare (conversie estimativă)'} value={currency} onChange={e => {const next = e.target.value === 'EUR' ? 'EUR' : 'RON';setCurrency(next);try{localStorage.setItem('autocare-currency',next)}catch{ /* Storage may be unavailable. */ }}} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff'}}><option value="RON">RON</option><option value="EUR">EUR</option></select>
           <button
             type="button"
             className="autocare-location-button"
@@ -1115,12 +1116,12 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                               {v.archived ? 'Arhivată' : 'Activă'}
                             </span>
                           </div>
-                          <div className="autocare-garage-card-icon" aria-hidden="true"><CarFront size={74} strokeWidth={1.15}/><span className="ac-premium-garage-visual-caption">{v.brand} {v.model}</span></div>
-                          <h2>
+                          <div className="autocare-garage-card-icon" aria-hidden="true"><CarFront size={74} strokeWidth={1.15}/><span data-user-content className="ac-premium-garage-visual-caption">{v.brand} {v.model}</span></div>
+                          <h2 data-user-content>
                             {v.brand} {v.model}
                           </h2>
                           <div className="between">
-                            <span className="plate">{v.plate}</span>
+                            <span data-user-content className="plate">{v.plate}</span>
                             <span className="small muted">
                               {v.odometer.toLocaleString(locale)} km
                             </span>
@@ -1162,7 +1163,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                         : ''
                                     }
                                   >
-                                    {r.category} · {r.expiresAt?.split('-').reverse().join('.')}
+                                    {r.category} · {(r.expiresAt?displayDate(r.expiresAt):'')}
                                   </strong>
                                 ) : (
                                   <strong>De completat</strong>
@@ -1170,7 +1171,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                               })()}
                             </div>
                           </div>
-                          {v.notes && <p className="small">{v.notes}</p>}
+                          {v.notes && <p data-user-content className="small">{v.notes}</p>}
                           <div className="row-actions">
                             <button className="primary" onClick={() => setVehicleDetail(v.id)}>
                               Vezi mașina <ArrowUpRight size={14} />
@@ -1249,7 +1250,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                       ['Operațiuni', maintenanceStats.count],
                       [
                         'Următoarea intervenție',
-                        maintenanceStats.next?.split('-').reverse().join('.') || 'Neplanificată',
+                        (maintenanceStats.next?displayDate(maintenanceStats.next):'') || 'Neplanificată',
                       ],
                       [
                         'Ultimul kilometraj',
@@ -1297,7 +1298,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                       >
                         <option value="">Toate mașinile</option>
                         {data.vehicles.map((v) => (
-                          <option value={v.id} key={v.id}>
+                          <option data-user-content value={v.id} key={v.id}>
                             {v.brand} {v.model} · {v.plate}
                           </option>
                         ))}
@@ -1420,7 +1421,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                 <Wrench size={18} />
                               </span>
                               <span className="list-grow">
-                                <strong>{r.title}</strong>
+                                <strong data-user-content>{r.title}</strong>
                                 <span className="micro">
                                   {r.expiresAt || 'Dată nestabilită'}
                                   {r.nextKm != null
@@ -1590,12 +1591,12 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                     <Files size={20} strokeWidth={1.6} />
                                   </span>
                                 )}
-                                <strong>{r.title}</strong>
+                                <strong data-user-content>{r.title}</strong>
                                 <div className="muted small">{vehicleName(r.vehicleId)}</div>
                                 <div className="micro">
                                   {r.category} {r.provider ? '· ' + r.provider : ''}
                                 </div>
-                                {r.notes && <p className="small">{r.notes}</p>}
+                                {r.notes && <p data-user-content className="small">{r.notes}</p>}
                                 {data.attachments
                                   .filter((f) => f.recordId === r.id)
                                   .map((f) => (
@@ -1630,11 +1631,11 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                               </td>
                               <td data-label="Dată și termen">
                                 {r.date
-                                  ? r.date.split('-').reverse().join('.')
+                                  ? displayDate(r.date)
                                   : 'Dată necompletată'}
                                 <div className="muted small">
                                   {r.expiresAt
-                                    ? 'Expiră la ' + r.expiresAt.split('-').reverse().join('.')
+                                    ? 'Expiră la ' + displayDate(r.expiresAt)
                                     : 'Fără scadență'}
                                 </div>
                                 {r.nextKm != null && (
@@ -1709,7 +1710,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                     />
                                   </label>
                                   <details className="record-context">
-                                    <summary aria-label={'Mai multe acțiuni pentru ' + r.title}>
+                                    <summary aria-label={(language==='en'?'More actions for ':'Mai multe acțiuni pentru ') + r.title}>
                                       •••
                                     </summary>
                                     <div>
@@ -1782,7 +1783,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                   >
                     <option value="">Toate mașinile</option>
                     {activeCars.map((v) => (
-                      <option key={v.id} value={v.id}>
+                      <option data-user-content key={v.id} value={v.id}>
                         {v.brand} {v.model} · {v.plate}
                       </option>
                     ))}
@@ -1818,7 +1819,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                         >
                           <span className="event-date">{r.expiresAt?.slice(-2)}</span>
                           <span className="list-grow">
-                            <strong>{r.title}</strong>
+                            <strong data-user-content>{r.title}</strong>
                             <span className="muted small">{vehicleName(r.vehicleId)}</span>
                           </span>
                           <Status record={r} />

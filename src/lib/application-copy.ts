@@ -939,5 +939,13 @@ export const applicationCopy: Record<string, string> = {
   "Acceptat": "Accepted",
   "Oprit": "Off",
   "Pornit": "On",
-  "Parolă incorectă": "Incorrect password"
+  "Parolă incorectă": "Incorrect password",
+  "Revizie": "Service",
+  "Garaj personal, Dashboard": "Personal garage, Overview",
+  "Garaj personal, Plan întreținere": "Personal garage, Maintenance planner",
+  "· litri": "· liters",
+  "Cost necompletat": "Cost not provided",
+  "Kilometraj necompletat": "Mileage not provided",
+  "Cost/km indisponibil: sunt necesare minimum două citiri distincte.": "Cost per km unavailable: at least two distinct readings are required.",
+  ". Mai mult control. Mai puține griji.":". More control. Fewer worries."
 };

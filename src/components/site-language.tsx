@@ -18,10 +18,10 @@ export default function SiteLanguage({language}:{language:'ro'|'en'}){
     textStates.set(text,{source:raw,rendered});
     if(text.nodeValue!==rendered)text.nodeValue=rendered;
    }
-   root.querySelectorAll('[placeholder],[aria-label],[title],[alt]').forEach(element=>{
+   root.querySelectorAll('[placeholder],[aria-label],[title],[alt],[data-label]').forEach(element=>{
     if(element.closest('[data-workspace-ui],[data-user-content]'))return;
     const states=attributeStates.get(element)||{};
-    for(const key of ['placeholder','aria-label','title','alt']){
+    for(const key of ['placeholder','aria-label','title','alt','data-label']){
      const value=element.getAttribute(key);if(value===null)continue;
      const source=translationSource(value,states[key]);const rendered=apply(source);
      states[key]={source,rendered};if(value!==rendered)element.setAttribute(key,rendered);
@@ -30,6 +30,6 @@ export default function SiteLanguage({language}:{language:'ro'|'en'}){
    });
   };
   translate();document.documentElement.lang=language;
-  const observer=new MutationObserver(translate);observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','aria-label','title','alt']});return()=>observer.disconnect();
+  const observer=new MutationObserver(translate);observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','aria-label','title','alt','data-label']});return()=>observer.disconnect();
  },[language]);return null;
 }

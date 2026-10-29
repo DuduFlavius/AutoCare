@@ -101,7 +101,7 @@ const home = dashboardHome(data);
       {cars.length > 1 && (
         <label className="ac-premium-car-selector">Mașina afișată
           <select value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
-            {cars.map((v) => <option key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>)}
+            {cars.map((v) => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>)}
           </select>
         </label>
       )}
@@ -122,9 +122,9 @@ const home = dashboardHome(data);
             </div>
             <div className="ac-premium-car-description">
               <span className="ac-lux-car-eyebrow">GARAJ PERSONAL · VEHICUL SELECTAT</span>
-              <h2>{car ? `${car.brand} ${car.model}` : 'Bine ai venit în AutoCare'}</h2>
+              <h2 data-user-content>{car ? `${car.brand} ${car.model}` : 'Bine ai venit în AutoCare'}</h2>
               <p>{car ? [car.year,car.fuel].filter(Boolean).join(' · ') : 'Adaugă prima mașină pentru a începe.'}</p>
-              {car && <span className="ac-premium-plate">{car.plate}</span>}
+              {car && <span data-user-content className="ac-premium-plate">{car.plate}</span>}
               <button type="button" onClick={() => car ? navigate('Garaj') : add('vehicle')}>
                 {car ? (language === 'en' ? 'Open garage' : 'Deschide garajul') : (language === 'en' ? 'Add your first vehicle' : 'Adaugă prima mașină')} <ArrowRight size={16}/>
               </button>
@@ -186,7 +186,7 @@ const home = dashboardHome(data);
           <img className="ac-premium-card-art" src="/images/autocare-documents-premium.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Files size={22}/></span> Documente care expiră</h3><button type="button" onClick={() => navigate('Documente')}>Vezi toate <ArrowRight size={15}/></button></div>
           {home.documents.filter(r => r.status.days !== null && r.status.days <= 30).slice(0,3).map(r =>
-            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Files size={19}/><span><strong>{r.category || r.title}</strong><small>{vehicle(r.vehicleId)}</small></span><em>{r.status.days !== null && r.status.days < 0 ? 'Expirat' : `În ${r.status.days} zile`}</em></button>
+            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Files size={19}/><span><strong data-user-content>{r.category || r.title}</strong><small>{vehicle(r.vehicleId)}</small></span><em>{r.status.days !== null && r.status.days < 0 ? 'Expirat' : `În ${r.status.days} zile`}</em></button>
           )}
           {!home.documentAttention && <p className="ac-premium-empty">Niciun document care necesită atenție.</p>}
         </section>
@@ -194,7 +194,7 @@ const home = dashboardHome(data);
           <img className="ac-premium-card-art" src="/images/autocare-tools-premium.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Wrench size={22}/></span> Ultimele intervenții</h3><button type="button" onClick={() => navigate('Întreținere')}>Vezi toate <ArrowRight size={15}/></button></div>
           {[...home.services].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3).map(r =>
-            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wrench size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.odometer === null ? '—' : `${r.odometer.toLocaleString(locale)} km`}</em></button>
+            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wrench size={19}/><span><strong data-user-content>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.odometer === null ? '—' : `${r.odometer.toLocaleString(locale)} km`}</em></button>
           )}
           {!home.services.length && <p className="ac-premium-empty">Nu ai înregistrat încă intervenții.</p>}
         </section>
@@ -202,7 +202,7 @@ const home = dashboardHome(data);
           <img className="ac-premium-card-art" src="/images/autocare-coins-premium.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Wallet size={22}/></span> Cheltuieli recente</h3><button type="button" onClick={() => navigate('Cheltuieli')}>Vezi toate <ArrowRight size={15}/></button></div>
           {[...records].filter(r => ['expense','service'].includes(r.kind)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3).map(r =>
-            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wallet size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.amountKnown === false ? 'Necunoscut' : moneyDisplay(r.amountBani)}</em></button>
+            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wallet size={19}/><span><strong data-user-content>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.amountKnown === false ? 'Necunoscut' : moneyDisplay(r.amountBani)}</em></button>
           )}
           {!records.some(r => ['expense','service'].includes(r.kind)) && <p className="ac-premium-empty">Nu există cheltuieli înregistrate.</p>}
           <div className="ac-premium-month-total">Total luna curentă <strong>{moneyDisplay(home.monthBani)}</strong>{home.unknownCosts > 0 && <small> + {home.unknownCosts} costuri necunoscute</small>}</div>
@@ -224,7 +224,7 @@ const home = dashboardHome(data);
           Mașina selectată
           <select value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
             {cars.map((v) => (
-              <option key={v.id} value={v.id}>
+              <option data-user-content key={v.id} value={v.id}>
                 {v.brand} {v.model} · {v.plate}
               </option>
             ))}
@@ -248,9 +248,9 @@ const home = dashboardHome(data);
           <div className="autocare-garage-body">
             <div className="autocare-garage-symbol"><CarFront size={35} strokeWidth={1.7}/></div>
             <span className="autocare-garage-overline">{car ? [car.year,car.fuel].filter(Boolean).join(' · ') : 'BUN VENIT ÎN AUTOCARE'}</span>
-            <h2>{car ? `${car.brand} ${car.model}` : 'Garajul tău începe aici'}</h2>
+            <h2 data-user-content>{car ? `${car.brand} ${car.model}` : 'Garajul tău începe aici'}</h2>
             <p>{car ? 'Toate informațiile importante despre mașina ta, într-un singur loc.' : 'Adaugă prima mașină și urmărește documentele, reviziile și cheltuielile.'}</p>
-            {car && <div className="autocare-garage-plate"><span>RO</span><strong>{car.plate}</strong></div>}
+            {car && <div className="autocare-garage-plate"><span>RO</span><strong data-user-content>{car.plate}</strong></div>}
           </div>
           <div className="autocare-garage-bottom">
             <div className="autocare-garage-metrics">
@@ -270,7 +270,7 @@ const home = dashboardHome(data);
                     <button className="autocare-next-record" key={record.id} onClick={() => open(record)}>
                       <span className="autocare-next-icon"><CalendarDays size={20}/></span>
                       <span className="autocare-next-description">
-                        <strong>{record.category || record.title}</strong>
+                        <strong data-user-content>{record.category || record.title}</strong>
                         <small>{linkedCar ? `${linkedCar.brand} ${linkedCar.model} · ${linkedCar.plate}` : 'Mașină'} · {record.kind === 'document' ? 'Document' : 'Întreținere'}</small>
                       </span>
                       <time>{date(record.expiresAt)}</time><ArrowRight size={17}/>
@@ -381,7 +381,7 @@ const home = dashboardHome(data);
                       ? date(r.expiresAt)
                       : 'Prag de kilometraj'}
                 </span>
-                <strong>{r.title}</strong>
+                <strong data-user-content>{r.title}</strong>
                 <small>{vehicle(r.vehicleId)}</small>
                 <ArrowUpRight size={16} />
               </button>
@@ -463,11 +463,11 @@ const home = dashboardHome(data);
                     <span className="micro">
                       {v.year} · {v.fuel}
                     </span>
-                    <h3>
+                    <h3 data-user-content>
                       {v.brand} {v.model}
                     </h3>
                     <div className="between">
-                      <span className="plate">{v.plate}</span>
+                      <span data-user-content className="plate">{v.plate}</span>
                       <span className="small muted">{v.odometer.toLocaleString(locale)} km</span>
                     </div>
                   </div>
@@ -502,7 +502,7 @@ const home = dashboardHome(data);
                   <CalendarDays size={17} />
                 </span>
                 <span className="list-grow">
-                  <strong>{r.title}</strong>
+                  <strong data-user-content>{r.title}</strong>
                   <span className="micro">{vehicle(r.vehicleId)}</span>
                 </span>
                 <span className="micro">{date(r.expiresAt)}</span>
@@ -553,7 +553,7 @@ const home = dashboardHome(data);
                 )}
               </span>
               <span className="list-grow">
-                <strong>{r.title}</strong>
+                <strong data-user-content>{r.title}</strong>
                 <span className="small muted">
                   {vehicle(r.vehicleId)} · {date(r.date)}
                 </span>
@@ -598,7 +598,7 @@ const [car, setCar] = useState(''),
         <select aria-label="Mașină" value={car} onChange={(e) => setCar(e.target.value)}>
           <option value="">Toate mașinile</option>
           {data.vehicles.map((v) => (
-            <option key={v.id} value={v.id}>
+            <option data-user-content key={v.id} value={v.id}>
               {v.brand} {v.model} · {v.plate}
             </option>
           ))}
@@ -639,15 +639,15 @@ const [car, setCar] = useState(''),
                   <small>{kindNames[r.kind]}</small>
                 </span>
                 <span className="list-grow">
-                  <strong>{r.title}</strong>
-                  <span className="muted small">
+                  <strong data-user-content>{r.title}</strong>
+                  <span data-user-content className="muted small">
                     {v?.brand} {v?.model} · {v?.plate}
                   </span>
                   <span className="small">
                     {r.odometer != null ? r.odometer.toLocaleString(locale) + ' km' : ''}
                     {r.provider ? ' · ' + r.provider : ''}
                   </span>
-                  {r.notes && <span className="small muted">{r.notes}</span>}
+                  {r.notes && <span data-user-content className="small muted">{r.notes}</span>}
                   {r.cancelled && <span className="pill archived">Arhivat</span>}
                 </span>
                 <strong>{r.amountKnown === false ? 'Cost necunoscut' : money(r.amountBani)}</strong>
@@ -697,10 +697,10 @@ const v = data.vehicles.find((v) => v.id === id);
           <p className="eyebrow">
             {v.year} · {v.fuel}
           </p>
-          <h2>
+          <h2 data-user-content>
             {v.brand} {v.model}
           </h2>
-          <span className="plate">{v.plate}</span>
+          <span data-user-content className="plate">{v.plate}</span>
           <p className="muted small">
             {v.engine || 'Motorizare necompletată'}
             {v.capacity ? ' · ' + v.capacity + ' cm³' : ''}
@@ -727,7 +727,7 @@ const v = data.vehicles.find((v) => v.id === id);
       {v.notes && (
         <section className="card">
           <h3>Notițe</h3>
-          <p className="small">{v.notes}</p>
+          <p data-user-content className="small">{v.notes}</p>
         </section>
       )}
       <section className="card">
@@ -735,7 +735,7 @@ const v = data.vehicles.find((v) => v.id === id);
         {readings.length ? (
           readings.map((r) => (
             <div className="between small list-row" key={r.id}>
-              <span>
+              <span data-user-content>
                 {date(r.date)} · {r.title}
               </span>
               <strong>{r.odometer?.toLocaleString(locale)} km</strong>
@@ -763,7 +763,7 @@ const v = data.vehicles.find((v) => v.id === id);
                 <div key={r.id}>
                   <button className="event-line" onClick={() => open(r)}>
                     <span className="list-grow">
-                      <strong>{r.title}</strong>
+                      <strong data-user-content>{r.title}</strong>
                       <span className="micro">
                         {date(r.date)}
                         {r.expiresAt ? ' · Termen: ' + date(r.expiresAt) : ''}
@@ -850,8 +850,8 @@ export function ReminderInbox({ data, open }: { data: Data; open: (record: Entry
                 {r.kind === 'document' ? <Files size={18} /> : <Wrench size={18} />}
               </span>
               <span className="list-grow">
-                <strong>{r.title}</strong>
-                <span className="micro">
+                <strong data-user-content>{r.title}</strong>
+                <span data-user-content className="micro">
                   {v?.brand} {v?.model} · {v?.plate}
                 </span>
                 <span className="micro">

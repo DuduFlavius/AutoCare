@@ -14,6 +14,7 @@ export function AuthForm({ mode }: { mode: string }) {
   const reset = mode === 'resetare-parola',
     signup = mode === 'inregistrare',
     forgot = mode === 'recuperare-parola';
+  useEffect(()=>{document.title=(language==='en'?(signup?'Create account':forgot?'Reset password':reset?'New password':'Sign in'):(signup?'Înregistrare':forgot?'Recuperare parolă':reset?'Parolă nouă':'Autentificare'))+' | AutoCare';},[language,signup,forgot,reset]);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);

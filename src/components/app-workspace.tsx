@@ -197,7 +197,7 @@ export function WorkspaceLauncher({
               <button type="button" key={v.id} onClick={() => onVehicle(v.id)}>
                 <CarFront size={19} />
                 <span>
-                  <strong>
+                  <strong data-user-content>
                     {v.brand} {v.model}
                   </strong>
                   <small>{v.plate}</small>
@@ -216,7 +216,7 @@ export function WorkspaceLauncher({
               <button type="button" key={r.id} onClick={() => onRecord(r)}>
                 <Files size={19} />
                 <span>
-                  <strong>{r.title}</strong>
+                  <strong data-user-content>{r.title}</strong>
                   <small>
                     {r.category} · {cars.find((v) => v.id === r.vehicleId)?.plate}
                   </small>
