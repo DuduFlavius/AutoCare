@@ -1474,7 +1474,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                     <section className="card">
                       <h3>Evoluția cheltuielilor</h3>
                       {data.premium ? (
-                        <ExpenseChart data={data} />
+                        <ExpenseChart data={data} currency={currency} />
                       ) : (
                         <p className="muted small">
                           Graficele și analiza detaliată sunt disponibile cu Premium.
@@ -2378,7 +2378,10 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     </div>
   );
 }
-function ExpenseChart({ data }: { data: Data }) {
+function ExpenseChart({ data, currency }: { data: Data; currency: 'RON' | 'EUR' }) {
+  const moneyDisplay = (bani: number): string => currency === 'EUR'
+    ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR'}).format(bani / 500)
+    : new Intl.NumberFormat('ro-RO', {style:'currency',currency:'RON'}).format(bani / 100);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const max = Math.max(1, ...data.summary.monthly.map((m) => m.bani));
   return (
