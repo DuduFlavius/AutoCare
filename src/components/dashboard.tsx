@@ -4,6 +4,7 @@ import Membership from './membership';
 import MobileInstall from './mobile-install';
 import PushSettings from './push-settings';
 import SmartDriveTrip from './smartdrive-trip';
+import ServiceForecastCards from './service-forecast-cards';
 import SmartDriveHistory from './smartdrive-history';
 import RecordEditor from './record-editor';
 import { filterRecords, documentCounts, serviceStats } from '@/lib/record-filters';
@@ -224,6 +225,7 @@ function MileagePlanner({ data, preview, onUpdated, onError }: {
                   </span>
                 </div>;
               })}</div>}
+            <ServiceForecastCards vehicleId={v.id} currentKm={v.odometer} preview={preview} services={due.map(r => ({id:r.id,title:r.title || r.category || 'Intervenție',nextKm:Number(r.nextKm),expiresAt:r.expiresAt}))} />
             <p className="micro">Recomandare AutoCare: actualizează kilometrajul periodic. Intervalele se stabilesc după manualul producătorului și condițiile de utilizare.</p>
           </article>;
         })}
