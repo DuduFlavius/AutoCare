@@ -257,6 +257,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     [locationAccuracy, setLocationAccuracy] = useState<number | null>(null),
     [menuOpen, setMenuOpen] = useState(false),
     [language, setLanguage] = useState<'ro' | 'en'>('ro'),
+    [currency, setCurrency] = useState<'RON' | 'EUR'>('RON'),
     [busy, setBusy] = useState(false),
     [modal, setModal] = useState<Modal>(null),
     [filter, setFilter] = useState(''),
@@ -280,7 +281,9 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     [invoices, setInvoices] = useState<any[]>([]),
     [calendarMonth, setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
   useEffect(() => {
-    try { if (window.localStorage.getItem('autocare-language') === 'en') setLanguage('en'); } catch { /* Storage may be unavailable. */ }
+    try { if (window.localStorage.getItem('autocare-language') === 'en') {setLanguage('en');setCurrency('EUR');}
+      const savedCurrency = window.localStorage.getItem('autocare-currency');
+      if (savedCurrency === 'EUR' || savedCurrency === 'RON') setCurrency(savedCurrency); } catch { /* Storage may be unavailable. */ }
     const t = new URLSearchParams(window.location.search).get('tab');
     if (t) setTab(t);
     refresh();
@@ -499,6 +502,9 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     new Date(),
     data?.profile.timezone || 'Europe/Bucharest',
   );
+  const moneyDisplay = (bani: number): string => currency === 'EUR'
+    ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR'}).format(bani / 500)
+    : new Intl.NumberFormat('ro-RO', {style:'currency',currency:'RON'}).format(bani / 100);
   const exportUrl = (format: string) =>
     '/api/v1/export?' +
     new URLSearchParams(
@@ -821,7 +827,8 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           <span>Garaj personal</span><span className="autocare-header-divider" aria-hidden="true">/</span><strong>{tab === 'Dashboard' ? 'Acasă' : tab}</strong>
         </span>
         <div className="inline autocare-header-actions">
-          <select aria-label="Language / Limbă" value={language} onChange={e => { const next = e.target.value === 'en' ? 'en' : 'ro'; setLanguage(next); try { localStorage.setItem('autocare-language',next); document.documentElement.lang = next; } catch {} }} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff',maxWidth:76}}><option value="ro">RO</option><option value="en">EN</option></select>
+          <select aria-label="Language / Limbă" value={language} onChange={e => { const next = e.target.value === 'en' ? 'en' : 'ro'; setLanguage(next); setCurrency(next === 'en' ? 'EUR' : 'RON'); try { localStorage.setItem('autocare-currency',next === 'en' ? 'EUR' : 'RON'); localStorage.setItem('autocare-language',next); document.documentElement.lang = next; } catch {} }} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff',maxWidth:76}}><option value="ro">RO</option><option value="en">EN</option></select>
+          <select aria-label="Currency / Monedă" title={language === 'en' ? 'Display currency (estimated conversion)' : 'Moneda de afișare (conversie estimativă)'} value={currency} onChange={e => {const next = e.target.value === 'EUR' ? 'EUR' : 'RON';setCurrency(next);try{localStorage.setItem('autocare-currency',next)}catch{}}} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff'}}><option value="RON">RON</option><option value="EUR">EUR</option></select>
           <button
             type="button"
             className="autocare-location-button"
@@ -1017,6 +1024,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             </div>
             {tab === 'Dashboard' && (
               <GarageHome
+                currency={currency}
                 language={language}
                 data={data}
                 name={name}
@@ -1218,7 +1226,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                 {tab === 'Întreținere' && (
                   <div className="stats maintenance-statistics ac-premium-service-stats">
                     {[
-                      ['Cost înregistrat', money(maintenanceStats.totalBani)],
+                      ['Cost înregistrat', moneyDisplay(maintenanceStats.totalBani)],
                       ['Operațiuni', maintenanceStats.count],
                       [
                         'Următoarea intervenție',
@@ -1425,10 +1433,10 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                       <h3>Costuri înregistrate</h3>
                       <div className="monthly-cost">
                         <span className="small muted">Luna aceasta</span>
-                        <strong>{money(data.summary.monthBani)}</strong>
+                        <strong>{moneyDisplay(data.summary.monthBani)}</strong>
                       </div>
                       <span className="small muted">Total anual</span>
-                      <div className="price">{money(data.summary.annualBani)}</div>
+                      <div className="price">{moneyDisplay(data.summary.annualBani)}</div>
                       <p className="muted small">
                         Include lucrările și documentele cu un cost, fără dublare.
                       </p>
@@ -1445,7 +1453,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                         >
                           <span className="between">
                             <span>{category}</span>
-                            <strong>{money(value)}</strong>
+                            <strong>{moneyDisplay(value)}</strong>
                           </span>
                           <span className="category-track">
                             <span
@@ -1622,7 +1630,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                                     <strong>
                                       {r.amountKnown === false
                                         ? 'Cost necunoscut'
-                                        : money(r.amountBani)}
+                                        : moneyDisplay(r.amountBani)}
                                     </strong>
                                     <div className="small muted">
                                       {r.odometer != null
@@ -2388,10 +2396,10 @@ function ExpenseChart({ data }: { data: Data }) {
             type="button"
             className="bar"
             key={m.month}
-            aria-label={`${m.month}: ${money(m.bani)}`}
+            aria-label={`${m.month}: ${moneyDisplay(m.bani)}`}
             aria-pressed={selectedMonth === m.month}
             onClick={() => setSelectedMonth(m.month)}
-            title={`${m.month}: ${money(m.bani)}`}
+            title={`${m.month}: ${moneyDisplay(m.bani)}`}
           >
             <div className="bar-fill" style={{ height: Math.max(2, (m.bani / max) * 140) }} />
             <span>{m.month.slice(-2)}</span>
@@ -2402,7 +2410,7 @@ function ExpenseChart({ data }: { data: Data }) {
         <p role="status" className="small">
           {selectedMonth}:{' '}
           <strong>
-            {money(data.summary.monthly.find((m) => m.month === selectedMonth)?.bani || 0)}
+            {moneyDisplay(data.summary.monthly.find((m) => m.month === selectedMonth)?.bani || 0)}
           </strong>
         </p>
       )}

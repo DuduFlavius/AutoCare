@@ -41,12 +41,14 @@ const kindNames: Record<string, string> = {
 };
 export function GarageHome({
   language = 'ro',
+  currency = 'RON',
   data,
   navigate,
   add,
   open,
 }: {
   language?: 'ro' | 'en';
+  currency?: 'RON' | 'EUR';
   data: Data;
   name: string;
   navigate: (tab: string) => void;
@@ -54,7 +56,7 @@ export function GarageHome({
   open: (record: Entry) => void;
 }) {
   const home = dashboardHome(data);
-  const moneyDisplay = (bani: number): string => language === 'en'
+  const moneyDisplay = (bani: number): string => currency === 'EUR'
     ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR',maximumFractionDigits:2}).format(bani / 500)
     : new Intl.NumberFormat('ro-RO', {style:'currency',currency:'RON'}).format(bani / 100);
   const { cars, records, attention: due } = home;
@@ -90,7 +92,7 @@ export function GarageHome({
   // The existing detailed overview remains below for compatibility.
   return (
     <div className="ac-premium-dashboard">
-      {language === 'en' && <p className="micro" style={{margin:"0 0 12px",color:"#526582"}}>EUR amounts are indicative (1 EUR ≈ 5 RON). Original records and payments remain in RON.</p>}
+      {currency === 'EUR' && <p className="micro" style={{margin:"0 0 12px",color:"#526582"}}>EUR amounts are indicative (1 EUR ≈ 5 RON). Original records and payments remain in RON.</p>}
       {cars.length > 1 && (
         <label className="ac-premium-car-selector">Mașina afișată
           <select value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
