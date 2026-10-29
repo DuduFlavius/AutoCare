@@ -638,7 +638,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   {tabs.filter(([label]) => (labels as readonly string[]).includes(label)).map(([label, Icon]) => (
                     <button key={label} aria-current={tab === label ? 'page' : undefined} onClick={() => navigate(label)}>
                       <Icon size={19} />
-                      <span>{label === 'Dashboard' ? 'Acasă' : label}</span>
+                      <span>{label === 'Dashboard' ? 'Acasă' : label === 'Plan întreținere' ? 'SmartDrive GPS' : label}</span>
                       {label === 'Notificări' && !!data?.notifications.filter((n) => !n.readAt).length && (
                         <span className="nav-unread">{data.notifications.filter((n) => !n.readAt).length}</span>
                       )}
@@ -690,6 +690,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           />
         </div>
       )}
+      <button type="button" className="autocare-gps-mobile-shortcut" onClick={() => navigate('Plan întreținere')} aria-label="Deschide SmartDrive GPS"><MapPin size={23}/><span>SmartDrive GPS</span></button>
       <aside className="sidebar">
         <Brand
           href={previewData ? '/previzualizare' : '/cont'}
