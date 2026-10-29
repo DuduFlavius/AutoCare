@@ -57,6 +57,7 @@ const tabs = [
   ['Calendar', CalendarDays],
   ['Întreținere', Wrench],
   ['Plan întreținere', Gauge],
+  ['Kilometraj', Gauge],
   ['Cheltuieli', Wallet],
   ['Centru de suport', MessageSquare],
   ['Istoric auto', Gauge],
@@ -170,8 +171,8 @@ function Dialog({
   );
 }
 
-function MileagePlanner({ data, preview, onUpdated, onError }: {
-  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void;
+function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false }: {
+  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean;
 }) {
   const [editing, setEditing] = useState<string | null>(null);
   useEffect(() => { if (window.location.hash === '#actualizeaza-km' && data.vehicles.length) { setEditing(data.vehicles[0].id); setKm(String(data.vehicles[0].odometer)); setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 150); } }, []);
@@ -198,13 +199,13 @@ function MileagePlanner({ data, preview, onUpdated, onError }: {
   return (
     <section className="mileage-planner">
       <div className="mileage-planner-heading">
-        <div><span className="eyebrow">AUTOCARE · PLANIFICARE</span><h2>Următoarea întreținere</h2>
+        <div><span className="eyebrow">AUTOCARE · PLANIFICARE</span><h2>{mileageOnly ? 'Kilometrajul mașinilor' : 'Următoarea întreținere'}</h2>
           <p>Calcule bazate pe kilometrajul introdus și termenele salvate în istoricul mașinii. Nu sunt estimări GPS.</p></div>
         <span className="mileage-planner-icon"><Gauge size={27}/></span>
       </div>
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
-      <SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} />
-      <SmartDriveTrip preview={preview} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model }))} />
+      {!mileageOnly && <SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} />}
+      {!mileageOnly && <SmartDriveTrip preview={preview} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model }))} />}
       <div className="mileage-planner-grid" id="ac-mileage-editor">
         {cars.map(v => {
           const due = services.filter(r => r.vehicleId === v.id).sort((a,b) => Number(a.nextKm)-Number(b.nextKm));
@@ -631,7 +632,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             <nav aria-label="Navigare mobil">
               {([
                 ['ESENȚIAL', ['Dashboard', 'Garaj', 'Documente', 'Notificări']],
-                ['ORGANIZARE', ['Calendar', 'Întreținere', 'Plan întreținere', 'Cheltuieli', 'Istoric auto']],
+                ['ORGANIZARE', ['Kilometraj', 'Plan întreținere', 'Calendar', 'Întreținere', 'Cheltuieli', 'Istoric auto']],
                 ['CONT ȘI AJUTOR', ['Centru de suport', 'Abonament', 'Setări']],
               ] as const).map(([group, labels]) => (
                 <div className="autocare-mobile-menu-group" key={group}>
@@ -639,7 +640,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   {tabs.filter(([label]) => (labels as readonly string[]).includes(label)).map(([label, Icon]) => (
                     <button key={label} aria-current={tab === label ? 'page' : undefined} onClick={() => navigate(label)}>
                       <Icon size={19} />
-                      <span>{label === 'Dashboard' ? 'Acasă' : label === 'Plan întreținere' ? 'SmartDrive GPS' : label}</span>
+                      <span>{label === 'Dashboard' ? 'Acasă' : label === 'Plan întreținere' ? 'SmartDrive GPS' : label === 'Kilometraj' ? 'Kilometraj & revizii' : label}</span>
                       {label === 'Notificări' && !!data?.notifications.filter((n) => !n.readAt).length && (
                         <span className="nav-unread">{data.notifications.filter((n) => !n.readAt).length}</span>
                       )}
@@ -691,8 +692,6 @@ export default function Dashboard({ name, previewData }: { name: string; preview
           />
         </div>
       )}
-      <button type="button" className="autocare-km-mobile-shortcut" onClick={() => { navigate('Plan întreținere'); window.location.hash = 'actualizeaza-km'; setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 200); }} aria-label="Actualizează kilometrajul"><Gauge size={22}/><span>Introdu km</span></button>
-      <button type="button" className="autocare-gps-mobile-shortcut" onClick={() => navigate('Plan întreținere')} aria-label="Deschide SmartDrive GPS"><MapPin size={23}/><span>SmartDrive GPS</span></button>
       <aside className="sidebar">
         <Brand
           href={previewData ? '/previzualizare' : '/cont'}
@@ -1789,6 +1788,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                 )}
               </section>
             )}
+            {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
             {tab === 'Plan întreținere' && <MileagePlanner data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
             {tab === 'Notificări' && (
               <div className="overview-stack">
