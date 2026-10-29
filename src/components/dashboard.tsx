@@ -280,6 +280,7 @@ export default function Dashboard({ name, previewData }: { name: string; preview
     [invoices, setInvoices] = useState<any[]>([]),
     [calendarMonth, setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
   useEffect(() => {
+    try { if (window.localStorage.getItem('autocare-language') === 'en') setLanguage('en'); } catch { /* Storage may be unavailable. */ }
     const t = new URLSearchParams(window.location.search).get('tab');
     if (t) setTab(t);
     refresh();

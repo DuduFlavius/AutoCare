@@ -30,3 +30,14 @@
  .app-shell>.app-header .autocare-location-button{max-width:52px!important;width:48px!important;padding:8px!important}
  .app-shell>.app-header .autocare-location-button span{display:none!important}
 }
+
+/* Locale-aware bottom bar; preserve the Romanian defaults above. */
+@media(max-width:760px){
+ html[lang="en"] .app-shell>.sidebar>nav>button:nth-child(1)::after{content:"Home"}
+ html[lang="en"] .app-shell>.sidebar>nav>button:nth-child(2)::after{content:"Garage"}
+ html[lang="en"] .app-shell>.sidebar>nav>button:nth-child(5)::after{content:"Service"}
+ html[lang="en"] .app-shell>.sidebar>nav>button:nth-child(11)::after{content:"Alerts"}
+ html[lang="en"] .app-shell>.sidebar>nav>button:nth-child(13)::after{content:"Profile"}
+ .app-shell>.sidebar>nav>button:focus-visible{outline:2px solid #1769db!important;outline-offset:-2px!important}
+ .app-shell>.sidebar>nav>button:active{transform:scale(.97)}
+}
