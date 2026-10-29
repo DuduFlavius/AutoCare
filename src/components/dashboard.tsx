@@ -876,22 +876,17 @@ export default function Dashboard({ name, previewData }: { name: string; preview
             <ChevronDown size={16} />
           </button>
           <button
-            className="autocare-header-signout autocare-signout-premium"
-            type="button"
-            aria-label={language === 'en' ? 'Sign out' : 'Deconectare'}
-            title={language === 'en' ? 'Sign out securely' : 'Deconectare securizată'}
+            className="autocare-header-signout"
+            aria-label="Deconectare"
+            title="Deconectare"
             onClick={async () => {
               if (previewData) return;
               if (recordDirty && !window.confirm('Ai modificări nesalvate. Vrei să te deconectezi?')) return;
-              try {
-                await authClient.signOut();
-                window.location.assign('/autentificare');
-              } catch {
-                window.alert(language === 'en' ? 'Sign out failed. Please try again.' : 'Deconectarea nu a reușit. Încearcă din nou.');
-              }
+              await authClient.signOut();
+              window.location.assign('/autentificare');
             }}
           >
-            <LogOut size={18} /><span className="autocare-signout-label">{language === 'en' ? 'Sign out' : 'Deconectare'}</span>
+            <LogOut size={18} />
           </button>
         </div>
       </header>

@@ -41,9 +41,3 @@
  .app-shell>.sidebar>nav>button:focus-visible{outline:2px solid #1769db!important;outline-offset:-2px!important}
  .app-shell>.sidebar>nav>button:active{transform:scale(.97)}
 }
-
-/* Prominent premium sign-out button; keyboard and touch accessible. */
-.app-shell>.app-header .autocare-signout-premium{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-height:42px!important;padding:9px 15px!important;border:1px solid #cad7ed!important;border-radius:12px!important;background:linear-gradient(135deg,#f9fbff,#e8f0ff)!important;color:#173e76!important;font-weight:750!important;font-size:13px!important;white-space:nowrap!important;box-shadow:0 3px 10px rgba(20,53,103,.08)!important;cursor:pointer!important;transition:background .15s ease,transform .15s ease!important}
-.app-shell>.app-header .autocare-signout-premium:hover{background:#dbe8ff!important;transform:translateY(-1px)}
-.app-shell>.app-header .autocare-signout-premium:focus-visible{outline:3px solid #4386e8!important;outline-offset:2px!important}
-@media(max-width:760px){.app-shell>.app-header .autocare-signout-premium{min-width:44px!important;min-height:44px!important;padding:10px!important;flex-shrink:0!important}.app-shell>.app-header .autocare-signout-premium .autocare-signout-label{display:none!important}}
