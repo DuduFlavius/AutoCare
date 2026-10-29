@@ -96,7 +96,7 @@ export function GarageHome({
       )}
       <div className="ac-premium-overview">
         <section className="ac-premium-vehicle ac-premium-panel">
-          <img className="ac-premium-hero-photo" src="/images/autocare-cinematic-exact.svg" alt="" aria-hidden="true" loading="eager" decoding="async" />
+          <img className="ac-premium-hero-photo" src="/images/autocare-editorial-premium.svg" alt="" aria-hidden="true" loading="eager" decoding="async" />
           <div className="ac-premium-hero-shade" aria-hidden="true" />
           <div className="ac-premium-vehicle-top">
             <span className="ac-premium-kicker"><CarFront size={17}/> {language === 'en' ? 'YOUR VEHICLE' : 'MAȘINA TA'}</span>
