@@ -181,7 +181,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   const [saving, setSaving] = useState(false);
   const [lastReadings, setLastReadings] = useState<Record<string,{odometer:number;recordedAt:string}>>({});
   const [confirmedJump, setConfirmedJump] = useState<string | null>(null);
-  useEffect(() => { if (preview) return; let cancelled=false; Promise.all(data.vehicles.filter(v=>!v.archived).map(async v=>{try{const rows=await api('smartdrive/vehicles/'+v.id+'/readings') as {odometer:number;recordedAt:string}[];return [v.id,rows[0]] as const}catch{return [v.id,undefined] as const}})).then(entries=>{if(!cancelled)setLastReadings(Object.fromEntries(entries.filter(e=>e[1]))) });return()=>{cancelled=true}; },[preview,data.vehicles.map(v=>v.id+':'+v.odometer).join('|')]);
+  useEffect(() => { if (preview) return; let cancelled=false; Promise.all(data.vehicles.filter(v=>!v.archived).map(async v=>{try{const rows=await api('smartdrive/vehicles/'+v.id+'/readings') as {odometer:number;recordedAt:string}[];return [v.id,rows[0]] as const}catch{return [v.id,undefined] as const}})).then(entries=>{if(!cancelled)setLastReadings(Object.fromEntries(entries.filter((e): e is readonly [string,{odometer:number;recordedAt:string}] => e[1] !== undefined))) });return()=>{cancelled=true}; },[preview,data.vehicles.map(v=>v.id+':'+v.odometer).join('|')]);
   const cars = data.vehicles.filter(v => !v.archived);
   const services = data.records.filter(r => r.kind === 'service' && !r.cancelled && r.nextKm != null && Number(r.nextKm) > 0);
   const fmt = (n: number) => n.toLocaleString('ro-RO') + ' km';
