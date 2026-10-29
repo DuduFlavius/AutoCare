@@ -1029,7 +1029,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                   }
                 >
                   <Plus size={17} />
-                  {!activeCars.length ? 'Adaugă întâi o mașină' : tab === 'Documente' ? 'Adaugă document' : tab === 'Întreținere' ? 'Adaugă lucrare' : 'Adaugă cheltuială'}
+                  {!activeCars.length ? 'Adaugă întâi o mașină' : tab === 'Documente' ? 'Adaugă document' : tab === 'Întreținere' ? 'Adaugă intervenție' : 'Adaugă cheltuială'}
                 </button>
               ) : tab === 'Calendar' ? (
                 <button
@@ -2236,7 +2236,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                   : modal.kind === 'document'
                     ? 'Adaugă document'
                     : modal.kind === 'service'
-                      ? 'Adaugă lucrare'
+                      ? 'Adaugă intervenție'
                       : 'Adaugă cheltuială'
             }
             onClose={closeRecord}

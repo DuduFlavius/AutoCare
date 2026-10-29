@@ -973,5 +973,8 @@ export const applicationCopy: Record<string, string> = {
   "Detalii aer condiționat": "Air conditioning details",
   "Detalii ambreiaj": "Clutch details",
   "Detalii evacuare": "Exhaust details",
-  "Detalii caroserie și vopsitorie": "Bodywork & paint details"
+  "Detalii caroserie și vopsitorie": "Bodywork & paint details",
+ "Adaugă intervenție":"Add maintenance",
+ "Detalii tehnice și piese · opțional":"Technical details & parts · optional",
+ "Defalcare cost: piese și manoperă · opțional":"Cost breakdown: parts & labor · optional"
 };

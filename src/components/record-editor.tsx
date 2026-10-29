@@ -274,14 +274,19 @@ export default function RecordEditor({
         </div>
         {kind === 'service' && (
           <>
-            <ServiceDetailFields
-              key={category}
-              category={category}
-              parts={
-                categoryDrafts.current[category] ??
-                (record?.category === category ? record?.parts || '' : '')
-              }
-            />
+            <details className="record-technical-details">
+              <summary>
+                Detalii tehnice și piese · opțional <ChevronDown size={16} />
+              </summary>
+              <ServiceDetailFields
+                key={category}
+                category={category}
+                parts={
+                  categoryDrafts.current[category] ??
+                  (record?.category === category ? record?.parts || '' : '')
+                }
+              />
+            </details>
             {category === 'Schimb ulei' && (
               <label className="ac-oil-interval">
                 Interval pentru următorul schimb · opțional, în km
@@ -319,62 +324,67 @@ export default function RecordEditor({
               incluse în total o singură dată.
             </p>
             {kind === 'service' && (
-              <div className="form-grid">
-                <label>
-                  Cost piese / materiale · RON
-                  <input
-                    name="ac_costPiese"
-                    type="number"
-                    min="0"
-                    max="1000000"
-                    step="0.01"
-                    inputMode="decimal"
-                    disabled={unknownCost}
-                    value={costParts}
-                    onChange={(e) => {
-                      setCostParts(e.target.value);
-                      setCostEdited(true);
-                    }}
-                    placeholder="Opțional"
-                  />
-                </label>
-                <label>
-                  Cost manoperă · RON
-                  <input
-                    name="ac_costLabor"
-                    type="number"
-                    min="0"
-                    max="1000000"
-                    step="0.01"
-                    inputMode="decimal"
-                    disabled={unknownCost}
-                    value={costLabor}
-                    onChange={(e) => {
-                      setCostLabor(e.target.value);
-                      setCostEdited(true);
-                    }}
-                    placeholder="Opțional"
-                  />
-                </label>
-                <label>
-                  Alte costuri · RON
-                  <input
-                    name="ac_costOther"
-                    type="number"
-                    min="0"
-                    max="1000000"
-                    step="0.01"
-                    inputMode="decimal"
-                    disabled={unknownCost}
-                    value={costOther}
-                    onChange={(e) => {
-                      setCostOther(e.target.value);
-                      setCostEdited(true);
-                    }}
-                    placeholder="Opțional"
-                  />
-                </label>
-              </div>
+              <details className="record-cost-details">
+                <summary>
+                  Defalcare cost: piese și manoperă · opțional <ChevronDown size={16} />
+                </summary>
+                <div className="form-grid">
+                  <label>
+                    Cost piese / materiale · RON
+                    <input
+                      name="ac_costPiese"
+                      type="number"
+                      min="0"
+                      max="1000000"
+                      step="0.01"
+                      inputMode="decimal"
+                      disabled={unknownCost}
+                      value={costParts}
+                      onChange={(e) => {
+                        setCostParts(e.target.value);
+                        setCostEdited(true);
+                      }}
+                      placeholder="Opțional"
+                    />
+                  </label>
+                  <label>
+                    Cost manoperă · RON
+                    <input
+                      name="ac_costLabor"
+                      type="number"
+                      min="0"
+                      max="1000000"
+                      step="0.01"
+                      inputMode="decimal"
+                      disabled={unknownCost}
+                      value={costLabor}
+                      onChange={(e) => {
+                        setCostLabor(e.target.value);
+                        setCostEdited(true);
+                      }}
+                      placeholder="Opțional"
+                    />
+                  </label>
+                  <label>
+                    Alte costuri · RON
+                    <input
+                      name="ac_costOther"
+                      type="number"
+                      min="0"
+                      max="1000000"
+                      step="0.01"
+                      inputMode="decimal"
+                      disabled={unknownCost}
+                      value={costOther}
+                      onChange={(e) => {
+                        setCostOther(e.target.value);
+                        setCostEdited(true);
+                      }}
+                      placeholder="Opțional"
+                    />
+                  </label>
+                </div>
+              </details>
             )}
             <label>
               {kind === 'service' ? 'Cost total · RON' : 'Cost · RON'}

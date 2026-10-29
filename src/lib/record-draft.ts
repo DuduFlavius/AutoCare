@@ -1,3 +1,4 @@
+import { recordCategory } from './record-categories';
 import { serializeServiceDetails } from './service-details';
 import { recordInput } from './validation';
 export type RecordPayload = {
@@ -133,7 +134,7 @@ export function prepareRecordDraft(
     kind,
     vehicleId: car,
     category,
-    title: str('title') || category,
+    title: str('title') || recordCategory(kind, category)?.ro || category,
     date: str('date') || null,
     expiresAt: computedExpiry || null,
     nextKm: computedNextKm,
