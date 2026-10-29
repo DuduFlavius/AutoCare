@@ -54,6 +54,9 @@ export function GarageHome({
   open: (record: Entry) => void;
 }) {
   const home = dashboardHome(data);
+  const moneyDisplay = (bani: number) => language === 'en'
+    ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR',maximumFractionDigits:2}).format(bani / 500)
+    : moneyDisplay(bani);
   const { cars, records, attention: due } = home;
   const [selectedCar, setSelectedCar] = useState('');
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
@@ -87,6 +90,7 @@ export function GarageHome({
   // The existing detailed overview remains below for compatibility.
   return (
     <div className="ac-premium-dashboard">
+      {language === 'en' && <p className="micro" style={{margin:"0 0 12px",color:"#526582"}}>EUR amounts are indicative (1 EUR ≈ 5 RON). Original records and payments remain in RON.</p>}
       {cars.length > 1 && (
         <label className="ac-premium-car-selector">Mașina afișată
           <select value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
@@ -191,10 +195,10 @@ export function GarageHome({
           <img className="ac-premium-card-art" src="/images/autocare-coins-premium.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Wallet size={22}/></span> Cheltuieli recente</h3><button type="button" onClick={() => navigate('Cheltuieli')}>Vezi toate <ArrowRight size={15}/></button></div>
           {[...records].filter(r => ['expense','service'].includes(r.kind)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3).map(r =>
-            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wallet size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.amountKnown === false ? 'Necunoscut' : money(r.amountBani)}</em></button>
+            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wallet size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.amountKnown === false ? 'Necunoscut' : moneyDisplay(r.amountBani)}</em></button>
           )}
           {!records.some(r => ['expense','service'].includes(r.kind)) && <p className="ac-premium-empty">Nu există cheltuieli înregistrate.</p>}
-          <div className="ac-premium-month-total">Total luna curentă <strong>{money(home.monthBani)}</strong>{home.unknownCosts > 0 && <small> + {home.unknownCosts} costuri necunoscute</small>}</div>
+          <div className="ac-premium-month-total">Total luna curentă <strong>{moneyDisplay(home.monthBani)}</strong>{home.unknownCosts > 0 && <small> + {home.unknownCosts} costuri necunoscute</small>}</div>
         </section>
         <section className="ac-premium-panel ac-premium-quick">
           <h3><Zap size={18}/> Acțiuni rapide</h3>
@@ -337,7 +341,7 @@ export function GarageHome({
             <Wallet size={22} />
             <span>Cheltuieli · luna curentă</span>
             <strong>
-              {home.expenseCount ? money(home.monthBani) : 'Nicio cheltuială înregistrată'}
+              {home.expenseCount ? moneyDisplay(home.monthBani) : 'Nicio cheltuială înregistrată'}
             </strong>
             <p>
               {home.unknownCosts
@@ -421,7 +425,7 @@ export function GarageHome({
           { title: 'Termene care necesită atenție', value: String(due.length), tab: 'Calendar' },
           {
             title: 'Costuri cunoscute · luna curentă',
-            value: money(home.monthBani),
+            value: moneyDisplay(home.monthBani),
             tab: 'Cheltuieli',
           },
         ].map((stat) => (
@@ -551,7 +555,7 @@ export function GarageHome({
                 {r.amountKnown === false
                   ? 'Cost necunoscut'
                   : r.amountBani
-                    ? money(r.amountBani)
+                    ? moneyDisplay(r.amountBani)
                     : kindNames[r.kind]}
               </span>
             </button>

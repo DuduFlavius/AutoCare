@@ -237,6 +237,7 @@ Object.assign(dictionary,{
   "Estimarea distanței unei călătorii": "Estimated trip distance",
   "km estimați prin GPS · actualizare la fiecare citire validă": "km estimated by GPS · updated with each valid reading"
 });
+Object.assign(dictionary,{"Total despre mașinile tale, într-un singur loc.":"All your vehicle information in one place.","Caută titlu, categorie sau service…":"Search title, category or workshop…","Caută o înregistrare":"Search records","Panou Fondator":"Founder dashboard","Ai introdus o creștere de":"You entered an increase of","față de ultima valoare confirmată. Verifică cifra de pe bord înainte de salvare.":"compared with the last confirmed reading. Check your odometer before saving.","Nicio cheltuială înregistrată":"No expenses recorded","Necunoscut":"Unknown","Necompletat":"Not provided","costuri necunoscute":"unknown costs","costuri necunoscute, excluse din total.":"unknown costs, excluded from the total.","Cheltuieli · luna curentă":"Expenses · this month","Căutare":"Search","Schimbă limba":"Change language","Nu există cheltuieli înregistrate.":"No expenses recorded.","Revizii":"Service","Alerte":"Alerts","Înregistrare nouă":"New record","Următorul prag: 94987 km":"Next threshold: 94987 km","Fără dată scadentă":"No due date","Schimb de ulei":"Oil change","Costuri necunoscute":"Unknown costs"});
 const originals=new WeakMap<Text,string>();
 export default function SiteLanguage({language}:{language:'ro'|'en'}){
  useEffect(()=>{
