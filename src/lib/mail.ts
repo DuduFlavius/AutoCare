@@ -9,8 +9,18 @@ export async function sendMail(
   tracking?: { userId: string; template: EmailTemplate },
 ) {
   const rendered = content || renderEmail('administrative', { subject, message: text });
-  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM)
-    throw new Error('EMAIL_NOT_CONFIGURED');
+  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+    try {
+      const { sendGoogleMail } = await import('./google-mail');
+      const providerId = await sendGoogleMail(to, rendered, key);
+      if (tracking) await safeSystemMailLog(tracking.userId, tracking.template, key, to, 'accepted', providerId);
+      return providerId;
+    } catch (error) {
+      const code = error instanceof Error && 'code' in error && typeof error.code === 'string' ? error.code : 'GMAIL_DELIVERY_UNCONFIRMED';
+      if (tracking) await safeSystemMailLog(tracking.userId, tracking.template, key, to, 'unknown', undefined, code);
+      throw new Error('EMAIL_TRANSPORT_UNCONFIRMED');
+    }
+  }
   let providerId: string;
   try {
     const r = await fetch('https://api.resend.com/emails', {
