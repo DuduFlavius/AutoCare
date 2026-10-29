@@ -3,6 +3,12 @@ import { readFile } from 'node:fs/promises';
 import { sql } from 'drizzle-orm';
 import { db, closeLocalDb } from '../src/lib/db';
 async function main() {
+  // Git branch previews do not share production database credentials.
+  // Keep the production migration mandatory; visual previews never mutate a database.
+  if (process.env.VERCEL_ENV === 'preview') {
+    console.log('Mail Center migration skipped for Preview; production migration remains required.');
+    return;
+  }
   if (process.env.DATABASE_URL) {
     const url = new URL(process.env.DATABASE_URL);
     if (url.hostname.endsWith('.neon.tech')) url.hostname = url.hostname.replace('-pooler.', '.');
