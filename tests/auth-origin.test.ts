@@ -63,6 +63,6 @@ test('Canonical navigation leaves API mutations, other projects, development and
 test('Authentication failures explain wrong credentials, duplicate accounts and origin mismatch in Romanian', () => {
   assert.match(authErrorMessage('INVALID_EMAIL_OR_PASSWORD'), /Emailul sau parola/);
   assert.match(authErrorMessage('USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL'), /Există deja un cont/);
-  assert.match(authErrorMessage('INVALID_ORIGIN'), /autocare-garaj.vercel.app/);
+  assert.match(authErrorMessage('INVALID_ORIGIN'), /adresa oficială/);
   assert.equal(authErrorMessage('UNKNOWN', 'Mesaj util'), 'Mesaj util');
 });

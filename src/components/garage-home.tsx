@@ -1,4 +1,5 @@
 'use client';
+import {useApplicationLocale} from './application-locale';
 import { useState } from 'react';
 import { dashboardHome } from '@/lib/dashboard-home';
 import {
@@ -24,11 +25,11 @@ import {
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type Entry = Data['records'][number];
-const money = (value: number) =>
-  new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(value / 100);
-const date = (value: string | null) =>
+const formatMoney = (value: number,locale:string) =>
+  new Intl.NumberFormat(locale, { style: 'currency', currency: 'RON' }).format(value / 100);
+const formatDate = (value: string | null,locale:string) =>
   value
-    ? new Date(value + 'T12:00:00').toLocaleDateString('ro-RO', {
+    ? new Date(value + 'T12:00:00').toLocaleDateString(locale, {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
@@ -55,10 +56,14 @@ export function GarageHome({
   add: (kind: 'vehicle' | 'document' | 'service' | 'expense') => void;
   open: (record: Entry) => void;
 }) {
-  const home = dashboardHome(data);
+
+  const locale=useApplicationLocale();
+  const date=(value:string|null)=>formatDate(value,locale);
+  const money=(value:number)=>formatMoney(value,locale);
+const home = dashboardHome(data);
   const moneyDisplay = (bani: number): string => currency === 'EUR'
     ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR',maximumFractionDigits:2}).format(bani / 500)
-    : new Intl.NumberFormat('ro-RO', {style:'currency',currency:'RON'}).format(bani / 100);
+    : new Intl.NumberFormat(locale, {style:'currency',currency:'RON'}).format(bani / 100);
   const { cars, records, attention: due } = home;
   const [selectedCar, setSelectedCar] = useState('');
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
@@ -92,7 +97,7 @@ export function GarageHome({
   // The existing detailed overview remains below for compatibility.
   return (
     <div className="ac-premium-dashboard">
-      {currency === 'EUR' && <p className="micro" style={{margin:"0 0 12px",color:"#526582"}}>EUR amounts are indicative (1 EUR ≈ 5 RON). Original records and payments remain in RON.</p>}
+      {currency === 'EUR' && <p className="micro" style={{margin:"0 0 12px",color:"#526582"}}>{language==='en'?'EUR amounts are estimates (EUR 1 ≈ RON 5). Saved amounts and payments remain in RON.':'Sumele în EUR sunt orientative (1 EUR ≈ 5 RON). Valorile salvate și plățile rămân în RON.'}</p>}
       {cars.length > 1 && (
         <label className="ac-premium-car-selector">Mașina afișată
           <select value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
@@ -126,7 +131,7 @@ export function GarageHome({
             </div>
           </div>
           <div className="ac-premium-vehicle-footer">
-            <div><span>{language === 'en' ? 'Current mileage' : 'Kilometraj actual'}</span><strong>{car ? `${car.odometer.toLocaleString('ro-RO')} km` : '—'}</strong></div>
+            <div><span>{language === 'en' ? 'Current mileage' : 'Kilometraj actual'}</span><strong>{car ? `${car.odometer.toLocaleString(locale)} km` : '—'}</strong></div>
             <div><span>{language === 'en' ? 'Saved documents' : 'Documente înregistrate'}</span><strong>{carDocuments.length}</strong></div>
             <button type="button" onClick={() => navigate('Garaj')}>{language === 'en' ? 'View details' : 'Vezi detalii'} <ArrowRight size={15}/></button>
           </div>
@@ -150,15 +155,15 @@ export function GarageHome({
               </svg>
             </div>
             <div className="ac-oil-info">
-              <strong className="ac-oil-next">{nextOilKm === null ? 'Neconfigurat' : `La ${nextOilKm.toLocaleString('ro-RO')} km`}</strong>
-              <span>{oilKmRemaining === null ? 'Setează intervalul de schimb' : oilKmRemaining < 0 ? `Depășit cu ${Math.abs(oilKmRemaining).toLocaleString('ro-RO')} km` : `${oilKmRemaining.toLocaleString('ro-RO')} km rămași`}</span>
+              <strong className="ac-oil-next">{nextOilKm === null ? 'Neconfigurat' : `La ${nextOilKm.toLocaleString(locale)} km`}</strong>
+              <span>{oilKmRemaining === null ? 'Setează intervalul de schimb' : oilKmRemaining < 0 ? `Depășit cu ${Math.abs(oilKmRemaining).toLocaleString(locale)} km` : `${oilKmRemaining.toLocaleString(locale)} km rămași`}</span>
               <div className="ac-oil-progress-line"><div className="ac-oil-progress" role="progressbar" aria-label="Progres până la schimbul de ulei" aria-valuemin={0} aria-valuemax={100} aria-valuenow={lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, Math.round((car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100))) : 0}>
                 <i style={{width: `${lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, (car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100)) : 0}%`}}/>
               </div><b>{lastOil?.odometer != null && nextOilKm != null && nextOilKm > lastOil.odometer ? Math.min(100, Math.max(0, Math.round((car!.odometer - lastOil.odometer) / (nextOilKm - lastOil.odometer) * 100))) : 0}%</b></div>
             </div>
           </div>
-          <div className="ac-oil-detail"><span><Clock3 size={16}/> Ultimul schimb</span><strong>{lastOil?.odometer != null ? <>{lastOil.odometer.toLocaleString('ro-RO')} km{lastOil.date && <small>{date(lastOil.date)}</small>}</> : 'Neconfigurat'}</strong></div>
-          <div className="ac-oil-detail"><span><Clock3 size={16}/> Interval setat</span><strong>{lastOil?.odometer != null && nextOilKm !== null ? `${(nextOilKm - lastOil.odometer).toLocaleString('ro-RO')} km` : 'Neconfigurat'}</strong></div>
+          <div className="ac-oil-detail"><span><Clock3 size={16}/> Ultimul schimb</span><strong>{lastOil?.odometer != null ? <>{lastOil.odometer.toLocaleString(locale)} km{lastOil.date && <small>{date(lastOil.date)}</small>}</> : 'Neconfigurat'}</strong></div>
+          <div className="ac-oil-detail"><span><Clock3 size={16}/> Interval setat</span><strong>{lastOil?.odometer != null && nextOilKm !== null ? `${(nextOilKm - lastOil.odometer).toLocaleString(locale)} km` : 'Neconfigurat'}</strong></div>
           <div className="ac-oil-detail"><span><Droplet size={16}/> Ulei utilizat</span><strong>{lastOil?.parts?.match(/(?:^|\\n)\\[ac:tipUlei\\]:\\s*([^\\n]+)/)?.[1] || 'Neconfigurat'}</strong></div>
           <button type="button" className="ac-premium-primary" onClick={() => navigate('Întreținere')}>Vezi istoricul intervențiilor <ArrowRight size={16}/></button>
         </section>
@@ -189,7 +194,7 @@ export function GarageHome({
           <img className="ac-premium-card-art" src="/images/autocare-tools-premium.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
           <div className="ac-premium-section-heading"><h3><span className="ac-summary-icon"><Wrench size={22}/></span> Ultimele intervenții</h3><button type="button" onClick={() => navigate('Întreținere')}>Vezi toate <ArrowRight size={15}/></button></div>
           {[...home.services].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3).map(r =>
-            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wrench size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.odometer === null ? '—' : `${r.odometer.toLocaleString('ro-RO')} km`}</em></button>
+            <button type="button" className="ac-premium-list-row" key={r.id} onClick={() => open(r)}><Wrench size={19}/><span><strong>{r.category || r.title}</strong><small>{date(r.date)}</small></span><em>{r.odometer === null ? '—' : `${r.odometer.toLocaleString(locale)} km`}</em></button>
           )}
           {!home.services.length && <p className="ac-premium-empty">Nu ai înregistrat încă intervenții.</p>}
         </section>
@@ -249,7 +254,7 @@ export function GarageHome({
           </div>
           <div className="autocare-garage-bottom">
             <div className="autocare-garage-metrics">
-              {car ? <><span><strong>{car.odometer.toLocaleString('ro-RO')} km</strong><small>Kilometraj</small></span><span><strong>{car.fuel || '—'}</strong><small>Combustibil</small></span></> : <span><strong>Totul pregătit</strong><small>Adaugă prima mașină</small></span>}
+              {car ? <><span><strong>{car.odometer.toLocaleString(locale)} km</strong><small>Kilometraj</small></span><span><strong>{car.fuel || '—'}</strong><small>Combustibil</small></span></> : <span><strong>Totul pregătit</strong><small>Adaugă prima mașină</small></span>}
             </div>
             <button onClick={() => car ? navigate('Garaj') : add('vehicle')}>{car ? 'Deschide garajul' : 'Adaugă mașină'} <ArrowUpRight size={16}/></button>
           </div>
@@ -463,7 +468,7 @@ export function GarageHome({
                     </h3>
                     <div className="between">
                       <span className="plate">{v.plate}</span>
-                      <span className="small muted">{v.odometer.toLocaleString('ro-RO')} km</span>
+                      <span className="small muted">{v.odometer.toLocaleString(locale)} km</span>
                     </div>
                   </div>
                 </button>
@@ -570,7 +575,11 @@ export function GarageHome({
   );
 }
 export function VehicleJournal({ data, open }: { data: Data; open: (record: Entry) => void }) {
-  const [car, setCar] = useState(''),
+
+  const locale=useApplicationLocale();
+  const date=(value:string|null)=>formatDate(value,locale);
+  const money=(value:number)=>formatMoney(value,locale);
+const [car, setCar] = useState(''),
     [kind, setKind] = useState(''),
     [from, setFrom] = useState(''),
     [to, setTo] = useState('');
@@ -635,7 +644,7 @@ export function VehicleJournal({ data, open }: { data: Data; open: (record: Entr
                     {v?.brand} {v?.model} · {v?.plate}
                   </span>
                   <span className="small">
-                    {r.odometer != null ? r.odometer.toLocaleString('ro-RO') + ' km' : ''}
+                    {r.odometer != null ? r.odometer.toLocaleString(locale) + ' km' : ''}
                     {r.provider ? ' · ' + r.provider : ''}
                   </span>
                   {r.notes && <span className="small muted">{r.notes}</span>}
@@ -668,7 +677,11 @@ export function VehicleSheet({
   open: (record: Entry) => void;
   edit: () => void;
 }) {
-  const v = data.vehicles.find((v) => v.id === id);
+
+  const locale=useApplicationLocale();
+  const date=(value:string|null)=>formatDate(value,locale);
+  const money=(value:number)=>formatMoney(value,locale);
+const v = data.vehicles.find((v) => v.id === id);
   if (!v) return null;
   const entries = data.records.filter((r) => r.vehicleId === id);
   const active = entries.filter((r) => !r.cancelled);
@@ -700,7 +713,7 @@ export function VehicleSheet({
       <div className="stats">
         <div className="card">
           <span className="micro">Kilometraj actual</span>
-          <h3>{v.odometer.toLocaleString('ro-RO')} km</h3>
+          <h3>{v.odometer.toLocaleString(locale)} km</h3>
         </div>
         <div className="card">
           <span className="micro">Cost total înregistrat</span>
@@ -725,7 +738,7 @@ export function VehicleSheet({
               <span>
                 {date(r.date)} · {r.title}
               </span>
-              <strong>{r.odometer?.toLocaleString('ro-RO')} km</strong>
+              <strong>{r.odometer?.toLocaleString(locale)} km</strong>
             </div>
           ))
         ) : (
@@ -788,6 +801,9 @@ export function VehicleSheet({
 }
 
 export function ReminderInbox({ data, open }: { data: Data; open: (record: Entry) => void }) {
+  const locale=useApplicationLocale();
+  const date=(value:string|null)=>formatDate(value,locale);
+  const money=(value:number)=>formatMoney(value,locale);
   const [view, setView] = useState('upcoming');
   const rows = data.records
     .filter(

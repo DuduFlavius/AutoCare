@@ -1,4 +1,6 @@
 'use client';
+import {translateApplicationCopy} from '@/lib/application-language';
+import {useApplicationLocale} from './application-locale';
 import { useEffect, useState, useRef, type FormEvent } from 'react';
 import {
   LayoutDashboard,
@@ -39,8 +41,8 @@ const nav = [
   ['Mail Center', Mail],
   ['Setări administrative', Settings],
 ] as const;
-const money = (b: number) =>
-  new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(b / 100);
+const formatMoney = (b: number,locale:string) =>
+  new Intl.NumberFormat(locale, { style: 'currency', currency: 'RON' }).format(b / 100);
 const labels: Record<string, string> = {
   founder: 'Fondator',
   admin: 'Administrator',
@@ -94,7 +96,10 @@ function Pagination({
   );
 }
 export default function FounderPanel({ initial, name }: { initial: Overview; name: string }) {
-  const [tab, setTab] = useState('Roluri și permisiuni'),
+
+  const locale=useApplicationLocale();
+  const money=(b:number)=>formatMoney(b,locale);
+const [tab, setTab] = useState('Roluri și permisiuni'),
     [overview, setOverview] = useState(initial),
     [users, setUsers] = useState<UsersData | null>(null),
     [audit, setAudit] = useState<Audit | null>(null),
@@ -193,7 +198,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
           AutoCare <small>CONTROL</small>
         </a>
         <div className="founder-owner">
-          <span className="founder-owner-dot" /> ESPAȚIUL FONDATORULUI
+          <span className="founder-owner-dot" /> SPAȚIUL FONDATORULUI
         </div>
         <nav aria-label="Panou Fondator">
           {nav.map(([label, Icon]) => (
@@ -292,7 +297,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                 {overview.revenues.length ? (
                   overview.revenues.map((r) => (
                     <div className="founder-revenue" key={r.currency}>
-                      {new Intl.NumberFormat('ro-RO', {
+                      {new Intl.NumberFormat(locale, {
                         style: 'currency',
                         currency: r.currency.toUpperCase(),
                       }).format(r.total / 100)}
@@ -357,7 +362,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                     const values = new FormData(form);
                     const email = String(values.get('email'));
                     const nextRole = String(values.get('teamRole'));
-                    if (!window.confirm(`Acorzi rolul ${labels[nextRole]} contului ${email}?`))
+                    if (!window.confirm(translateApplicationCopy(`Acorzi rolul ${labels[nextRole]} contului ${email}?`,locale==='ro-RO'?'ro':'en')))
                       return;
                     void act(async () => {
                       await api('team', 'POST', { email, role: nextRole, confirm: true });
@@ -493,7 +498,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                                         : user.premiumExpiresAt
                                           ? 'Până la ' +
                                             new Date(user.premiumExpiresAt).toLocaleDateString(
-                                              'ro-RO',
+                                              locale,
                                             )
                                           : ''}
                                     </span>
@@ -578,7 +583,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                             ? 'Fără dată de expirare'
                             : detail.access.expiresAt
                               ? 'Expiră la ' +
-                                new Date(detail.access.expiresAt).toLocaleDateString('ro-RO')
+                                new Date(detail.access.expiresAt).toLocaleDateString(locale)
                               : ''}
                         </strong>
                       )}
@@ -598,7 +603,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                         const f = new FormData(e.currentTarget);
                         const next = String(f.get('role'));
                         if (
-                          window.confirm(`Schimbi rolul lui ${selected.name} în ${labels[next]}?`)
+                          window.confirm(translateApplicationCopy(`Schimbi rolul lui ${selected.name} în ${labels[next]}?`,locale==='ro-RO'?'ro':'en'))
                         )
                           void act(
                             () =>
@@ -633,7 +638,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                           onClick={() => {
                             if (
                               window.confirm(
-                                `Revoci accesul de ${labels[selected.role]} pentru ${selected.name}? Contul va rămâne Client.`,
+                                translateApplicationCopy(`Revoci accesul de ${labels[selected.role]} pentru ${selected.name}? Contul va rămâne Client.`,locale==='ro-RO'?'ro':'en'),
                               )
                             )
                               void act(
@@ -664,7 +669,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                             : { months: Number(duration) };
                       if (
                         duration === 'forever' &&
-                        !window.confirm('Acorzi explicit Premium fără dată de expirare?')
+                        !window.confirm(translateApplicationCopy('Acorzi explicit Premium fără dată de expirare?',locale==='ro-RO'?'ro':'en'))
                       )
                         return;
                       void act(
@@ -726,7 +731,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                     onClick={() => {
                       if (
                         window.confirm(
-                          'Revoci tot accesul Premium acordat manual? Abonamentul plătit, dacă există, rămâne neschimbat.',
+                          translateApplicationCopy('Revoci tot accesul Premium acordat manual? Abonamentul plătit, dacă există, rămâne neschimbat.',locale==='ro-RO'?'ro':'en'),
                         )
                       )
                         void act(
@@ -752,9 +757,9 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                                   : 'Acordat'}
                             </strong>
                             <span>
-                              {new Date(g.grantedAt).toLocaleDateString('ro-RO')} →{' '}
+                              {new Date(g.grantedAt).toLocaleDateString(locale)} →{' '}
                               {g.expiresAt
-                                ? new Date(g.expiresAt).toLocaleDateString('ro-RO')
+                                ? new Date(g.expiresAt).toLocaleDateString(locale)
                                 : 'Fără expirare'}
                             </span>
                             {g.note && <p>{g.note}</p>}
@@ -766,7 +771,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                       <h3>Abonament plătit</h3>
                       <p className="small muted">
                         {detail.paid
-                          ? `${detail.paid.status} · ${detail.paid.periodEnd ? new Date(detail.paid.periodEnd).toLocaleDateString('ro-RO') : 'fără termen'}`
+                          ? `${detail.paid.status} · ${detail.paid.periodEnd ? new Date(detail.paid.periodEnd).toLocaleDateString(locale) : 'fără termen'}`
                           : 'Niciun abonament plătit.'}
                       </p>
                       <h3>Facturi confirmate / test</h3>
@@ -787,9 +792,9 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                       onClick={() => {
                         if (
                           window.confirm(
-                            selected.suspendedAt
+                            translateApplicationCopy(selected.suspendedAt
                               ? 'Reactivezi contul?'
-                              : 'Suspendarea deconectează utilizatorul și îi oprește accesul. Continui?',
+                              : 'Suspendarea deconectează utilizatorul și îi oprește accesul. Continui?',locale==='ro-RO'?'ro':'en'),
                           )
                         )
                           void act(
@@ -823,7 +828,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                 const f = new FormData(e.currentTarget);
                 if (
                   !window.confirm(
-                    'Actualizezi prețurile pentru abonamentele noi? Abonamentele existente nu vor fi modificate automat.',
+                    translateApplicationCopy('Actualizezi prețurile pentru abonamentele noi? Abonamentele existente nu vor fi modificate automat.',locale==='ro-RO'?'ro':'en'),
                   )
                 )
                   return;
@@ -888,7 +893,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                 Economie:{' '}
                 <strong>
                   {money(saving.savingBani)} ·{' '}
-                  {saving.savingPercent.toLocaleString('ro-RO', { maximumFractionDigits: 1 })}%
+                  {saving.savingPercent.toLocaleString(locale, { maximumFractionDigits: 1 })}%
                 </strong>
               </p>
               <p className="micro">
@@ -931,7 +936,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
                     <tbody>
                       {audit.rows.map((row) => (
                         <tr key={row.id}>
-                          <td>{new Date(row.createdAt).toLocaleString('ro-RO')}</td>
+                          <td>{new Date(row.createdAt).toLocaleString(locale)}</td>
                           <td>{row.action}</td>
                           <td>{row.actorId || 'Sistem'}</td>
                           <td>{row.target}</td>

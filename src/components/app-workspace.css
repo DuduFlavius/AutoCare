@@ -58,4 +58,10 @@
 .app-shell.ac-workspace>.autocare-mobile-dock>button :is(span,svg){color:inherit!important;opacity:1!important;-webkit-text-fill-color:inherit!important}
 .app-shell.ac-workspace>.autocare-mobile-dock>button span{font-size:11px!important;font-weight:700!important;letter-spacing:.1px!important}
 .app-shell.ac-workspace>.autocare-mobile-dock>button:focus-visible{outline:2px solid #a9d0ff!important;outline-offset:-2px!important}
+/* Mileage reminder action stays readable over legacy link styles. */
+.app-shell.ac-workspace .ac-smartdrive-history button.ac-mileage-reading-action{background:#245fa9!important;background-image:none!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:1px solid #245fa9!important;opacity:1!important;min-height:46px!important;padding:12px 18px!important;border-radius:11px!important;font-weight:750!important;text-decoration:none!important;box-shadow:0 3px 10px #124ba622!important;transition:background .15s}
+.app-shell.ac-workspace .ac-smartdrive-history button.ac-mileage-reading-action:hover{background:#194d8d!important;border-color:#194d8d!important}
+.app-shell.ac-workspace .ac-smartdrive-history button.ac-mileage-reading-action:focus-visible{outline:3px solid #99bff0!important;outline-offset:3px!important}
+@media(max-width:560px){.app-shell.ac-workspace .ac-smartdrive-history button.ac-mileage-reading-action{width:100%!important}}
+@container workspace-preview (max-width:560px){.app-shell.ac-workspace .ac-smartdrive-history button.ac-mileage-reading-action{width:100%!important}}
 }

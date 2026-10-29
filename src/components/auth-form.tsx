@@ -1,10 +1,13 @@
 'use client';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import SiteLanguage from './site-language';
 import { ShieldCheck, Files, Wrench } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { authErrorMessage } from '@/lib/auth-messages';
 export function AuthForm({ mode }: { mode: string }) {
+  const [language,setLanguage]=useState<'ro'|'en'>('ro');
+  useEffect(()=>{try{if(localStorage.getItem('autocare-language')==='en')setLanguage('en');}catch{/* Preferences still work without storage. */}},[]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -53,6 +56,7 @@ export function AuthForm({ mode }: { mode: string }) {
   }
   return (
     <div className="auth-layout">
+      <SiteLanguage language={language}/>
       <aside className="auth-editorial">
         <img src="/design-car.jpg" alt="Fotografie auto de ambianță" />
         <div className="auth-editorial-content">
@@ -84,6 +88,7 @@ export function AuthForm({ mode }: { mode: string }) {
         <small className="auth-image-caption">Fotografie de ambianță</small>
       </aside>
       <div className="auth-box">
+        <div style={{display:'flex',justifyContent:'flex-end',marginBottom:18}} data-workspace-ui><label style={{fontSize:12,color:'#47607f'}}>{language==='en'?'Language':'Limbă'} <select aria-label={language==='en'?'Language':'Limbă'} value={language} onChange={event=>{const next=event.target.value==='en'?'en':'ro';setLanguage(next);try{localStorage.setItem('autocare-language',next);}catch{/* Optional preference persistence. */}}} style={{minHeight:40,padding:'8px 12px',border:'1px solid #d2deed',borderRadius:9,background:'#fff',color:'#193b68'}}><option value="ro">Română</option><option value="en">English</option></select></label></div>
         <p className="eyebrow">GARAJUL TĂU DIGITAL</p>
         <h1>
           {signup

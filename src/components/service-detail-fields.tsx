@@ -27,7 +27,7 @@ export default function ServiceDetailFields({category,parts}:{category:string;pa
  const [filters,setFilters]=useState(()=>Math.max(1,...Object.keys(saved).filter(x=>/^filtru\d+Tip$/.test(x)).map(x=>Number(x.match(/\d+/)?.[0]||0)+1)));
  if(!config)return null;
  const render=(f:Field)=> <label key={f.key}>{f.label}{f.unit?' · '+f.unit:''}
- {f.type==='select'?<select name={'ac_'+f.key} defaultValue={saved[f.key]||''}><option value="">Alege (opțional)</option>{f.options?.map(x=><option key={x}>{x}</option>)}</select>
+ {f.type==='select'?<select name={'ac_'+f.key} defaultValue={saved[f.key]||''}><option value="">Alege (opțional)</option>{f.options?.map(x=><option key={x} value={x}>{x}</option>)}</select>
  :f.type==='textarea'?<textarea name={'ac_'+f.key} defaultValue={saved[f.key]||''} maxLength={800} rows={2}/>
  :<input name={'ac_'+f.key} type={f.type||'text'} step={f.type==='number'?'0.01':undefined} min={f.type==='number'?0:undefined} defaultValue={saved[f.key]||''} placeholder={f.placeholder||'Opțional'}/>}</label>;
  return <section className="ac-service-details" aria-label={config.heading}>

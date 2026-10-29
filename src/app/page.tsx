@@ -1,3 +1,4 @@
+import './product-intro.css';
 import Link from 'next/link';
 import {
   ShieldCheck,
@@ -51,27 +52,27 @@ export default function Home() {
               </Link>
             </div>
             <div className="micro inline">
-              <Check size={15} /> O mașină gratuit · Fără card bancar
+              <Check size={15} /> O mașină gratuită · Fără card bancar
             </div>
           </div>
-          <div className="cockpit">
+          <div className="cockpit ac-product-intro">
             <div className="between">
               <span className="eyebrow">UN LOC PENTRU MAȘINA TA</span>
               <CarFront size={22} className="accent" />
             </div>
             <img
-              className="editorial-car"
-              src="/images/aplicatie-intretinere-auto.webp"
-              srcSet="/images/aplicatie-intretinere-auto-640.webp 640w, /images/aplicatie-intretinere-auto.webp 1280w"
+              className="editorial-car ac-product-intro-art"
+              src="/images/autocare-app-premium.webp"
+              srcSet="/images/autocare-app-premium-mobile.webp 768w, /images/autocare-app-premium.webp 1400w"
               sizes="(max-width: 760px) 92vw, 48vw"
-              width={1280}
-              height={854}
+              width={1672}
+              height={940}
               fetchPriority="high"
               loading="eager"
-              alt="Automobil de prezentare pentru garajul digital AutoCare"
+              alt="Ilustrație AutoCare cu documente, calendar și scut cu bifă"
             />
             <h3>Mai multă liniște, la fiecare drum.</h3>
-            <p className="small muted">Ilustrație a funcțiilor. Garajul tău începe gol.</p>
+            <p className="small muted">Documente, termene și istoric. În ordine, într-un singur loc.</p>
             <div className="list">
               <div className="list-row">
                 <span className="list-icon">
@@ -219,7 +220,7 @@ export default function Home() {
               applicationCategory: 'LifestyleApplication',
               operatingSystem: 'Web',
               inLanguage: 'ro-RO',
-              image: origin() + '/images/aplicatie-intretinere-auto.webp',
+              image: origin() + '/images/autocare-app-premium.webp',
               offers: {
                 '@type': 'Offer',
                 price: '0',
@@ -232,7 +233,7 @@ export default function Home() {
               '@type': 'WebPage',
               url: origin(),
               name: 'AutoCare – Aplicație pentru Întreținerea și Gestionarea Mașinii',
-              primaryImageOfPage: origin() + '/images/aplicatie-intretinere-auto.webp',
+              primaryImageOfPage: origin() + '/images/autocare-app-premium.webp',
             },
           ],
         }}

@@ -1,4 +1,5 @@
 'use client';
+import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
 import { Mail, Eye, Send, Plus, RefreshCw } from 'lucide-react';
 import type { mailCenterOverview, campaignDetail } from '@/lib/mail-center';
@@ -29,7 +30,9 @@ const labels: Record<string, string> = {
   completed: 'Procesat',
 };
 export default function MailCenter() {
-  const [approvalConfirmed, setApprovalConfirmed] = useState(false);
+
+  const locale=useApplicationLocale();
+const [approvalConfirmed, setApprovalConfirmed] = useState(false);
   const [gmailStatus, setGmailStatus] = useState<{connected: boolean; testedAt?: string | null; reconnectRequired?: boolean} | null>(null);
   const [data, setData] = useState<Overview | null>(null),
     [template, setTemplate] = useState<EmailTemplate>('administrative');
@@ -472,7 +475,7 @@ export default function MailCenter() {
           Înregistrează aprobarea Fondatorului
         </button>
         {data.automation.approvedAt && (
-          <p>Ultima aprobare: {new Date(data.automation.approvedAt).toLocaleString('ro-RO')}</p>
+          <p>Ultima aprobare: {new Date(data.automation.approvedAt).toLocaleString(locale)}</p>
         )}
       </section>
       <section className="card">
@@ -504,7 +507,7 @@ export default function MailCenter() {
                   <td>
                     {c.subject}
                     <br />
-                    <small>{new Date(c.createdAt).toLocaleString('ro-RO')}</small>
+                    <small>{new Date(c.createdAt).toLocaleString(locale)}</small>
                   </td>
                   <td>
                     {c.category === 'promotional' ? 'Promoțional' : 'Tranzacțional'} /{' '}

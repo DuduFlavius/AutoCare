@@ -1,4 +1,6 @@
 'use client';
+import {translateApplicationCopy} from '@/lib/application-language';
+import {useApplicationLocale} from './application-locale';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   Headset,
@@ -79,7 +81,9 @@ export default function SupportChat({
   role: string;
   preview?: boolean;
 }) {
-  const staff = ['assistant', 'admin', 'founder'].includes(role);
+
+  const locale=useApplicationLocale();
+const staff = ['assistant', 'admin', 'founder'].includes(role);
   const [status, setStatus] = useState('open'),
     [threads, setThreads] = useState<Thread[]>([]),
     [counts, setCounts] = useState<Record<string, number>>({}),
@@ -497,7 +501,7 @@ export default function SupportChat({
                   </button>
                   <div className="support-thread-foot">
                     <time>
-                      {new Date(thread.updatedAt).toLocaleDateString('ro-RO', {
+                      {new Date(thread.updatedAt).toLocaleDateString(locale, {
                         day: 'numeric',
                         month: 'short',
                       })}
@@ -603,7 +607,7 @@ export default function SupportChat({
               {current.status === 'completed' && (
                 <>
                   <button type="button" className="support-session-enter" disabled={busy} onClick={() => void change(current, 'reopen')}><RotateCcw size={17}/> Redeschide</button>
-                  <button type="button" className="support-session-delete" disabled={busy} onClick={() => { if (window.confirm('Muți conversația în coș? Va putea fi restaurată.')) void change(current, 'trash'); }}><Trash2 size={17}/> Șterge</button>
+                  <button type="button" className="support-session-delete" disabled={busy} onClick={() => { if (window.confirm(translateApplicationCopy('Muți conversația în coș? Va putea fi restaurată.',locale==='ro-RO'?'ro':'en'))) void change(current, 'trash'); }}><Trash2 size={17}/> Șterge</button>
                 </>
               )}
               {current.status === 'trashed' && (
@@ -664,7 +668,7 @@ export default function SupportChat({
                   <ShieldCheck size={14} />
                   <span>{message.body}</span>
                   <time>
-                    {new Date(message.createdAt).toLocaleTimeString('ro-RO', {
+                    {new Date(message.createdAt).toLocaleTimeString(locale, {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
@@ -699,7 +703,7 @@ export default function SupportChat({
                         new Date(r.lastReadAt) >= new Date(message.createdAt),
                     ) && <small className="support-read-receipt">Citit</small>}
                   <time>
-                    {new Date(message.createdAt).toLocaleString('ro-RO', {
+                    {new Date(message.createdAt).toLocaleString(locale, {
                       day: 'numeric',
                       month: 'short',
                       hour: '2-digit',
@@ -744,7 +748,7 @@ export default function SupportChat({
                   </button>
                 ) : (
                   <button type="button" disabled={busy || preview} onClick={() => {
-                    if (window.confirm('Muți conversația în coșul de gunoi? O poți restaura ulterior.')) void change(current, 'trash');
+                    if (window.confirm(translateApplicationCopy('Muți conversația în coșul de gunoi? O poți restaura ulterior.',locale==='ro-RO'?'ro':'en'))) void change(current, 'trash');
                   }}>
                     <Trash2 size={15} /> Mută conversația în coș
                   </button>

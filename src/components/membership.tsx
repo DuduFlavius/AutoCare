@@ -1,4 +1,5 @@
 'use client';
+import {useApplicationLocale} from './application-locale';
 import { Check, ArrowUpRight, CreditCard, ShieldCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { savings } from '@/lib/pricing-display';
@@ -18,7 +19,9 @@ export function PriceCards({
   busy?: boolean;
   language?: 'ro' | 'en';
 }) {
-  const s = savings(monthlyBani, annualBani);
+
+  const locale=useApplicationLocale();
+const s = savings(monthlyBani, annualBani);
   const en = language === 'en';
   const euro = (b: number) => new Intl.NumberFormat('en-IE',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(b / 500);
   const price = (b: number) => en ? euro(b) : amount(b);
@@ -84,7 +87,7 @@ export function PriceCards({
           {s.savingBani > 0 ? (
             <>
               {en ? `Save ${euro(s.savingBani)}/year` : `Economisești ${amount(s.savingBani)} lei/an`} ·{' '}
-              {s.savingPercent.toLocaleString('ro-RO', { maximumFractionDigits: 1 })}%
+              {s.savingPercent.toLocaleString(locale, { maximumFractionDigits: 1 })}%
             </>
           ) : (
             (en ? 'One annual payment.' : 'Plată anuală într-o singură tranșă.')
@@ -137,7 +140,9 @@ export default function Membership({
     livemode?: boolean;
   }>;
 }) {
-  return (
+
+  const locale=useApplicationLocale();
+return (
     <div className="membership-workspace">
       <section className="card membership-current">
         <div className="settings-section-title">
@@ -173,9 +178,9 @@ export default function Membership({
                       Math.max(
                         ...data.premiumAccess.manual.map((g) => new Date(g.expiresAt!).getTime()),
                       ),
-                    ).toLocaleDateString('ro-RO')
+                    ).toLocaleDateString(locale)
                   : data.subscription?.periodEnd
-                    ? new Date(data.subscription.periodEnd).toLocaleDateString('ro-RO')
+                    ? new Date(data.subscription.periodEnd).toLocaleDateString(locale)
                     : 'Fără abonament activ'}
             </strong>
           </div>
@@ -228,7 +233,7 @@ export default function Membership({
         {invoices.length ? (
           invoices.map((i) => (
             <div className="list-row" key={i.id}>
-              <span>{new Date(i.createdAt).toLocaleDateString('ro-RO')}</span>
+              <span>{new Date(i.createdAt).toLocaleDateString(locale)}</span>
               <strong>
                 {amount(i.amountBani)} {i.currency.toUpperCase()}
               </strong>

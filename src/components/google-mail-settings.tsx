@@ -1,4 +1,5 @@
 'use client';
+import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
 import { Mail } from 'lucide-react';
 type Status = {
@@ -15,7 +16,9 @@ async function request(action: string, method = 'GET') {
   return result;
 }
 export default function GoogleMailSettings() {
-  const [status, setStatus] = useState<Status | null>(null);
+
+  const locale=useApplicationLocale();
+const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -97,7 +100,7 @@ export default function GoogleMailSettings() {
           </p>
           {!status.configured && <p>Configurarea Gmail pe server este incompletă.</p>}
           {status.testedAt && (
-            <p>Ultimul test trimis: {new Date(status.testedAt).toLocaleString('ro-RO')}</p>
+            <p>Ultimul test trimis: {new Date(status.testedAt).toLocaleString(locale)}</p>
           )}
           <div className="inline">
             <button

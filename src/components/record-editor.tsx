@@ -1,4 +1,5 @@
 'use client';
+import {useApplicationLocale} from './application-locale';
 import { useRef, useState, type FormEvent } from 'react';
 import ServiceDetailFields, { serializeServiceDetails, parseServiceDetails } from './service-detail-fields';
 import { CarFront, Files, Wrench, Paperclip, Check, ChevronDown } from 'lucide-react';
@@ -51,7 +52,9 @@ export default function RecordEditor({
   onCancel: () => void;
   onDirty: (dirty: boolean) => void;
 }) {
-  const cars = data.vehicles.filter((v) => !v.archived || v.id === record?.vehicleId);
+
+  const locale=useApplicationLocale();
+const cars = data.vehicles.filter((v) => !v.archived || v.id === record?.vehicleId);
   const [car, setCar] = useState(
       record?.vehicleId || vehicleId || cars[0]?.id || '',
     ),
@@ -300,7 +303,7 @@ export default function RecordEditor({
               max={10000000}
               defaultValue={record?.odometer ?? ''}
               placeholder={
-                data.vehicles.find((v) => v.id === car)?.odometer.toLocaleString('ro-RO') +
+                data.vehicles.find((v) => v.id === car)?.odometer.toLocaleString(locale) +
                 ' km · ultima valoare'
               }
             />
@@ -455,9 +458,9 @@ export default function RecordEditor({
         <h3>Rezumatul intervenției</h3>
         <div><span>Operațiune</span><strong>{category}</strong></div>
         <div><span>Data</span><strong>{live.date||'Necompletată'}</strong></div>
-        <div><span>Kilometraj</span><strong>{live.km?Number(live.km).toLocaleString('ro-RO')+' km':'Necompletat'}</strong></div>
+        <div><span>Kilometraj</span><strong>{live.km?Number(live.km).toLocaleString(locale)+' km':'Necompletat'}</strong></div>
         <div><span>Cost</span><strong>{unknownCost?'Necunoscut':costEdited?(Number(costParts||0)+Number(costLabor||0)+Number(costOther||0)).toFixed(2)+' RON':live.amount!==''?Number(live.amount).toFixed(2)+' RON':filterCostLive>0?filterCostLive.toFixed(2)+' RON':'Cost necompletat'}</strong></div>
-        <div><span>Următorul termen</span><strong>{live.due|| (live.next?Number(live.next).toLocaleString('ro-RO')+' km':category==='Schimb ulei'&&serviceKmInterval&&live.km?(Number(live.km)+Number(serviceKmInterval)).toLocaleString('ro-RO')+' km':'Nesetat')}</strong></div>
+        <div><span>Următorul termen</span><strong>{live.due|| (live.next?Number(live.next).toLocaleString(locale)+' km':category==='Schimb ulei'&&serviceKmInterval&&live.km?(Number(live.km)+Number(serviceKmInterval)).toLocaleString(locale)+' km':'Nesetat')}</strong></div>
         <div><span>Memento</span><strong>{live.due||live.next||category==='Schimb ulei'&&serviceKmInterval&&live.km?'Termen configurat':'Fără termen configurat'}</strong></div>
       </aside>}
       <footer className="record-form-footer">

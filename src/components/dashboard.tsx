@@ -1,4 +1,6 @@
 'use client';
+import {translateApplicationCopy} from '@/lib/application-language';
+import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
 import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspaceOverview, WorkspacePreferences } from './app-workspace';
 import { normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
@@ -179,6 +181,8 @@ function Dialog({
 function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false }: {
   data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean;
 }) {
+
+  const locale=useApplicationLocale();
   const [editing, setEditing] = useState<string | null>(null);
   useEffect(() => { if (window.location.hash === '#actualizeaza-km' && data.vehicles.length) { setEditing(data.vehicles[0].id); setKm(String(data.vehicles[0].odometer)); setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 150); } }, []);
   const [km, setKm] = useState('');
@@ -188,7 +192,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   useEffect(() => { if (preview) return; let cancelled=false; Promise.all(data.vehicles.filter(v=>!v.archived).map(async v=>{try{const rows=await api('smartdrive/vehicles/'+v.id+'/readings') as {odometer:number;recordedAt:string}[];return [v.id,rows[0]] as const}catch{return [v.id,undefined] as const}})).then(entries=>{if(!cancelled)setLastReadings(Object.fromEntries(entries.filter((e): e is readonly [string,{odometer:number;recordedAt:string}] => e[1] !== undefined))) });return()=>{cancelled=true}; },[preview,data.vehicles.map(v=>v.id+':'+v.odometer).join('|')]);
   const cars = data.vehicles.filter(v => !v.archived);
   const services = data.records.filter(r => r.kind === 'service' && !r.cancelled && r.nextKm != null && Number(r.nextKm) > 0);
-  const fmt = (n: number) => n.toLocaleString('ro-RO') + ' km';
+  const fmt = (n: number) => n.toLocaleString(locale) + ' km';
   async function saveKm(v: Vehicle) {
     const value = Number(km);
     if (!Number.isSafeInteger(value) || value < 0 || value < v.odometer) {
@@ -218,7 +222,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
         <span className="mileage-planner-icon"><Gauge size={27}/></span>
       </div>
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
-      {!mileageOnly && <SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} />}
+      {!mileageOnly && <SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} onUpdateMileage={id=>{const car=cars.find(v=>v.id===id);if(!car)return;setEditing(id);setKm(String(car.odometer));setConfirmedJump(null);requestAnimationFrame(()=>{const input=document.getElementById('ac-mileage-'+id);input?.focus({preventScroll:true});input?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});});}} />}
       {!mileageOnly && <SmartDriveTrip preview={preview} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model }))} />}
       <div className="mileage-planner-grid" id="ac-mileage-editor">
         {cars.map(v => {
@@ -227,8 +231,8 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
             <div className="between"><div><span className="eyebrow">{v.plate}</span><h3>{v.brand} {v.model}</h3></div><CarFront size={28}/></div>
             <div className="mileage-planner-odometer"><span>Kilometraj înregistrat</span><strong>{fmt(v.odometer)}</strong></div>
             {editing === v.id ? <div className="mileage-planner-edit">
-              <label>Kilometraj actual (km)<input type="number" min={v.odometer} step="1" value={km} onChange={e => {setKm(e.target.value);setConfirmedJump(null)}} /></label>
-              {confirmedJump === v.id+':'+Number(km) && <div role="alert" style={{padding:16,border:'1px solid #f0c68b',background:'linear-gradient(125deg,#fffaf0,#fff2dd)',color:'#6e410c',borderRadius:14,margin:'12px 0'}}><strong style={{display:'block',fontSize:16}}>Ești sigur că ai parcurs atât?</strong><p style={{margin:'7px 0'}}>Ai introdus o creștere de <b>{(Number(km)-v.odometer).toLocaleString('ro-RO')} km</b> față de ultima valoare confirmată. Verifică cifra de pe bord înainte de salvare.</p><p style={{fontSize:12,margin:0}}>Poți corecta valoarea în câmpul de mai sus sau confirma înregistrarea. Nu modificăm automat kilometrajul.</p></div>}
+              <label>Kilometraj actual (km)<input id={'ac-mileage-'+v.id} type="number" min={v.odometer} step="1" value={km} onChange={e => {setKm(e.target.value);setConfirmedJump(null)}} /></label>
+              {confirmedJump === v.id+':'+Number(km) && <div role="alert" style={{padding:16,border:'1px solid #f0c68b',background:'linear-gradient(125deg,#fffaf0,#fff2dd)',color:'#6e410c',borderRadius:14,margin:'12px 0'}}><strong style={{display:'block',fontSize:16}}>Ești sigur că ai parcurs atât?</strong><p style={{margin:'7px 0'}}>Ai introdus o creștere de <b>{(Number(km)-v.odometer).toLocaleString(locale)} km</b> față de ultima valoare confirmată. Verifică cifra de pe bord înainte de salvare.</p><p style={{fontSize:12,margin:0}}>Poți corecta valoarea în câmpul de mai sus sau confirma înregistrarea. Nu modificăm automat kilometrajul.</p></div>}
               <button className="primary" disabled={saving} onClick={() => void saveKm(v)}>{saving ? 'Se salvează…' : 'Actualizează km'}</button>
               <button disabled={saving} onClick={() => setEditing(null)}>Anulează</button>
             </div> : <button onClick={() => {setEditing(v.id);setKm(String(v.odometer));setConfirmedJump(null);}}>Actualizează kilometrajul</button>}
@@ -287,6 +291,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     [admin, setAdmin] = useState<any>(null),
     [invoices, setInvoices] = useState<any[]>([]),
     [calendarMonth, setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
+  const locale=language==='en'?'en-GB':'ro-RO';
   useEffect(() => {
     try { if (window.localStorage.getItem('autocare-language') === 'en') {setLanguage('en');setCurrency('EUR');}
       const savedCurrency = window.localStorage.getItem('autocare-currency');
@@ -425,7 +430,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     t=normalizeWorkspaceTab(t);
 
     if (recordSaving) return false;
-    if (recordDirty && !window.confirm('Ai modificări nesalvate. Vrei să le abandonezi?'))
+    if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?',locale==='ro-RO'?'ro':'en')))
       return false;
     workspaceViews.current.set(tab,{filter,query,recordState,categoryFilter,period,showArchived,scroll:window.scrollY});
     const view=workspaceViews.current.get(t);
@@ -546,7 +551,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
   );
   const moneyDisplay = (bani: number): string => currency === 'EUR'
     ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR'}).format(bani / 500)
-    : new Intl.NumberFormat('ro-RO', {style:'currency',currency:'RON'}).format(bani / 100);
+    : new Intl.NumberFormat(locale, {style:'currency',currency:'RON'}).format(bani / 100);
   const exportUrl = (format: string) =>
     '/api/v1/export?' +
     new URLSearchParams(
@@ -558,7 +563,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     if (recordSaving) return;
     if (
       recordDirty &&
-      !window.confirm('Ai modificări nesalvate. Închizi formularul și renunți la ele?')
+      !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Închizi formularul și renunți la ele?',locale==='ro-RO'?'ro':'en'))
     )
       return;
     setRecordDirty(false);
@@ -686,7 +691,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     }, 'Notificările push au fost activate pentru acest browser.');
   }
   return (
-    <div className="app-shell ac-workspace" data-language={language} data-settings-panel={settingsPanel}>
+    <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace" data-language={language} data-settings-panel={settingsPanel}>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
       {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>{if(navigate('Garaj'))setVehicleDetail(id);}} /></Dialog>}
       {menuOpen && (
@@ -717,7 +722,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                 </button>
                 <button type="button" onClick={async () => {
                   if (previewData) return;
-                  if (recordDirty && !window.confirm('Ai modificări nesalvate. Vrei să te deconectezi?')) return;
+                  if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',locale==='ro-RO'?'ro':'en'))) return;
                   try {
                     await authClient.signOut();
                     window.location.assign('/autentificare');
@@ -809,7 +814,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                 if (previewData) return;
                 if (
                   recordDirty &&
-                  !window.confirm('Ai modificări nesalvate. Vrei să te deconectezi?')
+                  !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',locale==='ro-RO'?'ro':'en'))
                 )
                   return;
                 await authClient.signOut();
@@ -891,7 +896,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
             title="Deconectare"
             onClick={async () => {
               if (previewData) return;
-              if (recordDirty && !window.confirm('Ai modificări nesalvate. Vrei să te deconectezi?')) return;
+              if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',locale==='ro-RO'?'ro':'en'))) return;
               await authClient.signOut();
               window.location.assign('/autentificare');
             }}
@@ -1117,7 +1122,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                           <div className="between">
                             <span className="plate">{v.plate}</span>
                             <span className="small muted">
-                              {v.odometer.toLocaleString('ro-RO')} km
+                              {v.odometer.toLocaleString(locale)} km
                             </span>
                           </div>
                           <p className="small muted" style={{ marginTop: 15 }}>
@@ -1189,7 +1194,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                 className="danger"
                                 disabled={busy}
                                 onClick={() => {
-                                  if (confirm('Arhivezi mașina? Alertele asociate se opresc.'))
+                                  if (confirm(translateApplicationCopy('Arhivezi mașina? Alertele asociate se opresc.',locale==='ro-RO'?'ro':'en')))
                                     act(() => api('vehicles/' + v.id, 'DELETE'));
                                 }}
                               >
@@ -1250,7 +1255,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                         'Ultimul kilometraj',
                         maintenanceStats.lastOdometer === null
                           ? 'Necompletat'
-                          : maintenanceStats.lastOdometer.toLocaleString('ro-RO') + ' km',
+                          : maintenanceStats.lastOdometer.toLocaleString(locale) + ' km',
                       ],
                     ].map(([label, value]) => (
                       <section key={label} className="card stat ac-premium-service-stat">
@@ -1419,7 +1424,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                 <span className="micro">
                                   {r.expiresAt || 'Dată nestabilită'}
                                   {r.nextKm != null
-                                    ? ' · ' + r.nextKm.toLocaleString('ro-RO') + ' km'
+                                    ? ' · ' + r.nextKm.toLocaleString(locale) + ' km'
                                     : ''}
                                 </span>
                               </span>
@@ -1456,8 +1461,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                       </p>
                       <p className="small">
                         {data.summary.costPerKm == null
-                          ? 'Cost/km indisponibil: sunt necesare minimum două citiri distincte.'
-                          : `Cost/km estimativ: ${data.summary.costPerKm.toFixed(2)} lei (acoperire parțială a datelor)`}
+                          ? (language==='en'?'Cost per km unavailable: at least two distinct readings are required.':'Cost/km indisponibil: sunt necesare minimum două citiri distincte.')
+                          : (language==='en'?`Estimated cost per km: ${moneyDisplay(data.summary.costPerKm*100)} (partial data coverage)`:`Cost/km estimativ: ${moneyDisplay(data.summary.costPerKm*100)} (acoperire parțială a datelor)`)}
                       </p>
                       {Object.entries(data.summary.categories).map(([category, value]) => (
                         <button
@@ -1614,7 +1619,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                         className="close danger"
                                         aria-label={'Șterge ' + f.name}
                                         onClick={() => {
-                                          if (confirm('Ștergi definitiv atașamentul?'))
+                                          if (confirm(translateApplicationCopy('Ștergi definitiv atașamentul?',locale==='ro-RO'?'ro':'en')))
                                             act(() => api('files/' + f.id, 'DELETE'));
                                         }}
                                       >
@@ -1648,7 +1653,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                     </strong>
                                     <div className="small muted">
                                       {r.odometer != null
-                                        ? r.odometer.toLocaleString('ro-RO') + ' km'
+                                        ? r.odometer.toLocaleString(locale) + ' km'
                                         : 'Kilometraj necompletat'}
                                     </div>
                                   </>
@@ -1723,7 +1728,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                         onClick={() => {
                                           if (
                                             confirm(
-                                              'Arhivezi această înregistrare și oprești alertele?',
+                                              translateApplicationCopy('Arhivezi această înregistrare și oprești alertele?',locale==='ro-RO'?'ro':'en'),
                                             )
                                           )
                                             act(() => api('records/' + r.id, 'DELETE'));
@@ -2199,7 +2204,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
             {history.length ? (
               history.map((h) => (
                 <section className="card" key={h.id}>
-                  <p className="eyebrow">{new Date(h.createdAt).toLocaleString('ro-RO')}</p>
+                  <p className="eyebrow">{new Date(h.createdAt).toLocaleString(locale)}</p>
                   <dl>
                     {Object.entries(h.snapshot)
                       .filter(([k]) => !['id', 'userId', 'vehicleId'].includes(k))
@@ -2338,7 +2343,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                     Combustibil
                     <select name="fuel" defaultValue={modal.vehicle?.fuel || 'Benzină'}>
                       {['Benzină', 'Diesel', 'Hibrid', 'Electric', 'GPL', 'Altul'].map((f) => (
-                        <option key={f}>{f}</option>
+                        <option key={f} value={f}>{f}</option>
                       ))}
                     </select>
                   </label>
@@ -2391,13 +2396,15 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
           </Dialog>
         )}
       </main>
-    </div>
+    </div></ApplicationLanguageProvider>
   );
 }
 function ExpenseChart({ data, currency }: { data: Data; currency: 'RON' | 'EUR' }) {
-  const moneyDisplay = (bani: number): string => currency === 'EUR'
+
+  const locale=useApplicationLocale();
+const moneyDisplay = (bani: number): string => currency === 'EUR'
     ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR'}).format(bani / 500)
-    : new Intl.NumberFormat('ro-RO', {style:'currency',currency:'RON'}).format(bani / 100);
+    : new Intl.NumberFormat(locale, {style:'currency',currency:'RON'}).format(bani / 100);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const max = Math.max(1, ...data.summary.monthly.map((m) => m.bani));
   return (
@@ -2448,13 +2455,14 @@ function Calendar({
   rows: RecordItem[];
   open: (record: RecordItem) => void;
 }) {
+  const language=useApplicationLanguage();
   if (!/^\d{4}-\d{2}$/.test(month)) return null;
   const [y, m] = month.split('-').map(Number),
     start = (new Date(y, m - 1, 1).getDay() + 6) % 7,
     days = new Date(y, m, 0).getDate();
   return (
     <div className="calendar">
-      {['Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ', 'Du'].map((d) => (
+      {(language==='en'?['Mon','Tue','Wed','Thu','Fri','Sat','Sun']:['Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ', 'Du']).map((d) => (
         <div className="muted small" key={d}>
           {d}
         </div>

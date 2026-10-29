@@ -1,276 +1,27 @@
 'use client';
 import {useEffect} from 'react';
+import {translateApplicationCopy} from '@/lib/application-language';
 import {translationSource} from '@/lib/workspace';
-const dictionary:Record<string,string>={
-'Acasă':'Home','Garaj personal':'Personal garage','Garajul meu':'My garage','Garaj':'Garage','Documente':'Documents','Calendar':'Calendar','Intervenții':'Maintenance','Întreținere':'Maintenance','Plan întreținere':'Maintenance planner','SmartDrive GPS':'SmartDrive GPS','Kilometraj':'Mileage','Cheltuieli':'Expenses','Centru de suport':'Support center','Istoric auto':'Vehicle history','Notificări':'Notifications','Premium':'Premium','Setări':'Settings','Abonament':'Subscription','Administrare':'Administration','Deconectare':'Sign out','Deschide meniul':'Open menu','Activează locația':'Enable location','Adaugă o mașină':'Add a vehicle','Adaugă prima mașină':'Add your first vehicle','Mașina ta':'Your vehicle','MAȘINA TA':'YOUR VEHICLE','Activă':'Active','Activ':'Active','Benzină':'Petrol','Motorină':'Diesel','Electric':'Electric','Hibrid':'Hybrid','Deschide garajul':'Open garage','Kilometraj actual':'Current mileage','Kilometraj înregistrat':'Recorded mileage','Documente înregistrate':'Saved documents','Vezi detalii':'View details','Următorul schimb de ulei':'Next oil change','URMĂTORUL SCHIMB DE ULEI':'NEXT OIL CHANGE','URMĂTORUL TERMEN':'NEXT DEADLINE','Nu există un termen viitor':'No upcoming deadline','Documente în atenție':'Documents needing attention','Termene prioritare':'Priority deadlines','Vezi calendarul':'View calendar','Vezi toate':'View all','Documente care expiră':'Expiring documents','Ultimele intervenții':'Recent maintenance','Cheltuieli recente':'Recent expenses','Ultimul schimb':'Last change','Interval setat':'Configured interval','Ulei utilizat':'Oil used','Neconfigurat':'Not configured','Vezi istoricul intervențiilor':'View maintenance history','Plan gratuit':'Free plan','ACCESUL TĂU ACTUAL':'YOUR CURRENT ACCESS','Facturare recurentă lunară':'Monthly recurring billing','Facturare recurentă anuală':'Annual recurring billing','Alege lunar':'Choose monthly','Alege anual':'Choose annual','Vezi în cont':'View in account','PREMIUM LUNAR':'MONTHLY PREMIUM','PREMIUM ANUAL':'ANNUAL PREMIUM','PREMIUM 3 LUNI':'3-MONTH PREMIUM','CEL MAI BUN RAPORT PREȚ–BENEFICII':'BEST VALUE','Flexibil, lună de lună.':'Flexible, month to month.','Mai multă valoare.':'More value.','Un trimestru fără griji.':'Three months of peace of mind.','Toate funcțiile Premium':'All Premium features','Gestionare din portalul de facturare':'Manage in billing portal','Următoarea întreținere':'Upcoming maintenance','Kilometrajul mașinilor':'Vehicle mileage','Actualizează kilometrajul':'Update mileage','Actualizează km':'Update mileage','Kilometraj actual (km)':'Current mileage (km)','Anulează':'Cancel','Se salvează…':'Saving…','AUTOCARE · PLANIFICARE':'AUTOCARE · PLANNING','Ești sigur că ai parcurs atât?':'Are you sure you drove this far?','Introdu km acum':'Enter mileage now','Următoarea citire de kilometraj':'Next mileage reading','Revizie scadentă':'Maintenance due','Timp necunoscut':'Time unknown','Estimare timp până la revizie':'Estimated time until maintenance','Se calculează…':'Calculating…','km rămași':'km remaining','Înregistrează intervenția':'Record maintenance','Adaugă document':'Add document','Salvează':'Save','Editează':'Edit','Șterge':'Delete','Caută':'Search','Închide':'Close','Confirmă':'Confirm','Profil':'Profile','Preferințe':'Preferences','Ajutor':'Help','Autentificare':'Sign in','Înregistrare':'Sign up','Parolă':'Password','Email':'Email','Nume':'Name','Data':'Date','Status':'Status','Descriere':'Description','Observații':'Notes','Sumă':'Amount','Preț':'Price','Valoare':'Value','Încarcă':'Upload','Trimite':'Send','Înapoi':'Back','Continuă':'Continue','Detalii':'Details','Istoric':'History','Atenție':'Attention','ESENȚIAL':'ESSENTIAL','ORGANIZARE':'ORGANIZATION','CONT ȘI AJUTOR':'ACCOUNT & HELP'};
-Object.assign(dictionary,{
-"Bună,":"Hello,",
-"Acasă, în garaj.":"Home, in your garage.",
-"Total despre mașinile tale, într-un singur loc.":"Everything about your vehicles, all in one place.",
-"Mașinile tale, organizate într-un singur loc":"Your vehicles, all in one place",
-"Documente, kilometraj și întreținere — informații din contul tău.":"Documents, mileage and maintenance — all your vehicle information.",
-"GARAJUL MEU":"MY GARAGE",
-"mașini active":"active vehicles",
-"mașină activă":"active vehicle",
-"Mai ai o mașină?":"Have another vehicle?",
-"Completează datele și gestionează totul dintr-un singur loc.":"Add your vehicle and manage everything in one place.",
-"Vezi mașina":"View vehicle",
-"Arhivează":"Archive",
-"De completat":"Not set",
-"Documente active":"Active documents",
-"Total documente":"Total documents",
-"În termen":"Valid",
-"Expiră în 30 de zile":"Expiring in 30 days",
-"Expirate":"Expired",
-"Caută titlu, categorie sau service...":"Search title, category or workshop...",
-"Filtre și exporturi":"Filters and exports",
-"Nu ai documente încă. Adaugă primul act al mașinii.":"No documents yet. Add your first vehicle document.",
-"Adaugă primul document":"Add your first document",
-"Lună":"Month",
-"Listă":"List",
-"Toate mașinile":"All vehicles",
-"Nu ai termene înregistrate în luna selectată.":"No deadlines recorded for the selected month.",
-"Scadențele documentelor și lucrărilor active":"Upcoming document and maintenance deadlines",
-"Cost înregistrat":"Recorded cost",
-"Operațiuni":"Operations",
-"Următoarea intervenție":"Next maintenance",
-"Ultimul kilometraj":"Last recorded mileage",
-"Neplanificată":"Not scheduled",
-"ÎNGRIJIRE LA TIMP":"ON-TIME CARE",
-"Următoarele intervenții":"Upcoming maintenance",
-"Dată nestabilită":"Date not set",
-"Fără scadență":"No due date",
-"Următorul prag:":"Next threshold:",
-"Costurile sunt cele înregistrate de tine.":"Costs are based on your records.",
-"Cronologie":"Timeline",
-"Tabel":"Table",
-"Atașează document":"Attach document",
-"Adaugă intervenție":"Add maintenance",
-"Înregistrează o nouă intervenție":"Record new maintenance",
-"Adaugă cheltuială":"Add expense",
-"Notează o nouă cheltuială":"Record a new expense",
-"Urmărește și înregistrează trasee":"Track and record trips",
-"Acțiuni rapide":"Quick actions",
-"Schimb ulei":"Oil change",
-"Total luna curentă":"Current month total",
-"Nu există un termen viitor":"No upcoming deadline",
-"Înregistrează intervenții pentru a vedea următoarele termene.":"Record maintenance to see upcoming deadlines.",
-"Nu ai termene înregistrate":"No deadlines recorded",
-"Înapoi la garaj":"Back to garage",
-"Documente care expiră":"Expiring documents",
-"Ultimele intervenții":"Recent maintenance",
-"Cheltuieli recente":"Recent expenses",
-"Următoarea citire de kilometraj":"Next mileage reading",
-"Introdu kilometrajul":"Enter mileage",
-"Actualizează citirea":"Update reading",
-"Setări notificări":"Notification settings",
-"Setări cont":"Account settings",
-"Creează cont":"Create account",
-"Autentifică-te":"Sign in",
-"Încarcă document":"Upload document",
-"Salvează modificările":"Save changes",
-"Șterge documentul":"Delete document",
-"Niciun rezultat":"No results",
-"Încarcă mai multe":"Load more",
-"Toate":"All",
-"Da":"Yes",
-"Nu":"No",
-"Gratuit":"Free",
-"lunar":"monthly",
-"anual":"yearly",
-"lună":"month",
-"an":"year"
-});
-Object.assign(dictionary,{
-"Total despre mașinile tale, într-un singur loc.":"All your vehicle information in one place.",
-"Adaugă lucrare":"Add maintenance",
-"Toate activitățile":"All activities",
-"De la":"From",
-"Până la":"To",
-"Cronologia înregistrărilor existente, inclusiv cele arhivate. Fotografiile și citirile separate de kilometraj nu sunt incluse în această listă.":"Timeline of existing records, including archived items. Photos and standalone mileage readings are not included.",
-"Calcule bazate pe kilometrajul introdus și termenele salvate în istoricul mașinii. Nu sunt estimări GPS.":"Calculations based on recorded mileage and maintenance deadlines, not GPS estimates.",
-"SMARTDRIVE · ISTORIC":"SMARTDRIVE · HISTORY",
-"Citiri confirmate și călătorii":"Confirmed mileage readings and trips",
-"Introdu o primă citire pentru a calcula data următoarei actualizări.":"Enter your first reading to calculate the next update date.",
-"Diferență între citiri":"Distance between readings",
-"Medie zilnică":"Daily average",
-"Medie lunară estimată (30 zile)":"Estimated monthly average (30 days)",
-"Date insuficiente":"Insufficient data",
-"Mediile folosesc numai citirile confirmate, nu distanțele GPS. Pentru calcul sunt necesare două citiri la cel puțin o zi distanță.":"Averages use confirmed mileage readings, not GPS distances. Two readings at least one day apart are required.",
-"Citiri kilometraj":"Mileage readings",
-"Călătorii GPS salvate":"Saved GPS trips",
-"Nu există călătorii GPS salvate.":"No saved GPS trips.",
-"REMINDER KILOMETRAJ":"MILEAGE REMINDER",
-"Preferința este salvată în cont. Livrarea periodică necesită activarea jobului pe baza de date configurată.":"Your preference is saved. Scheduled delivery requires the configured database job.",
-"La fiecare":"Every",
-"zile":"days",
-"Active":"Active",
-"Salvează preferința":"Save preference",
-"REZUMAT FINANCIAR · TOATE MAȘINILE":"FINANCIAL SUMMARY · ALL VEHICLES",
-"Costuri înregistrate":"Recorded expenses",
-"Luna aceasta":"This month",
-"Total anual":"Annual total",
-"Include lucrările și documentele cu un cost, fără dublare.":"Includes maintenance and documents with recorded costs, without double-counting.",
-"Cost/km indisponibil: sunt necesare minimum două citiri distincte.":"Cost per km unavailable: at least two separate readings are required.",
-"Evoluția cheltuielilor":"Expense trends",
-"Valori din înregistrările active. Lunile fără date nu indică lipsa cheltuielilor.":"Values from active records. Months without data do not necessarily mean no expenses.",
-"Nu ai cheltuieli înregistrate.":"No expenses recorded yet.",
-"Adaugă o cheltuială":"Add an expense",
-"Conversație client":"Customer conversation",
-"Mesaje private · echipa AutoCare":"Private messages · AutoCare team",
-"Conversație preluată":"Assigned conversation",
-"Responsabil: membru al echipei":"Assigned to a team member",
-"Conversația este preluată de alt membru al echipei. O poți consulta, dar nu poți răspunde.":"Another team member is handling this conversation. You can view it but cannot reply.",
-"Activează notificări pentru mesaje noi":"Enable new-message notifications",
-"Selectează o conversație activă pentru a răspunde.":"Select an active conversation to reply.",
-"Caută după nume sau e-mail":"Search by name or email",
-"Finalizate":"Completed",
-"Coș de gunoi":"Trash",
-"Preluată":"Assigned",
-"Citit":"Read",
-"Bună ziua":"Hello",
-"Niciun termen în această categorie.":"No deadlines in this category.",
-"Termenele apar după adăugarea documentelor și lucrărilor.":"Deadlines appear after adding documents and maintenance.",
-"Viitoare":"Upcoming",
-"Depășite":"Overdue",
-"Not set":"Not set",
-"Arhivate":"Archived",
-"ALERTE PE DISPOZITIV":"DEVICE ALERTS",
-"Notificări, ca într-o aplicație":"Notifications, just like an app",
-"Primește bannere pe telefon sau calculator pentru termenele tale. Browserul și sistemul trebuie să permită notificările.":"Get alerts on your phone or computer for upcoming deadlines. Browser and system notifications must be enabled.",
-"Verific dispozitivul...":"Checking device...",
-"Permite notificările pe dispozitiv":"Enable device notifications",
-"Trimite notificare de test":"Send test notification",
-"Centrul de termene":"Deadline center",
-"DOCUMENTE ȘI SERVICE":"DOCUMENTS & MAINTENANCE",
-"ACCESUL TĂU ACTUAL":"YOUR CURRENT ACCESS",
-"Sursa accesului":"Access source",
-"Valabilitate":"Valid until",
-"Acces acordat de Fondator":"Founder-granted access",
-"DE CE AUTOCARE PREMIUM?":"WHY AUTOCARE PREMIUM?",
-"Mai mult control asupra fiecărei mașini.":"More control over every vehicle.",
-"Premium deblochează funcții suplimentare pentru organizarea, urmărirea și analiza întreținerii. Toate planurile Premium au aceleași funcții; diferă doar perioada de facturare.":"Premium unlocks additional features for managing and analyzing vehicle maintenance. All Premium plans have the same features; only billing periods differ.",
-"Mai multe mașini":"More vehicles",
-"Istoric și exporturi":"History and exports",
-"Mai multă flexibilitate":"More flexibility",
-"Documente și cheltuieli":"Documents and expenses",
-"Gratuit sau Premium?":"Free or Premium?",
-"Funcție":"Feature",
-"Mașini active":"Active vehicles",
-"Nelimitate":"Unlimited",
-"Inclus":"Included",
-"Configurabilă":"Customizable",
-"Ora preferată a alertelor":"Preferred alert time",
-"Documente și istoric de bază":"Basic documents and history",
-"Economisești 100 lei/an · 5,6%":"Save 100 RON/year · 5.6%",
-"Alege 3 luni":"Choose 3 months",
-"Instalează aplicația":"Install the app",
-"Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.":"Install the app on iPhone or Samsung without losing your account data.",
-"Când vrei să primești notificări?":"When would you like to receive notifications?",
-"Alege doar ce ai nevoie. Opțiunile avansate sunt ascunse mai jos.":"Choose only what you need. Advanced options are below.",
-"Preferințe de comunicare":"Communication preferences",
-"Tu alegi ce primești. Comunicările promoționale sunt dezactivate până îți exprimi acordul. Poți retrage acordul oricând, aici.":"You decide what you receive. Marketing communications are off until you opt in. You can withdraw consent here anytime.",
-"Preferințele de comunicare nu au putut fi încărcate.":"Communication preferences could not be loaded.",
-"Setări avansate pentru notificări":"Advanced notification settings",
-"Salvează preferințele":"Save preferences",
-"Activare și administrare notificări push":"Enable and manage push notifications",
-"CONTUL TĂU":"YOUR ACCOUNT",
-"Profil și securitate":"Profile and security",
-"Actualizează numele, parola și datele personale.":"Update your name, password and personal information.",
-"Salvează numele":"Save name",
-"Schimbă parola":"Change password",
-"Date personale și ștergerea contului":"Personal information and account deletion",
-"ASISTENȚĂ AUTOCARE":"AUTOCARE SUPPORT",
-"Suntem aici să te ajutăm.":"We're here to help.",
-"Toate mesajele și răspunsurile echipei, în aceeași conversație privată.":"All messages and team replies in one private conversation."
-});
-Object.assign(dictionary,{
-  "Toate funcțiile Premium ale planului": "All Premium plan features",
-  "Facturare recurentă la 3 luni": "Recurring billing every 3 months",
-  "Aceleași funcții Premium": "The same Premium features",
-  "Cost mai mic față de 12 plăți lunare": "Lower cost than 12 monthly payments",
-  "O singură plată pe an": "One payment per year",
-  "Abonament plătit confirmat": "Confirmed paid subscription",
-  "Există și acces manual activ, separat de abonamentul plătit.": "Manual access is also active, separately from the paid subscription.",
-  "Acces manual fără expirare": "Manual access without expiry",
-  "Fără abonament activ": "No active subscription",
-  "Gestionează facturarea": "Manage billing",
-  "Adaugă oricâte mașini dorești în garaj, față de o singură mașină în planul gratuit.": "Add unlimited vehicles to your garage, instead of just one on the free plan.",
-  "Urmărește intervențiile, costurile și exportă datele disponibile în format CSV.": "Track maintenance and expenses, and export your data as CSV.",
-  "Configurează ora locală preferată pentru mementouri și gestionează termenele de întreținere.": "Set your preferred local reminder time and manage maintenance deadlines.",
-  "Păstrează în același loc documentele, intervențiile și costurile pentru mașinile tale.": "Keep vehicle documents, maintenance and expenses together.",
-  "Notificările pe dispozitiv necesită permisiunea browserului și configurarea serviciului push; nu sunt garantate doar prin cumpărarea Premium.": "Device notifications require browser permission and push-service configuration; Premium alone does not guarantee delivery.",
-  "Tarife în RON. Plata se deschide numai dacă prețul procesatorului corespunde sumei afișate.": "Prices are billed in RON. Checkout opens only if the processor's price matches the displayed amount.",
-  "Accesul manual nu declanșează plăți. Abonamentele existente își păstrează condițiile din": "Manually granted access does not trigger payments. Existing subscriptions retain their terms in the",
-  "portal.": "billing portal.",
-  "Istoricul facturării": "Billing history",
-  "Plată confirmată": "Payment confirmed",
-  "Test · nu este venit real": "Test · not real revenue",
-  "Nu ai facturi înregistrate. Accesul oferit manual nu generează facturi sau încasări.": "No invoices recorded. Manually granted access does not generate invoices or charges.",
-  "Comparație planuri": "Plan comparison",
-  "GPS-ul nu este activ în modul demonstrativ.": "GPS is unavailable in demo mode.",
-  "GPS-ul necesită HTTPS și un browser cu localizare.": "GPS requires HTTPS and a browser with location support.",
-  "Hartă rutieră · GPS în timp real": "Road map · Live GPS",
-  "Pornește GPS": "Start GPS",
-  "Oprește GPS": "Stop GPS",
-  "Călătoria GPS a fost salvată. Istoricul se actualizează după reîncărcarea paginii. Kilometrajul de bord nu este modificat automat.": "GPS trip saved. Trip history updates after refreshing the page. Your odometer is not changed automatically.",
-  "Distanță parcursă": "Distance traveled",
-  "Ora actuală": "Current time",
-  "Timp de la pornire": "Elapsed time",
-  "Început urmărire": "Tracking started",
-  "Urmărire în desfășurare": "Tracking in progress",
-  "Urmărire oprită": "Tracking stopped",
-  "GPS activ": "GPS active",
-  "GPS oprit": "GPS off",
-  "Citiri valide:": "Valid readings:",
-  "Precizie GPS:": "GPS accuracy:",
-  "în așteptare": "waiting",
-  "Se caută semnal GPS de precizie…": "Acquiring precise GPS signal…",
-  "Salvează călătoria GPS": "Save GPS trip",
-  "Se salvează…": "Saving…",
-  "Mașina pentru călătorie": "Trip vehicle",
-  "Pornește urmărirea și permite localizarea. Harta rutieră și traseul vor apărea aici.": "Start tracking and allow location access. The road map and route will appear here.",
-  "Hartă rutieră OpenStreetMap cu traseul parcurs desenat în albastru, fără cost API Google. Punctele GPS sunt păstrate doar pe acest ecran, nu pe server. Păstrează aplicația deschisă.": "OpenStreetMap road map with your route in blue, without Google API fees. GPS points stay on this screen, not on the server. Keep the app open.",
-  "Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și menține aplicația în prim-plan. Distanța nu crește fără puncte valide.": "GPS signal lost or delayed by more than 25 seconds. Check location permissions and keep the app in the foreground. Distance does not increase without valid readings.",
-  "Mărește harta": "Zoom in",
-  "Micșorează harta": "Zoom out",
-  "Centrare": "Recenter",
-  "Estimarea distanței unei călătorii": "Estimated trip distance",
-  "km estimați prin GPS · actualizare la fiecare citire validă": "km estimated by GPS · updated with each valid reading"
-});
-Object.assign(dictionary,{"Total despre mașinile tale, într-un singur loc.":"All your vehicle information in one place.","Caută titlu, categorie sau service…":"Search title, category or workshop…","Caută o înregistrare":"Search records","Panou Fondator":"Founder dashboard","Ai introdus o creștere de":"You entered an increase of","față de ultima valoare confirmată. Verifică cifra de pe bord înainte de salvare.":"compared with the last confirmed reading. Check your odometer before saving.","Nicio cheltuială înregistrată":"No expenses recorded","Necunoscut":"Unknown","Necompletat":"Not provided","costuri necunoscute":"unknown costs","costuri necunoscute, excluse din total.":"unknown costs, excluded from the total.","Cheltuieli · luna curentă":"Expenses · this month","Căutare":"Search","Schimbă limba":"Change language","Nu există cheltuieli înregistrate.":"No expenses recorded.","Revizii":"Service","Alerte":"Alerts","Înregistrare nouă":"New record","Următorul prag: 94987 km":"Next threshold: 94987 km","Fără dată scadentă":"No due date","Schimb de ulei":"Oil change","Costuri necunoscute":"Unknown costs"});
-
-Object.assign(dictionary,{
- 'Totul despre mașinile tale, într-un singur loc.':'Everything about your vehicles, all in one place.',
- 'Garajul tău':'Your garage','Întreținere și service':'Maintenance & service','Documente auto':'Vehicle documents','Cheltuielile garajului':'Garage expenses','Centrul de notificări':'Notification center','Calendar auto':'Vehicle calendar','Abonamentul tău':'Your subscription','Profil și preferințe':'Profile & preferences',
- 'Alege cum primești mementourile și gestionează datele contului.':'Choose how you receive reminders and manage your account.',
- 'Toate mașinile tale, într-un singur loc.':'All your vehicles, in one place.','Toate actele mașinilor tale, organizate și ușor de găsit.':'All your vehicle documents, organized and easy to find.','Păstrează un istoric clar și planifică următoarele intervenții.':'Keep a clear history and plan upcoming maintenance.','Toate termenele și lucrările programate, la îndemână.':'All deadlines and scheduled maintenance, within reach.','Vezi costurile înregistrate și cum se împart în timp.':'View recorded costs and how they change over time.','Documente și lucrări care au nevoie de atenția ta.':'Documents and maintenance that need your attention.','Planul actual, beneficiile și istoricul facturării.':'Your current plan, benefits and billing history.',
- 'AutoCare pe telefon':'AutoCare on your phone','Acte':'Documents','Meniu':'Menu','GARAJUL TĂU DIGITAL':'YOUR DIGITAL GARAGE','Verifică locația AutoCare':'Check AutoCare location','Deschide profilul și preferințele':'Open profile and preferences','Profil și securitate':'Profile & security','Actualizează numele, parola și datele personale.':'Update your name, password and personal data.','Salvează numele':'Save name','Schimbă parola':'Change password','Date personale și ștergerea contului':'Personal data and account deletion','Datele personale':'Personal data','Descarcă datele personale':'Download personal data',
- 'PREVIZUALIZARE DESIGN · Date fictive, separate de conturile reale. Navigarea este disponibilă; modificările nu se salvează.':'DESIGN PREVIEW · Fictitious data, separate from real accounts. Navigation is available; changes are not saved.'
-});
-Object.assign(dictionary,{
- 'Editează înregistrarea':'Edit record','Adaugă lucrare':'Add maintenance','Salvează documentul':'Save document','Salvează intervenția':'Save maintenance','Salvează cheltuiala':'Save expense','Pentru ce mașină?':'Vehicle','Alege mașina':'Select a vehicle','Tipul documentului':'Document type','Tipul operațiunii':'Maintenance type','Categoria cheltuielii':'Expense category','Rovinietă':'Road vignette','Permis':'Driving licence','Înmatriculare':'Registration','Alt document':'Other document','Alege tipul actului, completează data expirării și apasă Salvează.':'Choose the document type, enter its expiry date and save.','Data emiterii · opțional':'Issue date · optional','Data expirării · dacă este cazul':'Expiry date · if applicable','Lasă liber dacă documentul nu are termen de expirare.':'Leave blank if the document does not expire.','Număr sau serie · opțional':'Number or series · optional','Furnizor sau emitent':'Provider or issuer','Cost document · RON, opțional':'Document cost · RON, optional','Atașează documentul · opțional':'Attach document · optional','Notițe':'Notes','Data intervenției':'Maintenance date','Kilometraj · opțional':'Mileage · optional','Costurile intervenției':'Maintenance costs','Cost total · RON':'Total cost · RON','Rezumatul intervenției':'Maintenance summary','Următorul termen':'Next deadline','Detalii suplimentare':'Additional details'
-});
 const textStates=new WeakMap<Text,{source:string;rendered:string}>();
 const attributeStates=new WeakMap<Element,Record<string,{source:string;rendered:string}>>();
 export default function SiteLanguage({language}:{language:'ro'|'en'}){
  useEffect(()=>{
   const root=document.querySelector('.app-shell')||document.body;
-  const apply=(source:string)=>language==='en'?(dictionary[source]||source.replace(/^(Bună,)(.*)$/,(all,a,b)=>'Hello,'+b).replace(/^(Dată nestabilită)(.*)$/,(all,a,b)=>'Date not set'+b).replace(/^(Următorul prag:)(.*)$/,(all,a,b)=>'Next threshold:'+b)):source;
+  const apply=(source:string)=>translateApplicationCopy(source,language);
   const translate=()=>{
    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node:Node|null;
    while((node=walker.nextNode())){
     const text=node as Text;const parent=text.parentElement;
-    if(!parent||parent.closest('script,style,textarea,code,[contenteditable="true"],[data-workspace-ui]'))continue;
+    if(!parent||parent.closest('script,style,textarea,code,[contenteditable="true"],[data-workspace-ui],[data-user-content]'))continue;
     const raw=translationSource(text.nodeValue||'',textStates.get(text));
     const trimmed=raw.trim();const rendered=raw.replace(trimmed,apply(trimmed));
     textStates.set(text,{source:raw,rendered});
     if(text.nodeValue!==rendered)text.nodeValue=rendered;
    }
-   root.querySelectorAll('input[placeholder],textarea[placeholder],button[aria-label],input[aria-label]').forEach(element=>{
-    if(element.closest('[data-workspace-ui]'))return;
+   root.querySelectorAll('[placeholder],[aria-label],[title],[alt]').forEach(element=>{
+    if(element.closest('[data-workspace-ui],[data-user-content]'))return;
     const states=attributeStates.get(element)||{};
-    for(const key of ['placeholder','aria-label']){
+    for(const key of ['placeholder','aria-label','title','alt']){
      const value=element.getAttribute(key);if(value===null)continue;
      const source=translationSource(value,states[key]);const rendered=apply(source);
      states[key]={source,rendered};if(value!==rendered)element.setAttribute(key,rendered);
@@ -279,6 +30,6 @@ export default function SiteLanguage({language}:{language:'ro'|'en'}){
    });
   };
   translate();document.documentElement.lang=language;
-  const observer=new MutationObserver(translate);observer.observe(root,{subtree:true,childList:true,characterData:true});return()=>observer.disconnect();
+  const observer=new MutationObserver(translate);observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','aria-label','title','alt']});return()=>observer.disconnect();
  },[language]);return null;
 }

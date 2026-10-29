@@ -1,4 +1,5 @@
 'use client';
+import {useApplicationLocale} from './application-locale';
 import { useEffect, useRef, useState } from 'react';
 import { MapPin, Play, Square, Route } from 'lucide-react';
 
@@ -11,7 +12,9 @@ export function segmentMeters(a: Sample, b: Sample): number {
   return 6371000 * 2 * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean; vehicles: { id: string; brand: string; model: string }[] }) {
-  const [active, setActive] = useState(false);
+
+  const locale=useApplicationLocale();
+const [active, setActive] = useState(false);
   const [vehicleId, setVehicleId] = useState('');
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState('');
@@ -47,9 +50,9 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
     if (preview) { setError('GPS-ul nu este activ în modul demonstrativ.'); return; }
     if (!window.isSecureContext || !('geolocation' in navigator)) { setError('GPS-ul necesită HTTPS și un browser cu localizare.'); return; }
     if (watcher.current !== null) return;
-    setStartedAt(Date.now()); setClock(new Date().toLocaleTimeString('ro-RO'));
+    setStartedAt(Date.now()); setClock(new Date().toLocaleTimeString(locale));
     setDistance(0); distanceRef.current = 0; setSamples(0); setRoutePoints([]); setMapCenter(null); setFollow(true); setAccuracy(null); setSignal('waiting'); lastFix.current = 0; setTrackingSeconds(0); setError(''); setNotice(''); previous.current = null; started.current = Date.now();
-    tick.current = setInterval(() => { setTrackingSeconds(Math.floor((Date.now() - (started.current ?? Date.now())) / 1000)); setClock(new Date().toLocaleTimeString('ro-RO')); }, 1000);
+    tick.current = setInterval(() => { setTrackingSeconds(Math.floor((Date.now() - (started.current ?? Date.now())) / 1000)); setClock(new Date().toLocaleTimeString(locale)); }, 1000);
     watcher.current = navigator.geolocation.watchPosition(
       ({ coords, timestamp }) => {
         const next: Sample = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, timestamp };
@@ -90,12 +93,12 @@ export default function SmartDriveTrip({ preview, vehicles }: { preview: boolean
   };
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Estimarea distanței unei călătorii</h3></div>
-    <div className="ac-smartdrive-trip-metric"><strong>{(distance / 1000).toLocaleString('ro-RO', { maximumFractionDigits: 2 })}</strong><span>km estimați prin GPS · actualizare la fiecare citire validă</span></div>
+    <div className="ac-smartdrive-trip-metric"><strong>{(distance / 1000).toLocaleString(locale, { maximumFractionDigits: 2 })}</strong><span>km estimați prin GPS · actualizare la fiecare citire validă</span></div>
     <div className="ac-smartdrive-live" aria-live="off">
-      <div><span>Distanță parcursă</span><strong>{(distance / 1000).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km</strong></div>
+      <div><span>Distanță parcursă</span><strong>{(distance / 1000).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km</strong></div>
       <div><span>Ora actuală</span><strong>{clock || '--:--:--'}</strong></div>
       <div><span>Timp de la pornire</span><strong>{String(Math.floor(trackingSeconds / 3600)).padStart(2, '0')}:{String(Math.floor(trackingSeconds % 3600 / 60)).padStart(2, '0')}:{String(trackingSeconds % 60).padStart(2, '0')}</strong></div>
-      <div><span>Început urmărire</span><strong>{startedAt === null ? '—' : new Date(startedAt).toLocaleTimeString('ro-RO')}</strong></div>
+      <div><span>Început urmărire</span><strong>{startedAt === null ? '—' : new Date(startedAt).toLocaleTimeString(locale)}</strong></div>
     </div>
     <div className="ac-smartdrive-map" style={{margin:'18px 0',padding:12,background:'#fff',border:'1px solid #dbe5f3',borderRadius:18}}>
       <strong style={{display:'block',marginBottom:8,color:'#172b48'}}>Hartă rutieră · GPS în timp real</strong>
