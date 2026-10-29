@@ -40,11 +40,13 @@ const kindNames: Record<string, string> = {
   expense: 'Cheltuială',
 };
 export function GarageHome({
+  language = 'ro',
   data,
   navigate,
   add,
   open,
 }: {
+  language?: 'ro' | 'en';
   data: Data;
   name: string;
   navigate: (tab: string) => void;
@@ -97,8 +99,8 @@ export function GarageHome({
           <img className="ac-premium-hero-photo" src="/images/autocare-cinematic-exact.svg" alt="" aria-hidden="true" loading="eager" decoding="async" />
           <div className="ac-premium-hero-shade" aria-hidden="true" />
           <div className="ac-premium-vehicle-top">
-            <span className="ac-premium-kicker"><CarFront size={17}/> MAȘINA TA</span>
-            <span className="ac-premium-status">{car ? 'Activă' : 'Garaj gol'}</span>
+            <span className="ac-premium-kicker"><CarFront size={17}/> {language === 'en' ? 'YOUR VEHICLE' : 'MAȘINA TA'}</span>
+            <span className="ac-premium-status">{car ? (language === 'en' ? 'Active' : 'Activă') : (language === 'en' ? 'Empty garage' : 'Garaj gol')}</span>
           </div>
           <div className="ac-premium-vehicle-content">
             <div className="ac-premium-car-visual ac-lux-car-visual">
@@ -113,14 +115,14 @@ export function GarageHome({
               <p>{car ? [car.year,car.fuel].filter(Boolean).join(' · ') : 'Adaugă prima mașină pentru a începe.'}</p>
               {car && <span className="ac-premium-plate">{car.plate}</span>}
               <button type="button" onClick={() => car ? navigate('Garaj') : add('vehicle')}>
-                {car ? 'Deschide garajul' : 'Adaugă prima mașină'} <ArrowRight size={16}/>
+                {car ? (language === 'en' ? 'Open garage' : 'Deschide garajul') : (language === 'en' ? 'Add your first vehicle' : 'Adaugă prima mașină')} <ArrowRight size={16}/>
               </button>
             </div>
           </div>
           <div className="ac-premium-vehicle-footer">
-            <div><span>Kilometraj actual</span><strong>{car ? `${car.odometer.toLocaleString('ro-RO')} km` : '—'}</strong></div>
-            <div><span>Documente înregistrate</span><strong>{carDocuments.length}</strong></div>
-            <button type="button" onClick={() => navigate('Garaj')}>Vezi detalii <ArrowRight size={15}/></button>
+            <div><span>{language === 'en' ? 'Current mileage' : 'Kilometraj actual'}</span><strong>{car ? `${car.odometer.toLocaleString('ro-RO')} km` : '—'}</strong></div>
+            <div><span>{language === 'en' ? 'Saved documents' : 'Documente înregistrate'}</span><strong>{carDocuments.length}</strong></div>
+            <button type="button" onClick={() => navigate('Garaj')}>{language === 'en' ? 'View details' : 'Vezi detalii'} <ArrowRight size={15}/></button>
           </div>
         </section>
         <section className="ac-premium-odometer ac-premium-panel">
