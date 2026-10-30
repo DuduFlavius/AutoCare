@@ -949,3 +949,8 @@ summary + p {
 .ac-workspace .ac-oil-countdown-row{display:block}
 .ac-workspace .ac-oil-countdown-row>strong{display:block;width:100%;text-align:left;margin-top:8px}
 .ac-workspace .ac-oil-countdown-row .oil-countdown{text-align:left;align-items:flex-start;width:100%}
+html body .app-shell.ac-workspace main.main .ac-daily-usage>summary{background:transparent!important;color:#3158a4!important;-webkit-text-fill-color:#3158a4!important;border:0!important;padding:8px 0!important;opacity:1!important}
+html body .app-shell.ac-workspace main.main .ac-daily-usage button{background:#e4edff!important;color:#173467!important;border:1px solid #afc5ed!important;padding:8px 12px!important;min-height:40px!important;text-align:center!important}
+html body .app-shell.ac-workspace main.main .ac-premium-dashboard .ac-oil-detail.ac-oil-countdown-row{display:block!important}
+html body .app-shell.ac-workspace main.main .ac-premium-dashboard .ac-oil-detail.ac-oil-countdown-row>strong{display:block!important;width:100%!important;max-width:100%!important;text-align:left!important;align-items:flex-start!important;margin-top:8px}
+html body .app-shell.ac-workspace main.main .ac-premium-dashboard .ac-oil-detail.ac-oil-countdown-row>span{max-width:100%!important}
