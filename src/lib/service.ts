@@ -323,7 +323,7 @@ export async function dashboard(uid: string) {
         process.env.VAPID_PRIVATE_KEY &&
         process.env.VAPID_SUBJECT
       ),
-      emailConfigured: !!(process.env.RESEND_API_KEY && process.env.EMAIL_FROM),
+      emailConfigured: !!(process.env.RESEND_API_KEY && process.env.EMAIL_FROM) || (process.env.GOOGLE_MAIL_CLIENT_ID ? await import('./google-mail').then(mail=>mail.gmailReady()).catch(()=>false) : false),
     },
   };
 }
