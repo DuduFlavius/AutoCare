@@ -1,5 +1,8 @@
 // Reviewed application copy. Keys are whitespace-normalized Romanian UI messages.
 export const applicationCopy: Record<string, string> = {
+  "Denumirea documentului": "Document title",
+  "Denumirea cheltuielii": "Expense title",
+  "Cu ce te putem ajuta?": "How can we help you?",
   "Secțiunile aplicației": "Application sections",
   "Caută în aplicație": "Search the app",
   "Secțiuni, mașini, documente, intervenții…": "Sections, vehicles, documents, maintenance…",

@@ -110,10 +110,11 @@ function Empty({
   );
 }
 function Status({ record }: { record: RecordItem }) {
+  const statusLanguage = useApplicationLanguage();
   return (
     <span className={'pill ' + record.status.state}>
       {record.status.label}
-      {record.status.days != null && record.status.days >= 0 ? ` · ${record.status.days} zile` : ''}
+      {record.status.days != null && record.status.days >= 0 && <span data-workspace-ui>{` · ${record.status.days} ${statusLanguage === 'en' ? (record.status.days === 1 ? 'day' : 'days') : (record.status.days === 1 ? 'zi' : 'zile')}`}</span>}
     </span>
   );
 }
@@ -787,7 +788,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
               'sidebar-bottom ' + (data?.premium ? 'membership-active' : 'membership-promo')
             }
           >
-            <p className="eyebrow">{data?.premium ? 'PREMIUM ACTIV' : 'AUTOCARE PREMIUM'}</p>
+            <p className="eyebrow">{data?.premium ? (language === 'en' ? 'PREMIUM ACTIVE' : 'PREMIUM ACTIV') : 'AUTOCARE PREMIUM'}</p>
             <p>
               {data?.premium
                 ? 'Garajul tău, cu toate avantajele.'
@@ -2416,6 +2417,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
   );
 }
 function ExpenseChart({ data, currency }: { data: Data; currency: 'RON' | 'EUR' }) {
+  const chartLanguage = useApplicationLanguage();
 
   const locale=useApplicationLocale();
 const moneyDisplay = (bani: number): string => currency === 'EUR'
@@ -2429,8 +2431,8 @@ const moneyDisplay = (bani: number): string => currency === 'EUR'
         className="chart"
         role="group"
         aria-label={
-          'Cheltuieli lunare în lei: ' +
-          data.summary.monthly.map((m) => `${m.month}: ${m.bani / 100}`).join(', ')
+          (chartLanguage === 'en' ? 'Monthly expenses: ' : 'Cheltuieli lunare: ') +
+          data.summary.monthly.map((m) => `${m.month}: ${moneyDisplay(m.bani)}`).join(', ')
         }
       >
         {data.summary.monthly.map((m) => (

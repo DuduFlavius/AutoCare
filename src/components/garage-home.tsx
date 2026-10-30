@@ -64,7 +64,6 @@ export function GarageHome({
 
   const locale=useApplicationLocale();
   const date=(value:string|null)=>formatDate(value,locale);
-  const money=(value:number)=>formatMoney(value,locale);
 const home = dashboardHome(data);
   const moneyDisplay = (bani: number): string => currency === 'EUR'
     ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR',maximumFractionDigits:2}).format(bani / 500)
@@ -861,7 +860,6 @@ const v = data.vehicles.find((v) => v.id === id);
 export function ReminderInbox({ data, open }: { data: Data; open: (record: Entry) => void }) {
   const locale=useApplicationLocale();
   const date=(value:string|null)=>formatDate(value,locale);
-  const money=(value:number)=>formatMoney(value,locale);
   const [view, setView] = useState('upcoming');
   const rows = data.records
     .filter(

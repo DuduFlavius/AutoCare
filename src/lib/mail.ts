@@ -18,7 +18,7 @@ export async function sendMail(
     } catch (error) {
       const code = error instanceof Error && 'code' in error && typeof error.code === 'string' ? error.code : 'GMAIL_DELIVERY_UNCONFIRMED';
       if (tracking) await safeSystemMailLog(tracking.userId, tracking.template, key, to, 'unknown', undefined, code);
-      throw new Error('EMAIL_TRANSPORT_UNCONFIRMED');
+      throw new Error('EMAIL_TRANSPORT_UNCONFIRMED', { cause: error });
     }
   }
   let providerId: string;
