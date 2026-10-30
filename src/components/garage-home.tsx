@@ -1,6 +1,7 @@
 'use client';
 import {useApplicationLocale} from './application-locale';
 import {parseServiceDetails} from '@/lib/service-details';
+import InlineMileageEditor from './inline-mileage-editor';
 import OilChangeCountdown from './oil-change-countdown';
 import { maintenanceSchedule } from '@/lib/maintenance-schedule';
 import { useState } from 'react';
@@ -51,10 +52,12 @@ export function GarageHome({
   navigate,
   add,
   open,
+  onMileageSaved,
 }: {
   language?: 'ro' | 'en';
   currency?: 'RON' | 'EUR';
   preview?:boolean;
+  onMileageSaved: () => Promise<void>;
   data: Data;
   name: string;
   navigate: (tab: string) => void;
@@ -229,9 +232,9 @@ const home = dashboardHome(data);
             dueDate={timing?.expiresAt}
             timezone={data.profile.timezone}
             preview={preview}
-            onReadings={() => navigate('Kilometraj')}
             serviceLabel={language === 'en' ? 'Timing service due' : 'Distribuție scadentă'}
           />
+          <InlineMileageEditor key={car.id} vehicleId={car.id} currentKm={car.odometer} preview={preview} onSaved={onMileageSaved} />
           <button type="button" onClick={() => (lastTiming ? open(lastTiming) : add('service'))}>
             {language === 'en' ? 'Configure timing service' : 'Configurează distribuția'}{' '}
             <ArrowRight size={15} />

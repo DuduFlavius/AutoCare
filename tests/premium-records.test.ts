@@ -303,3 +303,19 @@ test('daily usage is stored per owned vehicle and reused after reload', async ()
   assert.deepEqual(await api(path), { dailyKm: 70 });
   assert.deepEqual(await api(path, 'POST', { dailyKm: null }), { dailyKm: null });
 });
+
+test('confirmed mileage update persists and recalculates timing distance and days', async () => {
+  const car = await api('vehicles', 'POST', { brand: 'Test', model: 'Timing update', year: 2024, plate: 'TIMING01', fuel: 'Benzină', odometer: 80000 });
+  await api(`vehicles/${car.id}/daily-usage`, 'POST', { dailyKm: 70 });
+  const saved = await api(`smartdrive/vehicles/${car.id}/readings`, 'POST', { odometer: 90000 });
+  assert.equal(saved.vehicle.odometer, 90000);
+  const refreshed = await api('dashboard');
+  const actual = refreshed.vehicles.find((v: { id: string }) => v.id === car.id);
+  assert.equal(actual.odometer, 90000);
+  const readings = await api(`smartdrive/vehicles/${car.id}/readings`);
+  assert.equal(readings[0].odometer, 90000);
+  const usage = await api(`vehicles/${car.id}/daily-usage`);
+  const forecast = forecastService({ currentKm: actual.odometer, nextKm: 150000, averageKmPerDay: usage.dailyKm });
+  assert.equal(forecast?.remainingKm, 60000);
+  assert.equal(forecast?.days, 858);
+});

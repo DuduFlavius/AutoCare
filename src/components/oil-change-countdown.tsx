@@ -20,7 +20,7 @@ export default function OilChangeCountdown({
   dueDate?: string | null;
   timezone: string;
   preview: boolean;
-  onReadings: () => void;
+  onReadings?: () => void;
 }) {
   const language = useApplicationLanguage(),
     locale = useApplicationLocale(),
@@ -63,9 +63,9 @@ export default function OilChangeCountdown({
             ? 'Insufficient readings'
             : 'Citiri insuficiente'}
         <DailyMileageInput key={vehicleId} usage={usage} />
-        <button type="button" onClick={onReadings}>
+        {onReadings && <button type="button" onClick={onReadings}>
           {en ? 'Update mileage' : 'Actualizează kilometrajul'}
-        </button>
+        </button>}
       </span>
     );
   return (
