@@ -48,6 +48,7 @@ export function WorkspaceNavigation({
   navigate,
   notifications = 0,
   support = 0,
+  premium = false,
   path = '/cont',
 }: {
   tab: string;
@@ -55,6 +56,7 @@ export function WorkspaceNavigation({
   navigate: (tab: string) => boolean;
   notifications?: number;
   support?: number;
+  premium?: boolean;
   path?: string;
 }) {
   return (
@@ -69,7 +71,7 @@ export function WorkspaceNavigation({
           const Icon=icons[section.icon];
           const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
           const labels:Record<string,string>=language==='ro'?{Dashboard:'Acasă',Garaj:'Garajul meu',Abonament:'Premium'}:{Dashboard:'Home',Garaj:'My garage',Abonament:'Premium'};
-          return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}><Icon size={17}/><span>{labels[id]||section[language]}</span>{count>0&&<span className="ws-nav-count">{count}</span>}</a>;
+          return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}><Icon size={17}/><span>{labels[id]||section[language]}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Abonament'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
         })}
       </div>
     </nav>

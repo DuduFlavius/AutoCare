@@ -293,6 +293,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     [admin, setAdmin] = useState<any>(null),
     [invoices, setInvoices] = useState<any[]>([]),
     [calendarMonth, setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
+  const dashboardRequest = useRef(0);
   const locale=language==='en'?'en-GB':'ro-RO';
   const displayDate=(value:string)=>new Date(value+'T12:00:00').toLocaleDateString(locale);
   useEffect(() => {
@@ -306,10 +307,11 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
   }, []);
   useEffect(() => {
     if (previewData || tab !== 'Notificări' || !data?.notifications.some(n => !n.readAt)) return;
-    void api('notifications/read', 'POST').then(refresh).catch(e => setError(e.message));
+    void api('notifications/read', 'POST').then(() => refresh()).catch(e => setError(e.message));
   }, [tab, previewData, data?.notifications]);
   useEffect(() => {
     if (previewData) return;
+    if (tab === 'Abonament') void refresh(true);
     if (tab === 'Abonament')
       api('billing/invoices')
         .then(setInvoices)
@@ -376,11 +378,12 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         .catch(() => {});
     };
     const notifications = () => {
-      if (!document.hidden) void api('dashboard').then(setData).catch(() => {});
+      if (!document.hidden) void refresh(true);
       void check();
     };
-    const notificationTimer = setInterval(notifications, 30000);
+    const notificationTimer = setInterval(notifications, 15000);
     window.addEventListener('focus', notifications);
+    window.addEventListener('online', notifications);
     document.addEventListener('visibilitychange', notifications);
     check();
     const timer = setInterval(check, 15000);
@@ -388,6 +391,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
       clearInterval(timer);
       clearInterval(notificationTimer);
       window.removeEventListener('focus', notifications);
+      window.removeEventListener('online', notifications);
       document.removeEventListener('visibilitychange', notifications);
     };
   }, [previewData]);
@@ -400,12 +404,14 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [recordDirty]);
-  async function refresh() {
+  async function refresh(silent = false) {
     if (previewData) return;
+    const request = ++dashboardRequest.current;
     try {
-      setData(await api('dashboard'));
+      const updated = await api('dashboard');
+      if (request === dashboardRequest.current) setData(updated);
     } catch (e) {
-      setError((e as Error).message);
+      if (!silent && request === dashboardRequest.current) setError((e as Error).message);
     }
   }
   async function act(fn: () => Promise<unknown>, message = 'Modificările au fost salvate.') {
@@ -701,7 +707,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         <div className="navigation-overlay">
           <Dialog title={data?.profile.role === 'founder' ? 'AutoCare · Fondator' : 'Navigare AutoCare'} onClose={() => setMenuOpen(false)}>
             <nav aria-label="Navigare mobil">
-              <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} path={previewData?'/previzualizare':'/cont'} />
+              <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} premium={!!data?.premium} path={previewData?'/previzualizare':'/cont'} />
               {data?.profile.role === 'founder' && (
                 <div className="autocare-mobile-founder-card">
                   <div className="autocare-mobile-founder-identity">
@@ -757,7 +763,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         <span className="sidebar-tagline">GARAJUL TĂU DIGITAL</span>
         <button type="button" className="ws-sidebar-search" data-workspace-ui onClick={()=>setLauncherOpen(true)} disabled={!!modal}><Search size={18}/><span>{language==='en'?'Search & actions':'Căutare și acțiuni'}</span><kbd>⌘ K</kbd></button>
         <div className="ws-sidebar-sections">
-          <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} path={previewData?'/previzualizare':'/cont'} />
+          <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} premium={!!data?.premium} path={previewData?'/previzualizare':'/cont'} />
           {data?.profile.role === 'founder' && (
             <a className="founder-nav-link" href="/admin">
               <Shield size={18} /> Panou Fondator <ArrowUpRight size={13} />
@@ -893,6 +899,9 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
             </span>
             <ChevronDown size={16} />
           </button>
+          <button type="button" className="ws-premium-access" data-workspace-ui aria-label={language==='en'?'Open Premium':'Accesează Premium'} title={data?.premium?(language==='en'?'Premium active':'Premium activ'):'Premium'} onClick={()=>navigate('Abonament')}>
+            <Star size={16} fill={data?.premium?'currentColor':'none'}/><span>Premium{data?.premium?(language==='en'?' · Active':' · Activ'):''}</span>
+          </button>
           <button type="button" className="autocare-header-signout ws-signout" data-workspace-ui
             aria-label={language==='en'?'Sign out':'Deconectare'} title={previewData?(language==='en'?'Unavailable in design preview':'Indisponibil în previzualizare'):(language==='en'?'Sign out':'Deconectare')}
             disabled={signingOut||!!previewData} aria-busy={signingOut}
@@ -956,7 +965,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         {!data ? (
           <div className="ws-loading" role="status">
             <p>{language==='en'?'Loading your workspace…':'Se încarcă spațiul tău de lucru…'}</p>
-            {error ? <button type="button" onClick={refresh}>{language==='en'?'Try again':'Reîncearcă'}</button> : <div className="ws-loading-grid" aria-hidden="true"><span/><span/><span/><span/></div>}
+            {error ? <button type="button" onClick={() => void refresh()}>{language==='en'?'Try again':'Reîncearcă'}</button> : <div className="ws-loading-grid" aria-hidden="true"><span/><span/><span/><span/></div>}
           </div>
         ) : (
           <>
