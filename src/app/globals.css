@@ -944,3 +944,8 @@ summary + p {
 .ac-daily-usage button{min-height:40px;border:1px solid #afc5ed;border-radius:10px;padding:8px 12px;background:#e4edff;color:#173467;font-size:12px}
 .ac-daily-usage small{flex-basis:100%;font-size:11px;line-height:1.5}
 .ac-daily-usage button:disabled{opacity:.6}
+.ac-workspace .ac-daily-usage>summary{background:transparent!important;color:#3158a4!important;border:0!important;padding:8px 0!important;font-weight:600;line-height:1.5}
+.ac-workspace .ac-daily-usage button{background:#e4edff!important;color:#173467!important;border:1px solid #afc5ed!important;padding:8px 12px!important;min-height:40px}
+.ac-workspace .ac-oil-countdown-row{display:block}
+.ac-workspace .ac-oil-countdown-row>strong{display:block;width:100%;text-align:left;margin-top:8px}
+.ac-workspace .ac-oil-countdown-row .oil-countdown{text-align:left;align-items:flex-start;width:100%}
