@@ -1402,7 +1402,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                     </div>
                   </div>
                 )}
-                {tab === 'Întreținere' && <MaintenanceForecast data={data} records={visible} preview={!!previewData}/>}
+                {tab === 'Întreținere' && <MaintenanceForecast data={data} records={visible} preview={!!previewData} onUpdateMileage={()=>navigate('Kilometraj')} onUpgrade={()=>navigate('Abonament')}/>}
                 {tab === 'Întreținere' &&
                   visible.some(
                     (r) =>
@@ -1895,6 +1895,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
               <Membership
                 language={language}
                 data={data}
+                preview={!!previewData}
                 invoices={invoices}
                 navigate={navigate}
                 onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}

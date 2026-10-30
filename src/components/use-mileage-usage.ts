@@ -7,6 +7,7 @@ export function useMileageUsage(vehicleId: string, currentKm: number, preview = 
   const [snapshot, setSnapshot] = useState<{
     key: string;
     value: ReturnType<typeof recentMileageUsage>;
+    lastReadingAt: string | null;
   } | null>(null);
   const [settled, setSettled] = useState('');
   useEffect(() => {
@@ -23,7 +24,16 @@ export function useMileageUsage(vehicleId: string, currentKm: number, preview = 
         return response.json() as Promise<OdometerReading[]>;
       })
       .then((rows) => {
-        if (!cancelled) setSnapshot({ key, value: recentMileageUsage(rows, new Date()) });
+        if (!cancelled)
+          setSnapshot({
+            key,
+            value: recentMileageUsage(rows, new Date()),
+            lastReadingAt:
+              rows
+                .filter((r) => Number.isFinite(Date.parse(r.recordedAt)))
+                .sort((a, b) => Date.parse(b.recordedAt) - Date.parse(a.recordedAt))[0]
+                ?.recordedAt || null,
+          });
       })
       .catch(() => {
         if (!cancelled) setSnapshot(null);
@@ -40,6 +50,7 @@ export function useMileageUsage(vehicleId: string, currentKm: number, preview = 
   }, [key, vehicleId, preview]);
   return {
     confirmed: snapshot?.key === key ? snapshot.value : null,
+    lastReadingAt: snapshot?.key === key ? snapshot.lastReadingAt : null,
     loading: !preview && !!vehicleId && settled !== key,
   };
 }

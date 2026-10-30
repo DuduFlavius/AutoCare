@@ -1,3 +1,4 @@
+import {parseServiceDetails} from './service-details';
 import { and, eq, desc, sql } from 'drizzle-orm';
 import { db } from './db';
 import * as s from './schema';
@@ -121,6 +122,14 @@ export async function saveRecord(uid: string, input: unknown, id?: string) {
   const parsed = recordInput.parse(input);
   const data = { ...parsed, amountBani: parsed.amountKnown ? parsed.amountBani : 0 };
   const car = await ownedVehicle(uid, data.vehicleId);
+  const technical=parseServiceDetails(data.parts||'');
+  const advanced=['intervalLuni','intervalIntretinere','intervalDistributie','alertDays','alertKm'].some(key=>!!technical[key]);
+  if(advanced&&!(await premium(uid))) {
+    const old=id?await ownedRecord(uid,id):null;
+    const previous=parseServiceDetails(old?.parts||'');
+    if(!old||['intervalLuni','intervalIntretinere','intervalDistributie','alertDays','alertKm'].some(key=>technical[key]!==previous[key]))throw new AppError(403,'Intervalele și alertele avansate necesită Premium.');
+  }
+
   if (car.archived) throw new AppError(400, 'Mașina este arhivată.');
   if (data.nextKm != null && !(await premium(uid)))
     throw new AppError(403, 'Mementourile după kilometraj necesită Premium.');
@@ -214,13 +223,15 @@ export function summarize(
     categories[r.category] = (categories[r.category] || 0) + r.amountBani;
   }
   const mileage = new Map<string, number[]>();
-  for (const r of selected)
+  for (const r of [...selected].sort((a,b)=>(a.date||'').localeCompare(b.date||'')))
     if (r.odometer != null) {
       const a = mileage.get(r.vehicleId) || [];
       a.push(r.odometer);
       mileage.set(r.vehicleId, a);
     }
   let km = 0;
+  let mileageComplete=true;
+  for(const id of new Set(selected.filter(r=>r.amountBani>0).map(r=>r.vehicleId))){const values=mileage.get(id)||[];if(values.length<2||values.some((value,index)=>index>0&&value<values[index-1])||values[values.length-1]<=values[0])mileageComplete=false;}
   for (const a of mileage.values()) if (a.length >= 2) km += Math.max(...a) - Math.min(...a);
   const annualBani = selected.reduce((a, r) => a + r.amountBani, 0);
   return {
@@ -230,7 +241,7 @@ export function summarize(
       .reduce((a, r) => a + r.amountBani, 0),
     monthly,
     categories,
-    costPerKm: km > 0 ? annualBani / 100 / km : null,
+    costPerKm: mileageComplete && km > 0 ? annualBani / 100 / km : null,
     km,
   };
 }
@@ -289,6 +300,7 @@ export async function dashboard(uid: string) {
         : documentStatus(r.expiresAt, now, p.timezone),
     })),
     premium: paid,
+    planLimits:{activeVehicles:paid?null:1,attachments:(await limits()).maxFiles},
     premiumAccess: {
       paid: !!sub[0]?.subscriptionId && isPremium(sub[0]),
       manual: grants.map(({ id, grantedAt, expiresAt }) => ({ id, grantedAt, expiresAt })),

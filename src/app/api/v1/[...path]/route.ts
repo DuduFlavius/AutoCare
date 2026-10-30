@@ -18,7 +18,7 @@ import * as googleMail from '@/lib/google-mail';
 import * as mailCenter from '@/lib/mail-center';
 import { renderEmail } from '@/lib/email-templates';
 import { stripe, checkout, billingPortal, processStripeEvent } from '@/lib/billing';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import {vehicleReport} from '@/lib/vehicle-report';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -565,37 +565,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         }),
       );
       if (format === 'pdf') {
-        const doc = await PDFDocument.create();
-        const font = await doc.embedFont(StandardFonts.Helvetica);
-        let page = doc.addPage();
-        let y = 790;
-        const clean = (v: string) =>
-          v
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^\x20-\x7E]/g, '?');
-        for (const line of [
-          'AutoCare - Raport personal',
-          'Sume in RON; date introduse de utilizator.',
-          ...rows.map(
-            (r) =>
-              `${r.date || '-'} | ${r.title} | ${r.amountBani === null ? 'Cost necunoscut' : (r.amountBani / 100).toFixed(2) + ' RON'}`,
-          ),
-        ]) {
-          if (y < 40) {
-            page = doc.addPage();
-            y = 790;
-          }
-          page.drawText(clean(line).slice(0, 95), {
-            x: 40,
-            y,
-            size: 10,
-            font,
-            color: rgb(0.1, 0.1, 0.1),
-          });
-          y -= 20;
-        }
-        return new Response(Buffer.from(await doc.save()), {
+        const vehicleIds=new Set(selected.map(r=>r.vehicleId));
+        const report=await vehicleReport({vehicles:data.vehicles.filter(v=>vehicleIds.has(v.id)),records:selected,generatedAt:new Date().toLocaleDateString('ro-RO',{timeZone:data.profile.timezone})});
+        return new Response(report, {
           headers: {
             'Content-Type': 'application/pdf',
             'Content-Disposition': 'attachment; filename="autocare-raport.pdf"',

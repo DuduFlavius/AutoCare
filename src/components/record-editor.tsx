@@ -1,6 +1,7 @@
 'use client';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import { useRef, useState, type FormEvent } from 'react';
+import OperationAlerts from './operation-alerts';
 import RecordCategoryPicker from './record-category-picker';
 import { recordCategory } from '@/lib/record-categories';
 import ServiceDetailFields, {
@@ -539,6 +540,7 @@ export default function RecordEditor({
             )}
             {kind === 'service' && (
               <div className="service-reminder-box">
+                <OperationAlerts parts={record?.parts||''} premium={data.premium}/>
                 <h3>Următoarea intervenție</h3>
                 <p className="micro">Completează doar intervalele recomandate pentru mașina ta.</p>
                 <div className="form-grid">

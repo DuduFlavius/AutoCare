@@ -102,6 +102,8 @@ export function maintenanceTargets(record: MaintenanceSource) {
     title: string;
     nextKm: number | null;
     expiresAt: string | null;
+    lastKm?: number | null;
+    lastDate?: string | null;
   }> = [];
   const filterKeys = Array.from(
     new Set(
@@ -112,7 +114,13 @@ export function maintenanceTargets(record: MaintenanceSource) {
   );
   if (record.category !== 'Filtre' || !filterKeys.length)
     if (schedule.nextKm !== null || schedule.expiresAt)
-      targets.push({ id: record.id, title: record.title || record.category, ...schedule });
+      targets.push({
+        id: record.id,
+        title: record.title || record.category,
+        ...schedule,
+        lastKm: record.odometer,
+        lastDate: record.date,
+      });
   for (const key of filterKeys) {
     const interval = positive(details[key + 'Interval']);
     const next =
@@ -122,6 +130,8 @@ export function maintenanceTargets(record: MaintenanceSource) {
     if (next !== null || due)
       targets.push({
         id: record.id + ':' + key,
+        lastKm: record.odometer,
+        lastDate: record.date,
         title:
           (record.title || record.category) +
           ' · ' +

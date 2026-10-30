@@ -67,6 +67,18 @@ export function prepareRecordDraft(
       if (!Number.isInteger(n) || n <= 0 || n > (key === 'ac_intervalLuni' ? 1200 : 99999999))
         throw new Error('Intervalul trebuie să fie un număr întreg pozitiv, în limita câmpului.');
     }
+  for (const key of ['ac_alertDays', 'ac_alertKm']) {
+    const raw = str(key);
+    if (!raw || raw === 'inherit' || (key === 'ac_alertDays' && raw === 'none')) continue;
+    const values = raw.split(',').map((x) => Number(x.trim()));
+    if (
+      values.length > 12 ||
+      values.some(
+        (n) => !Number.isInteger(n) || n < 0 || n > (key === 'ac_alertDays' ? 365 : 100000),
+      )
+    )
+      throw new Error('Verifică pragurile alertelor introduse.');
+  }
   const schedule = recordDraftSchedule(f, kind, category, serviceKmInterval);
   const computedNextKm = schedule.nextKm;
   const computedExpiry = schedule.expiresAt || '';

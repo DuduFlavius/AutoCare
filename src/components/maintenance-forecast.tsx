@@ -9,16 +9,38 @@ export default function MaintenanceForecast({
   data,
   records,
   preview,
+  onUpdateMileage,
+  onUpgrade,
 }: {
   data: Data;
   records: Data['records'];
   preview: boolean;
+  onUpdateMileage?: () => void;
+  onUpgrade?: () => void;
 }) {
   const en = useApplicationLanguage() === 'en',
     [selected, setSelected] = useState('');
   const cars = data.vehicles.filter((v) => !v.archived);
   const car = cars.find((v) => v.id === selected) || cars[0];
-  if (!data.premium || !car) return null;
+  if (!data.premium)
+    return (
+      <section className="card ac-premium-locked" data-workspace-ui>
+        <h3>
+          {en ? 'Keep your next service in sight.' : 'Nu pierde din vedere următoarea revizie.'}
+        </h3>
+        <p>
+          {en
+            ? 'Premium combines time and mileage intervals, remaining days and kilometers, and configurable reminders in one workspace.'
+            : 'Premium reunește intervalele după timp și kilometraj, zilele și kilometrii rămași și mementourile configurabile într-un singur spațiu.'}
+        </p>
+        {onUpgrade && (
+          <button type="button" onClick={onUpgrade}>
+            {en ? 'Discover Premium' : 'Descoperă Premium'}
+          </button>
+        )}
+      </section>
+    );
+  if (!car) return null;
   const services = records
     .filter((r) => r.kind === 'service' && !r.cancelled && r.vehicleId === car.id)
     .flatMap(maintenanceTargets);
@@ -51,6 +73,7 @@ export default function MaintenanceForecast({
           services={services}
           preview={preview}
           timezone={data.profile.timezone}
+          onUpdateMileage={onUpdateMileage}
         />
       ) : (
         <p className="micro">

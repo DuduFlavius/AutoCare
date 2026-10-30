@@ -1,3 +1,4 @@
+import {reminderOffsets,alertOffsetAllowed} from './maintenance-alerts';
 import { and, eq, sql, lte, or } from 'drizzle-orm';
 import { db } from './db';
 import * as s from './schema';
@@ -29,19 +30,15 @@ export async function scheduleReminders(now = new Date()) {
     );
     if (hour < p.hour) continue;
     const paid = await premium(u.id, now);
-    const selected = paid ? p.offsets : p.offsets.filter((n) => [30, 7, 1, 0].includes(n));
     const days = r.expiresAt ? daysRemaining(r.expiresAt, now, p.timezone) : null;
-    const due: string[] = [];
-    if (days !== null && selected.includes(days)) due.push(String(days));
-    if (days !== null && days < 0 && paid && p.afterExpiry) due.push('overdue');
-    if (r.kind === 'service' && r.nextKm != null && v.odometer >= r.nextKm && paid) due.push('km');
+    const due=reminderOffsets({parts:r.parts,paid,defaults:p.offsets,days,nextKm:r.kind==='service'?r.nextKm:null,odometer:v.odometer,afterExpiry:p.afterExpiry});
     for (const offset of due)
       for (const channel of ['email', 'push']) {
         if (channel === 'email' && !u.emailVerified) continue;
         if ((channel === 'email' && !p.emailEnabled) || (channel === 'push' && !p.pushEnabled))
           continue;
         const subject = `${r.category || r.title}: ${v.brand} ${v.model} (${v.plate})`;
-        const reminder = offset === 'km'
+        const reminder = offset.startsWith('km-before-') ? `Mai sunt ${Math.max(0,(r.nextKm??v.odometer)-v.odometer)} km până la intervenția programată.` : offset === 'km'
           ? `Ai atins ${r.nextKm} km. Verifică lucrarea programată.`
           : days === 0
             ? `Astăzi expiră ${r.category || r.title}.`
@@ -172,9 +169,6 @@ export async function deliverReminders(now = new Date(), transport: Transport = 
         .where(eq(s.records.id, n.recordId))
     )[0];
     const paid = context ? await premium(context.u.id, now) : false;
-    const allowed =
-      context &&
-      (paid ? context.p.offsets : context.p.offsets.filter((x) => [30, 7, 1, 0].includes(x)));
     const valid =
       context &&
       !context.r.cancelled &&
@@ -182,11 +176,7 @@ export async function deliverReminders(now = new Date(), transport: Transport = 
       context.r.revision === n.revision &&
       (n.channel !== 'email' || context.u.emailVerified) &&
       (n.channel === 'email' ? context.p.emailEnabled : context.p.pushEnabled) &&
-      (n.offset === 'km'
-        ? paid
-        : n.offset === 'overdue'
-          ? paid && context.p.afterExpiry
-          : allowed && allowed.includes(Number(n.offset))) &&
+      alertOffsetAllowed(n.offset,context.r.parts,paid,context.p.offsets,context.p.afterExpiry) &&
       localDate(now, context.p.timezone) === n.localDate;
     if (!valid) {
       await db()

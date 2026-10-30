@@ -93,6 +93,7 @@ export default async function DesignPreview({
     vehicles,
     records,
     premium: previewOptions.plan === 'premium',
+    planLimits:{activeVehicles:previewOptions.plan==='premium'?null:1,attachments:30},
     premiumAccess: { paid: false, manual: previewOptions.plan === 'premium' ? [{id:'design-only-grant',grantedAt:now,expiresAt:null}] : [] },
     pricing: {
       monthlyBani: 15000,

@@ -1,4 +1,7 @@
 'use client';
+import PremiumSales from './premium-sales';
+import PremiumDownloads from './premium-downloads';
+import PremiumOverview from './premium-overview';
 import PremiumWorkspace from './premium-workspace';
 import './membership-premium.css';
 import { useApplicationLocale } from './application-locale';
@@ -227,9 +230,11 @@ export default function Membership({
   invoices,
   navigate,
   onRecord,
+  preview = false,
 }: {
   language?: 'ro' | 'en';
   data: Data;
+  preview?: boolean;
   navigate: (tab: string) => void;
   onRecord: (record: Data['records'][number]) => void;
   busy: boolean;
@@ -302,25 +307,37 @@ export default function Membership({
           </button>
         )}
       </section>
+      {data.premium ? (
+        <PremiumOverview data={data} language={language} preview={preview} navigate={navigate} />
+      ) : (
+        <PremiumSales language={language} attachmentLimit={data.planLimits.attachments} />
+      )}
       <PremiumWorkspace data={data} language={language} navigate={navigate} onRecord={onRecord} />
-      <PriceCards
-        monthlyBani={data.pricing.monthlyBani}
-        annualBani={data.pricing.annualBani}
-        busy={busy}
-        checkout={checkout}
-        language={language}
-      />
-      <p className="micro">
-        {language === 'en' && (
-          <strong>
-            EUR amounts are indicative at 1 EUR ≈ 5 RON. Checkout is billed in RON at the confirmed
-            Stripe price.{' '}
-          </strong>
-        )}
-        Tarife în RON. Plata se deschide numai dacă prețul procesatorului corespunde sumei afișate.
-        Accesul manual nu declanșează plăți. Abonamentele existente își păstrează condițiile din
-        portal.
-      </p>
+      {data.premium && <PremiumDownloads data={data} language={language} preview={preview} />}
+      {!data.premium && (
+        <div id="premium-plans">
+          <PriceCards
+            monthlyBani={data.pricing.monthlyBani}
+            annualBani={data.pricing.annualBani}
+            busy={busy}
+            checkout={checkout}
+            language={language}
+          />
+        </div>
+      )}
+      {!data.premium && (
+        <p className="micro">
+          {language === 'en' && (
+            <strong>
+              EUR amounts are indicative at 1 EUR ≈ 5 RON. Checkout is billed in RON at the
+              confirmed Stripe price.{' '}
+            </strong>
+          )}
+          Tarife în RON. Plata se deschide numai dacă prețul procesatorului corespunde sumei
+          afișate. Accesul manual nu declanșează plăți. Abonamentele existente își păstrează
+          condițiile din portal.
+        </p>
+      )}
       <section className="card">
         <h3>Istoricul facturării</h3>
         {invoices.length ? (

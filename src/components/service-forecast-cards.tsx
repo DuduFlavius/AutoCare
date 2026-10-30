@@ -1,27 +1,37 @@
 'use client';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import { useState } from 'react';
+import { maintenanceStatus } from '@/lib/maintenance-status';
 import { CalendarClock, TrendingUp } from 'lucide-react';
 import { useMileageUsage } from './use-mileage-usage';
 import { forecastService, forecastDuration } from '@/lib/service-forecast';
-type Due = { id: string; title: string; nextKm: number | null; expiresAt?: string | Date | null };
+type Due = {
+  id: string;
+  title: string;
+  nextKm: number | null;
+  lastKm?: number | null;
+  lastDate?: string | null;
+  expiresAt?: string | Date | null;
+};
 export default function ServiceForecastCards({
   vehicleId,
   currentKm,
   services,
   preview,
   timezone = 'Europe/Bucharest',
+  onUpdateMileage,
 }: {
   vehicleId: string;
   currentKm: number;
   services: Due[];
   preview: boolean;
   timezone?: string;
+  onUpdateMileage?: () => void;
 }) {
   const language = useApplicationLanguage(),
     locale = useApplicationLocale(),
     en = language === 'en';
-  const { confirmed, loading } = useMileageUsage(vehicleId, currentKm, preview);
+  const { confirmed, loading, lastReadingAt } = useMileageUsage(vehicleId, currentKm, preview);
   const [manual, setManual] = useState({ vehicleId, value: '' });
   const value = manual.vehicleId === vehicleId ? manual.value : '';
   const parsed = Number(value.replace(',', '.'));
@@ -45,6 +55,24 @@ export default function ServiceForecastCards({
           </p>
         </div>
       </header>
+      <div className="forecast-reading-stamp">
+        <p>
+          {en ? 'Confirmed odometer: ' : 'Kilometraj confirmat: '}
+          {new Intl.NumberFormat(locale).format(currentKm)} km
+          <br />
+          {lastReadingAt
+            ? (en ? 'Latest reading: ' : 'Ultima citire: ') +
+              new Date(lastReadingAt).toLocaleString(locale, { timeZone: timezone })
+            : en
+              ? 'No dated reading available. Update the odometer for a current estimate.'
+              : 'Nu există o citire datată disponibilă. Actualizează kilometrajul pentru o estimare curentă.'}
+        </p>
+        {onUpdateMileage && (
+          <button type="button" onClick={onUpdateMileage}>
+            {en ? 'Update mileage' : 'Actualizează kilometrajul'}
+          </button>
+        )}
+      </div>
       <label className="forecast-daily-input">
         {en
           ? 'Typical kilometers per day · optional'
@@ -79,11 +107,48 @@ export default function ServiceForecastCards({
           timezone,
         });
         if (!estimate) return null;
+        const status = maintenanceStatus({
+          currentKm,
+          nextKm: service.nextKm,
+          lastKm: service.lastKm,
+          lastDate: service.lastDate,
+          dueDate: raw,
+          timezone,
+        });
+        const { remainingKm: kmLeft, calendarDays, progress } = status;
+        const overdue = status.state === 'overdue',
+          due = status.state === 'due';
+        const soon =
+          status.state === 'soon' ||
+          (estimate.days !== null && estimate.days > 0 && estimate.days <= 30);
+        const state = overdue
+          ? en
+            ? 'Overdue'
+            : 'Depășit'
+          : due
+            ? en
+              ? 'Due'
+              : 'Scadent'
+            : soon
+              ? en
+                ? 'Due soon'
+                : 'Se apropie'
+              : en
+                ? 'Within interval'
+                : 'În termen';
         return (
           <article className="forecast-service-card" key={service.id}>
             <strong data-user-content>
               {service.title || (en ? 'Scheduled maintenance' : 'Revizie programată')}
             </strong>
+            <span
+              className={
+                'forecast-maintenance-state ' +
+                (overdue || due ? 'is-due' : soon ? 'is-soon' : 'is-valid')
+              }
+            >
+              {state}
+            </span>
             <div className="forecast-result">
               <span>
                 {loading && value === ''
@@ -97,6 +162,46 @@ export default function ServiceForecastCards({
                   {new Intl.NumberFormat(locale).format(estimate.remainingKm)}{' '}
                   {en ? 'km remaining' : 'km rămași'}
                 </small>
+              )}
+            </div>
+            <div className="forecast-thresholds">
+              {calendarDays !== null && (
+                <small>
+                  {en ? 'Calendar limit: ' : 'Limită de timp: '}
+                  {Math.abs(calendarDays)} {en ? 'days' : 'zile'}
+                  {calendarDays < 0
+                    ? en
+                      ? ' overdue'
+                      : ' depășite'
+                    : en
+                      ? ' remaining'
+                      : ' rămase'}{' '}
+                  · {raw}
+                </small>
+              )}
+              {service.nextKm !== null && (
+                <small>
+                  {en ? 'Mileage limit: ' : 'Prag kilometraj: '}
+                  {new Intl.NumberFormat(locale).format(service.nextKm)} km
+                  {kmLeft !== null && kmLeft < 0
+                    ? ' · ' +
+                      new Intl.NumberFormat(locale).format(Math.abs(kmLeft)) +
+                      (en ? ' km overdue' : ' km depășiți')
+                    : ''}
+                </small>
+              )}
+              {progress !== null && (
+                <label>
+                  {status.progressBasis === 'time'
+                    ? en
+                      ? 'Time interval used'
+                      : 'Interval de timp parcurs'
+                    : en
+                      ? 'Mileage interval used'
+                      : 'Interval parcurs'}{' '}
+                  · {progress}%
+                  <progress max={100} value={progress} />
+                </label>
               )}
             </div>
             {estimate.estimatedDate && (

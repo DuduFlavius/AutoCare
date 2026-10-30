@@ -20,7 +20,8 @@ export function serializeServiceDetails(parts: string, form: FormData, existingP
     if (!key.startsWith('ac_')) continue;
     const name = key.slice(3),
       content = String(value).trim().replace(/\r?\n/g, ' / ');
-    if (content) details[name] = content;
+    if (name === 'alertDays' && content === 'inherit') delete details[name];
+    else if (content || name === 'alertDays') details[name] = content;
     else delete details[name];
   }
   return [text, ...Object.entries(details).map(([key, value]) => prefix + key + ': ' + value)]
