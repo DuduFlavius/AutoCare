@@ -160,6 +160,8 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (method === 'PUT') return json(await mailCenter.saveCommunicationPreference(uid, await body(req)));
     }
     if (path[0] === 'founder') {
+      // Deny before reading inputs or dispatching any founder operation, including future routes.
+      await founder.requireFounder(uid);
       if (route === 'founder/mail' && method === 'GET') return json(await mailCenter.mailCenterOverview(uid));
       if (route === 'founder/mail/approve' && method === 'POST') return json(await mailCenter.approveMailAutomation(uid, await body(req)));
       if (route === 'founder/mail/preview' && method === 'POST') return json(await mailCenter.previewMail(uid, await body(req)));
