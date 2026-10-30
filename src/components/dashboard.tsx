@@ -270,6 +270,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     [settingsPanel,setSettingsPanel] = useState('account'),
     [language, setLanguage] = useState<'ro' | 'en'>('ro'),
     [currency, setCurrency] = useState<'RON' | 'EUR'>('RON'),
+    [signingOut,setSigningOut]=useState(false),
     [busy, setBusy] = useState(false),
     [modal, setModal] = useState<Modal>(null),
     [filter, setFilter] = useState(''),
@@ -892,19 +893,16 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
             </span>
             <ChevronDown size={16} />
           </button>
-          <button
-            className="autocare-header-signout"
-            aria-label="Deconectare"
-            title="Deconectare"
-            onClick={async () => {
-              if (previewData) return;
-              if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',locale==='ro-RO'?'ro':'en'))) return;
-              await authClient.signOut();
-              window.location.assign('/autentificare');
-            }}
-          >
-            <LogOut size={18} />
-          </button>
+          <button type="button" className="autocare-header-signout ws-signout" data-workspace-ui
+            aria-label={language==='en'?'Sign out':'Deconectare'} title={previewData?(language==='en'?'Unavailable in design preview':'Indisponibil în previzualizare'):(language==='en'?'Sign out':'Deconectare')}
+            disabled={signingOut||!!previewData} aria-busy={signingOut}
+            onClick={async()=>{
+              if(previewData||signingOut)return;
+              if(recordDirty&&!window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language)))return;
+              setSigningOut(true);setError('');
+              try{const result=await authClient.signOut();if(result.error)throw new Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.');window.location.assign('/autentificare');}
+              catch(error){setError(error instanceof Error?error.message:'Deconectarea nu a reușit. Încearcă din nou.');setSigningOut(false);}
+            }}><LogOut size={16}/><span>{signingOut?(language==='en'?'Signing out…':'Se deconectează…'):(language==='en'?'Sign out':'Deconectare')}</span></button>
         </div>
       </header>
       <nav className="autocare-mobile-dock" aria-label="Navigare rapidă">

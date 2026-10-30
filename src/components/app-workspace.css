@@ -154,4 +154,11 @@
 @container workspace-preview (max-width:560px){.app-shell.ac-workspace>.main{padding-top:22px!important}}
 .app-shell.ac-workspace .main input::placeholder{color:#71849f!important;-webkit-text-fill-color:#71849f!important;opacity:1!important}
 .app-shell.ac-workspace .maintenance-timeline tr.ac-maintenance-record>td .ac-premium-record-actions>label.small{color:#245a9b!important;-webkit-text-fill-color:#245a9b!important}
+
+.app-shell.ac-workspace>.app-header .autocare-header-actions>button.ws-signout{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;min-height:33px!important;padding:7px 11px!important;border:1px solid #24588f!important;border-radius:8px!important;background:#24588f!important;color:#fff!important;box-shadow:0 2px 7px #163c6420!important;flex-shrink:0!important;font-size:11px!important;font-weight:650!important;line-height:1.2!important;white-space:nowrap!important}
+.app-shell.ac-workspace>.app-header .ws-signout :is(svg,span){color:#fff!important;-webkit-text-fill-color:#fff!important;opacity:1!important}
+.app-shell.ac-workspace>.app-header .ws-signout:hover:not(:disabled){background:#194571!important}
+.app-shell.ac-workspace>.app-header .ws-signout:focus-visible{outline:3px solid #aacbf3!important;outline-offset:2px!important}
+@media(max-width:1100px){.app-shell.ac-workspace>.app-header .ws-signout span{display:none!important}.app-shell.ac-workspace>.app-header .autocare-header-actions>button.ws-signout{width:36px!important;min-width:36px!important;min-height:36px!important;padding:8px!important}}
+@container workspace-preview (max-width:900px){.app-shell.ac-workspace>.app-header .ws-signout span{display:none!important}.app-shell.ac-workspace>.app-header .autocare-header-actions>button.ws-signout{width:36px!important;min-width:36px!important;min-height:36px!important;padding:8px!important}}
 }
