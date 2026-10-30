@@ -7,6 +7,9 @@ export function completedServiceSeed<T extends MaintenanceSource>(
   date: string,
 ): T {
   const details = parseServiceDetails(record.parts || '');
+  if (!details.intervalIntretinere && !details.intervalUlei && !details.intervalDistributie && record.nextKm != null && record.odometer != null && record.nextKm > record.odometer) {
+    details[record.category === 'Schimb ulei' ? 'intervalUlei' : 'intervalIntretinere'] = String(record.nextKm - record.odometer);
+  }
   for (const key of Object.keys(details))
     if (
       /^(cost|completedBy|previousService)|^filtru\d+(Cost|Km|Data)$|^urmatoarea|^verificare|^expirare/.test(

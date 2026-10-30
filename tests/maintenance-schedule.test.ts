@@ -115,3 +115,14 @@ test('maintenance ranking shows overdue and due work before future work and reca
   assert.equal(changed.find((item) => item.service.id === 'soon')?.status.state, 'overdue');
   assert.equal(changed.find((item) => item.service.id === 'soon')?.status.remainingKm, -1000);
 });
+
+ test('completion derives a legacy mileage interval without copying the old absolute threshold or costs',async()=>{
+ const {completedServiceSeed}=await import('../src/lib/completed-service');
+ const {parseServiceDetails}=await import('../src/lib/service-details');
+ for(const category of ['Schimb ulei','Distribuție']){
+ const seed=completedServiceSeed({id:'legacy',title:'Legacy',category,odometer:80000,nextKm:95000,date:'2025-10-30',expiresAt:null,parts:''},95000,'2026-10-30');
+ const details=parseServiceDetails(seed.parts||'');
+ assert.equal(details[category==='Schimb ulei'?'intervalUlei':'intervalIntretinere'],'15000');
+ assert.equal(maintenanceSchedule({...seed,details}).nextKm,110000);
+ }
+ });
