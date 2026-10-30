@@ -1,3 +1,4 @@
+import { maintenanceSchedule } from './maintenance-schedule';
 import { recordCategory } from './record-categories';
 import { serializeServiceDetails } from './service-details';
 import { recordInput } from './validation';
@@ -25,27 +26,20 @@ export function recordDraftSchedule(
 ) {
   const value = (key: string) => String(f.get(key) || '').trim();
   const km = value('odometer') === '' ? null : Number(value('odometer'));
-  const oil = Number(interval) > 0 ? Number(interval) : Number(value('ac_intervalUlei'));
+  const details: Record<string, string> = {};
+  for (const [key, val] of f.entries())
+    if (key.startsWith('ac_')) details[key.slice(3)] = String(val).trim();
+  if (category === 'Schimb ulei' && interval) details.intervalUlei = interval;
   const next = value('nextKm') === '' ? null : Number(value('nextKm'));
-  const nextKm =
-    kind === 'service' &&
-    category === 'Schimb ulei' &&
-    next === null &&
-    km !== null &&
-    Number.isFinite(oil) &&
-    oil > 0
-      ? km + oil
-      : next;
-  const keys: Record<string, string> = {
-    ITP: 'ac_expirareITP',
-    Frâne: 'ac_verificareFrane',
-    Baterie: 'ac_verificareBaterie',
-    Distribuție: 'ac_urmatoareaDataDistributie',
-  };
-  const expiry =
-    value('expiresAt') ||
-    (kind === 'service' ? value(keys[category] || 'ac_urmatoareaVerificare') : '');
-  return { nextKm, expiresAt: expiry || null };
+  if (kind !== 'service') return { nextKm: next, expiresAt: value('expiresAt') || null };
+  return maintenanceSchedule({
+    category,
+    odometer: km,
+    nextKm: next,
+    expiresAt: value('expiresAt'),
+    date: value('date'),
+    details,
+  });
 }
 export function prepareRecordDraft(
   f: FormData,
@@ -64,6 +58,15 @@ export function prepareRecordDraft(
     options;
   const str = (k: string) => String(f.get(k) || '').trim();
   const num = (k: string) => (str(k) === '' ? null : Number(str(k)));
+  for (const [key, value] of f.entries())
+    if (
+      /^ac_(interval(?:Ulei|Distributie|Intretinere|Luni)|filtru\d+(?:Interval|Km))$/.test(key) &&
+      String(value).trim() !== ''
+    ) {
+      const n = Number(value);
+      if (!Number.isInteger(n) || n <= 0 || n > (key === 'ac_intervalLuni' ? 1200 : 99999999))
+        throw new Error('Intervalul trebuie să fie un număr întreg pozitiv, în limita câmpului.');
+    }
   const schedule = recordDraftSchedule(f, kind, category, serviceKmInterval);
   const computedNextKm = schedule.nextKm;
   const computedExpiry = schedule.expiresAt || '';

@@ -983,4 +983,5 @@ export const applicationCopy: Record<string, string> = {
 "Dacă suma este zero, introdu 0 RON. Dacă nu cunoști costul, bifează opțiunea de mai sus.": "If the amount is zero, enter RON 0. If the cost is unknown, select the option above.",
 "Service sau mecanic": "Garage or mechanic",
 "Furnizor": "Supplier",
+"Intervalul trebuie să fie un număr întreg pozitiv, în limita câmpului.": "The interval must be a positive whole number within the field limit.",
 };

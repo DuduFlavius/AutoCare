@@ -10,6 +10,8 @@ import Membership from './membership';
 import MobileInstall from './mobile-install';
 import PushSettings from './push-settings';
 import SmartDriveTrip from './smartdrive-trip';
+import MaintenanceForecast from './maintenance-forecast';
+import {maintenanceTargets} from '@/lib/maintenance-schedule';
 import ServiceForecastCards from './service-forecast-cards';
 import SmartDriveHistory from './smartdrive-history';
 import RecordEditor from './record-editor';
@@ -247,7 +249,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
                   </span>
                 </div>;
               })}</div>}
-            <ServiceForecastCards vehicleId={v.id} currentKm={v.odometer} preview={preview} timezone={data.profile.timezone} services={planned.map(r => ({id:r.id,title:r.title || r.category || 'Intervenție',nextKm:r.nextKm==null?null:Number(r.nextKm),expiresAt:r.expiresAt}))} />
+            <ServiceForecastCards vehicleId={v.id} currentKm={v.odometer} preview={preview} timezone={data.profile.timezone} services={data.records.filter(r=>r.vehicleId===v.id&&r.kind==='service'&&!r.cancelled).flatMap(maintenanceTargets)} />
             <p className="micro">Recomandare AutoCare: actualizează kilometrajul periodic. Intervalele se stabilesc după manualul producătorului și condițiile de utilizare.</p>
           </article>;
         })}
@@ -1400,6 +1402,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                     </div>
                   </div>
                 )}
+                {tab === 'Întreținere' && <MaintenanceForecast data={data} records={visible} preview={!!previewData}/>}
                 {tab === 'Întreținere' &&
                   visible.some(
                     (r) =>
@@ -1893,6 +1896,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                 language={language}
                 data={data}
                 invoices={invoices}
+                navigate={navigate}
+                onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}
                 busy={busy}
                 checkout={(interval) =>
                   void act(async () => {

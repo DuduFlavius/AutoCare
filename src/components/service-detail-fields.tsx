@@ -32,7 +32,7 @@ export default function ServiceDetailFields({category,parts}:{category:string;pa
  :<input name={'ac_'+f.key} type={f.type||'text'} step={f.type==='number'?'0.01':undefined} min={f.type==='number'?0:undefined} defaultValue={saved[f.key]||''} placeholder={f.placeholder||'Opțional'}/>}</label>;
  return <section className="ac-service-details" aria-label={config.heading}>
  <div className="ac-service-heading"><h3>{config.heading}</h3><span>Completează ce cunoști</span></div>
- {config.fields.length>0&&<div className="form-grid">{config.fields.filter(f=>!(category==='Schimb ulei'&&f.key==='intervalUlei')).map(render)}</div>}
+ {config.fields.length>0&&<div className="form-grid">{config.fields.filter(f=>!((category==='Schimb ulei'&&f.key==='intervalUlei')||(category==='Distribuție'&&f.key==='intervalDistributie'))).map(render)}</div>}
  {['Filtre','Schimb ulei'].includes(category)&&<div className="ac-filter-list">{Array.from({length:filters},(_,i)=><div className="ac-filter-item" key={i}><strong>Filtrul {i+1}</strong><div className="form-grid">
  {render(field('filtru'+i+'Tip','Tip filtru','select',['Ulei','Aer','Habitaclu','Combustibil','Alt filtru']))}
  {render(field('filtru'+i+'Marca','Marcă / cod piesă'))}

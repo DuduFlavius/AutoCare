@@ -542,6 +542,39 @@ export default function RecordEditor({
                 <h3>Următoarea intervenție</h3>
                 <p className="micro">Completează doar intervalele recomandate pentru mașina ta.</p>
                 <div className="form-grid">
+                  {category !== 'Schimb ulei' && (
+                    <label data-workspace-ui>
+                      {en
+                        ? 'Repeat after · km (optional)'
+                        : 'Interval între intervenții · km (opțional)'}
+                      <input
+                        name="ac_intervalIntretinere"
+                        type="number"
+                        min="1"
+                        step="1"
+                        defaultValue={
+                          parseServiceDetails(record?.parts || '').intervalIntretinere ||
+                          (category === 'Distribuție'
+                            ? parseServiceDetails(record?.parts || '').intervalDistributie
+                            : '') ||
+                          ''
+                        }
+                      />
+                    </label>
+                  )}
+                  <label data-workspace-ui>
+                    {en
+                      ? 'Repeat after · months (optional)'
+                      : 'Interval între intervenții · luni (opțional)'}
+                    <input
+                      name="ac_intervalLuni"
+                      type="number"
+                      min="1"
+                      max="1200"
+                      step="1"
+                      defaultValue={parseServiceDetails(record?.parts || '').intervalLuni || ''}
+                    />
+                  </label>
                   <label>
                     Data planificată
                     <input name="expiresAt" type="date" defaultValue={record?.expiresAt || ''} />

@@ -1,0 +1,345 @@
+@layer autocare-membership {
+  .ac-plan-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+    margin: 24px 0 !important;
+  }
+  .ac-plan-grid > .ac-plan-card {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 24px !important;
+    border: 1px solid #dce5f2 !important;
+    border-radius: 18px !important;
+    background: #fff !important;
+    box-shadow: 0 6px 22px #17345508 !important;
+    position: relative !important;
+  }
+  .ac-plan-grid > .annual-option {
+    border-color: #88a8de !important;
+    background: linear-gradient(150deg, #f6f9ff, #fff) !important;
+  }
+  .ac-plan-card .subscription-symbol {
+    display: grid !important;
+    place-items: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 11px !important;
+    background: #edf3fe !important;
+    color: #315e9d !important;
+    margin: 0 0 16px !important;
+  }
+  .ac-plan-card .eyebrow {
+    font-size: 9px !important;
+    letter-spacing: 1.5px !important;
+    margin: 0 0 10px !important;
+  }
+  .ac-plan-card h2 {
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+    letter-spacing: -0.4px !important;
+    margin: 0 0 18px !important;
+  }
+  .ac-plan-card .subscription-price {
+    font-size: 38px !important;
+    font-weight: 750 !important;
+    line-height: 1.2 !important;
+    margin: 0 0 7px !important;
+    letter-spacing: -1px !important;
+    color: #20477d !important;
+  }
+  .ac-plan-card .subscription-price > span {
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+  .ac-plan-card > p.small,
+  .ac-plan-card > .savings {
+    font-size: 11px !important;
+    line-height: 1.6 !important;
+    min-height: 36px !important;
+    margin: 0 0 14px !important;
+    color: #647a97 !important;
+  }
+  .ac-plan-card .savings {
+    padding: 7px 9px !important;
+    border: 1px solid #b4d9ce !important;
+    border-radius: 8px !important;
+    background: #edf7f3 !important;
+    align-self: flex-start !important;
+    color: #28604e !important;
+  }
+  .ac-plan-card ul {
+    display: grid !important;
+    gap: 11px !important;
+    margin: 13px 0 24px !important;
+    padding: 0 !important;
+    list-style: none !important;
+    flex: 1 !important;
+  }
+  .ac-plan-card li {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: flex-start !important;
+    font-size: 11px !important;
+    line-height: 1.65 !important;
+    color: #536c8b !important;
+    margin: 0 !important;
+  }
+  .ac-plan-card li > svg {
+    flex: 0 0 15px !important;
+    margin-top: 2px !important;
+    color: #2d6a99 !important;
+  }
+  .ac-plan-card > .button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-height: 44px !important;
+    width: 100% !important;
+    padding: 11px 12px !important;
+    margin-top: auto !important;
+    border: 1px solid #b6ccee !important;
+    border-radius: 10px !important;
+    background: #e7effd !important;
+    color: #214d8a !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    white-space: normal !important;
+    box-sizing: border-box !important;
+  }
+  .ac-plan-card.annual-option > .button {
+    background: #2b59a5 !important;
+    color: white !important;
+    border-color: #2b59a5 !important;
+  }
+  .ac-plan-card .best-plan {
+    position: static !important;
+    align-self: flex-start !important;
+    order: -1 !important;
+    margin: 0 0 14px !important;
+    padding: 5px 7px !important;
+    font-size: 8px !important;
+    line-height: 1.4 !important;
+    background: #e4edfc !important;
+    color: #345b95 !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+  }
+  .ac-premium-tools {
+    border: 1px solid #dce5f2 !important;
+    border-radius: 18px !important;
+    background: white !important;
+    padding: 24px !important;
+    margin: 20px 0 !important;
+    color: #203b5b !important;
+  }
+  .ac-premium-tools > header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+  .ac-premium-tools-mark {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    background: #edf4ff;
+    border-radius: 12px;
+    color: #38639e;
+    flex: none;
+  }
+  .ac-premium-tools header p {
+    font-size: 9px !important;
+    letter-spacing: 1.3px !important;
+    margin: 0 0 5px !important;
+    color: #7188a5 !important;
+  }
+  .ac-premium-tools h2 {
+    font-size: 22px !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+    color: #203b5b !important;
+  }
+  .ac-premium-tools > p,
+  .ac-premium-priorities > p {
+    font-size: 12px !important;
+    line-height: 1.7 !important;
+    color: #6a809c !important;
+    margin: 14px 0 20px !important;
+  }
+  .ac-premium-tools-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+  .ac-premium-tools-grid > :is(button, article) {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    text-align: left !important;
+    padding: 16px !important;
+    border: 1px solid #e1e8f2 !important;
+    border-radius: 12px !important;
+    background: #f9fbff !important;
+    min-width: 0 !important;
+    color: #28538b !important;
+    box-shadow: none !important;
+    height: auto !important;
+    white-space: normal !important;
+  }
+  .ac-premium-tools-grid strong {
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    color: #24466e !important;
+  }
+  .ac-premium-tools-grid span {
+    font-size: 11px !important;
+    line-height: 1.65 !important;
+    color: #6b809c !important;
+  }
+  .ac-premium-tools-grid svg:last-child:not(:first-child) {
+    position: absolute;
+    top: 16px;
+    right: 14px;
+  }
+  .ac-premium-tools button:focus-visible,
+  .ac-plan-card > .button:focus-visible {
+    outline: 3px solid #9dbbe9 !important;
+    outline-offset: 3px !important;
+  }
+  .ac-premium-priorities {
+    margin-top: 24px !important;
+    border-top: 1px solid #e2e9f2 !important;
+    padding-top: 20px !important;
+  }
+  .ac-premium-priorities > header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    color: #a27832 !important;
+  }
+  .ac-premium-priorities h3 {
+    font-size: 16px !important;
+    margin: 0 !important;
+  }
+  .ac-premium-priorities > header > span {
+    margin-left: auto;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #edf3fb;
+    font-size: 11px;
+    color: #385d88;
+  }
+  .ac-premium-priorities > button {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    padding: 13px 10px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #e9edf4 !important;
+    border-radius: 0 !important;
+    background: white !important;
+    color: #315b8c !important;
+    text-align: left !important;
+    box-shadow: none !important;
+    white-space: normal !important;
+    height: auto !important;
+  }
+  .ac-premium-priorities > button > span:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+  .ac-premium-priorities > button > span {
+    display: grid;
+    gap: 5px;
+  }
+  .ac-premium-priorities strong {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+  .ac-premium-priorities small {
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+    color: #6d829c !important;
+  }
+  .ac-premium-priorities .is-due > span:nth-child(2) small {
+    color: #a14c41 !important;
+  }
+  .ac-premium-clear {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 15px;
+    border-radius: 10px;
+    background: #f0f8f4;
+    color: #36765b;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  @media (max-width: 1100px) {
+    .ac-premium-tools-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    .ac-plan-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    .ac-plan-grid > .annual-option {
+      grid-column: 1/-1 !important;
+    }
+  }
+  @media (max-width: 650px) {
+    .ac-plan-grid {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+    .ac-plan-grid > .annual-option {
+      grid-column: auto !important;
+    }
+    .ac-plan-grid > .ac-plan-card,
+    .ac-premium-tools {
+      padding: 20px !important;
+    }
+    .ac-premium-tools-grid {
+      gap: 9px !important;
+    }
+    .ac-premium-tools-grid > :is(button, article) {
+      padding: 13px !important;
+    }
+    .ac-premium-tools h2 {
+      font-size: 19px !important;
+    }
+    .ac-premium-priorities > button {
+      flex-wrap: wrap !important;
+    }
+  }
+  @container workspace-preview (max-width:650px) {
+    .ac-plan-grid {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+    .ac-plan-grid > .annual-option {
+      grid-column: auto !important;
+    }
+    .ac-premium-tools-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    .ac-plan-grid > .ac-plan-card,
+    .ac-premium-tools {
+      padding: 18px !important;
+    }
+    .ac-premium-tools h2 {
+      font-size: 19px !important;
+    }
+  }
+}

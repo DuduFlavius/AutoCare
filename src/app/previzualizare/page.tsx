@@ -8,7 +8,7 @@ export const metadata = { title: 'Previzualizare design', robots: { index: false
 export default async function DesignPreview({
   searchParams,
 }: {
-  searchParams: Promise<{ echipa?: string; device?:string; tab?:string }>;
+  searchParams: Promise<{ echipa?: string; device?:string; tab?:string; plan?:string }>;
 }) {
   const previewOptions = await searchParams;
   if (process.env.VERCEL_ENV === 'production') notFound();
@@ -92,11 +92,11 @@ export default async function DesignPreview({
     },
     vehicles,
     records,
-    premium: false,
-    premiumAccess: { paid: false, manual: [] },
+    premium: previewOptions.plan === 'premium',
+    premiumAccess: { paid: false, manual: previewOptions.plan === 'premium' ? [{id:'design-only-grant',grantedAt:now,expiresAt:null}] : [] },
     pricing: {
-      monthlyBani: 5000,
-      annualBani: 50000,
+      monthlyBani: 15000,
+      annualBani: 170000,
       currency: 'ron',
       annualMonthlyBani: 60000,
       savingBani: 10000,
