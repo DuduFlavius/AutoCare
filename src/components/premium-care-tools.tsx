@@ -36,7 +36,7 @@ export default function PremiumCareTools({
     );
   const money = (b: number) =>
     new Intl.NumberFormat(en ? 'en-GB' : 'ro-RO', { style: 'currency', currency: en ? 'EUR' : 'RON' }).format(
-      b / 100,
+      b / (en ? 500 : 100),
     );
   useEffect(() => {
     if (preview) return;
