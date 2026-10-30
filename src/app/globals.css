@@ -935,3 +935,12 @@ summary + p {
 .autocare-notification-content small{color:#46566f!important;font-size:.83rem;line-height:1.4}
 .autocare-notification-remove{display:inline-flex;gap:6px;align-items:center;flex-shrink:0;background:#e5efff;color:#174ea6!important;border-radius:9px;padding:9px 12px;font-size:.85rem;font-weight:750}
 @media(max-width:600px){.autocare-notification{padding:14px;align-items:flex-start;flex-direction:column}.autocare-notification-remove{align-self:flex-end}}
+
+.ac-daily-usage{display:block;text-align:left;font-weight:400;max-width:100%;margin-top:10px}
+.ac-daily-usage summary{cursor:pointer;font-size:12px;color:#3158a4;padding:8px 0}
+.ac-daily-usage-body{display:flex;flex-wrap:wrap;align-items:end;gap:8px;max-width:100%}
+.ac-daily-usage label{display:grid;gap:5px;flex:1 1 120px;min-width:0;font-size:12px}
+.ac-daily-usage input{width:100%;min-width:0;box-sizing:border-box;min-height:40px;border:1px solid #afc5ed;border-radius:10px;padding:8px;background:#f4f7ff;color:#173467}
+.ac-daily-usage button{min-height:40px;border:1px solid #afc5ed;border-radius:10px;padding:8px 12px;background:#e4edff;color:#173467;font-size:12px}
+.ac-daily-usage small{flex-basis:100%;font-size:11px;line-height:1.5}
+.ac-daily-usage button:disabled{opacity:.6}

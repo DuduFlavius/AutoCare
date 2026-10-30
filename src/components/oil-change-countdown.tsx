@@ -1,4 +1,5 @@
 'use client';
+import DailyMileageInput from './daily-mileage-input';
 import { useMileageUsage } from './use-mileage-usage';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import { forecastService } from '@/lib/service-forecast';
@@ -24,16 +25,17 @@ export default function OilChangeCountdown({
   const language = useApplicationLanguage(),
     locale = useApplicationLocale(),
     en = language === 'en';
-  const { confirmed, loading } = useMileageUsage(vehicleId, currentKm, preview);
+  const usage = useMileageUsage(vehicleId, currentKm, preview);
+  const { dailyKm, manualDailyKm, loading } = usage;
   const estimate = forecastService({
     currentKm,
     nextKm,
-    averageKmPerDay: confirmed?.dailyKm,
+    averageKmPerDay: dailyKm,
     dueDate,
     timezone,
   });
   const days = estimate?.days;
-  if (loading && days !== 0)
+  if (loading && days !== 0 && dailyKm === null)
     return (
       <span className="oil-countdown" data-workspace-ui>
         {en ? 'Calculating…' : 'Se calculează…'}
@@ -60,6 +62,7 @@ export default function OilChangeCountdown({
           : en
             ? 'Insufficient readings'
             : 'Citiri insuficiente'}
+        <DailyMileageInput key={vehicleId} usage={usage} />
         <button type="button" onClick={onReadings}>
           {en ? 'Update mileage' : 'Actualizează kilometrajul'}
         </button>
@@ -98,9 +101,10 @@ export default function OilChangeCountdown({
               ? 'Calendar deadline'
               : 'Termen calendaristic'
             : en
-              ? 'Estimate from confirmed mileage'
-              : 'Estimare din kilometrajul confirmat'}
+              ? `Estimate · ${dailyKm} km/day${manualDailyKm !== null ? ' · your average' : ''}`
+              : `Estimare · ${dailyKm} km/zi${manualDailyKm !== null ? ' · media ta' : ''}`}
       </small>
+      <DailyMileageInput key={vehicleId} usage={usage} />
     </span>
   );
 }

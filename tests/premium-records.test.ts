@@ -281,3 +281,25 @@ test('every catalog category round-trips through the existing API without a new 
   assert.equal(final.records.length, initial.records.length + count);
   assert.equal(final.summary.monthBani, initial.summary.monthBani + count * 100);
 });
+
+test('daily usage is stored per owned vehicle and reused after reload', async () => {
+  const path = `vehicles/${vehicleId}/daily-usage`;
+  assert.deepEqual(await api(path), { dailyKm: null });
+  assert.deepEqual(await api(path, 'POST', { dailyKm: 70 }), { dailyKm: 70 });
+  assert.deepEqual(await api(path), { dailyKm: 70 });
+  const today = new Date('2030-01-01T12:00:00Z');
+  const estimate = forecastService({ currentKm: 83000, nextKm: 150000, averageKmPerDay: (await api(path)).dailyKm, today });
+  assert.equal(estimate?.days, 958);
+  assert.equal(forecastService({ currentKm: 83000, nextKm: 83150, averageKmPerDay: 70, today })?.days, 3);
+  assert.equal(forecastService({ currentKm: 84000, nextKm: 150000, averageKmPerDay: 70, today })?.days, 943);
+  assert.equal(forecastService({ currentKm: 83000, nextKm: 150000, averageKmPerDay: 70, dueDate: '2030-02-01', today })?.days, 31);
+  for (const dailyKm of [0, -1, 2001, '70']) {
+    const response = await POST(new Request('http://localhost:3000/api/v1/' + path, { method: 'POST', headers: { Origin: 'http://localhost:3000', Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ dailyKm }) }), { params: Promise.resolve({ path: path.split('/') }) });
+    assert.equal(response.status, 400);
+  }
+  const missing = `vehicles/${crypto.randomUUID()}/daily-usage`;
+  const denied = await POST(new Request('http://localhost:3000/api/v1/' + missing, { method: 'POST', headers: { Origin: 'http://localhost:3000', Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ dailyKm: 70 }) }), { params: Promise.resolve({ path: missing.split('/') }) });
+  assert.equal(denied.status, 404);
+  assert.deepEqual(await api(path), { dailyKm: 70 });
+  assert.deepEqual(await api(path, 'POST', { dailyKm: null }), { dailyKm: null });
+});

@@ -1,6 +1,6 @@
 'use client';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
-import { useState } from 'react';
+import DailyMileageInput from './daily-mileage-input';
 import { rankMaintenanceForecasts } from '@/lib/maintenance-schedule';
 import { CalendarClock, TrendingUp } from 'lucide-react';
 import { useMileageUsage } from './use-mileage-usage';
@@ -31,12 +31,8 @@ export default function ServiceForecastCards({
   const language = useApplicationLanguage(),
     locale = useApplicationLocale(),
     en = language === 'en';
-  const { confirmed, loading, lastReadingAt } = useMileageUsage(vehicleId, currentKm, preview);
-  const [manual, setManual] = useState({ vehicleId, value: '' });
-  const value = manual.vehicleId === vehicleId ? manual.value : '';
-  const parsed = Number(value.replace(',', '.'));
-  const invalid = value !== '' && (!Number.isFinite(parsed) || parsed <= 0 || parsed > 2000);
-  const dailyKm = value !== '' && !invalid ? parsed : (confirmed?.dailyKm ?? null);
+  const usage = useMileageUsage(vehicleId, currentKm, preview);
+  const { confirmed, loading, lastReadingAt, dailyKm, manualDailyKm } = usage;
   if (!services.length) return null;
   return (
     <section
@@ -73,28 +69,8 @@ export default function ServiceForecastCards({
           </button>
         )}
       </div>
-      <label className="forecast-daily-input">
-        {en
-          ? 'Typical kilometers per day · optional'
-          : 'Kilometri parcurși într-o zi obișnuită · opțional'}
-        <input
-          type="number"
-          min="1"
-          max="2000"
-          value={value}
-          onChange={(e) => setManual({ vehicleId, value: e.target.value })}
-          aria-invalid={invalid || undefined}
-          placeholder={confirmed?.dailyKm ? Math.round(confirmed.dailyKm).toString() : '40'}
-        />
-      </label>
-      {invalid && (
-        <p role="alert">
-          {en
-            ? 'Enter a daily average between 1 and 2,000 km.'
-            : 'Introdu o medie zilnică între 1 și 2.000 km.'}
-        </p>
-      )}
-      {rankMaintenanceForecasts(services, currentKm, invalid ? null : dailyKm, timezone).map(
+      <DailyMileageInput key={vehicleId} usage={usage} />
+      {rankMaintenanceForecasts(services, currentKm, dailyKm, timezone).map(
         ({ service, estimate, status, raw }) => {
           if (!estimate) return null;
           const { remainingKm: kmLeft, calendarDays, progress } = status;
@@ -133,7 +109,7 @@ export default function ServiceForecastCards({
               </span>
               <div className="forecast-result">
                 <span>
-                  {loading && value === ''
+                  {loading && manualDailyKm === null
                     ? en
                       ? 'Updating estimate…'
                       : 'Se actualizează estimarea…'
@@ -220,10 +196,10 @@ export default function ServiceForecastCards({
       )}
       <p className="forecast-source">
         <TrendingUp size={14} />
-        {value !== '' && !invalid
+        {manualDailyKm !== null
           ? en
-            ? 'Using your daily average.'
-            : 'Se folosește media introdusă de tine.'
+            ? `Using your saved average: ${manualDailyKm} km/day, for all maintenance on this vehicle.`
+            : `Se folosește media salvată de tine: ${manualDailyKm} km/zi, pentru toată întreținerea acestei mașini.`
           : confirmed?.dailyKm != null
             ? en
               ? `Based on ${confirmed.samples} readings over ${Math.round(confirmed.sampleDays)} days.`

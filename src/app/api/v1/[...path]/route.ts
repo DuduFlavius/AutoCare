@@ -206,6 +206,19 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       await founder.requireFounder(uid);
       return json({ error: 'Rută inexistentă.' }, 404);
     }
+    if (path.length === 3 && path[0] === 'vehicles' && path[2] === 'daily-usage' && (method === 'GET' || method === 'POST')) {
+      const vehicleId = uuid.parse(path[1]);
+      const car = (await db().select({ id: s.vehicles.id }).from(s.vehicles).where(and(eq(s.vehicles.id, vehicleId), eq(s.vehicles.userId, uid))))[0];
+      if (!car) throw new svc.AppError(404, 'Mașină inexistentă.');
+      const key = `daily-usage:${uid}:${vehicleId}`;
+      if (method === 'POST') {
+        const value = z.object({ dailyKm: z.number().min(1).max(2000).nullable() }).parse(await body(req));
+        await db().insert(s.settings).values({ key, value }).onConflictDoUpdate({ target: s.settings.key, set: { value } });
+        return json(value);
+      }
+      const row = (await db().select().from(s.settings).where(eq(s.settings.key, key)))[0];
+      return json(row?.value ?? { dailyKm: null });
+    }
     if (route === 'dashboard' && method === 'GET') return json(await svc.dashboard(uid));
     if (path.length === 2 && path[0] === 'notifications' && method === 'DELETE') {
       const id = uuid.parse(path[1]);
