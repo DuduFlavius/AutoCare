@@ -177,4 +177,14 @@
 .ac-workspace .ws-navigation .ws-premium-state{margin-left:auto!important;padding:3px 6px!important;border-radius:5px!important;background:#e6f4ed!important;color:#25614d!important;font-size:9px!important;line-height:1.2!important}
 @media(max-width:1100px){.app-shell.ac-workspace .ws-premium-access>span{display:none!important}.app-shell.ac-workspace>.app-header .autocare-header-actions>.ws-premium-access{padding:8px!important;width:36px!important}}
 @container workspace-preview (max-width:900px){.app-shell.ac-workspace .ws-premium-access>span{display:none!important}.app-shell.ac-workspace>.app-header .autocare-header-actions>.ws-premium-access{padding:8px!important;width:36px!important}}
+
+/* Summary cards must grow to fit all three records and the monthly total. */
+html body .app-shell.ac-workspace .ac-premium-dashboard .ac-premium-bottom-grid>.ac-premium-panel:not(.ac-premium-quick){height:auto!important;max-height:none!important;min-height:170px!important;display:flex!important;flex-direction:column!important;gap:10px!important;padding:16px!important}
+html body .app-shell.ac-workspace .ac-premium-dashboard .ac-premium-list-row{height:auto!important;min-height:60px!important;flex:0 0 auto!important;padding:10px 12px!important;margin:0!important;line-height:1.5!important}
+html body .app-shell.ac-workspace .ac-premium-dashboard .ac-premium-section-heading{flex:0 0 auto!important;flex-wrap:wrap!important;gap:10px!important;margin:0 0 8px!important}
+html body .app-shell.ac-workspace .ac-premium-dashboard .ac-premium-month-total{position:relative!important;flex:0 0 auto!important;margin-top:auto!important;padding-top:12px!important}
+.app-shell.ac-workspace .ac-timing-summary{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;gap:24px!important;align-items:center!important;height:auto!important;padding:22px!important}
+.app-shell.ac-workspace .ac-timing-summary h3{margin:12px 0 6px!important;font-size:23px!important;color:#17345a!important}.app-shell.ac-workspace .ac-timing-summary p{margin:0 0 8px!important;color:#315d91!important}.app-shell.ac-workspace .ac-timing-summary small{font-size:11px!important;color:#607a9a!important}.app-shell.ac-workspace .ac-timing-summary>button{min-height:44px!important;white-space:normal!important}
+@media(max-width:780px){.app-shell.ac-workspace .ac-timing-summary{grid-template-columns:1fr!important;gap:16px!important}}
+@container workspace-preview(max-width:780px){.app-shell.ac-workspace .ac-timing-summary{grid-template-columns:1fr!important;gap:16px!important}}
 }

@@ -986,4 +986,6 @@ export const applicationCopy: Record<string, string> = {
 "Intervalul trebuie să fie un număr întreg pozitiv, în limita câmpului.": "The interval must be a positive whole number within the field limit.",
 "Intervalele și alertele avansate necesită Premium.":"Advanced intervals and reminders require Premium.",
 "Verifică pragurile alertelor introduse.":"Check the reminder thresholds entered.",
+"Spațiul tău Premium":"Your Premium workspace",
+"Întreținerea, rapoartele și toate instrumentele tale Premium.":"Your maintenance, reports and all your Premium tools.",
 };

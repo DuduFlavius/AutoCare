@@ -2,6 +2,7 @@
 import {useApplicationLocale} from './application-locale';
 import {parseServiceDetails} from '@/lib/service-details';
 import OilChangeCountdown from './oil-change-countdown';
+import { maintenanceSchedule } from '@/lib/maintenance-schedule';
 import { useState } from 'react';
 import { dashboardHome } from '@/lib/dashboard-home';
 import {
@@ -80,6 +81,14 @@ const home = dashboardHome(data);
     const label = [r.category, r.title].filter(Boolean).join(' ').toLocaleLowerCase('ro-RO');
     return /ulei/.test(label) && /(schimb|motor|revizie)/.test(label);
   }).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.odometer ?? 0) - (a.odometer ?? 0));
+  const lastTiming = home.services
+    .filter((r) => r.vehicleId === car?.id && r.category === 'Distribuție')
+    .sort(
+      (a, b) => (b.date || '').localeCompare(a.date || '') || (b.odometer ?? 0) - (a.odometer ?? 0),
+    )[0];
+  const timing = lastTiming
+    ? maintenanceSchedule({ ...lastTiming, details: parseServiceDetails(lastTiming.parts || '') })
+    : null;
   const lastOil = oilChanges[0];
   const savedOilInterval = parseServiceDetails(lastOil?.parts || '').intervalUlei || lastOil?.parts?.match(/(?:^|\n)\[ac:intervalUlei\]:\s*(\d+(?:[.,]\d+)?)/)?.[1];
   const parsedOilInterval = savedOilInterval ? Number(savedOilInterval.replace(',', '.')) : null;
@@ -185,6 +194,51 @@ const home = dashboardHome(data);
           <button type="button" onClick={() => navigate('Calendar')}>Vezi calendarul <ArrowRight size={16}/></button>
         </section>
       </div>
+      {data.premium && car && (
+        <section className="ac-premium-panel ac-timing-summary" data-workspace-ui>
+          <div>
+            <span className="ac-premium-kicker">
+              <Wrench size={18} />
+              {language === 'en'
+                ? 'NEXT TIMING BELT / CHAIN SERVICE'
+                : 'URMĂTORUL SCHIMB DE DISTRIBUȚIE'}
+            </span>
+            <h3>
+              {timing?.nextKm != null
+                ? `${language === 'en' ? 'At' : 'La'} ${timing.nextKm.toLocaleString(locale)} km`
+                : language === 'en'
+                  ? 'Set your service interval'
+                  : 'Configurează intervalul de schimb'}
+            </h3>
+            <p>
+              {timing?.nextKm != null
+                ? `${Math.abs(timing.nextKm - car.odometer).toLocaleString(locale)} ${timing.nextKm < car.odometer ? (language === 'en' ? 'km overdue' : 'km depășiți') : language === 'en' ? 'km remaining' : 'km rămași'}`
+                : language === 'en'
+                  ? 'Use the interval specified for your engine.'
+                  : 'Folosește intervalul specific motorului tău.'}
+            </p>
+            <small>
+              {language === 'en'
+                ? 'Based on manually confirmed mileage. GPS is not required.'
+                : 'Pe baza kilometrilor confirmați manual. Nu necesită GPS.'}
+            </small>
+          </div>
+          <OilChangeCountdown
+            vehicleId={car.id}
+            currentKm={car.odometer}
+            nextKm={timing?.nextKm ?? null}
+            dueDate={timing?.expiresAt}
+            timezone={data.profile.timezone}
+            preview={preview}
+            onReadings={() => navigate('Kilometraj')}
+            serviceLabel={language === 'en' ? 'Timing service due' : 'Distribuție scadentă'}
+          />
+          <button type="button" onClick={() => (lastTiming ? open(lastTiming) : add('service'))}>
+            {language === 'en' ? 'Configure timing service' : 'Configurează distribuția'}{' '}
+            <ArrowRight size={15} />
+          </button>
+        </section>
+      )}
       <div className="ac-premium-bottom-grid">
         <section className="ac-premium-panel ac-premium-list ac-premium-illustrated ac-premium-illustrated-1">
           <img className="ac-premium-card-art" src="/images/autocare-documents-premium.svg" alt="" aria-hidden="true" loading="lazy" decoding="async" />

@@ -10,7 +10,9 @@ export default function OilChangeCountdown({
   timezone,
   preview,
   onReadings,
+  serviceLabel,
 }: {
+  serviceLabel?: string;
   vehicleId: string;
   currentKm: number;
   nextKm: number | null;
@@ -40,7 +42,7 @@ export default function OilChangeCountdown({
   if (days === 0)
     return (
       <span className="oil-countdown oil-countdown-due" data-workspace-ui>
-        {en ? 'Oil change due' : 'Schimb scadent'}
+        {serviceLabel || (en ? 'Oil change due' : 'Schimb scadent')}
         <small>
           {en
             ? 'Mileage or calendar deadline reached'

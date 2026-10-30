@@ -1,3 +1,5 @@
+import { forecastService } from './service-forecast';
+import { maintenanceStatus } from './maintenance-status';
 import { parseServiceDetails } from './service-details';
 const positive = (value: string | undefined) => {
   const n = Number(value);
@@ -141,4 +143,49 @@ export function maintenanceTargets(record: MaintenanceSource) {
       });
   }
   return targets;
+}
+
+export function rankMaintenanceForecasts<
+  T extends { nextKm: number | null; expiresAt?: string | Date | null },
+>(
+  services: T[],
+  currentKm: number,
+  averageKmPerDay: number | null,
+  timezone: string,
+  today = new Date(),
+) {
+  return services
+    .map((service) => {
+      const raw =
+        service.expiresAt instanceof Date
+          ? service.expiresAt.toISOString().slice(0, 10)
+          : service.expiresAt;
+      const estimate = forecastService({
+        currentKm,
+        nextKm: service.nextKm,
+        averageKmPerDay,
+        dueDate: raw,
+        timezone,
+        today,
+      });
+      const status = maintenanceStatus({
+        currentKm,
+        nextKm: service.nextKm,
+        dueDate: raw,
+        timezone,
+        today,
+      });
+      return { service, estimate, status, raw };
+    })
+    .sort(
+      (a, b) =>
+        ((({ overdue: 0, due: 1, soon: 2, valid: 3, unscheduled: 4 }) as Record<string, number>)[
+          a.status.state
+        ] ?? 4) -
+          (({ overdue: 0, due: 1, soon: 2, valid: 3, unscheduled: 4 } as Record<string, number>)[
+            b.status.state
+          ] ?? 4) ||
+        (a.estimate?.days ?? Infinity) - (b.estimate?.days ?? Infinity) ||
+        (a.status.remainingKm ?? Infinity) - (b.status.remainingKm ?? Infinity),
+    );
 }

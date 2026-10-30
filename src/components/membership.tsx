@@ -298,7 +298,16 @@ export default function Membership({
           </div>
           <div>
             <span className="small muted">Garaj</span>
-            <strong>{data.vehicles.filter((v) => !v.archived).length} mașini active</strong>
+            <strong data-workspace-ui>
+              {data.vehicles.filter((v) => !v.archived).length}{' '}
+              {language === 'en'
+                ? data.vehicles.filter((v) => !v.archived).length === 1
+                  ? 'active vehicle'
+                  : 'active vehicles'
+                : data.vehicles.filter((v) => !v.archived).length === 1
+                  ? 'mașină activă'
+                  : 'mașini active'}
+            </strong>
           </div>
         </div>
         {data.subscription?.customerId && (

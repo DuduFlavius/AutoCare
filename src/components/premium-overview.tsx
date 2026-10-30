@@ -35,8 +35,8 @@ export default function PremiumOverview({
         <h2>{en ? 'Your next journey starts here.' : 'Următorul drum începe aici.'}</h2>
         <span>
           {en
-            ? 'Your tools, maintenance and downloads, without purchase offers.'
-            : 'Instrumentele, întreținerea și descărcările tale, fără oferte de cumpărare.'}
+            ? 'Your vehicles, maintenance and reports, in one place.'
+            : 'Mașinile, întreținerea și rapoartele tale, într-un singur loc.'}
         </span>
       </header>
       <div className="ac-premium-summary-grid">
@@ -127,6 +127,7 @@ export default function PremiumOverview({
       <MaintenanceForecast
         data={data}
         records={data.records}
+        vehicleId={car?.id}
         preview={preview}
         onUpdateMileage={() => navigate('Kilometraj')}
       />

@@ -11,17 +11,19 @@ export default function MaintenanceForecast({
   preview,
   onUpdateMileage,
   onUpgrade,
+  vehicleId,
 }: {
   data: Data;
   records: Data['records'];
   preview: boolean;
+  vehicleId?: string;
   onUpdateMileage?: () => void;
   onUpgrade?: () => void;
 }) {
   const en = useApplicationLanguage() === 'en',
     [selected, setSelected] = useState('');
   const cars = data.vehicles.filter((v) => !v.archived);
-  const car = cars.find((v) => v.id === selected) || cars[0];
+  const car = cars.find((v) => v.id === (vehicleId ?? selected)) || cars[0];
   if (!data.premium)
     return (
       <section className="card ac-premium-locked" data-workspace-ui>
@@ -54,7 +56,7 @@ export default function MaintenanceForecast({
             : 'Pentru fiecare prag salvat, pe baza kilometrajului confirmat.'}
         </p>
       </header>
-      {cars.length > 1 && (
+      {cars.length > 1 && !vehicleId && (
         <label>
           {en ? 'Vehicle' : 'Mașină'}
           <select value={car.id} onChange={(event) => setSelected(event.target.value)}>
@@ -91,7 +93,7 @@ export default function MaintenanceForecast({
           target="_blank"
           rel="noopener noreferrer"
         >
-          {en ? 'Manufacturer guidance' : 'Recomandări producător'}
+          {en ? 'Example: Ford service intervals' : 'Exemplu: intervalele de service Ford'}
         </a>
       </p>
     </section>

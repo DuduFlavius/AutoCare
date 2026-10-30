@@ -81,7 +81,37 @@ test('individual filters retain their own thresholds and dates without writing d
   );
 });
 
-test('a filter threshold remains usable when its optional type is not selected',()=>{
- const tasks=maintenanceTargets({id:'f',title:'Filters',category:'Filtre',date:'2026-10-30',odometer:80000,nextKm:null,expiresAt:null,parts:'AutoCare · filtru0Interval: 10000'});
- assert.equal(tasks.length,1);assert.equal(tasks[0].nextKm,90000);
+test('a filter threshold remains usable when its optional type is not selected', () => {
+  const tasks = maintenanceTargets({
+    id: 'f',
+    title: 'Filters',
+    category: 'Filtre',
+    date: '2026-10-30',
+    odometer: 80000,
+    nextKm: null,
+    expiresAt: null,
+    parts: 'AutoCare · filtru0Interval: 10000',
+  });
+  assert.equal(tasks.length, 1);
+  assert.equal(tasks[0].nextKm, 90000);
+});
+
+test('maintenance ranking shows overdue and due work before future work and recalculates for the selected car mileage', async () => {
+  const { rankMaintenanceForecasts } = await import('../src/lib/maintenance-schedule');
+  const today = new Date('2026-10-30T12:00:00Z');
+  const services = [
+    { id: 'later', nextKm: 150000, expiresAt: null },
+    { id: 'date', nextKm: null, expiresAt: '2026-10-29' },
+    { id: 'soon', nextKm: 101000, expiresAt: null },
+    { id: 'due', nextKm: 100000, expiresAt: null },
+  ];
+  const ranked = rankMaintenanceForecasts(services, 100000, 100, 'Europe/Bucharest', today);
+  assert.deepEqual(
+    ranked.map((item) => item.service.id),
+    ['date', 'due', 'soon', 'later'],
+  );
+  assert.equal(ranked.find((item) => item.service.id === 'soon')?.status.remainingKm, 1000);
+  const changed = rankMaintenanceForecasts(services, 102000, 100, 'Europe/Bucharest', today);
+  assert.equal(changed.find((item) => item.service.id === 'soon')?.status.state, 'overdue');
+  assert.equal(changed.find((item) => item.service.id === 'soon')?.status.remainingKm, -1000);
 });

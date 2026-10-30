@@ -1,10 +1,10 @@
 'use client';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import { useState } from 'react';
-import { maintenanceStatus } from '@/lib/maintenance-status';
+import { rankMaintenanceForecasts } from '@/lib/maintenance-schedule';
 import { CalendarClock, TrendingUp } from 'lucide-react';
 import { useMileageUsage } from './use-mileage-usage';
-import { forecastService, forecastDuration } from '@/lib/service-forecast';
+import { forecastDuration } from '@/lib/service-forecast';
 type Due = {
   id: string;
   title: string;
@@ -94,147 +94,130 @@ export default function ServiceForecastCards({
             : 'Introdu o medie zilnică între 1 și 2.000 km.'}
         </p>
       )}
-      {services.map((service) => {
-        const raw =
-          service.expiresAt instanceof Date
-            ? service.expiresAt.toISOString().slice(0, 10)
-            : service.expiresAt;
-        const estimate = forecastService({
-          currentKm,
-          nextKm: service.nextKm,
-          averageKmPerDay: invalid ? null : dailyKm,
-          dueDate: raw,
-          timezone,
-        });
-        if (!estimate) return null;
-        const status = maintenanceStatus({
-          currentKm,
-          nextKm: service.nextKm,
-          lastKm: service.lastKm,
-          lastDate: service.lastDate,
-          dueDate: raw,
-          timezone,
-        });
-        const { remainingKm: kmLeft, calendarDays, progress } = status;
-        const overdue = status.state === 'overdue',
-          due = status.state === 'due';
-        const soon =
-          status.state === 'soon' ||
-          (estimate.days !== null && estimate.days > 0 && estimate.days <= 30);
-        const state = overdue
-          ? en
-            ? 'Overdue'
-            : 'Depășit'
-          : due
+      {rankMaintenanceForecasts(services, currentKm, invalid ? null : dailyKm, timezone).map(
+        ({ service, estimate, status, raw }) => {
+          if (!estimate) return null;
+          const { remainingKm: kmLeft, calendarDays, progress } = status;
+          const overdue = status.state === 'overdue',
+            due = status.state === 'due';
+          const soon =
+            status.state === 'soon' ||
+            (estimate.days !== null && estimate.days > 0 && estimate.days <= 30);
+          const state = overdue
             ? en
-              ? 'Due'
-              : 'Scadent'
-            : soon
+              ? 'Overdue'
+              : 'Depășit'
+            : due
               ? en
-                ? 'Due soon'
-                : 'Se apropie'
-              : en
-                ? 'Within interval'
-                : 'În termen';
-        return (
-          <article className="forecast-service-card" key={service.id}>
-            <strong data-user-content>
-              {service.title || (en ? 'Scheduled maintenance' : 'Revizie programată')}
-            </strong>
-            <span
-              className={
-                'forecast-maintenance-state ' +
-                (overdue || due ? 'is-due' : soon ? 'is-soon' : 'is-valid')
-              }
-            >
-              {state}
-            </span>
-            <div className="forecast-result">
-              <span>
-                {loading && value === ''
-                  ? en
-                    ? 'Updating estimate…'
-                    : 'Se actualizează estimarea…'
-                  : forecastDuration(estimate.days, language)}
-              </span>
-              {estimate.remainingKm !== null && (
-                <small>
-                  {new Intl.NumberFormat(locale).format(estimate.remainingKm)}{' '}
-                  {en ? 'km remaining' : 'km rămași'}
-                </small>
-              )}
-            </div>
-            <div className="forecast-thresholds">
-              {calendarDays !== null && (
-                <small>
-                  {en ? 'Calendar limit: ' : 'Limită de timp: '}
-                  {Math.abs(calendarDays)} {en ? 'days' : 'zile'}
-                  {calendarDays < 0
-                    ? en
-                      ? ' overdue'
-                      : ' depășite'
-                    : en
-                      ? ' remaining'
-                      : ' rămase'}{' '}
-                  · {raw}
-                </small>
-              )}
-              {service.nextKm !== null && (
-                <small>
-                  {en ? 'Mileage limit: ' : 'Prag kilometraj: '}
-                  {new Intl.NumberFormat(locale).format(service.nextKm)} km
-                  {kmLeft !== null && kmLeft < 0
-                    ? ' · ' +
-                      new Intl.NumberFormat(locale).format(Math.abs(kmLeft)) +
-                      (en ? ' km overdue' : ' km depășiți')
-                    : ''}
-                </small>
-              )}
-              {progress !== null && (
-                <label>
-                  {status.progressBasis === 'time'
-                    ? en
-                      ? 'Time interval used'
-                      : 'Interval de timp parcurs'
-                    : en
-                      ? 'Mileage interval used'
-                      : 'Interval parcurs'}{' '}
-                  · {progress}%
-                  <progress max={100} value={progress} />
-                </label>
-              )}
-            </div>
-            {estimate.estimatedDate && (
-              <p>
-                {en ? 'Estimated date: ' : 'Dată estimată: '}
-                {new Date(estimate.estimatedDate + 'T12:00:00Z').toLocaleDateString(locale, {
-                  timeZone: 'UTC',
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })}
-              </p>
-            )}
-            <small>
-              {estimate.days === null
+                ? 'Due'
+                : 'Scadent'
+              : soon
                 ? en
-                  ? 'No reliable date yet.'
-                  : 'Data nu poate fi estimată încă.'
-                : estimate.basis === 'both'
-                  ? en
-                    ? 'Based on the earlier mileage or calendar deadline.'
-                    : 'Se ia în calcul termenul care apare primul: kilometraj sau dată.'
-                  : estimate.basis === 'time'
+                  ? 'Due soon'
+                  : 'Se apropie'
+                : en
+                  ? 'Within interval'
+                  : 'În termen';
+          return (
+            <article className="forecast-service-card" key={service.id}>
+              <strong data-user-content>
+                {service.title || (en ? 'Scheduled maintenance' : 'Revizie programată')}
+              </strong>
+              <span
+                className={
+                  'forecast-maintenance-state ' +
+                  (overdue || due ? 'is-due' : soon ? 'is-soon' : 'is-valid')
+                }
+              >
+                {state}
+              </span>
+              <div className="forecast-result">
+                <span>
+                  {loading && value === ''
                     ? en
-                      ? 'Based on the saved calendar deadline.'
-                      : 'Pe baza datei calendaristice salvate.'
-                    : en
-                      ? 'Based on confirmed mileage and daily usage.'
-                      : 'Pe baza kilometrilor confirmați și a utilizării zilnice.'}
-            </small>
-          </article>
-        );
-      })}
+                      ? 'Updating estimate…'
+                      : 'Se actualizează estimarea…'
+                    : forecastDuration(estimate.days, language)}
+                </span>
+                {estimate.remainingKm !== null && (
+                  <small>
+                    {new Intl.NumberFormat(locale).format(estimate.remainingKm)}{' '}
+                    {en ? 'km remaining' : 'km rămași'}
+                  </small>
+                )}
+              </div>
+              <div className="forecast-thresholds">
+                {calendarDays !== null && (
+                  <small>
+                    {en ? 'Calendar limit: ' : 'Limită de timp: '}
+                    {Math.abs(calendarDays)} {en ? 'days' : 'zile'}
+                    {calendarDays < 0
+                      ? en
+                        ? ' overdue'
+                        : ' depășite'
+                      : en
+                        ? ' remaining'
+                        : ' rămase'}{' '}
+                    · {raw}
+                  </small>
+                )}
+                {service.nextKm !== null && (
+                  <small>
+                    {en ? 'Mileage limit: ' : 'Prag kilometraj: '}
+                    {new Intl.NumberFormat(locale).format(service.nextKm)} km
+                    {kmLeft !== null && kmLeft < 0
+                      ? ' · ' +
+                        new Intl.NumberFormat(locale).format(Math.abs(kmLeft)) +
+                        (en ? ' km overdue' : ' km depășiți')
+                      : ''}
+                  </small>
+                )}
+                {progress !== null && (
+                  <label>
+                    {status.progressBasis === 'time'
+                      ? en
+                        ? 'Time interval used'
+                        : 'Interval de timp parcurs'
+                      : en
+                        ? 'Mileage interval used'
+                        : 'Interval parcurs'}{' '}
+                    · {progress}%
+                    <progress max={100} value={progress} />
+                  </label>
+                )}
+              </div>
+              {estimate.estimatedDate && (
+                <p>
+                  {en ? 'Estimated date: ' : 'Dată estimată: '}
+                  {new Date(estimate.estimatedDate + 'T12:00:00Z').toLocaleDateString(locale, {
+                    timeZone: 'UTC',
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </p>
+              )}
+              <small>
+                {estimate.days === null
+                  ? en
+                    ? 'No reliable date yet.'
+                    : 'Data nu poate fi estimată încă.'
+                  : estimate.basis === 'both'
+                    ? en
+                      ? 'Based on the earlier mileage or calendar deadline.'
+                      : 'Se ia în calcul termenul care apare primul: kilometraj sau dată.'
+                    : estimate.basis === 'time'
+                      ? en
+                        ? 'Based on the saved calendar deadline.'
+                        : 'Pe baza datei calendaristice salvate.'
+                      : en
+                        ? 'Based on confirmed mileage and daily usage.'
+                        : 'Pe baza kilometrilor confirmați și a utilizării zilnice.'}
+              </small>
+            </article>
+          );
+        },
+      )}
       <p className="forecast-source">
         <TrendingUp size={14} />
         {value !== '' && !invalid

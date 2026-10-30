@@ -994,7 +994,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                               : tab === 'Calendar'
                                 ? 'Calendar auto'
                                 : tab === 'Abonament'
-                                  ? 'Abonamentul tău'
+                                  ? (data.premium?'Spațiul tău Premium':'Abonamentul tău')
                                   : tab === 'Setări'
                                     ? 'Profil și preferințe'
                                     : tab}
@@ -1011,7 +1011,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                           Calendar: 'Toate termenele și lucrările programate, la îndemână.',
                           Cheltuieli: 'Vezi costurile înregistrate și cum se împart în timp.',
                           Notificări: 'Documente și lucrări care au nevoie de atenția ta.',
-                          Abonament: 'Planul actual, beneficiile și istoricul facturării.',
+                          Abonament: data.premium?'Întreținerea, rapoartele și toate instrumentele tale Premium.':'Planul actual, beneficiile și istoricul facturării.',
                           Setări: 'Alege cum primești mementourile și gestionează datele contului.',
                         } as Record<string, string>
                       )[tab] || 'Informațiile înregistrate de tine, organizate în siguranță.'}
