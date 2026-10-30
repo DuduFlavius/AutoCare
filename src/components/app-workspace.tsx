@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import {
   workspaceSections,
-  workspaceGroups,
   workspaceHref,
   normalizeWorkspaceSearch,
 } from '@/lib/workspace';
@@ -64,39 +63,15 @@ export function WorkspaceNavigation({
       aria-label={language === 'en' ? 'Application sections' : 'Secțiunile aplicației'}
       data-workspace-ui
     >
-      {workspaceGroups.map((group) => (
-        <div className="ws-nav-group" key={group.id}>
-          <p>{group[language]}</p>
-          {workspaceSections
-            .filter((s) => s.group === group.id)
-            .map((section) => {
-              const Icon = icons[section.icon];
-              const count =
-                section.id === 'Notificări'
-                  ? notifications
-                  : section.id === 'Centru de suport'
-                    ? support
-                    : 0;
-              return (
-                <a
-                  href={workspaceHref(path, section.id)}
-                  key={section.id}
-                  aria-current={tab === section.id ? 'page' : undefined}
-                  className={tab === section.id ? 'active' : ''}
-                  onClick={(e) => {
-                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                    e.preventDefault();
-                    navigate(section.id);
-                  }}
-                >
-                  <Icon size={18} />
-                  <span>{section[language]}</span>
-                  {count > 0 && <span className="ws-nav-count">{count}</span>}
-                </a>
-              );
-            })}
-        </div>
-      ))}
+      <div className="ws-nav-group ws-nav-flat">
+        {['Dashboard','Garaj','Documente','Calendar','Întreținere','Plan întreținere','Kilometraj','Cheltuieli','Centru de suport','Istoric auto','Notificări','Abonament','Setări'].map(id=>{
+          const section=workspaceSections.find(section=>section.id===id)!;
+          const Icon=icons[section.icon];
+          const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
+          const labels:Record<string,string>=language==='ro'?{Dashboard:'Acasă',Garaj:'Garajul meu',Abonament:'Premium'}:{Dashboard:'Home',Garaj:'My garage',Abonament:'Premium'};
+          return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}><Icon size={17}/><span>{labels[id]||section[language]}</span>{count>0&&<span className="ws-nav-count">{count}</span>}</a>;
+        })}
+      </div>
     </nav>
   );
 }

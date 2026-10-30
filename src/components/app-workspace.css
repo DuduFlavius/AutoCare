@@ -125,4 +125,33 @@
 
 @media(max-width:600px){.app-shell.ac-workspace .maintenance-timeline tr.ac-maintenance-record{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;padding:17px!important}.app-shell.ac-workspace .maintenance-timeline tr.ac-maintenance-record>td:first-child{grid-column:1/-1!important}.app-shell.ac-workspace .maintenance-timeline tr.ac-maintenance-record>td:last-child{margin-top:0!important}.app-shell.ac-workspace .maintenance-timeline .ac-premium-record-actions>:is(button,label){min-height:44px!important;font-size:11px!important;padding:10px!important}}
 @container workspace-preview (max-width:600px){.app-shell.ac-workspace .maintenance-timeline tr.ac-maintenance-record{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;padding:17px!important}.app-shell.ac-workspace .maintenance-timeline tr.ac-maintenance-record>td:first-child{grid-column:1/-1!important}.app-shell.ac-workspace .maintenance-timeline tr.ac-maintenance-record>td:last-child{margin-top:0!important}.app-shell.ac-workspace .maintenance-timeline .ac-premium-record-actions>:is(button,label){min-height:44px!important;font-size:11px!important;padding:10px!important}}
+
+/* Compact navigation requested from the original application reference. */
+@media(min-width:901px){
+.app-shell.ac-workspace{--ws-sidebar:242px}
+.app-shell.ac-workspace>.sidebar{padding:18px 15px 12px!important}
+.app-shell.ac-workspace>.sidebar>.brand{min-height:34px!important;margin:0 0 20px!important;padding:0 10px!important}
+.app-shell.ac-workspace>.sidebar .brand-word,.app-shell.ac-workspace>.sidebar .brand-word .accent{font-size:21px!important;letter-spacing:-.6px!important}
+.app-shell.ac-workspace>.sidebar .ws-sidebar-search{display:none!important}
+.app-shell.ac-workspace>.sidebar .ws-nav-flat{gap:7px!important;margin:0!important}
+.app-shell.ac-workspace>.sidebar .ws-navigation .ws-nav-flat>a{min-height:35px!important;padding:8px 11px!important;font-size:12px!important;font-weight:500!important;gap:11px!important;border-radius:9px!important;color:#2d4a70!important}
+.app-shell.ac-workspace>.sidebar .ws-navigation .ws-nav-flat>a.active{background:#4058db!important;color:white!important;font-weight:650!important;box-shadow:0 3px 8px #4058db20!important}
+.app-shell.ac-workspace>.sidebar .ws-navigation .ws-nav-flat>a.active :is(span,svg){color:#fff!important;-webkit-text-fill-color:#fff!important}
+.app-shell.ac-workspace>.sidebar .sidebar-bottom{padding:9px 10px!important;margin:10px 0!important}
+.app-shell.ac-workspace>.sidebar .sidebar-bottom>p:not(.eyebrow){display:none!important}
+.app-shell.ac-workspace>.sidebar .sidebar-account{padding-top:8px!important}
+.app-shell.ac-workspace>.app-header{height:56px!important;min-height:56px!important;padding:9px 22px!important;gap:12px!important;background:#edf3fc!important}
+.app-shell.ac-workspace>.main{padding-top:84px!important}
+.app-shell.ac-workspace .autocare-header-actions{gap:8px!important}
+.app-shell.ac-workspace .autocare-header-breadcrumb,.app-shell.ac-workspace .autocare-header-breadcrumb strong{font-size:11px!important}
+.app-shell.ac-workspace select.ws-header-locale{font-size:11px!important;font-weight:650!important;height:33px!important;min-height:33px!important;min-width:54px!important;max-width:65px!important;padding:5px 8px!important;border-radius:8px!important;background:#f8fbff!important}
+.app-shell.ac-workspace .ws-header-search{min-height:33px!important;font-size:11px!important;padding:6px 9px!important;border-radius:8px!important}
+.app-shell.ac-workspace .ws-header-search kbd{font-size:8px!important;margin-left:4px!important}
+.app-shell.ac-workspace .autocare-location-button{min-height:33px!important;padding:6px 9px!important;font-size:10px!important;border-radius:8px!important}
+.app-shell.ac-workspace .autocare-header-avatar{width:31px!important;height:31px!important;font-size:11px!important}
+}
+@container workspace-preview (max-width:900px){.app-shell.ac-workspace>.app-header{height:64px!important;min-height:64px!important;padding:10px 12px!important;background:#fff!important}.app-shell.ac-workspace>.main{padding-top:25px!important}}
+@container workspace-preview (max-width:560px){.app-shell.ac-workspace>.main{padding-top:22px!important}}
+.app-shell.ac-workspace .main input::placeholder{color:#71849f!important;-webkit-text-fill-color:#71849f!important;opacity:1!important}
+.app-shell.ac-workspace .maintenance-timeline tr.ac-maintenance-record>td .ac-premium-record-actions>label.small{color:#245a9b!important;-webkit-text-fill-color:#245a9b!important}
 }
