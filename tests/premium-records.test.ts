@@ -156,6 +156,44 @@ test('actual form payloads save six record types, update history/totals, edit an
   assert.equal(d.summary.monthBani, 92500);
   assert.equal(d.records.find((r: any) => r.id === saved[2].id).revision, 2);
   assert.equal((await api('records/' + saved[2].id + '/history')).length, 1);
+  // Editing uses the same draft builder for every kind; persist the complete returned payload.
+  for (const index of [1, 4, 5]) {
+    const current = d.records.find((r: any) => r.id === saved[index].id);
+    const f = new FormData();
+    for (const [key, value] of Object.entries({
+      title: current.title,
+      date: current.date || '',
+      expiresAt: current.expiresAt || '',
+      odometer: current.odometer?.toString() || '',
+      nextKm: current.nextKm?.toString() || '',
+      amount: (current.amountBani / 100).toString(),
+      notes: 'Edited ' + current.kind,
+      number: current.number || '',
+      provider: current.provider || '',
+    }))
+      f.set(key, String(value));
+    const payload = prepareRecordDraft(f, {
+      kind: current.kind,
+      category: current.category,
+      car: vehicleId,
+      serviceKmInterval: '',
+      costEdited: false,
+      unknownCost: false,
+      existingParts: current.parts,
+    });
+    await api('records/' + current.id, 'PATCH', payload);
+  }
+  d = await api('dashboard');
+  for (const index of [1, 4, 5]) {
+    const edited = d.records.find((r: any) => r.id === saved[index].id);
+    assert.equal(edited.notes, 'Edited ' + edited.kind);
+    assert.equal(edited.revision, 2);
+    assert.equal(edited.amountBani, payloads[index].amountBani);
+  }
+  assert.equal(d.records.find((r: any) => r.id === saved[1].id).nextKm, 110000);
+  assert.match(d.records.find((r: any) => r.id === saved[1].id).parts, /filtru0Cost: 40/);
+  assert.equal(d.records.find((r: any) => r.id === saved[5].id).expiresAt, '2030-12-01');
+  assert.equal(d.summary.monthBani, 92500);
   await api('records/' + saved[4].id, 'DELETE');
   d = await api('dashboard');
   assert.equal(d.records.length, 6);
