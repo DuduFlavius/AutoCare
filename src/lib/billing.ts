@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import {extensionCheckout,extensionEvent} from './subscription-extensions';
 import { eq } from 'drizzle-orm';
 import { db } from './db';
 import * as s from './schema';
@@ -15,7 +16,7 @@ export function stripe() {
     throw new AppError(503, 'Plățile reale sunt dezactivate în această versiune.');
   return new Stripe(key, { timeout: 12000, maxNetworkRetries: 1 });
 }
-export async function checkout(uid: string, interval: string) {
+export async function checkout(uid: string, interval: string, extend=false) {
   if (!['monthly', 'quarterly', 'annual'].includes(interval)) throw new AppError(400, 'Interval invalid.');
   const configured = await pricing();
   const price = interval === 'annual'
@@ -44,6 +45,7 @@ export async function checkout(uid: string, interval: string) {
       503,
       'Prețul procesatorului nu corespunde tarifului RON afișat. Plata a fost oprită.',
     );
+  if(extend)return extensionCheckout(uid,interval==='annual'?12:interval==='quarterly'?3:1,expectedAmount,client);
   const old = (await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid)))[0];
   if (old?.subscriptionId && ['active', 'trialing', 'past_due', 'unpaid'].includes(old.status))
     throw new AppError(409, 'Gestionează abonamentul existent din portal.');
@@ -79,6 +81,7 @@ export async function processStripeEvent(event: Stripe.Event, client: Stripe) {
     throw new AppError(400, 'Evenimentele live sunt dezactivate.');
   if ((await db().select().from(s.webhookEvents).where(eq(s.webhookEvents.id, event.id))).length)
     return { duplicate: true };
+  const extension=await extensionEvent(event,client);if(extension)return extension;
   let sub: Stripe.Subscription | undefined;
   let invoice: Stripe.Invoice | undefined;
   let refunded = false;

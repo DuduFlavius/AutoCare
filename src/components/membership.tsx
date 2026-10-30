@@ -17,12 +17,14 @@ export function PriceCards({
   annualBani,
   checkout,
   busy = false,
+  prepaid = false,
   language = 'ro',
 }: {
   monthlyBani: number;
   annualBani: number;
   checkout?: (interval: string) => void;
   busy?: boolean;
+  prepaid?: boolean;
   language?: 'ro' | 'en';
 }) {
   const locale = useApplicationLocale();
@@ -78,7 +80,7 @@ export function PriceCards({
           </li>
 
           <li>
-            <Check size={15} /> Facturare recurentă lunară
+            <Check size={15} /> {prepaid?(en?'One-time extension payment':'Prelungire cu plată unică'):(en?'Monthly recurring billing':'Facturare recurentă lunară')}
           </li>
           <li>
             <Check size={15} /> Gestionare din portalul de facturare
@@ -86,7 +88,7 @@ export function PriceCards({
         </ul>
         {checkout ? (
           <button className="button" disabled={busy} onClick={() => checkout('monthly')}>
-            Alege lunar <ArrowUpRight size={15} />
+            {prepaid?(en?'Add 1 month':'Adaugă 1 lună'):(en?'Choose monthly':'Alege lunar')} <ArrowUpRight size={15} />
           </button>
         ) : (
           <a className="button" href="/cont?tab=Abonament">
@@ -135,7 +137,7 @@ export function PriceCards({
           </li>
 
           <li>
-            <Check size={15} /> Facturare recurentă la 3 luni
+            <Check size={15} /> {prepaid?(en?'One-time extension payment':'Prelungire cu plată unică'):(en?'Recurring billing every 3 months':'Facturare recurentă la 3 luni')}
           </li>
           <li>
             <Check size={15} /> Gestionare din portalul de facturare
@@ -143,7 +145,7 @@ export function PriceCards({
         </ul>
         {checkout ? (
           <button className="button" disabled={busy} onClick={() => checkout('quarterly')}>
-            Alege 3 luni <ArrowUpRight size={15} />
+            {prepaid?(en?'Add 3 months':'Adaugă 3 luni'):(en?'Choose 3 months':'Alege 3 luni')} <ArrowUpRight size={15} />
           </button>
         ) : (
           <a className="button" href="/cont?tab=Abonament">
@@ -202,7 +204,7 @@ export function PriceCards({
           </li>
 
           <li>
-            <Check size={15} /> Facturare recurentă anuală
+            <Check size={15} /> {prepaid?(en?'One-time extension payment':'Prelungire cu plată unică'):(en?'Annual recurring billing':'Facturare recurentă anuală')}
           </li>
           <li>
             <Check size={15} />{' '}
@@ -211,7 +213,7 @@ export function PriceCards({
         </ul>
         {checkout ? (
           <button className="primary" disabled={busy} onClick={() => checkout('annual')}>
-            Alege anual <ArrowUpRight size={15} />
+            {prepaid?(en?'Add 12 months':'Adaugă 12 luni'):(en?'Choose annual':'Alege anual')} <ArrowUpRight size={15} />
           </button>
         ) : (
           <a className="button primary" href="/cont?tab=Abonament">
@@ -226,9 +228,9 @@ export default function Membership({
   language = 'ro',
   data,
   busy,
-  checkout,
-  portal,
-  invoices,
+  checkout: _checkout,
+  portal: _portal,
+  invoices: _invoices,
   navigate,
   onRecord,
   preview = false,
@@ -251,6 +253,7 @@ export default function Membership({
   }>;
 }) {
   const locale = useApplicationLocale();
+  const accessUntil=Math.max(new Date(data.premiumAccess.paidUntil||0).getTime(),...data.premiumAccess.manual.map(g=>g.expiresAt?new Date(g.expiresAt).getTime():0));
   return (
     <div className="membership-workspace">
       <section className="card membership-current">
@@ -286,15 +289,7 @@ export default function Membership({
             <strong>
               {data.premiumAccess.manual.some((g) => !g.expiresAt)
                 ? 'Acces manual fără expirare'
-                : data.premiumAccess.manual.length
-                  ? new Date(
-                      Math.max(
-                        ...data.premiumAccess.manual.map((g) => new Date(g.expiresAt!).getTime()),
-                      ),
-                    ).toLocaleDateString(locale)
-                  : data.subscription?.periodEnd
-                    ? new Date(data.subscription.periodEnd).toLocaleDateString(locale)
-                    : 'Fără abonament activ'}
+                : accessUntil>Date.now()?new Date(accessUntil).toLocaleDateString(locale):'Fără abonament activ'}
             </strong>
           </div>
           <div>
@@ -312,11 +307,12 @@ export default function Membership({
           </div>
         </div>
         {data.subscription?.customerId && (
-          <button disabled={busy} onClick={portal}>
+          <button disabled={busy} onClick={()=>navigate('Abonament')}>
             Gestionează facturarea <ArrowUpRight size={14} />
           </button>
         )}
       </section>
+      {data.premium && <nav aria-label={language==='en'?'Premium shortcuts':'Acces rapid Premium'} data-workspace-ui className="card" style={{display:'flex',gap:12,flexWrap:'wrap',padding:16}}><a className="button" href="#premium-budgets">{language==='en'?'Maintenance budgets':'Bugetele lucrărilor'}</a><a className="button" href="#premium-mechanic-folder">{language==='en'?'Mechanic folder':'Dosar pentru mecanic'}</a><a className="button" href="#premium-reports">{language==='en'?'PDF and CSV reports':'Rapoarte PDF și CSV'}</a></nav>}
       {data.premium ? (
         <PremiumOverview data={data} language={language} preview={preview} navigate={navigate} />
       ) : (
@@ -324,50 +320,8 @@ export default function Membership({
       )}
       <PremiumWorkspace data={data} language={language} navigate={navigate} onRecord={onRecord} />
       {data.premium && <PremiumCareTools data={data} language={language} preview={preview} onRecord={onRecord}/> }
-      {data.premium && <PremiumDownloads data={data} language={language} preview={preview} />}
-      {!data.premium && (
-        <div id="premium-plans">
-          <PriceCards
-            monthlyBani={data.pricing.monthlyBani}
-            annualBani={data.pricing.annualBani}
-            busy={busy}
-            checkout={checkout}
-            language={language}
-          />
-        </div>
-      )}
-      {!data.premium && (
-        <p className="micro">
-          {language === 'en' && (
-            <strong>
-              EUR amounts are indicative at 1 EUR ≈ 5 RON. Checkout is billed in RON at the
-              confirmed Stripe price.{' '}
-            </strong>
-          )}
-          Tarife în RON. Plata se deschide numai dacă prețul procesatorului corespunde sumei
-          afișate. Accesul manual nu declanșează plăți. Abonamentele existente își păstrează
-          condițiile din portal.
-        </p>
-      )}
-      <section className="card">
-        <h3>Istoricul facturării</h3>
-        {invoices.length ? (
-          invoices.map((i) => (
-            <div className="list-row" key={i.id}>
-              <span>{new Date(i.createdAt).toLocaleDateString(locale)}</span>
-              <strong>
-                {amount(i.amountBani)} {i.currency.toUpperCase()}
-              </strong>
-              <span className="pill">{i.status === 'paid' ? 'Plată confirmată' : i.status}</span>
-              {!i.livemode && <span className="pill archived">Test · nu este venit real</span>}
-            </div>
-          ))
-        ) : (
-          <p className="small muted">
-            Nu ai facturi înregistrate. Accesul oferit manual nu generează facturi sau încasări.
-          </p>
-        )}
-      </section>
+      {data.premium && <div id="premium-reports" style={{scrollMarginTop:90}}><PremiumDownloads data={data} language={language} preview={preview} /></div>}
+      <section className="card" id="premium-plans" data-workspace-ui><h3>{language==='en'?'Subscription and renewal':'Abonament și prelungire'}</h3><p>{language==='en'?'Manage your paid period, plans and invoices on the dedicated subscription page.':'Gestionează perioada achitată, planurile și facturile pe pagina separată de abonament.'}</p><button type="button" onClick={()=>navigate('Abonament')}>{language==='en'?'Open subscription':'Deschide abonamentul'}</button></section>
     </div>
   );
 }

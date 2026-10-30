@@ -1,3 +1,4 @@
+import {paidExtensions} from './paid-coverage';
 import {parseServiceDetails} from './service-details';
 import { and, eq, desc, sql } from 'drizzle-orm';
 import { db } from './db';
@@ -31,11 +32,12 @@ export async function activeGrants(uid: string, now = new Date()) {
     );
 }
 export async function premium(uid: string, now = new Date()) {
-  const [sub, grants] = await Promise.all([
+  const [sub, grants, extensions] = await Promise.all([
     db().select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid)),
     activeGrants(uid, now),
+    paidExtensions(uid,now),
   ]);
-  return (!!sub[0]?.subscriptionId && isPremium(sub[0], now)) || grants.length > 0;
+  return (!!sub[0]?.subscriptionId && isPremium(sub[0], now)) || grants.length > 0 || extensions.length>0;
 }
 export async function assertActiveAccount(uid: string) {
   const r = (
@@ -144,7 +146,7 @@ export async function saveRecord(uid: string, input: unknown, id?: string, compl
       const previous=(await tx.select().from(s.records).where(and(eq(s.records.id,completionOf),eq(s.records.userId,uid))).for('update'))[0];
       if(!previous || previous.cancelled || previous.kind!=='service' || data.kind!=='service' || previous.vehicleId!==data.vehicleId || previous.category!==data.category) throw new AppError(400,'Intervenția nu poate fi finalizată.');
       if(parseServiceDetails(previous.parts||'').completedBy) throw new AppError(409,'Această lucrare a fost deja înregistrată ca efectuată.');
-      if(!data.date || (previous.date && data.date<previous.date) || (previous.odometer!=null && (data.odometer==null || data.odometer<previous.odometer))) throw new AppError(400,'Verifică data și kilometrajul noului schimb.');
+      if(!data.date || (previous.date && previous.date<=completionToday! && data.date<previous.date) || (previous.odometer!=null && (data.odometer==null || data.odometer<previous.odometer))) throw new AppError(400,'Verifică data și kilometrajul noului schimb.');
       if(data.date===completionToday && data.odometer!=null){
         const current=(await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id,data.vehicleId),eq(s.vehicles.userId,uid))).for('update'))[0];
         if(data.odometer>current.odometer){await tx.update(s.vehicles).set({odometer:data.odometer}).where(eq(s.vehicles.id,current.id));await tx.insert(s.mileageReadings).values({id:crypto.randomUUID(),userId:uid,vehicleId:current.id,odometer:data.odometer,source:'manual'});}
@@ -304,7 +306,8 @@ export async function dashboard(uid: string) {
   const date = localDate(now, p.timezone);
   const grants = await activeGrants(uid);
   const price = await pricing();
-  const paid = (!!sub[0]?.subscriptionId && isPremium(sub[0])) || grants.length > 0;
+  const extensions=await paidExtensions(uid);
+  const paid = (!!sub[0]?.subscriptionId && isPremium(sub[0])) || grants.length > 0 || extensions.length>0;
   const summary = summarize(
     rows.filter((r) => !r.cancelled),
     Number(date.slice(0, 4)),
@@ -322,7 +325,8 @@ export async function dashboard(uid: string) {
     premium: paid,
     planLimits:{activeVehicles:paid?null:1,attachments:(await limits()).maxFiles},
     premiumAccess: {
-      paid: !!sub[0]?.subscriptionId && isPremium(sub[0]),
+      paid: (!!sub[0]?.subscriptionId && isPremium(sub[0])) || extensions.length>0,
+      paidUntil: new Date(Math.max(isPremium(sub[0])?sub[0].periodEnd!.getTime():0,...extensions.map(e=>e.endsAt?.getTime()||0))),
       manual: grants.map(({ id, grantedAt, expiresAt }) => ({ id, grantedAt, expiresAt })),
     },
     pricing: {

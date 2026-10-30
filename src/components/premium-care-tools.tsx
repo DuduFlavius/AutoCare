@@ -3,7 +3,13 @@ import { useEffect, useState } from 'react';
 import { parseServiceDetails } from '@/lib/service-details';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
-type LinkRow = { id: string; expiresAt: string; revoked: boolean };
+type LinkRow = {
+  id: string;
+  expiresAt: string;
+  revoked: boolean;
+  vehicle?: string;
+  recordCount?: number;
+};
 export default function PremiumCareTools({
   data,
   language,
@@ -35,9 +41,10 @@ export default function PremiumCareTools({
         parseServiceDetails(r.parts || '').budgetEstimat !== undefined,
     );
   const money = (b: number) =>
-    new Intl.NumberFormat(en ? 'en-GB' : 'ro-RO', { style: 'currency', currency: en ? 'EUR' : 'RON' }).format(
-      b / (en ? 500 : 100),
-    );
+    new Intl.NumberFormat(en ? 'en-GB' : 'ro-RO', {
+      style: 'currency',
+      currency: en ? 'EUR' : 'RON',
+    }).format(b / (en ? 500 : 100));
   useEffect(() => {
     if (preview) return;
     let cancelled = false;
@@ -72,8 +79,9 @@ export default function PremiumCareTools({
   }
   return (
     <div className="stack" data-workspace-ui>
-      <section className="card">
-        <h3>{en ? 'Maintenance budgets' : 'Bugetele lucrărilor'}</h3>{en&&<p>EUR amounts are indicative at EUR 1 ≈ RON 5. Saved costs remain in RON.</p>}
+      <section className="card" id="premium-budgets" style={{ scrollMarginTop: 90 }}>
+        <h3>{en ? 'Maintenance budgets' : 'Bugetele lucrărilor'}</h3>
+        {en && <p>EUR amounts are indicative at EUR 1 ≈ RON 5. Saved costs remain in RON.</p>}
         <p>
           {en
             ? 'Estimates are separate from actual expenses. Add a budget when creating or editing maintenance.'
@@ -117,7 +125,7 @@ export default function PremiumCareTools({
           <p>{en ? 'No estimates saved yet.' : 'Nu ai bugete estimate salvate încă.'}</p>
         )}
       </section>
-      <section className="card">
+      <section className="card" id="premium-mechanic-folder" style={{ scrollMarginTop: 90 }}>
         <h3>{en ? 'Temporary mechanic folder' : 'Dosar temporar pentru mecanic'}</h3>
         <p>
           {en
@@ -142,7 +150,16 @@ export default function PremiumCareTools({
               });
               setUrl(window.location.origin + '/dosar/' + out.token);
               setCreatedId(out.id);
-              setLinks((old) => [{ id: out.id, expiresAt: out.expiresAt, revoked: false }, ...old]);
+              setLinks((old) => [
+                {
+                  id: out.id,
+                  expiresAt: out.expiresAt,
+                  revoked: false,
+                  vehicle: cars.find((v) => v.id === vehicle)?.plate,
+                  recordCount: ids.length,
+                },
+                ...old,
+              ]);
             } catch (e) {
               setError((e as Error).message);
             } finally {
@@ -251,6 +268,11 @@ export default function PremiumCareTools({
               key={row.id}
             >
               <span>
+                {row.vehicle && (
+                  <strong style={{ display: 'block' }} data-user-content>
+                    {row.vehicle} · {row.recordCount} {en ? 'records' : 'înregistrări'}
+                  </strong>
+                )}
                 {new Date(row.expiresAt).toLocaleString(en ? 'en-GB' : 'ro-RO')} ·{' '}
                 {row.revoked
                   ? en

@@ -279,3 +279,11 @@ test('mechanic folders restrict selected records/files, hide private fields, and
  await revokePremium(accounts.paid.id,accounts.paid.id,{confirm:true});
  await assert.rejects(readMechanicShare(attached.token));
 });
+
+test('a scheduled future service can be completed early without rewriting its history',async()=>{
+ await grantPremium(accounts.paid.id,accounts.paid.id,{lifetime:true});
+ const future=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+ const source=await svc.saveRecord(accounts.paid.id,{kind:'service',vehicleId,category:'Revizie',title:'Programare viitoare',date:future,odometer:200000,nextKm:null,expiresAt:null,amountBani:0,amountKnown:false});
+ const done=await svc.saveRecord(accounts.paid.id,{kind:'service',vehicleId,category:'Revizie',title:'Revizie efectuată',date:today,odometer:200000,nextKm:215000,expiresAt:null,amountBani:30000,amountKnown:true},undefined,source.id);
+ assert.equal(done.date,today);assert.equal((await svc.ownedRecord(accounts.paid.id,source.id)).date,future);
+});

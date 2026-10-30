@@ -1,3 +1,4 @@
+import {sql} from 'drizzle-orm';
 import {
   pgTable,
   text,
@@ -484,3 +485,7 @@ export const mechanicShares=pgTable('mechanic_shares',{
  tokenHash:text().notNull().unique(),snapshot:jsonb().notNull(),fileIds:jsonb().$type<string[]>().notNull(),
  expiresAt:timestamp({withTimezone:true}).notNull(),revoked:boolean().notNull().default(false),createdAt:timestamp({withTimezone:true}).notNull().defaultNow(),
 },t=>[index('mechanic_share_owner').on(t.userId)]);
+
+export const subscriptionExtensions=pgTable('subscription_extensions',{
+ id:text().primaryKey(),userId:text().notNull().references(()=>user.id,{onDelete:'cascade'}),sessionId:text().notNull().unique(),paymentIntent:text(),months:integer().notNull(),amountBani:integer().notNull(),status:text().notNull().default('pending'),startsAt:timestamp({withTimezone:true}),endsAt:timestamp({withTimezone:true}),createdAt:timestamp({withTimezone:true}).notNull().defaultNow(),
+},t=>[index('subscription_extension_owner').on(t.userId),uniqueIndex('subscription_extension_pending').on(t.userId).where(sql`${t.status} IN ('pending','processing')`)]);

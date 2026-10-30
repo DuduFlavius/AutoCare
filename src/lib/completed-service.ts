@@ -7,8 +7,25 @@ export function completedServiceSeed<T extends MaintenanceSource>(
   date: string,
 ): T {
   const details = parseServiceDetails(record.parts || '');
-  if (!details.intervalIntretinere && !details.intervalUlei && !details.intervalDistributie && record.nextKm != null && record.odometer != null && record.nextKm > record.odometer) {
-    details[record.category === 'Schimb ulei' ? 'intervalUlei' : 'intervalIntretinere'] = String(record.nextKm - record.odometer);
+  if (
+    !details.intervalIntretinere &&
+    !details.intervalUlei &&
+    !details.intervalDistributie &&
+    record.nextKm != null &&
+    record.odometer != null &&
+    record.nextKm > record.odometer
+  ) {
+    details[record.category === 'Schimb ulei' ? 'intervalUlei' : 'intervalIntretinere'] = String(
+      record.nextKm - record.odometer,
+    );
+  }
+  for (const key of Object.keys(details)) {
+    if (/^filtru\d+Km$/.test(key) && record.odometer != null) {
+      const prefix = key.slice(0, -2),
+        next = Number(details[key]);
+      if (!details[prefix + 'Interval'] && Number.isSafeInteger(next) && next > record.odometer)
+        details[prefix + 'Interval'] = String(next - record.odometer);
+    }
   }
   for (const key of Object.keys(details))
     if (
@@ -22,7 +39,7 @@ export function completedServiceSeed<T extends MaintenanceSource>(
   return {
     ...record,
     date,
-    odometer,
+    odometer: Math.max(odometer, record.odometer ?? 0),
     expiresAt: null,
     nextKm: null,
     parts: serializeServiceDetails('', f, ''),

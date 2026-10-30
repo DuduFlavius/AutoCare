@@ -85,9 +85,10 @@ export async function createMechanicShare(uid: string, input: unknown) {
   return { id, token, expiresAt };
 }
 export async function listMechanicShares(uid: string) {
-  return db()
+  const rows = await db()
     .select({
       id: s.mechanicShares.id,
+      snapshot: s.mechanicShares.snapshot,
       expiresAt: s.mechanicShares.expiresAt,
       revoked: s.mechanicShares.revoked,
       createdAt: s.mechanicShares.createdAt,
@@ -96,6 +97,11 @@ export async function listMechanicShares(uid: string) {
     .where(eq(s.mechanicShares.userId, uid))
     .orderBy(desc(s.mechanicShares.createdAt))
     .limit(50);
+  return rows.map(({ snapshot, ...row }) => ({
+    ...row,
+    vehicle: (snapshot as ShareSnapshot).vehicle,
+    recordCount: (snapshot as ShareSnapshot).records.length,
+  }));
 }
 export async function revokeMechanicShare(uid: string, id: string) {
   await db()

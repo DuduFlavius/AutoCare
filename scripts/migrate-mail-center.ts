@@ -14,7 +14,7 @@ async function main() {
     if (url.hostname.endsWith('.neon.tech')) url.hostname = url.hostname.replace('-pooler.', '.');
     process.env.DATABASE_URL = url.toString();
   }
-  const source = (await readFile('migrations/0010_mail_center.sql', 'utf8'))+'\n--> statement-breakpoint\n'+(await readFile('migrations/0011_mechanic_shares.sql', 'utf8'));
+  const source = (await readFile('migrations/0010_mail_center.sql', 'utf8'))+'\n--> statement-breakpoint\n'+(await readFile('migrations/0011_mechanic_shares.sql', 'utf8'))+'\n--> statement-breakpoint\n'+(await readFile('migrations/0012_subscription_extensions.sql', 'utf8'));
   await db().transaction(async (tx) => {
     for (const statement of source.split('--> statement-breakpoint').filter((x) => x.trim()))
       await tx.execute(sql.raw(statement));

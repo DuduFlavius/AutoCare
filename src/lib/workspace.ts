@@ -23,10 +23,10 @@ export const workspaceSections = [
   { id: 'Notificări', ro: 'Notificări', en: 'Notifications', group: 'account', icon: 'bell' },
   {
     id: 'Abonament',
-    ro: 'Premium și facturare',
-    en: 'Premium & billing',
+    ro: 'Abonament',
+    en: 'Subscription',
     group: 'account',
-    icon: 'premium',
+    icon: 'credit',
   },
   {
     id: 'Centru de suport',
@@ -35,6 +35,7 @@ export const workspaceSections = [
     group: 'help',
     icon: 'support',
   },
+  {id:'Premium',ro:'Premium',en:'Premium',group:'account',icon:'premium'},
   { id: 'Setări', ro: 'Setări', en: 'Settings', group: 'help', icon: 'settings' },
 ] as const;
 export const workspaceGroups = [
@@ -47,7 +48,6 @@ export const workspaceGroups = [
 export function normalizeWorkspaceTab(value: string | null | undefined) {
   const aliases: Record<string, string> = {
     Acasă: 'Dashboard',
-    Premium: 'Abonament',
     Intervenții: 'Întreținere',
     'SmartDrive GPS': 'Plan întreținere',
     'Garajul meu': 'Garaj',

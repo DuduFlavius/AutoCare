@@ -7,6 +7,7 @@ import { normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/w
 import SiteLanguage from './site-language';
 import CommunicationPreferences from './communication-preferences';
 import Membership from './membership';
+import SubscriptionPage from './subscription-page';
 import MobileInstall from './mobile-install';
 import PushSettings from './push-settings';
 import SmartDriveTrip from './smartdrive-trip';
@@ -302,6 +303,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     [calendarMonth, setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
   const dashboardRequest = useRef(0);
   const locale=language==='en'?'en-GB':'ro-RO';
+  useEffect(()=>{if(previewData||tab!=='Abonament')return;const timer=setInterval(()=>{if(document.visibilityState==='visible'){void api('billing/sync','POST').then(()=>refresh(true)).catch(()=>{});void refresh(true);void api('billing/invoices').then(setInvoices).catch(e=>setError(e.message));}},15000);return()=>clearInterval(timer);},[tab,previewData]);
   const displayDate=(value:string)=>new Date(value+'T12:00:00').toLocaleDateString(locale);
   useEffect(() => {
     try { if (window.localStorage.getItem('autocare-language') === 'en') {setLanguage('en');setCurrency('EUR');}
@@ -318,7 +320,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
   }, [tab, previewData, data?.notifications]);
   useEffect(() => {
     if (previewData) return;
-    if (tab === 'Abonament') void refresh(true);
+    if (tab === 'Abonament' || tab === 'Premium') void refresh(true);
+    if (tab === 'Abonament') void api('billing/sync','POST').then(()=>refresh(true)).catch(()=>{});
     if (tab === 'Abonament')
       api('billing/invoices')
         .then(setInvoices)
@@ -906,7 +909,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
             </span>
             <ChevronDown size={16} />
           </button>
-          <button type="button" className="ws-premium-access" data-workspace-ui aria-label={language==='en'?'Open Premium':'Accesează Premium'} title={data?.premium?(language==='en'?'Premium active':'Premium activ'):'Premium'} onClick={()=>navigate('Abonament')}>
+          <button type="button" className="ws-premium-access" data-workspace-ui aria-label={language==='en'?'Open Premium':'Accesează Premium'} title={data?.premium?(language==='en'?'Premium active':'Premium activ'):'Premium'} onClick={()=>navigate('Premium')}>
             <Star size={16} fill={data?.premium?'currentColor':'none'}/><span>Premium{data?.premium?(language==='en'?' · Active':' · Activ'):''}</span>
           </button>
           <button type="button" className="autocare-header-signout ws-signout" data-workspace-ui
@@ -999,7 +1002,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                               : tab === 'Calendar'
                                 ? 'Calendar auto'
                                 : tab === 'Abonament'
-                                  ? (data.premium?'Spațiul tău Premium':'Abonamentul tău')
+                                  ? 'Abonamentul tău'
+                                  : tab === 'Premium' ? 'Spațiul tău Premium'
                                   : tab === 'Setări'
                                     ? 'Profil și preferințe'
                                     : tab}
@@ -1016,7 +1020,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                           Calendar: 'Toate termenele și lucrările programate, la îndemână.',
                           Cheltuieli: 'Vezi costurile înregistrate și cum se împart în timp.',
                           Notificări: 'Documente și lucrări care au nevoie de atenția ta.',
-                          Abonament: data.premium?'Întreținerea, rapoartele și toate instrumentele tale Premium.':'Planul actual, beneficiile și istoricul facturării.',
+                          Abonament:'Planul actual, beneficiile și istoricul facturării.',
+                          Premium:'Întreținerea, rapoartele și toate instrumentele tale Premium.',
                           Setări: 'Alege cum primești mementourile și gestionează datele contului.',
                         } as Record<string, string>
                       )[tab] || 'Informațiile înregistrate de tine, organizate în siguranță.'}
@@ -1897,7 +1902,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
             {tab === 'Centru de suport' && (
               <SupportChat role={data.profile.role} preview={!!previewData} />
             )}
-            {tab === 'Abonament' && (
+            {tab==='Abonament'&&<SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={(interval,extend)=>void act(async()=>{if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api(extend?'billing/extend':'billing/checkout','POST',{interval});if(typeof out.url!=='string'||!out.url.startsWith('https://checkout.stripe.com/'))throw new Error('Link de plată invalid.');window.location.assign(out.url);},'')}/>}
+            {tab === 'Premium' && (
               <Membership
                 language={language}
                 data={data}

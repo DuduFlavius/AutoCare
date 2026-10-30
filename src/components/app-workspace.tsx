@@ -12,6 +12,7 @@ import {
   Wallet,
   BellRing,
   Star,
+  CreditCard,
   MessageSquare,
   Settings,
   ArrowUpRight,
@@ -39,6 +40,7 @@ const icons = {
   wallet: Wallet,
   bell: BellRing,
   premium: Star,
+  credit: CreditCard,
   support: MessageSquare,
   settings: Settings,
 };
@@ -66,12 +68,12 @@ export function WorkspaceNavigation({
       data-workspace-ui
     >
       <div className="ws-nav-group ws-nav-flat">
-        {['Dashboard','Garaj','Documente','Calendar','Întreținere','Plan întreținere','Kilometraj','Cheltuieli','Centru de suport','Istoric auto','Notificări','Abonament','Setări'].map(id=>{
+        {['Dashboard','Garaj','Documente','Calendar','Întreținere','Plan întreținere','Kilometraj','Cheltuieli','Centru de suport','Istoric auto','Notificări','Premium','Abonament','Setări'].map(id=>{
           const section=workspaceSections.find(section=>section.id===id)!;
           const Icon=icons[section.icon];
           const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
-          const labels:Record<string,string>=language==='ro'?{Dashboard:'Acasă',Garaj:'Garajul meu',Abonament:'Premium'}:{Dashboard:'Home',Garaj:'My garage',Abonament:'Premium'};
-          return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}><Icon size={17}/><span>{labels[id]||section[language]}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Abonament'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
+          const labels:Record<string,string>=language==='ro'?{Dashboard:'Acasă',Garaj:'Garajul meu',Abonament:'Abonament',Premium:'Premium'}:{Dashboard:'Home',Garaj:'My garage',Abonament:'Subscription',Premium:'Premium'};
+          return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}><Icon size={17}/><span>{labels[id]||section[language]}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
         })}
       </div>
     </nav>

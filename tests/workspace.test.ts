@@ -22,6 +22,7 @@ test('Application navigation preserves every existing functional section, includ
     'Istoric auto',
     'Notificări',
     'Abonament',
+    'Premium',
     'Setări',
   ];
   assert.deepEqual(new Set(workspaceSections.map((s) => s.id)), new Set(expected));
@@ -32,7 +33,7 @@ test('Application navigation preserves every existing functional section, includ
   }
 });
 test('Existing bookmarked names recover to valid application sections', () => {
-  assert.equal(normalizeWorkspaceTab('Premium'), 'Abonament');
+  assert.equal(normalizeWorkspaceTab('Premium'), 'Premium');
   assert.equal(normalizeWorkspaceTab('SmartDrive GPS'), 'Plan întreținere');
   assert.equal(normalizeWorkspaceTab('Kilometraj'), 'Kilometraj');
   assert.equal(normalizeWorkspaceTab('unknown'), 'Dashboard');

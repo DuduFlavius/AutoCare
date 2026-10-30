@@ -19,6 +19,7 @@ import * as mailCenter from '@/lib/mail-center';
 import { renderEmail } from '@/lib/email-templates';
 import { stripe, checkout, billingPortal, processStripeEvent } from '@/lib/billing';
 import {createMechanicShare,listMechanicShares,revokeMechanicShare} from '@/lib/mechanic-shares';
+import {syncPaidExtensions} from '@/lib/subscription-extensions';
 import {vehicleReport} from '@/lib/vehicle-report';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -607,6 +608,8 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           z.object({ interval: z.enum(['monthly', 'quarterly', 'annual']) }).parse(await body(req)).interval,
         ),
       );
+    if(route==='billing/sync' && method==='POST')return json(await syncPaidExtensions(uid,stripe()));
+    if(route==='billing/extend' && method==='POST')return json(await checkout(uid,z.object({interval:z.enum(['monthly','quarterly','annual'])}).parse(await body(req)).interval,true));
     if (route === 'billing/portal' && method === 'POST') return json(await billingPortal(uid));
     if (route === 'billing/invoices' && method === 'GET')
       return json(
