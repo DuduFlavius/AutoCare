@@ -87,3 +87,18 @@ test('oil countdown recalculates on mileage and respects earlier dates without i
   assert.equal(forecastService({ ...base, averageKmPerDay: null })?.days, null);
   assert.match(forecastDuration(150, 'ro'), /luni.*150 zile/);
 });
+
+test('timing service recalculates stale next mileage after correcting historical odometer', () => {
+  for (const interval of ['100000', '150000']) {
+    const f = form({ date: '2026-10-30', odometer: '83000', nextKm: '80000', ac_intervalIntretinere: interval, ac_intervalLuni: '60', amount: '3000' });
+    const draft = prepareRecordDraft(f, {...opts, category: 'Distribuție'});
+    assert.equal(draft.odometer, 83000);
+    assert.equal(draft.nextKm, 83000 + Number(interval));
+    assert.equal(draft.expiresAt, '2031-10-30');
+    f.set('odometer', '90000');
+    assert.equal(prepareRecordDraft(f, {...opts, category: 'Distribuție'}).nextKm, 90000 + Number(interval));
+  }
+});
+test('timing service retains an explicit absolute deadline when no repeat interval is entered', () => {
+  assert.equal(recordDraftSchedule(form({odometer:'83000',nextKm:'150000'}), 'service', 'Distribuție').nextKm, 150000);
+});

@@ -273,7 +273,15 @@ export default function RecordEditor({
             </label>
           ) : (
             <label>
-              Kilometraj · opțional
+              <span data-workspace-ui>
+                {category === 'Distribuție'
+                  ? en
+                    ? 'Odometer at the last timing service · km'
+                    : 'Kilometraj la ultimul schimb de distribuție · km'
+                  : en
+                    ? 'Odometer · optional'
+                    : 'Kilometraj · opțional'}
+              </span>
               <input
                 type="number"
                 name="odometer"
@@ -288,6 +296,66 @@ export default function RecordEditor({
             </label>
           )}
         </div>
+        {kind === 'service' && category === 'Distribuție' && (
+          <section className="service-reminder-box" data-workspace-ui>
+            <h3>
+              {en
+                ? 'When should the timing service be repeated?'
+                : 'La câți km se repetă schimbul de distribuție?'}
+            </h3>
+            <p className="micro">
+              {en
+                ? 'Enter the distance between changes, not the odometer reading. Use the interval specified for your engine.'
+                : 'Introdu distanța dintre două schimburi, nu kilometrajul de pe bord. Folosește intervalul specific motorului tău.'}
+            </p>
+            <div className="form-grid">
+              <label>
+                {en ? 'Change every · km' : 'Schimb la fiecare · km'}
+                <input
+                  name="ac_intervalIntretinere"
+                  type="number"
+                  min="1"
+                  max="99999999"
+                  step="1"
+                  placeholder="100000"
+                  defaultValue={
+                    parseServiceDetails(record?.parts || '').intervalIntretinere ||
+                    parseServiceDetails(record?.parts || '').intervalDistributie ||
+                    (record?.nextKm != null &&
+                    record.odometer != null &&
+                    record.nextKm > record.odometer
+                      ? record.nextKm - record.odometer
+                      : '')
+                  }
+                />
+              </label>
+              <label>
+                {en ? 'Or every · months (optional)' : 'Sau la fiecare · luni (opțional)'}
+                <input
+                  name="ac_intervalLuni"
+                  type="number"
+                  min="1"
+                  max="1200"
+                  step="1"
+                  defaultValue={parseServiceDetails(record?.parts || '').intervalLuni || ''}
+                />
+              </label>
+            </div>
+            <p className="micro">
+              {en
+                ? 'Example: changed at 83,000 km + a 100,000 km interval = next change at 183,000 km. If your next change is at 150,000 km, enter an interval of 67,000 km.'
+                : 'Exemplu: schimb făcut la 83.000 km + interval de 100.000 km = următorul schimb la 183.000 km. Dacă următorul schimb trebuie făcut la 150.000 km, introdu un interval de 67.000 km.'}
+            </p>
+            <strong aria-live="polite">
+              {en ? 'Next change: ' : 'Următorul schimb: '}
+              {live.next && live.km
+                ? Number(live.next).toLocaleString(locale) + ' km'
+                : en
+                  ? 'complete the mileage and interval'
+                  : 'completează kilometrajul și intervalul'}
+            </strong>
+          </section>
+        )}
         {kind === 'service' && (
           <>
             <details className="record-technical-details">
@@ -540,11 +608,11 @@ export default function RecordEditor({
             )}
             {kind === 'service' && (
               <div className="service-reminder-box">
-                <OperationAlerts parts={record?.parts||''} premium={data.premium}/>
+                <OperationAlerts parts={record?.parts || ''} premium={data.premium} />
                 <h3>Următoarea intervenție</h3>
                 <p className="micro">Completează doar intervalele recomandate pentru mașina ta.</p>
                 <div className="form-grid">
-                  {category !== 'Schimb ulei' && (
+                  {category !== 'Schimb ulei' && category !== 'Distribuție' && (
                     <label data-workspace-ui>
                       {en
                         ? 'Repeat after · km (optional)'
@@ -564,32 +632,36 @@ export default function RecordEditor({
                       />
                     </label>
                   )}
-                  <label data-workspace-ui>
-                    {en
-                      ? 'Repeat after · months (optional)'
-                      : 'Interval între intervenții · luni (opțional)'}
-                    <input
-                      name="ac_intervalLuni"
-                      type="number"
-                      min="1"
-                      max="1200"
-                      step="1"
-                      defaultValue={parseServiceDetails(record?.parts || '').intervalLuni || ''}
-                    />
-                  </label>
+                  {category !== 'Distribuție' && (
+                    <label data-workspace-ui>
+                      {en
+                        ? 'Repeat after · months (optional)'
+                        : 'Interval între intervenții · luni (opțional)'}
+                      <input
+                        name="ac_intervalLuni"
+                        type="number"
+                        min="1"
+                        max="1200"
+                        step="1"
+                        defaultValue={parseServiceDetails(record?.parts || '').intervalLuni || ''}
+                      />
+                    </label>
+                  )}
                   <label>
                     Data planificată
                     <input name="expiresAt" type="date" defaultValue={record?.expiresAt || ''} />
                   </label>
-                  <label>
-                    Prag kilometraj · opțional
-                    <input
-                      name="nextKm"
-                      type="number"
-                      min={0}
-                      defaultValue={record?.nextKm ?? ''}
-                    />
-                  </label>
+                  {category !== 'Distribuție' && (
+                    <label>
+                      Prag kilometraj · opțional
+                      <input
+                        name="nextKm"
+                        type="number"
+                        min={0}
+                        defaultValue={record?.nextKm ?? ''}
+                      />
+                    </label>
+                  )}
                 </div>
               </div>
             )}
