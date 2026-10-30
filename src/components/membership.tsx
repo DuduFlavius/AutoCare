@@ -106,7 +106,7 @@ export function PriceCards({
           {price(monthlyBani * 3)} <span>{en ? '/3 months' : 'lei / 3 luni'}</span>
         </div>
         <p className="small muted">
-          {en
+          {prepaid ? (en?'One payment for 3 additional months.':'O singură plată pentru încă 3 luni.') : en
             ? `Equivalent to ${euro(monthlyBani)}/month, billed every 3 months.`
             : `Echivalent cu ${amount(monthlyBani)} lei/lună, facturat la fiecare 3 luni.`}
         </p>

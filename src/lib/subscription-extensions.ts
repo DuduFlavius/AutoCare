@@ -19,7 +19,7 @@ export async function extensionCheckout(
     const session=await client.checkout.sessions.retrieve(pending.sessionId);
     if(session.payment_status==='paid')await confirmExtension(session.id,'reconcile:'+session.id,session.livemode,client);
     else if(session.status==='expired')await db().update(s.subscriptionExtensions).set({status:'expired'}).where(eq(s.subscriptionExtensions.id,pending.id));
-    else if(session.status==='open'&&pending.months===months&&pending.amountBani===amountBani)return{url:session.url};
+    else if(session.status==='open'){if(pending.months===months&&pending.amountBani===amountBani)return{url:session.url};await client.checkout.sessions.expire(session.id);await db().update(s.subscriptionExtensions).set({status:'expired'}).where(eq(s.subscriptionExtensions.id,pending.id));}
     else throw new AppError(409,'Există o plată în curs. Finalizeaz-o sau așteaptă expirarea ei înainte de a alege alt plan.');
   }
   const grants = await activeGrants(uid);

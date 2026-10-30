@@ -85,11 +85,11 @@ export default function SubscriptionPage({
           </button>
         )}
       </section>
-      {!lifetime && (
+      {(
         <>
           <section className="card">
             <h3>
-              {data.premium
+              {lifetime ? (en?'Plans and prices':'Planuri și prețuri') : data.premium
                 ? en
                   ? 'Extend your Premium access'
                   : 'Prelungește accesul Premium'
@@ -98,7 +98,7 @@ export default function SubscriptionPage({
                   : 'Alege Premium'}
             </h3>
             <p>
-              {data.premium
+              {lifetime ? (en?'Your access has no expiry. The plans below are informational; no extension is needed.':'Accesul tău nu expiră. Planurile de mai jos sunt informative; nu este necesară prelungirea.') : data.premium
                 ? en
                   ? 'Your remaining days are preserved. Another month is added after your current paid deadline. This is one payment; an existing recurring subscription keeps its plan and moves its next billing date.'
                   : 'Păstrezi zilele rămase. Încă o lună se adaugă după termenul actual. Prelungirea se achită o singură dată; abonamentul recurent existent își păstrează planul și mută următoarea facturare.'
@@ -111,12 +111,13 @@ export default function SubscriptionPage({
             monthlyBani={data.pricing.monthlyBani}
             annualBani={data.pricing.annualBani}
             language={language}
-            busy={busy}
+            busy={busy||lifetime}
             prepaid={data.premium}
             checkout={(interval) => checkout(interval, data.premium)}
           />
         </>
       )}
+      <p className="micro">{en?'EUR prices are indicative at EUR 1 ≈ RON 5. Payment is charged in RON at the confirmed Stripe price.':'Prețurile sunt facturate în RON, la valoarea confirmată în pagina de plată Stripe.'}</p>
       <section className="card">
         <h3>{en ? 'Payment history' : 'Istoricul plăților'}</h3>
         {invoices.length ? (
