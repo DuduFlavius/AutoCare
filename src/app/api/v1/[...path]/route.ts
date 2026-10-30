@@ -18,6 +18,7 @@ import * as googleMail from '@/lib/google-mail';
 import * as mailCenter from '@/lib/mail-center';
 import { renderEmail } from '@/lib/email-templates';
 import { stripe, checkout, billingPortal, processStripeEvent } from '@/lib/billing';
+import {createMechanicShare,listMechanicShares,revokeMechanicShare} from '@/lib/mechanic-shares';
 import {vehicleReport} from '@/lib/vehicle-report';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -436,6 +437,10 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       await db().delete(s.pushes).where(eq(s.pushes.userId, uid));
       return json({ ok: true });
     }
+    if(path[0]==='records' && path.length===3 && path[2]==='complete' && method==='POST') return json(await svc.saveRecord(uid,await body(req),undefined,uuid.parse(path[1])),201);
+    if(route==='mechanic-shares' && method==='GET')return json(await listMechanicShares(uid));
+    if(route==='mechanic-shares' && method==='POST')return json(await createMechanicShare(uid,await body(req)),201);
+    if(path[0]==='mechanic-shares' && path.length===2 && method==='DELETE')return json(await revokeMechanicShare(uid,uuid.parse(path[1])));
     if (route === 'export' && method === 'GET') {
       const data = await svc.dashboard(uid);
       const format = new URL(req.url).searchParams.get('format');

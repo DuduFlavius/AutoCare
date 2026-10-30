@@ -97,6 +97,7 @@ export type MaintenanceSource = {
   parts: string | null;
 };
 export function maintenanceTargets(record: MaintenanceSource) {
+  if (parseServiceDetails(record.parts || '').completedBy) return [];
   const details = parseServiceDetails(record.parts || '');
   const schedule = maintenanceSchedule({ ...record, details });
   const targets: Array<{

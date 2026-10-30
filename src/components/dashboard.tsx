@@ -15,6 +15,8 @@ import {maintenanceTargets} from '@/lib/maintenance-schedule';
 import ServiceForecastCards from './service-forecast-cards';
 import SmartDriveHistory from './smartdrive-history';
 import RecordEditor from './record-editor';
+import {parseServiceDetails} from '@/lib/service-details';
+import {completedServiceSeed} from '@/lib/completed-service';
 import { filterRecords, documentCounts, serviceStats } from '@/lib/record-filters';
 import SupportChat from './support-chat';
 import { useState, useEffect, useRef, type FormEvent } from 'react';
@@ -55,6 +57,7 @@ type Modal = {
   kind: 'vehicle' | 'document' | 'service' | 'expense';
   vehicle?: Vehicle;
   record?: RecordItem;
+  completionOf?: string;
 } | null;
 const _money = (b: number) =>
   new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(b / 100);
@@ -111,6 +114,7 @@ function Empty({
 }
 function Status({ record }: { record: RecordItem }) {
   const statusLanguage = useApplicationLanguage();
+  if(record.kind==='service' && parseServiceDetails(record.parts||'').completedBy) return <span className="pill valid" data-workspace-ui>{statusLanguage==='en'?'Completed · next cycle saved':'Efectuată · ciclu nou salvat'}</span>;
   return (
     <span className={'pill ' + record.status.state}>
       {record.status.label}
@@ -1685,6 +1689,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                   >
                                     Editează
                                   </button>
+                                  {r.kind==='service' && data.premium && !parseServiceDetails(r.parts||'').completedBy && <button data-workspace-ui type="button" onClick={()=>setModal({kind:'service',completionOf:r.id,record:completedServiceSeed(r,data.vehicles.find(v=>v.id===r.vehicleId)?.odometer??r.odometer??0,new Date().toLocaleDateString('en-CA',{timeZone:data.profile.timezone}))})}>{language==='en'?'Mark as completed':'Marchează ca efectuată'}</button>}
                                   <label
                                     className="button small"
                                     style={{ cursor: 'pointer' }}
@@ -2246,7 +2251,9 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                 ? modal.vehicle
                   ? 'Editează mașina'
                   : 'Adaugă mașină'
-                : modal.record
+                : modal.completionOf
+                  ? (language==='en'?'Record completed service':'Înregistrează lucrarea efectuată')
+                  : modal.record
                   ? 'Editează înregistrarea'
                   : modal.kind === 'document'
                     ? 'Adaugă document'
@@ -2276,8 +2283,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                         'La cererea ta, formularele salvează numai în contul autentificat; demonstrația nu trimite date.',
                       );
                     const saved = await api(
-                      'records' + (modal.record ? '/' + modal.record.id : ''),
-                      modal.record ? 'PATCH' : 'POST',
+                      modal.completionOf ? 'records/'+modal.completionOf+'/complete' : 'records' + (modal.record ? '/' + modal.record.id : ''),
+                      modal.record && !modal.completionOf ? 'PATCH' : 'POST',
                       payload,
                     );
                     if (file) {

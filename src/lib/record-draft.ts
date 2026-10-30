@@ -89,7 +89,7 @@ export function prepareRecordDraft(
   const computedExpiry = schedule.expiresAt || '';
   for (const [key, value] of f.entries()) {
     if (
-      !['amount', 'ac_costPiese', 'ac_costLabor', 'ac_costOther'].includes(key) &&
+      !['amount', 'ac_budgetEstimat', 'ac_costPiese', 'ac_costLabor', 'ac_costOther'].includes(key) &&
       !/^ac_filtru\d+Cost$/.test(key)
     )
       continue;

@@ -478,3 +478,9 @@ export const mailDeliveries = pgTable('mail_deliveries', {
   attemptedAt: timestamp({ withTimezone: true }),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 }, t => [index('mail_delivery_campaign_status').on(t.campaignId,t.status), index('mail_delivery_provider').on(t.providerId)]);
+
+export const mechanicShares=pgTable('mechanic_shares',{
+ id:text().primaryKey(),userId:text().notNull().references(()=>user.id,{onDelete:'cascade'}),
+ tokenHash:text().notNull().unique(),snapshot:jsonb().notNull(),fileIds:jsonb().$type<string[]>().notNull(),
+ expiresAt:timestamp({withTimezone:true}).notNull(),revoked:boolean().notNull().default(false),createdAt:timestamp({withTimezone:true}).notNull().defaultNow(),
+},t=>[index('mechanic_share_owner').on(t.userId)]);

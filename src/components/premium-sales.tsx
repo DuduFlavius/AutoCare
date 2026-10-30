@@ -8,6 +8,9 @@ export default function PremiumSales({
 }) {
   const en = language === 'en';
   const comparison = [
+    [en ? 'Complete service and renew its interval' : 'Finalizează lucrarea și reînnoiește intervalul', '—', en ? 'Included' : 'Inclus'],
+    [en ? 'Estimated budget vs actual cost' : 'Buget estimat vs cost real', '—', en ? 'Included' : 'Inclus'],
+    [en ? 'Temporary mechanic folder' : 'Dosar temporar pentru mecanic', '—', en ? '1, 3 or 7 days · revocable' : '1, 3 sau 7 zile · revocabil'],
     [en ? 'Active vehicles' : 'Mașini active', '1', en ? 'Unlimited' : 'Nelimitate'],
     [
       en ? 'Basic documents & history' : 'Documente și istoric de bază',

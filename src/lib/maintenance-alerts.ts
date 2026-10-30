@@ -23,6 +23,7 @@ export function reminderOffsets(input: {
   afterExpiry: boolean;
 }) {
   const { parts, paid, defaults, days, nextKm, odometer, afterExpiry } = input;
+  if (parseServiceDetails(parts || '').completedBy) return [];
   const configured = operationAlerts(parts);
   const selected = paid
     ? (configured.days ?? defaults)

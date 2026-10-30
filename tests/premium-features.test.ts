@@ -244,3 +244,38 @@ test('expired Premium cancels custom alert permissions and insufficient mileage 
     null,
   );
 });
+
+test('completed services create one new history entry, reset the interval, retain original costs and reject duplicate completion',async()=>{
+ await grantPremium(accounts.paid.id,accounts.paid.id,{lifetime:true});
+ const {completedServiceSeed}=await import('../src/lib/completed-service');
+ const original=await svc.saveRecord(accounts.paid.id,{kind:'service',vehicleId,category:'Distribuție',title:'Distribuție finalizare',date:today,odometer:100000,nextKm:200000,expiresAt:null,amountBani:50000,amountKnown:true,parts:'AutoCare · intervalIntretinere: 100000\nAutoCare · budgetEstimat: 600',notes:'private'});
+ const seed=completedServiceSeed(original,200000,today);
+ assert.equal(seed.nextKm,null);assert.equal(seed.amountKnown,false);assert.equal(seed.notes,'');
+ const f=new FormData();for(const [k,v] of Object.entries({date:today,odometer:'200000',amount:'550',ac_intervalIntretinere:'100000',ac_budgetEstimat:'600'}))f.set(k,v);
+ const payload=prepareRecordDraft(f,{kind:'service',category:'Distribuție',car:vehicleId,serviceKmInterval:'',costEdited:false,unknownCost:false});
+ const res=await request('paid','records/'+original.id+'/complete',payload);assert.equal(res.status,201);const saved=await res.json();assert.equal(saved.nextKm,300000);assert.equal(saved.amountBani,55000);assert.equal((await svc.ownedVehicle(accounts.paid.id,vehicleId)).odometer,200000);
+ const {maintenanceTargets}=await import('../src/lib/maintenance-schedule');
+ const old=await svc.ownedRecord(accounts.paid.id,original.id);assert.equal(old.amountBani,50000);assert.equal(old.nextKm,null);assert.equal(old.expiresAt,null);assert.deepEqual(maintenanceTargets(old),[]);assert.deepEqual(reminderOffsets({parts:old.parts,paid:true,defaults:[0],days:0,nextKm:100,odometer:200000,afterExpiry:true}),[]);assert.ok(old.parts?.includes('completedBy: '+saved.id));
+ assert.equal((await request('paid','records/'+original.id+'/complete',payload)).status,409);
+ assert.equal((await request('free','records/'+original.id+'/complete',payload)).status,404);
+});
+test('mechanic folders restrict selected records/files, hide private fields, and enforce expiry, owner revocation and paid access',async()=>{
+ const {createMechanicShare,readMechanicShare,readMechanicFile,revokeMechanicShare,listMechanicShares}=await import('../src/lib/mechanic-shares');
+ const rec=await svc.ownedRecord(accounts.paid.id,savedId);
+ const args={vehicleId,recordIds:[rec.id],days:1 as const,includeCosts:false,includeFiles:false};
+ const share=await createMechanicShare(accounts.paid.id,args),opened=await readMechanicShare(share.token);
+ assert.equal(opened.snapshot.records.length,1);assert.equal(opened.snapshot.records[0].id,rec.id);assert.equal(opened.snapshot.records[0].amountBani,undefined);assert.ok(!JSON.stringify(opened.snapshot).includes('userId'));assert.ok(!JSON.stringify(opened.snapshot).includes('notes'));
+ assert.equal((await listMechanicShares(accounts.paid.id))[0].id,share.id);
+ assert.equal((await listMechanicShares(accounts.free.id)).length,0);
+ await assert.rejects(readMechanicShare(share.token+'x'));await assert.rejects(readMechanicShare(share.token,new Date(Date.now()+2*86400000)));await assert.rejects(readMechanicFile(share.token,crypto.randomUUID()));
+ await revokeMechanicShare(accounts.free.id,share.id);assert.ok(await readMechanicShare(share.token));
+ await revokeMechanicShare(accounts.paid.id,share.id);await assert.rejects(readMechanicShare(share.token));
+ await assert.rejects(createMechanicShare(accounts.free.id,args));
+ await assert.rejects(createMechanicShare(accounts.paid.id,{...args,recordIds:[crypto.randomUUID()]}));
+ const f=await db().insert(s.files).values({id:crypto.randomUUID(),userId:accounts.paid.id,recordId:rec.id,name:'factura.pdf',mime:'application/pdf',data:Buffer.from('pdf fixture').toString('base64'),size:11}).returning();
+ const attached=await createMechanicShare(accounts.paid.id,{...args,includeCosts:true,includeFiles:true});
+ assert.equal((await readMechanicFile(attached.token,f[0].id)).name,'factura.pdf');
+ const without=await createMechanicShare(accounts.paid.id,args);await assert.rejects(readMechanicFile(without.token,f[0].id));
+ await revokePremium(accounts.paid.id,accounts.paid.id,{confirm:true});
+ await assert.rejects(readMechanicShare(attached.token));
+});

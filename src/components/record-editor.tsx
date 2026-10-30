@@ -402,6 +402,7 @@ export default function RecordEditor({
         )}
         {kind !== 'document' && (
           <div className="cost-field ac-cost-breakdown">
+            {data.premium && kind==='service' && <label data-workspace-ui>{en?'Estimated budget · RON (optional)':'Buget estimat · RON (opțional)'}<input name="ac_budgetEstimat" type="number" min="0" max="1000000" step="0.01" defaultValue={parseServiceDetails(record?.parts||'').budgetEstimat||''}/><small>{en?'Planning only. It does not count as an actual expense.':'Doar pentru planificare. Nu se adaugă la cheltuielile reale.'}</small></label>}
             <h3>{kind === 'service' ? 'Costurile intervenției' : 'Valoarea cheltuielii'}</h3>
             <p className="micro">
               {kind === 'service'

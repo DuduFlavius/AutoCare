@@ -1,5 +1,6 @@
 'use client';
 import PremiumSales from './premium-sales';
+import PremiumCareTools from './premium-care-tools';
 import PremiumDownloads from './premium-downloads';
 import PremiumOverview from './premium-overview';
 import PremiumWorkspace from './premium-workspace';
@@ -322,6 +323,7 @@ export default function Membership({
         <PremiumSales language={language} attachmentLimit={data.planLimits.attachments} />
       )}
       <PremiumWorkspace data={data} language={language} navigate={navigate} onRecord={onRecord} />
+      {data.premium && <PremiumCareTools data={data} language={language} preview={preview} onRecord={onRecord}/> }
       {data.premium && <PremiumDownloads data={data} language={language} preview={preview} />}
       {!data.premium && (
         <div id="premium-plans">

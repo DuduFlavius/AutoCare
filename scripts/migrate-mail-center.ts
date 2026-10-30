@@ -14,7 +14,7 @@ async function main() {
     if (url.hostname.endsWith('.neon.tech')) url.hostname = url.hostname.replace('-pooler.', '.');
     process.env.DATABASE_URL = url.toString();
   }
-  const source = await readFile('migrations/0010_mail_center.sql', 'utf8');
+  const source = (await readFile('migrations/0010_mail_center.sql', 'utf8'))+'\n--> statement-breakpoint\n'+(await readFile('migrations/0011_mechanic_shares.sql', 'utf8'));
   await db().transaction(async (tx) => {
     for (const statement of source.split('--> statement-breakpoint').filter((x) => x.trim()))
       await tx.execute(sql.raw(statement));
@@ -25,7 +25,7 @@ async function main() {
       sql`INSERT INTO autocare_migrations(name) VALUES('0010_mail_center.sql') ON CONFLICT DO NOTHING`,
     );
   });
-  console.log('Mail Center additive migration completed.');
+  console.log('Mail Center and mechanic sharing additive migrations completed.');
 }
 main()
   .then(async () => {

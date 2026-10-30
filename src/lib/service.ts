@@ -118,23 +118,43 @@ export async function archiveVehicle(uid: string, id: string) {
     .set({ archived: true })
     .where(and(eq(s.vehicles.id, id), eq(s.vehicles.userId, uid)));
 }
-export async function saveRecord(uid: string, input: unknown, id?: string) {
+export async function saveRecord(uid: string, input: unknown, id?: string, completionOf?: string) {
   const parsed = recordInput.parse(input);
   const data = { ...parsed, amountBani: parsed.amountKnown ? parsed.amountBani : 0 };
   const car = await ownedVehicle(uid, data.vehicleId);
   const technical=parseServiceDetails(data.parts||'');
-  const advanced=['intervalLuni','intervalIntretinere','intervalDistributie','alertDays','alertKm'].some(key=>!!technical[key]);
+  if(technical.budgetEstimat!==undefined && (!Number.isFinite(Number(technical.budgetEstimat)) || Number(technical.budgetEstimat)<0 || Number(technical.budgetEstimat)>1000000)) throw new AppError(400,'Buget estimat invalid.');
+  const advanced=['intervalLuni','intervalIntretinere','intervalDistributie','alertDays','alertKm','budgetEstimat'].some(key=>!!technical[key]);
   if(advanced&&!(await premium(uid))) {
     const old=id?await ownedRecord(uid,id):null;
     const previous=parseServiceDetails(old?.parts||'');
-    if(!old||['intervalLuni','intervalIntretinere','intervalDistributie','alertDays','alertKm'].some(key=>technical[key]!==previous[key]))throw new AppError(403,'Intervalele și alertele avansate necesită Premium.');
+    if(!old||['intervalLuni','intervalIntretinere','intervalDistributie','alertDays','alertKm','budgetEstimat'].some(key=>technical[key]!==previous[key]))throw new AppError(403,'Intervalele și alertele avansate necesită Premium.');
   }
 
   if (car.archived) throw new AppError(400, 'Mașina este arhivată.');
   if (data.nextKm != null && !(await premium(uid)))
     throw new AppError(403, 'Mementourile după kilometraj necesită Premium.');
   if (id) await ownedRecord(uid, id);
+  if(completionOf && !(await premium(uid))) throw new AppError(403,'Premium necesar.');
+  const completionToday = completionOf ? localDate(new Date(), (await profile(uid)).timezone) : null;
+  if(completionOf && (!data.date || data.date>completionToday!)) throw new AppError(400,'Data lucrării efectuate nu poate fi în viitor.');
   return db().transaction(async (tx) => {
+    let completedId: string | undefined;
+    if (completionOf) {
+      const previous=(await tx.select().from(s.records).where(and(eq(s.records.id,completionOf),eq(s.records.userId,uid))).for('update'))[0];
+      if(!previous || previous.cancelled || previous.kind!=='service' || data.kind!=='service' || previous.vehicleId!==data.vehicleId || previous.category!==data.category) throw new AppError(400,'Intervenția nu poate fi finalizată.');
+      if(parseServiceDetails(previous.parts||'').completedBy) throw new AppError(409,'Această lucrare a fost deja înregistrată ca efectuată.');
+      if(!data.date || (previous.date && data.date<previous.date) || (previous.odometer!=null && (data.odometer==null || data.odometer<previous.odometer))) throw new AppError(400,'Verifică data și kilometrajul noului schimb.');
+      if(data.date===completionToday && data.odometer!=null){
+        const current=(await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id,data.vehicleId),eq(s.vehicles.userId,uid))).for('update'))[0];
+        if(data.odometer>current.odometer){await tx.update(s.vehicles).set({odometer:data.odometer}).where(eq(s.vehicles.id,current.id));await tx.insert(s.mileageReadings).values({id:crypto.randomUUID(),userId:uid,vehicleId:current.id,odometer:data.odometer,source:'manual'});}
+      }
+      completedId=crypto.randomUUID();
+      await tx.insert(s.recordHistory).values({id:crypto.randomUUID(),userId:uid,recordId:previous.id,snapshot:previous});
+      const parts=(previous.parts||'').split('\n').filter(line=>!line.startsWith('AutoCare · budgetEstimat:')).join('\n')+'\nAutoCare · completedBy: '+completedId;
+      await tx.update(s.records).set({nextKm:null,expiresAt:null,parts,revision:previous.revision+1}).where(eq(s.records.id,previous.id));
+      await tx.update(s.notifications).set({status:'cancelled'}).where(and(eq(s.notifications.recordId,previous.id),sql`${s.notifications.status} IN ('pending','retry')`));
+    }
     if (id) {
       const previous = (
         await tx
@@ -167,7 +187,7 @@ export async function saveRecord(uid: string, input: unknown, id?: string) {
     return (
       await tx
         .insert(s.records)
-        .values({ ...data, id: crypto.randomUUID(), userId: uid })
+        .values({ ...data, id: completedId || crypto.randomUUID(), userId: uid })
         .returning()
     )[0];
   });
