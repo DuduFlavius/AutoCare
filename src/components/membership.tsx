@@ -43,8 +43,8 @@ export function PriceCards({
         <div className="subscription-symbol">
           <CreditCard size={23} />
         </div>
-        <p className="eyebrow">PREMIUM LUNAR</p>
-        <h2>Flexibil, lună de lună.</h2>
+        <p className="eyebrow">{en?'MONTHLY PREMIUM':'PREMIUM LUNAR'}</p>
+        <h2>{en?'Flexible, month to month.':'Flexibil, lună de lună.'}</h2>
         <div className="subscription-price">
           {price(monthlyBani)} <span>{en ? '/month' : 'lei/lună'}</span>
         </div>
@@ -83,7 +83,7 @@ export function PriceCards({
             <Check size={15} /> {prepaid?(en?'One-time extension payment':'Prelungire cu plată unică'):(en?'Monthly recurring billing':'Facturare recurentă lunară')}
           </li>
           <li>
-            <Check size={15} /> Gestionare din portalul de facturare
+            <Check size={15} /> {en?'Manage in the billing portal':'Gestionare din portalul de facturare'}
           </li>
         </ul>
         {checkout ? (
@@ -92,7 +92,7 @@ export function PriceCards({
           </button>
         ) : (
           <a className="button" href="/cont?tab=Abonament">
-            Vezi în cont <ArrowUpRight size={15} />
+            {en?'View in your account':'Vezi în cont'} <ArrowUpRight size={15} />
           </a>
         )}
       </article>
@@ -100,8 +100,8 @@ export function PriceCards({
         <div className="subscription-symbol">
           <CreditCard size={23} />
         </div>
-        <p className="eyebrow">PREMIUM 3 LUNI</p>
-        <h2>Un trimestru fără griji.</h2>
+        <p className="eyebrow">{en?'3-MONTH PREMIUM':'PREMIUM 3 LUNI'}</p>
+        <h2>{en?'Three months of peace of mind.':'Un trimestru fără griji.'}</h2>
         <div className="subscription-price">
           {price(monthlyBani * 3)} <span>{en ? '/3 months' : 'lei / 3 luni'}</span>
         </div>
@@ -140,7 +140,7 @@ export function PriceCards({
             <Check size={15} /> {prepaid?(en?'One-time extension payment':'Prelungire cu plată unică'):(en?'Recurring billing every 3 months':'Facturare recurentă la 3 luni')}
           </li>
           <li>
-            <Check size={15} /> Gestionare din portalul de facturare
+            <Check size={15} /> {en?'Manage in the billing portal':'Gestionare din portalul de facturare'}
           </li>
         </ul>
         {checkout ? (
@@ -149,17 +149,17 @@ export function PriceCards({
           </button>
         ) : (
           <a className="button" href="/cont?tab=Abonament">
-            Vezi în cont <ArrowUpRight size={15} />
+            {en?'View in your account':'Vezi în cont'} <ArrowUpRight size={15} />
           </a>
         )}
       </article>
       <article className="card subscription-option annual-option ac-plan-card">
-        <span className="best-plan">CEL MAI BUN RAPORT PREȚ–BENEFICII</span>
+        <span className="best-plan">{en?'BEST VALUE':'CEL MAI BUN RAPORT PREȚ–BENEFICII'}</span>
         <div className="subscription-symbol">
           <ShieldCheck size={23} />
         </div>
-        <p className="eyebrow">PREMIUM ANUAL</p>
-        <h2>Mai multă valoare.</h2>
+        <p className="eyebrow">{en?'ANNUAL PREMIUM':'PREMIUM ANUAL'}</p>
+        <h2>{en?'More value.':'Mai multă valoare.'}</h2>
         <div className="subscription-price">
           {price(annualBani)} <span>{en ? '/year' : 'lei/an'}</span>
         </div>
@@ -208,7 +208,7 @@ export function PriceCards({
           </li>
           <li>
             <Check size={15} />{' '}
-            {s.savingBani > 0 ? 'Cost mai mic față de 12 plăți lunare' : 'O singură plată pe an'}
+            {s.savingBani>0?(en?'Lower cost than 12 monthly payments':'Cost mai mic față de 12 plăți lunare'):(en?'One payment per year':'O singură plată pe an')}
           </li>
         </ul>
         {checkout ? (
@@ -217,7 +217,7 @@ export function PriceCards({
           </button>
         ) : (
           <a className="button primary" href="/cont?tab=Abonament">
-            Vezi în cont <ArrowUpRight size={15} />
+            {en?'View in your account':'Vezi în cont'} <ArrowUpRight size={15} />
           </a>
         )}
       </article>
