@@ -1,8 +1,8 @@
 'use client';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CalendarClock, TrendingUp } from 'lucide-react';
-import { recentMileageUsage, type OdometerReading } from '@/lib/smartdrive-metrics';
+import { useMileageUsage } from './use-mileage-usage';
 import { forecastService, forecastDuration } from '@/lib/service-forecast';
 type Due = { id: string; title: string; nextKm: number | null; expiresAt?: string | Date | null };
 export default function ServiceForecastCards({
@@ -21,51 +21,12 @@ export default function ServiceForecastCards({
   const language = useApplicationLanguage(),
     locale = useApplicationLocale(),
     en = language === 'en';
-  const key = vehicleId + ':' + currentKm;
-  const [usage, setUsage] = useState<{
-    key: string;
-    value: ReturnType<typeof recentMileageUsage>;
-  } | null>(null);
-  const [settled, setSettled] = useState('');
+  const { confirmed, loading } = useMileageUsage(vehicleId, currentKm, preview);
   const [manual, setManual] = useState({ vehicleId, value: '' });
-  useEffect(() => {
-    if (preview) {
-      setSettled(key);
-      return;
-    }
-    let cancelled = false;
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 9000);
-    fetch('/api/v1/smartdrive/vehicles/' + encodeURIComponent(vehicleId) + '/readings', {
-      cache: 'no-store',
-      signal: controller.signal,
-    })
-      .then(async (r) => {
-        if (!r.ok) throw Error('Readings unavailable');
-        return r.json() as Promise<OdometerReading[]>;
-      })
-      .then((rows) => {
-        if (!cancelled) setUsage({ key, value: recentMileageUsage(rows, new Date()) });
-      })
-      .catch(() => {
-        if (!cancelled) setUsage(null);
-      })
-      .finally(() => {
-        clearTimeout(timer);
-        if (!cancelled) setSettled(key);
-      });
-    return () => {
-      cancelled = true;
-      controller.abort();
-      clearTimeout(timer);
-    };
-  }, [key, vehicleId, preview]);
   const value = manual.vehicleId === vehicleId ? manual.value : '';
   const parsed = Number(value.replace(',', '.'));
   const invalid = value !== '' && (!Number.isFinite(parsed) || parsed <= 0 || parsed > 2000);
-  const confirmed = usage?.key === key ? usage.value : null;
   const dailyKm = value !== '' && !invalid ? parsed : (confirmed?.dailyKm ?? null);
-  const loading = !preview && settled !== key;
   if (!services.length) return null;
   return (
     <section

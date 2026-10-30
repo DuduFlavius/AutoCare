@@ -977,5 +977,10 @@ export const applicationCopy: Record<string, string> = {
  "Adaugă intervenție":"Add maintenance",
  "Detalii tehnice și piese · opțional":"Technical details & parts · optional",
  "Defalcare cost: piese și manoperă · opțional":"Cost breakdown: parts & labor · optional",
- "Termen după kilometraj":"Mileage-based deadline"
+ "Termen după kilometraj":"Mileage-based deadline",
+"Costul total nu poate fi mai mic decât suma filtrelor.": "The total cannot be lower than the filter costs.",
+"Înregistrează suma plătită. Cheltuiala se adaugă o singură dată în istoricul mașinii.": "Enter the amount paid. The expense is recorded once in your vehicle history.",
+"Dacă suma este zero, introdu 0 RON. Dacă nu cunoști costul, bifează opțiunea de mai sus.": "If the amount is zero, enter RON 0. If the cost is unknown, select the option above.",
+"Service sau mecanic": "Garage or mechanic",
+"Furnizor": "Supplier",
 };

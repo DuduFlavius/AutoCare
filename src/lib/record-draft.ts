@@ -17,6 +17,36 @@ export type RecordPayload = {
   parts: string;
   notes: string;
 };
+export function recordDraftSchedule(
+  f: FormData,
+  kind: RecordPayload['kind'],
+  category: string,
+  interval = '',
+) {
+  const value = (key: string) => String(f.get(key) || '').trim();
+  const km = value('odometer') === '' ? null : Number(value('odometer'));
+  const oil = Number(interval) > 0 ? Number(interval) : Number(value('ac_intervalUlei'));
+  const next = value('nextKm') === '' ? null : Number(value('nextKm'));
+  const nextKm =
+    kind === 'service' &&
+    category === 'Schimb ulei' &&
+    next === null &&
+    km !== null &&
+    Number.isFinite(oil) &&
+    oil > 0
+      ? km + oil
+      : next;
+  const keys: Record<string, string> = {
+    ITP: 'ac_expirareITP',
+    Frâne: 'ac_verificareFrane',
+    Baterie: 'ac_verificareBaterie',
+    Distribuție: 'ac_urmatoareaDataDistributie',
+  };
+  const expiry =
+    value('expiresAt') ||
+    (kind === 'service' ? value(keys[category] || 'ac_urmatoareaVerificare') : '');
+  return { nextKm, expiresAt: expiry || null };
+}
 export function prepareRecordDraft(
   f: FormData,
   options: {
@@ -34,29 +64,19 @@ export function prepareRecordDraft(
     options;
   const str = (k: string) => String(f.get(k) || '').trim();
   const num = (k: string) => (str(k) === '' ? null : Number(str(k)));
-  const oilInterval =
-    Number(serviceKmInterval) > 0 ? Number(serviceKmInterval) : Number(str('ac_intervalUlei'));
-  const computedNextKm =
-    kind === 'service' &&
-    category === 'Schimb ulei' &&
-    num('nextKm') === null &&
-    num('odometer') !== null &&
-    Number.isFinite(oilInterval) &&
-    oilInterval > 0
-      ? Number(num('odometer')) + oilInterval
-      : num('nextKm');
-  const categoryDate =
-    category === 'ITP'
-      ? str('ac_expirareITP')
-      : category === 'Frâne'
-        ? str('ac_verificareFrane')
-        : category === 'Baterie'
-          ? str('ac_verificareBaterie')
-          : category === 'Distribuție'
-            ? str('ac_urmatoareaDataDistributie')
-            : str('ac_urmatoareaVerificare');
-  const computedExpiry =
-    kind === 'service' && !str('expiresAt') && categoryDate ? categoryDate : str('expiresAt');
+  const schedule = recordDraftSchedule(f, kind, category, serviceKmInterval);
+  const computedNextKm = schedule.nextKm;
+  const computedExpiry = schedule.expiresAt || '';
+  for (const [key, value] of f.entries()) {
+    if (
+      !['amount', 'ac_costPiese', 'ac_costLabor', 'ac_costOther'].includes(key) &&
+      !/^ac_filtru\d+Cost$/.test(key)
+    )
+      continue;
+    const raw = String(value).trim();
+    if (raw !== '' && (!Number.isFinite(Number(raw)) || Number(raw) < 0 || Number(raw) > 1000000))
+      throw new Error('Costul trebuie să fie între 0 și 1.000.000 RON.');
+  }
   const partsTotal = ['ac_costPiese', 'ac_costLabor', 'ac_costOther'].reduce(
     (sum, k) => sum + (num(k) || 0),
     0,
@@ -71,17 +91,23 @@ export function prepareRecordDraft(
         .filter(([key]) => /^ac_filtru\d+Cost$/.test(key))
         .reduce((total, [, value]) => total + (Number(value) || 0), 0)
     : 0;
+  const hasFilterCost =
+    ['Filtre', 'Schimb ulei'].includes(category) &&
+    Array.from(f.entries()).some(
+      ([key, value]) => /^ac_filtru\d+Cost$/.test(key) && String(value).trim() !== '',
+    );
+  if (kind === 'service' && hasCost && !costEdited && finalAmount + 0.01 < filterCost)
+    throw new Error('Costul total nu poate fi mai mic decât suma filtrelor.');
   // Filter line-item prices are informational when a total or parts breakdown is supplied: never add them twice.
   const effectiveTotal =
     kind === 'service' && !hasCost && filterCost > 0 ? filterCost : finalAmount;
-  const effectiveKnown = hasCost || (kind === 'service' && filterCost > 0);
+  const effectiveKnown = hasCost || (kind === 'service' && hasFilterCost);
   if (
     kind === 'service' &&
     ['Filtre', 'Schimb ulei'].includes(category) &&
     costEdited &&
     filterCost > 0 &&
-    str('ac_costPiese') === '' &&
-    Math.abs(partsTotal - filterCost) > 0.01
+    str('ac_costPiese') === ''
   ) {
     throw new Error('Introdu suma filtrelor la costul pieselor, pentru a păstra corect totalul.');
   }
@@ -145,8 +171,14 @@ export function prepareRecordDraft(
     number: str('number'),
     parts:
       kind === 'service'
-        ? serializeServiceDetails(f.has('parts') ? str('parts') : existingParts || '', f)
-        : str('parts'),
+        ? serializeServiceDetails(
+            f.has('parts') ? str('parts') : existingParts || '',
+            f,
+            existingParts || '',
+          )
+        : f.has('parts')
+          ? str('parts')
+          : existingParts || '',
     notes: str('notes'),
   };
   if (['Alt document', 'Altă operațiune', 'Altele'].includes(category) && !str('title'))

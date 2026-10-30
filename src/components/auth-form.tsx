@@ -2,19 +2,44 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import SiteLanguage from './site-language';
-import { ShieldCheck, Files, Wrench } from 'lucide-react';
+import './auth-premium.css';
+import { ShieldCheck, Files, Wrench, Eye, EyeOff } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { authErrorMessage } from '@/lib/auth-messages';
 export function AuthForm({ mode }: { mode: string }) {
-  const [language,setLanguage]=useState<'ro'|'en'>('ro');
-  useEffect(()=>{try{if(localStorage.getItem('autocare-language')==='en')setLanguage('en');}catch{/* Preferences still work without storage. */}},[]);
+  const [language, setLanguage] = useState<'ro' | 'en'>('ro');
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('autocare-language') === 'en') setLanguage('en');
+    } catch {
+      /* Preferences still work without storage. */
+    }
+  }, []);
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const reset = mode === 'resetare-parola',
     signup = mode === 'inregistrare',
     forgot = mode === 'recuperare-parola';
-  useEffect(()=>{document.title=(language==='en'?(signup?'Create account':forgot?'Reset password':reset?'New password':'Sign in'):(signup?'Înregistrare':forgot?'Recuperare parolă':reset?'Parolă nouă':'Autentificare'))+' | AutoCare';},[language,signup,forgot,reset]);
+  useEffect(() => {
+    document.title =
+      (language === 'en'
+        ? signup
+          ? 'Create account'
+          : forgot
+            ? 'Reset password'
+            : reset
+              ? 'New password'
+              : 'Sign in'
+        : signup
+          ? 'Înregistrare'
+          : forgot
+            ? 'Recuperare parolă'
+            : reset
+              ? 'Parolă nouă'
+              : 'Autentificare') + ' | AutoCare';
+  }, [language, signup, forgot, reset]);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
@@ -56,10 +81,17 @@ export function AuthForm({ mode }: { mode: string }) {
     }
   }
   return (
-    <div className="auth-layout">
-      <SiteLanguage language={language}/>
+    <div className="auth-layout ac-auth-premium">
+      <SiteLanguage language={language} />
       <aside className="auth-editorial">
-        <img src="/design-car.jpg" alt="Fotografie auto de ambianță" />
+        <img
+          src="/images/autocare-app-premium.webp"
+          srcSet="/images/autocare-app-premium-mobile.webp 768w, /images/autocare-app-premium.webp 1400w"
+          sizes="(max-width:760px) 100vw, 50vw"
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+        />
         <div className="auth-editorial-content">
           <span className="section-kicker">PENTRU DRUMURILE CARE URMEAZĂ</span>
           <h2>
@@ -86,10 +118,40 @@ export function AuthForm({ mode }: { mode: string }) {
             </span>
           </div>
         </div>
-        <small className="auth-image-caption">Fotografie de ambianță</small>
       </aside>
       <div className="auth-box">
-        <div style={{display:'flex',justifyContent:'flex-end',marginBottom:18}} data-workspace-ui><label style={{fontSize:12,color:'#47607f'}}>{language==='en'?'Language':'Limbă'} <select aria-label={language==='en'?'Language':'Limbă'} value={language} onChange={event=>{const next=event.target.value==='en'?'en':'ro';setLanguage(next);try{localStorage.setItem('autocare-language',next);}catch{/* Optional preference persistence. */}}} style={{minHeight:40,padding:'8px 12px',border:'1px solid #d2deed',borderRadius:9,background:'#fff',color:'#193b68'}}><option value="ro">Română</option><option value="en">English</option></select></label></div>
+        <div
+          style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 18 }}
+          data-workspace-ui
+        >
+          <label style={{ fontSize: 12, color: '#47607f' }}>
+            {language === 'en' ? 'Language' : 'Limbă'}{' '}
+            <select
+              aria-label={language === 'en' ? 'Language' : 'Limbă'}
+              value={language}
+              onChange={(event) => {
+                const next = event.target.value === 'en' ? 'en' : 'ro';
+                setLanguage(next);
+                try {
+                  localStorage.setItem('autocare-language', next);
+                } catch {
+                  /* Optional preference persistence. */
+                }
+              }}
+              style={{
+                minHeight: 40,
+                padding: '8px 12px',
+                border: '1px solid #d2deed',
+                borderRadius: 9,
+                background: '#fff',
+                color: '#193b68',
+              }}
+            >
+              <option value="ro">Română</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+        </div>
         <p className="eyebrow">GARAJUL TĂU DIGITAL</p>
         <h1>
           {signup
@@ -144,13 +206,42 @@ export function AuthForm({ mode }: { mode: string }) {
           {!forgot && (
             <label>
               Parolă
-              <input
-                name="password"
-                type="password"
-                autoComplete={signup || reset ? 'new-password' : 'current-password'}
-                minLength={signup || reset ? 12 : undefined}
-                required
-              />
+              <div className="auth-password-row">
+                <input
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete={signup || reset ? 'new-password' : 'current-password'}
+                  minLength={signup || reset ? 12 : undefined}
+                  required
+                />
+                <button
+                  type="button"
+                  className="auth-password-toggle"
+                  data-workspace-ui
+                  aria-pressed={showPassword}
+                  aria-label={
+                    language === 'en'
+                      ? showPassword
+                        ? 'Hide password'
+                        : 'Show password'
+                      : showPassword
+                        ? 'Ascunde parola'
+                        : 'Arată parola'
+                  }
+                  onClick={() => setShowPassword((value) => !value)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  <span>
+                    {language === 'en'
+                      ? showPassword
+                        ? 'Hide'
+                        : 'Show'
+                      : showPassword
+                        ? 'Ascunde'
+                        : 'Arată'}
+                  </span>
+                </button>
+              </div>
               {(signup || reset) && (
                 <span className="micro">Minimum 12 caractere. Contul se activează imediat.</span>
               )}

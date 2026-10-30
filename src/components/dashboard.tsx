@@ -1043,6 +1043,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
             {tab==='Dashboard'&&<WorkspaceOverview data={data} language={language} currency={currency} navigate={navigate}/>}
             {tab === 'Dashboard' && (
               <GarageHome
+                preview={!!previewData}
                 currency={currency}
                 language={language}
                 data={data}

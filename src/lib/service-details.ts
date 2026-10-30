@@ -2,24 +2,28 @@ const prefix = 'AutoCare · ';
 export function parseServiceDetails(parts: string) {
   const out: Record<string, string> = {};
   for (const line of parts.split('\n')) {
-    if (line.startsWith(prefix)) {
-      const i = line.indexOf(': ', prefix.length);
-      if (i > 0) out[line.slice(prefix.length, i)] = line.slice(i + 2);
-    }
+    if (!line.startsWith(prefix)) continue;
+    const index = line.indexOf(': ', prefix.length);
+    if (index > 0) out[line.slice(prefix.length, index)] = line.slice(index + 2);
   }
   return out;
 }
-export function serializeServiceDetails(parts: string, form: FormData) {
-  const old = parts
+/** Update submitted fields while preserving metadata from older editor versions. */
+export function serializeServiceDetails(parts: string, form: FormData, existingParts = parts) {
+  const text = parts
     .split('\n')
-    .filter((x) => !x.startsWith(prefix))
+    .filter((line) => !line.startsWith(prefix))
     .join('\n')
     .trim();
-  const lines: string[] = [];
+  const details = { ...parseServiceDetails(existingParts), ...parseServiceDetails(parts) };
   for (const [key, value] of form.entries()) {
     if (!key.startsWith('ac_')) continue;
-    const v = String(value).trim();
-    if (v) lines.push(prefix + key.slice(3) + ': ' + v.replace(/\r?\n/g, ' / '));
+    const name = key.slice(3),
+      content = String(value).trim().replace(/\r?\n/g, ' / ');
+    if (content) details[name] = content;
+    else delete details[name];
   }
-  return [old, ...lines].filter(Boolean).join('\n');
+  return [text, ...Object.entries(details).map(([key, value]) => prefix + key + ': ' + value)]
+    .filter(Boolean)
+    .join('\n');
 }

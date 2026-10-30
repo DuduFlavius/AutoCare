@@ -1,5 +1,7 @@
 'use client';
 import {useApplicationLocale} from './application-locale';
+import {parseServiceDetails} from '@/lib/service-details';
+import OilChangeCountdown from './oil-change-countdown';
 import { useState } from 'react';
 import { dashboardHome } from '@/lib/dashboard-home';
 import {
@@ -43,6 +45,7 @@ const kindNames: Record<string, string> = {
 export function GarageHome({
   language = 'ro',
   currency = 'RON',
+  preview=false,
   data,
   navigate,
   add,
@@ -50,6 +53,7 @@ export function GarageHome({
 }: {
   language?: 'ro' | 'en';
   currency?: 'RON' | 'EUR';
+  preview?:boolean;
   data: Data;
   name: string;
   navigate: (tab: string) => void;
@@ -77,7 +81,7 @@ const home = dashboardHome(data);
     return /ulei/.test(label) && /(schimb|motor|revizie)/.test(label);
   }).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.odometer ?? 0) - (a.odometer ?? 0));
   const lastOil = oilChanges[0];
-  const savedOilInterval = lastOil?.parts?.match(/(?:^|\\n)\\[ac:intervalUlei\\]:\\s*(\\d+(?:[.,]\\d+)?)/)?.[1];
+  const savedOilInterval = parseServiceDetails(lastOil?.parts || '').intervalUlei || lastOil?.parts?.match(/(?:^|\n)\[ac:intervalUlei\]:\s*(\d+(?:[.,]\d+)?)/)?.[1];
   const parsedOilInterval = savedOilInterval ? Number(savedOilInterval.replace(',', '.')) : null;
   const nextOilKm = lastOil?.nextKm ?? (
     lastOil?.odometer != null && parsedOilInterval !== null && Number.isFinite(parsedOilInterval) && parsedOilInterval > 0
@@ -164,7 +168,7 @@ const home = dashboardHome(data);
           </div>
           <div className="ac-oil-detail"><span><Clock3 size={16}/> Ultimul schimb</span><strong>{lastOil?.odometer != null ? <>{lastOil.odometer.toLocaleString(locale)} km{lastOil.date && <small>{date(lastOil.date)}</small>}</> : 'Neconfigurat'}</strong></div>
           <div className="ac-oil-detail"><span><Clock3 size={16}/> Interval setat</span><strong>{lastOil?.odometer != null && nextOilKm !== null ? `${(nextOilKm - lastOil.odometer).toLocaleString(locale)} km` : 'Neconfigurat'}</strong></div>
-          <div className="ac-oil-detail"><span><Droplet size={16}/> Ulei utilizat</span><strong>{lastOil?.parts?.match(/(?:^|\\n)\\[ac:tipUlei\\]:\\s*([^\\n]+)/)?.[1] || 'Neconfigurat'}</strong></div>
+          <div className="ac-oil-detail ac-oil-countdown-row"><span data-workspace-ui><CalendarDays size={16}/>{language==='en'?'Until the next oil change':'Până la următorul schimb'}</span><strong>{car?<OilChangeCountdown vehicleId={car.id} currentKm={car.odometer} nextKm={nextOilKm} dueDate={lastOil?.expiresAt} timezone={data.profile.timezone} preview={preview} onReadings={()=>navigate('Kilometraj')}/>:<span>{language==='en'?'Not configured':'Neconfigurat'}</span>}</strong></div>
           <button type="button" className="ac-premium-primary" onClick={() => navigate('Întreținere')}>Vezi istoricul intervențiilor <ArrowRight size={16}/></button>
         </section>
         <section className="ac-premium-next ac-premium-panel">

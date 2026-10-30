@@ -2,19 +2,17 @@
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import { useRef, useState, type FormEvent } from 'react';
 import RecordCategoryPicker from './record-category-picker';
-import { categoriesFor, recordCategory } from '@/lib/record-categories';
+import { recordCategory } from '@/lib/record-categories';
 import ServiceDetailFields, {
   serializeServiceDetails,
   parseServiceDetails,
 } from './service-detail-fields';
-import { CarFront, Files, Wrench, Paperclip, Check, ChevronDown } from 'lucide-react';
+import { CarFront, Paperclip, ChevronDown } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type RecordItem = Data['records'][number];
-const docs = categoriesFor('document').map((c) => c.value);
-const operations = categoriesFor('service').map((c) => c.value);
 export type { RecordPayload } from '@/lib/record-draft';
-import { prepareRecordDraft, type RecordPayload } from '@/lib/record-draft';
+import { prepareRecordDraft, recordDraftSchedule, type RecordPayload } from '@/lib/record-draft';
 export default function RecordEditor({
   kind,
   record,
@@ -56,6 +54,9 @@ export default function RecordEditor({
     [costLabor, setCostLabor] = useState(parseServiceDetails(record?.parts || '').costLabor || ''),
     [costOther, setCostOther] = useState(parseServiceDetails(record?.parts || '').costOther || ''),
     [costEdited, setCostEdited] = useState(false),
+    [manualAmount, setManualAmount] = useState(
+      record && record.amountKnown !== false ? (record.amountBani / 100).toString() : '',
+    ),
     [filterCostLive, setFilterCostLive] = useState(0),
     [live, setLive] = useState({
       date:
@@ -86,6 +87,27 @@ export default function RecordEditor({
   const _brakeValue = (label: string) => {
     const line = (record?.parts || '').split('\\n').find((item) => item.startsWith(label + ': '));
     return line ? line.slice(label.length + 2) : '';
+  };
+  const syncLive = (form: HTMLFormElement, selected = category) => {
+    const f = new FormData(form);
+    const schedule = recordDraftSchedule(
+      f,
+      kind,
+      selected,
+      String(f.get('ac_intervalUlei') || serviceKmInterval),
+    );
+    setLive({
+      date: String(f.get('date') || ''),
+      km: String(f.get('odometer') || ''),
+      next: schedule.nextKm === null ? '' : String(schedule.nextKm),
+      due: schedule.expiresAt || '',
+      amount: String(f.get('amount') || ''),
+    });
+    setFilterCostLive(
+      Array.from(f.entries())
+        .filter(([key]) => /^ac_filtru\d+Cost$/.test(key))
+        .reduce((sum, [, value]) => sum + (Number(value) || 0), 0),
+    );
   };
   const mark = () => onDirty(true);
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -122,19 +144,7 @@ export default function RecordEditor({
       onSubmit={submit}
       onChange={(e) => {
         mark();
-        const f = new FormData(e.currentTarget);
-        setLive({
-          date: String(f.get('date') || ''),
-          km: String(f.get('odometer') || ''),
-          next: String(f.get('nextKm') || ''),
-          due: String(f.get('expiresAt') || ''),
-          amount: String(f.get('amount') || ''),
-        });
-        setFilterCostLive(
-          Array.from(f.entries())
-            .filter(([k]) => /^ac_filtru\d+Cost$/.test(k))
-            .reduce((n, [, v]) => n + (Number(v) || 0), 0),
-        );
+        syncLive(e.currentTarget);
       }}
     >
       {choosing && (
@@ -147,7 +157,12 @@ export default function RecordEditor({
             setCategory(value);
             setChoosing(false);
             mark();
-            requestAnimationFrame(() => formRef.current?.closest('.dialog')?.scrollTo({ top: 0 }));
+            requestAnimationFrame(() => {
+              if (formRef.current) {
+                syncLive(formRef.current, value);
+                formRef.current.closest('.dialog')?.scrollTo({ top: 0 });
+              }
+            });
           }}
         />
       )}
@@ -320,9 +335,38 @@ export default function RecordEditor({
           <div className="cost-field ac-cost-breakdown">
             <h3>{kind === 'service' ? 'Costurile intervenției' : 'Valoarea cheltuielii'}</h3>
             <p className="micro">
-              Completează suma totală sau defalcarea. Pentru filtre, costurile individuale sunt
-              incluse în total o singură dată.
+              {kind === 'service'
+                ? 'Completează suma totală sau defalcarea. Pentru filtre, costurile individuale sunt incluse în total o singură dată.'
+                : 'Înregistrează suma plătită. Cheltuiala se adaugă o singură dată în istoricul mașinii.'}
             </p>
+            {kind === 'service' && (
+              <div className="record-cost-mode" data-workspace-ui>
+                <span>
+                  {costEdited
+                    ? en
+                      ? 'Total calculated from the breakdown'
+                      : 'Total calculat din defalcare'
+                    : en
+                      ? 'Enter the total directly'
+                      : 'Introdu direct costul total'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCostEdited(!costEdited);
+                    mark();
+                  }}
+                >
+                  {costEdited
+                    ? en
+                      ? 'Use a simple total'
+                      : 'Introdu doar totalul'
+                    : en
+                      ? 'Use cost breakdown'
+                      : 'Calculează din defalcare'}
+                </button>
+              </div>
+            )}
             {kind === 'service' && (
               <details className="record-cost-details">
                 <summary>
@@ -404,15 +448,9 @@ export default function RecordEditor({
                         Number(costLabor || 0) +
                         Number(costOther || 0)
                       ).toFixed(2)
-                    : undefined
+                    : manualAmount
                 }
-                defaultValue={
-                  kind === 'service' && costEdited
-                    ? undefined
-                    : record && record.amountKnown !== false
-                      ? record.amountBani / 100
-                      : ''
-                }
+                onChange={(event) => setManualAmount(event.target.value)}
                 placeholder="Introdu suma sau completează defalcarea"
               />
             </label>
@@ -436,8 +474,8 @@ export default function RecordEditor({
               Costul nu este cunoscut încă
             </label>
             <p className="micro">
-              Dacă intervenția a fost gratuită, introdu 0 RON. Dacă nu cunoști costul, bifează
-              opțiunea de mai sus.
+              Dacă suma este zero, introdu 0 RON. Dacă nu cunoști costul, bifează opțiunea de mai
+              sus.
             </p>
           </div>
         )}
@@ -454,24 +492,28 @@ export default function RecordEditor({
             {kind !== 'document' && (
               <>
                 <label>
-                  Service sau furnizor
+                  {kind === 'service' ? 'Service sau mecanic' : 'Furnizor'}
                   <input name="provider" maxLength={250} defaultValue={record?.provider || ''} />
                 </label>
                 <label>
                   Număr factură
                   <input name="number" maxLength={250} defaultValue={record?.number || ''} />
                 </label>
-                <label>
-                  Piese și materiale
-                  <textarea
-                    name="parts"
-                    maxLength={4000}
-                    defaultValue={(record?.parts || '')
-                      .split('\n')
-                      .filter((line) => !line.startsWith('AutoCare · '))
-                      .join('\n')}
-                  />
-                </label>
+                {(kind === 'service' || !!record?.parts) && (
+                  <>
+                    <label>
+                      Piese și materiale
+                      <textarea
+                        name="parts"
+                        maxLength={4000}
+                        defaultValue={(record?.parts || '')
+                          .split('\n')
+                          .filter((line) => !line.startsWith('AutoCare · '))
+                          .join('\n')}
+                      />
+                    </label>
+                  </>
+                )}
               </>
             )}
             {kind === 'document' && (
@@ -556,11 +598,17 @@ export default function RecordEditor({
             <h3>Rezumatul intervenției</h3>
             <div>
               <span>Operațiune</span>
-              <strong>{category}</strong>
+              <strong data-workspace-ui>
+                {selectedCategory ? (en ? selectedCategory.en : selectedCategory.ro) : category}
+              </strong>
             </div>
             <div>
               <span>Data</span>
-              <strong>{live.date || 'Necompletată'}</strong>
+              <strong>
+                {live.date
+                  ? new Date(live.date + 'T12:00:00').toLocaleDateString(locale)
+                  : 'Necompletată'}
+              </strong>
             </div>
             <div>
               <span>Kilometraj</span>
@@ -579,8 +627,8 @@ export default function RecordEditor({
                         Number(costLabor || 0) +
                         Number(costOther || 0)
                       ).toFixed(2) + ' RON'
-                    : live.amount !== ''
-                      ? Number(live.amount).toFixed(2) + ' RON'
+                    : manualAmount !== ''
+                      ? Number(manualAmount).toFixed(2) + ' RON'
                       : filterCostLive > 0
                         ? filterCostLive.toFixed(2) + ' RON'
                         : 'Cost necompletat'}
