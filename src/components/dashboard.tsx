@@ -38,6 +38,7 @@ import {
   ArrowUpRight,
   LogOut,
   X,
+  ChevronRight,
   CalendarDays,
   Download,
   FolderOpen,
@@ -429,7 +430,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
   function navigate(t: string, historyMode: 'push' | 'none' = 'push') {
     t=normalizeWorkspaceTab(t);
 
-    if (recordSaving) return false;
+    if (recordSaving || busy) return false;
     if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?',locale==='ro-RO'?'ro':'en')))
       return false;
     workspaceViews.current.set(tab,{filter,query,recordState,categoryFilter,period,showArchived,scroll:window.scrollY});
@@ -560,7 +561,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
       ) as [string, string][],
     ).toString();
   function closeRecord() {
-    if (recordSaving) return;
+    if (recordSaving || busy) return;
     if (
       recordDirty &&
       !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Închizi formularul și renunți la ele?',locale==='ro-RO'?'ro':'en'))
@@ -1238,62 +1239,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                     </div>
                   </div>
                 )}
-                {tab === 'Întreținere' && <MaintenanceForecast data={data} records={visible} preview={!!previewData} onUpdateMileage={()=>navigate('Kilometraj')} onUpgrade={()=>navigate('Abonament')}/>}
-                {tab === 'Întreținere' &&
-                  visible.some(
-                    (r) =>
-                      r.kind === 'service' && !r.cancelled && (r.expiresAt || r.nextKm != null),
-                  ) && (
-                    <div className="maintenance-overview ac-premium-maintenance-overview">
-                      <section className="card">
-                        <p className="eyebrow">ÎNGRIJIRE LA TIMP</p>
-                        <h3>Următoarele intervenții</h3>
-                        {visible
-                          .filter(
-                            (r) =>
-                              r.kind === 'service' &&
-                              !r.cancelled &&
-                              (r.expiresAt || r.nextKm != null),
-                          )
-                          .sort((a, b) =>
-                            (a.expiresAt || '9999').localeCompare(b.expiresAt || '9999'),
-                          )
-                          .slice(0, 3)
-                          .map((r) => (
-                            <button
-                              className="event-line"
-                              key={r.id}
-                              onClick={() => setModal({ kind: 'service', record: r })}
-                            >
-                              <span className="list-icon">
-                                <Wrench size={18} />
-                              </span>
-                              <span className="list-grow">
-                                <strong data-user-content>{r.title}</strong>
-                                <span className="micro">
-                                  {r.expiresAt || 'Dată nestabilită'}
-                                  {r.nextKm != null
-                                    ? ' · ' + r.nextKm.toLocaleString(locale) + ' km'
-                                    : ''}
-                                </span>
-                              </span>
-                              <ArrowUpRight size={15} />
-                            </button>
-                          ))}
-                        {!visible.some(
-                          (r) =>
-                            r.kind === 'service' &&
-                            !r.cancelled &&
-                            (r.expiresAt || r.nextKm != null),
-                        ) && (
-                          <p className="small muted">
-                            Programează următoarea lucrare după dată sau kilometraj, conform
-                            planului mașinii tale.
-                          </p>
-                        )}
-                      </section>
-                    </div>
-                  )}
+                {tab === 'Întreținere' && <details className="app-maintenance-plan" data-workspace-ui><summary><CalendarDays size={18}/>{language==='en'?'Maintenance plan · days & mileage':'Planul de întreținere · zile și kilometri'}<ChevronRight size={16}/></summary><MaintenanceForecast data={data} records={visible} preview={!!previewData} onUpdateMileage={()=>navigate('Kilometraj')} onUpgrade={()=>navigate('Abonament')}/></details>}
                 {tab === 'Cheltuieli' && (
                   <div className="grid2" style={{ marginBottom: 20 }}>
                     <section className="card">
@@ -2203,6 +2149,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                       ))}
                     </select>
                   </label>
+                  <details className="app-vehicle-extra full"><summary>{language==='en'?'Technical details · optional':'Detalii tehnice · opțional'}</summary><div className="form-grid">
                   <label>
                     VIN (opțional)
                     <input name="vin" maxLength={17} defaultValue={modal.vehicle?.vin || ''} />
@@ -2229,6 +2176,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                       defaultValue={modal.vehicle?.purchasedAt || ''}
                     />
                   </label>
+                  </div></details>
                 </>
                 <label className="full">
                   Note
@@ -2242,7 +2190,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                   <button className="primary" disabled={busy}>
                     {busy ? 'Se salvează…' : 'Salvează'}
                   </button>
-                  <button type="button" onClick={() => setModal(null)}>
+                  <button type="button" disabled={busy} onClick={closeRecord}>
                     Renunță
                   </button>
                 </div>
