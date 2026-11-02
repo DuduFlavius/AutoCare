@@ -8,7 +8,7 @@ export const metadata = { title: 'Previzualizare design', robots: { index: false
 export default async function DesignPreview({
   searchParams,
 }: {
-  searchParams: Promise<{ echipa?: string; device?:string; tab?:string; plan?:string }>;
+  searchParams: Promise<{ echipa?: string; device?:string; tab?:string; plan?:string; garage?:string }>;
 }) {
   const previewOptions = await searchParams;
   if (process.env.VERCEL_ENV === 'production') notFound();
@@ -66,8 +66,8 @@ export default async function DesignPreview({
     ...r,
     vehicleId: vehicles[0].id,
     userId: 'design-only',
-    nextKm: null,
-    odometer: null,
+    nextKm: r.kind === 'service' ? 140000 : null,
+    odometer: r.kind === 'service' ? 125000 : null,
     amountBani: 0,
     amountKnown: true,
     provider: null,
@@ -120,7 +120,10 @@ export default async function DesignPreview({
     summary: { monthBani: 0, annualBani: 0, monthly: [], categories: {}, costPerKm: null, km: 0 },
     pushPublicKey: null,
   };
+  if(previewOptions.garage==='empty'){data.vehicles=[];data.records=[];data.photos=[];}
+  if(previewOptions.garage==='multi'){data.vehicles.push({...vehicles[0],id:'design-car-2',brand:'A doua',model:'Mașină',plate:'DEMO 02',odometer:83000});}
   const application=<Dashboard name="Vizitator" previewData={data} initialTab={normalizeWorkspaceTab(previewOptions.tab)} />;
-  if(previewOptions.device==='phone') return <div style={{padding:24,background:'#eaf0f8',minHeight:'100vh'}}><p style={{textAlign:'center'}}>AutoCare · Verificare mobilă · Date fictive · 390px</p><div style={{width:390,maxWidth:'100%',height:844,overflow:'auto',margin:'20px auto',border:'1px solid #cedaeb',borderRadius:22,background:'white',transform:'translateZ(0)',containerName:'workspace-preview',containerType:'inline-size'}}>{application}</div></div>;
+  const deviceWidth = previewOptions.device==='phone'?390:previewOptions.device==='small'?320:previewOptions.device==='tablet'?768:null;
+  if(deviceWidth) return <div style={{padding:24,background:'#eaf0f8',minHeight:'100vh'}}><p style={{textAlign:'center'}}>AutoCare · Verificare interfață · Date fictive · {deviceWidth}px</p><div style={{width:deviceWidth,maxWidth:'100%',height:844,overflow:'auto',margin:'20px auto',border:'1px solid #cedaeb',borderRadius:22,background:'white',transform:'translateZ(0)',containerName:'workspace-preview',containerType:'size'}}>{application}</div></div>;
   return application;
 }

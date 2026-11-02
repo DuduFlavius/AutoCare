@@ -1,5 +1,13 @@
 // AutoCare PWA — private pages and API responses are never cached.
-self.addEventListener('install', () => self.skipWaiting());
+const OFFLINE_CACHE = 'autocare-public-offline-v1';
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(OFFLINE_CACHE).then(cache => cache.add('/offline.html')).then(() => self.skipWaiting()));
+});
+// Cache only this static, anonymous offline screen. Never cache authenticated HTML or API data.
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET' || event.request.mode !== 'navigate') return;
+  event.respondWith(fetch(event.request).catch(async () => (await caches.match('/offline.html')) || new Response('AutoCare: reconnect to the internet.', { status: 503, headers: { 'Content-Type': 'text/plain' } })));
+});
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 self.addEventListener('push', (event) => {
   let payload = {};

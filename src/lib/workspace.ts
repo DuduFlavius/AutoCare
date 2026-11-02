@@ -1,4 +1,12 @@
+export const mobileWorkspaceSections = [
+  { id: 'Dashboard', ro: 'Acasă', en: 'Home' },
+  { id: 'Garaj', ro: 'Garaj', en: 'Garage' },
+  { id: 'Întreținere', ro: 'Intervenții', en: 'Maintenance' },
+  { id: 'Documente', ro: 'Documente', en: 'Documents' },
+  { id: 'Cont', ro: 'Cont', en: 'Account' },
+] as const;
 export const workspaceSections = [
+  { id: 'Cont', ro: 'Cont', en: 'Account', group: 'account', icon: 'settings' },
   { id: 'Dashboard', ro: 'Prezentare generală', en: 'Overview', group: 'overview', icon: 'home' },
   { id: 'Garaj', ro: 'Mașinile mele', en: 'My vehicles', group: 'garage', icon: 'car' },
   { id: 'Documente', ro: 'Documente', en: 'Documents', group: 'garage', icon: 'files' },

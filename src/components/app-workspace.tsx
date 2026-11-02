@@ -67,15 +67,17 @@ export function WorkspaceNavigation({
       aria-label={language === 'en' ? 'Application sections' : 'Secțiunile aplicației'}
       data-workspace-ui
     >
-      <div className="ws-nav-group ws-nav-flat">
-        {['Dashboard','Garaj','Documente','Calendar','Întreținere','Plan întreținere','Kilometraj','Cheltuieli','Centru de suport','Istoric auto','Notificări','Premium','Abonament','Setări'].map(id=>{
-          const section=workspaceSections.find(section=>section.id===id)!;
-          const Icon=icons[section.icon];
-          const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
-          const labels:Record<string,string>=language==='ro'?{Dashboard:'Acasă',Garaj:'Garajul meu',Abonament:'Abonament',Premium:'Premium'}:{Dashboard:'Home',Garaj:'My garage',Abonament:'Subscription',Premium:'Premium'};
-          return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}><Icon size={17}/><span>{labels[id]||section[language]}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
-        })}
-      </div>
+      {([
+        { ro:'GARAJUL TĂU',en:'YOUR GARAGE', ids:['Dashboard','Garaj','Întreținere','Documente'] },
+        { ro:'EVIDENȚĂ ȘI PLANIFICARE',en:'TRACKING & PLANNING', ids:['Kilometraj','Calendar','Cheltuieli','Istoric auto','Plan întreținere'] },
+        { ro:'CONTUL TĂU',en:'YOUR ACCOUNT', ids:['Premium','Abonament','Cont'] },
+      ]).map(group => <div className="ws-nav-group" key={group.en}><p>{group[language]}</p>{group.ids.map(id => {
+        const section=workspaceSections.find(section=>section.id===id)!;
+        const Icon=icons[section.icon];
+        const count=id==='Cont'?notifications+support:0;
+        const label = id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj' ? (language==='en'?'My garage':'Garajul meu') : section[language];
+        return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}><Icon size={18}/><span>{label}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
+      })}</div>)}
     </nav>
   );
 }

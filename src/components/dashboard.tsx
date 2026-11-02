@@ -2,9 +2,14 @@
 import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
-import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspaceOverview, WorkspacePreferences } from './app-workspace';
+import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspacePreferences } from './app-workspace';
 import { normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
 import SiteLanguage from './site-language';
+import ApplicationHome from './application/home';
+import ApplicationHeader from './application/header';
+import MobileNavigation from './application/mobile-navigation';
+import AccountHub from './application/account';
+import InlineMileageEditor from './inline-mileage-editor';
 import CommunicationPreferences from './communication-preferences';
 import Membership from './membership';
 import SubscriptionPage from './subscription-page';
@@ -23,20 +28,15 @@ import SupportChat from './support-chat';
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import {
   CarFront,
-  LayoutDashboard,
   Files,
   Wrench,
   Wallet,
   BellRing,
-  Settings,
-  CreditCard,
   Shield,
-  Star,
   Gauge,
   Plus,
   ArrowUpRight,
   LogOut,
-  ChevronDown,
   X,
   CalendarDays,
   Download,
@@ -44,11 +44,9 @@ import {
   MessageSquare,
   SlidersHorizontal,
   Search,
-  Menu,
-  MapPin,
 } from 'lucide-react';
 import { Brand } from './public-shell';
-import { GarageHome, VehicleJournal, VehicleSheet, ReminderInbox } from './garage-home';
+import { VehicleJournal, VehicleSheet, ReminderInbox } from './garage-home';
 import { authClient } from '@/lib/auth-client';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -62,21 +60,6 @@ type Modal = {
 } | null;
 const _money = (b: number) =>
   new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(b / 100);
-const tabs = [
-  ['Dashboard', LayoutDashboard],
-  ['Garaj', CarFront],
-  ['Documente', Files],
-  ['Calendar', CalendarDays],
-  ['Întreținere', Wrench],
-  ['Plan întreținere', Gauge],
-  ['Kilometraj', Gauge],
-  ['Cheltuieli', Wallet],
-  ['Centru de suport', MessageSquare],
-  ['Istoric auto', Gauge],
-  ['Notificări', BellRing],
-  ['Abonament', CreditCard],
-  ['Setări', Settings],
-] as const;
 async function api(path: string, method = 'GET', data?: unknown) {
   if(method!=='GET' && typeof navigator!=='undefined' && !navigator.onLine) throw new Error('Ești offline. Reconectează-te înainte de a salva.');
   const r = await fetch('/api/v1/' + path, {
@@ -270,9 +253,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [supportUnread, setSupportUnread] = useState(0),
-    [locationStatus, setLocationStatus] = useState<'idle'|'loading'|'active'|'denied'|'unavailable'>('idle'),
-    [locationAccuracy, setLocationAccuracy] = useState<number | null>(null),
-    [menuOpen, setMenuOpen] = useState(false),
+    [activeVehicleId, setActiveVehicleId] = useState(''),
     [launcherOpen,setLauncherOpen] = useState(false),
     [offline,setOffline] = useState(false),
     [settingsPanel,setSettingsPanel] = useState('account'),
@@ -457,7 +438,6 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     setModal(null);
     setRecordDirty(false);
     setTab(t);
-    setMenuOpen(false);
     setFilter(view?.filter||'');
     setQuery(view?.query||'');
     setRecordState(view?.recordState||'');
@@ -474,6 +454,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
       );
     return true;
   }
+  useEffect(()=>{if(!data?.profile.userId)return;try{setActiveVehicleId(sessionStorage.getItem('autocare-active-vehicle:'+data.profile.userId)||'');}catch { /* Selection stays active for this session when storage is blocked. */ }},[data?.profile.userId]);
   const displayedTabRef = useRef(tab);
   displayedTabRef.current = tab;
   const navigationRef = useRef(navigate);
@@ -508,10 +489,10 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
   },[tab,language]);
   useEffect(()=>{
     const shortcut=(event:KeyboardEvent)=>{
-      if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'&&!modal&&!recordDirty&&!recordSaving&&!menuOpen){event.preventDefault();setLauncherOpen(v=>!v);}
+      if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'&&!modal&&!recordDirty&&!recordSaving){event.preventDefault();setLauncherOpen(v=>!v);}
     };
     window.addEventListener('keydown',shortcut);return()=>window.removeEventListener('keydown',shortcut);
-  },[modal,recordDirty,recordSaving,menuOpen]);
+  },[modal,recordDirty,recordSaving]);
   function changeLanguage(next:'ro'|'en'){
     setLanguage(next);setCurrency(next==='en'?'EUR':'RON');
     try{localStorage.setItem('autocare-language',next);localStorage.setItem('autocare-currency',next==='en'?'EUR':'RON');}catch{ /* Storage may be unavailable. */ }
@@ -709,58 +690,21 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
       await api('profile', 'PUT', { ...profileValues(), pushEnabled: true });
     }, 'Notificările push au fost activate pentru acest browser.');
   }
+  function selectVehicle(id: string) {
+    setActiveVehicleId(id);
+    if(data) { try { sessionStorage.setItem('autocare-active-vehicle:'+data.profile.userId,id); } catch { /* Storage may be blocked; keep the in-memory selection. */ } }
+  }
+  async function signOut() {
+    if (previewData || signingOut) return;
+    if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
+    setSigningOut(true); setError('');
+    try { const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
+    catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
+  }
   return (
     <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace" data-language={language} data-settings-panel={settingsPanel}>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
       {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>{if(navigate('Garaj'))setVehicleDetail(id);}} /></Dialog>}
-      {menuOpen && (
-        <div className="navigation-overlay">
-          <Dialog title={data?.profile.role === 'founder' ? 'AutoCare · Fondator' : 'Navigare AutoCare'} onClose={() => setMenuOpen(false)}>
-            <nav aria-label="Navigare mobil">
-              <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} premium={!!data?.premium} path={previewData?'/previzualizare':'/cont'} />
-              {data?.profile.role === 'founder' && (
-                <div className="autocare-mobile-founder-card">
-                  <div className="autocare-mobile-founder-identity">
-                    <Shield size={20} />
-                    <span><strong>FONDATOR AUTOCARE</strong><small>Administrare și acces Premium gratuit</small></span>
-                  </div>
-                  <a className="autocare-mobile-founder-action" href="/admin">
-                    <Star size={18} /> Acordă Premium prietenilor <ArrowUpRight size={16} />
-                  </a>
-                </div>
-              )}
-              {data?.profile.role === 'admin' && (
-                <button onClick={() => navigate('Administrare')}>
-                  <Shield size={20} />
-                  Administrare
-                </button>
-              )}
-              <div className="autocare-mobile-account-actions">
-                <button type="button" onClick={() => navigate('Setări')}>
-                  <Settings size={19} /> <span>Contul meu și setări</span>
-                </button>
-                <button type="button" onClick={async () => {
-                  if (previewData) return;
-                  if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',locale==='ro-RO'?'ro':'en'))) return;
-                  try {
-                    await authClient.signOut();
-                    window.location.assign('/autentificare');
-                  } catch {
-                    window.alert('Deconectarea nu a reușit. Încearcă din nou.');
-                  }
-                }}>
-                  <LogOut size={19} /> <span>Deconectare</span>
-                </button>
-              </div>
-            </nav>
-          </Dialog>
-          <button
-            className="drawer-outside"
-            aria-label="Închide meniul"
-            onClick={() => setMenuOpen(false)}
-          />
-        </div>
-      )}
       <aside className="sidebar">
         <Brand
           href={previewData ? '/previzualizare' : '/cont'}
@@ -829,16 +773,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
           <div className="profile-actions">
             <button onClick={() => navigate('Setări')}>Profil și preferințe</button>
             <button
-              onClick={async () => {
-                if (previewData) return;
-                if (
-                  recordDirty &&
-                  !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',locale==='ro-RO'?'ro':'en'))
-                )
-                  return;
-                await authClient.signOut();
-                window.location.assign('/autentificare');
-              }}
+              disabled={signingOut || !!previewData}
+              onClick={() => void signOut()}
             >
               <LogOut size={16} />
               Deconectare
@@ -847,91 +783,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         </details>
       </aside>
       <SiteLanguage language={language} />
-      <header className="app-header between">
-        <button
-          className="mobile-menu-toggle"
-          aria-label="Deschide meniul"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(true)}
-        >
-          <Menu size={23} />
-        </button>
-        <span className="autocare-header-breadcrumb" aria-label={`Garaj personal, ${tab}`}>
-          <span>Garaj personal</span><span className="autocare-header-divider" aria-hidden="true">/</span><strong>{tab === 'Dashboard' ? 'Acasă' : tab}</strong>
-        </span>
-        <div className="inline autocare-header-actions">
-          <button type="button" className="ws-header-search" data-workspace-ui disabled={!!modal} onClick={()=>setLauncherOpen(true)} aria-label={language==='en'?'Search application':'Caută în aplicație'}><Search size={19}/><span>{language==='en'?'Search':'Caută'}</span><kbd>Ctrl K</kbd></button>
-          <select className="ws-header-locale" aria-label={language==='en'?'App language':'Limba aplicației'} value={language} onChange={e => { const next = e.target.value === 'en' ? 'en' : 'ro'; setLanguage(next); setCurrency(next === 'en' ? 'EUR' : 'RON'); try { localStorage.setItem('autocare-currency',next === 'en' ? 'EUR' : 'RON'); localStorage.setItem('autocare-language',next); document.documentElement.lang = next; } catch { /* Display preferences remain active for this page. */ } }} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff',maxWidth:76}}><option value="ro">RO</option><option value="en">EN</option></select>
-          <select className="ws-header-locale" aria-label={language==='en'?'Display currency':'Moneda de afișare'} title={language === 'en' ? 'Display currency (estimated conversion)' : 'Moneda de afișare (conversie estimativă)'} value={currency} onChange={e => {const next = e.target.value === 'EUR' ? 'EUR' : 'RON';setCurrency(next);try{localStorage.setItem('autocare-currency',next)}catch{ /* Storage may be unavailable. */ }}} style={{border:'1px solid #bdd1ef',borderRadius:10,padding:'8px 9px',fontWeight:800,color:'#173e76',background:'#f4f8ff'}}><option value="RON">RON</option><option value="EUR">EUR</option></select>
-          <button
-            type="button"
-            className="autocare-location-button"
-            title={locationStatus === 'active' ? 'Locația este activă pe acest dispozitiv.' : 'Verifică sau activează permisiunea de localizare pentru AutoCare'}
-            aria-label="Verifică locația AutoCare"
-            disabled={locationStatus === 'loading'}
-            onClick={() => {
-              // Geolocation must be called directly from the user gesture.
-              if (!window.isSecureContext || !('geolocation' in navigator)) {
-                setLocationStatus('unavailable');
-                setNotice('Locația necesită HTTPS și un browser compatibil.');
-                return;
-              }
-              setLocationStatus('loading');
-              setNotice('');
-              navigator.geolocation.getCurrentPosition(
-                (position) => {
-                  setLocationAccuracy(Math.round(position.coords.accuracy));
-                  setLocationStatus('active');
-                  setNotice('Locația a fost permisă și activată.');
-                },
-                (err) => {
-                  setLocationStatus(err.code === 1 ? 'denied' : 'unavailable');
-                  setNotice(err.code === 1
-                    ? 'Browserul blochează locația. Dacă nu apare fereastra de permisiune, permite locația din setările site-ului și apasă din nou.'
-                    : err.code === 3 ? 'GPS-ul nu a răspuns la timp. Încearcă din nou.'
-                    : 'Activează localizarea pe telefon și încearcă din nou.');
-                },
-                { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
-              );
-            }}
-          >
-            <MapPin size={16}/>
-            <span>{locationStatus === 'active' ? 'Locație activă' : locationStatus === 'loading' ? 'Se verifică…' : locationStatus === 'denied' ? 'Locație refuzată' : locationStatus === 'unavailable' ? 'Locație indisponibilă' : 'Activează locația'}</span>
-          </button>
-          {locationStatus === 'denied' && <span className="ac-premium-location-help" role="status">Locația este blocată pe dispozitiv. Samsung: Setări site în Chrome → Locație → Permite; verifică și Locație în setările telefonului. iPhone: Configurări → Confidențialitate și securitate → Servicii de localizare și Safari → Locație → Permite. Reîncarcă apoi AutoCare. Permisiunea nu poate fi forțată de aplicație.</span>}
-          {locationStatus === 'active' && locationAccuracy !== null && <span className="autocare-location-accuracy" title="Precizia estimată a localizării">±{locationAccuracy} m</span>}
-
-          <button className="autocare-header-user" onClick={() => navigate('Setări')} aria-label="Deschide profilul și preferințele">
-            <span className="autocare-header-avatar">{name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}</span>
-            <span className="autocare-header-identity">
-              <strong>{name}</strong>
-              <small>{({ founder: 'Fondator', admin: 'Administrator', assistant: 'Asistent', user: 'Utilizator' } as Record<string, string>)[data?.profile.role || 'user']}</small>
-            </span>
-            <ChevronDown size={16} />
-          </button>
-          <button type="button" className="ws-premium-access" data-workspace-ui aria-label={language==='en'?'Open Premium':'Accesează Premium'} title={data?.premium?(language==='en'?'Premium active':'Premium activ'):'Premium'} onClick={()=>navigate('Premium')}>
-            <Star size={16} fill={data?.premium?'currentColor':'none'}/><span>Premium{data?.premium?(language==='en'?' · Active':' · Activ'):''}</span>
-          </button>
-          <button type="button" className="autocare-header-signout ws-signout" data-workspace-ui
-            aria-label={language==='en'?'Sign out':'Deconectare'} title={previewData?(language==='en'?'Unavailable in design preview':'Indisponibil în previzualizare'):(language==='en'?'Sign out':'Deconectare')}
-            disabled={signingOut||!!previewData} aria-busy={signingOut}
-            onClick={async()=>{
-              if(previewData||signingOut)return;
-              if(recordDirty&&!window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language)))return;
-              setSigningOut(true);setError('');
-              try{const result=await authClient.signOut();if(result.error)throw new Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.');window.location.assign('/autentificare');}
-              catch(error){setError(error instanceof Error?error.message:'Deconectarea nu a reușit. Încearcă din nou.');setSigningOut(false);}
-            }}><LogOut size={16}/><span>{signingOut?(language==='en'?'Signing out…':'Se deconectează…'):(language==='en'?'Sign out':'Deconectare')}</span></button>
-        </div>
-      </header>
-      <nav className="autocare-mobile-dock" aria-label="Navigare rapidă">
-        {tabs.filter(([label]) => ['Dashboard','Garaj','Documente','Notificări'].includes(label)).map(([label, Icon]) => (
-          <button key={label} className={tab === label ? 'active' : ''} onClick={() => navigate(label)}>
-            <Icon size={20} /><span>{label === 'Dashboard' ? 'Acasă' : label === 'Documente' ? 'Acte' : label === 'Notificări' ? 'Alerte' : label}</span>
-          </button>
-        ))}
-        <button className={!['Dashboard','Garaj','Documente','Notificări'].includes(tab) ? 'active' : ''} onClick={() => setMenuOpen(true)}><Menu size={20}/><span>Meniu</span></button>
-      </nav>
+      <ApplicationHeader title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (workspaceSections.find(s=>s.id===tab)?.[language] ?? tab)} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
+      <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'}/>
       <main id="workspace-main" tabIndex={-1} aria-busy={busy||!data}
         className={
           'main workspace-' +
@@ -979,7 +832,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
           </div>
         ) : (
           <>
-            <div className="page-head between">
+            {!['Dashboard','Cont'].includes(tab) && <div className="page-head between">
               <div>
                 <p className="eyebrow">
                   {tab === 'Dashboard'
@@ -1059,42 +912,13 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                   <Plus size={16} /> Planifică o lucrare
                 </button>
               ) : null}
-            </div>
+            </div>}
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
-            {tab==='Dashboard'&&<WorkspaceOverview data={data} language={language} currency={currency} navigate={navigate}/>}
-            {tab === 'Dashboard' && (
-              <GarageHome
-                onMileageSaved={refresh}
-                preview={!!previewData}
-                currency={currency}
-                language={language}
-                data={data}
-                name={name}
-                navigate={navigate}
-                add={(kind) => setModal({ kind })}
-                open={(record) =>
-                  setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })
-                }
-              />
-            )}
-            {tab === 'Istoric auto' && (
-              <VehicleJournal
-                data={data}
-                open={(record) =>
-                  setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })
-                }
-              />
-            )}
+            {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={activeVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={setVehicleDetail} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
+            {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
+            {tab === 'Istoric auto' && <VehicleJournal data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
             {tab === 'Garaj' && (
               <>
-                <div className="ac-premium-garage-intro">
-                  <div>
-                    <span className="ac-premium-kicker"><CarFront size={17}/> GARAJUL MEU</span>
-                    <h2>Mașinile tale, organizate într-un singur loc</h2>
-                    <p>Documente, kilometraj și întreținere — informații din contul tău.</p>
-                  </div>
-                  <div className="ac-premium-garage-counter"><strong>{data.vehicles.filter(v => !v.archived).length}</strong><span>mașini active</span></div>
-                </div>
                 <div className="toolbar">
                   {data.vehicles.length > 1 && <input
                     aria-label="Caută o mașină"
@@ -1194,6 +1018,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                             </div>
                           </div>
                           {v.notes && <p data-user-content className="small">{v.notes}</p>}
+                          {!v.archived && <><button className="app-select-vehicle" type="button" aria-pressed={(activeVehicleId || activeCars[0]?.id)===v.id} onClick={()=>selectVehicle(v.id)}>{(activeVehicleId || activeCars[0]?.id)===v.id ? (language==='en'?'Selected for Home':'Selectată pentru Acasă') : (language==='en'?'Select for Home':'Selectează pentru Acasă')}</button><InlineMileageEditor key={v.id} vehicleId={v.id} currentKm={v.odometer} preview={!!previewData} onSaved={refresh}/></>}
                           <div className="row-actions">
                             <button className="primary" onClick={() => setVehicleDetail(v.id)}>
                               Vezi mașina <ArrowUpRight size={14} />

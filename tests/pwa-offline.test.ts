@@ -1,0 +1,20 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
+test('service worker caches only anonymous offline HTML and leaves APIs untouched',async()=>{
+  const listeners:Record<string,(event:any)=>void>={};
+  const cached:string[]=[], requested:string[]=[];
+  const context={self:{addEventListener:(name:string,fn:(e:any)=>void)=>{listeners[name]=fn;},skipWaiting:()=>Promise.resolve(),clients:{claim:()=>Promise.resolve()}},caches:{open:async()=>({add:async(path:string)=>{cached.push(path);}}),match:async(path:string)=>{requested.push(path);return new Response('Static offline screen');}},fetch:async()=>{throw Error('offline');},Response};
+  vm.runInNewContext(readFileSync('public/sw.js','utf8'),context);
+  let pending:Promise<unknown>=Promise.resolve();
+  listeners.install({waitUntil:(p:Promise<unknown>)=>{pending=p;}});await pending;
+  assert.deepEqual(cached,['/offline.html']);
+  let intercepted=false;
+  listeners.fetch({request:{method:'GET',mode:'cors',url:'https://autocare.invalid/api/v1/dashboard'},respondWith:()=>{intercepted=true;}});
+  assert.equal(intercepted,false);
+  let response:Promise<Response>=Promise.resolve(new Response(''));
+  listeners.fetch({request:{method:'GET',mode:'navigate',url:'https://autocare.invalid/cont'},respondWith:(p:Promise<Response>)=>{response=p;}});
+  assert.equal(await (await response).text(),'Static offline screen');
+  assert.deepEqual(requested,['/offline.html']);
+});

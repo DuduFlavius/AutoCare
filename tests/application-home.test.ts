@@ -1,0 +1,33 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { selectActiveVehicle, upcomingMaintenance } from '../src/lib/application-home';
+import { mobileWorkspaceSections, workspaceSections } from '../src/lib/workspace';
+const today = new Date('2030-01-01T12:00:00Z');
+const service = { id:'oil',title:'Oil',category:'Schimb ulei',kind:'service',cancelled:false,date:'2029-12-01',odometer:100000,nextKm:115000,expiresAt:null,parts:null };
+test('active vehicle selection never returns an archived or missing vehicle',()=>{
+  const cars=[{id:'first',archived:false},{id:'second',archived:false},{id:'old',archived:true}];
+  assert.equal(selectActiveVehicle(cars,'second')?.id,'second');
+  assert.equal(selectActiveVehicle(cars,'old')?.id,'first');
+  assert.equal(selectActiveVehicle(cars,'other-account')?.id,'first');
+  assert.equal(selectActiveVehicle([{id:'old',archived:true}],'old'),null);
+});
+test('home maintenance uses shared calculations and confirmed daily usage',()=>{
+  const result=upcomingMaintenance([service],108000,70,'UTC',today)[0];
+  assert.equal(result.estimate?.remainingKm,7000);
+  assert.equal(result.estimate?.days,100);
+  assert.equal(upcomingMaintenance([service],110000,70,'UTC',today)[0].estimate?.days,72);
+});
+test('home prioritizes overdue work and does not invent deadlines',()=>{
+  const result=upcomingMaintenance([service,{...service,id:'timing',category:'Distribuție',nextKm:105000},{...service,id:'no-plan',nextKm:null}],108000,null,'UTC',today);
+  assert.equal(result[0].service.id,'timing');
+  assert.equal(result[0].status.state,'overdue');
+  assert.equal(result[1].estimate?.days,null);
+  assert.equal(result.length,2);
+  assert.equal(upcomingMaintenance([{...service,cancelled:true}],108000,70,'UTC',today).length,0);
+});
+test('five mobile destinations retain all previous sections through account and search',()=>{
+  assert.equal(mobileWorkspaceSections.length,5);
+  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cont'));
+  for(const section of mobileWorkspaceSections)assert.ok(workspaceSections.some(s=>s.id===section.id));
+  for(const id of ['Notificări','Setări','Plan întreținere','Premium','Abonament','Centru de suport','Istoric auto','Cheltuieli','Calendar','Kilometraj'])assert.ok(workspaceSections.some(s=>s.id===id));
+});

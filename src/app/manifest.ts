@@ -1,12 +1,12 @@
 import type { MetadataRoute } from 'next';
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: process.env.NEXT_PUBLIC_APP_NAME || 'AutoCare',
+    name: process.env.NEXT_PUBLIC_APP_NAME || 'AutoCare Premium',
     short_name: process.env.NEXT_PUBLIC_APP_NAME || 'AutoCare',
     description: 'Garajul tău digital',
     start_url: '/cont',
     display: 'standalone',
-    background_color: '#151B26',
+    background_color: '#f4f7fb',
     theme_color: '#151B26',
     lang: 'ro',
     icons: [
