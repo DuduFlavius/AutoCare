@@ -1285,7 +1285,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                         </button>
                       ))}
                     </section>
-                    <section className="card">
+                    {(data.summary.monthly.some(m=>m.bani>0) || !data.premium) && <section className="card">
                       <h3>Evoluția cheltuielilor</h3>
                       {data.premium ? (
                         <ExpenseChart data={data} currency={currency} />
@@ -1294,7 +1294,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                           Graficele și analiza detaliată sunt disponibile cu Premium.
                         </p>
                       )}
-                    </section>
+                    </section>}
                   </div>
                 )}
                 {!rows.length &&

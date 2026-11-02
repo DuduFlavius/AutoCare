@@ -39,3 +39,10 @@ test('home retains legacy free oil tracking and retires older oil and timing for
   assert.equal(results.length,1);assert.equal(results[0].service.id,'new-oil');
   assert.equal(results[0].estimate?.remainingKm,14000);
 });
+
+test('a future planned source marked completed cannot hide its actual replacement on Home',()=>{
+  const planned={...service,id:'old-plan',date:'2030-04-01',parts:'AutoCare · completedBy: actual'};
+  const actual={...service,id:'actual',date:'2030-01-01',odometer:110000,nextKm:125000};
+  const result=upcomingMaintenance([planned,actual],111000,70,'UTC',today);
+  assert.equal(result.length,1);assert.equal(result[0].service.id,'actual');
+});

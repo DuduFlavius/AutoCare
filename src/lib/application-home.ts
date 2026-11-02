@@ -1,3 +1,4 @@
+import { parseServiceDetails } from './service-details';
 import { maintenanceTargets, rankMaintenanceForecasts, type MaintenanceSource } from './maintenance-schedule';
 export function selectActiveVehicle<T extends { id: string; archived: boolean }>(vehicles: T[], selected: string) {
   const active = vehicles.filter(v => !v.archived);
@@ -8,7 +9,7 @@ export function isOilMaintenance(record: {category: string; title: string}) {
   return /ulei/.test(label) && /(schimb|motor|revizie)/.test(label);
 }
 export function currentHomeMaintenance<T extends MaintenanceSource & {kind: string; cancelled: boolean}>(records: T[]) {
-  const ordered = records.filter(r => r.kind === 'service' && !r.cancelled).sort((a,b) => (b.date ?? '').localeCompare(a.date ?? '') || (b.odometer ?? 0) - (a.odometer ?? 0));
+  const ordered = records.filter(r => r.kind === 'service' && !r.cancelled && !parseServiceDetails(r.parts ?? '').completedBy).sort((a,b) => (b.date ?? '').localeCompare(a.date ?? '') || (b.odometer ?? 0) - (a.odometer ?? 0));
   const seen = new Set<string>();
   return ordered.filter(record => {
     const key = isOilMaintenance(record) ? 'oil' : record.category === 'Distribuție' ? 'timing' : null;

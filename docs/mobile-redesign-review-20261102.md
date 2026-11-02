@@ -14,9 +14,9 @@
 
 ## Verificări executate
 
-- 157 teste automate trecute. Acoperă și salvări/recitiri, proprietatea datelor, calcule de întreținere, abonamente și securitatea Fondatorului din suita existentă.
+- 158 teste automate trecute. Acoperă și salvări/recitiri, proprietatea datelor, calcule de întreținere, abonamente și securitatea Fondatorului din suita existentă.
 - Test nou cu autentificare reală izolată: creare cont de test, login, dashboard autorizat, logout, dashboard respins cu vechiul cookie.
-- Teste noi: alegere vehicul valid, refuzul vehiculelor arhivate/lipsă, calculul priorităților fără date inventate, continuitatea funcției gratuite pentru schimbul de ulei și excluderea prognozelor vechi de ulei/distribuție din Acasă când există o înregistrare mai nouă. Istoricul rămâne intact.
+- Teste noi: alegere vehicul valid, refuzul vehiculelor arhivate/lipsă, calculul priorităților fără date inventate, continuitatea funcției gratuite pentru schimbul de ulei și excluderea prognozelor vechi de ulei/distribuție din Acasă când există o înregistrare mai nouă. Sursa unei lucrări marcate ca efectuată nu ascunde lucrarea înlocuitoare, inclusiv când programarea inițială era în viitor. Istoricul rămâne intact.
 - Test nou pentru service worker: numai offline.html se memorează; cererile API nu sunt interceptate și nu sunt salvate în cache.
 - Build Next.js și ESLint trecute.
 - Browser Preview: navigare desktop prin intervenții, documente, kilometraj, calendar, cheltuieli, istoric, SmartDrive, abonament și Cont; selecție de vehicul și păstrare după reload; setări și schimbare RO/EN cu monedă EUR; deschidere formulare mașină/document; formular document în doi pași fără overflow la 320px; starea inițială fără mașini la 768px.

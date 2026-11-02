@@ -257,9 +257,11 @@
   .ac-workspace .record-category-search input { flex: 1 !important; border: 0 !important; padding-inline: 0 !important; background: transparent !important; }
   .ac-workspace .record-category-grid { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 10px !important; margin-block: 16px !important; }
   .ac-workspace .dialog .record-category-grid button { display: grid !important; align-content: start !important; justify-content: stretch !important; justify-items: start !important; gap: 8px !important; padding: 16px !important; min-height: 140px !important; text-align: left !important; border-color: #e1e7f0 !important; background: #fbfcff !important; }
-  .ac-workspace .record-category-grid strong { font-size: 14px !important; color: #304b71 !important; line-height: 1.4 !important; }
-  .ac-workspace .record-category-grid small { font-size: 12px !important; color: #6c7f97 !important; line-height: 1.5 !important; }
+  .ac-workspace .record-category-grid strong { display: block !important; overflow-wrap: anywhere !important; font-size: 14px !important; color: #304b71 !important; line-height: 1.4 !important; }
+  .ac-workspace .record-category-grid small { display: block !important; margin-top: 4px !important; overflow-wrap: anywhere !important; font-size: 12px !important; color: #6c7f97 !important; line-height: 1.5 !important; }
   .ac-workspace .record-category-grid button > svg:last-child { display: none !important; }
+  .ac-workspace .record-category-grid button svg { color: #557fbf !important; }
+  .ac-workspace .dialog .record-category-grid button[aria-pressed=true] { border-color: #9db9ed !important; background: #f0f5ff !important; }
   .ac-workspace .record-category-icon { display: grid !important; place-items: center !important; width: 32px !important; height: 32px !important; border-radius: 9px !important; background: #e9f0ff !important; color: #557fbf !important; }
   .ac-workspace .record-selected-category { display: flex !important; justify-content: space-between !important; align-items: start !important; gap: 15px !important; border-bottom: 1px solid var(--app-line) !important; padding-bottom: 18px !important; }
   .ac-workspace .record-step { font-size: 10px !important; letter-spacing: 1px !important; color: #7d8da3 !important; }
