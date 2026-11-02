@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { selectActiveVehicle, upcomingMaintenance } from '../src/lib/application-home';
+import { selectActiveVehicle, upcomingMaintenance, isOilMaintenance } from '../src/lib/application-home';
 import { mobileWorkspaceSections, workspaceSections } from '../src/lib/workspace';
 const today = new Date('2030-01-01T12:00:00Z');
 const service = { id:'oil',title:'Oil',category:'Schimb ulei',kind:'service',cancelled:false,date:'2029-12-01',odometer:100000,nextKm:115000,expiresAt:null,parts:null };
@@ -30,4 +30,12 @@ test('five mobile destinations retain all previous sections through account and 
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cont'));
   for(const section of mobileWorkspaceSections)assert.ok(workspaceSections.some(s=>s.id===section.id));
   for(const id of ['Notificări','Setări','Plan întreținere','Premium','Abonament','Centru de suport','Istoric auto','Cheltuieli','Calendar','Kilometraj'])assert.ok(workspaceSections.some(s=>s.id===id));
+});
+
+test('home retains legacy free oil tracking and retires older oil and timing forecasts only on Home',()=>{
+  assert.equal(isOilMaintenance({...service,category:'Revizie',title:'Schimb de ulei și filtre'}),true);
+  const newer={...service,id:'new-oil',date:'2030-01-01',odometer:110000,nextKm:125000};
+  const results=upcomingMaintenance([service,newer],111000,70,'UTC',today);
+  assert.equal(results.length,1);assert.equal(results[0].service.id,'new-oil');
+  assert.equal(results[0].estimate?.remainingKm,14000);
 });

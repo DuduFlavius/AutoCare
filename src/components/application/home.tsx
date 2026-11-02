@@ -4,7 +4,7 @@ import { useApplicationLanguage, useApplicationLocale } from '../application-loc
 import { useMileageUsage } from '../use-mileage-usage';
 import DailyMileageInput from '../daily-mileage-input';
 import InlineMileageEditor from '../inline-mileage-editor';
-import { selectActiveVehicle, upcomingMaintenance } from '@/lib/application-home';
+import { selectActiveVehicle, upcomingMaintenance, isOilMaintenance } from '@/lib/application-home';
 import { forecastDuration } from '@/lib/service-forecast';
 import { AppEmpty, AppSection, AppStatus } from './ui';
 import type { dashboard } from '@/lib/service';
@@ -22,7 +22,7 @@ export default function ApplicationHome({ data, name, selectedVehicle, onSelectV
   const cars = data.vehicles.filter(v => !v.archived);
   const usage = useMileageUsage(car?.id ?? '', car?.odometer ?? 0, preview);
   const rows = data.records.filter(r => r.vehicleId === car?.id && !r.cancelled);
-  const planningRows = data.premium ? rows : rows.filter(r => r.category === 'Schimb ulei');
+  const planningRows = data.premium ? rows : rows.filter(isOilMaintenance);
   const upcoming = car ? upcomingMaintenance(planningRows, car.odometer, usage.dailyKm, data.profile.timezone) : [];
   const next = upcoming[0];
   const documents = rows.filter(r => r.kind === 'document' && r.status.days !== null && r.status.days <= 30).sort((a,b) => a.status.days! - b.status.days!);

@@ -244,6 +244,9 @@
   .ac-workspace .dialog .form-grid > .full { grid-column: 1/-1 !important; }
   .ac-workspace .dialog .form-grid label { display: grid !important; gap: 7px !important; }
   .ac-workspace .dialog .form-grid label.check { display: flex !important; align-items: center !important; gap: 8px !important; }
+  .ac-workspace .dialog .record-editor-shell { padding: 0 !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+  .ac-workspace .dialog .record-form-stage { padding: 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
+  .ac-workspace .dialog .record-selected-category { background: transparent !important; padding-inline: 0 !important; border-radius: 0 !important; }
   .ac-workspace .dialog .record-form-stage { display: grid !important; gap: 20px !important; }
   .ac-workspace .dialog .record-editor-intro { display: none !important; }
   .ac-workspace .record-category-browser { padding: 0 !important; background: transparent !important; border: 0 !important; }
