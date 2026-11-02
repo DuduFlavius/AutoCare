@@ -1,15 +1,15 @@
 /* One application design system. This layer owns authenticated UI; public pages keep their styles. */
 @layer autocare-workspace {
   .app-shell.ac-workspace {
-    --app-bg: #f4f7fb;
+    --app-bg: #e9edf2;
     --app-surface: #fff;
     --app-ink: #1b2940;
     --app-muted: #65748b;
     --app-line: #e3e9f1;
     --app-blue: #316beb;
     --app-blue-soft: #edf3ff;
-    --app-sidebar: 236px;
-    --app-radius: 18px;
+    --app-sidebar: 248px;
+    --app-radius: 20px;
     --app-gap: 20px;
     display: block !important;
     min-height: 100dvh !important;
@@ -36,11 +36,11 @@
     max-width: none !important;
     min-width: 0 !important;
     margin: 0 0 0 var(--app-sidebar) !important;
-    padding: 100px clamp(24px, 4vw, 56px) 48px !important;
+    padding: 108px clamp(24px, 3vw, 52px) 56px !important;
     background: var(--app-bg) !important;
     min-height: 100dvh !important;
   }
-  .ac-workspace .main > :is(.app-home,.app-account,.page-head,.card,.grid2,.grid3,.record-tools,.ws-settings-layout,.membership-workspace,.subscription-page,.workspace-context,.ws-context-nav,.overview-stack,.table-scroll,.record-search,.stats) { max-width: 1200px !important; margin-inline: auto !important; }
+  .ac-workspace .main > :is(.app-home,.app-account,.page-head,.card,.grid2,.grid3,.record-tools,.ws-settings-layout,.membership-workspace,.subscription-page,.workspace-context,.ws-context-nav,.overview-stack,.table-scroll,.record-search,.stats) { max-width: 1440px !important; margin-inline: auto !important; }
   .ac-workspace .main :is(h1,h2,h3,h4,strong) { color: var(--app-ink) !important; -webkit-text-fill-color: currentColor !important; text-shadow: none !important; }
   .ac-workspace .main h1:focus { outline: none !important; }
   .ac-workspace .main h1 { font-size: clamp(24px, 2.4vw, 30px) !important; letter-spacing: -.8px !important; line-height: 1.2 !important; margin: 0 !important; }
@@ -70,7 +70,7 @@
   .ac-workspace .preview-note { font-size: 11px !important; padding: 8px 12px !important; margin-bottom: 18px !important; color: #687d96 !important; background: #edf2fa !important; border: 1px dashed #d5deeb !important; }
 
   /* Desktop navigation and the single, compact application header. */
-  .app-shell.ac-workspace > .sidebar { position: fixed !important; inset: 0 auto 0 0 !important; width: var(--app-sidebar) !important; height: 100dvh !important; padding: 26px 16px 18px !important; background: #172131 !important; color: #c2ccda !important; border: 0 !important; display: flex !important; flex-direction: column !important; gap: 18px !important; z-index: 70 !important; overflow: hidden !important; }
+  .app-shell.ac-workspace > .sidebar { position: fixed !important; inset: 0 auto 0 0 !important; width: var(--app-sidebar) !important; height: 100dvh !important; padding: 26px 16px 18px !important; background: #101820 !important; color: #c2ccda !important; border: 0 !important; display: flex !important; flex-direction: column !important; gap: 18px !important; z-index: 70 !important; overflow: hidden !important; }
   .ac-workspace .sidebar .brand { padding: 0 8px !important; margin: 0 !important; color: #fff !important; font-size: 23px !important; }
   .ac-workspace .sidebar .brand :is(span,.accent) { color: #fff !important; -webkit-text-fill-color: currentColor !important; }
   .ac-workspace .sidebar .brandmark { background: #316beb !important; width: 35px !important; height: 35px !important; border-radius: 11px !important; box-shadow: none !important; }
@@ -94,7 +94,7 @@
   .ac-workspace .profile-actions { display: grid !important; gap: 8px !important; padding-top: 12px !important; }
   .ac-workspace .profile-actions button { min-height: 38px !important; background: #25334a !important; color: white !important; border: 0 !important; }
   .ac-workspace .founder-nav-link { display: flex !important; gap: 10px !important; align-items: center !important; padding: 14px 10px !important; color: #a5bbdb !important; font-size: 12px !important; }
-  .app-shell.ac-workspace > .app-header.app-topbar { position: fixed !important; top: 0 !important; left: var(--app-sidebar) !important; right: 0 !important; height: 72px !important; width: auto !important; margin: 0 !important; min-height: 0 !important; padding: 0 clamp(24px,4vw,56px) !important; display: flex !important; align-items: center !important; gap: 16px !important; background: #f4f7fbf2 !important; border: 0 !important; border-bottom: 1px solid var(--app-line) !important; box-shadow: none !important; z-index: 60 !important; backdrop-filter: blur(16px) !important; }
+  .app-shell.ac-workspace > .app-header.app-topbar { position: fixed !important; top: 0 !important; left: var(--app-sidebar) !important; right: 0 !important; height: 72px !important; width: auto !important; margin: 0 !important; min-height: 0 !important; padding: 0 clamp(24px,4vw,56px) !important; display: flex !important; align-items: center !important; gap: 16px !important; background: #18232df5 !important; border: 0 !important; border-bottom: 1px solid #32404d !important; box-shadow: none !important; z-index: 60 !important; backdrop-filter: blur(16px) !important; }
   .ac-workspace .app-topbar-brand { display: none !important; align-items: center !important; gap: 8px !important; font-size: 17px !important; }
   .ac-workspace .app-topbar-mark { color: white !important; display: grid !important; place-items: center !important; background: var(--app-blue) !important; color: #fff !important; font-weight: 750 !important; border-radius: 9px !important; width: 30px !important; height: 30px !important; }
   .ac-workspace .app-topbar-title { color: var(--app-muted) !important; font-size: 13px !important; }
@@ -110,11 +110,14 @@
   .ac-workspace .ws-context-nav [aria-current=page] { background: #e8effc !important; color: #315fbb !important; }
 
   /* Home: selected car, one priority, documents, actions, then history. */
-  .ac-workspace .app-home { display: grid !important; gap: 22px !important; }
+  .ac-workspace .app-home { display: grid !important; grid-template-columns: repeat(12,minmax(0,1fr)) !important; gap: 24px !important; }
+  .ac-workspace .app-home > * { grid-column: 1/-1 !important; }
+  .ac-workspace .app-home > .app-home-documents { grid-column: span 7 !important; }
+  .ac-workspace .app-home > .app-home-actions { grid-column: span 5 !important; }
   .ac-workspace .app-home-welcome { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; margin-bottom: 2px !important; }
   .ac-workspace .app-home-welcome p { margin: 0 0 5px !important; font-size: 13px !important; }
   .ac-workspace .app-home-welcome > svg { color: #7899d4 !important; }
-  .ac-workspace .app-home-primary { display: grid !important; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr) !important; gap: var(--app-gap) !important; align-items: start !important; }
+  .ac-workspace .app-home-primary { display: grid !important; grid-template-columns: minmax(0,1.55fr) minmax(0,1fr) !important; gap: var(--app-gap) !important; align-items: stretch !important; }
   .ac-workspace .app-vehicle-picker { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 10px !important; border: 1px solid var(--app-line) !important; border-radius: 12px !important; padding: 2px 12px !important; background: white !important; }
   .ac-workspace .app-vehicle-picker select { width: 100% !important; border: 0 !important; background: transparent !important; flex: 1 !important; appearance: none !important; }
   .ac-workspace .app-vehicle-hero { background: #1e2d45 !important; color: #fff !important; border-radius: 22px !important; padding: 26px !important; position: relative !important; overflow: hidden !important; }
@@ -336,6 +339,58 @@
   .ac-workspace .main > .app-home, .ac-workspace .main > .app-account { animation: app-enter .15s ease-out !important; }
 
   @media (max-width: 1100px) { .ac-workspace .main .grid3 { grid-template-columns: repeat(2,minmax(0,1fr)) !important; } .ac-workspace .app-header-signout span { display: none !important; } }
+  /* Desktop editorial hierarchy; shared light work surfaces keep forms and records legible. */
+  .ac-workspace .app-editorial-eyebrow { display: block !important; margin-bottom: 12px !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: 2px !important; color: #51708d !important; }
+  .ac-workspace .app-home-welcome h1 { font-size: clamp(28px,3vw,40px) !important; font-weight: 650 !important; letter-spacing: -1.4px !important; }
+  .ac-workspace .app-home-welcome { padding-block: 8px !important; }
+  .ac-workspace .app-topbar-title { display: flex !important; align-items: center !important; gap: 14px !important; color: #97a8ba !important; }
+  .ac-workspace .app-topbar-title strong { color: #edf5ff !important; font-weight: 600 !important; }
+  .ac-workspace .app-topbar-brand { color: #fff !important; }
+  .ac-workspace .app-topbar-actions button { background: #243440 !important; color: #e2edf9 !important; border-color: #425361 !important; }
+  .ac-workspace .app-topbar-actions .app-header-signout { background: #304656 !important; color: #fff !important; border-color: #6d879a !important; }
+  .ac-workspace .ws-navigation a.active { background: #203d52 !important; box-shadow: inset 3px 0 #5ec5e5 !important; }
+  .ac-workspace .ws-navigation a:hover { background: #21313f !important; }
+  .ac-workspace .app-vehicle-hero { min-height: 450px !important; padding: 30px !important; background: #101d2b !important; border: 1px solid #35495a !important; }
+  .ac-workspace .app-vehicle-visual { position: absolute !important; inset: 0 !important; pointer-events: none !important; }
+  .ac-workspace .app-vehicle-visual img { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: 65% center !important; display: block !important; }
+  .ac-workspace .app-vehicle-visual-shade { position: absolute !important; inset: 0 !important; background: linear-gradient(90deg,#101d2bf5 0%,#101d2bd9 35%,#101d2b33 75%,#101d2b10 100%) !important; }
+  .ac-workspace .app-vehicle-personal .app-vehicle-visual-shade { background: linear-gradient(90deg,#0c1729f5,#0c1729ad 55%,#0c172933) !important; }
+  .ac-workspace .app-vehicle-content { position: relative !important; z-index: 1 !important; width: min(65%,360px) !important; }
+  .ac-workspace .app-vehicle-top > svg { display: none !important; }
+  .ac-workspace .app-vehicle-title h2 { font-size: clamp(26px,2.8vw,40px) !important; letter-spacing: -1px !important; }
+  .ac-workspace .app-vehicle-content > p { color: #c3d1e2 !important; margin: 6px 0 20px !important; font-size: 13px !important; }
+  .ac-workspace .main .app-vehicle-details { background: transparent !important; color: #d7efff !important; border: 0 !important; padding: 12px 0 0 !important; }
+  .ac-workspace .app-next-maintenance { display: flex !important; flex-direction: column !important; }
+  .ac-workspace .app-next-maintenance > .app-text-action:last-child { margin-top: auto !important; align-self: flex-start !important; }
+  .ac-workspace .app-maintenance-highlights { display: grid !important; grid-template-columns: repeat(auto-fit,minmax(min(100%,280px),1fr)) !important; gap: 20px !important; }
+  .ac-workspace .main .app-maintenance-highlights > button { width: 100% !important; min-width: 0 !important; padding: 20px 24px !important; gap: 16px !important; text-align: left !important; border-radius: 16px !important; background: #f8fafc !important; }
+  .ac-workspace .app-highlight-icon { display: grid !important; place-items: center !important; width: 44px !important; height: 44px !important; flex: none !important; background: #e5eff8 !important; color: #386f9c !important; border-radius: 12px !important; }
+  .ac-workspace .app-highlight-description { flex: 1 !important; min-width: 0 !important; }
+  .ac-workspace .app-maintenance-highlights :is(strong,small) { display: block !important; }
+  .ac-workspace .app-highlight-description strong { font-size: 14px !important; margin-bottom: 4px !important; }
+  .ac-workspace .app-highlight-description small { font-size: 11px !important; font-weight: 400 !important; }
+  .ac-workspace .app-highlight-distance { text-align: right !important; flex: none !important; }
+  .ac-workspace .app-highlight-distance strong { font-size: 16px !important; font-variant-numeric: tabular-nums !important; }
+  .ac-workspace .app-highlight-distance small { font-size: 10px !important; font-weight: 400 !important; }
+  .ac-workspace .app-home-actions .app-quick-actions { grid-template-columns: 1fr !important; gap: 8px !important; }
+  .ac-workspace .main .app-home-actions .app-quick-actions button { flex-direction: row !important; justify-content: flex-start !important; min-height: 48px !important; padding: 11px 14px !important; }
+  .ac-workspace .app-home-actions .app-quick-actions button > svg:last-child { display: block !important; margin-left: auto !important; }
+  .ac-workspace .app-home-secondary { grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr) !important; }
+  .ac-workspace .main .subscription-options.ac-plan-grid { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 20px !important; align-items: stretch !important; }
+  .ac-workspace .main .subscription-option.ac-plan-card { display: flex !important; flex-direction: column !important; grid-column: auto !important; min-width: 0 !important; padding: 28px !important; position: relative !important; }
+  .ac-workspace .ac-plan-card ul { flex: 1 !important; padding-block: 16px !important; }
+  .ac-workspace .ac-plan-card .subscription-price { font-size: 42px !important; letter-spacing: -1.5px !important; line-height: 1.2 !important; }
+  .ac-workspace .ac-plan-card .subscription-price span { font-size: 12px !important; letter-spacing: 0 !important; }
+  .ac-workspace .main .ac-plan-card.annual-option { border-color: #6a97c8 !important; background: #f5f9ff !important; }
+  .ac-workspace .ac-plan-card .best-plan { position: static !important; align-self: flex-start !important; margin-bottom: 18px !important; background: #dceafc !important; color: #315d91 !important; border-radius: 6px !important; padding: 6px 9px !important; font-size: 9px !important; }
+  .ac-workspace .ac-premium-sales { display: grid !important; gap: 18px !important; padding: clamp(24px,4vw,48px) !important; background: #172a3b !important; border-radius: 22px !important; margin-bottom: 24px !important; }
+  .ac-workspace .ac-premium-sales > a { width: fit-content !important; background: #dceeff !important; color: #193d5e !important; padding: 12px 18px !important; border-radius: 10px !important; font-weight: 650 !important; }
+  .ac-workspace .ac-premium-sales :is(h1,h2,h3,strong) { color: #eef7ff !important; }
+  .ac-workspace .ac-premium-sales :is(p,small) { color: #b6c9dd !important; }
+  .ac-workspace .main :is(button,a.button) { transition: background-color .16s ease,border-color .16s ease,box-shadow .16s ease !important; }
+  .ac-workspace .main button:hover:not(:disabled) { border-color: #95b2d4 !important; }
+  .ac-workspace .main button.primary:hover:not(:disabled) { background: #245bcf !important; }
+
   @media (max-width: 900px) {
     .app-shell.ac-workspace { --app-sidebar: 0px; --app-gap: 16px; }
     .app-shell.ac-workspace > .sidebar { display: none !important; }
@@ -354,6 +409,14 @@
     .ac-workspace .ws-settings-nav button { flex: none !important; }
   }
   @media (max-width: 600px) {
+    .ac-workspace .app-home > .app-home-documents, .ac-workspace .app-home > .app-home-actions { grid-column: 1/-1 !important; }
+    .ac-workspace .app-vehicle-content { width: min(80%,360px) !important; }
+    .ac-workspace .app-vehicle-hero { min-height: 410px !important; }
+    .ac-workspace .app-maintenance-highlights { grid-template-columns: 1fr !important; gap: 12px !important; }
+    .ac-workspace .main .app-maintenance-highlights > button { padding: 16px !important; gap: 12px !important; }
+    .ac-workspace .main .subscription-options.ac-plan-grid { grid-template-columns: 1fr !important; }
+    .ac-workspace .main .subscription-option.ac-plan-card { padding: 22px !important; }
+
     .ac-workspace .app-home-primary, .ac-workspace .app-home-secondary, .ac-workspace .main .grid2, .ac-workspace .main .grid3, .ac-workspace .main .ac-smartdrive-history-columns { grid-template-columns: 1fr !important; }
     .ac-workspace .main :is(.app-section,.card,.app-upcoming,.app-account-identity) { padding: 19px !important; border-radius: 16px !important; }
     .ac-workspace .app-home { gap: 16px !important; }
@@ -412,6 +475,14 @@
     .ac-workspace .ws-settings-nav button { flex: none !important; }
   }
   @container workspace-preview (max-width: 600px) {
+    .ac-workspace .app-home > .app-home-documents, .ac-workspace .app-home > .app-home-actions { grid-column: 1/-1 !important; }
+    .ac-workspace .app-vehicle-content { width: min(80%,360px) !important; }
+    .ac-workspace .app-vehicle-hero { min-height: 410px !important; }
+    .ac-workspace .app-maintenance-highlights { grid-template-columns: 1fr !important; gap: 12px !important; }
+    .ac-workspace .main .app-maintenance-highlights > button { padding: 16px !important; gap: 12px !important; }
+    .ac-workspace .main .subscription-options.ac-plan-grid { grid-template-columns: 1fr !important; }
+    .ac-workspace .main .subscription-option.ac-plan-card { padding: 22px !important; }
+
     .ac-workspace .app-home-primary, .ac-workspace .app-home-secondary, .ac-workspace .main .grid2, .ac-workspace .main .grid3, .ac-workspace .main .ac-smartdrive-history-columns { grid-template-columns: 1fr !important; }
     .ac-workspace .main :is(.app-section,.card,.app-upcoming,.app-account-identity) { padding: 19px !important; border-radius: 16px !important; }
     .ac-workspace .app-home { gap: 16px !important; }
