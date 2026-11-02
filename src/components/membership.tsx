@@ -316,7 +316,7 @@ export default function Membership({
       {data.premium ? (
         <PremiumOverview data={data} language={language} preview={preview} navigate={navigate} />
       ) : (
-        <PremiumSales language={language} attachmentLimit={data.planLimits.attachments} />
+        <PremiumSales language={language} attachmentLimit={data.planLimits.attachments} onChoosePlan={() => navigate('Abonament')} />
       )}
       <PremiumWorkspace data={data} language={language} navigate={navigate} onRecord={onRecord} />
       {data.premium && <PremiumCareTools data={data} language={language} preview={preview} onRecord={onRecord}/> }

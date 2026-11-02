@@ -2,9 +2,11 @@
 export default function PremiumSales({
   language,
   attachmentLimit,
+  onChoosePlan,
 }: {
   language: 'ro' | 'en';
   attachmentLimit: number;
+  onChoosePlan: () => void;
 }) {
   const en = language === 'en';
   const comparison = [
@@ -101,7 +103,7 @@ export default function PremiumSales({
             ? 'Plan maintenance by days and kilometers, organize unlimited vehicles and keep documents and costs together.'
             : 'Planifică întreținerea după zile și kilometri, organizează mașini nelimitate și păstrează documentele și cheltuielile la îndemână.'}
         </p>
-        <a href="#premium-plans">{en ? 'Choose your plan' : 'Alege planul potrivit'} ↗</a>
+        <button type="button" onClick={onChoosePlan}>{en ? 'Choose your plan' : 'Alege planul potrivit'} ↗</button>
         <small>
           {en
             ? 'All Premium plans include the same tools. Only the billing period differs.'

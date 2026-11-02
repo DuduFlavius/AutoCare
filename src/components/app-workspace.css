@@ -339,11 +339,22 @@
   .ac-workspace .main > .app-home, .ac-workspace .main > .app-account { animation: app-enter .15s ease-out !important; }
 
   @media (max-width: 1100px) { .ac-workspace .main .grid3 { grid-template-columns: repeat(2,minmax(0,1fr)) !important; } .ac-workspace .app-header-signout span { display: none !important; } }
+  html body .app-shell.ac-workspace .app-topbar-brand strong { color: #fff !important; -webkit-text-fill-color: currentColor !important; }
+  html body .app-shell.ac-workspace .main .ac-premium-overview-dashboard > header { background: #172a3b !important; }
+  html body .app-shell.ac-workspace .main .ac-premium-overview-dashboard > header :is(h2,p,span) { color: #e9f3ff !important; }
+  html body .app-shell.ac-workspace .main .ac-premium-sales { background: linear-gradient(90deg,#172a3bf8 35%,#172a3bc9 70%,#172a3b80),url('/images/autocare-app-premium.webp') center right/cover !important; }
+  html body .app-shell.ac-workspace .main .ac-premium-sales h2 { font-size: clamp(25px,3vw,38px) !important; line-height: 1.2 !important; letter-spacing: -1px !important; max-width: 650px !important; }
+  html body .app-shell.ac-workspace .main .ac-premium-sales :is(p,small) { color: #c1d0e1 !important; max-width: 650px !important; margin: 0 !important; }
+  html body .app-shell.ac-workspace .main .ac-premium-sales > p:first-child { color: #8acbe8 !important; font-size: 10px !important; letter-spacing: 2px !important; }
+  html body .app-shell.ac-workspace .main .ac-premium-sales > button { justify-self: start !important; background: #dceeff !important; color: #193d5e !important; border-color: #dceeff !important; }
   /* Desktop editorial hierarchy; shared light work surfaces keep forms and records legible. */
   .ac-workspace .app-editorial-eyebrow { display: block !important; margin-bottom: 12px !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: 2px !important; color: #51708d !important; }
   .ac-workspace .app-home-welcome h1 { font-size: clamp(28px,3vw,40px) !important; font-weight: 650 !important; letter-spacing: -1.4px !important; }
   .ac-workspace .app-home-welcome { padding-block: 8px !important; }
   .ac-workspace .app-topbar-title { display: flex !important; align-items: center !important; gap: 14px !important; color: #97a8ba !important; }
+  html body .app-shell.ac-workspace .app-topbar-title > span { color: #b5c5d5 !important; -webkit-text-fill-color: currentColor !important; }
+  html body .app-shell.ac-workspace .app-topbar-actions button :is(svg,span) { color: inherit !important; -webkit-text-fill-color: currentColor !important; }
+  html body .app-shell.ac-workspace .main .app-vehicle-content > p { color: #c3d1e2 !important; }
   .ac-workspace .app-topbar-title strong { color: #edf5ff !important; font-weight: 600 !important; }
   .ac-workspace .app-topbar-brand { color: #fff !important; }
   .ac-workspace .app-topbar-actions button { background: #243440 !important; color: #e2edf9 !important; border-color: #425361 !important; }
@@ -521,6 +532,14 @@
     .ac-workspace .app-account-identity h2 { font-size: 18px !important; }
     .ac-workspace .app-record-row { gap: 10px !important; }
     .ac-workspace .app-record-row strong { font-size: 13px !important; }
+  }
+  @media (max-width: 380px) {
+    .ac-workspace .record-category-grid { grid-template-columns: 1fr !important; }
+    .ac-workspace .dialog .record-category-grid button { min-height: 110px !important; }
+  }
+  @container workspace-preview (max-width: 380px) {
+    .ac-workspace .record-category-grid { grid-template-columns: 1fr !important; }
+    .ac-workspace .dialog .record-category-grid button { min-height: 110px !important; }
   }
   @media (prefers-reduced-motion: reduce) { .ac-workspace *, .ac-workspace *::before, .ac-workspace *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 }
