@@ -154,12 +154,7 @@ export default function ApplicationHome({
           )}
           <div className="app-home-primary">
             <section className="app-vehicle-hero">
-              <VehicleVisual
-                key={car.id}
-                vehicleId={car.id}
-                hasPhoto={data.photos.some((p) => p.vehicleId === car.id)}
-                preview={preview}
-              />
+              <VehicleVisual />
               <div className="app-vehicle-content">
                 <div className="app-vehicle-top">
                   <span>{t('MAȘINA ACTIVĂ', 'ACTIVE VEHICLE')}</span>

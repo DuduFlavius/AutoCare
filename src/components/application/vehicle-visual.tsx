@@ -1,30 +1,10 @@
-'use client';
-import { useState } from 'react';
-/** Owned photos use the existing authenticated endpoint; the illustration is decorative. */
-export default function VehicleVisual({
-  vehicleId,
-  hasPhoto,
-  preview,
-}: {
-  vehicleId: string;
-  hasPhoto: boolean;
-  preview: boolean;
-}) {
-  const [failed, setFailed] = useState(false);
-  const personal = hasPhoto && !preview && !failed;
+/** Shared decorative illustration for the active vehicle on web and installed PWA. */
+export default function VehicleVisual() {
   return (
-    <div
-      className={'app-vehicle-visual' + (personal ? ' app-vehicle-personal' : '')}
-      aria-hidden="true"
-    >
+    <div className="app-vehicle-visual" aria-hidden="true">
       <img
-        src={
-          personal
-            ? '/api/v1/vehicles/' + encodeURIComponent(vehicleId) + '/photo'
-            : '/images/autocare-app-premium.webp'
-        }
+        src="/images/autocare-app-premium.webp"
         alt=""
-        onError={personal ? () => setFailed(true) : undefined}
         fetchPriority="high"
         decoding="async"
       />
