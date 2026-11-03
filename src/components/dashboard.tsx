@@ -1953,6 +1953,13 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
             <VehicleSheet
               data={data}
               id={vehicleDetail}
+              busy={busy}
+              removeService={(record) => {
+                const question = locale === 'ro-RO'
+                  ? 'Arhivezi intervenția și oprești alertele ei?'
+                  : 'Archive this service entry and stop its reminders?';
+                if (confirm(question)) void act(() => api('records/' + record.id, 'DELETE'));
+              }}
               edit={() => {
                 const v = data.vehicles.find((v) => v.id === vehicleDetail);
                 setVehicleDetail(null);

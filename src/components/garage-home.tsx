@@ -731,11 +731,15 @@ export function VehicleSheet({
   id,
   open,
   edit,
+  removeService,
+  busy,
 }: {
   data: Data;
   id: string;
   open: (record: Entry) => void;
   edit: () => void;
+  removeService: (record: Entry) => void;
+  busy: boolean;
 }) {
 
   const locale=useApplicationLocale();
@@ -746,8 +750,8 @@ const v = data.vehicles.find((v) => v.id === id);
   const entries = data.records.filter((r) => r.vehicleId === id);
   const active = entries.filter((r) => !r.cancelled);
   const cost = active.reduce((sum, r) => sum + r.amountBani, 0);
-  const readings = entries
-    .filter((r) => r.odometer != null)
+  const readings = active
+    .filter((r) => r.kind === 'service' && r.odometer != null)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   return (
     <div className="vehicle-sheet">
@@ -791,7 +795,7 @@ const v = data.vehicles.find((v) => v.id === id);
         </section>
       )}
       <section className="card">
-        <h3>Citiri de kilometraj din înregistrări</h3>
+        <h3>{locale === 'ro-RO' ? 'Kilometraj la intervenții' : 'Mileage at service'}</h3>
         {readings.length ? (
           readings.map((r) => (
             <div className="between small list-row" key={r.id}>
@@ -799,11 +803,14 @@ const v = data.vehicles.find((v) => v.id === id);
                 {date(r.date)} · {r.title}
               </span>
               <strong>{r.odometer?.toLocaleString(locale)} km</strong>
+              <button type="button" className="danger" disabled={busy} onClick={() => removeService(r)}>
+                {locale === 'ro-RO' ? 'Șterge intervenția' : 'Remove service entry'}
+              </button>
             </div>
           ))
         ) : (
           <p className="muted small">
-            Nu sunt disponibile citiri istorice în documente, lucrări sau cheltuieli.
+            {locale === 'ro-RO' ? 'Nicio intervenție activă cu kilometraj salvat.' : 'No active service entries with saved mileage.'}
           </p>
         )}
       </section>
