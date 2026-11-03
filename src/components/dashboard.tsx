@@ -1950,7 +1950,14 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         )}
         {checkoutUrl && (
           <Dialog title={language === 'en' ? 'Secure payment' : 'Plată securizată'} onClose={() => setCheckoutUrl(null)}>
-            <a className="button primary" href={checkoutUrl} target="_blank" rel="noopener noreferrer" onClick={() => setCheckoutUrl(null)}>
+            <a
+              className="button primary stripe-checkout-cta"
+              href={checkoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setCheckoutUrl(null)}
+            >
+              <span className="stripe-checkout-mark" aria-hidden="true">stripe</span>
               {language === 'en' ? 'Continue to Stripe' : 'Continuă către Stripe'}
             </a>
           </Dialog>
