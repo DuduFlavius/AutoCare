@@ -828,7 +828,11 @@ const v = data.vehicles.find((v) => v.id === id);
           </p>
         )}
       </section>
-      {(['document', 'service', 'expense'] as const).map((kind) => (
+      {(['document', 'service', 'expense'] as const).map((kind) => {
+        const rows = kind === 'expense'
+          ? active.filter((r) => r.kind === 'expense' || (r.kind === 'service' && r.amountKnown !== false && r.amountBani > 0))
+          : entries.filter((r) => r.kind === kind);
+        return (
         <section className="card" key={kind}>
           <h3>
             {kind === 'document'
@@ -837,10 +841,8 @@ const v = data.vehicles.find((v) => v.id === id);
                 ? 'Istoric de service'
                 : 'Cheltuieli'}
           </h3>
-          {entries.filter((r) => r.kind === kind).length ? (
-            entries
-              .filter((r) => r.kind === kind)
-              .map((r) => (
+          {rows.length ? (
+            rows.map((r) => (
                 <div key={r.id}>
                   <button className="event-line" onClick={() => open(r)}>
                     <span className="list-grow">
@@ -850,17 +852,17 @@ const v = data.vehicles.find((v) => v.id === id);
                         {r.expiresAt ? ' · Termen: ' + date(r.expiresAt) : ''}
                       </span>
                     </span>
-                    <span className="small">
+                    {(r.cancelled || kind === 'expense') && <span className="small">
                       {r.cancelled
                         ? 'Arhivat'
                         : r.amountKnown === false
                           ? 'Cost necunoscut'
                           : money(r.amountBani)}
-                    </span>
+                    </span>}
                     <ArrowRight size={15} />
                   </button>
                   {data.attachments
-                    .filter((f) => f.recordId === r.id)
+                    .filter((f) => f.recordId === r.id && r.kind === kind)
                     .map((f) => (
                       <a
                         className="attachment-link small"
@@ -876,7 +878,8 @@ const v = data.vehicles.find((v) => v.id === id);
             <p className="muted small">Nicio înregistrare în această secțiune.</p>
           )}
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }
