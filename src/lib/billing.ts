@@ -17,11 +17,11 @@ export function stripe() {
   return new Stripe(key, { timeout: 12000, maxNetworkRetries: 1 });
 }
 export async function checkout(uid: string, interval: string, extend=false) {
-  if (!['monthly', 'quarterly', 'annual'].includes(interval) && !(extend && interval === 'decade'))
+  if (!['monthly', 'quarterly', 'annual'].includes(interval))
     throw new AppError(400, 'Interval invalid.');
   const configured = await pricing();
   if (extend) {
-    const months = interval === 'decade' ? 120 : interval === 'annual' ? 12 : interval === 'quarterly' ? 3 : 1;
+    const months = interval === 'annual' ? 12 : interval === 'quarterly' ? 3 : 1;
     const amount = months >= 12 ? configured.annualBani * (months / 12) : configured.monthlyBani * months;
     return extensionCheckout(uid, months, amount, stripe());
   }

@@ -117,21 +117,6 @@ export default function SubscriptionPage({
           />
         </>
       )}
-      {data.premium && !lifetime && (
-        <section className="card">
-          <h3>{en ? 'Extend for 10 years' : 'Prelungește cu 10 ani'}</h3>
-          <p>{new Intl.NumberFormat(en ? 'en-GB' : 'ro-RO', {
-            style: 'currency',
-            currency: 'RON',
-          }).format(data.pricing.annualBani * 10 / 100)}</p>
-          <p>{recurring
-            ? (en ? 'Available after the recurring subscription ends.' : 'Disponibilă după încheierea abonamentului recurent.')
-            : (en ? 'One payment. Ten years are added after your current access ends.' : 'Plată unică. Cei 10 ani se adaugă după expirarea accesului actual.')}</p>
-          <button type="button" disabled={busy || recurring} onClick={() => checkout('decade', true)}>
-            {en ? 'Choose 10 years' : 'Alege 10 ani'}
-          </button>
-        </section>
-      )}
       <p className="micro">{en?'EUR prices are indicative at EUR 1 ≈ RON 5. Payment is charged in RON at the confirmed Stripe price.':'Prețurile sunt facturate în RON, la valoarea confirmată în pagina de plată Stripe.'}</p>
       <section className="card">
         <h3>{en ? 'Payment history' : 'Istoricul plăților'}</h3>
