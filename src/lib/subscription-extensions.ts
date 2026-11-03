@@ -14,6 +14,9 @@ export async function extensionCheckout(
   const old = (await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid)))[0];
   if (old && ['past_due', 'unpaid', 'pending_payment', 'incomplete'].includes(old.status))
     throw new AppError(409, 'Rezolvă mai întâi plata restantă din portalul de facturare.');
+  const recurring = old?.subscriptionId && ['active', 'trialing'].includes(old.status);
+  if (recurring && months > 23)
+    throw new AppError(409, 'Prelungirea pe 10 ani este disponibilă după încheierea abonamentului recurent.');
   const pending=(await db().select().from(s.subscriptionExtensions).where(and(eq(s.subscriptionExtensions.userId,uid),sql`${s.subscriptionExtensions.status} IN ('pending','processing')`)))[0];
   if(pending){
     const session=await client.checkout.sessions.retrieve(pending.sessionId);
@@ -44,7 +47,7 @@ export async function extensionCheckout(
         ...existing.map((g) => g.endsAt?.getTime() || 0),
       ),
     );
-  if (addPaidMonths(base, months).getTime() > addPaidMonths(now, 23).getTime())
+  if (recurring && addPaidMonths(base, months).getTime() > addPaidMonths(now, 23).getTime())
     throw new AppError(400, 'Poți prelungi accesul până la maximum 23 de luni în avans.');
   const id = crypto.randomUUID();
   const session = await client.checkout.sessions.create(

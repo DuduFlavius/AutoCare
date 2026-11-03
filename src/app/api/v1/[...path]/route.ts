@@ -622,7 +622,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         ),
       );
     if(route==='billing/sync' && method==='POST')return json(await syncPaidExtensions(uid,stripe()));
-    if(route==='billing/extend' && method==='POST')return json(await checkout(uid,z.object({interval:z.enum(['monthly','quarterly','annual'])}).parse(await body(req)).interval,true));
+    if(route==='billing/extend' && method==='POST')return json(await checkout(uid,z.object({interval:z.enum(['monthly','quarterly','annual','decade'])}).parse(await body(req)).interval,true));
     if (route === 'billing/portal' && method === 'POST') return json(await billingPortal(uid));
     if (route === 'billing/invoices' && method === 'GET')
       return json(

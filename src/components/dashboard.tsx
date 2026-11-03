@@ -406,6 +406,21 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
       if (!silent && request === dashboardRequest.current) setError((e as Error).message);
     }
   }
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+
+  function startCheckout(interval: string, extend = false) {
+    void act(async () => {
+      const out = await api(extend ? 'billing/extend' : 'billing/checkout', 'POST', { interval });
+      if (typeof out?.url !== 'string' || !out.url.startsWith('https://checkout.stripe.com/')) {
+        throw new Error(language === 'en' ? 'Invalid Stripe checkout link.' : 'Linkul de plată Stripe este invalid.');
+      }
+      const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+        (navigator as Navigator & { standalone?: boolean }).standalone === true;
+      if (standalone) setCheckoutUrl(out.url);
+      else window.location.assign(out.url);
+    }, '');
+  }
+
   async function act(fn: () => Promise<unknown>, message = 'Modificările au fost salvate.') {
     if (previewData) {
       setNotice('Previzualizare de design: date fictive, modificările nu se salvează.');
@@ -1674,7 +1689,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
             {tab === 'Centru de suport' && (
               <SupportChat role={data.profile.role} preview={!!previewData} />
             )}
-            {tab==='Abonament'&&<SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={(interval,extend)=>void act(async()=>{if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api(extend?'billing/extend':'billing/checkout','POST',{interval});if(typeof out.url!=='string'||!out.url.startsWith('https://checkout.stripe.com/'))throw new Error('Link de plată invalid.');window.location.assign(out.url);},'')}/>}
+            {tab==='Abonament'&&<SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/>}
             {tab === 'Premium' && (
               <Membership
                 language={language}
@@ -1684,22 +1699,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                 navigate={navigate}
                 onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}
                 busy={busy}
-                checkout={(interval) =>
-                  void act(async () => {
-                    setNotice('Se pregătește plata securizată Stripe…');
-                    try {
-                      const out = await api('billing/checkout', 'POST', { interval });
-                      if (typeof out?.url !== 'string' || !out.url.startsWith('https://checkout.stripe.com/')) {
-                        throw new Error('Stripe nu a returnat un link valid pentru plată. Încearcă din nou sau contactează suportul.');
-                      }
-                      window.location.assign(out.url);
-                    } catch (e) {
-                      const reason = (e as Error).message || 'Eroare necunoscută la inițierea plății.';
-                      setError('Plata nu a putut fi inițiată. ' + reason);
-                      throw e;
-                    }
-                  }, '')
-                }
+                checkout={startCheckout}
                 portal={() =>
                   void act(async () => {
                     const out = await api('billing/portal', 'POST');
@@ -1947,6 +1947,13 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                 <p className="muted">Se verifică accesul…</p>
               ))}
           </>
+        )}
+        {checkoutUrl && (
+          <Dialog title={language === 'en' ? 'Secure payment' : 'Plată securizată'} onClose={() => setCheckoutUrl(null)}>
+            <a className="button primary" href={checkoutUrl} target="_blank" rel="noopener noreferrer" onClick={() => setCheckoutUrl(null)}>
+              {language === 'en' ? 'Continue to Stripe' : 'Continuă către Stripe'}
+            </a>
+          </Dialog>
         )}
         {vehicleDetail && data && (
           <Dialog title="Fișa mașinii" onClose={() => setVehicleDetail(null)}>

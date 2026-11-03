@@ -17,8 +17,14 @@ export function stripe() {
   return new Stripe(key, { timeout: 12000, maxNetworkRetries: 1 });
 }
 export async function checkout(uid: string, interval: string, extend=false) {
-  if (!['monthly', 'quarterly', 'annual'].includes(interval)) throw new AppError(400, 'Interval invalid.');
+  if (!['monthly', 'quarterly', 'annual'].includes(interval) && !(extend && interval === 'decade'))
+    throw new AppError(400, 'Interval invalid.');
   const configured = await pricing();
+  if (extend) {
+    const months = interval === 'decade' ? 120 : interval === 'annual' ? 12 : interval === 'quarterly' ? 3 : 1;
+    const amount = months >= 12 ? configured.annualBani * (months / 12) : configured.monthlyBani * months;
+    return extensionCheckout(uid, months, amount, stripe());
+  }
   const price = interval === 'annual'
     ? process.env.STRIPE_ANNUAL_PRICE_ID || configured.annualPriceId
     : interval === 'quarterly'
@@ -45,7 +51,6 @@ export async function checkout(uid: string, interval: string, extend=false) {
       503,
       'Prețul procesatorului nu corespunde tarifului RON afișat. Plata a fost oprită.',
     );
-  if(extend)return extensionCheckout(uid,interval==='annual'?12:interval==='quarterly'?3:1,expectedAmount,client);
   const old = (await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid)))[0];
   if (old?.subscriptionId && ['active', 'trialing', 'past_due', 'unpaid'].includes(old.status))
     throw new AppError(409, 'Gestionează abonamentul existent din portal.');
