@@ -798,7 +798,7 @@ const v = data.vehicles.find((v) => v.id === id);
         <h3>{locale === 'ro-RO' ? 'Kilometraj la intervenții' : 'Mileage at service'}</h3>
         {readings.length ? (
           readings.map((r) => (
-            <div className="between small list-row" key={r.id}>
+            <div className="between small list-row vehicle-mileage-row" key={r.id}>
               <span data-user-content>
                 {date(r.date)} · {r.title}
               </span>

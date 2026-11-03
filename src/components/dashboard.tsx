@@ -1955,7 +1955,6 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
               href={checkoutUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setCheckoutUrl(null)}
             >
               <span className="stripe-checkout-mark" aria-hidden="true">stripe</span>
               {language === 'en' ? 'Continue to Stripe' : 'Continuă către Stripe'}

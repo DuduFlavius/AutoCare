@@ -563,4 +563,21 @@
     font-weight: 800;
     letter-spacing: -.04em;
   }
+
+  .ac-workspace .vehicle-mileage-row {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+  .ac-workspace .vehicle-mileage-row > span {
+    flex: 1 1 12rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .ac-workspace .vehicle-mileage-row > strong {
+    white-space: nowrap;
+  }
+  .ac-workspace .dialog a.stripe-checkout-cta {
+    flex-wrap: wrap !important;
+    text-align: center;
+  }
 }
