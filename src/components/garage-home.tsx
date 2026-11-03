@@ -799,10 +799,18 @@ const v = data.vehicles.find((v) => v.id === id);
         {readings.length ? (
           readings.map((r) => (
             <div className="between small list-row vehicle-mileage-row" key={r.id}>
-              <span data-user-content>
-                {date(r.date)} · {r.title}
+              <span>
+                <strong data-user-content>{r.title}</strong>
+                <br />
+                {locale === 'ro-RO' ? 'Efectuată la ' : 'Performed on '}{date(r.date)}
+                {' · '}{r.odometer?.toLocaleString(locale)} km
+                <br />
+                {locale === 'ro-RO' ? 'Următoarea intervenție: ' : 'Next service: '}
+                {r.expiresAt && date(r.expiresAt)}
+                {r.expiresAt && r.nextKm != null && ' · '}
+                {r.nextKm != null && `${r.nextKm.toLocaleString(locale)} km`}
+                {!r.expiresAt && r.nextKm == null && (locale === 'ro-RO' ? 'Termen nesetat' : 'Not scheduled')}
               </span>
-              <strong>{r.odometer?.toLocaleString(locale)} km</strong>
               <button type="button" className="danger" disabled={busy} onClick={() => removeService(r)}>
                 {locale === 'ro-RO' ? 'Șterge intervenția' : 'Remove service entry'}
               </button>
