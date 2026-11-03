@@ -678,7 +678,9 @@ const [tab, setTab] = useState('Roluri și permisiuni'),
                             ...grant,
                             note: String(f.get('note')),
                           }),
-                        'Accesul manual a fost actualizat. Nu s-a efectuat nicio plată.',
+                        duration === 'forever'
+                          ? 'Premium permanent acordat, fără dată de expirare.'
+                          : 'Accesul manual a fost actualizat. Nu s-a efectuat nicio plată.',
                       );
                     }}
                   >

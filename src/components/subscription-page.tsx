@@ -58,14 +58,19 @@ export default function SubscriptionPage({
         <h3>
           {lifetime
             ? en
-              ? 'Lifetime access'
-              : 'Acces fără expirare'
+              ? 'Premium permanent · no expiry'
+              : 'Premium permanent · fără expirare'
             : date
               ? (en ? 'Access until: ' : 'Acces până la: ') + date
               : en
                 ? 'No active paid period'
                 : 'Nu ai o perioadă activă'}
         </h3>
+        {lifetime && recurring && (
+          <p>{en
+            ? 'Any date in the billing portal refers to your separate Stripe subscription.'
+            : 'Data din portalul de facturare se referă la abonamentul Stripe separat.'}</p>
+        )}
         <p>
           {recurring
             ? cancelled
