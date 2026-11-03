@@ -581,3 +581,71 @@
     text-align: center;
   }
 }
+
+@layer autocare-workspace {
+  .ac-workspace .vehicle-sheet .sheet-overview {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    padding: clamp(18px, 4vw, 30px);
+    border-radius: 18px;
+    background: linear-gradient(135deg, #14263d, #244872);
+    color: white;
+  }
+  .ac-workspace .vehicle-sheet .sheet-overview :is(h2,p,.muted,.eyebrow) {
+    color: white !important;
+  }
+  .ac-workspace .vehicle-sheet .sheet-overview h2 {
+    font-size: clamp(24px, 5vw, 34px);
+    margin: 0 0 8px;
+  }
+  .ac-workspace .vehicle-sheet-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ac-workspace .vehicle-sheet .vehicle-mileage-row > span {
+    line-height: 1.65;
+  }
+}
+
+@layer autocare-workspace {
+
+@media print {
+  html:has(.dialog .vehicle-sheet),
+  body:has(.dialog .vehicle-sheet) {
+    overflow: visible !important;
+    height: auto !important;
+    background: white !important;
+  }
+  body:has(.dialog .vehicle-sheet) :not(:has(.vehicle-sheet)):not(.vehicle-sheet):not(.vehicle-sheet *) {
+    display: none !important;
+  }
+  body:has(.dialog .vehicle-sheet) :has(.vehicle-sheet) {
+    position: static !important;
+    display: block !important;
+    overflow: visible !important;
+    transform: none !important;
+    max-height: none !important;
+    height: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+  .vehicle-sheet :is(button:not(.event-line), .attachment-link) {
+    display: none !important;
+  }
+  .vehicle-sheet :is(.sheet-overview, .stats, .list-row, .event-line) {
+    break-inside: avoid;
+  }
+  .vehicle-sheet .sheet-overview {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+}

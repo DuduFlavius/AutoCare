@@ -755,10 +755,11 @@ const v = data.vehicles.find((v) => v.id === id);
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   return (
     <div className="vehicle-sheet">
-      <div className="sheet-overview">
+      <header className="sheet-overview">
         <div className="autocare-vehicle-sheet-symbol"><CarFront size={56} strokeWidth={1.5}/></div>
         <div>
-          <p className="eyebrow">
+          <p className="eyebrow">AutoCare · {locale === 'ro-RO' ? 'Fișa vehiculului' : 'Vehicle report'}</p>
+          <p className="small">
             {v.year} · {v.fuel}
           </p>
           <h2 data-user-content>
@@ -771,9 +772,14 @@ const v = data.vehicles.find((v) => v.id === id);
             <br />
             VIN: {v.vin || 'Necompletat'}
           </p>
-          <button onClick={edit}>Editează datele mașinii</button>
+          <div className="vehicle-sheet-actions">
+            <button type="button" onClick={edit}>Editează datele mașinii</button>
+            <button type="button" className="primary" onClick={() => window.print()}>
+              {locale === 'ro-RO' ? 'Printează / Salvează PDF' : 'Print / Save PDF'}
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
       <div className="stats">
         <div className="card">
           <span className="micro">Kilometraj actual</span>
