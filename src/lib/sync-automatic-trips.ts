@@ -22,6 +22,7 @@ export async function syncAutomaticTrips(
       groups.set(row.vehicleId, values);
     }
     let count = 0;
+    const confirmedOdometers=new Map(cars.map(car=>[car.id,car.odometer]));
     for (const [id, rows] of groups) {
       if (active?.active && active.vehicleId === id) continue;
       if (!cars.some((c) => c.id === id))
@@ -52,6 +53,7 @@ export async function syncAutomaticTrips(
       if (!Array.isArray(value.ids) || rows.some((t) => !value.ids.includes(t.id)))
         throw Error('Serverul nu a confirmat toate traseele.');
       await nativeAutomation.acknowledge(ownerId, value.ids);
+      if(Number.isSafeInteger(value.odometer))confirmedOdometers.set(id,value.odometer);
       count += rows.length;
       window.dispatchEvent(
         new CustomEvent('autocare-native-synced', { detail: { ids: value.ids } }),
@@ -59,7 +61,7 @@ export async function syncAutomaticTrips(
       window.dispatchEvent(new Event('autocare-trips-updated'));
     }
     // Never rebase a queued or currently recording trip. Both native platforms guard this.
-    for (const car of cars) await nativeAutomation.updateVehicle(ownerId, car.id, car.odometer);
+    for (const car of cars) await nativeAutomation.updateVehicle(ownerId, car.id, confirmedOdometers.get(car.id)??car.odometer);
     return count;
   })();
   locks.set(ownerId, operation);

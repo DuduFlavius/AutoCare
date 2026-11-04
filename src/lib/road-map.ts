@@ -1,3 +1,4 @@
+import type {StyleSpecification} from 'maplibre-gl';
 import type { FeatureCollection, LineString } from 'geojson';
 import type { GPSFix } from './gps-tracking';
 /** Keep signal gaps disconnected on the map, just as in distance calculations. */
@@ -19,3 +20,6 @@ export function routeGeometry(points: GPSFix[]): FeatureCollection<LineString> {
   };
 }
 export const roadMapStyle = 'https://tiles.openfreemap.org/styles/bright';
+
+/** Street mode deliberately excludes imagery and terrain shading. */
+export function streetOnlyStyle(style:StyleSpecification):StyleSpecification{return {...style,layers:style.layers.filter(layer=>layer.type!=="raster"&&layer.type!=="hillshade")};}

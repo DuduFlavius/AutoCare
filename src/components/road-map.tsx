@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Map as RoadMap, Marker, GeoJSONSource } from 'maplibre-gl';
 import type { GPSFix } from '@/lib/gps-tracking';
-import { roadMapStyle, routeGeometry } from '@/lib/road-map';
+import { roadMapStyle, routeGeometry, streetOnlyStyle } from '@/lib/road-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
 export default function RoadMapView({
   points,
@@ -34,6 +34,7 @@ export default function RoadMapView({
           const view = new lib.Map({
             container: host.current,
             style: roadMapStyle,
+          transformStyle:(_previous,next)=>streetOnlyStyle(next),
             center: p ? [p.longitude, p.latitude] : [24.9668, 45.9432],
             zoom: p ? 15.8 : 5.2,
             maxZoom: 19,
