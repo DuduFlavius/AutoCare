@@ -679,3 +679,16 @@
 .app-shell.ac-workspace .ac-gps-history-details { margin:16px 0!important; border:1px solid #dce4ee!important; border-radius:16px!important; padding:16px!important; background:#fff!important; }
 .app-shell.ac-workspace .ac-gps-history-details>summary { cursor:pointer!important; font-weight:650!important; font-size:14px!important; padding:4px!important; }
 }
+@layer autocare-workspace {
+.app-shell.ac-workspace .ac-smartdrive-sync { display:flex!important; flex-direction:row!important; align-items:center!important; text-align:left!important; }
+.app-shell.ac-workspace .ac-smartdrive-sync input { margin:0!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip>label:not(.ac-smartdrive-sync) { text-align:left!important; justify-content:flex-start!important; }
+.app-shell.ac-workspace .ac-gps-history-details>summary { color:#26374d!important; background:transparent!important; border:0!important; }
+@container workspace-preview (max-width:640px){
+.app-shell.ac-workspace .ac-smartdrive-live { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip { padding:16px!important; border-radius:18px!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip-controls { display:grid!important; grid-template-columns:1fr!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip-controls button { width:100%!important; justify-content:center!important; }
+.app-shell.ac-workspace .ac-smartdrive-sync { align-items:flex-start!important; }
+}
+}

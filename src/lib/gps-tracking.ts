@@ -13,6 +13,6 @@ export function acceptGPSFix(anchor: GPSFix | null, next: GPSFix) {
   if(seconds>45) return {point:{...next,breakBefore:true},meters:0};
   if(next.speed!=null && (!Number.isFinite(next.speed)||next.speed<0.7||next.speed>55))return null;
   const meters=segmentMeters(anchor,next);
-  if(meters/seconds>55 || meters<Math.max(5,Math.min(20,(anchor.accuracy+next.accuracy)/2))) return null;
+  if(meters/seconds>55 || meters<Math.max(8,Math.min(35,anchor.accuracy+next.accuracy))) return null;
   return {point:next,meters};
 }
