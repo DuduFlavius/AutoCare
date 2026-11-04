@@ -14,6 +14,9 @@ export type NativeTrip = {
   distance: number;
   active: boolean;
   automatic?: boolean;
+  disconnectedAt?: number;
+  disconnectDistance?: number;
+  stopAt?: number;
   points: GPSFix[];
 };
 interface TrackingPlugin {
@@ -67,6 +70,9 @@ const trip = z.object({
   distance: z.number().nonnegative(),
   active: z.boolean(),
   automatic: z.boolean().optional(),
+  disconnectedAt: z.number().positive().optional(),
+  disconnectDistance: z.number().nonnegative().optional(),
+  stopAt: z.number().positive().optional(),
   points: z.array(point).max(1500),
 });
 export function readNativeTrip(value: unknown, ownerId: string): NativeTrip | null {

@@ -1,9 +1,11 @@
 'use client';
+import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import type { Map as RoadMap, Marker, GeoJSONSource } from 'maplibre-gl';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { roadMapStyle, routeGeometry, streetOnlyStyle } from '@/lib/road-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
+const RasterRoadMap = dynamic(() => import('./raster-road-map'), { ssr: false });
 export default function RoadMapView({
   points,
   active,
@@ -34,7 +36,7 @@ export default function RoadMapView({
           const view = new lib.Map({
             container: host.current,
             style: roadMapStyle,
-          transformStyle:(_previous,next)=>streetOnlyStyle(next),
+            transformStyle: (_previous, next) => streetOnlyStyle(next),
             center: p ? [p.longitude, p.latitude] : [24.9668, 45.9432],
             zoom: p ? 15.8 : 5.2,
             maxZoom: 19,
@@ -79,18 +81,32 @@ export default function RoadMapView({
             setLoading(false);
           });
           view.on('error', () => {
-            if (!disposed) setFailed(true);
+            if (!disposed) {
+              marker.current?.remove();
+              marker.current = null;
+              map.current?.remove();
+              map.current = null;
+              setFailed(true);
+            }
           });
           resize = new ResizeObserver(() => view.resize());
           resize.observe(host.current);
-        } catch {
+        } catch (error) {
+          console.warn(
+            'AutoCare street-map initialization failed',
+            error instanceof Error ? error.message : 'Map unavailable',
+          );
           if (!disposed) {
             setFailed(true);
             setLoading(false);
           }
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.warn(
+          'AutoCare street-map module unavailable',
+          error instanceof Error ? error.message : 'Map unavailable',
+        );
         if (!disposed) {
           setFailed(true);
           setLoading(false);
@@ -129,6 +145,7 @@ export default function RoadMapView({
         duration: 750,
       });
   }, [points]);
+  if (failed) return <RasterRoadMap points={points} active={active} english={english} />;
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -148,6 +165,7 @@ export default function RoadMapView({
       <button
         type="button"
         className="ac-road-map-center"
+        disabled={!points.length}
         aria-pressed={following}
         onClick={() => {
           follow.current = true;

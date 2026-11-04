@@ -19,7 +19,7 @@ public class AutoCareTrackingPlugin extends Plugin {
     private PluginCall pairing;
     private ActivityResultLauncher<IntentSenderRequest> chooser;
     private boolean owned(PluginCall call,JSONObject state){return call.getString("ownerId","").equals(state.optString("ownerId"));}
-    @PluginMethod public void snapshot(PluginCall call){JSONObject state=TrackingStore.forOwner(getContext(),call.getString("ownerId",""));if(!state.has("id")||!owned(call,state)){call.resolve(new JSObject());return;}try{if(state.optBoolean("active")&&!TrackingService.running){state.put("active",false).put("endedAt",state.optLong("updatedAt"));AutoDrive.enqueue(getContext(),state);TrackingStore.write(getContext(),state);}call.resolve(new JSObject(state.toString()));}catch(Exception e){call.reject("Invalid saved GPS state",e);}}
+    @PluginMethod public void snapshot(PluginCall call){JSONObject state=TrackingStore.forOwner(getContext(),call.getString("ownerId",""));if(!state.has("id")||!owned(call,state)){call.resolve(new JSObject());return;}try{if(state.optBoolean("active")&&!TrackingService.running){state.put("active",false).put("endedAt",state.optLong("updatedAt"));TrackingStore.write(getContext(),state);state=TrackingStore.stop(getContext());}call.resolve(new JSObject(state.toString()));}catch(Exception e){call.reject("Invalid saved GPS state",e);}}
     @PluginMethod public void start(PluginCall call){
         if(getPermissionState("location")!=PermissionState.GRANTED){requestPermissionForAlias("location",call,"permissionResult");return;}
         permissionResult(call);

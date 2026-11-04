@@ -51,10 +51,10 @@ final class AutoDrive {
     static void connection(Context c,String address,boolean connected){
         try{
             JSONObject config=bindings(c).optJSONObject(address);if(config==null||!config.optBoolean("enabled")||!config.optString("ownerId").equals(prefs(c).getString("owner","")))return;
-            JSONObject state=TrackingStore.read(c);if(state.optBoolean("active")&&!TrackingService.running){state.put("active",false).put("endedAt",state.optLong("updatedAt"));enqueue(c,state);TrackingStore.write(c,state);}
+            JSONObject state=TrackingStore.read(c);if(state.optBoolean("active")&&!TrackingService.running){state.put("active",false).put("endedAt",state.optLong("updatedAt"));TrackingStore.write(c,state);state=TrackingStore.stop(c);}
             boolean matching=state.optBoolean("automatic")&&address.equals(state.optString("address"))&&state.optBoolean("active")&&TrackingService.running;
-            if(!connected){prefs(c).edit().remove("suppressed-"+address).apply();if(matching){state.put("stopAt",System.currentTimeMillis()+STOP_DELAY);TrackingStore.write(c,state);}return;}
-            if(matching){state.remove("stopAt");TrackingStore.write(c,state);return;}
+            if(!connected){prefs(c).edit().remove("suppressed-"+address).apply();if(matching&&state.optLong("stopAt")==0){long now=System.currentTimeMillis();state.put("stopAt",now+STOP_DELAY).put("disconnectedAt",now).put("disconnectDistance",state.optDouble("distance")).put("disconnectPoints",new JSONArray(state.optJSONArray("points").toString()));TrackingStore.write(c,state);}return;}
+            if(matching){state.remove("stopAt");state.remove("disconnectedAt");state.remove("disconnectDistance");state.remove("disconnectPoints");TrackingStore.write(c,state);return;}
             if(prefs(c).getBoolean("suppressed-"+address,false)||TrackingService.running)return;
             if(Build.VERSION.SDK_INT>=29&&c.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)!=PackageManager.PERMISSION_GRANTED){prefs(c).edit().putString("error","Permite localizarea Tot timpul pentru pornire automată.").apply();return;}
             if(pending(c,config.getString("ownerId")).length()>=200){prefs(c).edit().putString("error","Deschide AutoCare pentru a sincroniza traseele.").apply();return;}

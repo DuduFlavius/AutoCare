@@ -49,7 +49,12 @@ final class TrackingStore {
     }
     static synchronized JSONObject stop(Context context) throws JSONException {
         JSONObject value=read(context);
-        if(value.has("id")){if(value.optBoolean("active"))value.put("endedAt",System.currentTimeMillis());value.put("active",false).put("updatedAt",System.currentTimeMillis());AutoDrive.enqueue(context,value);}
+        if(value.has("id")){
+            if(value.optBoolean("automatic")&&value.has("disconnectedAt")){value.put("distance",value.optDouble("disconnectDistance")).put("points",value.optJSONArray("disconnectPoints")).put("endedAt",value.optLong("disconnectedAt"));}
+            else if(value.optBoolean("active"))value.put("endedAt",System.currentTimeMillis());
+            value.remove("stopAt");value.remove("disconnectedAt");value.remove("disconnectDistance");value.remove("disconnectPoints");
+            value.put("active",false).put("updatedAt",System.currentTimeMillis());AutoDrive.enqueue(context,value);
+        }
         write(context,value);return value;
     }
 }

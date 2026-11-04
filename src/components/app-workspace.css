@@ -714,3 +714,10 @@
 .app-shell.ac-workspace .ac-auto-sync-warning {position:fixed!important;z-index:50!important;left:calc(var(--app-sidebar) + 18px)!important;right:18px!important;bottom:20px!important;background:#fff8e7!important;color:#704f13!important;border:1px solid #e8d6a5!important;border-radius:14px!important;padding:14px 18px!important;display:flex!important;gap:14px!important;align-items:center!important;justify-content:space-between!important;font-size:13px!important;}
 @media(max-width:760px){.app-shell.ac-workspace .ac-auto-sync-warning {left:12px!important;right:12px!important;bottom:90px!important;}.app-shell.ac-workspace .ac-auto-actions button {width:100%!important;}}
 }
+@layer autocare-workspace {
+.app-shell.ac-workspace .ac-road-map .leaflet-container {font:inherit!important;z-index:0!important;}
+.app-shell.ac-workspace .ac-road-map .leaflet-control-zoom a {width:36px!important;height:36px!important;line-height:36px!important;color:#243b58!important;background:white!important;}
+.app-shell.ac-workspace .ac-road-map .leaflet-control-attribution {font-size:10px!important;}
+.app-shell.ac-workspace .ac-road-map .leaflet-tile {max-width:none!important;max-height:none!important;}
+.app-shell.ac-workspace .ac-road-map-status,.app-shell.ac-workspace .ac-road-map-center,.app-shell.ac-workspace .ac-road-map-message {z-index:5!important;}
+}

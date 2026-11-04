@@ -12,7 +12,7 @@ private final class NativeTracker: NSObject, CLLocationManagerDelegate {
         state = UserDefaults.standard.dictionary(forKey: "autocare-gps-trip-v1") ?? [:]
         super.init()
         // iOS force-quit is a stop; never restart location silently on next launch.
-        if state["active"] as? Bool == true { state["active"] = false; state["endedAt"] = state["updatedAt"]; AutoDriveState.enqueue(state); persist() }
+        if state["active"] as? Bool == true { state["active"] = false; state["endedAt"] = state["updatedAt"]; stop() }
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.activityType = .automotiveNavigation
@@ -52,7 +52,13 @@ private final class NativeTracker: NSObject, CLLocationManagerDelegate {
     }
     func stop() {
         manager.stopUpdatingLocation()
-        if !state.isEmpty { if state["active"] as? Bool == true { state["endedAt"] = Date().timeIntervalSince1970 * 1000 }; state["active"] = false; AutoDriveState.enqueue(state); persist() }
+        if !state.isEmpty {
+            if state["automatic"] as? Bool == true, let disconnected = state["disconnectedAt"] as? Double {
+                state["distance"] = state["disconnectDistance"] ?? 0.0; state["points"] = state["disconnectPoints"] ?? [[String: Any]](); state["endedAt"] = disconnected
+            } else if state["active"] as? Bool == true { state["endedAt"] = Date().timeIntervalSince1970*1000 }
+            for key in ["stopAt", "disconnectedAt", "disconnectDistance", "disconnectPoints"] { state.removeValue(forKey: key) }
+            state["active"] = false; AutoDriveState.enqueue(state); persist()
+        }
     }
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { if (error as? CLError)?.code == .denied { stop() } }
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -128,7 +134,7 @@ public class AutoCareTrackingPlugin: CAPPlugin, CAPBridgedPlugin {
         guard AutoDriveState.pending(owner).count < 200 else { throw AutoDriveState.error("Deschide AutoCare pentru sincronizarea traseelor.") }
         if tracker.state["active"] as? Bool == true {
             guard tracker.state["automatic"] as? Bool == true, tracker.state["vehicleId"] as? String == vehicleId else { throw AutoDriveState.error("Există deja un traseu activ.") }
-            tracker.state.removeValue(forKey: "stopAt"); tracker.persist(); return
+            for key in ["stopAt", "disconnectedAt", "disconnectDistance", "disconnectPoints"] { tracker.state.removeValue(forKey: key) }; tracker.persist(); return
         }
         if !tracker.state.isEmpty && tracker.state["automatic"] as? Bool != true { throw AutoDriveState.error("Salvează traseul manual înainte de pornirea automată.") }
         let now = Date().timeIntervalSince1970*1000
@@ -139,8 +145,9 @@ public class AutoCareTrackingPlugin: CAPPlugin, CAPBridgedPlugin {
         UserDefaults.standard.removeObject(forKey: "autocare-auto-suppressed-"+vehicleId)
         let tracker = NativeTracker.shared
         guard tracker.state["automatic"] as? Bool == true, tracker.state["vehicleId"] as? String == vehicleId, tracker.state["ownerId"] as? String == AutoDriveState.owner, tracker.state["active"] as? Bool == true else { return }
-        let deadline = Date().timeIntervalSince1970*1000+AutoDriveState.stopDelay
-        tracker.state["stopAt"] = deadline; tracker.persist()
+        if tracker.state["stopAt"] != nil { return }
+        let now = Date().timeIntervalSince1970*1000, deadline = now+AutoDriveState.stopDelay
+        tracker.state["stopAt"] = deadline; tracker.state["disconnectedAt"] = now; tracker.state["disconnectDistance"] = tracker.state["distance"]; tracker.state["disconnectPoints"] = tracker.state["points"]; tracker.persist()
         DispatchQueue.main.asyncAfter(deadline: .now()+120) { if let at = tracker.state["stopAt"] as? Double, at == deadline, Date().timeIntervalSince1970*1000 >= at { tracker.stop() } }
     }
     @objc func automationStatus(_ call: CAPPluginCall) { DispatchQueue.main.async {
