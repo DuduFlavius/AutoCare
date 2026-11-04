@@ -8,8 +8,10 @@ public class TrackingService extends Service implements LocationListener {
     static volatile boolean running=false;
     static final String STOP="ro.autocare.tracking.STOP";
     private LocationManager manager;
+    private final Handler clock=new Handler(Looper.getMainLooper());
+    private final Runnable deadline=new Runnable(){public void run(){long at=TrackingStore.read(TrackingService.this).optLong("stopAt");if(at>0&&System.currentTimeMillis()>=at){stopTracking();return;}clock.postDelayed(this,2000);}};
     @Override public int onStartCommand(Intent intent,int flags,int startId){
-        if(intent!=null && STOP.equals(intent.getAction())){stopTracking();return START_NOT_STICKY;}
+        if(intent!=null && STOP.equals(intent.getAction())){AutoDrive.suppress(this);stopTracking();return START_NOT_STICKY;}
         if(!TrackingStore.read(this).optBoolean("active")){stopSelf();return START_NOT_STICKY;}
         running=true;
         try {
@@ -23,12 +25,13 @@ public class TrackingService extends Service implements LocationListener {
             manager=(LocationManager)getSystemService(LOCATION_SERVICE);
             if(!manager.isProviderEnabled(LocationManager.GPS_PROVIDER))throw new IllegalStateException("GPS disabled");
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,0f,this,Looper.getMainLooper());
+            clock.removeCallbacks(deadline);clock.postDelayed(deadline,2000);
             return START_NOT_STICKY;
         } catch(Exception e){stopTracking();return START_NOT_STICKY;}
     }
-    private void stopTracking(){running=false;try{TrackingStore.stop(this);}catch(Exception ignored){}if(manager!=null)manager.removeUpdates(this);stopForeground(STOP_FOREGROUND_REMOVE);stopSelf();}
+    private void stopTracking(){clock.removeCallbacks(deadline);running=false;try{TrackingStore.stop(this);}catch(Exception ignored){}if(manager!=null)manager.removeUpdates(this);stopForeground(STOP_FOREGROUND_REMOVE);stopSelf();}
     @Override public void onLocationChanged(Location location){try{TrackingStore.append(this,location);}catch(Exception e){stopTracking();}}
     @Override public void onProviderDisabled(String provider){stopTracking();}
-    @Override public void onDestroy(){running=false;if(manager!=null)manager.removeUpdates(this);try{TrackingStore.stop(this);}catch(Exception ignored){}super.onDestroy();}
+    @Override public void onDestroy(){clock.removeCallbacks(deadline);running=false;if(manager!=null)manager.removeUpdates(this);try{TrackingStore.stop(this);}catch(Exception ignored){}super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
 }

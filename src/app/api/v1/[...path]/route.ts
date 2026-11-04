@@ -1,10 +1,11 @@
+import {automaticTripBatch} from '@/lib/automatic-trips';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { filterRecords } from '@/lib/record-filters';
 import * as founder from '@/lib/founder';
 import { pricing, savings } from '@/lib/pricing';
 import * as supportChat from '@/lib/support-chat';
 import { emailWebhook } from '@/lib/email-events';
-import { and, eq, desc, sql, isNull } from 'drizzle-orm';
+import { and, eq, desc, sql, isNull, inArray } from 'drizzle-orm';
 import { ZodError, z } from 'zod';
 import { timingSafeEqual } from 'node:crypto';
 import { auth } from '@/lib/auth';
@@ -284,6 +285,29 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           });
           return json(result, 201);
         }
+      }
+      if(path[3]==='trip-batch'&&method==='POST'){
+        const input=automaticTripBatch.parse(await body(req));
+        if(input.trips.some(t=>Date.parse(t.endedAt)>Date.now()+60000))throw new svc.AppError(400,'Data traseului nu poate fi în viitor.');
+        const result=await db().transaction(async tx=>{
+          const vehicle=(await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid))).for('update'))[0];
+          if(!vehicle)throw new svc.AppError(404,'Mașina nu există.');
+          const ids=input.trips.map(t=>t.id),existing=await tx.select().from(s.gpsTrips).where(inArray(s.gpsTrips.id,ids));
+          if(existing.some(t=>t.userId!==uid||t.vehicleId!==vehicleId))throw new svc.AppError(409,'Identificator de traseu invalid.');
+          const known=new Set(existing.map(t=>t.id)),fresh=input.trips.filter(t=>!known.has(t.id));
+          if(!fresh.length)return {ids,odometer:vehicle.odometer};
+          let odometer=vehicle.odometer;
+          if(input.syncMileage){
+            if(vehicle.odometer!==input.expectedOdometer)throw new svc.AppError(409,'Kilometrajul a fost modificat între timp. Verifică traseele înainte de sincronizare.');
+            const previous=(await tx.select({meters:sql<string>`coalesce(sum(${s.gpsTrips.distanceMeters}),0)`}).from(s.gpsTrips).where(and(eq(s.gpsTrips.userId,uid),eq(s.gpsTrips.vehicleId,vehicleId),eq(s.gpsTrips.source,'browser-gps-synced'))))[0];
+            odometer+=Math.floor((Number(previous.meters)%1000+fresh.reduce((sum,t)=>sum+t.distanceMeters,0))/1000);
+            if(odometer>99999999)throw new svc.AppError(400,'Kilometraj invalid.');
+            await tx.update(s.vehicles).set({odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
+          }
+          await tx.insert(s.gpsTrips).values(fresh.map(t=>({...t,userId:uid,vehicleId,startedAt:new Date(t.startedAt),endedAt:new Date(t.endedAt),source:input.syncMileage?'browser-gps-synced':'browser-gps'})));
+          return {ids,odometer};
+        });
+        return json(result,201);
       }
       if (path[3] === 'trips') {
         if (method === 'GET') return json(await db().select().from(s.gpsTrips)

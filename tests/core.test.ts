@@ -995,6 +995,26 @@ test('SmartDrive: explicit sync is atomic, idempotent, carries sub-km distance a
   assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer,initial+2);
   assert.deepEqual(await db().select().from(s.records).where(eq(s.records.vehicleId,id)),records);
 });
+test('SmartDrive: automatic trip batches commit once, preserve service records and stop on mileage conflicts',async()=>{
+ const id=car.id,route='smartdrive/vehicles/'+id+'/trip-batch';
+ const initial=(await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer;
+ const beforeTrips=await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId,id));
+ const carry=beforeTrips.filter(t=>t.source==='browser-gps-synced').reduce((n,t)=>n+t.distanceMeters,0)%1000;
+ const records=await db().select().from(s.records).where(eq(s.records.vehicleId,id));
+ const trip={id:crypto.randomUUID(),distanceMeters:1500,durationSeconds:600,startedAt:'2020-03-11T10:00:00.000Z',endedAt:'2020-03-11T10:10:00.000Z'};
+ const input={expectedOdometer:initial,trips:[trip,{...trip,id:crypto.randomUUID(),distanceMeters:800,startedAt:'2020-03-12T10:00:00.000Z',endedAt:'2020-03-12T10:10:00.000Z'}]};
+ assert.equal((await call(route,'POST',input)).status,201);
+ assert.equal((await call(route,'POST',input)).status,201);
+ assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer,initial+Math.floor((carry+2300)/1000));
+ const count=(await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId,id))).length;
+ assert.equal(count,beforeTrips.length+2);
+ assert.equal((await call(route,'POST',{...input,trips:[{...trip,id:crypto.randomUUID()}]})).status,409);
+ assert.equal((await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId,id))).length,count);
+ assert.equal((await call(route,'POST',{...input,syncMileage:false,trips:[{...trip,id:crypto.randomUUID()}]})).status,201);
+ assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer,initial+Math.floor((carry+2300)/1000));
+ assert.deepEqual(await db().select().from(s.records).where(eq(s.records.vehicleId,id)),records);
+ assert.equal((await call(route,'POST',input,'')).status,401);
+});
 test('SmartDrive: reminder preferences validate frequency and persist', async () => {
   let r = await call('smartdrive/preferences');
   assert.equal(r.status, 200);

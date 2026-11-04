@@ -14,7 +14,9 @@
     "admin:grant": "node --import tsx scripts/set-admin.ts",
     "lint": "eslint src scripts tests",
     "founder:identify": "node --import tsx scripts/identify-founder.ts",
-    "db:mail-center": "node --import tsx scripts/migrate-mail-center.ts"
+    "db:mail-center": "node --import tsx scripts/migrate-mail-center.ts",
+    "prebuild": "node scripts/prepare-road-map.mjs",
+    "predev": "node scripts/prepare-road-map.mjs"
   },
   "dependencies": {
     "@capacitor/core": "8.6.0",
@@ -22,6 +24,7 @@
     "better-auth": "1.7.11",
     "drizzle-orm": "0.45.4",
     "lucide-react": "latest",
+    "maplibre-gl": "6.16.0",
     "next": "16.4.2",
     "pdf-lib": "latest",
     "pg": "latest",

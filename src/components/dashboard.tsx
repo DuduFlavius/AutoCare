@@ -15,7 +15,8 @@ import Membership from './membership';
 import SubscriptionPage from './subscription-page';
 import MobileInstall from './mobile-install';
 import PushSettings from './push-settings';
-import {hasNativeTracking,nativeTracking} from '@/lib/native-tracking';
+import {hasNativeTracking,nativeAutomation} from '@/lib/native-tracking';
+import NativeTripSync from './native-trip-sync';
 import SmartDriveTrip from './smartdrive-trip';
 import MaintenanceForecast from './maintenance-forecast';
 import {maintenanceTargets} from '@/lib/maintenance-schedule';
@@ -715,7 +716,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     if (previewData || signingOut) return;
     if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
     setSigningOut(true); setError('');
-    try { if(hasNativeTracking()&&data?.profile.userId)await nativeTracking.stop(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
+    try { if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (
@@ -799,6 +800,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
           </div>
         </details>
       </aside>
+      {data&&!previewData&&<NativeTripSync ownerId={data.profile.userId} vehicles={data.vehicles.filter(v=>!v.archived)} onUpdated={refresh} onReview={()=>navigate('Plan întreținere')} english={language==='en'}/>}
       <SiteLanguage language={language} />
       <ApplicationHeader title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (workspaceSections.find(s=>s.id===tab)?.[language] ?? tab)} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
       <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'}/>

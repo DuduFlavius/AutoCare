@@ -1,6 +1,7 @@
 import Foundation
 import Capacitor
 import CoreLocation
+import UIKit
 
 private final class NativeTracker: NSObject, CLLocationManagerDelegate {
     static let shared = NativeTracker()
@@ -11,7 +12,7 @@ private final class NativeTracker: NSObject, CLLocationManagerDelegate {
         state = UserDefaults.standard.dictionary(forKey: "autocare-gps-trip-v1") ?? [:]
         super.init()
         // iOS force-quit is a stop; never restart location silently on next launch.
-        if state["active"] as? Bool == true { state["active"] = false; state["endedAt"] = state["updatedAt"]; persist() }
+        if state["active"] as? Bool == true { state["active"] = false; state["endedAt"] = state["updatedAt"]; AutoDriveState.enqueue(state); persist() }
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.activityType = .automotiveNavigation
@@ -34,6 +35,7 @@ private final class NativeTracker: NSObject, CLLocationManagerDelegate {
         }
     }
     func activate() {
+        guard manager.accuracyAuthorization == .fullAccuracy else { failPermission(); return }
         state["active"] = true; state.removeValue(forKey: "endedAt"); persist()
         manager.startUpdatingLocation()
         let resolve = pending; pending = nil; resolve?(nil)
@@ -50,11 +52,12 @@ private final class NativeTracker: NSObject, CLLocationManagerDelegate {
     }
     func stop() {
         manager.stopUpdatingLocation()
-        if !state.isEmpty { if state["active"] as? Bool == true { state["endedAt"] = Date().timeIntervalSince1970 * 1000 }; state["active"] = false; persist() }
+        if !state.isEmpty { if state["active"] as? Bool == true { state["endedAt"] = Date().timeIntervalSince1970 * 1000 }; state["active"] = false; AutoDriveState.enqueue(state); persist() }
     }
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { if (error as? CLError)?.code == .denied { stop() } }
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard state["active"] as? Bool == true else { return }
+        if let at = state["stopAt"] as? Double, Date().timeIntervalSince1970*1000 >= at { stop(); return }
         for location in locations {
             let now = Date().timeIntervalSince1970 * 1000, timestamp = location.timestamp.timeIntervalSince1970 * 1000
             guard location.horizontalAccuracy >= 0, location.horizontalAccuracy <= 50, timestamp <= now+5000, now-timestamp <= 15000 else { continue }
@@ -80,7 +83,7 @@ private final class NativeTracker: NSObject, CLLocationManagerDelegate {
 public class AutoCareTrackingPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "AutoCareTrackingPlugin"
     public let jsName = "AutoCareTracking"
-    public let pluginMethods: [CAPPluginMethod] = ["snapshot", "start", "stop", "clear"].map { CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise) }
+    public let pluginMethods: [CAPPluginMethod] = ["snapshot", "start", "stop", "clear", "automationStatus", "configureAutomation", "disableAutomation", "openLocationSettings", "pendingTrips", "acknowledgeTrips", "updateAutomationVehicle"].map { CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise) }
     private func owned(_ call: CAPPluginCall) -> Bool { NativeTracker.shared.state["ownerId"] as? String == call.getString("ownerId") }
     @objc func snapshot(_ call: CAPPluginCall) { DispatchQueue.main.async { call.resolve(NativeTracker.shared.forOwner(call.getString("ownerId") ?? "")) } }
     @objc func start(_ call: CAPPluginCall) {
@@ -91,6 +94,7 @@ public class AutoCareTrackingPlugin: CAPPlugin, CAPBridgedPlugin {
                 guard tracker.state["active"] as? Bool != true else { call.reject("O altă urmărire este deja activă pe acest dispozitiv."); return }
                 tracker.state = tracker.forOwner(owner)
             }
+            if tracker.state["automatic"] as? Bool == true && tracker.state["active"] as? Bool != true { call.reject("Traseul automat așteaptă sincronizarea. Deschide AutoDrive."); return }
             if !tracker.state.isEmpty {
                 guard self.owned(call), tracker.state["id"] as? String == id else { call.reject("Salvează sau șterge traseul existent înainte de altă urmărire."); return }
             } else {
@@ -101,7 +105,7 @@ public class AutoCareTrackingPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
     @objc func stop(_ call: CAPPluginCall) {
-        DispatchQueue.main.async { guard self.owned(call) || NativeTracker.shared.state.isEmpty else { call.resolve(NativeTracker.shared.forOwner(call.getString("ownerId") ?? "")); return }; NativeTracker.shared.stop(); call.resolve(NativeTracker.shared.state) }
+        DispatchQueue.main.async { guard self.owned(call) || NativeTracker.shared.state.isEmpty else { call.resolve(NativeTracker.shared.forOwner(call.getString("ownerId") ?? "")); return }; if NativeTracker.shared.state["automatic"] as? Bool == true, let vehicle = NativeTracker.shared.state["vehicleId"] as? String { UserDefaults.standard.set(true, forKey: "autocare-auto-suppressed-"+vehicle) }; NativeTracker.shared.stop(); call.resolve(NativeTracker.shared.state) }
     }
     @objc func clear(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
@@ -112,4 +116,59 @@ public class AutoCareTrackingPlugin: CAPPlugin, CAPBridgedPlugin {
             call.resolve()
         }
     }
+
+    @MainActor public static func automationVehicles() -> [[String: String]] {
+        AutoDriveState.bindings.compactMap { id,value in guard value["enabled"] as? Bool == true, value["ownerId"] as? String == AutoDriveState.owner else { return nil }; return ["id": id, "name": value["vehicleName"] as? String ?? "AutoCare"] }
+    }
+    @MainActor public static func startAutomatic(vehicleId: String) throws {
+        let tracker = NativeTracker.shared
+        if UserDefaults.standard.bool(forKey: "autocare-auto-suppressed-"+vehicleId) { return }
+        guard let config = AutoDriveState.bindings[vehicleId], config["enabled"] as? Bool == true, let owner = config["ownerId"] as? String, owner == AutoDriveState.owner, !owner.isEmpty else { throw AutoDriveState.error("Configurează mașina în AutoCare înainte de automatizare.") }
+        guard tracker.manager.authorizationStatus == .authorizedAlways, tracker.manager.accuracyAuthorization == .fullAccuracy else { throw AutoDriveState.error("Permite localizarea Întotdeauna și locația precisă din setări.") }
+        guard AutoDriveState.pending(owner).count < 200 else { throw AutoDriveState.error("Deschide AutoCare pentru sincronizarea traseelor.") }
+        if tracker.state["active"] as? Bool == true {
+            guard tracker.state["automatic"] as? Bool == true, tracker.state["vehicleId"] as? String == vehicleId else { throw AutoDriveState.error("Există deja un traseu activ.") }
+            tracker.state.removeValue(forKey: "stopAt"); tracker.persist(); return
+        }
+        if !tracker.state.isEmpty && tracker.state["automatic"] as? Bool != true { throw AutoDriveState.error("Salvează traseul manual înainte de pornirea automată.") }
+        let now = Date().timeIntervalSince1970*1000
+        tracker.state = ["id": UUID().uuidString.lowercased(), "ownerId": owner, "vehicleId": vehicleId, "baseline": config["baseline"] as? Int ?? 0, "startedAt": now, "updatedAt": now, "distance": 0.0, "active": true, "automatic": true, "points": [[String: Any]]()]
+        tracker.activate()
+    }
+    @MainActor public static func stopAutomatic(vehicleId: String) {
+        UserDefaults.standard.removeObject(forKey: "autocare-auto-suppressed-"+vehicleId)
+        let tracker = NativeTracker.shared
+        guard tracker.state["automatic"] as? Bool == true, tracker.state["vehicleId"] as? String == vehicleId, tracker.state["ownerId"] as? String == AutoDriveState.owner, tracker.state["active"] as? Bool == true else { return }
+        let deadline = Date().timeIntervalSince1970*1000+AutoDriveState.stopDelay
+        tracker.state["stopAt"] = deadline; tracker.persist()
+        DispatchQueue.main.asyncAfter(deadline: .now()+120) { if let at = tracker.state["stopAt"] as? Double, at == deadline, Date().timeIntervalSince1970*1000 >= at { tracker.stop() } }
+    }
+    @objc func automationStatus(_ call: CAPPluginCall) { DispatchQueue.main.async {
+        let owner = call.getString("ownerId") ?? "", values = AutoDriveState.bindings.values.filter { $0["ownerId"] as? String == owner }
+        call.resolve(["apiVersion": 2, "platform": "ios", "supported": ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 16, "bindings": Array(values), "pendingCount": AutoDriveState.pending(owner).count, "backgroundLocation": NativeTracker.shared.manager.authorizationStatus == .authorizedAlways, "error": ""])
+    } }
+    @objc func configureAutomation(_ call: CAPPluginCall) { DispatchQueue.main.async {
+        let manager = NativeTracker.shared.manager
+        guard manager.authorizationStatus == .authorizedAlways, manager.accuracyAuthorization == .fullAccuracy else {
+            if manager.authorizationStatus == .notDetermined || manager.authorizationStatus == .authorizedWhenInUse { manager.requestAlwaysAuthorization() }
+            call.reject("Permite localizarea Întotdeauna și locația precisă, apoi reîncearcă.", "BACKGROUND_PERMISSION_REQUIRED"); return
+        }
+        guard let owner = call.getString("ownerId"), !owner.isEmpty, let vehicle = call.getString("vehicleId"), let baseline = call.getInt("baseline"), baseline >= 0 else { call.reject("Invalid vehicle"); return }
+        AutoDriveState.configure(owner: owner, vehicle: vehicle, name: call.getString("vehicleName") ?? "AutoCare", baseline: baseline); self.automationStatus(call)
+    } }
+    @objc func disableAutomation(_ call: CAPPluginCall) { DispatchQueue.main.async { AutoDriveState.disable(owner: call.getString("ownerId") ?? "", vehicle: call.getString("vehicleId")); call.resolve() } }
+    @objc func openLocationSettings(_ call: CAPPluginCall) { DispatchQueue.main.async { if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }; call.resolve() } }
+    @objc func pendingTrips(_ call: CAPPluginCall) { DispatchQueue.main.async { call.resolve(["trips": AutoDriveState.pending(call.getString("ownerId") ?? "")]) } }
+    @objc func acknowledgeTrips(_ call: CAPPluginCall) { DispatchQueue.main.async {
+        let owner = call.getString("ownerId") ?? "", ids = call.getArray("ids", String.self) ?? [], tracker = NativeTracker.shared
+        AutoDriveState.acknowledge(owner, ids)
+        if tracker.state["ownerId"] as? String == owner, tracker.state["active"] as? Bool != true, ids.contains(tracker.state["id"] as? String ?? "") { tracker.state = [:]; tracker.persist(); UserDefaults.standard.removeObject(forKey: "autocare-gps-owner-v1-"+owner) }
+        call.resolve()
+    } }
+    @objc func updateAutomationVehicle(_ call: CAPPluginCall) { DispatchQueue.main.async {
+        let owner = call.getString("ownerId") ?? "", vehicle = call.getString("vehicleId") ?? "", tracker = NativeTracker.shared
+        if tracker.state["active"] as? Bool == true && tracker.state["vehicleId"] as? String == vehicle { call.resolve(); return }
+        if AutoDriveState.pending(owner).contains(where: { $0["vehicleId"] as? String == vehicle }) { call.resolve(); return }
+        var all = AutoDriveState.bindings; if var config = all[vehicle], config["ownerId"] as? String == owner { config["baseline"] = call.getInt("baseline") ?? 0; all[vehicle] = config; AutoDriveState.bindings = all }; call.resolve()
+    } }
 }

@@ -48,6 +48,8 @@ final class TrackingStore {
         write(context,state);
     }
     static synchronized JSONObject stop(Context context) throws JSONException {
-        JSONObject value=read(context);if(value.has("id"))value.put("active",false).put("endedAt",System.currentTimeMillis()).put("updatedAt",System.currentTimeMillis());write(context,value);return value;
+        JSONObject value=read(context);
+        if(value.has("id")){if(value.optBoolean("active"))value.put("endedAt",System.currentTimeMillis());value.put("active",false).put("updatedAt",System.currentTimeMillis());AutoDrive.enqueue(context,value);}
+        write(context,value);return value;
     }
 }
