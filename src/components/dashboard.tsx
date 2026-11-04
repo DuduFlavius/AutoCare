@@ -14,6 +14,7 @@ import CommunicationPreferences from './communication-preferences';
 import Membership from './membership';
 import SubscriptionPage from './subscription-page';
 import MobileInstall from './mobile-install';
+import {AppUpdateSettings} from './auto-update';
 import PushSettings from './push-settings';
 import {hasNativeTracking,nativeAutomation} from '@/lib/native-tracking';
 import NativeTripSync from './native-trip-sync';
@@ -1716,7 +1717,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
               <div className="ws-settings-layout">
               <nav className="ws-settings-nav" aria-label={language==='en'?'Settings categories':'Categorii setări'} data-workspace-ui>{([['account','Profil și securitate','Profile & security'],['alerts','Notificări și email','Notifications & email'],['device','Aplicație și afișare','App & display'],['help','Ajutor','Help']] as const).map(([id,ro,en])=><button type="button" key={id} aria-current={settingsPanel===id?'page':undefined} onClick={()=>setSettingsPanel(id)}>{language==='en'?en:ro}<ArrowUpRight size={15}/></button>)}</nav>
               <div className="grid2 settings-workspace">
-                <section hidden={settingsPanel!=='device'} className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /><WorkspacePreferences language={language} currency={currency} onLanguage={changeLanguage} onCurrency={changeCurrency}/></section>
+                <section hidden={settingsPanel!=='device'} className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /><AppUpdateSettings /><WorkspacePreferences language={language} currency={currency} onLanguage={changeLanguage} onCurrency={changeCurrency}/></section>
                 <section hidden={settingsPanel!=='alerts'} className="card">
                   <div className="settings-section-title">
                     <span className="list-icon">
