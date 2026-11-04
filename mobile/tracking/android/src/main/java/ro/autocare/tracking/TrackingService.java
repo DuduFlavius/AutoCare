@@ -14,10 +14,10 @@ public class TrackingService extends Service implements LocationListener {
         running=true;
         try {
             NotificationManager notifications=getSystemService(NotificationManager.class);
-            notifications.createNotificationChannel(new NotificationChannel("autocare-gps","AutoCare GPS",NotificationManager.IMPORTANCE_LOW));
+            if(Build.VERSION.SDK_INT>=26)notifications.createNotificationChannel(new NotificationChannel("autocare-gps","AutoCare GPS",NotificationManager.IMPORTANCE_LOW));
             PendingIntent stop=PendingIntent.getService(this,1,new Intent(this,TrackingService.class).setAction(STOP),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
             Intent launch=getPackageManager().getLaunchIntentForPackage(getPackageName());
-            Notification.Builder notification=new Notification.Builder(this,"autocare-gps").setSmallIcon(android.R.drawable.ic_menu_mylocation).setContentTitle("AutoCare · GPS activ").setContentText("Înregistrare traseu · apasă Oprește GPS la final").setOngoing(true).addAction(new Notification.Action.Builder(android.R.drawable.ic_media_pause,"Oprește GPS",stop).build());
+            Notification.Builder notification=(Build.VERSION.SDK_INT>=26?new Notification.Builder(this,"autocare-gps"):new Notification.Builder(this)).setSmallIcon(android.R.drawable.ic_menu_mylocation).setContentTitle("AutoCare · GPS activ").setContentText("Înregistrare traseu · apasă Oprește GPS la final").setOngoing(true).addAction(new Notification.Action.Builder(android.R.drawable.ic_media_pause,"Oprește GPS",stop).build());
             if(launch!=null)notification.setContentIntent(PendingIntent.getActivity(this,0,launch,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
             startForeground(317,notification.build());
             manager=(LocationManager)getSystemService(LOCATION_SERVICE);

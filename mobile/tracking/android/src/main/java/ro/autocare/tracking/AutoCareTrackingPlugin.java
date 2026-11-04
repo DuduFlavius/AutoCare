@@ -37,7 +37,7 @@ public class AutoCareTrackingPlugin extends Plugin {
                 TrackingStore.write(getContext(),new JSONObject().put("id",id).put("ownerId",owner).put("vehicleId",vehicle).put("baseline",baseline).put("startedAt",System.currentTimeMillis()).put("updatedAt",System.currentTimeMillis()).put("distance",0).put("active",true).put("points",new JSONArray()));
             }
             TrackingService.running=true;
-            getContext().startForegroundService(new Intent(getContext(),TrackingService.class));snapshot(call);
+            if(android.os.Build.VERSION.SDK_INT>=26)getContext().startForegroundService(new Intent(getContext(),TrackingService.class));else getContext().startService(new Intent(getContext(),TrackingService.class));snapshot(call);
         }catch(Exception e){TrackingService.running=false;try{TrackingStore.stop(getContext());}catch(Exception ignored){}call.reject("Nu s-a putut porni urmărirea GPS.",e);}
     }
     @PluginMethod public void stop(PluginCall call){JSONObject state=TrackingStore.read(getContext());if(state.has("id")&&!owned(call,state)){snapshot(call);return;}getContext().stopService(new Intent(getContext(),TrackingService.class));try{TrackingStore.stop(getContext());snapshot(call);}catch(Exception e){call.reject("Unable to stop GPS",e);}}
