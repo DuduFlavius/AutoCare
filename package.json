@@ -17,6 +17,7 @@
     "db:mail-center": "node --import tsx scripts/migrate-mail-center.ts"
   },
   "dependencies": {
+    "@capacitor/core": "8.6.0",
     "@electric-sql/pglite": "latest",
     "better-auth": "1.7.11",
     "drizzle-orm": "0.45.4",

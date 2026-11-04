@@ -15,6 +15,7 @@ import Membership from './membership';
 import SubscriptionPage from './subscription-page';
 import MobileInstall from './mobile-install';
 import PushSettings from './push-settings';
+import {hasNativeTracking,nativeTracking} from '@/lib/native-tracking';
 import SmartDriveTrip from './smartdrive-trip';
 import MaintenanceForecast from './maintenance-forecast';
 import {maintenanceTargets} from '@/lib/maintenance-schedule';
@@ -714,7 +715,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     if (previewData || signingOut) return;
     if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
     setSigningOut(true); setError('');
-    try { const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
+    try { if(hasNativeTracking()&&data?.profile.userId)await nativeTracking.stop(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (

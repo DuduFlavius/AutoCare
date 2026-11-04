@@ -3,10 +3,14 @@ import {useApplicationLocale} from './application-locale';
 import { useEffect, useRef, useState } from 'react';
 import { MapPin, Play, Square, Route } from 'lucide-react';
 
+import {hasNativeTracking,nativeTracking,type NativeTrip} from '@/lib/native-tracking';
 import { acceptGPSFix, segmentMeters, type GPSFix as Sample } from '@/lib/gps-tracking';
 export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId }: { preview: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; odometer:number }[]; onSaved:()=>Promise<unknown> }) {
 
   const locale=useApplicationLocale();
+  const [native,setNative]=useState(false);
+  const nativeMode=useRef(false);
+  const nativeStarting=useRef(false);
 const [active, setActive] = useState(false);
   const [vehicleId, setVehicleId] = useState('');
   const [saving, setSaving] = useState(false);
@@ -33,6 +37,20 @@ const [active, setActive] = useState(false);
   const started = useRef<number | null>(null);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
   const distanceRef = useRef(0);
+  function applyNative(value:NativeTrip){
+    tripId.current=value.id;baseline.current=value.baseline;started.current=value.startedAt;endedAt.current=value.endedAt??null;
+    distanceRef.current=value.distance;setDistance(value.distance);setVehicleId(value.vehicleId);setStartedAt(value.startedAt);setActive(value.active);setRoutePoints(value.points);
+    setClock(new Date().toLocaleTimeString(locale));setTrackingSeconds(Math.max(0,Math.floor(((value.endedAt??Date.now())-value.startedAt)/1000)));
+    const last=value.points.at(-1);if(last){setMapCenter(last);setAccuracy(Math.round(last.accuracy));lastFix.current=value.lastFixAt||last.timestamp;setSignal(value.active&&Date.now()-lastFix.current>25000?'lost':'ok');}
+  }
+  useEffect(()=>{
+    if(preview||!hasNativeTracking())return;
+    nativeMode.current=true;setNative(true);let disposed=false,busy=false;
+    const refresh=async()=>{if(busy||disposed||document.visibilityState!=='visible')return;busy=true;try{const value=await nativeTracking.snapshot(ownerId);if(!disposed&&value&&vehicles.some(v=>v.id===value.vehicleId))applyNative(value);}catch{if(!disposed)setError('Nu se poate citi starea GPS. Redeschide aplicația.');}finally{busy=false;}};
+    void refresh();const timer=setInterval(()=>void refresh(),2000);document.addEventListener('visibilitychange',refresh);
+    // Navigating away must detach UI polling, never stop the native location service.
+    return()=>{disposed=true;clearInterval(timer);document.removeEventListener('visibilitychange',refresh);};
+  },[ownerId,preview]);
   useEffect(() => { if (!active) return; const check = setInterval(() => { if (lastFix.current && Date.now() - lastFix.current > 25000) setSignal('lost'); }, 4000); return () => clearInterval(check); }, [active]);
   useEffect(()=>{
     if(!active || !('wakeLock' in navigator)) return;
@@ -43,7 +61,7 @@ const [active, setActive] = useState(false);
   },[active]);
   const draftKey='autocare-gps-draft-v1:'+ownerId;
   useEffect(()=>{
-    if(preview)return;
+    if(preview||hasNativeTracking())return;
     try{
       const draft=JSON.parse(localStorage.getItem(draftKey)||'null');
       if(!draft || Date.now()-draft.updatedAt>86400000 || !vehicles.some(v=>v.id===draft.vehicleId) || !Number.isFinite(draft.distance) || draft.distance<=0 || !Number.isFinite(draft.startedAt) || !Number.isFinite(draft.baseline) || !Array.isArray(draft.points) || typeof draft.id!=='string')return;
@@ -57,10 +75,12 @@ const [active, setActive] = useState(false);
   // Restore once for this signed-in account, never when the odometer refreshes.
   },[draftKey,preview]);
   useEffect(()=>{
-    if(preview || !started.current || distance<=0)return;
+    if(preview || nativeMode.current || !started.current || distance<=0)return;
     try{if(saved){localStorage.removeItem(draftKey);return;}localStorage.setItem(draftKey,JSON.stringify({id:tripId.current,vehicleId:vehicleId||vehicles[0]?.id,baseline:baseline.current,startedAt:started.current,updatedAt:endedAt.current??Date.now(),distance,points:routePoints}));}catch{/* Preserve the live trip if storage is full. */}
   },[distance,routePoints,saved,draftKey,preview,vehicleId,vehicles]);
   const stop = () => {
+    if(nativeMode.current){void nativeTracking.stop(ownerId).then(value=>{if(value)applyNative(value);}).catch(e=>setError(e instanceof Error?e.message:'Nu s-a putut opri GPS-ul.'));return;}
+
     if (watcher.current !== null && typeof navigator !== 'undefined' && 'geolocation' in navigator) navigator.geolocation.clearWatch(watcher.current);
     watcher.current = null;
     if (tick.current) clearInterval(tick.current);
@@ -71,6 +91,17 @@ const [active, setActive] = useState(false);
   };
   useEffect(() => () => { if (watcher.current !== null) navigator.geolocation.clearWatch(watcher.current); if (tick.current) clearInterval(tick.current); }, []);
   const start = () => {
+    if(hasNativeTracking()&&!preview){
+      if(nativeStarting.current)return;
+      const car=vehicles.find(v=>v.id===vehicleId)||vehicles[0];if(!car){setError('Selectează o mașină înainte de pornire.');return;}
+      nativeStarting.current=true;setError('');
+      void (async()=>{try{
+        if(saved)await nativeTracking.clear(ownerId);
+        const value=await nativeTracking.start({id:tripId.current&&!saved?tripId.current:crypto.randomUUID(),ownerId,vehicleId:car.id,baseline:car.odometer});
+        setSaved(false);setNotice('');applyNative(value);
+      }catch(e){setError(e instanceof Error?e.message:'Nu s-a putut porni urmărirea GPS.');}finally{nativeStarting.current=false;}})();return;
+    }
+
     const resume=distanceRef.current>0 && !saved;
     if (preview) { setError('GPS-ul nu este activ în modul demonstrativ.'); return; }
     if (!window.isSecureContext || !('geolocation' in navigator)) { setError('GPS-ul necesită HTTPS și un browser cu localizare.'); return; }
@@ -111,6 +142,7 @@ const [active, setActive] = useState(false);
       const res = await fetch('/api/v1/smartdrive/vehicles/' + id + '/trips', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id:tripId.current, syncMileage, expectedOdometer:baseline.current, distanceMeters: Math.round(distanceRef.current), durationSeconds: Math.max(1, Math.round((ended - started.current) / 1000)), startedAt: new Date(started.current).toISOString(), endedAt: new Date(ended).toISOString() }) });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || 'Salvarea călătoriei a eșuat.');
+      if(nativeMode.current){try{await nativeTracking.clear(ownerId);}catch{throw Error('Călătoria a fost salvată, dar arhiva locală nu a putut fi curățată. Reîncearcă salvarea.');}}
       setSaved(true); setNotice(syncMileage ? 'Călătorie salvată. Distanța GPS a fost adăugată kilometrajului și planului de întreținere. Verifică periodic valoarea cu bordul mașinii.' : 'Călătoria GPS a fost salvată separat.'); setError('');
       window.dispatchEvent(new Event('autocare-trips-updated'));
       try{await onSaved();}catch{setNotice('Călătoria a fost salvată. Reîncarcă pagina pentru kilometrajul actualizat.');}
@@ -131,7 +163,7 @@ const [active, setActive] = useState(false);
     <div className="ac-smartdrive-trip-controls">
       {!active ? <button type="button" className="primary" disabled={saving} onClick={start}><Play size={17}/> {distance>0&&!saved ? 'Reia GPS' : 'Pornește GPS'}</button> : <button type="button" className="primary" style={{background:"#b42332",color:"#fff",borderColor:"#b42332"}} onClick={stop}><Square size={17}/> Oprește GPS</button>}
       {!active && distance > 0 && <button type="button" disabled={saving || preview || saved} onClick={() => void saveTrip()}>{saved ? 'Călătorie salvată' : saving ? 'Se salvează…' : syncMileage ? 'Salvează și sincronizează' : 'Salvează călătoria GPS'}</button>}
-      {!active && distance>0 && !saved && <button type="button" disabled={saving} onClick={()=>{if(!window.confirm('Renunți la traseul nesalvat?'))return;distanceRef.current=0;started.current=null;previous.current=null;setDistance(0);setRoutePoints([]);setMapCenter(null);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');try{localStorage.removeItem(draftKey);}catch{/* Storage unavailable. */}}}>Renunță la traseu</button>}
+      {!active && (distance>0 || (native&&startedAt!==null)) && !saved && <button type="button" disabled={saving} onClick={()=>{if(!window.confirm('Renunți la traseul nesalvat?'))return;if(nativeMode.current){void nativeTracking.clear(ownerId).then(()=>{distanceRef.current=0;started.current=null;setDistance(0);setRoutePoints([]);setMapCenter(null);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');}).catch(e=>setError(e instanceof Error?e.message:'GPS indisponibil.'));return;}distanceRef.current=0;started.current=null;previous.current=null;setDistance(0);setRoutePoints([]);setMapCenter(null);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');try{localStorage.removeItem(draftKey);}catch{/* Storage unavailable. */}}}>Renunță la traseu</button>}
       <span><MapPin size={15}/> {active ? 'GPS activ' : 'GPS oprit'}</span>
     </div>
     <div className="ac-smartdrive-map" style={{margin:'18px 0',padding:12,background:'#fff',border:'1px solid #dbe5f3',borderRadius:18}}>
@@ -174,7 +206,7 @@ const [active, setActive] = useState(false);
     {active && signal === 'lost' && <div role="alert" style={{background:'#fff3df',color:'#8a4600',border:'1px solid #ffd18a',borderRadius:12,padding:13,margin:'12px 0',fontWeight:700}}>Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și menține aplicația în prim-plan. Distanța nu crește fără puncte valide.</div>}
     {active && signal === 'waiting' && <p role="status" style={{color:'#815500'}}>Se caută semnal GPS de precizie…</p>}
     <p role="status">{active ? 'Urmărire în desfășurare' : 'Urmărire oprită'}</p>
-    <p>Menține aplicația deschisă pentru înregistrare. Browserul poate opri GPS-ul în fundal sau cu ecranul blocat. Segmentele fără semnal nu sunt adăugate la distanță.</p>
+    <p>{native ? 'Urmărirea nativă continuă în fundal, cu permisiunea telefonului, până alegi Oprește GPS. Oprirea forțată a aplicației sau restricțiile telefonului pot întrerupe înregistrarea.' : 'Menține aplicația deschisă pentru înregistrare. Browserul poate opri GPS-ul în fundal sau cu ecranul blocat. Segmentele fără semnal nu sunt adăugate la distanță.'}</p>
 
     {notice && <p role="status">{notice}</p>}
     {error && <p className="ac-smartdrive-trip-error" role="alert">{error}</p>}
