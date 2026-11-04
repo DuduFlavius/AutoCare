@@ -102,9 +102,9 @@ export function AppUpdateSettings() {
     return () => clearTimeout(timer);
   }, [status]);
   const messages: Record<string,string> = en ? {
-    current:'You have the latest AutoCare version.', available:'An update is ready. Tap “Install update” in the notification.', offline:'Connect to the internet to check for updates.', error:'Could not check for updates. Please try again.', checking:'Checking for updates…',
+    current:'The AutoCare interface is up to date. This check does not update the installed Android APK.', available:'An update is ready. Tap “Install update” in the notification.', offline:'Connect to the internet to check for updates.', error:'Could not check for updates. Please try again.', checking:'Checking for updates…',
   } : {
-    current:'Ai cea mai nouă versiune AutoCare.', available:'Actualizarea este pregătită. Apasă „Instalează actualizarea” în notificare.', offline:'Conectează-te la internet pentru verificare.', error:'Actualizările nu au putut fi verificate. Încearcă din nou.', checking:'Se verifică actualizările…',
+    current:'Interfața AutoCare este actualizată. Această verificare nu actualizează APK-ul Android instalat.', available:'Actualizarea este pregătită. Apasă „Instalează actualizarea” în notificare.', offline:'Conectează-te la internet pentru verificare.', error:'Actualizările nu au putut fi verificate. Încearcă din nou.', checking:'Se verifică actualizările…',
   };
   return <div style={{marginTop:20,paddingTop:18,borderTop:'1px solid #dbe5f3'}}>
     <h4>{en ? 'App updates' : 'Actualizările aplicației'}</h4>

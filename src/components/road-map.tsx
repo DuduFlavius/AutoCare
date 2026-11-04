@@ -9,10 +9,12 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 const RasterRoadMap = dynamic(() => import('./raster-road-map'), { ssr: false });
 export default function RoadMapView({
   points,
+  position,
   active,
   english = false,
 }: {
   points: GPSFix[];
+  position?: GPSFix | null;
   active: boolean;
   english?: boolean;
 }) {
@@ -21,6 +23,8 @@ export default function RoadMapView({
     marker = useRef<Marker | null>(null);
   const latest = useRef(points);
   latest.current = points;
+  const latestPosition = useRef(position);
+  latestPosition.current = position;
   const follow = useRef(true);
   const [failed, setFailed] = useState(false),
     [loading, setLoading] = useState(true),
@@ -42,7 +46,7 @@ export default function RoadMapView({
       .then((lib) => {
         if (disposed || !host.current) return;
         lib.setWorkerUrl('/maps/maplibre-gl-worker.mjs');
-        const p = latest.current.at(-1);
+        const p = latestPosition.current ?? latest.current.at(-1);
         try {
           const view = new lib.Map({
             container: host.current,
@@ -80,7 +84,7 @@ export default function RoadMapView({
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             const element = createRoadPositionMarker(english);
-            const position = latest.current.at(-1);
+            const position = latestPosition.current ?? latest.current.at(-1);
             if (position)
               marker.current = new lib.Marker({ element })
                 .setLngLat([position.longitude, position.latitude])
@@ -137,7 +141,7 @@ export default function RoadMapView({
   }, [english]);
   useEffect(() => {
     const view = map.current,
-      p = points.at(-1);
+      p = position ?? points.at(-1);
     if (!view) return;
     const source = view.getSource('trip') as GeoJSONSource | undefined;
     source?.setData(routeGeometry(points));
@@ -149,7 +153,7 @@ export default function RoadMapView({
     if (marker.current) marker.current.setLngLat([p.longitude, p.latitude]);
     else if (view.isStyleLoaded()) {
       void import('maplibre-gl').then((lib) => {
-        if (map.current !== view || latest.current.at(-1) !== p) return;
+        if (map.current !== view || (latestPosition.current ?? latest.current.at(-1)) !== p) return;
         if (marker.current) {
           marker.current.setLngLat([p.longitude, p.latitude]);
           return;
@@ -166,8 +170,9 @@ export default function RoadMapView({
         zoom: Math.max(15, view.getZoom()),
         duration: 750,
       });
-  }, [points, english]);
-  if (failed) return <RasterRoadMap points={points} active={active} english={english} />;
+  }, [points, position, english]);
+  if (failed)
+    return <RasterRoadMap points={points} position={position} active={active} english={english} />;
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -187,12 +192,12 @@ export default function RoadMapView({
       <button
         type="button"
         className="ac-road-map-center"
-        disabled={!points.length}
+        disabled={!position && !points.length}
         aria-pressed={following}
         onClick={() => {
           follow.current = true;
           setFollowing(true);
-          const p = points.at(-1);
+          const p = position ?? points.at(-1);
           if (p)
             map.current?.easeTo({ center: [p.longitude, p.latitude], zoom: 16, duration: 700 });
         }}

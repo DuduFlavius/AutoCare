@@ -8,10 +8,12 @@ import 'leaflet/dist/leaflet.css';
 /** Flat street tiles are the compatibility path for devices without WebGL. */
 export default function RasterRoadMap({
   points,
+  position,
   active,
   english,
 }: {
   points: GPSFix[];
+  position?: GPSFix | null;
   active: boolean;
   english: boolean;
 }) {
@@ -21,6 +23,8 @@ export default function RasterRoadMap({
     line = useRef<Polyline | null>(null),
     latest = useRef(points);
   latest.current = points;
+  const latestPosition = useRef(position);
+  latestPosition.current = position;
   const follow = useRef(true),
     [following, setFollowing] = useState(true),
     [tileError, setTileError] = useState(false);
@@ -30,7 +34,7 @@ export default function RasterRoadMap({
     void import('leaflet')
       .then((L) => {
         if (disposed || !host.current) return;
-        const last = latest.current.at(-1),
+        const last = latestPosition.current ?? latest.current.at(-1),
           view = L.map(host.current, {
             zoomControl: false,
             attributionControl: true,
@@ -85,7 +89,7 @@ export default function RasterRoadMap({
   }, [english]);
   useEffect(() => {
     const view = map.current,
-      last = points.at(-1);
+      last = position ?? points.at(-1);
     if (!view) return;
     line.current?.setLatLngs(
       routeGeometry(points).features.map((f) =>
@@ -100,7 +104,8 @@ export default function RasterRoadMap({
     if (marker.current) marker.current.setLatLng([last.latitude, last.longitude]);
     else
       void import('leaflet').then((L) => {
-        if (map.current !== view || latest.current.at(-1) !== last) return;
+        if (map.current !== view || (latestPosition.current ?? latest.current.at(-1)) !== last)
+          return;
         if (marker.current) {
           marker.current.setLatLng([last.latitude, last.longitude]);
           return;
@@ -119,7 +124,7 @@ export default function RasterRoadMap({
         animate: true,
         duration: 0.7,
       });
-  }, [points, english]);
+  }, [points, position, english]);
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -139,12 +144,12 @@ export default function RasterRoadMap({
       <button
         type="button"
         className="ac-road-map-center"
-        disabled={!points.length}
+        disabled={!position && !points.length}
         aria-pressed={following}
         onClick={() => {
           follow.current = true;
           setFollowing(true);
-          const p = points.at(-1);
+          const p = position ?? points.at(-1);
           if (p) map.current?.setView([p.latitude, p.longitude], 16, { animate: true });
         }}
       >

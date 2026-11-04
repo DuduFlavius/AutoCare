@@ -27,6 +27,35 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId }: 
       setLocationMessage(error.code===1 ? (locale.startsWith('en') ? 'Allow location access in your phone or browser settings.' : 'Permite accesul la locație din setările telefonului sau browserului.') : (locale.startsWith('en') ? 'Position unavailable. Check GPS and try again outdoors.' : 'Poziția nu este disponibilă. Verifică GPS-ul și încearcă din nou în aer liber.'));
     }, {enableHighAccuracy:true,maximumAge:0,timeout:20000});
   };
+  useEffect(() => {
+    if (preview || !navigator.geolocation) return;
+    const watch = navigator.geolocation.watchPosition(
+      ({ coords, timestamp }) => {
+        if (![coords.latitude, coords.longitude, coords.accuracy, timestamp].every(Number.isFinite))
+          return;
+        setMapPosition({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracy: coords.accuracy,
+          timestamp,
+        });
+        setLocationMessage('');
+      },
+      (error) => {
+        setLocationMessage(
+          error.code === 1
+            ? locale.startsWith('en')
+              ? 'Allow precise location in your phone settings to show your position.'
+              : 'Permite locația precisă în setările telefonului pentru afișarea poziției tale.'
+            : locale.startsWith('en')
+              ? 'Waiting for your GPS position…'
+              : 'Se așteaptă poziția ta GPS…',
+        );
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 },
+    );
+    return () => navigator.geolocation.clearWatch(watch);
+  }, [preview, locale]);
   const [automatic,setAutomatic]=useState(false);
   const [native,setNative]=useState(false);
   const nativeMode=useRef(false);
@@ -194,12 +223,15 @@ const [active, setActive] = useState(false);
       <strong style={{display:'block',marginBottom:8,color:'#172b48'}}>Hartă rutieră · GPS în timp real</strong>
       {!active && routePoints.length===0 && <button type="button" disabled={locating||preview} onClick={locate} style={{marginBottom:12}}><MapPin size={17}/> {locating ? (locale.startsWith('en')?'Locating…':'Se caută poziția…') : (locale.startsWith('en')?'Show my location':'Arată poziția mea')}</button>}
       {locationMessage && !active && <p role="status" style={{fontSize:13,marginBottom:12}}>{locationMessage}</p>}
-      <RoadMapView points={routePoints.length ? routePoints : mapPosition ? [mapPosition] : []} active={active} english={locale.startsWith('en')}/>
+      <RoadMapView points={routePoints} position={mapPosition && (!routePoints.at(-1) || mapPosition.timestamp >= routePoints.at(-1)!.timestamp) ? mapPosition : routePoints.at(-1)} active={active} english={locale.startsWith('en')}/>
       <p style={{fontSize:12,color:'#536681',margin:'9px 0 0'}}>Traseul parcurs este afișat în albastru. Coordonatele rămân pe acest dispozitiv pentru recuperarea traseului și nu sunt trimise la server.</p>
     </div>
-    {active && signal === 'lost' && <div role="alert" style={{background:'#fff3df',color:'#8a4600',border:'1px solid #ffd18a',borderRadius:12,padding:13,margin:'12px 0',fontWeight:700}}>Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și menține aplicația în prim-plan. Distanța nu crește fără puncte valide.</div>}
+    {active && signal === 'lost' && <div role="alert" style={{background:'#fff3df',color:'#8a4600',border:'1px solid #ffd18a',borderRadius:12,padding:13,margin:'12px 0',fontWeight:700}}>Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și permisiunile telefonului. Distanța nu crește fără puncte valide.</div>}
     {active && signal === 'waiting' && <p role="status" style={{color:'#815500'}}>Se caută semnal GPS de precizie…</p>}
     <p role="status">{active ? 'Urmărire în desfășurare' : 'Urmărire oprită'}</p>
+    <p role="status"><strong>{native ? 'GPS Android/iOS nativ · disponibil în fundal' : 'GPS în browser · fără urmărire în fundal'}</strong></p>
+    {native && <button type="button" onClick={() => void import('@/lib/native-tracking').then(({nativeAutomation}) => nativeAutomation.openSettings()).catch(() => setError('Deschide Setările telefonului → Aplicații → AutoCare.'))}>Deschide permisiunile telefonului</button>}
+    {native && <p className="small muted">După Pornește GPS trebuie să apară notificarea permanentă „AutoCare · GPS activ”. Pe Android, verifică în Setări → Aplicații → AutoCare: locație precisă, notificări permise și Baterie → Fără restricții. Pentru pornirea automată prin Bluetooth, permite locația „Tot timpul”.</p>}
     <p>{native ? 'Urmărirea nativă continuă în fundal, cu permisiunea telefonului, până alegi Oprește GPS. Oprirea forțată a aplicației sau restricțiile telefonului pot întrerupe înregistrarea.' : 'Menține aplicația deschisă pentru înregistrare. Browserul poate opri GPS-ul în fundal sau cu ecranul blocat. Segmentele fără semnal nu sunt adăugate la distanță.'}</p>
 
     {waitingCar&&active&&<p role="status">{locale.startsWith('en')?'Car disconnected. Waiting up to two minutes to reconnect; walking distance will not be added if the trip ends here.':'Mașina s-a deconectat. Aștept reconectarea până la două minute; mersul pe jos nu se adaugă dacă traseul se încheie aici.'}</p>}
