@@ -127,6 +127,7 @@ const [active, setActive] = useState(false);
       <div><span>Început urmărire</span><strong>{startedAt === null ? '—' : new Date(startedAt).toLocaleTimeString(locale)}</strong></div>
     </div>
     {vehicles.length > 0 && <label>Mașina pentru călătorie <select value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active || (distance>0 && !saved)} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}
+    <label className="ac-smartdrive-sync" style={{display:'flex',gap:12,alignItems:'center',padding:16,border:'1px solid #dbe5f3',borderRadius:14,marginBottom:16}}><input type="checkbox" checked={syncMileage} disabled={saving||saved} onChange={e=>setSyncMileage(e.target.checked)}/> Adaugă distanța GPS la kilometraj la salvare. Actualizează automat uleiul, distribuția și celelalte intervale, păstrând kilometrajul intervențiilor.</label>
     <div className="ac-smartdrive-trip-controls">
       {!active ? <button type="button" className="primary" disabled={saving} onClick={start}><Play size={17}/> {distance>0&&!saved ? 'Reia GPS' : 'Pornește GPS'}</button> : <button type="button" className="primary" style={{background:"#b42332",color:"#fff",borderColor:"#b42332"}} onClick={stop}><Square size={17}/> Oprește GPS</button>}
       {!active && distance > 0 && <button type="button" disabled={saving || preview || saved} onClick={() => void saveTrip()}>{saved ? 'Călătorie salvată' : saving ? 'Se salvează…' : syncMileage ? 'Salvează și sincronizează' : 'Salvează călătoria GPS'}</button>}
@@ -174,7 +175,7 @@ const [active, setActive] = useState(false);
     {active && signal === 'waiting' && <p role="status" style={{color:'#815500'}}>Se caută semnal GPS de precizie…</p>}
     <p role="status">{active ? 'Urmărire în desfășurare' : 'Urmărire oprită'}</p>
     <p>Menține aplicația deschisă pentru înregistrare. Browserul poate opri GPS-ul în fundal sau cu ecranul blocat. Segmentele fără semnal nu sunt adăugate la distanță.</p>
-    <label className="ac-smartdrive-sync" style={{display:'flex',gap:12,alignItems:'center',padding:16,border:'1px solid #dbe5f3',borderRadius:14,marginBottom:16}}><input type="checkbox" checked={syncMileage} disabled={saving||saved} onChange={e=>setSyncMileage(e.target.checked)}/> Adaugă distanța GPS la kilometraj la salvare. Actualizează automat uleiul, distribuția și celelalte intervale, păstrând kilometrajul intervențiilor.</label>
+
     {notice && <p role="status">{notice}</p>}
     {error && <p className="ac-smartdrive-trip-error" role="alert">{error}</p>}
   </section>;

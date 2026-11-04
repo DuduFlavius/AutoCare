@@ -209,13 +209,13 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   return (
     <section className="mileage-planner">
       <div className="mileage-planner-heading">
-        <div><span className="eyebrow">AUTOCARE · PLANIFICARE</span><h2>{mileageOnly ? 'Kilometrajul mașinilor' : 'Următoarea întreținere'}</h2>
-          <p>Calcule bazate pe kilometrajul introdus și termenele salvate în istoricul mașinii. Nu sunt estimări GPS.</p></div>
+        <div><span className="eyebrow">AUTOCARE · PLANIFICARE</span><h2>{mileageOnly ? 'Kilometrajul mașinilor' : 'SmartDrive GPS'}</h2>
+          <p>{mileageOnly ? 'Calcule bazate pe kilometrajul introdus și termenele salvate în istoricul mașinii.' : 'Înregistrează traseul și sincronizează distanța cu întreținerea la salvare.'}</p></div>
         <span className="mileage-planner-icon"><Gauge size={27}/></span>
       </div>
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
-      {!mileageOnly && <SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} onUpdateMileage={id=>{const car=cars.find(v=>v.id===id);if(!car)return;setEditing(id);setKm(String(car.odometer));setConfirmedJump(null);requestAnimationFrame(()=>{const input=document.getElementById('ac-mileage-'+id);input?.focus({preventScroll:true});input?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});});}} />}
       {!mileageOnly && <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer:v.odometer }))} />}
+      {!mileageOnly && <details className="ac-gps-history-details"><summary>Istoric și preferințe kilometraj</summary><SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} onUpdateMileage={id=>{const car=cars.find(v=>v.id===id);if(!car)return;setEditing(id);setKm(String(car.odometer));setConfirmedJump(null);requestAnimationFrame(()=>{const input=document.getElementById('ac-mileage-'+id);input?.focus({preventScroll:true});input?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});});}} /></details>}
       <div className="mileage-planner-grid" id="ac-mileage-editor">
         {cars.map(v => {
           const planned = services.filter(r=>r.vehicleId===v.id);
@@ -873,6 +873,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                 : tab === 'Abonament'
                                   ? 'Abonamentul tău'
                                   : tab === 'Premium' ? 'Spațiul tău Premium'
+                                  : tab === 'Plan întreținere' ? 'SmartDrive GPS'
                                   : tab === 'Setări'
                                     ? 'Profil și preferințe'
                                     : tab}
