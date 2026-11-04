@@ -949,8 +949,8 @@ test('SmartDrive: manual readings persist, reject regressions, and isolate owner
 test('SmartDrive: GPS trips validate payload and never modify dashboard odometer', async () => {
   const id = car.id;
   const initial = (await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer;
-  const startedAt = '2030-03-10T10:00:00.000Z',
-    endedAt = '2030-03-10T10:10:00.000Z';
+  const startedAt = '2020-03-10T10:00:00.000Z',
+    endedAt = '2020-03-10T10:10:00.000Z';
   const route = 'smartdrive/vehicles/' + id + '/trips';
   const valid = { distanceMeters: 3200, durationSeconds: 600, startedAt, endedAt };
   let r = await call(route, 'POST', valid);
@@ -963,7 +963,7 @@ test('SmartDrive: GPS trips validate payload and never modify dashboard odometer
     { ...valid, distanceMeters: 3000000 },
     { ...valid, distanceMeters: 50000, durationSeconds: 600 },
     { ...valid, durationSeconds: -10 },
-    { ...valid, endedAt: '2030-03-10T09:00:00.000Z' },
+    { ...valid, endedAt: '2020-03-10T09:00:00.000Z' },
     { ...valid, durationSeconds: 200 },
     { ...valid, startedAt: 'not-a-date' },
   ]) {
@@ -979,6 +979,21 @@ test('SmartDrive: GPS trips validate payload and never modify dashboard odometer
   );
   r = await call(route, 'GET', undefined, '');
   assert.equal(r.status, 401);
+});
+test('SmartDrive: explicit sync is atomic, idempotent, carries sub-km distance and preserves interventions', async () => {
+  const id=car.id, route='smartdrive/vehicles/'+id+'/trips';
+  const initial=(await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer;
+  const records=await db().select().from(s.records).where(eq(s.records.vehicleId,id));
+  const valid={id:crypto.randomUUID(),syncMileage:true,expectedOdometer:initial,distanceMeters:1600,durationSeconds:600,startedAt:'2020-03-10T10:00:00.000Z',endedAt:'2020-03-10T10:10:00.000Z'};
+  assert.equal((await call(route,'POST',valid)).status,201);
+  assert.equal((await call(route,'POST',valid)).status,201);
+  assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer,initial+1);
+  const count=(await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId,id))).length;
+  assert.equal((await call(route,'POST',{...valid,id:crypto.randomUUID()})).status,409);
+  assert.equal((await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId,id))).length,count);
+  assert.equal((await call(route,'POST',{...valid,id:crypto.randomUUID(),expectedOdometer:initial+1,distanceMeters:600})).status,201);
+  assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer,initial+2);
+  assert.deepEqual(await db().select().from(s.records).where(eq(s.records.vehicleId,id)),records);
 });
 test('SmartDrive: reminder preferences validate frequency and persist', async () => {
   let r = await call('smartdrive/preferences');

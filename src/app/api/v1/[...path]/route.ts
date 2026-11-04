@@ -291,6 +291,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           .orderBy(desc(s.gpsTrips.startedAt)).limit(100));
         if (method === 'POST') {
           const value = z.object({
+            id: z.string().uuid().optional(),
+            syncMileage: z.boolean().default(false),
+            expectedOdometer: z.number().int().min(0).max(99999999).optional(),
             distanceMeters: z.number().int().min(0).max(2000000),
             durationSeconds: z.number().int().min(1).max(604800),
             startedAt: z.string().datetime(),
@@ -299,7 +302,24 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           const startedAt = new Date(value.startedAt), endedAt = new Date(value.endedAt);
           if (endedAt < startedAt || Math.abs((endedAt.getTime() - startedAt.getTime()) / 1000 - value.durationSeconds) > 60 || value.distanceMeters / value.durationSeconds > 65)
             throw new svc.AppError(400, 'Durata sau distanța călătoriei este invalidă.');
-          return json((await db().insert(s.gpsTrips).values({ id: crypto.randomUUID(), userId: uid, vehicleId, distanceMeters: value.distanceMeters, durationSeconds: value.durationSeconds, startedAt, endedAt }).returning())[0], 201);
+          if(value.syncMileage && !value.id)throw new svc.AppError(400,'Identificatorul călătoriei este necesar pentru sincronizare.');
+          if (endedAt.getTime() > Date.now()+60000) throw new svc.AppError(400, 'Data călătoriei nu poate fi în viitor.');
+          const result=await db().transaction(async tx=>{
+            // Serialize saves on this vehicle, then deduplicate retries before changing mileage.
+            const vehicle=(await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid))).for('update'))[0];
+            if(!vehicle) throw new svc.AppError(404,'Mașina nu există.');
+            if(value.id){const existing=(await tx.select().from(s.gpsTrips).where(eq(s.gpsTrips.id,value.id)))[0];if(existing){if(existing.userId!==uid || existing.vehicleId!==vehicleId)throw new svc.AppError(409,'Identificator de călătorie invalid.');return existing;}}
+            if(value.syncMileage){
+              if(value.expectedOdometer===undefined || value.expectedOdometer!==vehicle.odometer)throw new svc.AppError(409,'Kilometrajul a fost modificat între timp. Debifează sincronizarea pentru a salva separat călătoria și verifică bordul.');
+              const previous=(await tx.select({meters:sql<string>`coalesce(sum(${s.gpsTrips.distanceMeters}),0)`}).from(s.gpsTrips).where(and(eq(s.gpsTrips.vehicleId,vehicleId),eq(s.gpsTrips.userId,uid),eq(s.gpsTrips.source,'browser-gps-synced'))))[0];
+              const carry=Number(previous.meters)%1000;
+              const odometer=vehicle.odometer+Math.floor((carry+value.distanceMeters)/1000);
+              if(odometer>99999999)throw new svc.AppError(400,'Kilometraj invalid.');
+              await tx.update(s.vehicles).set({odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
+            }
+            return (await tx.insert(s.gpsTrips).values({id:value.id??crypto.randomUUID(),userId:uid,vehicleId,distanceMeters:value.distanceMeters,durationSeconds:value.durationSeconds,startedAt,endedAt,source:value.syncMileage?'browser-gps-synced':'browser-gps'}).returning())[0];
+          });
+          return json(result,201);
         }
       }
     }

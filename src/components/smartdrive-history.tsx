@@ -16,6 +16,8 @@ async function request<T>(path: string, method = 'GET', body?: unknown): Promise
 export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage }: { vehicles: Vehicle[]; preview: boolean; onUpdateMileage:(vehicleId:string)=>void }) {
 
   const locale=useApplicationLocale();
+  const [revision,setRevision]=useState(0);
+  useEffect(()=>{const refresh=()=>setRevision(v=>v+1);window.addEventListener('autocare-trips-updated',refresh);return()=>window.removeEventListener('autocare-trips-updated',refresh);},[]);
 const [selected, setSelected] = useState('');
   const [readings, setReadings] = useState<Reading[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -33,7 +35,7 @@ const [selected, setSelected] = useState('');
     ]).then(([r,t,p]) => { if (!cancelled) { setReadings(r); setTrips(t); setPrefs(p); setError(''); } })
       .catch(e => { if (!cancelled) setError(e instanceof Error ? e.message : 'Eroare SmartDrive.'); });
     return () => { cancelled = true; };
-  }, [vehicleId, preview, vehicles.map(v => v.odometer).join(',')]);
+  }, [vehicleId, preview, revision, vehicles.map(v => v.odometer).join(',')]);
   const { deltaKm, dailyKm, monthlyKm } = mileageMetrics(readings);
   const save = async () => {
     if (preview) return;

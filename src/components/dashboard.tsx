@@ -215,7 +215,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
       </div>
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
       {!mileageOnly && <SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} onUpdateMileage={id=>{const car=cars.find(v=>v.id===id);if(!car)return;setEditing(id);setKm(String(car.odometer));setConfirmedJump(null);requestAnimationFrame(()=>{const input=document.getElementById('ac-mileage-'+id);input?.focus({preventScroll:true});input?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});});}} />}
-      {!mileageOnly && <SmartDriveTrip preview={preview} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model }))} />}
+      {!mileageOnly && <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer:v.odometer }))} />}
       <div className="mileage-planner-grid" id="ac-mileage-editor">
         {cars.map(v => {
           const planned = services.filter(r=>r.vehicleId===v.id);

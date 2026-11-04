@@ -649,3 +649,29 @@
   }
 }
 }
+
+/* SmartDrive: prominent controls, quiet telemetry and a full road-map canvas. */
+@layer autocare-workspace {
+.app-shell.ac-workspace .ac-smartdrive-trip { gap:18px!important; padding:clamp(18px,2.3vw,30px)!important; border-radius:22px!important; background:#fff!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip-heading h3 { font-size:clamp(23px,2.2vw,32px)!important; letter-spacing:-.035em!important; margin-top:12px!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip-metric strong { font-variant-numeric:tabular-nums!important; font-size:clamp(44px,5vw,66px)!important; letter-spacing:-.05em!important; }
+.app-shell.ac-workspace .ac-smartdrive-live { grid-template-columns:repeat(4,minmax(0,1fr))!important; gap:10px!important; margin:0!important; }
+.app-shell.ac-workspace .ac-smartdrive-live>div { border-radius:13px!important; padding:14px!important; background:#f5f7fb!important; border:1px solid #e7ebf2!important; min-width:0!important; }
+.app-shell.ac-workspace .ac-smartdrive-live strong { font-variant-numeric:tabular-nums!important; font-size:18px!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip>label:not(.ac-smartdrive-sync) { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:12px!important; font-size:13px!important; font-weight:600!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip select { flex:1!important; max-width:400px!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip-controls { gap:10px!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip-controls button { min-height:48px!important; border-radius:12px!important; padding:12px 20px!important; }
+.app-shell.ac-workspace .ac-smartdrive-map { margin:0!important; padding:0!important; border:0!important; background:transparent!important; }
+.app-shell.ac-workspace .ac-smartdrive-map>strong { font-size:13px!important; margin-bottom:12px!important; }
+.app-shell.ac-workspace .ac-smartdrive-map a { text-decoration:none!important; }
+.app-shell.ac-workspace .ac-smartdrive-sync { font-size:13px!important; line-height:1.65!important; background:#f4f8ff!important; }
+.app-shell.ac-workspace .ac-smartdrive-sync input { width:20px!important; height:20px!important; flex:0 0 20px!important; accent-color:#2563eb!important; }
+@media(max-width:640px){
+.app-shell.ac-workspace .ac-smartdrive-live { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip { padding:16px!important; border-radius:18px!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip-controls { display:grid!important; grid-template-columns:1fr!important; }
+.app-shell.ac-workspace .ac-smartdrive-trip-controls button { width:100%!important; justify-content:center!important; }
+.app-shell.ac-workspace .ac-smartdrive-sync { align-items:flex-start!important; }
+}
+}
