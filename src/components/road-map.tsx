@@ -28,6 +28,16 @@ export default function RoadMapView({
   useEffect(() => {
     let disposed = false,
       resize: ResizeObserver | undefined;
+    // A stalled style/worker request need not leave a permanent loading panel.
+    const fallbackTimer = window.setTimeout(() => {
+      if (disposed) return;
+      resize?.disconnect();
+      marker.current?.remove();
+      marker.current = null;
+      map.current?.remove();
+      map.current = null;
+      setFailed(true);
+    }, 15000);
     void import('maplibre-gl')
       .then((lib) => {
         if (disposed || !host.current) return;
@@ -53,6 +63,7 @@ export default function RoadMapView({
           });
           view.on('load', () => {
             if (disposed) return;
+            window.clearTimeout(fallbackTimer);
             view.addSource('trip', { type: 'geojson', data: routeGeometry(latest.current) });
             view.addLayer({
               id: 'trip-outline',
@@ -74,10 +85,16 @@ export default function RoadMapView({
               marker.current = new lib.Marker({ element })
                 .setLngLat([position.longitude, position.latitude])
                 .addTo(view);
+            // GPS can arrive while the style is loading, before the points effect
+            // has a usable map. Apply the latest fix when loading completes.
+            if (position && follow.current)
+              view.jumpTo({ center: [position.longitude, position.latitude], zoom: 16 });
             setLoading(false);
           });
           view.on('error', () => {
             if (!disposed) {
+              window.clearTimeout(fallbackTimer);
+              resize?.disconnect();
               marker.current?.remove();
               marker.current = null;
               map.current?.remove();
@@ -110,6 +127,7 @@ export default function RoadMapView({
       });
     return () => {
       disposed = true;
+      window.clearTimeout(fallbackTimer);
       resize?.disconnect();
       marker.current?.remove();
       marker.current = null;
@@ -120,13 +138,22 @@ export default function RoadMapView({
   useEffect(() => {
     const view = map.current,
       p = points.at(-1);
-    if (!view || !p) return;
+    if (!view) return;
     const source = view.getSource('trip') as GeoJSONSource | undefined;
     source?.setData(routeGeometry(points));
+    if (!p) {
+      marker.current?.remove();
+      marker.current = null;
+      return;
+    }
     if (marker.current) marker.current.setLngLat([p.longitude, p.latitude]);
     else if (view.isStyleLoaded()) {
       void import('maplibre-gl').then((lib) => {
-        if (map.current !== view) return;
+        if (map.current !== view || latest.current.at(-1) !== p) return;
+        if (marker.current) {
+          marker.current.setLngLat([p.longitude, p.latitude]);
+          return;
+        }
         const element = createRoadPositionMarker(english);
         marker.current = new lib.Marker({ element })
           .setLngLat([p.longitude, p.latitude])
@@ -170,7 +197,13 @@ export default function RoadMapView({
             map.current?.easeTo({ center: [p.longitude, p.latitude], zoom: 16, duration: 700 });
         }}
       >
-        {following ? (english ? 'Following you' : 'Te urmărește') : (english ? 'Recenter on me' : 'Recentrează pe mine')}
+        {following
+          ? english
+            ? 'Following you'
+            : 'Te urmărește'
+          : english
+            ? 'Recenter on me'
+            : 'Recentrează pe mine'}
       </button>
       {loading && !failed && (
         <p className="ac-road-map-message" role="status">

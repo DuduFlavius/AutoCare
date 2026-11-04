@@ -92,19 +92,27 @@ export default function RasterRoadMap({
         f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
       ),
     );
-    if (!last) return;
+    if (!last) {
+      marker.current?.remove();
+      marker.current = null;
+      return;
+    }
     if (marker.current) marker.current.setLatLng([last.latitude, last.longitude]);
     else
       void import('leaflet').then((L) => {
-        if (map.current === view)
-          marker.current = L.marker([last.latitude, last.longitude], {
-            icon: L.divIcon({
-              className: 'ac-road-marker-host',
-              html: createRoadPositionMarker(english),
-              iconSize: [28, 28],
-              iconAnchor: [14, 14],
-            }),
-          }).addTo(view);
+        if (map.current !== view || latest.current.at(-1) !== last) return;
+        if (marker.current) {
+          marker.current.setLatLng([last.latitude, last.longitude]);
+          return;
+        }
+        marker.current = L.marker([last.latitude, last.longitude], {
+          icon: L.divIcon({
+            className: 'ac-road-marker-host',
+            html: createRoadPositionMarker(english),
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+          }),
+        }).addTo(view);
       });
     if (follow.current)
       view.setView([last.latitude, last.longitude], Math.max(15, view.getZoom()), {
@@ -140,7 +148,13 @@ export default function RasterRoadMap({
           if (p) map.current?.setView([p.latitude, p.longitude], 16, { animate: true });
         }}
       >
-        {following ? (english ? 'Following you' : 'Te urmărește') : (english ? 'Recenter on me' : 'Recentrează pe mine')}
+        {following
+          ? english
+            ? 'Following you'
+            : 'Te urmărește'
+          : english
+            ? 'Recenter on me'
+            : 'Recentrează pe mine'}
       </button>
       {tileError && (
         <p className="ac-road-map-message" role="status">
