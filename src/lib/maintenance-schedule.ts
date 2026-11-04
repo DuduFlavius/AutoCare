@@ -99,7 +99,8 @@ export type MaintenanceSource = {
 export function maintenanceTargets(record: MaintenanceSource) {
   if (parseServiceDetails(record.parts || '').completedBy) return [];
   const details = parseServiceDetails(record.parts || '');
-  const schedule = maintenanceSchedule({ ...record, details });
+  const oil = /ulei/i.test(record.category + ' ' + record.title) && /schimb|motor|revizie/i.test(record.category + ' ' + record.title);
+  const schedule = maintenanceSchedule({ ...record, category: oil ? 'Schimb ulei' : record.category, details });
   const targets: Array<{
     id: string;
     title: string;
@@ -116,7 +117,7 @@ export function maintenanceTargets(record: MaintenanceSource) {
     ),
   );
   if (record.category !== 'Filtre' || !filterKeys.length)
-    if (schedule.nextKm !== null || schedule.expiresAt)
+    if (oil || schedule.nextKm !== null || schedule.expiresAt)
       targets.push({
         id: record.id,
         title: record.title || record.category,

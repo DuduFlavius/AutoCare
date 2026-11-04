@@ -20,7 +20,25 @@ public class AutoCareTrackingPlugin extends Plugin {
     private ActivityResultLauncher<IntentSenderRequest> chooser;
     private boolean owned(PluginCall call,JSONObject state){return call.getString("ownerId","").equals(state.optString("ownerId"));}
     @PluginMethod public void snapshot(PluginCall call){JSONObject state=TrackingStore.forOwner(getContext(),call.getString("ownerId",""));if(!state.has("id")||!owned(call,state)){call.resolve(new JSObject());return;}try{if(state.optBoolean("active")&&!TrackingService.running){state.put("active",false).put("endedAt",state.optLong("updatedAt"));TrackingStore.write(getContext(),state);state=TrackingStore.stop(getContext());}call.resolve(new JSObject(state.toString()));}catch(Exception e){call.reject("Invalid saved GPS state",e);}}
+    private boolean locationDisclosure(PluginCall call,boolean automation) {
+        if(getContext().getSharedPreferences("autocare-location-consent",0).getBoolean("disclosed-v1",false))return true;
+        getActivity().runOnUiThread(() -> {
+            boolean en=getContext().getResources().getConfiguration().getLocales().get(0).getLanguage().equals("en");
+            new android.app.AlertDialog.Builder(getActivity())
+              .setTitle(en?"Location in the background":"Localizarea în fundal")
+              .setMessage(en?"AutoCare collects location data to record your route, calculate driving distance and run AutoDrive, even when the app is closed or not in use. Tracking starts only when you press Start GPS or enable AutoDrive for your car. Route coordinates stay on this device; distance and trip times sync to your account when the app is reopened. You can stop GPS from the app or its notification and disable AutoDrive. Location is not used for advertising.":"AutoCare colectează date de locație pentru înregistrarea traseului, calcularea distanței și AutoDrive, inclusiv când aplicația este închisă sau nu este utilizată. Urmărirea pornește doar când apeși Pornește GPS sau activezi AutoDrive pentru mașina ta. Coordonatele traseului rămân pe dispozitiv; distanța și orele călătoriei se sincronizează în cont când redeschizi aplicația. Poți opri GPS-ul din aplicație sau notificare și poți dezactiva AutoDrive. Locația nu este folosită pentru publicitate.")
+              .setPositiveButton(en?"Continue":"Continuă",(dialog,which)->{
+                getContext().getSharedPreferences("autocare-location-consent",0).edit().putBoolean("disclosed-v1",true).apply();
+                if(automation)configureAutomation(call);else start(call);
+              })
+              .setNegativeButton(en?"Not now":"Nu acum",(dialog,which)->call.reject(en?"Location setup cancelled.":"Configurarea locației a fost anulată.","LOCATION_CONSENT_CANCELLED"))
+              .setOnCancelListener(dialog->call.reject("Location setup cancelled.","LOCATION_CONSENT_CANCELLED"))
+              .show();
+        });
+        return false;
+    }
     @PluginMethod public void start(PluginCall call){
+        if(!locationDisclosure(call,false))return;
         if(getPermissionState("location")!=PermissionState.GRANTED){requestPermissionForAlias("location",call,"permissionResult");return;}
         permissionResult(call);
     }
@@ -64,6 +82,7 @@ public class AutoCareTrackingPlugin extends Plugin {
     private void listDevices(PluginCall call){try{BluetoothManager manager=getContext().getSystemService(BluetoothManager.class);BluetoothAdapter adapter=manager.getAdapter();JSONArray list=new JSONArray();if(adapter!=null&&adapter.isEnabled())for(BluetoothDevice device:adapter.getBondedDevices())list.put(new JSONObject().put("name",device.getName()==null?"Bluetooth":device.getName()).put("address",device.getAddress()));JSObject out=new JSObject();out.put("devices",list);call.resolve(out);}catch(Exception e){call.reject("Unable to list paired devices",e);}}
     @PluginMethod public void openLocationSettings(PluginCall call){Intent intent=new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:"+getContext().getPackageName()));getActivity().startActivity(intent);call.resolve();}
     @PluginMethod public void configureAutomation(PluginCall call){
+        if(!locationDisclosure(call,true))return;
         if(Build.VERSION.SDK_INT<26){call.reject("Pornirea automată necesită Android 8 sau mai nou.");return;}
         if(getPermissionState("location")!=PermissionState.GRANTED){requestPermissionForAlias("location",call,"autoLocation");return;}
         if(Build.VERSION.SDK_INT>=33&&getPermissionState("notifications")!=PermissionState.GRANTED){requestPermissionForAlias("notifications",call,"autoNotifications");return;}

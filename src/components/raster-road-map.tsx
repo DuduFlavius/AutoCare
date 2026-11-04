@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import type { Map as LeafletMap, Marker, Polyline } from 'leaflet';
+import { createRoadPositionMarker } from '@/lib/road-position-marker';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { routeGeometry } from '@/lib/road-map';
 import 'leaflet/dist/leaflet.css';
@@ -57,9 +58,10 @@ export default function RasterRoadMap({
         if (last)
           marker.current = L.marker([last.latitude, last.longitude], {
             icon: L.divIcon({
-              className: 'ac-road-position',
-              iconSize: [24, 24],
-              iconAnchor: [12, 12],
+              className: 'ac-road-marker-host',
+              html: createRoadPositionMarker(english),
+              iconSize: [28, 28],
+              iconAnchor: [14, 14],
             }),
           }).addTo(view);
         view.on('dragstart', () => {
@@ -80,7 +82,7 @@ export default function RasterRoadMap({
       marker.current = null;
       line.current = null;
     };
-  }, []);
+  }, [english]);
   useEffect(() => {
     const view = map.current,
       last = points.at(-1);
@@ -97,9 +99,10 @@ export default function RasterRoadMap({
         if (map.current === view)
           marker.current = L.marker([last.latitude, last.longitude], {
             icon: L.divIcon({
-              className: 'ac-road-position',
-              iconSize: [24, 24],
-              iconAnchor: [12, 12],
+              className: 'ac-road-marker-host',
+              html: createRoadPositionMarker(english),
+              iconSize: [28, 28],
+              iconAnchor: [14, 14],
             }),
           }).addTo(view);
       });
@@ -108,7 +111,7 @@ export default function RasterRoadMap({
         animate: true,
         duration: 0.7,
       });
-  }, [points]);
+  }, [points, english]);
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -137,7 +140,7 @@ export default function RasterRoadMap({
           if (p) map.current?.setView([p.latitude, p.longitude], 16, { animate: true });
         }}
       >
-        {english ? 'Follow position' : 'Urmărește poziția'}
+        {following ? (english ? 'Following you' : 'Te urmărește') : (english ? 'Recenter on me' : 'Recentrează pe mine')}
       </button>
       {tileError && (
         <p className="ac-road-map-message" role="status">

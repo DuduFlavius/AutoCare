@@ -2,6 +2,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import type { Map as RoadMap, Marker, GeoJSONSource } from 'maplibre-gl';
+import { createRoadPositionMarker } from '@/lib/road-position-marker';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { roadMapStyle, routeGeometry, streetOnlyStyle } from '@/lib/road-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -67,12 +68,7 @@ export default function RoadMapView({
               paint: { 'line-color': '#2677f4', 'line-width': 6 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
-            const element = document.createElement('div');
-            element.className = 'ac-road-position';
-            element.setAttribute(
-              'aria-label',
-              english ? 'Recorded GPS position' : 'Poziția GPS înregistrată',
-            );
+            const element = createRoadPositionMarker(english);
             const position = latest.current.at(-1);
             if (position)
               marker.current = new lib.Marker({ element })
@@ -131,8 +127,7 @@ export default function RoadMapView({
     else if (view.isStyleLoaded()) {
       void import('maplibre-gl').then((lib) => {
         if (map.current !== view) return;
-        const element = document.createElement('div');
-        element.className = 'ac-road-position';
+        const element = createRoadPositionMarker(english);
         marker.current = new lib.Marker({ element })
           .setLngLat([p.longitude, p.latitude])
           .addTo(view);
@@ -144,7 +139,7 @@ export default function RoadMapView({
         zoom: Math.max(15, view.getZoom()),
         duration: 750,
       });
-  }, [points]);
+  }, [points, english]);
   if (failed) return <RasterRoadMap points={points} active={active} english={english} />;
   return (
     <div className="ac-road-map" data-workspace-ui>
@@ -175,7 +170,7 @@ export default function RoadMapView({
             map.current?.easeTo({ center: [p.longitude, p.latitude], zoom: 16, duration: 700 });
         }}
       >
-        {english ? 'Follow position' : 'Urmărește poziția'}
+        {following ? (english ? 'Following you' : 'Te urmărește') : (english ? 'Recenter on me' : 'Recentrează pe mine')}
       </button>
       {loading && !failed && (
         <p className="ac-road-map-message" role="status">
