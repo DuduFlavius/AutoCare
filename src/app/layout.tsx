@@ -1,3 +1,4 @@
+import AutoUpdate from '@/components/auto-update';
 import type { Metadata, Viewport } from 'next';
 import './design-system.css';
 import './globals.css';
@@ -50,7 +51,7 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, view
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ro">
-      <body>{children}</body>
+      <body>{children}<AutoUpdate /></body>
     </html>
   );
 }

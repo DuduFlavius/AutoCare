@@ -1,9 +1,11 @@
 import type { NextConfig } from 'next';
 const config: NextConfig = {
   poweredByHeader: false,
+  env: { NEXT_PUBLIC_AUTOCARE_BUILD: process.env.VERCEL_GIT_COMMIT_SHA || process.env.VERCEL_DEPLOYMENT_ID || "development" },
   serverExternalPackages: ['@electric-sql/pglite'],
   async headers() {
     return [
+      { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-store, max-age=0" }] },
       ...['/api/:path*', '/cont', '/admin', '/start', '/previzualizare'].map((source) => ({
         source,
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],

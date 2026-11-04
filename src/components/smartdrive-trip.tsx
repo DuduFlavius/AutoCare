@@ -12,11 +12,30 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId }: 
 
   const locale=useApplicationLocale();
   const [waitingCar,setWaitingCar]=useState(false);
+  const [mapPosition,setMapPosition]=useState<Sample|null>(null);
+  const [locating,setLocating]=useState(false);
+  const [locationMessage,setLocationMessage]=useState('');
+  const locate = () => {
+    if (!navigator.geolocation) { setLocationMessage(locale.startsWith('en') ? 'Location is not supported on this device.' : 'Localizarea nu este disponibilă pe acest dispozitiv.'); return; }
+    setLocating(true); setLocationMessage('');
+    navigator.geolocation.getCurrentPosition(position => {
+      setMapPosition({latitude:position.coords.latitude,longitude:position.coords.longitude,accuracy:position.coords.accuracy,timestamp:position.timestamp});
+      setLocating(false);
+      setLocationMessage(locale.startsWith('en') ? `Position located · accuracy approximately ${Math.round(position.coords.accuracy)} m. This does not record a trip or change mileage.` : `Poziție localizată · precizie aproximativă ${Math.round(position.coords.accuracy)} m. Nu înregistrează un traseu și nu modifică kilometrajul.`);
+    }, error => {
+      setLocating(false);
+      setLocationMessage(error.code===1 ? (locale.startsWith('en') ? 'Allow location access in your phone or browser settings.' : 'Permite accesul la locație din setările telefonului sau browserului.') : (locale.startsWith('en') ? 'Position unavailable. Check GPS and try again outdoors.' : 'Poziția nu este disponibilă. Verifică GPS-ul și încearcă din nou în aer liber.'));
+    }, {enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  };
   const [automatic,setAutomatic]=useState(false);
   const [native,setNative]=useState(false);
   const nativeMode=useRef(false);
   const nativeStarting=useRef(false);
 const [active, setActive] = useState(false);
+  useEffect(() => {
+    document.documentElement.dataset.autocareGpsActive = active ? 'true' : 'false';
+    return () => { delete document.documentElement.dataset.autocareGpsActive; };
+  }, [active]);
   const [vehicleId, setVehicleId] = useState('');
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState('');
@@ -173,7 +192,9 @@ const [active, setActive] = useState(false);
     </div>
     <div className="ac-smartdrive-map" style={{margin:'18px 0',padding:12,background:'#fff',border:'1px solid #dbe5f3',borderRadius:18}}>
       <strong style={{display:'block',marginBottom:8,color:'#172b48'}}>Hartă rutieră · GPS în timp real</strong>
-      <RoadMapView points={routePoints} active={active} english={locale.startsWith('en')}/>
+      {!active && routePoints.length===0 && <button type="button" disabled={locating||preview} onClick={locate} style={{marginBottom:12}}><MapPin size={17}/> {locating ? (locale.startsWith('en')?'Locating…':'Se caută poziția…') : (locale.startsWith('en')?'Show my location':'Arată poziția mea')}</button>}
+      {locationMessage && !active && <p role="status" style={{fontSize:13,marginBottom:12}}>{locationMessage}</p>}
+      <RoadMapView points={routePoints.length ? routePoints : mapPosition ? [mapPosition] : []} active={active} english={locale.startsWith('en')}/>
       <p style={{fontSize:12,color:'#536681',margin:'9px 0 0'}}>Traseul parcurs este afișat în albastru. Coordonatele rămân pe acest dispozitiv pentru recuperarea traseului și nu sunt trimise la server.</p>
     </div>
     {active && signal === 'lost' && <div role="alert" style={{background:'#fff3df',color:'#8a4600',border:'1px solid #ffd18a',borderRadius:12,padding:13,margin:'12px 0',fontWeight:700}}>Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și menține aplicația în prim-plan. Distanța nu crește fără puncte valide.</div>}
