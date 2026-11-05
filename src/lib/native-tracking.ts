@@ -21,6 +21,8 @@ export type NativeTrip = {
   lastPosition?: GPSFix;
 };
 interface TrackingPlugin {
+  openAndroidUpdate(input: {url: string}): Promise<void>;
+  appVersion(): Promise<{version: string; versionCode: number}>;
   start(input: {
     id: string;
     ownerId: string;
@@ -85,6 +87,8 @@ export function hasNativeTracking() {
   return Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('AutoCareTracking');
 }
 export const nativeTracking = {
+  async appVersion() { return plugin.appVersion(); },
+  async openAndroidUpdate(url: string) { return plugin.openAndroidUpdate({url}); },
   async snapshot(ownerId: string) {
     return readNativeTrip(await plugin.snapshot({ ownerId }), ownerId);
   },

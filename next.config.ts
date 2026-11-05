@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 const config: NextConfig = {
   poweredByHeader: false,
+  outputFileTracingIncludes: { '/api/android-update': ['./public/downloads/**/*'] },
   env: { NEXT_PUBLIC_AUTOCARE_BUILD: process.env.VERCEL_GIT_COMMIT_SHA || process.env.VERCEL_DEPLOYMENT_ID || "development" },
   serverExternalPackages: ['@electric-sql/pglite'],
   async headers() {

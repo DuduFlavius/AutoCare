@@ -16,6 +16,12 @@ import org.json.*;
 
 @CapacitorPlugin(name="AutoCareTracking",permissions={@Permission(alias="location",strings={Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION}),@Permission(alias="notifications",strings={Manifest.permission.POST_NOTIFICATIONS}),@Permission(alias="bluetooth",strings={Manifest.permission.BLUETOOTH_CONNECT})})
 public class AutoCareTrackingPlugin extends Plugin {
+    @PluginMethod public void appVersion(PluginCall call){
+        try{android.content.pm.PackageInfo info=getContext().getPackageManager().getPackageInfo(getContext().getPackageName(),0);JSObject value=new JSObject();value.put("version",info.versionName);value.put("versionCode",Build.VERSION.SDK_INT>=28?info.getLongVersionCode():info.versionCode);call.resolve(value);}catch(Exception e){call.reject("Unable to read app version",e);}
+    }
+    @PluginMethod public void openAndroidUpdate(PluginCall call){
+        try{Uri uri=Uri.parse(call.getString("url",""));if(!"https".equals(uri.getScheme())||!"project-sxage.vercel.app".equals(uri.getHost())||uri.getPath()==null||!uri.getPath().matches("/downloads/AutoCare-[0-9.]+\\.apk")){call.reject("Invalid update URL");return;}getActivity().startActivity(new Intent(Intent.ACTION_VIEW,uri).addCategory(Intent.CATEGORY_BROWSABLE));call.resolve();}catch(Exception e){call.reject("Unable to open Android installer",e);}
+    }
     private PluginCall pairing;
     private ActivityResultLauncher<IntentSenderRequest> chooser;
     private boolean owned(PluginCall call,JSONObject state){return call.getString("ownerId","").equals(state.optString("ownerId"));}
