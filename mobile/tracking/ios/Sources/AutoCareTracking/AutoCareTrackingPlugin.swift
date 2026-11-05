@@ -68,6 +68,9 @@ private final class NativeTracker: NSObject, CLLocationManagerDelegate {
             let now = Date().timeIntervalSince1970 * 1000, timestamp = location.timestamp.timeIntervalSince1970 * 1000
             guard location.horizontalAccuracy >= 0, location.horizontalAccuracy <= 50, timestamp <= now+5000, now-timestamp <= 15000 else { continue }
             UserDefaults.standard.set(now, forKey: "autocare-gps-fix-at")
+            if let previous = state["lastPosition"] as? [String: Any], let time = previous["timestamp"] as? Double, timestamp <= time { continue }
+            state["lastPosition"] = ["latitude": location.coordinate.latitude, "longitude": location.coordinate.longitude, "accuracy": location.horizontalAccuracy, "timestamp": timestamp]
+            state["updatedAt"] = now; persist()
             var points = state["points"] as? [[String: Any]] ?? []
             var gap = points.isEmpty, meters = 0.0
             if let previous = points.last, let lat = previous["latitude"] as? Double, let lon = previous["longitude"] as? Double, let time = previous["timestamp"] as? Double, let accuracy = previous["accuracy"] as? Double {

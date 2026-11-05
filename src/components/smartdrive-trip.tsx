@@ -93,7 +93,9 @@ const [active, setActive] = useState(false);
     tripId.current=value.id;baseline.current=value.baseline;started.current=value.startedAt;endedAt.current=value.endedAt??null;
     distanceRef.current=shownDistance;setDistance(shownDistance);setVehicleId(value.vehicleId);setStartedAt(value.startedAt);setActive(value.active);setRoutePoints(shownPoints);
     setClock(new Date().toLocaleTimeString(locale));setTrackingSeconds(Math.max(0,Math.floor(((value.endedAt??Date.now())-value.startedAt)/1000)));
-    const last=shownPoints.at(-1);if(last){lastFix.current=value.lastFixAt||last.timestamp;setSignal(value.active&&Date.now()-lastFix.current>25000?'lost':'ok');}
+    const position=value.lastPosition??shownPoints.at(-1);
+    if(position)setMapPosition(current=>!current||position.timestamp>=current.timestamp?position:current);
+    const last=position;if(last){lastFix.current=value.lastFixAt||last.timestamp;setSignal(value.active&&Date.now()-lastFix.current>25000?'lost':'ok');}
   }
   useEffect(()=>{
     if(preview||!hasNativeTracking())return;
