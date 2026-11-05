@@ -218,9 +218,10 @@ const [active, setActive] = useState(false);
   // Also catches trips stopped from the notification while the WebView was closed.
   // Failed requests retain the native snapshot; retry when connectivity returns.
   useEffect(()=>{
-    const retry=()=>setSaveRetry(value=>value+1);
+    const retry=()=>{if(document.visibilityState==='visible')setSaveRetry(value=>value+1);};
     window.addEventListener('online',retry);
-    return()=>window.removeEventListener('online',retry);
+    document.addEventListener('visibilitychange',retry);
+    return()=>{window.removeEventListener('online',retry);document.removeEventListener('visibilitychange',retry);};
   },[]);
   useEffect(()=>{
     if(!native || active || automatic || saved || !endedAt.current || distanceRef.current<=0)return;
