@@ -51,7 +51,7 @@ final class AutoDrive {
     static void connection(Context c,String address,boolean connected){
         try{
             JSONObject config=bindings(c).optJSONObject(address);if(config==null||!config.optBoolean("enabled")||!config.optString("ownerId").equals(prefs(c).getString("owner","")))return;
-            JSONObject state=TrackingStore.read(c);if(state.optBoolean("active")&&!TrackingService.running){state.put("active",false).put("endedAt",state.optLong("updatedAt"));TrackingStore.write(c,state);state=TrackingStore.stop(c);}
+            JSONObject state=TrackingStore.read(c);if(state.optBoolean("active")&&!TrackingService.running){TrackingService.running=true;if(Build.VERSION.SDK_INT>=26)c.startForegroundService(new Intent(c,TrackingService.class));else c.startService(new Intent(c,TrackingService.class));}
             boolean matching=state.optBoolean("automatic")&&address.equals(state.optString("address"))&&state.optBoolean("active")&&TrackingService.running;
             if(!connected){prefs(c).edit().remove("suppressed-"+address).apply();if(matching&&state.optLong("stopAt")==0){long now=System.currentTimeMillis();state.put("stopAt",now+STOP_DELAY).put("disconnectedAt",now).put("disconnectDistance",state.optDouble("distance")).put("disconnectPoints",new JSONArray(state.optJSONArray("points").toString()));TrackingStore.write(c,state);}return;}
             if(matching){state.remove("stopAt");state.remove("disconnectedAt");state.remove("disconnectDistance");state.remove("disconnectPoints");TrackingStore.write(c,state);return;}

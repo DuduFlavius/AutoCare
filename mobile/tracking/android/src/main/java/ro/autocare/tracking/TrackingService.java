@@ -26,12 +26,13 @@ public class TrackingService extends Service implements LocationListener {
             if(!manager.isProviderEnabled(LocationManager.GPS_PROVIDER))throw new IllegalStateException("GPS disabled");
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,0f,this,Looper.getMainLooper());
             clock.removeCallbacks(deadline);clock.postDelayed(deadline,2000);
-            return START_NOT_STICKY;
+            return START_STICKY;
         } catch(Exception e){stopTracking();return START_NOT_STICKY;}
     }
     private void stopTracking(){clock.removeCallbacks(deadline);running=false;try{TrackingStore.stop(this);}catch(Exception ignored){}if(manager!=null)manager.removeUpdates(this);stopForeground(STOP_FOREGROUND_REMOVE);stopSelf();}
     @Override public void onLocationChanged(Location location){try{TrackingStore.append(this,location);}catch(Exception e){stopTracking();}}
     @Override public void onProviderDisabled(String provider){stopTracking();}
-    @Override public void onDestroy(){clock.removeCallbacks(deadline);running=false;if(manager!=null)manager.removeUpdates(this);try{TrackingStore.stop(this);}catch(Exception ignored){}super.onDestroy();}
+    @Override public void onDestroy(){clock.removeCallbacks(deadline);running=false;if(manager!=null)manager.removeUpdates(this);// Lifecycle cleanup must not finalize a trip: Android may recreate this sticky service.
+        super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
 }

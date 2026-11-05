@@ -15,3 +15,22 @@ function fixture(t:TestContext){
 test('safe sync uses the confirmed server mileage for the next automatic trip',async t=>{const f=fixture(t);globalThis.fetch=async(_url,input)=>{const value=JSON.parse(String(input?.body));assert.equal(value.expectedOdometer,10000);assert.equal(value.trips[0].distanceMeters,1500);return Response.json({ids:[trip.id],odometer:10002},{status:201});};assert.equal(await syncAutomaticTrips(owner,[car]),1);assert.deepEqual(f.acks,[[trip.id]]);assert.deepEqual(f.updates,[10002]);});
 test('odometer conflicts retain the local outbox and never acknowledge unsaved trips',async t=>{const f=fixture(t);globalThis.fetch=async()=>Response.json({error:'Mileage conflict'},{status:409});await assert.rejects(syncAutomaticTrips(owner,[car]),/Mileage conflict/);assert.equal(f.acks.length,0);assert.equal(f.updates.length,0);});
 test('a currently recording vehicle is never synced mid-trip',async t=>{const f=fixture(t);nativeTracking.snapshot=async()=>({...trip,active:true});globalThis.fetch=async()=>{throw Error('Should not send an active trip');};assert.equal(await syncAutomaticTrips(owner,[car]),0);assert.equal(f.acks.length,0);});
+
+test('offline sync preserves the outbox and retries the same trip when online',async t=>{
+ const f=fixture(t);let attempts=0;
+ globalThis.fetch=async(_url,input)=>{
+  const value=JSON.parse(String(input?.body));assert.equal(value.trips[0].id,trip.id);
+  if(++attempts===1)throw new TypeError('Network unavailable');
+  return Response.json({ids:[trip.id],odometer:10001});
+ };
+ await assert.rejects(syncAutomaticTrips(owner,[car]),/Network unavailable/);
+ assert.equal(f.acks.length,0);
+ assert.equal(await syncAutomaticTrips(owner,[car]),1);
+ assert.deepEqual(f.acks,[[trip.id]]);
+});
+test('a partial server confirmation never deletes locally recorded trips',async t=>{
+ const f=fixture(t);
+ globalThis.fetch=async()=>Response.json({ids:[],odometer:10001});
+ await assert.rejects(syncAutomaticTrips(owner,[car]),/confirmat toate/);
+ assert.equal(f.acks.length,0);assert.equal(f.updates.length,0);
+});

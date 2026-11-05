@@ -67,6 +67,8 @@ const [active, setActive] = useState(false);
   }, [active]);
   const [vehicleId, setVehicleId] = useState('');
   const [saving, setSaving] = useState(false);
+  const saveInFlight = useRef(false);
+  const [saveRetry, setSaveRetry] = useState(0);
   const [notice, setNotice] = useState('');
   const [distance, setDistance] = useState(0);
   const [error, setError] = useState('');
@@ -147,7 +149,7 @@ const [active, setActive] = useState(false);
   useEffect(() => () => { if (watcher.current !== null) navigator.geolocation.clearWatch(watcher.current); if (tick.current) clearInterval(tick.current); }, []);
   const start = () => {
     if(hasNativeTracking()&&!preview){
-      if(nativeStarting.current)return;
+      if(nativeStarting.current || saveInFlight.current)return;
       const car=vehicles.find(v=>v.id===vehicleId)||vehicles[0];if(!car){setError('Selectează o mașină înainte de pornire.');return;}
       nativeStarting.current=true;setError('');
       void (async()=>{try{
@@ -187,14 +189,23 @@ const [active, setActive] = useState(false);
     setActive(true);
   };
   const saveTrip = async () => {
-    if(saved || saving)return;
+    if(saved || saveInFlight.current)return;
     const id = vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0]?.id;
     if (active) { setError('Oprește urmărirea înainte de salvare.'); return; }
     if (!id || !started.current || distanceRef.current <= 0 || preview) { setError('Selectează o mașină și înregistrează o distanță validă.'); return; }
     const ended = endedAt.current ?? Date.now();
+    saveInFlight.current=true;
     setSaving(true);
     try {
-      const res = await fetch('/api/v1/smartdrive/vehicles/' + id + '/trips', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id:tripId.current, syncMileage, expectedOdometer:baseline.current, distanceMeters: Math.round(distanceRef.current), durationSeconds: Math.max(1, Math.round((ended - started.current) / 1000)), startedAt: new Date(started.current).toISOString(), endedAt: new Date(ended).toISOString() }) });
+      // Read the durable final snapshot, not a potentially stale two-second UI poll.
+      if(nativeMode.current){
+        const finalTrip=await nativeTracking.snapshot(ownerId);
+        if(!finalTrip || finalTrip.active || finalTrip.id!==tripId.current)throw Error('Traseul GPS nu este încă finalizat. Reîncearcă salvarea.');
+        distanceRef.current=finalTrip.distance;
+        endedAt.current=finalTrip.endedAt??finalTrip.updatedAt;
+      }
+      const finalEnd=endedAt.current??ended;
+      const res = await fetch('/api/v1/smartdrive/vehicles/' + id + '/trips', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id:tripId.current, syncMileage, expectedOdometer:baseline.current, distanceMeters: Math.round(distanceRef.current), durationSeconds: Math.max(1, Math.round((finalEnd - started.current) / 1000)), startedAt: new Date(started.current).toISOString(), endedAt: new Date(finalEnd).toISOString() }) });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || 'Salvarea călătoriei a eșuat.');
       if(nativeMode.current){try{await nativeTracking.clear(ownerId);}catch{throw Error('Călătoria a fost salvată, dar arhiva locală nu a putut fi curățată. Reîncearcă salvarea.');}}
@@ -202,8 +213,20 @@ const [active, setActive] = useState(false);
       window.dispatchEvent(new Event('autocare-trips-updated'));
       try{await onSaved();}catch{setNotice('Călătoria a fost salvată. Reîncarcă pagina pentru kilometrajul actualizat.');}
     } catch(e) { setError(e instanceof Error ? e.message : 'Salvarea a eșuat.'); }
-    finally { setSaving(false); }
+    finally { saveInFlight.current=false;setSaving(false); }
   };
+  // Also catches trips stopped from the notification while the WebView was closed.
+  // Failed requests retain the native snapshot; retry when connectivity returns.
+  useEffect(()=>{
+    const retry=()=>setSaveRetry(value=>value+1);
+    window.addEventListener('online',retry);
+    return()=>window.removeEventListener('online',retry);
+  },[]);
+  useEffect(()=>{
+    if(!native || active || automatic || saved || !endedAt.current || distanceRef.current<=0)return;
+    void saveTrip();
+    // Finalization, rather than each GPS poll, triggers one save attempt.
+  },[native,active,automatic,saved,startedAt,saveRetry]);
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Traseul tău, în timp real</h3></div>
     <div className="ac-smartdrive-trip-metric"><strong>{(distance / 1000).toLocaleString(locale, { maximumFractionDigits: 2 })}</strong><span>km estimați · traseu filtrat în timp real</span></div>

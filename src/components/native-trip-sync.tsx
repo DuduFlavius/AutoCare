@@ -48,12 +48,14 @@ export default function NativeTripSync({
     };
     void run();
     const timer = setInterval(() => void run(), 10000);
-    document.addEventListener('visibilitychange', run);
+    document.addEventListener('visibilitychange', retry);
+    window.addEventListener('online', retry);
     window.addEventListener('autocare-auto-retry', retry);
     return () => {
       disposed = true;
       clearInterval(timer);
-      document.removeEventListener('visibilitychange', run);
+      document.removeEventListener('visibilitychange', retry);
+      window.removeEventListener('online', retry);
       window.removeEventListener('autocare-auto-retry', retry);
     };
   }, [ownerId]);

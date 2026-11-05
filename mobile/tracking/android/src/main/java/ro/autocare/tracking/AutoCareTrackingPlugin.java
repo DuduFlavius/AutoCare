@@ -25,7 +25,7 @@ public class AutoCareTrackingPlugin extends Plugin {
     private PluginCall pairing;
     private ActivityResultLauncher<IntentSenderRequest> chooser;
     private boolean owned(PluginCall call,JSONObject state){return call.getString("ownerId","").equals(state.optString("ownerId"));}
-    @PluginMethod public void snapshot(PluginCall call){JSONObject state=TrackingStore.forOwner(getContext(),call.getString("ownerId",""));if(!state.has("id")||!owned(call,state)){call.resolve(new JSObject());return;}try{if(state.optBoolean("active")&&!TrackingService.running){state.put("active",false).put("endedAt",state.optLong("updatedAt"));TrackingStore.write(getContext(),state);state=TrackingStore.stop(getContext());}call.resolve(new JSObject(state.toString()));}catch(Exception e){call.reject("Invalid saved GPS state",e);}}
+    @PluginMethod public void snapshot(PluginCall call){JSONObject state=TrackingStore.forOwner(getContext(),call.getString("ownerId",""));if(!state.has("id")||!owned(call,state)){call.resolve(new JSObject());return;}try{if(state.optBoolean("active")&&!TrackingService.running){if(Build.VERSION.SDK_INT>=26)getContext().startForegroundService(new Intent(getContext(),TrackingService.class));else getContext().startService(new Intent(getContext(),TrackingService.class));}call.resolve(new JSObject(state.toString()));}catch(Exception e){call.reject("Invalid saved GPS state",e);}}
     private boolean locationDisclosure(PluginCall call,boolean automation) {
         if(getContext().getSharedPreferences("autocare-location-consent",0).getBoolean("disclosed-v1",false))return true;
         getActivity().runOnUiThread(() -> {
@@ -59,7 +59,7 @@ public class AutoCareTrackingPlugin extends Plugin {
             LocationManager manager=(LocationManager)getContext().getSystemService(android.content.Context.LOCATION_SERVICE);
             if(!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){call.reject("Activează GPS-ul telefonului.");return;}
             JSONObject current=TrackingStore.read(getContext());
-            if(current.optBoolean("active")&&!TrackingService.running){TrackingStore.stop(getContext());current=TrackingStore.read(getContext());}
+
             if(current.optBoolean("active")&&!owned(call,current)){call.reject("O altă urmărire este deja activă pe acest dispozitiv.");return;}
             JSONObject existing=TrackingStore.forOwner(getContext(),call.getString("ownerId",""));
             if(existing.optBoolean("automatic")&&!existing.optBoolean("active")){call.reject("Traseul automat așteaptă sincronizarea. Deschide AutoDrive.");return;}
@@ -75,7 +75,7 @@ public class AutoCareTrackingPlugin extends Plugin {
             if(android.os.Build.VERSION.SDK_INT>=26)getContext().startForegroundService(new Intent(getContext(),TrackingService.class));else getContext().startService(new Intent(getContext(),TrackingService.class));snapshot(call);
         }catch(Exception e){TrackingService.running=false;try{TrackingStore.stop(getContext());}catch(Exception ignored){}call.reject("Nu s-a putut porni urmărirea GPS.",e);}
     }
-    @PluginMethod public void stop(PluginCall call){JSONObject state=TrackingStore.read(getContext());if(owned(call,state))AutoDrive.suppress(getContext());if(state.has("id")&&!owned(call,state)){snapshot(call);return;}getContext().stopService(new Intent(getContext(),TrackingService.class));try{TrackingStore.stop(getContext());snapshot(call);}catch(Exception e){call.reject("Unable to stop GPS",e);}}
+    @PluginMethod public void stop(PluginCall call){JSONObject state=TrackingStore.read(getContext());if(owned(call,state))AutoDrive.suppress(getContext());if(state.has("id")&&!owned(call,state)){snapshot(call);return;}try{TrackingStore.stop(getContext());getContext().stopService(new Intent(getContext(),TrackingService.class));snapshot(call);}catch(Exception e){call.reject("Unable to stop GPS",e);}}
     @PluginMethod public void clear(PluginCall call){JSONObject state=TrackingStore.forOwner(getContext(),call.getString("ownerId",""));if(state.optBoolean("active")){call.reject("Stop GPS before clearing");return;}try{TrackingStore.clearOwner(getContext(),call.getString("ownerId",""));call.resolve();}catch(Exception e){call.reject("Unable to clear GPS trip",e);}}
 
     @PluginMethod public void automationStatus(PluginCall call){
