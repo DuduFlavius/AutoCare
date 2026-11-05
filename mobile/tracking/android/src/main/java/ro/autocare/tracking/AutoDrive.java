@@ -28,12 +28,15 @@ final class AutoDrive {
         JSONObject current=TrackingStore.read(c);if(owner.equals(current.optString("ownerId"))&&!current.optBoolean("active")){for(int j=0;j<ids.length();j++)if(current.optString("id").equals(ids.getString(j)))TrackingStore.clearOwner(c,owner);}
     }
     static synchronized void configure(Context c,JSONObject config)throws JSONException{
-        JSONObject all=bindings(c);String address=config.getString("address");
+        JSONObject all=bindings(c);String address=config.getString("address").toUpperCase(java.util.Locale.ROOT);
+        if(!CarIdentity.valid(address)||config.optString("ownerId").isEmpty()||config.optString("vehicleId").isEmpty()||config.optInt("baseline",-1)<0)throw new IllegalArgumentException("Invalid car association");
+        JSONObject active=TrackingStore.read(c);if(active.optBoolean("active"))throw new IllegalStateException("Stop the current trip before changing car associations");
+        config.put("address",address);
         JSONObject old=all.optJSONObject(address);if(old!=null&&old.optBoolean("enabled")&&!old.optString("ownerId").equals(config.optString("ownerId")))throw new IllegalStateException("Bluetooth already associated with another account");
         // Exactly one Bluetooth identity per vehicle, and one vehicle per identity.
         for(java.util.Iterator<String> it=all.keys();it.hasNext();){String key=it.next();JSONObject value=all.optJSONObject(key);if(value!=null&&value.optString("ownerId").equals(config.optString("ownerId"))&&value.optString("vehicleId").equals(config.optString("vehicleId"))&&!key.equals(address))value.put("enabled",false);}
         all.put(address,config);
-        prefs(c).edit().putString("bindings",all.toString()).putString("owner",config.getString("ownerId")).remove("error").apply();
+        if(!prefs(c).edit().putString("bindings",all.toString()).putString("owner",config.getString("ownerId")).remove("error").commit())throw new IllegalStateException("Unable to persist car association");
     }
     static synchronized void updateBaseline(Context c,String owner,String vehicle,int km)throws JSONException{
         JSONObject current=TrackingStore.read(c);if(current.optBoolean("active")&&vehicle.equals(current.optString("vehicleId")))return;
@@ -48,11 +51,16 @@ final class AutoDrive {
         prefs(c).edit().putString("bindings",all.toString()).apply();
         if(vehicle==null&&owner.equals(prefs(c).getString("owner","")))prefs(c).edit().remove("owner").apply();
     }
-    static void connection(Context c,String address,boolean connected){
+    static synchronized void connection(Context c,String address,boolean connected){
         try{
-            JSONObject config=bindings(c).optJSONObject(address);if(config==null||!config.optBoolean("enabled")||!config.optString("ownerId").equals(prefs(c).getString("owner","")))return;
-            JSONObject state=TrackingStore.read(c);if(state.optBoolean("active")&&!TrackingService.running){TrackingService.running=true;if(Build.VERSION.SDK_INT>=26)c.startForegroundService(new Intent(c,TrackingService.class));else c.startService(new Intent(c,TrackingService.class));}
-            boolean matching=state.optBoolean("automatic")&&address.equals(state.optString("address"))&&state.optBoolean("active")&&TrackingService.running;
+            if(!CarIdentity.valid(address))return;
+            address=address.toUpperCase(java.util.Locale.ROOT);
+            JSONObject config=bindings(c).optJSONObject(address);
+            if(config==null||!config.optBoolean("enabled")||!CarIdentity.matches(config.optString("address"),address,config.optString("ownerId"),prefs(c).getString("owner",""),config.optString("vehicleId")))return;
+            JSONObject state=TrackingStore.read(c);
+            if(state.optBoolean("automatic")&&state.optBoolean("active")&&state.optLong("stopAt")>0&&System.currentTimeMillis()>=state.optLong("stopAt")){state=TrackingStore.stop(c);c.stopService(new Intent(c,TrackingService.class));TrackingService.running=false;}
+            if(state.optBoolean("active")&&!TrackingService.running){TrackingService.running=true;if(Build.VERSION.SDK_INT>=26)c.startForegroundService(new Intent(c,TrackingService.class));else c.startService(new Intent(c,TrackingService.class));}
+            boolean matching=state.optBoolean("automatic")&&config.optString("ownerId").equals(state.optString("ownerId"))&&config.optString("vehicleId").equals(state.optString("vehicleId"))&&address.equalsIgnoreCase(state.optString("address"))&&state.optBoolean("active")&&TrackingService.running;
             if(!connected){prefs(c).edit().remove("suppressed-"+address).apply();if(matching&&state.optLong("stopAt")==0){long now=System.currentTimeMillis();state.put("stopAt",now+STOP_DELAY).put("disconnectedAt",now).put("disconnectDistance",state.optDouble("distance")).put("disconnectPoints",new JSONArray(state.optJSONArray("points").toString()));TrackingStore.write(c,state);}return;}
             if(matching){state.remove("stopAt");state.remove("disconnectedAt");state.remove("disconnectDistance");state.remove("disconnectPoints");TrackingStore.write(c,state);return;}
             if(prefs(c).getBoolean("suppressed-"+address,false)||TrackingService.running)return;

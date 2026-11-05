@@ -4,7 +4,7 @@ export function founderId() {
 }
 export function effectiveRole(uid: string, storedRole: string) {
   if (founderId() === uid) return 'founder';
-  return ['admin', 'assistant'].includes(storedRole) ? storedRole : 'user';
+  return ['superadmin', 'admin', 'assistant'].includes(storedRole) ? storedRole : 'user';
 }
 export function isFounder(uid: string) {
   return !!founderId() && founderId() === uid;

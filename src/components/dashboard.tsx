@@ -737,9 +737,9 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         <button type="button" className="ws-sidebar-search" data-workspace-ui onClick={()=>setLauncherOpen(true)} disabled={!!modal}><Search size={18}/><span>{language==='en'?'Search & actions':'Căutare și acțiuni'}</span><kbd>⌘ K</kbd></button>
         <div className="ws-sidebar-sections">
           <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} premium={!!data?.premium} path={previewData?'/previzualizare':'/cont'} />
-          {data?.profile.role === 'founder' && (
+          {['founder', 'superadmin', 'admin', 'assistant'].includes(data?.profile.role || '') && (
             <a className="founder-nav-link" href="/admin">
-              <Shield size={18} /> Panou Fondator <ArrowUpRight size={13} />
+              <Shield size={18} /> {data?.profile.role === 'founder' ? 'Panou Fondator' : 'Mail Center'} <ArrowUpRight size={13} />
             </a>
           )}
           {data?.profile.role === 'admin' && (

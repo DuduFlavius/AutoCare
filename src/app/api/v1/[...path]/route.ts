@@ -164,8 +164,14 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     }
     if (path[0] === 'founder') {
       // Deny before reading inputs or dispatching any founder operation, including future routes.
-      await founder.requireFounder(uid);
+      if (path[1] === 'mail') await mailCenter.requireMailStaff(uid);
+      else await founder.requireFounder(uid);
       if (route === 'founder/mail' && method === 'GET') return json(await mailCenter.mailCenterOverview(uid));
+      if (route === 'founder/mail/approval-request' && method === 'POST') return json(await mailCenter.requestAutomationApproval(uid));
+      if (path.length === 5 && path[1] === 'mail' && path[2] === 'campaigns' && path[4] === 'request-approval' && method === 'POST') return json(await mailCenter.requestCampaignApproval(uid, path[3]));
+      if (path.length === 5 && path[1] === 'mail' && path[2] === 'campaigns' && path[4] === 'review' && method === 'POST') return json(await mailCenter.reviewCampaign(uid, path[3], await body(req)));
+      if (route === 'founder/mail/library' && method === 'POST') return json(await mailCenter.saveMailLibraryEntry(uid, await body(req)));
+      if (path.length === 4 && path[1] === 'mail' && path[2] === 'library' && method === 'DELETE') return json(await mailCenter.deleteMailLibraryEntry(uid, path[3]));
       if (route === 'founder/mail/approve' && method === 'POST') return json(await mailCenter.approveMailAutomation(uid, await body(req)));
       if (route === 'founder/mail/preview' && method === 'POST') return json(await mailCenter.previewMail(uid, await body(req)));
       if (route === 'founder/mail/campaigns' && method === 'POST') return json(await mailCenter.saveCampaign(uid, await body(req)));

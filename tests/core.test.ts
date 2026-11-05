@@ -700,6 +700,7 @@ test('19aa Founder team API rejects anonymous users and authenticated clients', 
   );
 });
 test('Mail Center API rejects anonymous users, clients and foreign origins; Founder can preview and save safely', async () => {
+  await db().update(s.profiles).set({ role: 'user' }).where(eq(s.profiles.userId, uid));
   for (const route of ['founder/mail', 'founder/mail/campaigns/nonexistent']) {
     assert.equal((await call(route, 'GET', undefined, '')).status, 401);
     assert.equal((await call(route)).status, 403);
@@ -754,6 +755,7 @@ test('Mail Center API rejects anonymous users, clients and foreign origins; Foun
     const rows = await db().select().from(s.mailCampaigns);
     assert.ok(!JSON.stringify(rows).includes('token='));
   } finally {
+    await db().update(s.profiles).set({ role: 'admin' }).where(eq(s.profiles.userId, uid));
     if (original) process.env.AUTOCARE_FOUNDER_USER_ID = original;
     else delete process.env.AUTOCARE_FOUNDER_USER_ID;
   }

@@ -88,8 +88,9 @@ test('client and admin sessions cannot read founder data, grant or revoke Premiu
       ['founder/unrecognized', 'POST', {}],
     ] as const) {
       const response = await request(actor, path, method, body);
+      if (path === 'founder/mail' && actor === 'admin') { assert.equal(response.status, 200); continue; }
       assert.equal(response.status, 403, actor + ' ' + path);
-      assert.match((await response.json()).error, /Fondator/);
+      assert.match((await response.json()).error, path === 'founder/mail' ? /echipei autorizate/ : /Fondator/);
     }
   }
   assert.equal(await premium(victim), false);

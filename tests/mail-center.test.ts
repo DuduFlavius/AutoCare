@@ -74,8 +74,8 @@ test('Every email template has escaped personalized HTML, responsive editorial h
   assert.ok(mail.text.includes(link));
   assert.ok(mail.html.includes(link.replaceAll('&', '&amp;')));
 });
-test('Only Founder can author or read Mail Center; security templates cannot be sent as arbitrary campaigns', async () => {
-  for (const uid of [client, admin]) {
+test('Clients cannot author or read Mail Center; security templates cannot be sent as arbitrary campaigns', async () => {
+  for (const uid of [client]) {
     await assert.rejects(() => center.mailCenterOverview(uid));
     await assert.rejects(() => center.previewMail(uid, { template: 'welcome' }));
     await assert.rejects(() => center.saveCampaign(uid, input()));
@@ -440,4 +440,69 @@ test('System history stores no authentication links and respects early delivery 
   )[0];
   assert.ok(!JSON.stringify(campaign).includes('token='));
   assert.equal(campaign.template, 'verification');
+});
+
+test('Founder library persists reusable templates and communication types; other roles cannot access it', async () => {
+  const entry = { id: crypto.randomUUID(), kind: 'template', label: 'Revizie personalizată', template: 'service_due', category: 'transactional', subject: 'Revizia mașinii tale', message: 'Verifică planul de întreținere pentru mașina ta.', ctaLabel: 'Vezi contul', ctaPath: '/cont' };
+  for (const uid of [client]) {
+    await assert.rejects(() => center.saveMailLibraryEntry(uid, entry));
+    await assert.rejects(() => center.deleteMailLibraryEntry(uid, entry.id));
+  }
+  await center.saveMailLibraryEntry(founder, entry);
+  await center.saveMailLibraryEntry(founder, { ...entry, label: 'Revizie actualizată' });
+  let library = (await center.mailCenterOverview(founder)).library;
+  assert.equal(library.filter(x => x.id === entry.id).length, 1);
+  assert.equal(library.find(x => x.id === entry.id)?.label, 'Revizie actualizată');
+  const type = { ...entry, id: crypto.randomUUID(), kind: 'communication', label: 'Informare service' };
+  await center.saveMailLibraryEntry(founder, type);
+  assert.ok((await center.mailCenterOverview(founder)).library.some(x => x.id === type.id));
+  await assert.rejects(() => center.saveMailLibraryEntry(founder, { ...entry, ctaPath: '//evil.invalid' }));
+  await assert.rejects(() => center.saveMailLibraryEntry(founder, { ...entry, template: 'password_reset' }));
+  for (const template of ['feedback', 'feature_news', 'special_offer']) {
+    await assert.rejects(() => center.saveMailLibraryEntry(founder, { ...entry, template }));
+    await assert.rejects(() => center.saveCampaign(founder, input({ template, category: 'transactional' })));
+    assert.match(renderEmail(template as keyof typeof emailTemplates).text, /acceptat comunicările promoționale/);
+  }
+  await center.deleteMailLibraryEntry(founder, entry.id);
+  library = (await center.mailCenterOverview(founder)).library;
+  assert.ok(!library.some(x => x.id === entry.id));
+  assert.ok(library.some(x => x.id === type.id));
+});
+
+
+test('Admin and Assistant request Founder approval; Super Admin sends directly; approval is bound to immutable content', async () => {
+  const { changeRole } = await import('../src/lib/founder');
+  for (const role of ['admin', 'assistant', 'superadmin'] as const) {
+    await changeRole(founder, admin, { role, confirm: true });
+    const overview = await center.mailCenterOverview(admin);
+    assert.equal(overview.permissions.directSend, role === 'superadmin');
+    assert.equal(overview.permissions.canApprove, false);
+    const campaign = await center.saveCampaign(admin, input());
+    let sent = 0;
+    const transport = async () => { sent++; return 'test-only'; };
+    if (role !== 'superadmin') {
+      await assert.rejects(() => center.sendCampaign(admin, campaign.id), /aprobare/);
+      await center.deliverCampaign(campaign.id, transport);
+      assert.equal(sent, 0);
+      assert.ok((await center.mailCenterOverview(founder)).reviews.some(x => x.campaignId === campaign.id && x.status === 'pending'));
+      await assert.rejects(() => center.reviewCampaign(admin, campaign.id, { approve: true }));
+      await center.reviewCampaign(founder, campaign.id, { approve: false });
+      await center.deliverCampaign(campaign.id, transport);
+      assert.equal(sent, 0);
+      await center.reviewCampaign(founder, campaign.id, { approve: true });
+    }
+    await center.deliverCampaign(campaign.id, transport);
+    assert.equal(sent, 1);
+    await center.deliverCampaign(campaign.id, transport);
+    assert.equal(sent, 1);
+  }
+  await changeRole(founder, admin, { role: 'admin', confirm: true });
+  await center.requestAutomationApproval(admin);
+  assert.ok((await center.mailCenterOverview(founder)).automationRequests.some(x => x.requestedBy === admin));
+  await assert.rejects(() => center.approveMailAutomation(admin, { confirmEnable: true }));
+  const draft = await center.saveCampaign(admin, input({ communicationType: 'Tip scris manual' }));
+  assert.equal((await center.campaignDetail(admin, draft.id)).communicationType, 'Tip scris manual');
+  await changeRole(founder, admin, { role: 'user', confirm: true });
+  await assert.rejects(() => center.mailCenterOverview(admin));
+  await changeRole(founder, admin, { role: 'admin', confirm: true });
 });

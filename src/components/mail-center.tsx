@@ -3,6 +3,7 @@ import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
 import { Mail, Eye, Send, Plus, RefreshCw } from 'lucide-react';
 import type { mailCenterOverview, campaignDetail } from '@/lib/mail-center';
+import { templateCategory } from '@/lib/email-templates';
 import type { EmailTemplate, EmailContent } from '@/lib/email-templates';
 type Overview = Awaited<ReturnType<typeof mailCenterOverview>>;
 type Detail = Awaited<ReturnType<typeof campaignDetail>>;
@@ -32,7 +33,9 @@ const labels: Record<string, string> = {
 export default function MailCenter() {
 
   const locale=useApplicationLocale();
-const [approvalConfirmed, setApprovalConfirmed] = useState(false);
+const [libraryName, setLibraryName] = useState('');
+  const [communicationType, setCommunicationType] = useState('Informare cont');
+  const [section, setSection] = useState<'compose' | 'history' | 'automation'>('compose');
   const [gmailStatus, setGmailStatus] = useState<{connected: boolean; testedAt?: string | null; reconnectRequired?: boolean} | null>(null);
   const [data, setData] = useState<Overview | null>(null),
     [template, setTemplate] = useState<EmailTemplate>('administrative');
@@ -73,7 +76,9 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
       .catch(() => {
         if (active) setError('Mail Center nu a putut fi încărcat.');
       });
+    const timer = setInterval(() => { void api().then((d: Overview) => { if (active) setData(d); }).catch(() => {}); }, 30000);
     return () => {
+      clearInterval(timer);
       active = false;
     };
   }, []);
@@ -85,7 +90,7 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
     setMessage(t.body);
     setCtaLabel(t.cta);
     setCtaPath(t.path);
-    setCategory(id === 'promotional' ? 'promotional' : 'transactional');
+    setCategory(templateCategory(id));
     setPreview(null);
     setSaved(false);
     setDraftId(crypto.randomUUID());
@@ -127,10 +132,9 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
           </div>
         </div>
         <p>
-          Redactează, verifică și trimite manual. Fiecare destinatar primește un email separat,
-          personalizat.
+          Alege un model, personalizează mesajul și selectează destinatarii.
         </p>
-        {gmailStatus && (!gmailStatus.connected || !gmailStatus.testedAt) && (
+        {data.permissions.directSend && gmailStatus && (!gmailStatus.connected || !gmailStatus.testedAt) && (
           <p className="error" role="alert">
             Trimiterea manuală este blocată: {gmailStatus.connected
               ? 'Gmail este conectat, dar lipsește testul de trimitere.'
@@ -138,7 +142,7 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
             {' '}Deschide secțiunea „Conectare Gmail”, reconectează dacă este necesar și trimite un email de test.
           </p>
         )}
-        {gmailStatus?.connected && !gmailStatus.testedAt && (
+        {data.permissions.directSend && gmailStatus?.connected && !gmailStatus.testedAt && (
           <div className="card stack">
             <strong>Activează trimiterea manuală Gmail</strong>
             <p>Este necesar un singur email de test către adresa Gmail conectată. Nu se trimit mesaje către utilizatori în această etapă.</p>
@@ -157,8 +161,7 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
           </div>
         )}
         <p className="notice">
-          Automatizări: {data.automation.enabled ? 'activate' : 'dezactivate'}. Activarea necesită
-          testare completă, aprobarea explicită a Fondatorului și configurare separată pe server.
+          Automatizări: {data.automation.enabled ? 'activate' : 'dezactivate'}. Administrare din secțiunea Automatizări.
         </p>
       </section>
       {error && (
@@ -171,7 +174,12 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
           {notice}
         </p>
       )}
-      <div className="mail-center-grid">
+      <nav className="mail-tabs" aria-label="Meniu Mail Center">
+        <button type="button" aria-pressed={section === 'compose'} onClick={() => setSection('compose')}>Redactează</button>
+        <button type="button" aria-pressed={section === 'history'} onClick={() => setSection('history')}>Istoric și aprobări {data.reviews.filter(x => x.status === 'pending').length || ''}</button>
+        <button type="button" aria-pressed={section === 'automation'} onClick={() => setSection('automation')}>Automatizări</button>
+      </nav>
+      <div className="mail-center-grid" hidden={section !== 'compose'}>
         <section className="card stack">
           <div className="inline">
             <h2>Redactare</h2>
@@ -187,6 +195,31 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
               Ciornă nouă
             </button>
           </div>
+          <p className="small muted">Șabloanele proprii se salvează în contul echipei și pot fi refolosite oricând.</p>
+          <details className="mail-library"><summary>Șabloanele și tipurile mele</summary>
+          <label>Biblioteca ta
+            <select value="" disabled={busy || saved} onChange={e => {
+              const entry = data.library.find(x => x.id === e.target.value);
+              if (!entry) return;
+              if (entry.kind === 'template') {
+                choose(entry.template); setSubject(entry.subject); setMessage(entry.message);
+                setCtaLabel(entry.ctaLabel); setCtaPath(entry.ctaPath);
+              }
+              setCategory(entry.category); setCommunicationType(entry.kind === 'communication' ? entry.label : 'Informare cont'); setPreview(null);
+            }}>
+              <option value="">Alege un șablon sau tip propriu</option>
+              {data.library.filter(x => templateCategory(template) !== 'promotional' || x.category === 'promotional').map(x => <option key={x.id} value={x.id}>{x.kind === 'template' ? 'Șablon' : 'Tip'}: {x.label} · {x.category === 'promotional' ? 'Promoțional' : 'Administrativ'}</option>)}
+            </select>
+          </label>
+          <label>Nume șablon / tip nou<input maxLength={100} value={libraryName} onChange={e => setLibraryName(e.target.value)} /></label>
+          <div className="inline">
+            {(['template', 'communication'] as const).map(kind => <button key={kind} type="button" disabled={busy || security || libraryName.trim().length < 2} onClick={() => void run(async () => {
+              await api('/library', 'POST', {id: crypto.randomUUID(), kind, label: libraryName, category, template, subject, message, ctaLabel, ctaPath});
+              setData(await api()); setLibraryName(''); setNotice('Salvat în biblioteca ta.');
+            })}>{kind === 'template' ? 'Salvează ca șablon propriu' : 'Adaugă tip de comunicare'}</button>)}
+          </div>
+          {data.library.length > 0 && <details><summary>Gestionează biblioteca</summary>{data.library.map(x => <p key={x.id}>{x.label} <button type="button" disabled={busy} onClick={() => void run(async () => { await api('/library/' + x.id, 'DELETE'); setData(await api()); })}>Șterge</button></p>)}</details>}
+          </details>
           <label>
             Șablon
             <select
@@ -201,11 +234,15 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
               ))}
             </select>
           </label>
+          <label>Tip de comunicare — alege sau scrie tu
+            <input list="mail-communication-options" disabled={saved || busy} maxLength={100} value={communicationType} onChange={e => setCommunicationType(e.target.value)} placeholder="Ex.: Informare service, răspuns suport…" />
+            <datalist id="mail-communication-options">{['Informare cont', 'Revizie și întreținere', 'Documente și expirări', 'Asistență tehnică', 'GPS și Bluetooth', 'Actualizare aplicație', 'Stare abonament', 'Incident tehnic', 'Mentenanță platformă', 'Confirmare solicitare', 'Răspuns reclamație', 'Anunț de serviciu', 'Feedback', 'Noutăți', 'Ofertă specială'].map(x => <option key={x} value={x} />)}{data.library.filter(x => x.kind === 'communication').map(x => <option key={x.id} value={x.label} />)}</datalist>
+          </label>
           <label>
-            Tip de comunicare
+            Categoria de comunicare
             <select
               value={category}
-              disabled={saved || busy || template === 'promotional'}
+              disabled={saved || busy || templateCategory(template) === 'promotional'}
               onChange={(e) => {
                 setCategory(e.target.value as typeof category);
                 setPreview(null);
@@ -220,8 +257,9 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
             sunt excluși. Preferințele se verifică din nou înaintea trimiterii.
           </p>
           <label>
-            Subiect
+            Subiect — alege o sugestie sau scrie tu
             <input
+              list="mail-subject-options"
               maxLength={180}
               value={subject}
               disabled={saved || busy}
@@ -231,6 +269,7 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
               }}
             />
           </label>
+          <datalist id="mail-subject-options">{Object.entries(data.templates).map(([key, t]) => <option key={key} value={t.subject} />)}{data.library.filter(x => x.kind === 'template').map(t => <option key={t.id} value={t.subject} />)}</datalist>
           <label>
             Mesaj
             <textarea
@@ -244,6 +283,7 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
               }}
             />
           </label>
+          <details><summary>Personalizează butonul și linkul</summary>
           <label>
             Text buton CTA
             <input
@@ -268,6 +308,7 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
               }}
             />
           </label>
+          </details>
           {security && (
             <p className="notice">
               Previzualizare de design. Verificarea și resetarea se trimit numai din fluxurile
@@ -359,10 +400,10 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
             onClick={() => {
               if (busy || security || !recipients.length || !subject.trim() || !message.trim()) return;
               void run(async () => {
-              if (gmailStatus && !gmailStatus.connected) {
+              if (data.permissions.directSend && gmailStatus && !gmailStatus.connected) {
                 throw new Error('Contul Gmail nu este conectat. Apasă „Conectează Gmail” din Panoul Fondator.');
               }
-              if (gmailStatus && !gmailStatus.testedAt) {
+              if (data.permissions.directSend && gmailStatus && !gmailStatus.testedAt) {
                 const testResponse = await fetch('/api/v1/mail/google/test', { method: 'POST' });
                 const testResult = await testResponse.json();
                 if (!testResponse.ok) throw new Error(testResult.error || 'Testul Gmail a eșuat. Emailurile nu au fost trimise.');
@@ -374,9 +415,13 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
               }
               if (!saved) {
                 await api('/campaigns', 'POST', {
-                  id: draftId, template, category, subject, message, ctaLabel, ctaPath, recipients,
+                  id: draftId, template, category, communicationType, subject, message, ctaLabel, ctaPath, recipients,
                 });
                 setSaved(true);
+              }
+              if (!data.permissions.directSend && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved')) {
+                await api(`/campaigns/${draftId}/request-approval`, 'POST');
+                setData(await api()); setNotice('Cererea apare în Mail Center-ul Fondatorului. Nu s-au trimis emailuri.'); setSection('history'); return;
               }
               let total = 0;
               let remaining = true;
@@ -395,10 +440,10 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
               });
             }}
           >
-            <Send size={17} /> {busy ? 'Se trimit emailurile…' : saved ? 'Continuă trimiterea emailurilor' : recipients.length ? `Trimite emailul către ${recipients.length} destinatari` : 'Bifează un destinatar pentru trimitere'}
+            <Send size={17} /> {busy ? 'Se procesează…' : !data.permissions.directSend && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved') ? 'Trimite Fondatorului pentru aprobare' : saved ? 'Continuă trimiterea emailurilor' : recipients.length ? `Trimite emailul către ${recipients.length} destinatari` : 'Bifează un destinatar pentru trimitere'}
           </button>
           {!recipients.length && <p className="small muted">Bifează cel puțin un destinatar pentru a activa trimiterea.</p>}
-          {gmailStatus && !gmailStatus.testedAt && (
+          {data.permissions.directSend && gmailStatus && !gmailStatus.testedAt && (
             <p className="small muted">La prima trimitere, AutoCare verifică automat Gmail. Dacă testul eșuează, nu expediază mesajele către destinatari.</p>
           )}
         </section>
@@ -442,43 +487,23 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
           )}
         </section>
       </div>
-      <section className="card stack">
-        <h2>Aprobarea automatizărilor</h2>
-        <p>
-          Nu activa înainte de verificarea reală a tuturor șabloanelor, linkurilor, preferințelor și
-          evenimentelor de plată. Aprobarea este înregistrată în audit; trimiterea rămâne blocată
-          până la activarea separată pe server.
-        </p>
-        <label className="check">
-          <input
-            type="checkbox"
-            checked={approvalConfirmed}
-            disabled={busy}
-            onChange={(e) => setApprovalConfirmed(e.target.checked)}
-          />
-          Confirm că am testat toate șabloanele și am verificat livrarea reală în Inbox.
-        </label>
-        <button
-          disabled={busy || !approvalConfirmed}
-          onClick={() =>
-            void run(async () => {
-              await api('/approve', 'POST', {
-                confirmAllTemplatesTested: true,
-                confirmInboxDeliveryVerified: true,
-              });
-              setData(await api());
-              setApprovalConfirmed(false);
-              setNotice('Aprobare înregistrată. Activarea pe server este o etapă separată.');
-            })
+      <section className="card stack mail-automation-card" hidden={section !== 'automation'}>
+        <p className="eyebrow">CONTROL COMUNICĂRI</p><h2>Automatizări</h2>
+        <p className="mail-status">{data.automation.enabled ? 'Automatizările sunt active.' : 'Automatizările sunt oprite.'}</p>
+        <p>{data.permissions.directSend ? 'Poți autoriza automatizările direct. Preferințele utilizatorilor și regulile de livrare rămân active.' : 'Solicitarea ta ajunge în Mail Center-ul Fondatorului pentru aprobare.'}</p>
+        <button className="primary" disabled={busy} onClick={() => void run(async () => {
+          if (data.permissions.directSend) {
+            await api('/approve', 'POST', { confirmEnable: true });
+            setNotice('Autorizare înregistrată.' + (!data.automation.deploymentGate ? ' Activarea pe server este încă oprită.' : ''));
+          } else {
+            await api('/approval-request', 'POST'); setNotice('Cerere trimisă Fondatorului.');
           }
-        >
-          Înregistrează aprobarea Fondatorului
-        </button>
-        {data.automation.approvedAt && (
-          <p>Ultima aprobare: {new Date(data.automation.approvedAt).toLocaleString(locale)}</p>
-        )}
+          setData(await api());
+        })}>{data.permissions.directSend ? 'Autorizează automatizările' : 'Solicită aprobarea Fondatorului'}</button>
+        {data.automation.approvedAt && <p>Ultima autorizare: {new Date(data.automation.approvedAt).toLocaleString(locale)}</p>}
+        {data.permissions.canApprove && data.automationRequests.length > 0 && <div className="mail-review-list"><h3>Cereri pentru tine</h3>{data.automationRequests.map(x => <p key={x.requestedBy}>Cerere de activare automatizări · {data.users.find(u => u.id === x.requestedBy)?.name || x.requestedBy} · {new Date(x.requestedAt).toLocaleString(locale)}</p>)}</div>}
       </section>
-      <section className="card">
+      <section className="card" hidden={section !== 'history'}>
         <div className="inline">
           <h2>Istoric și statusuri</h2>
           <button disabled={busy} onClick={() => void run(async () => setData(await api()))}>
@@ -486,6 +511,12 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
             Reîncarcă
           </button>
         </div>
+        {data.reviews.length > 0 && <div className="mail-review-list"><h3>Aprobări comunicări</h3>{data.reviews.map(review => <div className="mail-review-item" key={review.campaignId}>
+          <strong>{data.campaigns.find(x => x.id === review.campaignId)?.subject || 'Comunicare'}</strong>
+          <p>{data.users.find(u => u.id === review.requestedBy)?.name || review.requestedBy} · {review.status === 'pending' ? 'Așteaptă aprobarea Fondatorului' : review.status === 'approved' ? 'Aprobată' : 'Respinsă'}</p>
+          <button disabled={busy} onClick={() => void run(async () => { setDetail(await api(`/campaigns/${review.campaignId}`)); })}>Vezi conținutul și destinatarii</button>
+          {data.permissions.canApprove && review.status === 'pending' && <>{[true, false].map(approve => <button key={String(approve)} disabled={busy} onClick={() => void run(async () => { await api(`/campaigns/${review.campaignId}/review`, 'POST', { approve }); setData(await api()); setNotice(approve ? 'Comunicare aprobată. Expedierea se face separat.' : 'Comunicare respinsă.'); })}>{approve ? 'Aprobă' : 'Respinge'}</button>)}</>}
+        </div>)}</div>}
         <p className="small muted">
           „Acceptat” confirmă răspunsul Gmail API, nu livrarea în Inbox. Rezultatele incerte nu sunt
           retrimise automat. Ciornele salvate rămân nemodificabile; creează o ciornă nouă pentru
@@ -535,6 +566,7 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
                             setCtaLabel(c.ctaLabel);
                             setCtaPath(c.ctaPath);
                             setCategory(c.category as typeof category);
+                            setCommunicationType(result.communicationType);
                             setSaved(true);
                             setConfirmed(false);
                             setPreview(null);
@@ -555,7 +587,7 @@ const [approvalConfirmed, setApprovalConfirmed] = useState(false);
         </div>
         {detail && (
           <div>
-            <h3>{detail.campaign.subject}</h3>
+            <h3>{detail.campaign.subject}</h3><p>{detail.communicationType}</p><p style={{whiteSpace: 'pre-wrap'}}>{detail.campaign.message}</p><p>{detail.campaign.ctaLabel} · {detail.campaign.ctaPath}</p>
             <ul>
               {detail.deliveries.map((d) => (
                 <li key={d.id}>

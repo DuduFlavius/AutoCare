@@ -1,5 +1,22 @@
 import { origin } from './config';
 export const emailTemplates = {
+  itp: { label: 'Expirare ITP', title: 'Verifică termenul inspecției tehnice', subject: 'AutoCare — Expirare ITP', body: 'Verifică data ITP și programează inspecția înainte de expirare. Actualizează documentul în cont după efectuarea inspecției.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  rca: { label: 'Expirare RCA', title: 'Verifică valabilitatea asigurării RCA', subject: 'AutoCare — Expirare RCA', body: 'Consultă data expirării RCA din cont și verifică polița înainte de următoarea deplasare.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  vignette: { label: 'Expirare rovinietă', title: 'Verifică rovinieta înainte de drum', subject: 'AutoCare — Expirare rovinietă', body: 'Verifică valabilitatea rovinietei și datele vehiculului. După reînnoire, actualizează documentul în AutoCare.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  oil_change: { label: 'Schimb de ulei', title: 'Pregătește următorul schimb de ulei', subject: 'AutoCare — Schimb de ulei', body: 'Consultă intervalul de schimb pentru ulei și filtre. Programează lucrarea și înregistrează kilometrajul după intervenție.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  service_due: { label: 'Revizie programată', title: 'Verifică următoarea revizie', subject: 'AutoCare — Revizie programată', body: 'Consultă planul de întreținere al mașinii și confirmă lucrările necesare împreună cu service-ul ales.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  tires: { label: 'Anvelope de sezon', title: 'Pregătește mașina pentru sezon', subject: 'AutoCare — Anvelope de sezon', body: 'Verifică starea anvelopelor, presiunea și recomandările producătorului. Notează lucrările efectuate în istoricul mașinii.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  gps_setup: { label: 'Configurare GPS și Bluetooth', title: 'Configurează AutoDrive pentru mașina ta', subject: 'AutoCare — Configurare GPS și Bluetooth', body: 'Selectează Bluetooth-ul exact al mașinii în AutoDrive și acordă permisiunile cerute. Verifică o sesiune scurtă înainte de utilizarea obișnuită.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  gps_sync: { label: 'Sincronizare trasee', title: 'Verifică sincronizarea traseelor', subject: 'AutoCare — Sincronizare trasee', body: 'Deschide AutoCare cu internet activ și verifică traseele în așteptare. Consultă kilometrajul rezultat înainte de a adăuga o citire manuală.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  app_update: { label: 'Actualizare aplicație', title: 'Verifică actualizările AutoCare', subject: 'AutoCare — Actualizare aplicație', body: 'Consultă versiunea instalată și actualizările disponibile în aplicație. După actualizare, verifică permisiunile pentru GPS și Bluetooth.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  maintenance_notice: { label: 'Mentenanță platformă', title: 'Informații despre disponibilitatea AutoCare', subject: 'AutoCare — Mentenanță platformă', body: 'Completează aici intervalul confirmat al mentenanței și funcțiile afectate. Te vom informa despre reluarea funcționării.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  support_reply: { label: 'Răspuns suport', title: 'Ai un răspuns în centrul de suport', subject: 'AutoCare — Răspuns suport', body: 'Echipa AutoCare a actualizat conversația ta. Deschide centrul de suport din cont pentru a vedea răspunsul.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  support_resolved: { label: 'Solicitare rezolvată', title: 'Verifică soluția pentru solicitarea ta', subject: 'AutoCare — Solicitare rezolvată', body: 'Consultă răspunsul echipei și verifică soluția propusă. Dacă problema persistă, răspunde în conversația din cont.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  document_update: { label: 'Actualizare documente', title: 'Verifică documentele mașinii', subject: 'AutoCare — Actualizare documente', body: 'Consultă documentele din garaj și actualizează fișierele și datele care s-au schimbat.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  premium_grant: { label: 'Acces Premium acordat', title: 'Verifică accesul tău Premium', subject: 'AutoCare — Acces Premium acordat', body: 'Verifică în cont perioada și condițiile accesului Premium acordat. Detaliile actuale sunt disponibile în secțiunea Abonament.', cta: 'Deschide contul', path: '/cont', category: 'transactional' },
+  feedback: { label: 'Solicitare feedback', title: 'Cum a fost experiența ta cu AutoCare?', subject: 'AutoCare — Solicitare feedback', body: 'Spune-ne ce funcționează bine și ce ai vrea să îmbunătățim. Ne poți scrie din centrul de suport.', cta: 'Deschide contul', path: '/cont', category: 'promotional' },
+  feature_news: { label: 'Funcții noi', title: 'Descoperă noutățile AutoCare', subject: 'AutoCare — Funcții noi', body: 'Consultă noutățile disponibile în contul tău și descoperă funcțiile care te ajută să îți organizezi garajul.', cta: 'Deschide contul', path: '/cont', category: 'promotional' },
+  special_offer: { label: 'Ofertă Premium', title: 'Descoperă opțiunile Premium', subject: 'AutoCare — Ofertă Premium', body: 'Verifică ofertele și prețurile afișate în cont. Condițiile și perioada ofertei sunt cele prezentate în secțiunea Abonament.', cta: 'Deschide contul', path: '/cont', category: 'promotional' },
   gmail_test: {
     label: 'Test Gmail',
     title: 'O conexiune pregătită de drum.',
@@ -81,6 +98,10 @@ export const emailTemplates = {
     path: '/cont',
   },
 } as const;
+export function templateCategory(id: keyof typeof emailTemplates): 'transactional' | 'promotional' {
+  const t = emailTemplates[id];
+  return id === 'promotional' || ('category' in t && t.category === 'promotional') ? 'promotional' : 'transactional';
+}
 export type EmailTemplate = keyof typeof emailTemplates;
 export type EmailContent = { subject: string; text: string; html: string };
 export type TemplateInput = {
@@ -118,7 +139,7 @@ export function renderEmail(template: EmailTemplate, input: TemplateInput = {}):
   )
     throw new Error('EMAIL_INVALID_LINK');
   const name = input.name?.trim() || 'prietene';
-  const promotional = input.promotional || template === 'promotional';
+  const promotional = input.promotional || templateCategory(template) === 'promotional';
   const preferences = appLink('/cont?tab=Setări');
   const footer = promotional
     ? 'Primești acest mesaj deoarece ai acceptat comunicările promoționale AutoCare. Îți poți retrage acordul din preferințele de comunicare.'

@@ -2,6 +2,8 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { requireFounder, founderOverview } from '@/lib/founder';
+import MailCenter from '@/components/mail-center';
+import { requireMailStaff } from '@/lib/mail-center';
 import FounderPanel from '@/components/founder-panel';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Panou Fondator', robots: { index: false, follow: false } };
@@ -13,6 +15,8 @@ export default async function FounderPage() {
   )
     redirect('/autentificare');
   try {
+    const actor = await requireMailStaff(session.user.id);
+    if (actor.role !== 'founder') return <main className="founder-shell mail-staff-shell"><a className="button" href="/cont">Înapoi în garaj</a><MailCenter /></main>;
     await requireFounder(session.user.id);
   } catch {
     return (

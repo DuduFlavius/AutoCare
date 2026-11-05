@@ -1,5 +1,6 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { createHash } from 'node:crypto';
+import { profile, assertActiveAccount } from './service';
 import { db } from './db';
 import * as s from './schema';
 import { emailTemplates, type EmailTemplate } from './email-templates';
@@ -10,11 +11,15 @@ export async function automationState() {
   )[0];
   const approval = row?.value as
     { approvedBy?: string; approvedAt?: string; testedAt?: string } | undefined;
+  let trusted = approval?.approvedBy === process.env.AUTOCARE_FOUNDER_USER_ID;
+  if (approval?.approvedBy && !trusted) {
+    try { await assertActiveAccount(approval.approvedBy); trusted = (await profile(approval.approvedBy)).role === 'superadmin'; } catch { trusted = false; }
+  }
   const enabled =
     process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED === 'true' &&
     !!approval?.approvedAt &&
     !!approval.testedAt &&
-    approval.approvedBy === process.env.AUTOCARE_FOUNDER_USER_ID;
+    trusted;
   return {
     enabled,
     deploymentGate: process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED === 'true',

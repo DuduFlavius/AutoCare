@@ -150,7 +150,7 @@ export default function AutoDrivePanel({
               </button>
               {devices.length > 0 && (
                 <label>
-                  {english ? 'Car Bluetooth' : 'Bluetooth-ul mașinii'}
+                  {english ? 'Select only your car: name and Bluetooth address' : 'Selectează doar mașina ta: nume și adresă Bluetooth'}
                   <select
                     value={device}
                     disabled={busy}
@@ -159,7 +159,7 @@ export default function AutoDrivePanel({
                     <option value="">{english ? 'Choose device' : 'Alege dispozitivul'}</option>
                     {devices.map((d) => (
                       <option key={d.address} value={d.address} data-user-content>
-                        {d.name}
+                        {d.name} · {d.address}
                       </option>
                     ))}
                   </select>
