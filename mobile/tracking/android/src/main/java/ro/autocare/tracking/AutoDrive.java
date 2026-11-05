@@ -10,24 +10,32 @@ import java.util.UUID;
 
 /** Local opt-in associations; no credentials, network requests or server odometers. */
 final class AutoDrive {
+    // One shared monitor keeps trip snapshots and queue/bindings atomic without lock inversion.
     static final long STOP_DELAY=120000L;
     static android.content.SharedPreferences prefs(Context c){return c.getSharedPreferences("autocare-auto-drive",Context.MODE_PRIVATE);}
     static JSONObject bindings(Context c){try{return new JSONObject(prefs(c).getString("bindings","{}"));}catch(Exception e){return new JSONObject();}}
     static JSONArray pending(Context c,String owner){try{return new JSONArray(prefs(c).getString("pending-"+owner,"[]"));}catch(Exception e){return new JSONArray();}}
-    static synchronized void enqueue(Context c,JSONObject state)throws JSONException{
+    static void enqueue(Context c,JSONObject state)throws JSONException{
+        synchronized(TrackingStore.class){
         if(!state.optBoolean("automatic")||state.optDouble("distance")<=0)return;
         String owner=state.optString("ownerId");JSONArray queue=pending(c,owner);
         for(int i=0;i<queue.length();i++)if(queue.getJSONObject(i).optString("id").equals(state.optString("id")))return;
         JSONObject summary=new JSONObject(state.toString());summary.put("points",new JSONArray());queue.put(summary);
         if(!prefs(c).edit().putString("pending-"+owner,queue.toString()).commit())throw new IllegalStateException("Unable to queue GPS trip");
+
+        }
     }
-    static synchronized void acknowledge(Context c,String owner,JSONArray ids)throws JSONException{
+    static void acknowledge(Context c,String owner,JSONArray ids)throws JSONException{
+        synchronized(TrackingStore.class){
         JSONArray queue=pending(c,owner),keep=new JSONArray();
         for(int i=0;i<queue.length();i++){JSONObject row=queue.getJSONObject(i);boolean found=false;for(int j=0;j<ids.length();j++)if(row.optString("id").equals(ids.getString(j)))found=true;if(!found)keep.put(row);}
         if(!prefs(c).edit().putString("pending-"+owner,keep.toString()).commit())throw new IllegalStateException("Unable to acknowledge GPS trips");
         JSONObject current=TrackingStore.read(c);if(owner.equals(current.optString("ownerId"))&&!current.optBoolean("active")){for(int j=0;j<ids.length();j++)if(current.optString("id").equals(ids.getString(j)))TrackingStore.clearOwner(c,owner);}
+
+        }
     }
-    static synchronized void configure(Context c,JSONObject config)throws JSONException{
+    static void configure(Context c,JSONObject config)throws JSONException{
+        synchronized(TrackingStore.class){
         JSONObject all=bindings(c);String address=config.getString("address").toUpperCase(java.util.Locale.ROOT);
         if(!CarIdentity.valid(address)||config.optString("ownerId").isEmpty()||config.optString("vehicleId").isEmpty()||config.optInt("baseline",-1)<0)throw new IllegalArgumentException("Invalid car association");
         JSONObject active=TrackingStore.read(c);if(active.optBoolean("active"))throw new IllegalStateException("Stop the current trip before changing car associations");
@@ -37,21 +45,30 @@ final class AutoDrive {
         for(java.util.Iterator<String> it=all.keys();it.hasNext();){String key=it.next();JSONObject value=all.optJSONObject(key);if(value!=null&&value.optString("ownerId").equals(config.optString("ownerId"))&&value.optString("vehicleId").equals(config.optString("vehicleId"))&&!key.equals(address))value.put("enabled",false);}
         all.put(address,config);
         if(!prefs(c).edit().putString("bindings",all.toString()).putString("owner",config.getString("ownerId")).remove("error").commit())throw new IllegalStateException("Unable to persist car association");
+
+        }
     }
-    static synchronized void updateBaseline(Context c,String owner,String vehicle,int km)throws JSONException{
+    static void updateBaseline(Context c,String owner,String vehicle,int km)throws JSONException{
+        synchronized(TrackingStore.class){
         JSONObject current=TrackingStore.read(c);if(current.optBoolean("active")&&vehicle.equals(current.optString("vehicleId")))return;
         JSONArray queue=pending(c,owner);for(int i=0;i<queue.length();i++)if(vehicle.equals(queue.getJSONObject(i).optString("vehicleId")))return;
         JSONObject all=bindings(c);for(java.util.Iterator<String> it=all.keys();it.hasNext();){JSONObject value=all.getJSONObject(it.next());if(owner.equals(value.optString("ownerId"))&&vehicle.equals(value.optString("vehicleId")))value.put("baseline",km);}
         prefs(c).edit().putString("bindings",all.toString()).apply();
+
+        }
     }
     static void suppress(Context c){JSONObject state=TrackingStore.read(c);if(state.optBoolean("automatic"))prefs(c).edit().putBoolean("suppressed-"+state.optString("address"),true).apply();}
-    static synchronized void disable(Context c,String owner,String vehicle)throws JSONException{
+    static void disable(Context c,String owner,String vehicle)throws JSONException{
+        synchronized(TrackingStore.class){
         JSONObject all=bindings(c);CompanionDeviceManager manager=Build.VERSION.SDK_INT>=26?c.getSystemService(CompanionDeviceManager.class):null;
         for(java.util.Iterator<String> it=all.keys();it.hasNext();){String address=it.next();JSONObject value=all.getJSONObject(address);if(owner.equals(value.optString("ownerId"))&&(vehicle==null||vehicle.equals(value.optString("vehicleId")))){value.put("enabled",false);if(manager!=null)try{manager.disassociate(address);}catch(Exception ignored){}}}
         prefs(c).edit().putString("bindings",all.toString()).apply();
         if(vehicle==null&&owner.equals(prefs(c).getString("owner","")))prefs(c).edit().remove("owner").apply();
+
+        }
     }
-    static synchronized void connection(Context c,String address,boolean connected){
+    static void connection(Context c,String address,boolean connected){
+        synchronized(TrackingStore.class){
         try{
             if(!CarIdentity.valid(address))return;
             address=address.toUpperCase(java.util.Locale.ROOT);
@@ -72,5 +89,7 @@ final class AutoDrive {
             TrackingStore.write(c,trip);prefs(c).edit().remove("error").apply();TrackingService.running=true;
             if(Build.VERSION.SDK_INT>=26)c.startForegroundService(new Intent(c,TrackingService.class));else c.startService(new Intent(c,TrackingService.class));
         }catch(Exception e){TrackingService.running=false;try{TrackingStore.stop(c);}catch(Exception ignored){}prefs(c).edit().putString("error","Pornirea automată a fost oprită de telefon. Deschide AutoCare.").apply();}
+
+        }
     }
 }
