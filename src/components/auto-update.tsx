@@ -7,10 +7,31 @@ import { useApplicationLanguage } from './application-locale';
 /** Web releases refresh only at an idle, visible, online and unedited page. */
 export default function AutoUpdate() {
   const [available, setAvailable] = useState(false);
+  const [native, setNative] = useState(false);
+  const [androidRelease, setAndroidRelease] = useState<{version: string; url: string} | null>(null);
   const [installing, setInstalling] = useState(false);
   const [gpsBlocked, setGpsBlocked] = useState(false);
   const dirty = useRef(false);
   const interaction = useRef(Date.now());
+  useEffect(() => {
+    const native = Capacitor.isNativePlatform(); setNative(native);
+    let disposed = false, busy = false;
+    const checkAndroid = async () => {
+      if (Capacitor.getPlatform() !== 'android' || document.hidden || !navigator.onLine || busy) return;
+      busy = true;
+      try {
+        const [response, installed] = await Promise.all([fetch('/api/android-update', {cache:'no-store', signal:AbortSignal.timeout(10000)}), nativeTracking.appVersion()]);
+        if (!response.ok) return;
+        const release = await response.json();
+        if (!disposed && release.available && Number.isInteger(release.versionCode) && release.versionCode > installed.versionCode && typeof release.version === 'string' && typeof release.url === 'string' && /^\/downloads\/AutoCare-[0-9.]+\.apk$/.test(release.url)) setAndroidRelease({version:release.version,url:release.url});
+      } catch { /* A failed check never interrupts a trip or requests a downgrade. */ }
+      finally { busy = false; }
+    };
+    void checkAndroid();
+    const timer = setInterval(() => void checkAndroid(), 120000);
+    window.addEventListener('focus',checkAndroid);
+    return () => { disposed = true; clearInterval(timer); window.removeEventListener('focus',checkAndroid); };
+  }, []);
   useEffect(() => {
     const current = process.env.NEXT_PUBLIC_AUTOCARE_BUILD;
     if (!current || current === 'development') return;
@@ -36,7 +57,7 @@ export default function AutoUpdate() {
         setAvailable(true);
         setGpsBlocked(document.documentElement.dataset.autocareGpsActive === 'true');
         if (manual) report('available');
-        if (!dirty.current && document.documentElement.dataset.autocareGpsActive !== 'true' && Date.now() - interaction.current > 30000) window.location.reload();
+        if (!Capacitor.isNativePlatform() && !dirty.current && document.documentElement.dataset.autocareGpsActive !== 'true' && Date.now() - interaction.current > 30000) window.location.reload();
       } catch { if (manual) report('error'); /* Keep the working page after a failed check. */ }
       finally { checking = false; }
     };
@@ -68,15 +89,21 @@ export default function AutoUpdate() {
       window.removeEventListener('focus', resume);
     };
   }, []);
-  if (!available) return null;
+  if (!native || (!available && !androidRelease)) return null;
   const en = document.documentElement.lang.startsWith('en');
   return <aside role="status" style={{ position: 'fixed', bottom: 'calc(88px + env(safe-area-inset-bottom))', right: 16, left: 'auto', maxWidth: 'min(370px, calc(100vw - 32px))', zIndex: 10000, padding: 18, borderRadius: 16, background: '#151b26', color: '#fff', boxShadow: '0 12px 36px #0004', border: '1px solid #3478f6' }}>
-    <strong>{en ? 'Update available' : 'Actualizare disponibilă'}</strong>
-    <p style={{ color: '#d6e2f5', margin: '8px 0 12px' }}>{en ? 'Updates install automatically when you are idle. Finish your form or GPS trip first.' : 'Se aplică automat când nu lucrezi în pagină. Finalizează întâi formularul sau traseul GPS.'}</p>
+    <strong>{en ? 'Update available' : 'Actualizare disponibilă'}{androidRelease ? ` · ${androidRelease.version}` : ''}</strong>
+    <p style={{ color: '#d6e2f5', margin: '8px 0 12px' }}>{en ? 'Install when your trip is saved. Android will ask you to confirm the installation.' : 'Instalează după salvarea traseului. Android îți va cere confirmarea instalării.'}</p>
     <button type="button" disabled={installing} style={{ background: '#3478f6', color: '#fff', border: 0, padding: '12px 18px', borderRadius: 10, fontWeight: 700 }} onClick={async () => {
       if (document.documentElement.dataset.autocareGpsActive === 'true') { setGpsBlocked(true); return; }
       if (dirty.current && !window.confirm(en ? 'Install the update? Unsaved form changes may be lost.' : 'Instalezi actualizarea? Modificările nesalvate din formular se pot pierde.')) return;
       setInstalling(true);
+      if (androidRelease) {
+        try { await nativeTracking.openAndroidUpdate(new URL(androidRelease.url,window.location.origin).href); }
+        catch { setGpsBlocked(true); }
+        finally { setInstalling(false); }
+        return;
+      }
       try {
         if ('serviceWorker' in navigator) {
           const reg = await navigator.serviceWorker.getRegistration();
@@ -96,7 +123,8 @@ export function AppUpdateSettings() {
   const [androidRelease,setAndroidRelease] = useState<{version:string;url:string}|null>(null);
   const [androidStatus,setAndroidStatus] = useState('');
   const [android,setAndroid] = useState(false);
-  useEffect(()=>{setAndroid(Capacitor.getPlatform()==='android');},[]);
+  const [native,setNative] = useState(false);
+  useEffect(()=>{setAndroid(Capacitor.getPlatform()==='android');setNative(Capacitor.isNativePlatform());},[]);
   const checkAndroid = async () => {
     setAndroidStatus('checking');setAndroidRelease(null);
     try {
@@ -126,6 +154,7 @@ export function AppUpdateSettings() {
   } : {
     current:'Interfața AutoCare este actualizată. Această verificare nu actualizează APK-ul Android instalat.', available:'Actualizarea este pregătită. Apasă „Instalează actualizarea” în notificare.', offline:'Conectează-te la internet pentru verificare.', error:'Actualizările nu au putut fi verificate. Încearcă din nou.', checking:'Se verifică actualizările…',
   };
+  if (!native) return null;
   return <div style={{marginTop:20,paddingTop:18,borderTop:'1px solid #dbe5f3'}}>
     <h4>{en ? 'App updates' : 'Actualizările aplicației'}</h4>
     <p className="small muted">{en ? 'AutoCare checks for new versions when you reopen it and while it is active. Your account data stays saved.' : 'AutoCare verifică versiunile noi la redeschidere și cât timp este activă. Datele salvate în cont rămân păstrate.'}</p>

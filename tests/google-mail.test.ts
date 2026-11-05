@@ -231,3 +231,13 @@ test('Provider errors are sanitized and config/key changes require reconnection'
   process.env.GOOGLE_MAIL_REDIRECT_URI = 'https://other.invalid/callback';
   assert.equal((await mail.googleMailStatus(uid)).configured, false);
 });
+
+test('Rejected Gmail refresh authorization is surfaced as reconnect required instead of a healthy stale test',async()=>{
+  process.env.GOOGLE_MAIL_REDIRECT_URI=mail.GOOGLE_MAIL_CALLBACK;
+  const connect=await start();await mail.completeGoogleMail(uid,session,callback(connect.state,connect.cookie));
+  const center=await import('../src/lib/mail-center');
+  const campaign=await center.saveCampaign(uid,{id:crypto.randomUUID(),template:'administrative',category:'transactional',subject:'Test authorization failure',message:'An isolated test with no real recipients.',ctaLabel:'Open account',ctaPath:'/cont',recipients:[client]});
+  await center.deliverCampaign(campaign.id,async()=>{throw new mail.GoogleDeliveryError('failed','GMAIL_AUTHORIZATION_FAILED');});
+  const status=await mail.googleMailStatus(uid);
+  assert.equal(status.connected,false);assert.equal(status.reconnectRequired,true);assert.equal(await mail.gmailReady(),false);
+});

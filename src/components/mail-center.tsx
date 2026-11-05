@@ -1,6 +1,7 @@
 'use client';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
+import GoogleMailSettings from './google-mail-settings';
 import { Mail, Eye, Send, Plus, RefreshCw } from 'lucide-react';
 import type { mailCenterOverview, campaignDetail } from '@/lib/mail-center';
 import { templateCategory } from '@/lib/email-templates';
@@ -18,6 +19,7 @@ async function api(path = '', method = 'GET', body?: unknown) {
   if (!r.ok) throw new Error(out.error || 'Operațiunea nu a reușit.');
   return out;
 }
+const deliveryErrors: Record<string,string> = { GMAIL_AUTHORIZATION_FAILED: 'Gmail nu a autorizat trimiterea. Fondatorul trebuie să reconecteze Gmail și să refacă testul.', PREFERENCES_OR_EVENT_CHANGED: 'Preferințele destinatarului sau evenimentul asociat nu permit această trimitere.', GMAIL_HTTP_429: 'Google a respins cererea din cauza limitei de trimitere. Reîncearcă mai târziu.', GMAIL_HTTP_403: 'Google a refuzat trimiterea. Verifică autorizarea și limitele contului.', GMAIL_DELIVERY_UNCONFIRMED: 'Rezultat incert. Verifică Gmail înainte de a crea o nouă trimitere.' };
 const labels: Record<string, string> = {
   draft: 'Ciornă',
   pending: 'În așteptare',
@@ -76,7 +78,7 @@ const [libraryName, setLibraryName] = useState('');
       .catch(() => {
         if (active) setError('Mail Center nu a putut fi încărcat.');
       });
-    const timer = setInterval(() => { void api().then((d: Overview) => { if (active) setData(d); }).catch(() => {}); }, 30000);
+    const timer = setInterval(() => { if (document.hidden || !navigator.onLine) return; void api().then((d: Overview) => { if (active) setData(d); }).catch(() => {}); }, 30000);
     return () => {
       clearInterval(timer);
       active = false;
@@ -164,6 +166,7 @@ const [libraryName, setLibraryName] = useState('');
           Automatizări: {data.automation.enabled ? 'activate' : 'dezactivate'}. Administrare din secțiunea Automatizări.
         </p>
       </section>
+      {data.permissions.canApprove && gmailStatus?.reconnectRequired && <GoogleMailSettings />}
       {error && (
         <p className="error" role="alert">
           {error}
@@ -436,7 +439,11 @@ const [libraryName, setLibraryName] = useState('');
               setData(await api());
               const issues = latest.deliveries.filter((d) => ['failed', 'unknown', 'suppressed'].includes(d.status));
               setNotice(`${total} emailuri acceptate de Gmail.${remaining ? ' Mai sunt destinatari în așteptare: apasă din nou Trimite.' : ' Trimiterea a fost procesată.'}`);
-              if (issues.length) setError(`${issues.length} emailuri au status eșuat, incert sau omis. Verifică detaliile înainte de orice retrimitere.`);
+              if (issues.length) {
+                const reasons = [...new Set(issues.map(d => deliveryErrors[d.error || ''] || (d.status === 'suppressed' ? 'Trimitere omisă conform preferințelor sau stării evenimentului.' : 'Verifică detaliile de mai jos.')))];
+                setError(`${issues.length} emailuri necesită atenție. ${reasons.join(' ')}`);
+                setSection('history');
+              }
               });
             }}
           >
@@ -588,11 +595,16 @@ const [libraryName, setLibraryName] = useState('');
         {detail && (
           <div>
             <h3>{detail.campaign.subject}</h3><p>{detail.communicationType}</p><p style={{whiteSpace: 'pre-wrap'}}>{detail.campaign.message}</p><p>{detail.campaign.ctaLabel} · {detail.campaign.ctaPath}</p>
+            {detail.deliveries.some(d => d.status === 'failed') && <button disabled={busy} onClick={() => void run(async () => {
+              const result = await api(`/campaigns/${detail.campaign.id}/retry-failed`, 'POST');
+              setDetail(await api(`/campaigns/${detail.campaign.id}`)); setData(await api());
+              setNotice(`${result.requeued} emailuri eșuate sunt pregătite pentru reîncercare. Deschide comunicarea din istoric și apasă Continuă trimiterea după reconectarea Gmail. Cele acceptate, incerte sau omise nu sunt retrimise.`);
+            })}>Pregătește reîncercarea emailurilor eșuate</button>}
             <ul>
               {detail.deliveries.map((d) => (
                 <li key={d.id}>
                   {d.name} · {d.email} — {labels[d.status] || d.status}
-                  {d.error ? ` · ${d.error}` : ''}
+                  {d.error ? ` · ${deliveryErrors[d.error] || d.error}` : ''}
                 </li>
               ))}
             </ul>

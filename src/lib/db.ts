@@ -4,11 +4,14 @@ import { drizzle as liteDrizzle } from 'drizzle-orm/pglite';
 import { PGlite } from '@electric-sql/pglite';
 import * as schema from './schema';
 type DB = NodePgDatabase<typeof schema>;
-const globalDb = globalThis as unknown as { autoDb?: DB; autoLite?: PGlite };
+const globalDb = globalThis as unknown as { autoDb?: DB; autoLite?: PGlite; autoPool?: Pool };
 export function db(): DB {
   if (globalDb.autoDb) return globalDb.autoDb;
   if (process.env.DATABASE_URL) {
-    globalDb.autoDb = pgDrizzle(new Pool({ connectionString: process.env.DATABASE_URL, max: 5 }), {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 5, connectionTimeoutMillis: 5000, idleTimeoutMillis: 10000, maxLifetimeSeconds: 300, query_timeout: 15000, statement_timeout: 15000, application_name: 'autocare-web' });
+    pool.on('error', () => console.error(JSON.stringify({ event: 'database_idle_connection_error' })));
+    globalDb.autoPool = pool;
+    globalDb.autoDb = pgDrizzle(pool, {
       schema,
     });
   } else if (
@@ -26,6 +29,8 @@ export function db(): DB {
 }
 export async function closeLocalDb() {
   await globalDb.autoLite?.close();
+  await globalDb.autoPool?.end();
+  delete globalDb.autoPool;
   delete globalDb.autoDb;
   delete globalDb.autoLite;
 }

@@ -117,6 +117,17 @@ async function connection() {
     throw new AppError(409, 'Configurația Gmail s-a schimbat. Reconectează contul.');
   return { value, row, c };
 }
+async function authorizationFailedSince(connectedAt: string) {
+  const failed = (await db().select({ at: s.mailDeliveries.attemptedAt }).from(s.mailDeliveries)
+    .where(and(eq(s.mailDeliveries.error, 'GMAIL_AUTHORIZATION_FAILED'), sql`${s.mailDeliveries.attemptedAt} >= ${new Date(connectedAt)}`)).limit(1))[0];
+  return !!failed;
+}
+/** Refresh authorization before claiming recipients; this never sends an email. */
+export async function verifyGoogleMailAuthorization() {
+  const { value } = await connection();
+  try { await tokenRequest({ grant_type: 'refresh_token', refresh_token: value.refresh }); }
+  catch { throw new AppError(409, 'Gmail nu a autorizat trimiterea. Reconectează Gmail din Mail Center și trimite testul; emailurile destinatarilor nu au fost expediate.'); }
+}
 export async function googleMailStatus(uid: string) {
   await requireFounder(uid);
   let c;
@@ -129,6 +140,7 @@ export async function googleMailStatus(uid: string) {
   if (!row) return { configured: true, connected: false, from: c.from, automaticEnabled: false };
   try {
     const { value } = await connection();
+    if (await authorizationFailedSince(value.connectedAt)) return { configured: true, connected: false, from: c.from, testedAt: null, reconnectRequired: true, automaticEnabled: false, reason: 'GMAIL_AUTHORIZATION_FAILED' };
     return {
       configured: true,
       connected: true,
@@ -315,7 +327,7 @@ export class GoogleDeliveryError extends Error {
 }
 export async function gmailReady() {
   const { value } = await connection();
-  return !!value.testedAt;
+  return !!value.testedAt && !(await authorizationFailedSince(value.connectedAt));
 }
 export async function sendGoogleMail(to: string, content: EmailContent, deliveryId: string) {
   const { value, c } = await connection();
