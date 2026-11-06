@@ -1967,3 +1967,48 @@
  html body .app-shell.ac-workspace.ac-studio .settings-workspace details {background:#1a293c !important; border:1px solid #ffffff25 !important; color:#dbeaff !important;}
  html body .app-shell.ac-workspace.ac-studio .settings-workspace details > summary {background:transparent !important; color:#dbeaff !important; padding:18px !important; font-size:15px !important;}
 }
+
+/* Complete graphite surfaces, including nested widgets that carry legacy light styles. */
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio {
+  color-scheme: dark;
+  --bg:#151d28; --panel:#222e3d; --panel2:#1b293a; --border:#42546d; --muted:#b9c7d9; --text:#f3f7ff;
+ }
+ html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.support-workspace,.support-chat-panel) {
+  background:#222e3d !important; background-image:none !important; color:#e7f0ff !important; border-color:#ffffff24 !important;
+ }
+ html body .app-shell.ac-workspace.ac-studio :is(.mileage-planner-odometer,.service-reminder-box,.ac-smartdrive-reminder,.ac-smartdrive-history-metrics>div,.ac-smartdrive-history>div[style],.ac-smartdrive-history-columns>div,.record-context,.record-context>summary,.record-context>div,.push-state,.section-title,.filter-pills) {
+  background:#1b2b3f !important; background-image:none !important; color:#d7e6fb !important; border-color:#ffffff24 !important;
+ }
+ html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.service-reminder-box,.ac-smartdrive-reminder) :is(p,span,small,label) {color:#bdcfe7 !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.service-reminder-box,.ac-smartdrive-reminder) :is(h2,h3,h4,strong) {color:#f3f7ff !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.mileage-planner-icon,.subscription-symbol,.list-icon,.event-date,.app-profile-avatar) {background:#2b4668 !important; color:#d1e5ff !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.best-plan,.subscription-saving) {background:#294c6e !important; color:#c8e7ff !important; border-color:#527da5 !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.mileage-ok,.forecast-maintenance-state.is-valid) {background:#1c413b !important; color:#a8edda !important;}
+ html body .app-shell.ac-workspace.ac-studio .pill.soon {background:#493b28 !important; color:#ffdda4 !important; border-color:#9f7c49 !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.support-client-folders,.support-client-intro,.support-chat-header,.support-composer) {background:#1b2b3e !important; color:#d8e6f9 !important; border-color:#ffffff24 !important;}
+ html body .app-shell.ac-workspace.ac-studio .support-messages {background:#162334 !important; color:#d8e6f9 !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.support-workspace,.support-chat-panel) :is(p,span,small,label) {color:#c2d1e6 !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.support-workspace,.support-chat-panel) :is(h2,h3,h4,strong) {color:#eef5ff !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.support-message,.support-empty>div) {background:#263c56 !important; color:#e3efff !important; border-color:#ffffff24 !important;}
+ html body .app-shell.ac-workspace.ac-studio .main .view-toggle {background:#1d3048 !important; border:1px solid #526b8e !important; padding:4px !important;}
+ html body .app-shell.ac-workspace.ac-studio .plate {background:#243c59 !important; color:#d5e8ff !important; border-color:#5d7a9e !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo {background:radial-gradient(ellipse at 75% 30%,#1b4e6f 0%,#182a40 40%,#111d2c 85%) !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-brand-emblem {display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; width:100%; height:100%; color:#88c9ff !important; background:repeating-linear-gradient(125deg,transparent 0 45px,#ffffff05 46px 47px);}
+ html body .app-shell.ac-workspace.ac-studio .studio-brand-emblem span {font-size:12px !important; letter-spacing:4px !important; color:#b4cce9 !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel>.studio-vehicle-photo {opacity:.48 !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-brand-emblem {align-items:flex-end; padding-right:35px;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-brand-emblem span {display:none !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-brand-emblem svg {width:150px; height:150px;}
+}
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio .record-view-switch>div {background:#1b2b3f !important; border:1px solid #536b8c !important; padding:4px !important; border-radius:10px !important;}
+ html body .app-shell.ac-workspace.ac-studio .record-view-switch button[aria-pressed=true] {background:#345e94 !important; color:#fff !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo img {background:#1b2b3f !important;}
+ html body .app-shell.ac-workspace.ac-studio .support-empty>div {background:#294464 !important;}
+}
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio label.check {background:#1c3047 !important; color:#d9e8fb !important; border-color:#ffffff25 !important;}
+ html body .app-shell.ac-workspace.ac-studio label.check :is(span,strong,small) {color:#d9e8fb !important;}
+ html body .app-shell.ac-workspace.ac-studio .support-header-role {background:#25435b !important; color:#c7e7ff !important; border-color:#5d87a8 !important; padding:6px 10px !important; border-radius:7px !important;}
+}
