@@ -57,6 +57,7 @@ export default function MaintenanceHighlights({
           ? upcomingMaintenance([s.record], currentKm, dailyKm, timezone)[0]
           : undefined;
         const km = result?.status.remainingKm;
+        const nextKm=result?.service.nextKm??s.record?.nextKm;
         return (
           <button
             type="button"
@@ -69,12 +70,14 @@ export default function MaintenanceHighlights({
             <span className="app-highlight-description">
               <strong>{s[language]}</strong>
               <small>
-                {result
+                {result&&result.status.state!=='unscheduled'
                   ? forecastDuration(result.estimate?.days ?? null, language)
-                  : en
-                    ? 'Set a service interval'
-                    : 'Configurează intervalul de schimb'}
+                  : s.record?(en?'Service saved · set the next interval':'Schimb salvat · completează următorul interval'):(en?'Add the last service':'Adaugă ultimul schimb')}
               </small>
+              {s.record?.date&&<small>{en?'Last service: ':'Ultimul schimb: '}{new Date(s.record.date+'T12:00:00Z').toLocaleDateString(locale,{timeZone:'UTC'})}</small>}
+              <small>{en?'Current: ':'Acum: '}{currentKm.toLocaleString(locale)} km</small>
+              {s.record?.odometer!=null&&<small>{en?'At service: ':'La schimb: '}{s.record.odometer.toLocaleString(locale)} km</small>}
+              {nextKm!=null&&<small>{en?'Next at: ':'Următorul la: '}{nextKm.toLocaleString(locale)} km</small>}
             </span>
             <span className="app-highlight-distance">
               {km != null ? (

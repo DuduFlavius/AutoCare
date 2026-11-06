@@ -1,3 +1,4 @@
+import {isOilMaintenance} from './maintenance-kind';
 import { forecastService } from './service-forecast';
 import { maintenanceStatus } from './maintenance-status';
 import { parseServiceDetails } from './service-details';
@@ -99,7 +100,7 @@ export type MaintenanceSource = {
 export function maintenanceTargets(record: MaintenanceSource) {
   if (parseServiceDetails(record.parts || '').completedBy) return [];
   const details = parseServiceDetails(record.parts || '');
-  const oil = /ulei/i.test(record.category + ' ' + record.title) && /schimb|motor|revizie/i.test(record.category + ' ' + record.title);
+  const oil = isOilMaintenance(record);
   const schedule = maintenanceSchedule({ ...record, category: oil ? 'Schimb ulei' : record.category, details });
   const targets: Array<{
     id: string;

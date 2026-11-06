@@ -9,6 +9,7 @@ import {
   Wallet,
   ArrowRight,
   CalendarClock,
+  Route,
   Check,
   ChevronDown,
 } from 'lucide-react';
@@ -65,6 +66,7 @@ export default function ApplicationHome({
   const documents = rows
     .filter((r) => r.kind === 'document' && r.status.days !== null && r.status.days <= 30)
     .sort((a, b) => a.status.days! - b.status.days!);
+  const rca=rows.filter(r=>r.kind==='document'&&r.category==='RCA').sort((a,b)=>(b.expiresAt||'').localeCompare(a.expiresAt||''))[0];
   const recent = rows
     .filter((r) => r.kind === 'service')
     .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
@@ -175,7 +177,7 @@ export default function ApplicationHome({
                 <div className="app-vehicle-distance">
                   <Gauge size={20} />
                   <div>
-                    <small>{t('Kilometraj confirmat', 'Confirmed mileage')}</small>
+                    <small>{t('Kilometraj actual', 'Current mileage')}</small>
                     <strong>
                       {car.odometer.toLocaleString(locale)} <span>km</span>
                     </strong>
@@ -256,7 +258,7 @@ export default function ApplicationHome({
                       {date(next.raw)}
                     </p>
                   )}
-                  <DailyMileageInput key={car.id} usage={usage} />
+                  <details className="app-estimate-settings"><summary>{t('Ajustează estimarea','Adjust estimate')}</summary><DailyMileageInput key={car.id} usage={usage}/></details>
                   <p className="app-caption">
                     {t(
                       'Se aplică primul prag atins: timp sau kilometraj. Estimarea folosește kilometrajul confirmat și media zilnică.',
@@ -313,6 +315,7 @@ export default function ApplicationHome({
             action={t('Toate documentele', 'All documents')}
             onAction={() => navigate('Documente')}
           >
+            <div className="app-inline-empty" data-workspace-ui><ShieldCheck size={20}/><div><strong>RCA</strong><p>{rca?(rca.expiresAt?t('Expiră la ','Expires on ')+date(rca.expiresAt):t('Completează expirarea pentru notificări.','Set expiry for reminders.')):t('Adaugă polița RCA și data expirării.','Add your RCA policy and expiry date.')}</p></div><button type="button" className="app-text-action" onClick={()=>rca?onRecord(rca):onCreate('document',car.id)}>{rca?t('Vezi RCA','View RCA'):t('Adaugă RCA','Add RCA')}<ArrowRight size={15}/></button></div>
             {documents.length ? (
               <div className="app-document-list">
                 {documents.slice(0, 3).map((r) => (
@@ -390,7 +393,12 @@ export default function ApplicationHome({
                   : ''}
               </p>
             </AppSection>
-            <AppSection
+            <AppSection title={t('Ultimele călătorii','Recent trips')} action={t('Toate călătoriile','All trips')} onAction={()=>navigate('Plan întreținere')}>
+              {(data.recentTrips||[]).filter(trip=>trip.vehicleId===car.id).slice(0,3).map(trip=><button type="button" className="app-record-row" key={trip.id} onClick={()=>navigate('Plan întreținere')}><Route size={18}/><span><strong>{(trip.distanceMeters/1000).toLocaleString(locale,{maximumFractionDigits:2})} km</strong><small>{new Date(trip.startedAt).toLocaleString(locale,{timeZone:data.profile.timezone,day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · {Math.max(1,Math.round(trip.durationSeconds/60))} min</small></span><ArrowRight size={16}/></button>)}
+              {!(data.recentTrips||[]).some(trip=>trip.vehicleId===car.id)&&<p className="app-caption">{t('Călătoriile salvate vor apărea aici.','Saved trips will appear here.')}</p>}
+            </AppSection>
+          </div>
+          <details className="app-upcoming"><summary>{t('Istoric service','Service history')}</summary>            <AppSection
               title={t('Ultimele intervenții', 'Recent maintenance')}
               action={t('Istoric', 'History')}
               onAction={() => navigate('Istoric auto')}
@@ -417,7 +425,7 @@ export default function ApplicationHome({
                 </p>
               )}
             </AppSection>
-          </div>
+</details>
           {upcoming.length > 1 && (
             <details className="app-upcoming">
               <summary>

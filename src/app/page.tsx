@@ -35,13 +35,10 @@ export default function Home() {
           <div>
             <p className="eyebrow">GARAJUL TĂU DIGITAL</p>
             <h1>
-              Ai grijă de mașina ta.{' '}
-              <span className="accent">Toate informațiile, într-un singur loc.</span>
+              Mașina ta.{' '}<span className="accent">Totul în ordine.</span>
             </h1>
             <p>
-              AutoCare te ajută să îți organizezi documentele mașinii, să urmărești termenele
-              importante, să păstrezi istoricul de întreținere și să înțelegi cheltuielile auto. Mai
-              puțină dezordine, mai mult control asupra mașinii tale.
+              Documentele, reviziile și cheltuielile mașinii, la îndemână. Vezi ce urmează și păstrează istoricul fiecărui drum.
             </p>
             <div className="actions">
               <Link href="/inregistrare" className="button primary">
@@ -116,7 +113,7 @@ export default function Home() {
               [
                 BellRing,
                 'Mementouri la timp',
-                'Activează Web Push pe dispozitive compatibile. E-mailul necesită configurarea furnizorului.',
+                'Alege când și cum vrei să fii anunțat despre termenele mașinii.',
               ],
               [
                 Wrench,

@@ -102,3 +102,15 @@ test('timing service recalculates stale next mileage after correcting historical
 test('timing service retains an explicit absolute deadline when no repeat interval is entered', () => {
   assert.equal(recordDraftSchedule(form({odometer:'83000',nextKm:'150000'}), 'service', 'Distribuție').nextKm, 150000);
 });
+
+
+test('RCA requires expiry and retains configured document day reminders on edits',()=>{
+ const options={...opts,kind:'document' as const,category:'RCA'};
+ assert.throws(()=>prepareRecordDraft(form({}),options));
+ const saved=prepareRecordDraft(form({expiresAt:'2030-12-01',ac_alertDays:'30,7,1,0'}),options);
+ assert.equal(parseServiceDetails(saved.parts).alertDays,'30,7,1,0');
+ const edited=prepareRecordDraft(form({expiresAt:'2031-12-01'}),{...options,existingParts:saved.parts});
+ assert.equal(parseServiceDetails(edited.parts).alertDays,'30,7,1,0');
+ const inherit=prepareRecordDraft(form({expiresAt:'2031-12-01',ac_alertDays:'inherit'}),{...options,existingParts:saved.parts});
+ assert.equal(parseServiceDetails(inherit.parts).alertDays,undefined);
+});

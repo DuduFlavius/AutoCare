@@ -73,6 +73,7 @@ const [active, setActive] = useState(false);
   const [distance, setDistance] = useState(0);
   const [error, setError] = useState('');
   const [syncMileage,setSyncMileage]=useState(true);
+  const [finalizeOnStop,setFinalizeOnStop]=useState(false);
   const [saved,setSaved]=useState(false);
   const tripId=useRef('');
   const baseline=useRef(0);
@@ -144,6 +145,7 @@ const [active, setActive] = useState(false);
     tick.current = null;
     previous.current = null;
     endedAt.current=Date.now();
+    setFinalizeOnStop(true);
     setActive(false);
   };
   useEffect(() => () => { if (watcher.current !== null) navigator.geolocation.clearWatch(watcher.current); if (tick.current) clearInterval(tick.current); }, []);
@@ -224,10 +226,10 @@ const [active, setActive] = useState(false);
     return()=>{window.removeEventListener('online',retry);document.removeEventListener('visibilitychange',retry);};
   },[]);
   useEffect(()=>{
-    if(!native || active || automatic || saved || !endedAt.current || distanceRef.current<=0)return;
+    if((!native&&!finalizeOnStop) || active || automatic || saved || !endedAt.current || distanceRef.current<=0)return;
     void saveTrip();
     // Finalization, rather than each GPS poll, triggers one save attempt.
-  },[native,active,automatic,saved,startedAt,saveRetry]);
+  },[native,finalizeOnStop,active,automatic,saved,startedAt,saveRetry]);
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Traseul tău, în timp real</h3></div>
     <div className="ac-smartdrive-trip-metric"><strong>{(distance / 1000).toLocaleString(locale, { maximumFractionDigits: 2 })}</strong><span>km estimați · traseu filtrat în timp real</span></div>
@@ -245,6 +247,7 @@ const [active, setActive] = useState(false);
       {!active && !automatic && (distance>0 || (native&&startedAt!==null)) && !saved && <button type="button" disabled={saving} onClick={()=>{if(!window.confirm('Renunți la traseul nesalvat?'))return;if(nativeMode.current){void nativeTracking.clear(ownerId).then(()=>{distanceRef.current=0;started.current=null;setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');}).catch(e=>setError(e instanceof Error?e.message:'GPS indisponibil.'));return;}distanceRef.current=0;started.current=null;previous.current=null;setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');try{localStorage.removeItem(draftKey);}catch{/* Storage unavailable. */}}}>Renunță la traseu</button>}
       <span><MapPin size={15}/> {active ? 'GPS activ' : 'GPS oprit'}</span>
     </div>
+    <div className="service-reminder-box" data-workspace-ui><strong>{locale.startsWith('en')?'Current vehicle mileage: ':'Kilometraj actual al mașinii: '}{(vehicles.find(v=>v.id===vehicleId)??vehicles[0])?.odometer.toLocaleString(locale)} km</strong><p>{locale.startsWith('en')?'Saved sessions update maintenance mileage.':'Sesiunile salvate actualizează kilometrajul folosit pentru întreținere.'}</p><a href="?tab=%C3%8Entre%C8%9Binere">{locale.startsWith('en')?'View maintenance and remaining kilometres':'Vezi intervențiile și kilometrii rămași'}</a></div>
     <div className="ac-smartdrive-map" style={{margin:'18px 0',padding:12,background:'#fff',border:'1px solid #dbe5f3',borderRadius:18}}>
       <strong style={{display:'block',marginBottom:8,color:'#172b48'}}>Hartă rutieră · GPS în timp real</strong>
       {!active && routePoints.length===0 && <button type="button" disabled={locating||preview} onClick={locate} style={{marginBottom:12}}><MapPin size={17}/> {locating ? (locale.startsWith('en')?'Locating…':'Se caută poziția…') : (locale.startsWith('en')?'Show my location':'Arată poziția mea')}</button>}

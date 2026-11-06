@@ -59,7 +59,7 @@ export const pages: Record<
     sections: [
       [
         'Se citesc automat datele mașinii?',
-        'Nu. Kilometrajul și datele documentelor sunt introduse de utilizator. Nu există o conexiune cu registrele oficiale sau cu vehiculul.',
+        'Poți introduce kilometrajul manual sau sincroniza distanța sesiunilor GPS salvate, fără adaptor. Bluetooth-ul mașinii declanșează înregistrarea; nu citește kilometrajul din bord. Documentele sunt completate de utilizator și nu sunt verificate în registre oficiale.',
       ],
       [
         'Pot primi notificări pe iPhone?',

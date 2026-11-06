@@ -210,6 +210,7 @@ test('05 Records enforce owner, track changes, and keep expiry incomplete if omi
     category: 'RCA',
     title: 'RCA',
     vehicleId: crypto.randomUUID(),
+    expiresAt:'2030-04-09',
   });
   assert.equal(foreign.status, 404);
 });
@@ -273,7 +274,7 @@ test('07 Retry is bounded; parallel workers do not double claim; archive suppres
     await deliverReminders(new Date(now.getTime() + delta * 60000), transient);
   const n = (
     await db().select().from(s.notifications).where(eq(s.notifications.recordId, r.id))
-  )[0];
+  ).find(row=>row.channel==='email')!;
   assert.equal(n.status, 'failed');
   assert.equal(n.attempts, 4);
   await deliverReminders(new Date(now.getTime() + 35 * 60000), transient);

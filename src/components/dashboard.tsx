@@ -24,6 +24,7 @@ import {maintenanceTargets} from '@/lib/maintenance-schedule';
 import ServiceForecastCards from './service-forecast-cards';
 import SmartDriveHistory from './smartdrive-history';
 import RecordEditor from './record-editor';
+import ServiceMileage from './service-mileage';
 import {parseServiceDetails} from '@/lib/service-details';
 import {completedServiceSeed} from '@/lib/completed-service';
 import { filterRecords, documentCounts, serviceStats } from '@/lib/record-filters';
@@ -1466,6 +1467,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                         ? 'Cost necunoscut'
                                         : moneyDisplay(r.amountBani)}
                                     </strong>
+                                    {r.kind==='service'&&data.vehicles.find(v=>v.id===r.vehicleId)&&<ServiceMileage currentKm={data.vehicles.find(v=>v.id===r.vehicleId)!.odometer} lastKm={r.odometer} nextKm={r.nextKm}/>}
                                     <div className="small muted">
                                       {r.odometer != null
                                         ? r.odometer.toLocaleString(locale) + ' km'

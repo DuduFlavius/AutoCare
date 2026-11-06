@@ -27,6 +27,10 @@ final class TrackingStore {
     static synchronized void append(Context context,Location location) throws JSONException {
         JSONObject state=read(context);
         long now=System.currentTimeMillis();
+        if(state.optBoolean("automatic")){
+            if(!state.optBoolean("bluetoothConnected"))return;
+            if(android.os.Build.VERSION.SDK_INT>=31&&context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)!=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
+        }
         if(!state.optBoolean("active") || !location.hasAccuracy() || location.getAccuracy()<0 || location.getAccuracy()>50 || location.getTime()>now+5000 || now-location.getTime()>15000)return;
         context.getSharedPreferences("autocare-gps",Context.MODE_PRIVATE).edit().putLong("fix-at",now).apply();
         // Live location is independent from the distance/movement filter.
@@ -35,13 +39,14 @@ final class TrackingStore {
         if(old!=null && location.getTime()<=old.optLong("timestamp"))return;
         state.put("lastPosition",live).put("updatedAt",now);
         write(context,state);
+        if(state.optBoolean("automatic")&&(!location.hasSpeed()||location.getSpeed()<2.5f))return;
         JSONArray points=state.optJSONArray("points");if(points==null)points=new JSONArray();
         JSONObject previous=points.length()>0?points.getJSONObject(points.length()-1):null;
-        boolean gap=previous==null; double meters=0;
+        boolean gap=previous==null||state.optBoolean("forceBreak"); double meters=0;
         if(previous!=null){
             double seconds=(location.getTime()-previous.getDouble("timestamp"))/1000;
             if(seconds<=0)return;
-            gap=seconds>45;
+            gap=gap||seconds>45;
             if(!gap){
                 float[] distance=new float[1];Location.distanceBetween(previous.getDouble("latitude"),previous.getDouble("longitude"),location.getLatitude(),location.getLongitude(),distance);
                 meters=distance[0];
@@ -50,6 +55,7 @@ final class TrackingStore {
         }
         JSONObject point=new JSONObject().put("latitude",location.getLatitude()).put("longitude",location.getLongitude()).put("accuracy",location.getAccuracy()).put("timestamp",location.getTime()).put("breakBefore",gap);
         if(points.length()>=1500){JSONArray recent=new JSONArray();for(int i=1;i<points.length();i++)recent.put(points.get(i));points=recent;}
+        state.remove("forceBreak");
         points.put(point);state.put("points",points).put("distance",state.optDouble("distance")+(gap?0:meters)).put("updatedAt",now);
         write(context,state);
     }

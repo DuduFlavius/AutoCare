@@ -33,7 +33,7 @@ export async function scheduleReminders(now = new Date()) {
     const days = r.expiresAt ? daysRemaining(r.expiresAt, now, p.timezone) : null;
     const due=reminderOffsets({parts:r.parts,paid,defaults:p.offsets,days,nextKm:r.kind==='service'?r.nextKm:null,odometer:v.odometer,afterExpiry:p.afterExpiry});
     for (const offset of due)
-      for (const channel of ['email', 'push']) {
+      for (const channel of ['email', 'push', 'app']) {
         if (channel === 'email' && !u.emailVerified) continue;
         if ((channel === 'email' && !p.emailEnabled) || (channel === 'push' && !p.pushEnabled))
           continue;
@@ -54,6 +54,7 @@ export async function scheduleReminders(now = new Date()) {
             recordId: r.id,
             revision: r.revision,
             channel,
+            status:channel==='app'?'delivered':'pending',
             offset,
             localDate: localDate(now, p.timezone),
             message,
@@ -62,7 +63,7 @@ export async function scheduleReminders(now = new Date()) {
           })
           .onConflictDoNothing()
           .returning({ id: s.notifications.id });
-        queued += out.length;
+        if(channel!=='app')queued += out.length;
       }
   }
   return queued;

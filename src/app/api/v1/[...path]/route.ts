@@ -229,10 +229,12 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     if (route === 'dashboard' && method === 'GET') return json(await svc.dashboard(uid));
     if (path.length === 2 && path[0] === 'notifications' && method === 'DELETE') {
       const id = uuid.parse(path[1]);
-      const removed = await db().delete(s.notifications)
-        .where(and(eq(s.notifications.id, id), eq(s.notifications.userId, uid)))
-        .returning({ id: s.notifications.id });
-      if (!removed.length) throw new svc.AppError(404, 'Notificare inexistentă.');
+      const notice=(await db().select().from(s.notifications).where(and(eq(s.notifications.id,id),eq(s.notifications.userId,uid))))[0];
+      if(!notice)throw new svc.AppError(404,'Notificare inexistentă.');
+      const group=and(eq(s.notifications.userId,uid),eq(s.notifications.recordId,notice.recordId),eq(s.notifications.revision,notice.revision),eq(s.notifications.offset,notice.offset),eq(s.notifications.localDate,notice.localDate));
+      await db().update(s.notifications).set({readAt:new Date()}).where(group);
+      await db().insert(s.notifications).values({...notice,id:crypto.randomUUID(),channel:'app',status:'dismissed',readAt:new Date()}).onConflictDoNothing();
+      await db().update(s.notifications).set({status:'dismissed'}).where(and(group,eq(s.notifications.channel,'app')));
       return json({ ok: true });
     }
     if (route === 'notifications/read' && method === 'POST') {

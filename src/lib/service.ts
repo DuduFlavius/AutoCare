@@ -1,3 +1,4 @@
+import {groupedNotifications} from './notification-groups';
 import {paidExtensions} from './paid-coverage';
 import {parseServiceDetails} from './service-details';
 import { and, eq, desc, sql } from 'drizzle-orm';
@@ -269,7 +270,7 @@ export function summarize(
 }
 export async function dashboard(uid: string) {
   const p = await profile(uid);
-  const [cars, rows, sub, alerts, attachments, photos] = await Promise.all([
+  const [cars, rows, sub, alerts, attachments, photos, recentTrips] = await Promise.all([
     db()
       .select()
       .from(s.vehicles)
@@ -301,6 +302,7 @@ export async function dashboard(uid: string) {
       .select({ vehicleId: s.vehiclePhotos.vehicleId })
       .from(s.vehiclePhotos)
       .where(eq(s.vehiclePhotos.userId, uid)),
+    db().select({id:s.gpsTrips.id,vehicleId:s.gpsTrips.vehicleId,startedAt:s.gpsTrips.startedAt,durationSeconds:s.gpsTrips.durationSeconds,distanceMeters:s.gpsTrips.distanceMeters,source:s.gpsTrips.source}).from(s.gpsTrips).where(eq(s.gpsTrips.userId,uid)).orderBy(desc(s.gpsTrips.startedAt)).limit(12),
   ]);
   const now = new Date();
   const date = localDate(now, p.timezone);
@@ -316,6 +318,7 @@ export async function dashboard(uid: string) {
   return {
     profile: p,
     vehicles: cars,
+    recentTrips,
     records: rows.map((r) => ({
       ...r,
       status: r.cancelled
@@ -336,7 +339,7 @@ export async function dashboard(uid: string) {
       ...savings(price.monthlyBani, price.annualBani),
     },
     subscription: sub[0] || null,
-    notifications: alerts,
+    notifications: groupedNotifications(alerts.filter(n=>n.status!=='cancelled')),
     attachments,
     photos,
     summary: paid ? summary : { ...summary, monthly: [], categories: {}, costPerKm: null, km: 0 },

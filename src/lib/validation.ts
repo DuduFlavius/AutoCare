@@ -46,6 +46,7 @@ export const recordInput = z
     parts: note,
   })
   .superRefine((r, ctx) => {
+    if(r.kind==='document'&&r.category==='RCA'&&!r.expiresAt)ctx.addIssue({code:'custom',path:['expiresAt'],message:'Completează data expirării RCA pentru notificări.'});
     if (r.kind === 'document' && r.date && r.expiresAt && r.expiresAt < r.date)
       ctx.addIssue({
         code: 'custom',

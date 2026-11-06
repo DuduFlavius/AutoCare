@@ -1,0 +1,23 @@
+html{scroll-behavior:smooth}body{-webkit-font-smoothing:antialiased}
+:where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid #3478f6;outline-offset:3px}
+html body .ac-workspace .app-home{max-width:1180px;margin-inline:auto;gap:24px}
+html body .ac-workspace .app-home .app-section{background:#fff!important;border:1px solid #e2e8f0!important;border-radius:22px!important;box-shadow:0 4px 22px #151b2605!important;padding:24px!important}
+html body .ac-workspace .app-home .app-section-head{margin-bottom:20px;gap:12px;flex-wrap:wrap}
+html body .ac-workspace .app-home .app-section-head h2{font-size:17px;letter-spacing:-.025em}
+html body .ac-workspace .app-home .app-caption{font-size:12px;line-height:1.65;color:#64748b!important}
+html body .ac-workspace .app-home .app-highlight-description small{line-height:1.6}
+html body .ac-workspace .app-home .app-maintenance-highlights{gap:14px}
+html body .ac-workspace .app-home .app-maintenance-highlights>button{border-radius:18px!important;background:#fff!important;border:1px solid #e2e8f0!important}
+html body .ac-workspace .app-home .app-record-row{min-height:64px;padding-block:14px}
+html body .ac-workspace .app-home .app-record-row>span{min-width:0}
+html body .ac-workspace .app-home .app-record-row strong{overflow-wrap:anywhere}
+html body .ac-workspace .app-estimate-settings{margin-block:16px;border-top:1px solid #e2e8f0;padding-top:12px}
+html body .ac-workspace .app-estimate-settings summary{cursor:pointer;font-size:13px;font-weight:600;color:#1d57b0;padding-block:10px}
+html body .ac-workspace .app-home .app-upcoming{border:1px solid #e2e8f0;border-radius:18px;background:#fff;padding:16px 20px}
+html body .ac-workspace .app-home .app-upcoming summary{cursor:pointer;min-height:28px;font-size:14px;font-weight:600}
+html body .ac-workspace .app-home .app-upcoming>.app-section{border:0!important;box-shadow:none!important;padding:16px 0 0!important}
+html body .ac-workspace :is(.app-icon-button,.app-avatar-button){min-width:44px;min-height:44px}
+html body .ac-workspace :is(.app-text-action,.row-actions button,.app-quick-actions button){min-height:44px}
+html body .ac-workspace .app-home button{transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
+@media(max-width:760px){html body .ac-workspace .app-home{gap:18px}html body .ac-workspace .app-home .app-section{border-radius:18px!important;padding:20px!important}html body .ac-workspace .app-home .app-home-secondary{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}html body .ac-workspace .app-topbar :is(.app-header-premium,.app-header-signout){display:none!important}html body .ac-workspace .app-topbar{gap:12px!important;padding:10px 16px!important}html body .ac-workspace .app-topbar .app-topbar-actions{gap:4px;margin-left:auto}html body .ac-workspace .app-home .app-inline-empty{align-items:flex-start;flex-wrap:wrap}html body .ac-workspace .app-home .app-inline-empty p{margin:4px 0}html body .ac-workspace .app-home .app-inline-empty .app-text-action{margin-left:auto}html body .ac-workspace .app-bottom-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;animation-iteration-count:1!important}}

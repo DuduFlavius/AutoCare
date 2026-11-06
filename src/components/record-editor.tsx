@@ -2,6 +2,7 @@
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import { useRef, useState, type FormEvent } from 'react';
 import OperationAlerts from './operation-alerts';
+import ServiceMileage from './service-mileage';
 import RecordCategoryPicker from './record-category-picker';
 import { recordCategory } from '@/lib/record-categories';
 import ServiceDetailFields, {
@@ -229,6 +230,7 @@ export default function RecordEditor({
           </select>
         </label>
         <input name="category" value={category} readOnly hidden />
+        {kind==='service'&&<section className="service-reminder-box" data-workspace-ui><h3>{en?'Service mileage':'Kilometrii intervenției'}</h3><ServiceMileage currentKm={data.vehicles.find(v=>v.id===car)?.odometer??0} lastKm={record?.odometer??null} nextKm={record?.nextKm??null}/><small>{en?'Saved trips update current mileage and remaining distance. Historical service mileage stays fixed.':'Sesiunile salvate actualizează kilometrajul actual și distanța rămasă. Kilometrajul intervenției rămâne fix.'}</small></section>}
         <label>
           {kind === 'document'
             ? 'Denumirea documentului'
@@ -267,9 +269,9 @@ export default function RecordEditor({
           </label>
           {kind === 'document' ? (
             <label>
-              Data expirării · dacă este cazul
-              <input type="date" name="expiresAt" defaultValue={record?.expiresAt || ''} />
-              <small>Lasă liber dacă documentul nu are termen de expirare.</small>
+              {category==='RCA'?(en?'RCA expiry date · required':'Data expirării RCA · obligatorie'):'Data expirării · dacă este cazul'}
+              <input type="date" name="expiresAt" required={category==='RCA'} defaultValue={record?.expiresAt || ''} />
+              <small data-workspace-ui>{category==='RCA'?(en?'Used for your expiry reminders.':'Folosită pentru notificările de expirare.'):(en?'Leave blank for documents without expiry.':'Lasă liber dacă documentul nu are termen de expirare.')}</small>
             </label>
           ) : (
             <label>
@@ -394,6 +396,7 @@ export default function RecordEditor({
             )}
           </>
         )}
+        {kind==='document'&&<section className="service-reminder-box" data-workspace-ui><h3>{en?'Document expiry reminders':'Notificări pentru expirarea documentului'}</h3><p>{en?'General reminders follow your account preferences in Settings → Notifications and email.':'Mementourile respectă preferințele din Setări → Notificări și email.'}</p><OperationAlerts parts={record?.parts||''} premium={data.premium} mileage={false}/></section>}
         {kind === 'document' && (
           <label>
             Număr sau serie · opțional

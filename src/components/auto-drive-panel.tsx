@@ -39,7 +39,7 @@ export default function AutoDrivePanel({
     ]);
     setStatus(s);
     setPending(p);
-    setSupported(s.apiVersion >= 2 && s.supported);
+    setSupported(s.apiVersion >= 3 && s.supported);
   }
   useEffect(() => {
     if (preview || !hasNativeTracking()) return;
@@ -49,7 +49,7 @@ export default function AutoDrivePanel({
       .then((s) => {
         if (!disposed) {
           setStatus(s);
-          setSupported(s.apiVersion >= 2 && s.supported);
+          setSupported(s.apiVersion >= 3 && s.supported);
         }
       })
       .catch((e) => {
@@ -96,10 +96,11 @@ export default function AutoDrivePanel({
         </h3>
         <p>
           {english
-            ? 'Opt-in tracking for the vehicle you associate. Disconnects shorter than two minutes do not split your trip.'
-            : 'Urmărire opțională pentru mașina asociată. Deconectările mai scurte de două minute nu fragmentează traseul.'}
+            ? 'Your selected car Bluetooth starts and stops GPS recording. No OBD2 adapter is needed.'
+            : 'Bluetooth-ul mașinii selectate pornește și oprește înregistrarea GPS. Nu ai nevoie de adaptor OBD2.'}
         </p>
       </header>
+      <p>{english?'GPS distance is an estimate. Bluetooth does not read the dashboard odometer. Very slow movement is excluded to reduce walking and stationary drift.':'Distanța este estimată prin GPS. Bluetooth-ul nu citește kilometrajul din bord. Mișcarea foarte lentă este exclusă pentru a reduce mersul pe jos și erorile la staționare.'}</p>
       <p>
         {english
           ? 'Enabling AutoDrive allows trip recording and mileage sync when you next open AutoCare. Your historical service mileage stays unchanged.'
