@@ -181,7 +181,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         if (path.length === 5 && path[4] === 'send' && method === 'POST') return json(await mailCenter.sendCampaign(uid, path[3]));
       }
 
-      if (route === 'founder/seo' && method === 'GET') return json(await founder.founderSeo(uid));
+      if (route === 'founder/seo' && method === 'GET') return json({ ...await founder.founderSeo(uid), appURL: origin() });
       if (route === 'founder/seo' && method === 'PUT') {
         const result = await founder.saveFounderSeo(uid, await body(req));
         revalidateTag('autocare-google-verification', { expire: 0 });
