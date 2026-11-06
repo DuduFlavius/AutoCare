@@ -1,1 +1,17 @@
-{"appId":"ro.autocare.garage","appName":"AutoCare","webDir":"www","server":{"url":"https://project-sxage.vercel.app/cont","cleartext":false},"android":{"allowMixedContent":false},"ios":{"contentInset":"automatic"}}
+{
+  "appId": "ro.autocare.garage",
+  "appName": "AutoCare",
+  "webDir": "www",
+  "server": {
+    "url": "https://autocare-premium.vercel.app/cont",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "zoomEnabled": false
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "zoomEnabled": false
+  }
+}

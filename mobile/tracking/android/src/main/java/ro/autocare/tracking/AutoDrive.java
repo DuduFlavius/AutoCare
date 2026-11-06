@@ -10,7 +10,7 @@ import java.util.UUID;
 
 /** Local opt-in associations; no credentials, network requests or server odometers. */
 final class AutoDrive {
-    static final long STOP_DELAY=120000L;
+    static final long STOP_DELAY=10000L;
     static android.content.SharedPreferences prefs(Context c){return c.getSharedPreferences("autocare-auto-drive",Context.MODE_PRIVATE);}
     static JSONObject bindings(Context c){try{return new JSONObject(prefs(c).getString("bindings","{}"));}catch(Exception e){return new JSONObject();}}
     static JSONArray pending(Context c,String owner){try{return new JSONArray(prefs(c).getString("pending-"+owner,"[]"));}catch(Exception e){return new JSONArray();}}
@@ -63,14 +63,14 @@ final class AutoDrive {
             if(state.optBoolean("automatic")&&state.optBoolean("active")&&state.optLong("stopAt")>0&&System.currentTimeMillis()>=state.optLong("stopAt")){state=TrackingStore.stop(c);c.stopService(new Intent(c,TrackingService.class));TrackingService.running=false;}
             if(state.optBoolean("active")&&!TrackingService.running){TrackingService.running=true;if(Build.VERSION.SDK_INT>=26)c.startForegroundService(new Intent(c,TrackingService.class));else c.startService(new Intent(c,TrackingService.class));}
             boolean matching=state.optBoolean("automatic")&&config.optString("ownerId").equals(state.optString("ownerId"))&&config.optString("vehicleId").equals(state.optString("vehicleId"))&&address.equalsIgnoreCase(state.optString("address"))&&state.optBoolean("active")&&TrackingService.running;
-            if(!connected){prefs(c).edit().remove("suppressed-"+address).apply();if(matching){TrackingStore.stop(c);c.stopService(new Intent(c,TrackingService.class));TrackingService.running=false;}return;}
-            if(matching){state.remove("stopAt");state.remove("disconnectedAt");state.remove("disconnectDistance");state.remove("disconnectPoints");TrackingStore.write(c,state);return;}
+            if(!connected){prefs(c).edit().remove("suppressed-"+address).apply();if(matching&&state.optLong("stopAt")==0){long now=System.currentTimeMillis();state.put("bluetoothConnected",false).put("stopAt",now+STOP_DELAY).put("disconnectedAt",now).put("disconnectDistance",state.optDouble("distance")).put("disconnectPoints",new JSONArray(state.optJSONArray("points").toString()));TrackingStore.write(c,state);}return;}
+            if(matching){if(state.has("disconnectedAt"))state.put("forceBreak",true);state.put("bluetoothConnected",true);state.remove("stopAt");state.remove("disconnectedAt");state.remove("disconnectDistance");state.remove("disconnectPoints");TrackingStore.write(c,state);return;}
             if(prefs(c).getBoolean("suppressed-"+address,false)||TrackingService.running)return;
             if(Build.VERSION.SDK_INT>=29&&c.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)!=PackageManager.PERMISSION_GRANTED){prefs(c).edit().putString("error","Permite localizarea Tot timpul pentru pornire automată.").apply();return;}
             if(pending(c,config.getString("ownerId")).length()>=200){prefs(c).edit().putString("error","Deschide AutoCare pentru a sincroniza traseele.").apply();return;}
             if(state.has("id")&&!state.optBoolean("automatic")){prefs(c).edit().putString("error","Salvează traseul manual înainte de pornirea automată.").apply();return;}
             long now=System.currentTimeMillis();
-            JSONObject trip=new JSONObject().put("id",UUID.randomUUID().toString()).put("ownerId",config.getString("ownerId")).put("vehicleId",config.getString("vehicleId")).put("baseline",config.getInt("baseline")).put("startedAt",now).put("updatedAt",now).put("distance",0).put("active",true).put("automatic",true).put("bluetoothConnected",true).put("bluetoothConnectionAt",now).put("address",address).put("points",new JSONArray());
+            JSONObject trip=new JSONObject().put("id",UUID.randomUUID().toString()).put("ownerId",config.getString("ownerId")).put("vehicleId",config.getString("vehicleId")).put("baseline",config.getInt("baseline")).put("startedAt",now).put("updatedAt",now).put("distance",0).put("active",true).put("automatic",true).put("awaitingMotion",true).put("bluetoothConnected",true).put("bluetoothConnectionAt",now).put("address",address).put("points",new JSONArray());
             TrackingStore.write(c,trip);prefs(c).edit().remove("error").apply();TrackingService.running=true;
             if(Build.VERSION.SDK_INT>=26)c.startForegroundService(new Intent(c,TrackingService.class));else c.startService(new Intent(c,TrackingService.class));
         }catch(Exception e){TrackingService.running=false;try{TrackingStore.stop(c);}catch(Exception ignored){}prefs(c).edit().putString("error","Pornirea automată a fost oprită de telefon. Deschide AutoCare.").apply();}

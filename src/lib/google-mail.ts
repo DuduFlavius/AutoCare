@@ -17,7 +17,7 @@ import { automationState } from './mail-automation';
 import { renderEmail, type EmailContent } from './email-templates';
 
 export const GOOGLE_MAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
-export const GOOGLE_MAIL_CALLBACK = 'https://project-sxage.vercel.app/api/v1/mail/google/callback';
+export function googleMailCallback() { return new URL('/api/v1/mail/google/callback', origin()).href; }
 const CONNECTION = 'private:google-mail:connection';
 const STATE_PREFIX = 'private:google-mail:state:';
 const COOKIE = '__Host-autocare-mail-oauth';
@@ -45,7 +45,7 @@ function config() {
   if (
     !client ||
     !secret ||
-    redirect !== GOOGLE_MAIL_CALLBACK ||
+    redirect !== googleMailCallback() ||
     !from ||
     !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@gmail\.com$/.test(from)
   )

@@ -20,7 +20,7 @@ public class AutoCareTrackingPlugin extends Plugin {
         try{android.content.pm.PackageInfo info=getContext().getPackageManager().getPackageInfo(getContext().getPackageName(),0);JSObject value=new JSObject();value.put("version",info.versionName);value.put("versionCode",Build.VERSION.SDK_INT>=28?info.getLongVersionCode():info.versionCode);call.resolve(value);}catch(Exception e){call.reject("Unable to read app version",e);}
     }
     @PluginMethod public void openAndroidUpdate(PluginCall call){
-        try{if(TrackingStore.read(getContext()).optBoolean("active")){call.reject("Stop and save GPS before installing an update");return;}Uri uri=Uri.parse(call.getString("url",""));if(!"https".equals(uri.getScheme())||!"project-sxage.vercel.app".equals(uri.getHost())||uri.getPath()==null||!uri.getPath().matches("/downloads/AutoCare-[0-9.]+\\.apk")){call.reject("Invalid update URL");return;}getActivity().startActivity(new Intent(Intent.ACTION_VIEW,uri).addCategory(Intent.CATEGORY_BROWSABLE));call.resolve();}catch(Exception e){call.reject("Unable to open Android installer",e);}
+        try{if(TrackingStore.read(getContext()).optBoolean("active")){call.reject("Stop and save GPS before installing an update");return;}Uri uri=Uri.parse(call.getString("url",""));if(!"https".equals(uri.getScheme())||!"autocare-premium.vercel.app".equals(uri.getHost())||uri.getPath()==null||!uri.getPath().matches("/downloads/AutoCare-[0-9.]+\\.apk")){call.reject("Invalid update URL");return;}getActivity().startActivity(new Intent(Intent.ACTION_VIEW,uri).addCategory(Intent.CATEGORY_BROWSABLE));call.resolve();}catch(Exception e){call.reject("Unable to open Android installer",e);}
     }
     private PluginCall pairing;
     private ActivityResultLauncher<IntentSenderRequest> chooser;
@@ -62,7 +62,10 @@ public class AutoCareTrackingPlugin extends Plugin {
 
             if(current.optBoolean("active")&&!owned(call,current)){call.reject("O altă urmărire este deja activă pe acest dispozitiv.");return;}
             JSONObject existing=TrackingStore.forOwner(getContext(),call.getString("ownerId",""));
-            if(existing.optBoolean("automatic")&&!existing.optBoolean("active")){call.reject("Traseul automat așteaptă sincronizarea. Deschide AutoDrive.");return;}
+            if(existing.optBoolean("automatic")&&!existing.optBoolean("active")){
+                if(existing.optDouble("distance")>0){call.reject("Traseul automat așteaptă sincronizarea. Deschide AutoDrive.");return;}
+                TrackingStore.clearOwner(getContext(),call.getString("ownerId",""));existing=new JSONObject();
+            }
             if(existing.has("id")){
                 if(!owned(call,existing)||!existing.optString("id").equals(call.getString("id"))){call.reject("Salvează sau șterge traseul existent înainte de altă urmărire.");return;}
                 existing.put("active",true);existing.remove("endedAt");TrackingStore.write(getContext(),existing);
@@ -80,7 +83,7 @@ public class AutoCareTrackingPlugin extends Plugin {
 
     @PluginMethod public void automationStatus(PluginCall call){
         try{String owner=call.getString("ownerId","");JSONArray list=new JSONArray();JSONObject all=AutoDrive.bindings(getContext());for(java.util.Iterator<String> it=all.keys();it.hasNext();){JSONObject row=all.getJSONObject(it.next());if(owner.equals(row.optString("ownerId")))list.put(row);}
-            JSObject result=new JSObject();result.put("apiVersion",3);result.put("platform","android");result.put("supported",Build.VERSION.SDK_INT>=26);result.put("bindings",list);result.put("pendingCount",AutoDrive.pending(getContext(),owner).length());result.put("backgroundLocation",Build.VERSION.SDK_INT<29||getContext().checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)==PackageManager.PERMISSION_GRANTED);result.put("error",AutoDrive.prefs(getContext()).getString("error",""));call.resolve(result);
+            JSObject result=new JSObject();result.put("apiVersion",4);result.put("platform","android");result.put("supported",Build.VERSION.SDK_INT>=26);result.put("bindings",list);result.put("pendingCount",AutoDrive.pending(getContext(),owner).length());result.put("backgroundLocation",Build.VERSION.SDK_INT<29||getContext().checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)==PackageManager.PERMISSION_GRANTED);result.put("error",AutoDrive.prefs(getContext()).getString("error",""));call.resolve(result);
         }catch(Exception e){call.reject("Unable to read automation status",e);}
     }
     @PluginMethod public void pairedDevices(PluginCall call){if(Build.VERSION.SDK_INT>=31&&getPermissionState("bluetooth")!=PermissionState.GRANTED){requestPermissionForAlias("bluetooth",call,"pairedPermission");return;}listDevices(call);}

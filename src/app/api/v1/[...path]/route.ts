@@ -135,7 +135,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         return json(await googleMail.googleMailStatus(uid));
       if (route === 'mail/google/disconnect' && method === 'POST')
         return json(await googleMail.disconnectGoogleMail(uid));
-      if (new URL(req.url).origin !== new URL(googleMail.GOOGLE_MAIL_CALLBACK).origin)
+      if (new URL(req.url).origin !== new URL(googleMail.googleMailCallback()).origin)
         return json({ error: 'Conectarea și testarea Gmail sunt disponibile pe domeniul de producție configurat.' }, 403);
       if (route === 'mail/google/connect' && method === 'POST') {
         const result = await googleMail.beginGoogleMail(uid, sess.session.id);

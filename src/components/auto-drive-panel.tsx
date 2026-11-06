@@ -39,7 +39,7 @@ export default function AutoDrivePanel({
     ]);
     setStatus(s);
     setPending(p);
-    setSupported(s.apiVersion >= 3 && s.supported);
+    setSupported(s.apiVersion >= 4 && s.supported);
   }
   useEffect(() => {
     if (preview || !hasNativeTracking()) return;
@@ -49,7 +49,7 @@ export default function AutoDrivePanel({
       .then((s) => {
         if (!disposed) {
           setStatus(s);
-          setSupported(s.apiVersion >= 3 && s.supported);
+          setSupported(s.apiVersion >= 4 && s.supported);
         }
       })
       .catch((e) => {
@@ -96,8 +96,8 @@ export default function AutoDrivePanel({
         </h3>
         <p>
           {english
-            ? 'Your selected car Bluetooth starts and stops GPS recording. No OBD2 adapter is needed.'
-            : 'Bluetooth-ul mașinii selectate pornește și oprește înregistrarea GPS. Nu ai nevoie de adaptor OBD2.'}
+            ? 'Your selected car Bluetooth prepares GPS. A trip starts only after sustained movement is confirmed.'
+            : 'Bluetooth-ul mașinii pregătește GPS-ul. Călătoria începe doar după confirmarea deplasării.'}
         </p>
       </header>
       <p>{english?'GPS distance is an estimate. Bluetooth does not read the dashboard odometer. Very slow movement is excluded to reduce walking and stationary drift.':'Distanța este estimată prin GPS. Bluetooth-ul nu citește kilometrajul din bord. Mișcarea foarte lentă este exclusă pentru a reduce mersul pe jos și erorile la staționare.'}</p>

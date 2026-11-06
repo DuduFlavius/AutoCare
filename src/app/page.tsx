@@ -69,6 +69,7 @@ export default function Home() {
               alt="Ilustrație AutoCare cu documente, calendar și scut cu bifă"
             />
             <h3>Mai multă liniște, la fiecare drum.</h3>
+            <Link href="/aplicatie-auto" className="small accent">Descoperă aplicația AutoCare pentru Android și web →</Link>
             <p className="small muted">Documente, termene și istoric. În ordine, într-un singur loc.</p>
             <div className="list">
               <div className="list-row">
@@ -215,7 +216,10 @@ export default function Home() {
               url: origin(),
               description: siteDescription,
               applicationCategory: 'LifestyleApplication',
-              operatingSystem: 'Web',
+              operatingSystem: 'Android, Web',
+              '@id': origin() + '/#application',
+              publisher: { '@id': origin() + '/#organization' },
+              featureList: ['Documente RCA, ITP și rovinietă', 'Istoric service și kilometraj', 'Cheltuieli auto', 'Sesiuni SmartDrive'],
               inLanguage: 'ro-RO',
               image: origin() + '/images/autocare-app-premium.webp',
               offers: {

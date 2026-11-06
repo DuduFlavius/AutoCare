@@ -28,7 +28,7 @@ final class TrackingStore {
         JSONObject state=read(context);
         long now=System.currentTimeMillis();
         if(state.optBoolean("automatic")){
-            if(!state.optBoolean("bluetoothConnected"))return;
+            if(!state.optBoolean("bluetoothConnected")||state.has("disconnectedAt"))return;
             if(android.os.Build.VERSION.SDK_INT>=31&&context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)!=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
         }
         if(!state.optBoolean("active") || !location.hasAccuracy() || location.getAccuracy()<0 || location.getAccuracy()>50 || location.getTime()>now+5000 || now-location.getTime()>15000)return;
@@ -39,7 +39,8 @@ final class TrackingStore {
         if(old!=null && location.getTime()<=old.optLong("timestamp"))return;
         state.put("lastPosition",live).put("updatedAt",now);
         write(context,state);
-        if(state.optBoolean("automatic")&&(!location.hasSpeed()||location.getSpeed()<2.5f))return;
+        if(state.optBoolean("automatic")&&state.optBoolean("awaitingMotion")&&location.getAccuracy()>25)return;
+        if(state.optBoolean("automatic")&&!DrivingGate.usableSpeed(location.hasSpeed(),location.getSpeed()))return;
         JSONArray points=state.optJSONArray("points");if(points==null)points=new JSONArray();
         JSONObject previous=points.length()>0?points.getJSONObject(points.length()-1):null;
         boolean gap=previous==null||state.optBoolean("forceBreak"); double meters=0;
@@ -56,7 +57,15 @@ final class TrackingStore {
         JSONObject point=new JSONObject().put("latitude",location.getLatitude()).put("longitude",location.getLongitude()).put("accuracy",location.getAccuracy()).put("timestamp",location.getTime()).put("breakBefore",gap);
         if(points.length()>=1500){JSONArray recent=new JSONArray();for(int i=1;i<points.length();i++)recent.put(points.get(i));points=recent;}
         state.remove("forceBreak");
-        points.put(point);state.put("points",points).put("distance",state.optDouble("distance")+(gap?0:meters)).put("updatedAt",now);
+        points.put(point);
+        if(state.optBoolean("automatic")&&state.optBoolean("awaitingMotion")){
+            long first=state.optLong("motionStartAt",location.getTime());
+            if(gap||location.getTime()-first>120000){first=location.getTime();state.put("motionSamples",0).put("motionMeters",0);points=new JSONArray().put(point);}
+            int samples=state.optInt("motionSamples")+1;double measured=state.optDouble("motionMeters")+(gap?0:meters);
+            state.put("motionStartAt",first).put("motionSamples",samples).put("motionMeters",measured);
+            if(DrivingGate.qualifies(samples,location.getTime()-first,measured))state.put("awaitingMotion",false).put("startedAt",first).put("distance",measured);
+        }else state.put("distance",state.optDouble("distance")+(gap?0:meters));
+        state.put("points",points).put("updatedAt",now);
         write(context,state);
     }
     static synchronized JSONObject stop(Context context) throws JSONException {

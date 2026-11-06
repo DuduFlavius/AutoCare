@@ -2,6 +2,7 @@
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useRef, useState } from 'react';
 import AutoDrivePanel from './auto-drive-panel';
+import DriveSessionSummary from './drive-session-summary';
 import dynamic from 'next/dynamic';
 import { MapPin, Play, Square, Route } from 'lucide-react';
 
@@ -12,6 +13,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId }: 
 
   const locale=useApplicationLocale();
   const [waitingCar,setWaitingCar]=useState(false);
+  const [awaitingMotion,setAwaitingMotion]=useState(false);
   const [mapPosition,setMapPosition]=useState<Sample|null>(null);
   const [locating,setLocating]=useState(false);
   const [locationMessage,setLocationMessage]=useState('');
@@ -82,7 +84,7 @@ const [active, setActive] = useState(false);
   const lastFix = useRef<number>(0);
   const [routePoints, setRoutePoints] = useState<Sample[]>([]);
   const [trackingSeconds, setTrackingSeconds] = useState(0);
-  const [clock, setClock] = useState('');
+  const [, setClock] = useState('');
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const watcher = useRef<number | null>(null);
   const previous = useRef<Sample | null>(null);
@@ -90,12 +92,14 @@ const [active, setActive] = useState(false);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
   const distanceRef = useRef(0);
   function applyNative(value:NativeTrip){
-    setAutomatic(!!value.automatic);setWaitingCar(!!value.stopAt);
+    if(tripId.current!==value.id)setSaved(false);
+    setAutomatic(!!value.automatic&&(value.active||value.distance>0));setWaitingCar(!!value.stopAt);setAwaitingMotion(!!value.awaitingMotion);
+    if(value.automatic&&!value.active&&value.distance===0)setSaved(true);
     const shownDistance=value.stopAt?(value.disconnectDistance??value.distance):value.distance;
     const shownPoints=value.disconnectedAt?value.points.filter(p=>p.timestamp<=value.disconnectedAt!):value.points;
     tripId.current=value.id;baseline.current=value.baseline;started.current=value.startedAt;endedAt.current=value.endedAt??null;
     distanceRef.current=shownDistance;setDistance(shownDistance);setVehicleId(value.vehicleId);setStartedAt(value.startedAt);setActive(value.active);setRoutePoints(shownPoints);
-    setClock(new Date().toLocaleTimeString(locale));setTrackingSeconds(Math.max(0,Math.floor(((value.endedAt??Date.now())-value.startedAt)/1000)));
+    setClock(new Date().toLocaleTimeString(locale));setTrackingSeconds(value.awaitingMotion?0:Math.max(0,Math.floor(((value.disconnectedAt??value.endedAt??Date.now())-value.startedAt)/1000)));
     const position=value.lastPosition??shownPoints.at(-1);
     if(position)setMapPosition(current=>!current||position.timestamp>=current.timestamp?position:current);
     const last=position;if(last){lastFix.current=value.lastFixAt||last.timestamp;setSignal(value.active&&Date.now()-lastFix.current>25000?'lost':'ok');}
@@ -232,13 +236,7 @@ const [active, setActive] = useState(false);
   },[native,finalizeOnStop,active,automatic,saved,startedAt,saveRetry]);
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Traseul tău, în timp real</h3></div>
-    <div className="ac-smartdrive-trip-metric"><strong>{(distance / 1000).toLocaleString(locale, { maximumFractionDigits: 2 })}</strong><span>km estimați · traseu filtrat în timp real</span></div>
-    <div className="ac-smartdrive-live" aria-live="off">
-      <div><span>Distanță parcursă</span><strong>{(distance / 1000).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km</strong></div>
-      <div><span>Ora actuală</span><strong>{clock || '--:--:--'}</strong></div>
-      <div><span>Timp de la pornire</span><strong>{String(Math.floor(trackingSeconds / 3600)).padStart(2, '0')}:{String(Math.floor(trackingSeconds % 3600 / 60)).padStart(2, '0')}:{String(trackingSeconds % 60).padStart(2, '0')}</strong></div>
-      <div><span>Început urmărire</span><strong>{startedAt === null ? '—' : new Date(startedAt).toLocaleTimeString(locale)}</strong></div>
-    </div>
+    <DriveSessionSummary distance={distance} seconds={trackingSeconds} phase={saving?'saving':waitingCar&&active?'reconnecting':active&&awaitingMotion?'waiting':active?'driving':saved&&distance>0?'saved':'ready'} accuracy={mapPosition?.accuracy??null} english={locale.startsWith('en')}/>
     {vehicles.length > 0 && <label>Mașina pentru călătorie <select value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active || (distance>0 && !saved)} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}
     {!automatic&&<label className="ac-smartdrive-sync" style={{display:'flex',gap:12,alignItems:'center',padding:16,border:'1px solid #dbe5f3',borderRadius:14,marginBottom:16}}><input type="checkbox" checked={syncMileage} disabled={saving||saved} onChange={e=>setSyncMileage(e.target.checked)}/> Adaugă distanța GPS la kilometraj la salvare. Actualizează automat uleiul, distribuția și celelalte intervale, păstrând kilometrajul intervențiilor.</label>}
     <div className="ac-smartdrive-trip-controls">
@@ -263,8 +261,8 @@ const [active, setActive] = useState(false);
     {native && <p className="small muted">După Pornește GPS trebuie să apară notificarea permanentă „AutoCare · GPS activ”. Pe Android, verifică în Setări → Aplicații → AutoCare: locație precisă, notificări permise și Baterie → Fără restricții. Pentru pornirea automată prin Bluetooth, permite locația „Tot timpul”.</p>}
     <p>{native ? 'Urmărirea nativă continuă în fundal, cu permisiunea telefonului, până alegi Oprește GPS. Oprirea forțată a aplicației sau restricțiile telefonului pot întrerupe înregistrarea.' : 'Menține aplicația deschisă pentru înregistrare. Browserul poate opri GPS-ul în fundal sau cu ecranul blocat. Segmentele fără semnal nu sunt adăugate la distanță.'}</p>
 
-    {waitingCar&&active&&<p role="status">{locale.startsWith('en')?'Car disconnected. Waiting up to two minutes to reconnect; walking distance will not be added if the trip ends here.':'Mașina s-a deconectat. Aștept reconectarea până la două minute; mersul pe jos nu se adaugă dacă traseul se încheie aici.'}</p>}
-    {automatic&&!active&&!saved&&<p role="status">{locale.startsWith('en')?'Automatic trip saved on this device; waiting for safe account sync.':'Traseu automat păstrat pe dispozitiv; în așteptarea sincronizării sigure în cont.'}</p>}
+    {waitingCar&&active&&<p role="status">{locale.startsWith('en')?'Car connection interrupted. Distance is paused while reconnection is checked.':'Conexiunea mașinii este întreruptă. Kilometrii sunt opriți cât se verifică reconectarea.'}</p>}
+    {automatic&&!active&&!saved&&distance>0&&<p role="status">{locale.startsWith('en')?'Automatic trip saved on this device; waiting for safe account sync.':'Traseu automat păstrat pe dispozitiv; în așteptarea sincronizării sigure în cont.'}</p>}
     <AutoDrivePanel ownerId={ownerId} vehicles={vehicles} english={locale.startsWith('en')} onUpdated={onSaved} preview={preview}/>
     {notice && <p role="status">{notice}</p>}
     {error && <p className="ac-smartdrive-trip-error" role="alert">{error}</p>}

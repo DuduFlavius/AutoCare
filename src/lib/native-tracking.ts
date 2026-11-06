@@ -14,6 +14,7 @@ export type NativeTrip = {
   distance: number;
   active: boolean;
   automatic?: boolean;
+  awaitingMotion?: boolean;
   disconnectedAt?: number;
   disconnectDistance?: number;
   stopAt?: number;
@@ -73,6 +74,7 @@ const trip = z.object({
   distance: z.number().nonnegative(),
   active: z.boolean(),
   automatic: z.boolean().optional(),
+  awaitingMotion: z.boolean().optional(),
   disconnectedAt: z.number().positive().optional(),
   disconnectDistance: z.number().nonnegative().optional(),
   stopAt: z.number().positive().optional(),
