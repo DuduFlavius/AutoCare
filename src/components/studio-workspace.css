@@ -1959,3 +1959,11 @@
  html body .app-shell.ac-workspace.ac-studio .membership-access strong {color:#f3f7ff !important;}
  html body .app-shell.ac-workspace.ac-studio .app-account-section button {margin-bottom:8px !important;}
 }
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio .main .settings-workspace.grid2 {grid-template-columns:minmax(0,1fr) !important; width:100% !important; max-width:none !important;}
+ html body .app-shell.ac-workspace.ac-studio .ws-settings-nav {background:#1c2b3e !important; border:1px solid #ffffff20 !important; padding:10px !important; border-radius:14px !important;}
+ html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button {margin-bottom:6px !important;}
+ html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button[aria-current=page] {background:#3065bc !important; border-color:#73aaff !important;}
+ html body .app-shell.ac-workspace.ac-studio .settings-workspace details {background:#1a293c !important; border:1px solid #ffffff25 !important; color:#dbeaff !important;}
+ html body .app-shell.ac-workspace.ac-studio .settings-workspace details > summary {background:transparent !important; color:#dbeaff !important; padding:18px !important; font-size:15px !important;}
+}
