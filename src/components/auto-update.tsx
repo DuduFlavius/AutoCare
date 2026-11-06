@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { nativeTracking, nativeMethodMissing } from '@/lib/native-tracking';
+import { nativeTracking, nativeAutomation, nativeMethodMissing } from '@/lib/native-tracking';
 import { useApplicationLanguage } from './application-locale';
 
 /** Web releases refresh only at an idle, visible, online and unedited page. */
@@ -11,6 +11,7 @@ export default function AutoUpdate() {
   const [androidRelease, setAndroidRelease] = useState<{version: string; url: string} | null>(null);
   const [installing, setInstalling] = useState(false);
   const [gpsBlocked, setGpsBlocked] = useState(false);
+  const [installError, setInstallError] = useState(false);
   const dirty = useRef(false);
   const interaction = useRef(Date.now());
   useEffect(() => {
@@ -30,7 +31,9 @@ export default function AutoUpdate() {
     void checkAndroid();
     const timer = setInterval(() => void checkAndroid(), 120000);
     window.addEventListener('focus',checkAndroid);
-    return () => { disposed = true; clearInterval(timer); window.removeEventListener('focus',checkAndroid); };
+    window.addEventListener('online',checkAndroid);
+    document.addEventListener('visibilitychange',checkAndroid);
+    return () => { disposed = true; clearInterval(timer); window.removeEventListener('focus',checkAndroid); window.removeEventListener('online',checkAndroid); document.removeEventListener('visibilitychange',checkAndroid); };
   }, []);
   useEffect(() => {
     const current = process.env.NEXT_PUBLIC_AUTOCARE_BUILD;
@@ -57,7 +60,13 @@ export default function AutoUpdate() {
         setAvailable(true);
         setGpsBlocked(document.documentElement.dataset.autocareGpsActive === 'true');
         if (manual) report('available');
-        if (!Capacitor.isNativePlatform() && !dirty.current && document.documentElement.dataset.autocareGpsActive !== 'true' && Date.now() - interaction.current > 30000) window.location.reload();
+        let nativeSafe = !Capacitor.isNativePlatform();
+        const ownerId = document.documentElement.dataset.autocareNativeOwner;
+        if (!nativeSafe && ownerId && document.documentElement.dataset.autocareNativeUpdateSafe === 'true') {
+          const [active, queue] = await Promise.all([nativeTracking.snapshot(ownerId), nativeAutomation.pending(ownerId)]);
+          nativeSafe = !active?.active && queue.length === 0;
+        }
+        if (!disposed && document.visibilityState === 'visible' && navigator.onLine && (!Capacitor.isNativePlatform() || (document.documentElement.dataset.autocareNativeOwner === ownerId && document.documentElement.dataset.autocareNativeUpdateSafe === 'true')) && nativeSafe && !dirty.current && document.documentElement.dataset.autocareGpsActive !== 'true' && Date.now() - interaction.current > 30000) window.location.reload();
       } catch { if (manual) report('error'); /* Keep the working page after a failed check. */ }
       finally { checking = false; }
     };
@@ -93,16 +102,26 @@ export default function AutoUpdate() {
   const en = document.documentElement.lang.startsWith('en');
   return <aside role="status" style={{ position: 'fixed', bottom: 'calc(88px + env(safe-area-inset-bottom))', right: 16, left: 'auto', maxWidth: 'min(370px, calc(100vw - 32px))', zIndex: 10000, padding: 18, borderRadius: 16, background: '#151b26', color: '#fff', boxShadow: '0 12px 36px #0004', border: '1px solid #3478f6' }}>
     <strong>{en ? 'Update available' : 'Actualizare disponibilă'}{androidRelease ? ` · ${androidRelease.version}` : ''}</strong>
-    <p style={{ color: '#d6e2f5', margin: '8px 0 12px' }}>{en ? 'Install when your trip is saved. Android will ask you to confirm the installation.' : 'Instalează după salvarea traseului. Android îți va cere confirmarea instalării.'}</p>
+    <p style={{ color: '#d6e2f5', margin: '8px 0 12px' }}>{androidRelease ? (en ? 'Android will ask you to confirm installation. Save your trip first.' : 'Android îți va cere confirmarea instalării. Salvează întâi traseul.') : (en ? 'The interface refreshes automatically when idle, after trips sync and without unsaved edits.' : 'Interfața se actualizează automat în repaus, după sincronizarea traseelor și fără modificări nesalvate.')}</p>
     <button type="button" disabled={installing} style={{ background: '#3478f6', color: '#fff', border: 0, padding: '12px 18px', borderRadius: 10, fontWeight: 700 }} onClick={async () => {
       if (document.documentElement.dataset.autocareGpsActive === 'true') { setGpsBlocked(true); return; }
       if (dirty.current && !window.confirm(en ? 'Install the update? Unsaved form changes may be lost.' : 'Instalezi actualizarea? Modificările nesalvate din formular se pot pierde.')) return;
+      setInstallError(false);
       setInstalling(true);
       if (androidRelease) {
         try { await nativeTracking.openAndroidUpdate(new URL(androidRelease.url,window.location.origin).href); }
-        catch { setGpsBlocked(true); }
+        catch { setInstallError(true); }
         finally { setInstalling(false); }
         return;
+      }
+      if (Capacitor.isNativePlatform()) {
+        const ownerId = document.documentElement.dataset.autocareNativeOwner;
+        if (ownerId) {
+          try {
+            const [active, queue] = await Promise.all([nativeTracking.snapshot(ownerId), nativeAutomation.pending(ownerId)]);
+            if (active?.active || queue.length > 0 || document.documentElement.dataset.autocareNativeUpdateSafe !== 'true') { setGpsBlocked(true); setInstalling(false); return; }
+          } catch { setInstallError(true); setInstalling(false); return; }
+        }
       }
       try {
         if ('serviceWorker' in navigator) {
@@ -112,6 +131,7 @@ export default function AutoUpdate() {
       } catch { /* The network-first page still refreshes to the current release. */ }
       window.location.reload();
     }}>{installing ? (en ? 'Installing…' : 'Se instalează…') : (en ? 'Install update' : 'Instalează actualizarea')}</button>
+    {installError && <p role="alert">{en ? 'Could not open the installer. Try again after saving your trip.' : 'Kitul de instalare nu a putut fi deschis. Reîncearcă după salvarea traseului.'}</p>}
     {gpsBlocked && <p style={{color:'#fbd38d',margin:'10px 0 0'}}>{en ? 'Stop and save your GPS trip before installing.' : 'Oprește și salvează traseul GPS înainte de instalare.'}</p>}
   </aside>;
 }

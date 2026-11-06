@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { hasNativeTracking, nativeMethodMissing } from '@/lib/native-tracking';
+import { hasNativeTracking, nativeMethodMissing, nativeTracking, nativeAutomation } from '@/lib/native-tracking';
 import { syncAutomaticTrips } from '@/lib/sync-automatic-trips';
 export default function NativeTripSync({
   ownerId,
@@ -20,6 +20,7 @@ export default function NativeTripSync({
   const [error, setError] = useState('');
   useEffect(() => {
     if (!hasNativeTracking()) return;
+    document.documentElement.dataset.autocareNativeOwner = ownerId;
     let disposed = false,
       busy = false,
       paused = false,
@@ -28,9 +29,12 @@ export default function NativeTripSync({
       if (disposed || busy || paused || unsupported || document.visibilityState !== 'visible')
         return;
       busy = true;
+      document.documentElement.dataset.autocareNativeUpdateSafe = 'false';
       try {
         const count = await syncAutomaticTrips(ownerId, latest.current.vehicles);
         if (!disposed && count) await latest.current.onUpdated();
+        const [active, pending] = await Promise.all([nativeTracking.snapshot(ownerId), nativeAutomation.pending(ownerId)]);
+        if (!disposed) document.documentElement.dataset.autocareNativeUpdateSafe = !active?.active && pending.length === 0 ? 'true' : 'false';
       } catch (e) {
         if (nativeMethodMissing(e)) unsupported = true;
         else {
@@ -53,6 +57,8 @@ export default function NativeTripSync({
     window.addEventListener('autocare-auto-retry', retry);
     return () => {
       disposed = true;
+      delete document.documentElement.dataset.autocareNativeUpdateSafe;
+      delete document.documentElement.dataset.autocareNativeOwner;
       clearInterval(timer);
       document.removeEventListener('visibilitychange', retry);
       window.removeEventListener('online', retry);

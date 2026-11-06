@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', images: ['/opengraph-image'] },
   openGraph: {
     title: `${appName} — Mașina ta, fără griji`,
-    description: 'Un loc pentru tot ce ține de mașina ta.',
+    description: siteDescription,
     locale: 'ro_RO',
     type: 'website',
     siteName: appName,

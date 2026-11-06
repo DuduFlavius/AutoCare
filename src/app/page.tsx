@@ -222,6 +222,8 @@ export default function Home() {
               featureList: ['Documente RCA, ITP și rovinietă', 'Istoric service și kilometraj', 'Cheltuieli auto', 'Sesiuni SmartDrive'],
               inLanguage: 'ro-RO',
               image: origin() + '/images/autocare-app-premium.webp',
+              screenshot: origin() + '/images/autocare-app-premium.webp',
+              installUrl: origin() + '/aplicatie-auto',
               offers: {
                 '@type': 'Offer',
                 price: '0',
@@ -234,7 +236,10 @@ export default function Home() {
               '@type': 'WebPage',
               url: origin(),
               name: 'AutoCare – Aplicație pentru Întreținerea și Gestionarea Mașinii',
-              primaryImageOfPage: origin() + '/images/autocare-app-premium.webp',
+              '@id': origin() + '/#webpage',
+              isPartOf: { '@id': origin() + '/#website' },
+              about: { '@id': origin() + '/#application' },
+              primaryImageOfPage: { '@type': 'ImageObject', url: origin() + '/images/autocare-app-premium.webp', caption: 'AutoCare — aplicație pentru documente, întreținere și cheltuieli auto' },
             },
           ],
         }}
