@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-/** Owner-uploaded photos take priority; the fallback is explicitly illustrative. */
+import { ShieldCheck } from 'lucide-react';
+/** Keep uploaded owner photos; use a graphic identity when none exists. */
 export default function VehiclePhoto({
   vehicleId,
   name,
@@ -20,8 +21,8 @@ export default function VehiclePhoto({
   const owned = original && failed !== original;
   return (
     <div className="studio-vehicle-photo">
-      <img
-        src={owned ? original : '/images/autocare-studio-coupe.webp'}
+      {owned ? <img
+        src={original}
         alt={
           owned
             ? 'Fotografia mașinii ' + name
@@ -35,12 +36,8 @@ export default function VehiclePhoto({
         onError={() => {
           if (original) setFailed(original);
         }}
-      />
-      {!owned && (
-        <span className="studio-photo-caption">
-          {preview ? 'Imagine de prezentare' : 'Imagine ilustrativă · poți adăuga fotografia ta'}
-        </span>
-      )}
+      /> : <div className="studio-vehicle-identity" aria-label="Garaj digital AutoCare"><ShieldCheck size={64} strokeWidth={1.25}/><span>AUTOCARE</span></div>}
+
     </div>
   );
 }

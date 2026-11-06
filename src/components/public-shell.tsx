@@ -2,9 +2,10 @@ import Link from 'next/link';
 import { appName } from '@/lib/config';
 import { Brand } from './brand';
 import MobileInstall from './mobile-install';
+import './public-surfaces.css';
 export { Brand } from './brand';
-export function PublicShell({ children }: { children: React.ReactNode }) {
-  return (
+export function PublicShell({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+  const content = (
     <>
       <div className="wrap">
         <header className="public-nav">
@@ -45,4 +46,5 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       </div>
     </>
   );
+  return dark ? <div className="ac-public-dark">{content}</div> : content;
 }

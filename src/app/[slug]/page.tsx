@@ -50,7 +50,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         ? await pricing()
         : DEFAULT_PRICING;
     return (
-      <PublicShell>
+      <PublicShell dark>
         <main className="content-page">
           <Breadcrumbs
             items={[
@@ -80,7 +80,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const p = pages[slug];
   if (!p) notFound();
   return (
-    <PublicShell>
+    <PublicShell dark>
       <main className="content-page seo-content">
         <Breadcrumbs items={[{ name: p.title, path: '/' + slug }]} />
         <p className="eyebrow">AUTOCARE</p>

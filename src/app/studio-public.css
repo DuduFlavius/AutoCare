@@ -486,3 +486,11 @@ html body .ac-lux-public.ac-studio-public .footer .between > span {
     scroll-behavior: auto !important;
   }
 }
+/* Brand graphic replaces generic car photography. */
+html body .ac-lux-public.ac-studio-public .studio-landing-graphic {display:flex; flex-direction:column; align-items:center; justify-content:center; padding:38px 24px; gap:28px; background:radial-gradient(ellipse at 50% 28%,#21516d 0,#1b3049 38%,#101d2e 85%);}
+html body .ac-lux-public.ac-studio-public .studio-graphic-orbit {display:grid; place-items:center; width:190px; height:190px; border:1px solid #81c8ff44; border-radius:50%; background:#15355066; box-shadow:0 0 0 28px #69b5f908,0 0 0 56px #69b5f905,inset 0 0 45px #4d9fff15; color:#92cfff;}
+html body .ac-lux-public.ac-studio-public .studio-graphic-title {text-align:center; color:#bbd5f3; font-size:17px; margin:0; line-height:1.6;}
+html body .ac-lux-public.ac-studio-public .studio-graphic-title strong {display:block; color:#f0f6ff; font-size:22px;}
+html body .ac-lux-public.ac-studio-public .studio-graphic-topics {display:flex; flex-wrap:wrap; gap:10px; justify-content:center;}
+html body .ac-lux-public.ac-studio-public .studio-graphic-topics span {display:flex; gap:7px; align-items:center; font-size:13px; color:#d0e5ff; background:#233d59; border:1px solid #6b9dca44; padding:10px 12px; border-radius:9px;}
+@media(max-width:760px){html body .ac-lux-public.ac-studio-public .studio-landing-graphic {min-height:350px;} html body .ac-lux-public.ac-studio-public .studio-graphic-orbit {width:135px; height:135px;}}
