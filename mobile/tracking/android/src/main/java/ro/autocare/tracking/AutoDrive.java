@@ -53,6 +53,16 @@ final class AutoDrive {
         if(active.optBoolean("automatic")&&active.optBoolean("active")&&owner.equals(active.optString("ownerId"))&&(vehicle==null||vehicle.equals(active.optString("vehicleId")))){TrackingStore.stop(c);c.stopService(new Intent(c,TrackingService.class));TrackingService.running=false;}
         if(vehicle==null&&owner.equals(prefs(c).getString("owner","")))prefs(c).edit().remove("owner").apply();
     }}
+    /** Recover a missed broadcast and activate an already-connected, explicitly bound car. */
+    static void reconcileConnected(Context context,String owner){
+        if(owner==null||owner.isEmpty()||!owner.equals(prefs(context).getString("owner","")))return;
+        JSONObject all=bindings(context);
+        for(java.util.Iterator<String> it=all.keys();it.hasNext();){
+            String address=it.next();JSONObject config=all.optJSONObject(address);
+            if(config==null||!config.optBoolean("enabled")||!owner.equals(config.optString("ownerId")))continue;
+            CarBluetoothVerifier.verify(context,address,connected->{if(connected)connection(context,address,true);});
+        }
+    }
     static void connection(Context c,String address,boolean connected){synchronized(TrackingStore.class){
         try{
             if(!CarIdentity.valid(address))return;

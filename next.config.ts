@@ -25,6 +25,15 @@ const config: NextConfig = {
           },
         ],
       },
+      // The synthetic design preview may be framed only by this same site for
+      // accurate mobile viewport review. Private/account pages retain DENY.
+      {
+        source: '/previzualizare',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.unsplash.com https://tile.openstreetmap.org https://tiles.openfreemap.org; font-src 'self'; connect-src 'self' https://tiles.openfreemap.org; worker-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'" },
+        ],
+      },
     ];
   },
 };

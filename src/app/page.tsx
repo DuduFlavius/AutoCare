@@ -1,15 +1,9 @@
 import './product-intro.css';
 import Link from 'next/link';
-import {
-  ShieldCheck,
-  BellRing,
-  Wrench,
-  ArrowUpRight,
-  Check,
-  CarFront,
-  ChartNoAxesCombined,
-  Files,
-} from 'lucide-react';
+import {ArrowUpRight, Check, ShieldCheck, Wrench, Files, CarFront} from 'lucide-react';
+import LuxuryExperience, {LuxuryMotion} from '@/components/luxury-experience';
+import {pricing, DEFAULT_PRICING} from '@/lib/pricing';
+import './luxury-public.css';
 import { PublicShell } from '@/components/public-shell';
 import { appName, origin } from '@/lib/config';
 import { publicMetadata, siteDescription } from '@/lib/seo';
@@ -27,169 +21,25 @@ export async function generateMetadata() {
     title: { absolute: 'AutoCare – Aplicație pentru Întreținerea și Gestionarea Mașinii' },
   };
 }
-export default function Home() {
+export default async function Home() {
+  const prices=process.env.DATABASE_URL||process.env.LOCAL_DATABASE_PATH?await pricing():DEFAULT_PRICING;
+  const money=(bani:number)=>new Intl.NumberFormat('ro-RO',{maximumFractionDigits:2}).format(bani/100);
   return (
-    <PublicShell>
+    <div className="ac-lux-public"><PublicShell><LuxuryMotion/>
       <main>
-        <section className="hero">
-          <div>
-            <p className="eyebrow">GARAJUL TĂU DIGITAL</p>
-            <h1>
-              Mașina ta.{' '}<span className="accent">Totul în ordine.</span>
-            </h1>
-            <p>
-              Documentele, reviziile și cheltuielile mașinii, la îndemână. Vezi ce urmează și păstrează istoricul fiecărui drum.
-            </p>
-            <div className="actions">
-              <Link href="/inregistrare" className="button primary">
-                Începe gratuit <ArrowUpRight size={18} />
-              </Link>
-              <Link href="#functii" className="button ghost">
-                Descoperă funcțiile
-              </Link>
-            </div>
-            <div className="micro inline">
-              <Check size={15} /> O mașină gratuită · Fără card bancar
-            </div>
-          </div>
-          <div className="cockpit ac-product-intro">
-            <div className="between">
-              <span className="eyebrow">UN LOC PENTRU MAȘINA TA</span>
-              <CarFront size={22} className="accent" />
-            </div>
-            <img
-              className="editorial-car ac-product-intro-art"
-              src="/images/autocare-app-premium.webp"
-              srcSet="/images/autocare-app-premium-mobile.webp 768w, /images/autocare-app-premium.webp 1400w"
-              sizes="(max-width: 760px) 92vw, 48vw"
-              width={1672}
-              height={940}
-              fetchPriority="high"
-              loading="eager"
-              alt="Ilustrație AutoCare cu documente, calendar și scut cu bifă"
-            />
-            <h3>Mai multă liniște, la fiecare drum.</h3>
-            <Link href="/aplicatie-auto" className="small accent">Descoperă aplicația AutoCare pentru Android și web →</Link>
-            <p className="small muted">Documente, termene și istoric. În ordine, într-un singur loc.</p>
-            <div className="list">
-              <div className="list-row">
-                <span className="list-icon">
-                  <ShieldCheck size={21} />
-                </span>
-                <div className="list-grow">
-                  <strong>Documente organizate</strong>
-                  <span className="small muted">RCA · ITP · Rovinietă · CASCO</span>
-                </div>
-                <Check className="accent" size={18} />
-              </div>
-              <div className="list-row">
-                <span className="list-icon">
-                  <BellRing size={21} />
-                </span>
-                <div className="list-grow">
-                  <strong>Scadențe sub control</strong>
-                  <span className="small muted">Alerte configurate de tine</span>
-                </div>
-                <Check className="accent" size={18} />
-              </div>
-            </div>
-          </div>
+        <section className="lux-hero">
+          <div className="lux-hero-media lux-abstract-stage" aria-hidden="true"><div className="lux-abstract-grid"/><div className="lux-abstract-orbit"/><div className="lux-abstract-core"><ShieldCheck size={70} strokeWidth={1}/><span>AUTOCARE</span></div><div className="lux-floating-panel lux-floating-panel--one"><Files size={22}/><span>Documente<small>Organizate. Private.</small></span><i/></div><div className="lux-floating-panel lux-floating-panel--two"><Wrench size={22}/><span>Întreținere<small>Fiecare lucrare, în context.</small></span></div><div className="lux-floating-panel lux-floating-panel--three"><Check size={18}/><span>Totul într-un singur loc.</span></div></div>
+          <div className="lux-hero-shade"/>
+          <div className="lux-hero-copy"><p className="lux-eyebrow">AUTOCARE · GARAJUL TĂU DIGITAL</p><h1>Tu alegi drumul.<br/><span>Noi păstrăm<br/>totul în ordine.</span></h1><p>Documente, întreținere, kilometri și cheltuieli. Un singur spațiu pentru tot ce contează la mașina ta.</p><div className="lux-hero-actions"><Link href="/inregistrare" className="lux-primary">Deschide garajul gratuit <ArrowUpRight size={18}/></Link><Link href="/autentificare" className="lux-secondary">Intră în cont <ArrowUpRight size={16}/></Link></div><small><Check size={14}/>O mașină gratuită · Fără card bancar</small></div>
+          <div className="lux-hero-bottom"><span>MAI MULT CONTROL. MAI PUȚINE GRIJI.</span><a href="#functii">Explorează AutoCare <span aria-hidden="true">↓</span></a></div>
         </section>
-        <section className="section" id="functii">
-          <div className="section-head">
-            <p className="eyebrow">SIMPLU, DE LA PRIMUL KILOMETRU</p>
-            <h2>
-              Ai grijă de drum.
-              <br />
-              Noi te ajutăm cu organizarea.
-            </h2>
-          </div>
-          <div className="grid3">
-            {[
-              [
-                Files,
-                'Actele, la îndemână',
-                'Documentele auto și termenele lor, într-un spațiu privat.',
-              ],
-              [
-                BellRing,
-                'Mementouri la timp',
-                'Alege când și cum vrei să fii anunțat despre termenele mașinii.',
-              ],
-              [
-                Wrench,
-                'Istoric fără goluri',
-                'Notează reviziile, piesele și kilometrajul, în ordine.',
-              ],
-              [
-                ChartNoAxesCombined,
-                'Vezi unde merg banii',
-                'Urmărește costurile lunare și categoriile de cheltuieli.',
-              ],
-              [
-                CarFront,
-                'Tot garajul, împreună',
-                'O mașină în planul gratuit. Mai multe, cu Premium.',
-              ],
-              [
-                ShieldCheck,
-                'Calendar și date private',
-                'Vezi termenele în calendar. Acces privat și export conform planului.',
-              ],
-            ].map(([Icon, title, copy]) => (
-              <article className="card feature" key={String(title)}>
-                {typeof Icon !== 'string' && <Icon size={26} />}
-                <h3>{String(title)}</h3>
-                <p className="muted small">{String(copy)}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-        <section className="section seo-home-links">
-          <h2>Organizează ce contează.</h2>
-          <div className="grid3">
-            {[
-              [
-                'documente-auto',
-                'Documente și expirări',
-                'Un dosar privat pentru RCA, ITP și celelalte acte.',
-              ],
-              ['intretinere-auto', 'Istoric de service', 'Revizii și reparații, în ordine.'],
-              [
-                'cheltuieli-auto',
-                'Cheltuielile mașinii',
-                'Înțelege costurile pe care le înregistrezi.',
-              ],
-            ].map(([slug, title, text]) => (
-              <article className="card feature" key={slug}>
-                <h3>
-                  <Link href={'/' + slug}>{title} →</Link>
-                </h3>
-                <p>{text}</p>
-              </article>
-            ))}
-          </div>
-          <p>
-            <Link href="/preturi">Compară planurile Gratuit și Premium</Link> ·{' '}
-            <Link href="/ghiduri">Citește ghidurile practice</Link>
-          </p>
-        </section>
-        <section className="section">
-          <div className="between">
-            <div className="section-head">
-              <p className="eyebrow">UN ÎNCEPUT FĂRĂ COMPLICAȚII</p>
-              <h2>
-                Mașina ta merită
-                <br />
-                un istoric bine păstrat.
-              </h2>
-              <p className="muted">Adaugi mașina. Completezi actele. Alegi când să fii anunțat.</p>
-            </div>
-            <Link href="/inregistrare" className="button primary">
-              Deschide garajul <ArrowUpRight size={18} />
-            </Link>
-          </div>
-        </section>
+        <div className="lux-capabilities" aria-label="Funcționalități AutoCare"><span><Wrench size={17}/>Întreținere</span><span><Files size={17}/>Documente</span><span><CarFront size={17}/>Garaj digital</span><span><ShieldCheck size={17}/>Date private</span></div>
+        <LuxuryExperience/>
+        <section className="lux-premium" data-reveal><div><p className="lux-eyebrow">AUTOCARE PREMIUM</p><h2>Mai multă claritate.<br/><span>Pentru întregul tău garaj.</span></h2><p>Mai multe mașini, planificare avansată și rapoarte. Instrumentele de care ai nevoie ca să vezi imaginea completă.</p><ul>{['Mașini nelimitate, organizate individual','Istoric, documente și cheltuieli','Rapoarte și exporturi PDF / CSV','Estimări de întreținere din datele tale'].map(text=><li key={text}><Check size={16}/>{text}</li>)}</ul></div><div className="lux-pricing-card"><span>PREMIUM LUNAR</span><div><strong>{money(prices.monthlyBani)}</strong><span>lei / lună</span></div><p>sau {money(prices.annualBani)} lei / an</p><Link href="/preturi" className="lux-primary">Alege planul potrivit <ArrowUpRight size={18}/></Link><Link href="/comparatie" className="lux-text-link">Compară Gratuit și Premium <ArrowUpRight size={16}/></Link><small>Prețul final și condițiile sunt afișate înainte de plată.</small></div></section>
+        <section className="lux-plan-compare" data-reveal><div className="lux-section-heading"><p className="lux-eyebrow">ALEGI CE ȚI SE POTRIVEȘTE</p><h2>Gratuit pentru început.<br/><span>Premium pentru mai mult control.</span></h2></div><div className="lux-compare-scroll"><table><caption>Comparație între funcțiile existente ale planurilor AutoCare</caption><thead><tr><th scope="col">Funcționalitate</th><th scope="col">Gratuit</th><th scope="col">Premium</th></tr></thead><tbody>{[
+          ['Mașini active','1','Nelimitate'],['Documente și istoric de bază','Incluse','Incluse'],['Intervale pe operațiune','Istoric de bază','Configurabile'],['Rapoarte PDF și CSV','—','Incluse'],['Statistici și cost per km','—','Cu date suficiente'],['Export date personale JSON','Inclus','Inclus'],
+        ].map(([label,free,premium])=><tr key={label}><th scope="row">{label}</th><td>{free}</td><td>{premium}</td></tr>)}</tbody></table></div><Link href="/comparatie" className="lux-text-link">Vezi toate limitele și condițiile <ArrowUpRight size={16}/></Link></section>
+        <section className="lux-final" data-reveal><p className="lux-eyebrow">GATA PENTRU URMĂTORUL DRUM?</p><h2>Mașina ta merită<br/>un garaj pe măsură.</h2><Link href="/inregistrare" className="lux-primary">Începe cu prima mașină <ArrowUpRight size={18}/></Link><Link href="/ghiduri" className="lux-text-link">Citește ghidurile practice</Link></section>
       </main>
       <JsonLd
         value={{
@@ -244,6 +94,6 @@ export default function Home() {
           ],
         }}
       />
-    </PublicShell>
+    </PublicShell></div>
   );
 }

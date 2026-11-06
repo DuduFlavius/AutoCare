@@ -111,10 +111,15 @@ public class AutoCareTrackingPlugin extends Plugin {
     @PermissionCallback private void autoLocation(PluginCall call){if(getPermissionState("location")!=PermissionState.GRANTED){call.reject("Permite localizarea precisă.");return;}configureAutomation(call);}
     @PermissionCallback private void autoNotifications(PluginCall call){if(getPermissionState("notifications")!=PermissionState.GRANTED){call.reject("Permite notificările GPS.");return;}configureAutomation(call);}
     @PermissionCallback private void autoBluetooth(PluginCall call){if(getPermissionState("bluetooth")!=PermissionState.GRANTED){call.reject("Permite accesul Bluetooth.");return;}configureAutomation(call);}
-    private void saveAssociation(PluginCall call){try{AutoDrive.configure(getContext(),new JSONObject().put("ownerId",call.getString("ownerId")).put("vehicleId",call.getString("vehicleId")).put("vehicleName",call.getString("vehicleName","")).put("baseline",call.getInt("baseline")).put("address",call.getString("address")).put("enabled",true));automationStatus(call);}catch(Exception e){call.reject("Nu s-a putut salva asocierea.",e);}}
+    private void saveAssociation(PluginCall call){try{AutoDrive.configure(getContext(),new JSONObject().put("ownerId",call.getString("ownerId")).put("vehicleId",call.getString("vehicleId")).put("vehicleName",call.getString("vehicleName","")).put("baseline",call.getInt("baseline")).put("address",call.getString("address")).put("enabled",true));AutoDrive.reconcileConnected(getContext(),call.getString("ownerId",""));automationStatus(call);}catch(Exception e){call.reject("Nu s-a putut salva asocierea.",e);}}
     @PluginMethod public void disableAutomation(PluginCall call){try{AutoDrive.disable(getContext(),call.getString("ownerId",""),call.getString("vehicleId"));call.resolve();}catch(Exception e){call.reject("Unable to disable automatic tracking",e);}}
     @PluginMethod public void pendingTrips(PluginCall call){JSObject result=new JSObject();result.put("trips",AutoDrive.pending(getContext(),call.getString("ownerId","")));call.resolve(result);}
     @PluginMethod public void acknowledgeTrips(PluginCall call){try{AutoDrive.acknowledge(getContext(),call.getString("ownerId",""),call.getArray("ids",new JSArray()));call.resolve();}catch(Exception e){call.reject("Unable to confirm GPS sync",e);}}
     @PluginMethod public void updateAutomationVehicle(PluginCall call){try{AutoDrive.updateBaseline(getContext(),call.getString("ownerId",""),call.getString("vehicleId",""),call.getInt("baseline",0));call.resolve();}catch(Exception e){call.reject("Unable to refresh vehicle mileage",e);}}
+    @Override protected void handleOnResume(){
+        super.handleOnResume();
+        if(Build.VERSION.SDK_INT>=31&&getPermissionState("bluetooth")!=PermissionState.GRANTED)return;
+        AutoDrive.reconcileConnected(getContext(),AutoDrive.prefs(getContext()).getString("owner",""));
+    }
     @Override protected void handleOnDestroy(){if(chooser!=null)chooser.unregister();if(pairing!=null){pairing.reject("Asocierea a fost întreruptă.");pairing=null;}}
 }
