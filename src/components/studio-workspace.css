@@ -319,7 +319,7 @@
     background: transparent !important;
   }
   html body .app-shell.ac-workspace.ac-studio .page-head p {
-    max-width: 760px !important;
+    max-width: 900px !important;
     margin-top: 10px !important;
     font-size: 15px !important;
   }
@@ -1451,12 +1451,12 @@
       transform: scaleY(1);
     }
   }
-  @media (min-width: 761px) {
+  @media (min-width: 901px) {
     html body .app-shell.ac-workspace.ac-studio .app-topbar-brand {
       display: none !important;
     }
   }
-  @media (min-width: 761px) and (max-width: 1250px) {
+  @media (min-width: 901px) and (max-width: 1250px) {
     html body .app-shell.ac-workspace.ac-studio {
       --app-sidebar: 230px;
     }
@@ -1480,7 +1480,7 @@
       flex-wrap: wrap;
     }
   }
-  @media (max-width: 760px) {
+  @media (max-width: 900px) {
     html body .app-shell.ac-workspace.ac-studio {
       --app-sidebar: 0px;
       font-size: 16px !important;
@@ -1869,7 +1869,7 @@
       grid-template-columns: minmax(0, 1fr) !important;
     }
   }
-  @media (max-width: 760px) {
+  @media (max-width: 900px) {
     html body .app-shell.ac-workspace.ac-studio .studio-search-label {
       display: none !important;
     }
