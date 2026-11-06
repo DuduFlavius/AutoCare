@@ -432,7 +432,8 @@ export default function ApplicationHome({
                   {t('Documente în atenție', 'Documents to review')}
                 </span>
                 <strong>
-                  {attention.length} {t('documente', 'documents')}
+                  {attention.length}{' '}
+                  {attention.length === 1 ? t('document', 'document') : t('documente', 'documents')}
                 </strong>
                 <small>
                   {t('Expirate sau în următoarele 30 zile', 'Expired or due within 30 days')}

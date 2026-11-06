@@ -694,7 +694,7 @@
     flex: 0 0 42px;
     background: #2a4261;
     border-radius: 11px;
-    color: #9ed1ff;
+    color: #9ed1ff !important;
   }
   html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > span:nth-child(2) {
     display: flex;
@@ -705,11 +705,11 @@
   html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > svg {
     margin-left: auto;
     flex-shrink: 0;
-    color: #93b5e0;
+    color: #93b5e0 !important;
   }
   html body .app-shell.ac-workspace.ac-studio .studio-tile-label {
-    font-size: 12px;
-    color: #becde2;
+    font-size: 14px !important;
+    color: #becde2 !important;
     font-weight: 500;
     line-height: 1.4;
   }
@@ -719,7 +719,7 @@
     font-variant-numeric: tabular-nums;
   }
   html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile small {
-    font-size: 11px !important;
+    font-size: 13px !important;
     color: #b8c8df !important;
     line-height: 1.5 !important;
   }
@@ -1887,4 +1887,55 @@
       font-size: 29px !important;
     }
   }
+}
+
+@layer autocare-workspace {
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile .studio-tile-icon svg {
+    color: inherit !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile .studio-tile-label {
+    color: #becde2 !important;
+    font-size: 14px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile strong {
+    color: #f3f7ff !important;
+  }
+}
+@layer autocare-workspace {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .car-card > .small {
+    display: block !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .car-metrics {
+    background: #182636 !important;
+    border: 1px solid #ffffff20 !important;
+    padding: 15px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .car-metrics :is(span, small) {
+    color: #b9c7d9 !important;
+    font-size: 13px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .car-metrics strong {
+    color: #f3f7ff !important;
+    font-size: 15px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .add-car-tile {
+    background: linear-gradient(150deg, #253b56, #1c2a3b) !important;
+    min-height: 360px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .add-car-tile :is(span, svg) {
+    color: #bcd9ff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .add-car-tile strong {
+    color: #f3f7ff !important;
+  }
+}
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) svg {color:#b4d5ff !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) button.primary svg {color:#fff !important;}
+ html body .app-shell.ac-workspace.ac-studio .record-category-grid svg {background:#334e70 !important; color:#d6e8ff !important;}
 }
