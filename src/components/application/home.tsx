@@ -353,23 +353,6 @@ export default function ApplicationHome({
               </div>
             )}
           </AppSection>
-          <AppSection className="app-home-actions" title={t('Adaugă rapid', 'Quick add')}>
-            <div className="app-quick-actions">
-              {(
-                [
-                  { kind: 'service', Icon: Wrench, ro: 'Intervenție', en: 'Maintenance' },
-                  { kind: 'document', Icon: FileText, ro: 'Document', en: 'Document' },
-                  { kind: 'expense', Icon: Wallet, ro: 'Cheltuială', en: 'Expense' },
-                ] as const
-              ).map((a) => (
-                <button key={a.kind} onClick={() => onCreate(a.kind, car.id)}>
-                  <a.Icon size={21} />
-                  <span>{a[language]}</span>
-                  <Plus size={15} />
-                </button>
-              ))}
-            </div>
-          </AppSection>
           <div className="app-home-secondary">
             <AppSection
               title={t('Luna aceasta', 'This month')}
@@ -398,6 +381,23 @@ export default function ApplicationHome({
               {!(data.recentTrips||[]).some(trip=>trip.vehicleId===car.id)&&<p className="app-caption">{t('Călătoriile salvate vor apărea aici.','Saved trips will appear here.')}</p>}
             </AppSection>
           </div>
+          <AppSection className="app-home-actions" title={t('Adaugă rapid', 'Quick add')}>
+            <div className="app-quick-actions">
+              {(
+                [
+                  { kind: 'service', Icon: Wrench, ro: 'Intervenție', en: 'Maintenance' },
+                  { kind: 'document', Icon: FileText, ro: 'Document', en: 'Document' },
+                  { kind: 'expense', Icon: Wallet, ro: 'Cheltuială', en: 'Expense' },
+                ] as const
+              ).map((a) => (
+                <button key={a.kind} onClick={() => onCreate(a.kind, car.id)}>
+                  <a.Icon size={21} />
+                  <span>{a[language]}</span>
+                  <Plus size={15} />
+                </button>
+              ))}
+            </div>
+          </AppSection>
           <div className="app-home-history"><AppSection
               title={t('Ultimele intervenții', 'Recent maintenance')}
               action={t('Istoric', 'History')}

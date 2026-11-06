@@ -30,7 +30,7 @@ html body .app-shell.ac-workspace .sidebar-profile small{color:#91a0b4!important
 html body .app-shell.ac-workspace .profile-avatar{background:#263448!important;color:#b9d3ff!important;border-radius:12px!important}
 html body .app-shell.ac-workspace .profile-actions{background:#1d2836!important;border-color:#344153!important}
 html body .app-shell.ac-workspace .profile-actions button{color:#e1e9f5!important;background:transparent!important}
-html body .app-shell.ac-workspace .app-topbar{height:78px!important;min-height:78px!important;padding:0 clamp(24px,3.4vw,64px)!important;background:#ffffffec!important;border-bottom:1px solid #e0e5ec!important;backdrop-filter:blur(12px);box-shadow:none!important}
+html body .app-shell.ac-workspace > .app-header.app-topbar{height:78px!important;min-height:78px!important;padding:0 clamp(24px,3.4vw,64px)!important;background:#ffffffec!important;border-bottom:1px solid #e0e5ec!important;backdrop-filter:blur(12px);box-shadow:none!important}
 html body .app-shell.ac-workspace .app-topbar-title{gap:14px!important;font-size:13px!important;color:#8993a2!important}
 html body .app-shell.ac-workspace .app-topbar-title strong{font-weight:600!important;color:#243145!important}
 html body .app-shell.ac-workspace .app-topbar-actions{gap:12px!important}
@@ -48,7 +48,7 @@ html body .app-shell.ac-workspace .app-home-welcome h1{font-size:clamp(30px,3vw,
 html body .app-shell.ac-workspace .ac-overview-date{display:flex;flex-direction:column;align-items:flex-end;gap:5px;color:#637083;font-size:12px;text-align:right}
 html body .app-shell.ac-workspace .ac-overview-date span{display:flex;align-items:center;gap:6px;color:#2f6a58;font-size:11px}
 html body .app-shell.ac-workspace .app-home-primary{display:grid!important;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr)!important;gap:24px!important}
-html body .app-shell.ac-workspace .app-vehicle-hero{min-height:380px!important;border:1px solid #24334a!important;border-radius:20px!important;background:radial-gradient(ellipse at 85% 35%,#344963,#182332 55%,#141c28)!important;position:relative!important;isolation:isolate;overflow:hidden!important}
+html body .app-shell.ac-workspace .app-vehicle-hero{padding:0!important;min-height:380px!important;border:1px solid #24334a!important;border-radius:20px!important;background:radial-gradient(ellipse at 85% 35%,#344963,#182332 55%,#141c28)!important;position:relative!important;isolation:isolate;overflow:hidden!important}
 html body .app-shell.ac-workspace .app-vehicle-visual{position:absolute!important;inset:0!important;pointer-events:none!important;opacity:1!important}
 html body .app-shell.ac-workspace .app-vehicle-visual .car-art{position:absolute;width:75%;max-width:560px;height:auto;bottom:50px;right:-8%;opacity:.8;filter:drop-shadow(0 24px 18px #0006)}
 html body .app-shell.ac-workspace .app-vehicle-visual-shade{position:absolute;inset:0;background:linear-gradient(90deg,#151e2cf5,#151e2c85 48%,transparent)}
@@ -102,6 +102,7 @@ html body .app-shell.ac-workspace .app-inline-empty{display:flex!important;gap:1
 html body .app-shell.ac-workspace .app-inline-empty > div{flex:1!important;min-width:120px!important}
 html body .app-shell.ac-workspace .app-status{font-size:10px!important;padding:5px 9px!important;border-radius:6px!important;white-space:normal!important}
 html body .app-shell.ac-workspace .app-home-history{grid-column:1/-1!important}
+html body .app-shell.ac-workspace .app-estimate-settings > summary{background:transparent!important;color:#2861b9!important;border:0!important;border-radius:0!important;padding:10px 0!important;font-size:12px!important;min-height:40px!important}
 /***** All account screens: real controls, clear tables and forms. *****/
 html body .app-shell.ac-workspace :is(button,.button){transition:background-color .18s,border-color .18s,box-shadow .18s!important}
 html body .app-shell.ac-workspace .main :is(button.primary,.button.primary){background:#286ce8!important;border:1px solid #286ce8!important;color:white!important;border-radius:9px!important;padding:11px 18px!important;box-shadow:0 3px 7px #286ce818!important}
@@ -150,13 +151,13 @@ html body .app-shell.ac-workspace .ac-premium-comparison [role=row]{display:grid
 html body .app-shell.ac-workspace .ac-premium-comparison [role=row]:first-child{background:#f3f6fa!important;border-radius:8px!important;font-size:11px!important;letter-spacing:.4px!important}
 html body .app-shell.ac-workspace .ac-premium-faq details{padding:17px 0!important;border-bottom:1px solid #e5eaf1!important}
 html body .app-shell.ac-workspace .ac-premium-faq summary{font-weight:600!important;font-size:14px!important;cursor:pointer!important}
-@media(min-width:761px){html body .app-shell.ac-workspace .app-topbar{left:var(--app-sidebar)!important;width:calc(100% - var(--app-sidebar))!important}html body .app-shell.ac-workspace .app-topbar-brand{display:none!important}}
+@media(min-width:761px){html body .app-shell.ac-workspace > .app-header.app-topbar{left:var(--app-sidebar)!important;width:calc(100% - var(--app-sidebar))!important}html body .app-shell.ac-workspace .app-topbar-brand{display:none!important}}
 @media(min-width:761px) and (max-width:1150px){html body .app-shell.ac-workspace{--app-sidebar:228px}html body .app-shell.ac-workspace .app-home-primary{grid-template-columns:minmax(0,1fr)!important}html body .app-shell.ac-workspace .app-vehicle-hero{min-height:340px!important}html body .app-shell.ac-workspace .app-maintenance-highlights{gap:16px!important}html body .app-shell.ac-workspace .app-home-actions{display:block!important}html body .app-shell.ac-workspace .app-home-actions .app-section-head{margin-bottom:14px!important}}
 @media(max-width:760px){
  html body .app-shell.ac-workspace{--app-sidebar:0px;--app-gap:16px}
  html body .app-shell.ac-workspace > .main{padding:86px 16px 106px!important;width:100%!important;margin:0!important;overflow-x:clip!important}
  html body .app-shell.ac-workspace > .sidebar{display:none!important}
- html body .app-shell.ac-workspace .app-topbar{left:0!important;width:100%!important;min-height:66px!important;height:66px!important;padding:0 16px!important;position:fixed!important}
+ html body .app-shell.ac-workspace > .app-header.app-topbar{left:0!important;width:100%!important;min-height:66px!important;height:66px!important;padding:0 16px!important;position:fixed!important}
  html body .app-shell.ac-workspace .app-topbar-actions{gap:3px!important}
  html body .app-shell.ac-workspace .app-topbar-title{display:none!important}
  html body .app-shell.ac-workspace .app-topbar-brand{display:flex!important;gap:8px!important;align-items:center!important;font-size:17px!important}
