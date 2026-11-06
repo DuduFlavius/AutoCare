@@ -125,6 +125,7 @@ export default async function DesignPreview({
   if(previewOptions.garage==='multi'){data.vehicles.push({...vehicles[0],id:'design-car-2',brand:'A doua',model:'Mașină',plate:'DEMO 02',odometer:83000});}
   const application=<Dashboard name="Vizitator" previewData={data} initialTab={normalizeWorkspaceTab(previewOptions.tab)} />;
   const deviceWidth = previewOptions.device==='phone'?390:previewOptions.device==='small'?320:previewOptions.device==='tablet'?768:null;
-  if(deviceWidth) return <div style={{padding:24,background:'#eaf0f8',minHeight:'100vh'}}><p style={{textAlign:'center'}}>AutoCare · Verificare interfață · Date fictive · {deviceWidth}px</p><div style={{width:deviceWidth,maxWidth:'100%',height:844,overflow:'auto',margin:'20px auto',border:'1px solid #cedaeb',borderRadius:22,background:'white',transform:'translateZ(0)',containerName:'workspace-preview',containerType:'size'}}>{application}</div></div>;
+  const frameParams=new URLSearchParams(Object.entries(previewOptions).filter(([key,value])=>key!=='device'&&typeof value==='string') as [string,string][]);
+  if(deviceWidth) return <div style={{padding:24,background:'#eaf0f8',minHeight:'100vh'}}><p style={{textAlign:'center'}}>AutoCare · Verificare interfață · Date fictive · {deviceWidth}px</p><iframe title="AutoCare — verificare responsive cu date fictive" src={'/previzualizare?'+frameParams.toString()} style={{display:'block',width:deviceWidth,maxWidth:'100%',height:844,margin:'20px auto',border:'1px solid #cedaeb',borderRadius:22,background:'white'}}/></div>;
   return application;
 }

@@ -121,7 +121,7 @@ export default function ApplicationHome({
             {t('Mașina ta, sub control.', 'Your car, under control.')}
           </h1>
         </div>
-        <ShieldCheck size={26} />
+        <div className="ac-overview-date"><time dateTime={today}>{new Date(today+'T12:00:00Z').toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})}</time><span><ShieldCheck size={14}/>{t('Garajul tău digital','Your digital garage')}</span></div>
       </div>
       {!car ? (
         <AppEmpty
@@ -398,7 +398,7 @@ export default function ApplicationHome({
               {!(data.recentTrips||[]).some(trip=>trip.vehicleId===car.id)&&<p className="app-caption">{t('Călătoriile salvate vor apărea aici.','Saved trips will appear here.')}</p>}
             </AppSection>
           </div>
-          <details className="app-upcoming"><summary>{t('Istoric service','Service history')}</summary>            <AppSection
+          <div className="app-home-history"><AppSection
               title={t('Ultimele intervenții', 'Recent maintenance')}
               action={t('Istoric', 'History')}
               onAction={() => navigate('Istoric auto')}
@@ -425,7 +425,7 @@ export default function ApplicationHome({
                 </p>
               )}
             </AppSection>
-</details>
+</div>
           {upcoming.length > 1 && (
             <details className="app-upcoming">
               <summary>

@@ -2,6 +2,8 @@
 import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
+import './workspace-redesign.css';
+import WorkspaceViewport from './workspace-viewport';
 import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspacePreferences } from './app-workspace';
 import { normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
 import SiteLanguage from './site-language';
@@ -724,6 +726,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
   }
   return (
     <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace" data-language={language} data-settings-panel={settingsPanel}>
+      <WorkspaceViewport service={tab==='Întreținere'}/>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
       {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>{if(navigate('Garaj'))setVehicleDetail(id);}} /></Dialog>}
       <aside className="sidebar">
