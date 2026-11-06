@@ -506,3 +506,16 @@ test('Admin and Assistant request Founder approval; Super Admin sends directly; 
   await assert.rejects(() => center.mailCenterOverview(admin));
   await changeRole(founder, admin, { role: 'admin', confirm: true });
 });
+
+test('Retry queues only definite failures without a provider ID, preserving accepted, uncertain and suppressed emails', async () => {
+  const campaign = await center.saveCampaign(founder, input({recipients:[client,other]}));
+  await center.deliverCampaign(campaign.id, async () => {throw new GoogleDeliveryError('failed','GMAIL_AUTHORIZATION_FAILED');});
+  const rows=(await center.campaignDetail(founder,campaign.id)).deliveries;
+  await db().update(s.mailDeliveries).set({status:'unknown',error:'GMAIL_DELIVERY_UNCONFIRMED'}).where(eq(s.mailDeliveries.id,rows[0].id));
+  await assert.rejects(()=>center.retryFailedCampaign(client,campaign.id));
+  assert.equal((await center.retryFailedCampaign(founder,campaign.id)).requeued,1);
+  const after=(await center.campaignDetail(founder,campaign.id)).deliveries;
+  assert.equal(after.find(x=>x.id===rows[0].id)?.status,'unknown');
+  assert.equal(after.find(x=>x.id===rows[1].id)?.status,'pending');
+  assert.equal((await center.retryFailedCampaign(founder,campaign.id)).requeued,0);
+});

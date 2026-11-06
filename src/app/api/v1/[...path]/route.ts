@@ -177,6 +177,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (route === 'founder/mail/campaigns' && method === 'POST') return json(await mailCenter.saveCampaign(uid, await body(req)));
       if (path[1] === 'mail' && path[2] === 'campaigns' && path[3]) {
         if (path.length === 4 && method === 'GET') return json(await mailCenter.campaignDetail(uid, path[3]));
+        if (path.length === 5 && path[4] === 'retry-failed' && method === 'POST') return json(await mailCenter.retryFailedCampaign(uid, path[3]));
         if (path.length === 5 && path[4] === 'send' && method === 'POST') return json(await mailCenter.sendCampaign(uid, path[3]));
       }
 

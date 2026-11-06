@@ -351,7 +351,10 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
   useEffect(() => {
     if (previewData) return;
     let lastUnread: number | null = null;
+    let unreadBusy = false;
     const check = () => {
+      if (document.hidden || !navigator.onLine || unreadBusy) return;
+      unreadBusy = true;
       void api('support/unread')
         .then(async (x) => {
           const count = Number(x.unread || 0);
@@ -371,20 +374,18 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
           lastUnread = count;
           setSupportUnread(count);
         })
-        .catch(() => {});
+        .catch(() => {}).finally(() => { unreadBusy = false; });
     };
     const notifications = () => {
       if (!document.hidden) void refresh(true);
       void check();
     };
-    const notificationTimer = setInterval(notifications, 15000);
+    const notificationTimer = setInterval(notifications, 45000);
     window.addEventListener('focus', notifications);
     window.addEventListener('online', notifications);
     document.addEventListener('visibilitychange', notifications);
     check();
-    const timer = setInterval(check, 15000);
     return () => {
-      clearInterval(timer);
       clearInterval(notificationTimer);
       window.removeEventListener('focus', notifications);
       window.removeEventListener('online', notifications);

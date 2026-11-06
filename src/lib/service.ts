@@ -17,8 +17,11 @@ export class AppError extends Error {
   }
 }
 export async function profile(uid: string) {
-  await db().insert(s.profiles).values({ userId: uid }).onConflictDoNothing();
-  const row = (await db().select().from(s.profiles).where(eq(s.profiles.userId, uid)))[0];
+  let row = (await db().select().from(s.profiles).where(eq(s.profiles.userId, uid)))[0];
+  if (!row) {
+    await db().insert(s.profiles).values({ userId: uid }).onConflictDoNothing();
+    row = (await db().select().from(s.profiles).where(eq(s.profiles.userId, uid)))[0];
+  }
   return { ...row, role: effectiveRole(uid, row.role) };
 }
 export async function activeGrants(uid: string, now = new Date()) {

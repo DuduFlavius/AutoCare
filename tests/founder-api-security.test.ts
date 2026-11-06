@@ -151,3 +151,17 @@ test('missing founder configuration fails closed for every account and profile i
   assert.equal(response.status, 400);
   assert.equal(isFounder(accounts.user.id), false);
 });
+
+test('Clients cannot assign any privileged role and Super Admin cannot promote users or inherit Founder control', async () => {
+  for (const role of ['founder','superadmin','admin','assistant']) {
+    assert.equal((await request('user','profile','PUT',{role})).status,400);
+    assert.equal((await request('user','founder/users/'+accounts.user.id+'/role','POST',{role,confirm:true})).status,403);
+  }
+  assert.equal((await request('user','founder/mail')).status,403);
+  assert.equal((await request('founder','founder/users/'+accounts.admin.id+'/role','POST',{role:'superadmin',confirm:true})).status,200);
+  assert.equal((await request('admin','founder/mail')).status,200);
+  assert.equal((await request('admin','founder/team','POST',{email:'any@example.invalid',role:'admin',confirm:true})).status,403);
+  assert.equal((await request('admin','founder/users/'+accounts.user.id+'/role','POST',{role:'admin',confirm:true})).status,403);
+  assert.equal((await request('admin','founder/overview')).status,403);
+  await request('founder','founder/users/'+accounts.admin.id+'/role','POST',{role:'admin',confirm:true});
+});

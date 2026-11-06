@@ -14,7 +14,7 @@ import {
   type EmailTemplate,
   type EmailContent,
 } from './email-templates';
-import { gmailReady, GoogleDeliveryError, sendGoogleMail } from './google-mail';
+import { gmailReady, GoogleDeliveryError, sendGoogleMail, verifyGoogleMailAuthorization } from './google-mail';
 import { billingMailValid, communicationPreference, recipientAllowed } from './mail-policy';
 import { automationState } from './mail-automation';
 export async function requireMailStaff(uid: string) {
@@ -418,6 +418,9 @@ export async function sendCampaign(uid: string, id: string) {
     throw new AppError(403, 'Comunicarea a fost trimisă Fondatorului pentru aprobare.');
   }
   if (!(await gmailReady()))
+    throw new AppError(409, 'Reconectează Gmail și finalizează testul înainte de trimitere.');
+  await verifyGoogleMailAuthorization();
+  if (!(await gmailReady()))
     throw new AppError(409, 'Conectează Gmail și finalizează testul manual înainte de trimitere.');
   const key = `mail-center:${uid}:${Math.floor(Date.now() / 60000)}`;
   const count = (
@@ -437,6 +440,17 @@ export async function sendCampaign(uid: string, id: string) {
     .insert(s.audit)
     .values({ id: crypto.randomUUID(), actorId: uid, action: 'mail.manual.batch', target: id });
   return result;
+}
+export async function retryFailedCampaign(uid: string, id: string) {
+  const actor = await requireMailStaff(uid);
+  const { campaign } = await campaignDetail(uid, id);
+  if (campaign.source !== 'manual') throw new AppError(403, 'Doar comunicările manuale pot fi reîncercate aici.');
+  if (!actor.directSend && !(await campaignApproved(id, campaign.fingerprint))) throw new AppError(403, 'Este necesară aprobarea Fondatorului.');
+  const requeued = await db().update(s.mailDeliveries).set({status:'pending',error:null,attemptedAt:null})
+    .where(and(eq(s.mailDeliveries.campaignId,id),eq(s.mailDeliveries.status,'failed'),sql`${s.mailDeliveries.providerId} IS NULL`)).returning({id:s.mailDeliveries.id});
+  if (requeued.length) await db().update(s.mailCampaigns).set({status:'draft'}).where(eq(s.mailCampaigns.id,id));
+  await db().insert(s.audit).values({id:crypto.randomUUID(),actorId:uid,action:'mail.failed.requeued',target:id});
+  return { requeued: requeued.length };
 }
 export async function deliverAutomatedMail() {
   if (!(await automationState()).enabled) return { enabled: false, accepted: 0 };
