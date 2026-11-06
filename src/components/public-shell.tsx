@@ -4,7 +4,13 @@ import { Brand } from './brand';
 import MobileInstall from './mobile-install';
 import './public-surfaces.css';
 export { Brand } from './brand';
-export function PublicShell({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+export function PublicShell({
+  children,
+  dark = false,
+}: {
+  children: React.ReactNode;
+  dark?: boolean;
+}) {
   const content = (
     <>
       <div className="wrap">
@@ -22,7 +28,10 @@ export function PublicShell({ children, dark = false }: { children: React.ReactN
         </header>
         {children}
         <section className="ac-install-banner" aria-label="Instalează AutoCare pe telefon">
-          <div><strong>AutoCare, direct pe telefonul tău</strong><p>Instalează aplicația pe iPhone sau Samsung și accesează-ți garajul mai rapid.</p></div>
+          <div>
+            <strong>AutoCare, direct pe telefonul tău</strong>
+            <p>Instalează aplicația pe iPhone sau Samsung și accesează-ți garajul mai rapid.</p>
+          </div>
           <MobileInstall />
         </section>
         <footer className="footer">

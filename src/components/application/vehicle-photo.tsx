@@ -21,23 +21,25 @@ export default function VehiclePhoto({
   const owned = original && failed !== original;
   return (
     <div className="studio-vehicle-photo">
-      {owned ? <img
-        src={original}
-        alt={
-          owned
-            ? 'Fotografia mașinii ' + name
-            : 'Imagine auto de prezentare, diferită de mașina din cont'
-        }
-        width={1200}
-        height={675}
-        loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : 'auto'}
-        decoding="async"
-        onError={() => {
-          if (original) setFailed(original);
-        }}
-      /> : <div className="studio-vehicle-identity" aria-label="Garaj digital AutoCare"><ShieldCheck size={64} strokeWidth={1.25}/><span>AUTOCARE</span></div>}
-
+      {owned ? (
+        <img
+          src={original}
+          alt={'Fotografia mașinii ' + name}
+          width={1200}
+          height={675}
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
+          decoding="async"
+          onError={() => {
+            if (original) setFailed(original);
+          }}
+        />
+      ) : (
+        <div className="studio-brand-emblem" aria-label="Garaj digital AutoCare">
+          <ShieldCheck size={64} strokeWidth={1.25} />
+          <span>AUTOCARE</span>
+        </div>
+      )}
     </div>
   );
 }
