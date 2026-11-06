@@ -288,3 +288,16 @@ html body .app-shell.ac-workspace .main :is(.app-section,.app-maintenance-highli
 html body .app-shell.ac-workspace .main :is(.app-section,.app-highlight-distance,.stats .value){font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){html body .app-shell.ac-workspace .main :is(.app-section,.app-maintenance-highlights,.page-head){animation:none!important}}
 }
+@layer autocare-workspace {
+html body .app-shell.ac-workspace .main :is(.app-text-action,.app-vehicle-title,.app-vehicle-details){background:transparent!important;border:0!important;box-shadow:none!important}
+html body .app-shell.ac-workspace .main .app-vehicle-title{padding:0!important}
+html body .app-shell.ac-workspace .main .app-text-action{color:#94beff!important}
+}
+@layer autocare-workspace {
+html body .app-shell.ac-workspace .main .stats .value{color:#e2ecfa!important}
+html body .app-shell.ac-workspace .ac-premium-service-stat-icon{background:#263b53!important;color:#a1c6f8!important}
+html body .app-shell.ac-workspace .record-filter-panel summary{background:#1d2c3d!important;color:#bed0e9!important;border-color:#354a63!important}
+html body .app-shell.ac-workspace .ws-context-nav a{color:#afc4e1!important;background:#1b2a3b!important;border-color:#32465e!important}
+html body .app-shell.ac-workspace .ws-context-nav a[aria-current=page]{background:#2c4770!important;color:#d3e5ff!important}
+@media(max-width:380px){html body .app-shell.ac-workspace .main .stats .value{font-size:14px!important;letter-spacing:-.3px!important;overflow-wrap:normal!important;word-break:normal!important}html body .app-shell.ac-workspace .app-bottom-nav a{font-size:9px!important;padding-inline:2px!important}}
+}
