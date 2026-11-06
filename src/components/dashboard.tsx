@@ -2,7 +2,8 @@
 import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
-import './workspace-redesign.css';
+import './studio-workspace.css';
+import VehiclePhoto from './application/vehicle-photo';
 import WorkspaceViewport from './workspace-viewport';
 import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspacePreferences } from './app-workspace';
 import { normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
@@ -14,6 +15,7 @@ import AccountHub from './application/account';
 import InlineMileageEditor from './inline-mileage-editor';
 import CommunicationPreferences from './communication-preferences';
 import Membership from './membership';
+import PremiumDownloads from './premium-downloads';
 import SubscriptionPage from './subscription-page';
 import MobileInstall from './mobile-install';
 import {AppUpdateSettings} from './auto-update';
@@ -725,7 +727,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (
-    <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace" data-language={language} data-settings-panel={settingsPanel}>
+    <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace ac-studio" data-language={language} data-settings-panel={settingsPanel}>
       <WorkspaceViewport service={tab==='Întreținere'}/>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
       {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>{if(navigate('Garaj'))setVehicleDetail(id);}} /></Dialog>}
@@ -881,7 +883,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                 ? 'Calendar auto'
                                 : tab === 'Abonament'
                                   ? 'Abonamentul tău'
-                                  : tab === 'Premium' ? 'Spațiul tău Premium'
+                                  : tab === 'Rapoarte' ? 'Rapoarte și exporturi' : tab === 'Premium' ? 'Spațiul tău Premium'
                                   : tab === 'Plan întreținere' ? 'SmartDrive GPS'
                                   : tab === 'Setări'
                                     ? 'Profil și preferințe'
@@ -988,7 +990,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                               {v.archived ? 'Arhivată' : 'Activă'}
                             </span>
                           </div>
-                          <div className="autocare-garage-card-icon" aria-hidden="true"><CarFront size={74} strokeWidth={1.15}/><span data-user-content className="ac-premium-garage-visual-caption">{v.brand} {v.model}</span></div>
+                          <VehiclePhoto vehicleId={v.id} name={v.brand+' '+v.model} uploaded={data.photos.some(p=>p.vehicleId===v.id)} preview={!!previewData}/>
                           <h2 data-user-content>
                             {v.brand} {v.model}
                           </h2>
@@ -1264,7 +1266,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                     </div>
                   </div>
                 )}
-                {tab === 'Întreținere' && <details className="app-maintenance-plan" data-workspace-ui><summary><CalendarDays size={18}/>{language==='en'?'Maintenance plan · days & mileage':'Planul de întreținere · zile și kilometri'}<ChevronRight size={16}/></summary><MaintenanceForecast data={data} records={visible} preview={!!previewData} onUpdateMileage={()=>navigate('Kilometraj')} onUpgrade={()=>navigate('Abonament')}/></details>}
+                {tab === 'Întreținere' && <details open className="app-maintenance-plan" data-workspace-ui><summary><CalendarDays size={18}/>{language==='en'?'Maintenance plan · days & mileage':'Planul de întreținere · zile și kilometri'}<ChevronRight size={16}/></summary><MaintenanceForecast data={data} records={visible} preview={!!previewData} onUpdateMileage={()=>navigate('Kilometraj')} onUpgrade={()=>navigate('Abonament')}/></details>}
                 {tab === 'Cheltuieli' && (
                   <div className="grid2" style={{ marginBottom: 20 }}>
                     <section className="card">
@@ -1701,6 +1703,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
               <SupportChat role={data.profile.role} preview={!!previewData} />
             )}
             {tab==='Abonament'&&<SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/>}
+            {tab==='Rapoarte'&&(data.premium?<PremiumDownloads data={data} language={language} preview={!!previewData}/>:<section className="card studio-report-intro"><Download size={32}/><h2>{language==='en'?'Reports, ready when you need them.':'Rapoartele tale, gata când ai nevoie.'}</h2><p>{language==='en'?'PDF and CSV reports are included with Premium. Your personal data export remains free in account settings.':'Rapoartele PDF și CSV sunt incluse cu Premium. Exportul datelor personale rămâne gratuit în setările contului.'}</p><button className="primary" onClick={()=>navigate('Premium')}>{language==='en'?'Compare plans':'Compară planurile'}</button></section>)}
             {tab === 'Premium' && (
               <Membership
                 language={language}

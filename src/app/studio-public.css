@@ -1,0 +1,488 @@
+/* Larger typography and a product-led, photographic public identity. */
+html body .ac-lux-public.ac-studio-public {
+  --lux-bg: #16202d;
+  --lux-surface: #26364a;
+  --lux-muted: #c0cee0;
+  --lux-line: #ffffff20;
+  background: #16202d !important;
+  color: #f2f7ff !important;
+  font-size: 16px !important;
+}
+html body .ac-lux-public.ac-studio-public .public-nav {
+  max-width: 1480px !important;
+  padding: 24px 4% !important;
+  background: #142031 !important;
+  min-height: 88px !important;
+}
+html body .ac-lux-public.ac-studio-public .navlinks {
+  gap: 28px !important;
+}
+html body .ac-lux-public.ac-studio-public .navlinks a {
+  font-size: 15px !important;
+  color: #d2e2f9 !important;
+}
+html body .ac-lux-public.ac-studio-public .public-nav > .button {
+  font-size: 14px !important;
+  color: #e8f2ff !important;
+  border-color: #607d9f !important;
+  background: #263e5b !important;
+  min-height: 44px !important;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 45px;
+  max-width: 1440px;
+  margin: auto;
+  padding: 64px 4% 55px;
+  min-height: 600px;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-copy h1 {
+  font-size: clamp(43px, 4.8vw, 70px) !important;
+  letter-spacing: -2.2px !important;
+  line-height: 1.05 !important;
+  font-weight: 550 !important;
+  color: #f3f8ff !important;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-copy h1 span {
+  color: #8ecaff !important;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-copy > p:not(.lux-eyebrow) {
+  max-width: 520px;
+  font-size: 18px !important;
+  line-height: 1.75 !important;
+  color: #c6d5e9 !important;
+  margin: 28px 0 30px;
+}
+html body .ac-lux-public.ac-studio-public .lux-eyebrow {
+  font-size: 12px !important;
+  letter-spacing: 1.7px !important;
+  color: #9ccaff !important;
+  margin-bottom: 20px !important;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+html body .ac-lux-public.ac-studio-public :is(.lux-primary, .lux-secondary) {
+  font-size: 15px !important;
+  padding: 14px 20px !important;
+  min-height: 50px !important;
+  border-radius: 9px !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-primary {
+  background: #4085f8 !important;
+  border-color: #73aaff !important;
+  color: #fff !important;
+  box-shadow: 0 6px 25px #2678ff20 !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-secondary {
+  background: #2a3d56 !important;
+  border-color: #597393 !important;
+  color: #e9f3ff !important;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-trust {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-trust span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #c3d3e8;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-trust svg {
+  color: #a1dfbd;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-photography {
+  min-height: 410px;
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid #6b89ae61;
+  box-shadow: 0 25px 75px #0003;
+  background: #142033;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-photography > img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 68% center;
+  animation: studio-photo-enter 1s ease-out both;
+}
+html body .ac-lux-public.ac-studio-public .studio-photo-label {
+  position: absolute;
+  bottom: 45px;
+  left: 22px;
+  right: 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #172d46df;
+  border: 1px solid #a1caff42;
+  border-radius: 12px;
+  padding: 17px 20px;
+  backdrop-filter: blur(12px);
+  color: #c7e1ff;
+}
+html body .ac-lux-public.ac-studio-public .studio-photo-label span {
+  font-size: 13px;
+  color: #b6cce9;
+}
+html body .ac-lux-public.ac-studio-public .studio-photo-label strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f0f6ff;
+  margin-top: 4px;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-photo-note {
+  position: absolute;
+  bottom: 15px;
+  right: 20px;
+  font-size: 11px;
+  color: #c7d9f0;
+  background: #0d1b2cc2;
+  padding: 3px 7px;
+  border-radius: 4px;
+}
+html body .ac-lux-public.ac-studio-public .lux-capabilities {
+  padding: 26px 4%;
+  border-block: 1px solid #ffffff1b;
+  background: #1d2c40;
+}
+html body .ac-lux-public.ac-studio-public .lux-capabilities span {
+  font-size: 14px;
+  color: #d2e4fb;
+  gap: 12px;
+}
+html
+  body
+  .ac-lux-public.ac-studio-public
+  :is(
+    .lux-feature-section,
+    .lux-drive-section,
+    .lux-product-tour,
+    .lux-faq,
+    .lux-plan-compare,
+    .lux-final
+  ) {
+  padding: 72px 4%;
+  max-width: 1360px;
+}
+html body .ac-lux-public.ac-studio-public .lux-section-heading h2,
+html body .ac-lux-public.ac-studio-public :is(.lux-drive-section, .lux-faq, .lux-premium) h2 {
+  font-size: clamp(32px, 3.3vw, 46px) !important;
+  line-height: 1.17 !important;
+  letter-spacing: -1.1px !important;
+  color: #f3f8ff !important;
+}
+html body .ac-lux-public.ac-studio-public h2 span {
+  color: #b2c8e4 !important;
+}
+html body .ac-lux-public.ac-studio-public p {
+  color: #c0d0e5 !important;
+  font-size: 16px !important;
+  line-height: 1.75 !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-section-heading > p:not(.lux-eyebrow) {
+  max-width: 720px;
+  font-size: 17px !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-tabs {
+  background: #263a53;
+  border-color: #577394;
+  border-radius: 12px;
+  padding: 7px;
+  margin-top: 30px;
+}
+html body .ac-lux-public.ac-studio-public .lux-tabs button {
+  font-size: 15px;
+  padding: 14px 22px;
+  color: #cbddf5;
+  min-height: 48px;
+}
+html body .ac-lux-public.ac-studio-public .lux-tabs button[aria-selected='true'] {
+  background: #3b6699;
+  color: white;
+}
+html body .ac-lux-public.ac-studio-public .lux-feature-panel {
+  background: linear-gradient(120deg, #263c56, #203146);
+  border-color: #526d8b;
+  padding: 28px;
+  gap: 45px;
+}
+html body .ac-lux-public.ac-studio-public .lux-feature-copy h3 {
+  font-size: 31px !important;
+  letter-spacing: -0.6px !important;
+  max-width: 480px;
+}
+html body .ac-lux-public.ac-studio-public .lux-feature-copy > p:not(.lux-eyebrow) {
+  font-size: 16px !important;
+  line-height: 1.8 !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-feature-copy > a,
+html body .ac-lux-public.ac-studio-public .lux-text-link {
+  font-size: 15px !important;
+  color: #9bd2ff !important;
+  min-height: 40px;
+}
+html body .ac-lux-public.ac-studio-public .lux-stage-label {
+  font-size: 11px;
+  color: #c7dbf6;
+  letter-spacing: 1.4px;
+}
+html body .ac-lux-public.ac-studio-public .lux-stage-chips span {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #c6daf5;
+  border-color: #92b2d73b;
+  background: #ffffff06;
+  padding: 7px 10px;
+}
+html body .ac-lux-public.ac-studio-public .lux-cockpit {
+  border-color: #7094bd;
+  background: linear-gradient(140deg, #324f74, #20324b);
+  padding: 30px;
+}
+html body .ac-lux-public.ac-studio-public .lux-cockpit-top {
+  font-size: 12px;
+  color: #d2e6ff;
+  letter-spacing: 1px;
+}
+html body .ac-lux-public.ac-studio-public .lux-live-caption {
+  font-size: 11px;
+  color: #c5d5ed;
+}
+html body .ac-lux-public.ac-studio-public .lux-cockpit-footer span {
+  font-size: 12px;
+  color: #c4daf7;
+}
+html body .ac-lux-public.ac-studio-public .lux-cockpit > p {
+  font-size: 15px !important;
+  color: #cfe4ff !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-tour-grid {
+  gap: 22px;
+}
+html body .ac-lux-public.ac-studio-public .lux-tour-grid article {
+  background: #26374d;
+  border: 1px solid #58718e;
+  border-radius: 13px;
+  padding: 26px;
+}
+html body .ac-lux-public.ac-studio-public .lux-tour-grid h3 {
+  font-size: 22px !important;
+  margin: 20px 0 14px !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-tour-grid p {
+  font-size: 15px !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-faq details {
+  padding: 23px 0;
+  border-color: #7289a23b;
+}
+html body .ac-lux-public.ac-studio-public .lux-faq summary {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #e0ecfb;
+}
+html body .ac-lux-public.ac-studio-public .lux-faq details p {
+  font-size: 15px !important;
+  margin-top: 15px;
+}
+html body .ac-lux-public.ac-studio-public .lux-premium {
+  max-width: 1240px;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 45px;
+  background: linear-gradient(120deg, #2b496c, #20354e);
+  border: 1px solid #7296be;
+  padding: 45px !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-premium li {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #d2e4fd;
+}
+html body .ac-lux-public.ac-studio-public .lux-pricing-card {
+  border-color: #7e9fc163;
+  background: #203750;
+  padding: 28px;
+}
+html body .ac-lux-public.ac-studio-public .lux-pricing-card > span {
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  color: #c1d8f5;
+}
+html body .ac-lux-public.ac-studio-public .lux-pricing-card strong {
+  font-size: 56px;
+  color: #f4f9ff;
+}
+html body .ac-lux-public.ac-studio-public .lux-pricing-card > div span {
+  font-size: 17px;
+  color: #d3e5fc;
+}
+html body .ac-lux-public.ac-studio-public .lux-pricing-card small {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #c0d2ec;
+}
+html body .ac-lux-public.ac-studio-public .lux-plan-compare table {
+  font-size: 15px;
+  background: #24364d;
+  color: #d0dff4;
+}
+html body .ac-lux-public.ac-studio-public .lux-plan-compare :is(th, td) {
+  padding: 20px;
+  font-size: 15px !important;
+  border-color: #8ba4c431;
+}
+html body .ac-lux-public.ac-studio-public .lux-plan-compare thead th {
+  font-size: 13px !important;
+  background: #1c2e46;
+  color: #d6e8ff;
+}
+html body .ac-lux-public.ac-studio-public .lux-plan-compare caption {
+  font-size: 13px !important;
+  color: #b4c9e4;
+}
+html body .ac-lux-public.ac-studio-public .ac-install-banner {
+  background: #25384f !important;
+  border-color: #607b9b !important;
+  max-width: 1240px !important;
+}
+html body .ac-lux-public.ac-studio-public .ac-install-banner strong {
+  font-size: 18px !important;
+  color: #eef6ff !important;
+}
+html body .ac-lux-public.ac-studio-public .ac-install-banner p {
+  font-size: 15px !important;
+  color: #c0d4ef !important;
+}
+html body .ac-lux-public.ac-studio-public .footer a {
+  font-size: 13px !important;
+  color: #c2d6f1 !important;
+}
+html body .ac-lux-public.ac-studio-public .footer .between > span {
+  font-size: 13px !important;
+  color: #b7cce8 !important;
+}
+@keyframes studio-photo-enter {
+  from {
+    opacity: 0.7;
+    transform: scale(1.025);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (max-width: 1000px) {
+  html body .ac-lux-public.ac-studio-public .studio-landing-hero {
+    gap: 25px;
+    padding-block: 45px;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-landing-copy h1 {
+    font-size: 48px !important;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-landing-photography {
+    min-height: 380px;
+  }
+  html body .ac-lux-public.ac-studio-public .lux-premium {
+    margin-inline: 24px !important;
+    padding: 34px !important;
+  }
+}
+@media (max-width: 760px) {
+  html body .ac-lux-public.ac-studio-public .public-nav {
+    padding: 18px 20px !important;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-landing-hero {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 40px 22px 32px;
+    min-height: 0;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-landing-copy h1 {
+    font-size: 45px !important;
+    letter-spacing: -1.5px !important;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-landing-copy > p:not(.lux-eyebrow) {
+    font-size: 17px !important;
+    margin: 24px 0;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-landing-actions {
+    display: grid;
+    gap: 10px;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-landing-trust {
+    gap: 10px 16px;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-landing-photography {
+    min-height: 260px;
+    border-radius: 15px;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-photo-label {
+    left: 14px;
+    right: 14px;
+    bottom: 42px;
+    padding: 13px;
+    gap: 9px;
+  }
+  html body .ac-lux-public.ac-studio-public .studio-photo-label strong {
+    font-size: 14px;
+  }
+  html body .ac-lux-public.ac-studio-public .lux-capabilities span {
+    font-size: 13px;
+  }
+  html
+    body
+    .ac-lux-public.ac-studio-public
+    :is(
+      .lux-feature-section,
+      .lux-drive-section,
+      .lux-product-tour,
+      .lux-faq,
+      .lux-plan-compare,
+      .lux-final
+    ) {
+    padding: 50px 22px;
+  }
+  html body .ac-lux-public.ac-studio-public .lux-feature-panel {
+    gap: 20px;
+    padding: 20px;
+  }
+  html body .ac-lux-public.ac-studio-public .lux-section-heading h2 {
+    font-size: 33px !important;
+  }
+  html body .ac-lux-public.ac-studio-public .lux-tabs button {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+  html body .ac-lux-public.ac-studio-public .lux-premium {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 25px !important;
+    margin-inline: 16px !important;
+  }
+  html body .ac-lux-public.ac-studio-public .lux-plan-compare :is(th, td) {
+    font-size: 13px !important;
+    padding: 15px 13px;
+  }
+  html body .ac-lux-public.ac-studio-public .footer-links {
+    gap: 16px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .ac-lux-public.ac-studio-public * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

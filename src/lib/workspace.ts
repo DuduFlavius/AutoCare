@@ -43,6 +43,7 @@ export const workspaceSections = [
     group: 'help',
     icon: 'support',
   },
+  {id:'Rapoarte',ro:'Rapoarte',en:'Reports',group:'account',icon:'files'},
   {id:'Premium',ro:'Premium',en:'Premium',group:'account',icon:'premium'},
   { id: 'Setări', ro: 'Setări', en: 'Settings', group: 'help', icon: 'settings' },
 ] as const;

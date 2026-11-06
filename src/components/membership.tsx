@@ -255,7 +255,8 @@ export default function Membership({
   const locale = useApplicationLocale();
   const accessUntil=Math.max(new Date(data.premiumAccess.paidUntil||0).getTime(),...data.premiumAccess.manual.map(g=>g.expiresAt?new Date(g.expiresAt).getTime():0));
   return (
-    <div className="membership-workspace">
+    <div className="membership-workspace studio-membership">
+      <section className="studio-premium-offer" data-workspace-ui><div><span className="studio-kicker">AUTOCARE PREMIUM</span><h2>{language==='en'?'Your garage. The complete picture.':'Garajul tău. Imaginea completă.'}</h2><p>{language==='en'?'More vehicles, advanced maintenance and reports. All in one place.':'Mai multe mașini, întreținere avansată și rapoarte. Totul într-un singur loc.'}</p><div className="studio-benefit-chips"><span><Check size={17}/>{language==='en'?'Multiple vehicles':'Mai multe mașini'}</span><span><Check size={17}/>PDF / CSV</span><span><Check size={17}/>{language==='en'?'Maintenance forecasts':'Estimări de întreținere'}</span></div></div><div className="studio-offer-price"><span>{language==='en'?'MONTHLY PLAN':'PLAN LUNAR'}</span><strong>{new Intl.NumberFormat(locale,{style:'currency',currency:'RON',maximumFractionDigits:0}).format(data.pricing.monthlyBani/100)}<small>{language==='en'?'/ month':'/ lună'}</small></strong><button className="primary" type="button" onClick={()=>navigate('Abonament')}>{data.premium?(language==='en'?'Manage subscription':'Gestionează abonamentul'):(language==='en'?'Choose Premium':'Alege Premium')}<ArrowUpRight size={18}/></button><small>{language==='en'?'Final conditions shown before payment.':'Condițiile finale sunt afișate înainte de plată.'}</small></div></section>
       <section className="card membership-current">
         <div className="settings-section-title">
           <span className="list-icon">
