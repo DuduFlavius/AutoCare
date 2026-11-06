@@ -19,6 +19,7 @@ import DailyMileageInput from '../daily-mileage-input';
 import InlineMileageEditor from '../inline-mileage-editor';
 import VehicleVisual from './vehicle-visual';
 import MaintenanceHighlights from './maintenance-highlights';
+import SystemHealth from './system-health';
 import { selectActiveVehicle, upcomingMaintenance, isOilMaintenance } from '@/lib/application-home';
 import { forecastDuration } from '@/lib/service-forecast';
 import { AppEmpty, AppSection, AppStatus } from './ui';
@@ -309,6 +310,7 @@ export default function ApplicationHome({
             onRecord={onRecord}
             onCreate={() => onCreate('service', car.id)}
           />
+          <SystemHealth rows={rows} currentKm={car.odometer} dailyKm={usage.dailyKm} timezone={data.profile.timezone} premium={data.premium} onRecord={onRecord} onCreate={()=>onCreate('service',car.id)}/>
           <AppSection
             className="app-home-documents"
             title={t('Documente în atenție', 'Documents to review')}

@@ -202,3 +202,89 @@ html body .app-shell.ac-workspace .ac-premium-faq summary{font-weight:600!import
 }
 @media(prefers-reduced-motion:reduce){html body .app-shell.ac-workspace *{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 }
+/* Graphite account theme: restrained technical surfaces, no car photographs. */
+@layer autocare-workspace {
+html body .app-shell.ac-workspace{--app-bg:#111820;--app-surface:#1a242f;--app-ink:#e4ecf7;--app-muted:#a0afc2;--app-line:#ffffff12;--app-blue:#3c81f1;--app-blue-soft:#22384f;color-scheme:dark!important}
+html body .app-shell.ac-workspace > .app-header.app-topbar{background:#151e29ed!important;border-color:#ffffff0d!important;color:#dce9fa!important}
+html body .app-shell.ac-workspace .app-topbar-title{color:#a0afc2!important}
+html body .app-shell.ac-workspace .app-topbar-title strong{color:#dce7f6!important}
+html body .app-shell.ac-workspace .app-icon-button,html body .app-shell.ac-workspace .app-header-signout{color:#a1b3cc!important}
+html body .app-shell.ac-workspace .app-avatar-button{background:#263549!important;border-color:#354762!important;color:#c1d7f6!important}
+html body .app-shell.ac-workspace .app-header-premium{background:#233951!important;border-color:#385475!important;color:#a4c9ff!important}
+html body .app-shell.ac-workspace .app-topbar-brand{color:#e3edfb!important}
+html body .app-shell.ac-workspace .main :is(.card,.app-section,.app-upcoming,.app-empty,.app-account-identity){background:var(--app-surface)!important;border-color:var(--app-line)!important;box-shadow:0 8px 32px #0000000d!important}
+html body .app-shell.ac-workspace .main :is(p,small,.muted,.micro){color:var(--app-muted)!important}
+html body .app-shell.ac-workspace .main :is(button,.button){background:#202e3e!important;border-color:#ffffff16!important;color:#bdd0eb!important}
+html body .app-shell.ac-workspace .main :is(button.primary,.button.primary){background:#347af0!important;color:white!important;border-color:#4a8af5!important}
+html body .app-shell.ac-workspace .main button.danger{background:#432730!important;color:#f3aab3!important;border-color:#69404a!important}
+html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,select,textarea){background:#141f2c!important;border-color:#344456!important;color:#dfeaf8!important;caret-color:#90bdff!important}
+html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,textarea)::placeholder{color:#8093ab!important;-webkit-text-fill-color:#8093ab!important}
+html body .app-shell.ac-workspace :is(.main,.dialog) label{color:#b8c9e1!important}
+html body .app-shell.ac-workspace .preview-note{background:#182737!important;border-color:#354a61!important;color:#9eafc7!important}
+html body .app-shell.ac-workspace .page-head{border-color:#ffffff12!important}
+html body .app-shell.ac-workspace .app-home-welcome .app-editorial-eyebrow{color:#8398b3!important}
+html body .app-shell.ac-workspace .app-home-welcome p{color:#a0afc2!important}
+html body .app-shell.ac-workspace .ac-overview-date{color:#a0afc2!important}
+html body .app-shell.ac-workspace .ac-overview-date span{color:#88bda7!important}
+html body .app-shell.ac-workspace .app-vehicle-visual.ac-instrument-visual{background:radial-gradient(ellipse at 90% 50%,#31598944,transparent 70%)}
+html body .app-shell.ac-workspace .ac-instrument-grid{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 39px,#91b8e808 40px),repeating-linear-gradient(90deg,transparent 0 39px,#91b8e808 40px);transform:perspective(600px) rotateY(-12deg);mask-image:linear-gradient(90deg,transparent,#000)}
+html body .app-shell.ac-workspace .ac-instrument-orbit{position:absolute;width:280px;height:280px;right:-30px;top:25%;border-radius:50%;border:1px solid #81b2f13b;display:flex;align-items:center;justify-content:center;color:#7aa9e340;box-shadow:0 0 0 34px #7caef309,0 0 0 68px #7caef305}
+html body .app-shell.ac-workspace .app-vehicle-visual-shade{background:linear-gradient(90deg,#151e2cf5,#151e2c66 65%,transparent)}
+html body .app-shell.ac-workspace .app-next-maintenance{border-top-color:#478af5!important}
+html body .app-shell.ac-workspace .app-text-action{background:transparent!important;border:0!important;color:#8bb9ff!important}
+html body .app-shell.ac-workspace .app-icon,html body .app-shell.ac-workspace .app-highlight-icon{background:#273a50!important;color:#92b8ec!important}
+html body .app-shell.ac-workspace .app-maintenance-highlights > button{background:#1a242f!important;border-color:#ffffff14!important}
+html body .app-shell.ac-workspace .app-maintenance-highlights strong{color:#e5edf9!important}
+html body .app-shell.ac-workspace .app-highlight-description small{color:#9aaec6!important}
+html body .app-shell.ac-workspace .app-quick-actions button{background:#202e3e!important;border-color:#ffffff12!important;color:#c3d8f8!important}
+html body .app-shell.ac-workspace .app-record-row{background:transparent!important;border-color:#ffffff0d!important}
+html body .app-shell.ac-workspace .app-inline-empty{border-color:#ffffff12!important;background:transparent!important}
+html body .app-shell.ac-workspace .app-estimate-settings > summary{background:transparent!important;color:#94beff!important;border-color:#ffffff12!important}
+html body .app-shell.ac-workspace .app-status{background:#254236!important;color:#a0d4ba!important;border-color:#3e6655!important}
+html body .app-shell.ac-workspace .app-status--soon{background:#443a24!important;color:#e7c887!important}
+html body .app-shell.ac-workspace .app-status--overdue{background:#432731!important;color:#f1a6b2!important}
+html body .app-shell.ac-workspace .record-search{background:#1b2734!important;border-color:#ffffff14!important}
+html body .app-shell.ac-workspace .record-search input{background:transparent!important}
+html body .app-shell.ac-workspace th{background:#18222e!important;border-color:#ffffff12!important;color:#93a8c3!important}
+html body .app-shell.ac-workspace td{border-color:#ffffff0f!important;color:#c6d4e8!important}
+html body .app-shell.ac-workspace .dialog{background:#192430!important;border-color:#35475d!important;box-shadow:0 28px 100px #0006!important;color:#d9e7fa!important}
+html body .app-shell.ac-workspace .dialog :is(h2,h3,strong){color:#e2ecfa!important}
+html body .app-shell.ac-workspace .dialog :is(p,small){color:#a9b9ce!important}
+html body .app-shell.ac-workspace .dialog :is(button,summary){background:#243449!important;color:#bdd3f1!important;border-color:#3b506a!important}
+html body .app-shell.ac-workspace .dialog button.primary{background:#347af0!important;color:white!important;border-color:#4a8af5!important}
+html body .app-shell.ac-workspace .dialog :is(.service-reminder-box,.record-selected-category,.ac-service-summary,.record-form-stage,.record-extra){background:transparent!important;border-color:#3b506a!important;color:#c4d8f3!important}
+html body .app-shell.ac-workspace .dialog .record-form-footer{background:#192430!important;border-color:#ffffff14!important}
+html body .app-shell.ac-workspace .dialog .record-category-card{background:#1d2d3e!important;color:#c9dbf4!important;border-color:#3a4e68!important}
+html body .app-shell.ac-workspace .dialog .record-category-card[aria-pressed=true]{background:#294568!important;border-color:#6091d4!important}
+html body .app-shell.ac-workspace .ac-auto-drive{background:#1a2634!important;border-color:#354b65!important}
+html body .app-shell.ac-workspace .drive-session{background:linear-gradient(130deg,#1d2e42,#18232f)!important;border-color:#354c68!important;color:#e3efff!important}
+html body .app-shell.ac-workspace .drive-session-distance>span{color:#e5f0ff!important}
+html body .app-shell.ac-workspace .drive-session-details{border-color:#ffffff16!important}
+html body .app-shell.ac-workspace .ac-premium-summary-grid>article{background:#1c2a39!important;border-color:#ffffff14!important;color:#bed0eb!important}
+html body .app-shell.ac-workspace .ac-premium-summary-grid>article strong{color:#e4f0ff!important}
+html body .app-shell.ac-workspace .ac-plan-card{background:#1a2634!important;border-color:#354b65!important}
+html body .app-shell.ac-workspace .ac-plan-card:last-child{background:linear-gradient(135deg,#253b55,#1b2838)!important;border-color:#5681bb!important}
+html body .app-shell.ac-workspace .subscription-price{color:#ebf3ff!important}
+html body .app-shell.ac-workspace .ac-plan-card li{color:#adbed5!important}
+html body .app-shell.ac-workspace .ac-premium-comparison [role=row]{border-color:#ffffff14!important;color:#bdcee5!important}
+html body .app-shell.ac-workspace .ac-premium-comparison [role=row]:first-child{background:#26384e!important}
+html body .app-shell.ac-workspace .chart .bar{background:transparent!important;border:0!important}
+html body .app-shell.ac-workspace .chart .bar-fill{background:linear-gradient(#75b5ff,#3068c1)!important;transform-origin:bottom;animation:ac-chart-enter .5s ease-out both;border-radius:5px 5px 0 0!important}
+html body .app-shell.ac-workspace .notice{background:#213d34!important;border-color:#3a6253!important;color:#a1d7bd!important}
+html body .app-shell.ac-workspace .error{background:#442a34!important;border-color:#6c4150!important;color:#f0b3c1!important}
+html body .app-shell.ac-workspace .ac-system-checks{grid-column:1/-1;border:1px solid #ffffff14;border-radius:14px;padding:18px 22px;background:#18232f}
+html body .app-shell.ac-workspace .ac-system-checks>summary{cursor:pointer;display:flex;align-items:center;gap:9px;color:#b4c8e4;font-size:12px;background:transparent!important;border:0!important}
+html body .app-shell.ac-workspace .ac-system-check-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:20px}
+html body .app-shell.ac-workspace .ac-system-check-grid>button{display:flex!important;flex-direction:column!important;align-items:flex-start!important;text-align:left!important;padding:18px!important;gap:10px!important;border-radius:10px!important;min-width:0!important}
+html body .app-shell.ac-workspace .ac-system-check-grid>button>span{color:#b8d0f1;font-size:12px;font-weight:600}
+html body .app-shell.ac-workspace .ac-system-check-grid small{font-size:11px!important}
+@keyframes ac-chart-enter{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@media(max-width:760px){html body .app-shell.ac-workspace .ac-premium-record-table tr{background:#1a242f!important;border-color:#ffffff18!important}html body .app-shell.ac-workspace .ac-system-check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}html body .app-shell.ac-workspace .app-bottom-nav{background:#192430!important;border-color:#ffffff16!important}html body .app-shell.ac-workspace .app-bottom-nav a{color:#9badc6!important}html body .app-shell.ac-workspace .app-bottom-nav a.active{background:#28456b!important;color:#c1dafe!important}}
+@media(prefers-reduced-motion:reduce){html body .app-shell.ac-workspace .chart .bar-fill{animation:none!important}}
+}
+@layer autocare-workspace {
+html body .app-shell.ac-workspace .main :is(.app-section,.app-maintenance-highlights,.page-head){animation:ac-surface-enter .3s ease-out both}
+@keyframes ac-surface-enter{from{opacity:.5;translate:0 5px}to{opacity:1;translate:0 0}}
+html body .app-shell.ac-workspace .main :is(.app-section,.app-highlight-distance,.stats .value){font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){html body .app-shell.ac-workspace .main :is(.app-section,.app-maintenance-highlights,.page-head){animation:none!important}}
+}
