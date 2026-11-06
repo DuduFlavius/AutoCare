@@ -1,0 +1,1890 @@
+/* Clarity rebuild: one scoped account layer, replacing the rejected redesign. */
+@layer autocare-workspace {
+  html body .app-shell.ac-workspace.ac-studio {
+    --app-bg: #151d28;
+    --app-surface: #222e3d;
+    --app-ink: #f3f7ff;
+    --app-muted: #b9c7d9;
+    --app-line: #ffffff16;
+    --app-blue: #4489ff;
+    --app-blue-soft: #243f64;
+    --app-sidebar: 252px;
+    --app-radius: 16px;
+    --app-gap: 22px;
+    background: var(--app-bg) !important;
+    color: var(--app-ink) !important;
+    color-scheme: dark !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio > .sidebar {
+    width: var(--app-sidebar) !important;
+    padding: 28px 16px 20px !important;
+    background: #111925 !important;
+    border-right: 1px solid #ffffff12 !important;
+    gap: 20px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar .brand {
+    font-size: 25px !important;
+    letter-spacing: -0.5px !important;
+    color: #f4f8ff !important;
+    padding: 0 10px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar .brand span {
+    color: inherit !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar .brandmark {
+    background: #387ded !important;
+    box-shadow: 0 5px 18px #2575ff2b !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-sidebar-search {
+    font-size: 13px !important;
+    min-height: 44px !important;
+    background: #1e2a3c !important;
+    border: 1px solid #3c506b !important;
+    color: #d1dff3 !important;
+    border-radius: 10px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-sidebar-sections {
+    scrollbar-width: thin !important;
+    scrollbar-color: #3d4d66 transparent !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-navigation {
+    gap: 23px !important;
+    display: grid !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-nav-group {
+    gap: 4px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-nav-group > p {
+    font-size: 11px !important;
+    letter-spacing: 1.2px !important;
+    line-height: 1.5 !important;
+    color: #a6b9d2 !important;
+    margin: 0 12px 8px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    min-height: 44px !important;
+    padding: 10px 12px !important;
+    gap: 12px !important;
+    border-radius: 9px !important;
+    color: #c9d5e7 !important;
+    background: transparent !important;
+    font-weight: 500 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a.active {
+    background: linear-gradient(105deg, #367ded, #265cc9) !important;
+    color: #fff !important;
+    box-shadow: 0 5px 16px #0002 !important;
+    font-weight: 650 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a:hover:not(.active) {
+    background: #243247 !important;
+    color: #fff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke-width: 1.7 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar-profile {
+    border-top: 1px solid #ffffff14 !important;
+    padding: 18px 8px 0 !important;
+    color: #e6efff !important;
+    gap: 12px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar-profile strong {
+    color: #f1f6ff !important;
+    font-size: 14px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .sidebar-profile small {
+    color: #b5c6dd !important;
+    font-size: 12px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .profile-avatar {
+    background: #2a4061 !important;
+    color: #c7deff !important;
+    border-radius: 11px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .profile-actions {
+    background: #1c2b3e !important;
+    border: 1px solid #415773 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .profile-actions button {
+    background: transparent !important;
+    color: #e3edfb !important;
+    font-size: 14px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio > .app-header.app-topbar {
+    left: var(--app-sidebar) !important;
+    width: calc(100% - var(--app-sidebar)) !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    padding: 0 30px !important;
+    background: #1a2533f5 !important;
+    border-bottom: 1px solid #ffffff14 !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(14px);
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-topbar-title {
+    color: #bbcae0 !important;
+    font-size: 14px !important;
+    gap: 14px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-topbar-title strong {
+    color: #f2f7ff !important;
+    font-size: 15px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-topbar-actions {
+    gap: 10px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-icon-button {
+    color: #d1e0f5 !important;
+    background: transparent !important;
+    border: 0 !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-header-premium {
+    background: #253d61 !important;
+    border: 1px solid #496a97 !important;
+    color: #c6deff !important;
+    border-radius: 9px !important;
+    font-size: 13px !important;
+    min-height: 40px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-avatar-button {
+    background: #314766 !important;
+    border: 1px solid #536e91 !important;
+    color: #eff7ff !important;
+    border-radius: 50% !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-header-signout {
+    background: transparent !important;
+    border: 0 !important;
+    color: #c4d2e6 !important;
+    font-size: 13px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio > .main {
+    width: calc(100% - var(--app-sidebar)) !important;
+    margin: 0 0 0 var(--app-sidebar) !important;
+    padding: 104px 30px 42px !important;
+    background: var(--app-bg) !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main > * {
+    max-width: 1560px !important;
+    margin-inline: auto !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main :is(h1, h2, h3, h4, strong, .value, .price) {
+    color: var(--app-ink) !important;
+    -webkit-text-fill-color: currentColor !important;
+    letter-spacing: normal !important;
+    text-shadow: none !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main h1 {
+    font-size: 32px !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.9px !important;
+    font-weight: 650 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main h2 {
+    font-size: 20px !important;
+    line-height: 1.35 !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.3px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main h3 {
+    font-size: 18px !important;
+    line-height: 1.4 !important;
+    font-weight: 600 !important;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    .main
+    :is(p, small, .small, .muted, .micro, .app-caption) {
+    color: var(--app-muted) !important;
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+    opacity: 1 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main .eyebrow {
+    font-size: 12px !important;
+    color: #afc9ed !important;
+    letter-spacing: 1px !important;
+    line-height: 1.5 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main :is(button, .button) {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    min-height: 43px !important;
+    padding: 10px 15px !important;
+    border-radius: 9px !important;
+    border: 1px solid #4b617e !important;
+    background: #293d56 !important;
+    color: #e2eeff !important;
+    gap: 8px !important;
+    line-height: 1.4 !important;
+    box-shadow: none !important;
+    transition:
+      background-color 0.18s,
+      border-color 0.18s !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main :is(button, .button):hover {
+    background: #354e6e !important;
+    border-color: #7b9ac3 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main :is(button.primary, .button.primary) {
+    background: #3c80f2 !important;
+    border-color: #609bff !important;
+    color: #fff !important;
+    box-shadow: 0 5px 16px #2471ee1b !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main :is(button.primary, .button.primary):hover {
+    background: #5594ff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main :is(button.danger, .danger) {
+    background: #512e3e !important;
+    border-color: #976077 !important;
+    color: #ffcedb !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio :is(.main, .dialog) :is(input, select, textarea) {
+    background: #172331 !important;
+    border: 1px solid #566c88 !important;
+    border-radius: 9px !important;
+    color: #eff6ff !important;
+    font-size: 16px !important;
+    padding: 11px 13px !important;
+    min-height: 46px !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-shadow: none !important;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    :is(.main, .dialog)
+    :is(input, textarea)::placeholder {
+    color: #a2b4ce !important;
+    -webkit-text-fill-color: #a2b4ce !important;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    :is(.main, .dialog)
+    :is(input, select, textarea):focus {
+    outline: 2px solid #70baff !important;
+    outline-offset: 2px !important;
+    border-color: #70baff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio :is(.main, .dialog) label {
+    font-size: 14px !important;
+    color: #d6e3f6 !important;
+    line-height: 1.55 !important;
+    font-weight: 550 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio :is(input[type='checkbox'], input[type='radio']) {
+    width: 20px !important;
+    min-height: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+    accent-color: #4a90ff !important;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    .main
+    :is(.card, .app-section, .app-account-identity, .app-empty) {
+    background: #222e3d !important;
+    border: 1px solid #ffffff19 !important;
+    border-radius: 15px !important;
+    padding: 24px !important;
+    box-shadow: 0 6px 24px #0000000d !important;
+    color: #ecf4ff !important;
+    min-width: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .page-head {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    gap: 20px !important;
+    flex-wrap: wrap !important;
+    border-bottom: 1px solid #ffffff1a !important;
+    padding: 0 0 22px !important;
+    margin-bottom: 24px !important;
+    background: transparent !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .page-head p {
+    max-width: 760px !important;
+    margin-top: 10px !important;
+    font-size: 15px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .preview-note {
+    font-size: 12px !important;
+    color: #bdcee5 !important;
+    background: #24374e !important;
+    border: 1px dashed #527096 !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    margin-bottom: 22px !important;
+    line-height: 1.6 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio :is(.app-section-head, .studio-panel-head) {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+    flex-wrap: wrap !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main :is(.app-text-action, .studio-text-button) {
+    background: transparent !important;
+    border: 0 !important;
+    color: #86caff !important;
+    min-height: 36px !important;
+    padding: 3px 0 !important;
+    font-size: 14px !important;
+    box-shadow: none !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-status {
+    display: inline-flex !important;
+    align-items: center !important;
+    background: #274e43 !important;
+    border: 1px solid #527c6e !important;
+    color: #b9edce !important;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    border-radius: 7px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    white-space: normal !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio :is(.app-status-soon, .app-status-due) {
+    background: #51452c !important;
+    border-color: #8c784c !important;
+    color: #ffe1a1 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-status-overdue {
+    background: #572e3c !important;
+    border-color: #995a6d !important;
+    color: #ffcfda !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-status-unscheduled {
+    background: #2e3e52 !important;
+    border-color: #536a88 !important;
+    color: #c8d9f1 !important;
+  }
+  /* New dashboard layout: photography and urgent information above operational detail. */
+  html body .app-shell.ac-workspace.ac-studio .studio-home {
+    display: grid !important;
+    gap: 22px !important;
+    max-width: 1560px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-home-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-home-heading h1 {
+    margin: 7px 0 5px !important;
+    font-size: 34px !important;
+    letter-spacing: -1px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-home-heading p {
+    margin: 0 !important;
+    font-size: 15px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-kicker {
+    font-size: 11px !important;
+    letter-spacing: 1.6px !important;
+    font-weight: 600 !important;
+    color: #8dbdff !important;
+    line-height: 1.5 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-heading-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 22px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel {
+    position: relative;
+    min-height: 320px;
+    isolation: isolate;
+    border-radius: 17px;
+    border: 1px solid #4b6079;
+    overflow: hidden;
+    background: #172331;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo {
+    position: relative;
+    height: 210px;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 11px;
+    background: #1a2635;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.8s ease;
+    max-width: 100%;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-photo-caption {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    max-width: 90%;
+    background: #142032dc;
+    color: #d6e4fa !important;
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+    padding: 5px 8px;
+    border: 1px solid #b4ccec2e;
+    border-radius: 5px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel > .studio-vehicle-photo {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    z-index: -2;
+    border-radius: 0;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel > .studio-vehicle-photo img {
+    object-position: 72% center;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel > .studio-vehicle-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, #132031f5 0%, #132031d0 35%, #13203114 85%),
+      linear-gradient(0deg, #13203180, transparent 65%);
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-photo-caption {
+    z-index: 1;
+    bottom: 12px;
+    right: 12px;
+    font-size: 10px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-overlay {
+    padding: 25px 28px;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity {
+    max-width: 90%;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity h2 {
+    font-size: 27px !important;
+    letter-spacing: -0.7px !important;
+    margin: 10px 0 !important;
+    color: #fff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity p {
+    font-size: 14px !important;
+    color: #e0eaf9 !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity select {
+    margin: 8px 0 !important;
+    max-width: 100% !important;
+    font-size: 18px !important;
+    background: #192b40dd !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-plate {
+    border: 1px solid #8399b678;
+    background: #eaf1ff0d;
+    border-radius: 5px;
+    padding: 3px 9px;
+    letter-spacing: 1px;
+    color: #f1f6ff !important;
+    font-size: 13px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage {
+    margin-top: auto;
+    padding-top: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage > span {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: #c2d5ef;
+    font-size: 13px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage > strong {
+    font-size: 36px !important;
+    line-height: 1.25 !important;
+    letter-spacing: -1px !important;
+    font-weight: 650 !important;
+    color: #fff !important;
+    font-variant-numeric: tabular-nums;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage > strong small {
+    font-size: 17px !important;
+    color: #c7daf5 !important;
+    font-weight: 500 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage button {
+    margin-top: 6px !important;
+    font-size: 12px !important;
+    min-height: 32px !important;
+    background: #213752d9 !important;
+    padding: 6px 10px !important;
+    color: #cfe5ff !important;
+    border-color: #6783a35e !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-open {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    background: #223650bd !important;
+    border-color: #a9c7ef38 !important;
+    color: #ebf4ff !important;
+    min-width: 40px !important;
+    padding: 8px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio :is(.studio-priority, .studio-panel) {
+    background: #243243;
+    border: 1px solid #4c607b75;
+    border-radius: 16px;
+    padding: 23px;
+    min-width: 0;
+    box-shadow: 0 6px 22px #0000000b;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-priority {
+    border-top: 3px solid #55a6ff;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-panel-head h2 {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 17px !important;
+    margin: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-main {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 20px 0;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-main h3 {
+    font-size: 21px !important;
+    margin: 0 0 5px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-main p {
+    font-size: 13px !important;
+    margin: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-progress-ring {
+    width: 76px;
+    height: 76px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: conic-gradient(#62c3ef var(--progress), #ffffff14 0);
+    padding: 4px;
+    display: grid;
+    place-items: center;
+    rotate: -90deg;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-progress-ring > span {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #243243;
+    color: #97caff;
+    rotate: 90deg;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid #ffffff15;
+    border-bottom: 1px solid #ffffff15;
+    padding: 16px 0;
+    gap: 22px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics strong {
+    font-size: 29px !important;
+    line-height: 1.3 !important;
+    letter-spacing: -0.7px !important;
+    font-variant-numeric: tabular-nums;
+    white-space: normal;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics small {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics span {
+    font-size: 12px;
+    color: #c2d1e6;
+    line-height: 1.55;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-empty {
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-empty p {
+    margin: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-status-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main .studio-maintenance-tile {
+    display: flex !important;
+    align-items: center !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    background: #222e3d !important;
+    border: 1px solid #ffffff1c !important;
+    border-radius: 13px !important;
+    padding: 17px !important;
+    min-height: 116px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > .studio-tile-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    background: #2a4261;
+    border-radius: 11px;
+    color: #9ed1ff;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > span:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > svg {
+    margin-left: auto;
+    flex-shrink: 0;
+    color: #93b5e0;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-tile-label {
+    font-size: 12px;
+    color: #becde2;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile strong {
+    font-size: 20px !important;
+    letter-spacing: -0.3px !important;
+    font-variant-numeric: tabular-nums;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile small {
+    font-size: 11px !important;
+    color: #b8c8df !important;
+    line-height: 1.5 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main .studio-tile-warning {
+    border-color: #9c7b415e !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-tile-warning > .studio-tile-icon {
+    color: #ffdda0;
+    background: #594a30;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 18px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-detail-grid .studio-panel {
+    padding: 21px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-service-list > button,
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list > button {
+    width: 100% !important;
+    padding: 15px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 11px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #ffffff16 !important;
+    border-radius: 0 !important;
+    text-align: left !important;
+    background: transparent !important;
+    min-width: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-service-list > button > span:nth-child(2),
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list > button > span:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    flex: 1;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-service-list strong,
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list strong {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    overflow-wrap: anywhere;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-service-list small,
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list small {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-row-icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 9px;
+    background: #2a405b;
+    color: #a5cbfa;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-row-cost {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    color: #dbeaff;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list {
+    margin-bottom: 12px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list > button > svg {
+    color: #95c3fc;
+    flex-shrink: 0;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-cost-total {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-cost-total strong {
+    font-size: 28px !important;
+    letter-spacing: -0.5px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-cost-total > span {
+    font-size: 12px;
+    color: #b6c8e2;
+    line-height: 1.5;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart {
+    height: 140px;
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart > button {
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    padding: 0 !important;
+    gap: 8px !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart .studio-chart-track {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 110px;
+    width: 100%;
+    background: #1c293c;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-chart-track > i {
+    display: block;
+    width: 100%;
+    min-height: 0;
+    background: linear-gradient(#6bd1ed, #4284ee);
+    border-radius: 5px 5px 0 0;
+    transform-origin: bottom;
+    animation: studio-chart-in 0.55s ease-out both;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    .studio-mini-chart
+    > button[aria-pressed='true']
+    .studio-chart-track {
+    outline: 2px solid #a7d3ff;
+    outline-offset: 2px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart small {
+    font-size: 11px !important;
+    text-transform: capitalize;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-chart-empty {
+    margin: 24px 0 0 !important;
+    padding: 22px 14px !important;
+    border: 1px dashed #526886 !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    min-height: 100px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-empty-inline {
+    padding: 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    color: #a0bde3;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-tools-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 22px;
+    border: 1px solid #ffffff1a;
+    border-radius: 14px;
+    background: #1d2b3c;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-tools-row > div {
+    margin-right: auto;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-tools-row h2 {
+    font-size: 17px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-tools-row p {
+    font-size: 13px !important;
+    margin: 4px 0 0 !important;
+  }
+  /* Page-specific density and layouts: each existing workflow keeps its controls. */
+  html body .app-shell.ac-workspace.ac-studio .main .grid3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 22px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main .grid2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 22px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .car-card {
+    padding: 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .car-card .studio-vehicle-photo {
+    height: 195px;
+    flex-shrink: 0;
+    margin: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .car-card h2 {
+    font-size: 23px !important;
+    margin: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .car-card p {
+    margin: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .car-card .actions {
+    margin-top: auto !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .stats {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .stats .card {
+    padding: 20px !important;
+    background: linear-gradient(145deg, #2b3b50, #222e3d) !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .stats .value {
+    font-size: 25px !important;
+    line-height: 1.4 !important;
+    margin-top: 10px !important;
+    color: #f0f6ff !important;
+    font-weight: 650 !important;
+    font-variant-numeric: tabular-nums;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-service-stat-icon {
+    background: #324e72 !important;
+    color: #b5d9ff !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 11px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .record-tools {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 22px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .record-search {
+    flex: 1 1 300px !important;
+    background: #213146 !important;
+    border: 1px solid #57708e !important;
+    border-radius: 10px !important;
+    padding: 0 14px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .record-search input {
+    background: transparent !important;
+    border: 0 !important;
+    min-height: 48px !important;
+    box-shadow: none !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .record-filter-panel {
+    background: #263950 !important;
+    border: 1px solid #516a8b !important;
+    border-radius: 10px !important;
+    padding: 4px 14px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .record-filter-panel summary {
+    font-size: 14px !important;
+    background: transparent !important;
+    border: 0 !important;
+    color: #e1edff !important;
+    min-height: 38px !important;
+    padding: 5px 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .record-filter-fields {
+    gap: 14px !important;
+    background: transparent !important;
+    padding: 16px 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .table-scroll {
+    overflow-x: auto !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 14px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio th {
+    background: #1a293c !important;
+    color: #bed0e9 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.5px !important;
+    font-weight: 600 !important;
+    padding: 17px 20px !important;
+    border-color: #ffffff18 !important;
+    white-space: normal !important;
+    text-align: left !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio td {
+    background: transparent !important;
+    color: #dae6f8 !important;
+    font-size: 14px !important;
+    padding: 20px !important;
+    border-color: #ffffff12 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    vertical-align: top !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .row-actions {
+    display: flex !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .row-actions button {
+    font-size: 13px !important;
+    padding: 8px 11px !important;
+    min-height: 38px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio :is(.record-timeline, .service-timeline) {
+    gap: 16px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-maintenance-plan {
+    background: #1d3047 !important;
+    border: 1px solid #496586 !important;
+    padding: 18px !important;
+    border-radius: 12px !important;
+    margin-bottom: 22px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-maintenance-plan > summary {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #d9eaff !important;
+    background: transparent !important;
+    padding: 3px !important;
+    cursor: pointer;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-context-nav {
+    display: flex !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 24px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-context-nav a {
+    font-size: 14px !important;
+    background: #243851 !important;
+    color: #bcd5f6 !important;
+    border: 1px solid #496586 !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    min-height: 40px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-context-nav a[aria-current='page'] {
+    color: #fff !important;
+    border-color: #6b9dea !important;
+    background: #315a91 !important;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    :is(.ac-smartdrive-trip, .ac-auto-drive, .ac-gps-history-details) {
+    background: #243345 !important;
+    border: 1px solid #4c6584 !important;
+    border-radius: 16px !important;
+    padding: 25px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-trip-heading h3 {
+    font-size: 28px !important;
+    letter-spacing: -0.5px !important;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    :is(.ac-smartdrive-live > div, .ac-auto-steps, .ac-auto-pending, .ac-smartdrive-sync) {
+    background: #1b2b40 !important;
+    border: 1px solid #405c7c !important;
+    border-radius: 11px !important;
+    padding: 17px !important;
+    color: #d4e5fb !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-live strong {
+    font-size: 23px !important;
+    color: #f2f8ff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-live small {
+    font-size: 13px !important;
+    color: #c0d1e8 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-gps-history-details > summary {
+    font-size: 16px !important;
+    color: #d8eaff !important;
+    background: transparent !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-auto-drive :is(p, li) {
+    font-size: 14px !important;
+    color: #bdcee6 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-map {
+    background: transparent !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .drive-session {
+    background: linear-gradient(120deg, #2a4567, #213247) !important;
+    border: 1px solid #547ca8 !important;
+    border-radius: 16px !important;
+    padding: 25px !important;
+    color: #e8f3ff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .drive-session-distance > span {
+    font-size: 64px !important;
+    color: #f0f7ff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .drive-session-details {
+    border-color: #6786ab5c !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-road-map-status {
+    font-size: 13px !important;
+    padding: 11px 14px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .category-cost {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 16px 0 !important;
+    border-bottom: 1px solid #ffffff16 !important;
+    border-radius: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .category-track {
+    background: #192b43 !important;
+    border-radius: 5px !important;
+    height: 7px !important;
+    margin-top: 12px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .category-track > span {
+    background: linear-gradient(90deg, #478dff, #71d5ed) !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .monthly-cost strong,
+  html body .app-shell.ac-workspace.ac-studio .price {
+    font-size: 34px !important;
+    letter-spacing: -0.6px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .chart .bar {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .chart .bar-fill {
+    background: linear-gradient(#7dd6ef, #478af1) !important;
+    border-radius: 6px 6px 0 0 !important;
+    transform-origin: bottom;
+    animation: studio-chart-in 0.6s ease both;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales {
+    padding: 38px !important;
+    border: 1px solid #4c719b !important;
+    border-radius: 18px !important;
+    background:
+      radial-gradient(ellipse at 100% 10%, #38628b66, transparent 70%), #20354e !important;
+    margin-bottom: 24px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales h2 {
+    font-size: 34px !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.8px !important;
+    color: #fff !important;
+    max-width: 850px !important;
+    margin: 15px 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales p {
+    font-size: 16px !important;
+    color: #d3e3f9 !important;
+    max-width: 800px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales small {
+    font-size: 13px !important;
+    color: #bcd1ee !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 24px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card {
+    padding: 28px !important;
+    background: #25364a !important;
+    border: 1px solid #587393 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card:last-child {
+    background: linear-gradient(130deg, #2c4768, #22364f) !important;
+    border: 2px solid #649df0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .subscription-price {
+    font-size: 44px !important;
+    color: #f3f8ff !important;
+    line-height: 1.2 !important;
+    letter-spacing: -1px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .subscription-price span {
+    font-size: 16px !important;
+    color: #c4d7f0 !important;
+    letter-spacing: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card li {
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    color: #cfdef2 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card li svg {
+    flex-shrink: 0;
+    color: #8ee3bf;
+    margin-top: 4px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card ul {
+    display: grid !important;
+    gap: 12px !important;
+    list-style: none !important;
+    padding: 8px 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card button {
+    width: 100% !important;
+    min-height: 48px !important;
+    margin-top: auto !important;
+    font-size: 15px !important;
+    background: #3d80f0 !important;
+    border-color: #79acff !important;
+    color: #fff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row'] {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 1.6fr) minmax(100px, 1fr) minmax(120px, 1fr) !important;
+    gap: 20px !important;
+    padding: 17px 16px !important;
+    color: #d4e3f8 !important;
+    border-bottom: 1px solid #ffffff16 !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row']:first-child {
+    background: #1c2e45 !important;
+    border-radius: 8px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-summary-grid > article {
+    background: #273b54 !important;
+    border: 1px solid #58718f !important;
+    border-radius: 12px !important;
+    padding: 21px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-summary-grid > article strong {
+    font-size: 27px !important;
+    color: #f0f7ff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-overview-dashboard > header {
+    padding: 30px !important;
+    border-radius: 16px !important;
+    background: #244463 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-account {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 22px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-account > h1,
+  html body .app-shell.ac-workspace.ac-studio .app-account-identity {
+    grid-column: 1/-1 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-record-row {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid #ffffff15 !important;
+    border-radius: 0 !important;
+    padding: 16px 0 !important;
+    min-height: 65px !important;
+    gap: 14px !important;
+    text-align: left !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-record-row strong {
+    font-size: 15px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .app-icon {
+    background: #304b6c !important;
+    color: #b5d7ff !important;
+    border-radius: 10px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-settings-layout {
+    gap: 24px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button {
+    font-size: 14px !important;
+    min-height: 46px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .dialog-backdrop {
+    padding: 24px !important;
+    background: #0b172aa8 !important;
+    backdrop-filter: blur(6px);
+    z-index: 220 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .dialog {
+    width: min(900px, 100%) !important;
+    max-height: calc(100dvh - 48px) !important;
+    overflow: auto !important;
+    background: #243346 !important;
+    color: #edf5ff !important;
+    border: 1px solid #637b9d !important;
+    border-radius: 18px !important;
+    padding: 28px !important;
+    box-shadow: 0 30px 100px #0005 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .dialog :is(h2, h3, strong) {
+    color: #f1f7ff !important;
+    font-size: 20px !important;
+    line-height: 1.4 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .dialog :is(p, small) {
+    color: #bdcfe7 !important;
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .dialog :is(button, summary) {
+    color: #e1edff !important;
+    border-color: #58728f !important;
+    background: #2d4563 !important;
+    font-size: 14px !important;
+    min-height: 42px !important;
+    padding: 10px 14px !important;
+    border-radius: 9px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .dialog button.primary {
+    background: #4388f4 !important;
+    border-color: #81b2ff !important;
+    color: white !important;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    .dialog
+    .quick-record-form
+    :is(
+      .form-grid,
+      .record-form-stage,
+      .record-technical-details,
+      .record-extra,
+      .record-cost-details
+    ) {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    background: transparent !important;
+    border-color: #58708c !important;
+    color: #d6e5f9 !important;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    .dialog
+    .quick-record-form
+    :is(
+      .cost-field,
+      .ac-filter-item,
+      .ac-service-advice,
+      .ac-service-summary > div,
+      .service-reminder-box
+    ) {
+    background: #1d2e45 !important;
+    border: 1px solid #526d8e !important;
+    border-radius: 10px !important;
+    color: #cfdef3 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .dialog .form-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .dialog .record-form-footer {
+    position: sticky !important;
+    bottom: -28px !important;
+    padding: 18px 0 !important;
+    background: #243346 !important;
+    border-top: 1px solid #ffffff26 !important;
+    display: flex !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+    z-index: 2 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .dialog .record-category-grid > button {
+    background: #293f5c !important;
+    border: 1px solid #5c7596 !important;
+    border-radius: 12px !important;
+    padding: 18px !important;
+    min-height: 130px !important;
+    gap: 11px !important;
+  }
+  html
+    body
+    .app-shell.ac-workspace.ac-studio
+    .dialog
+    .record-category-grid
+    > button[aria-pressed='true'] {
+    background: #335986 !important;
+    border-color: #9ac6ff !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .main :is(.notice, .error, .ws-offline) {
+    font-size: 15px !important;
+    padding: 16px 18px !important;
+    border-radius: 10px !important;
+    line-height: 1.6 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .notice {
+    background: #244d40 !important;
+    border-color: #6a9b85 !important;
+    color: #c7f3da !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .error {
+    background: #563141 !important;
+    border-color: #ae7186 !important;
+    color: #ffdee7 !important;
+  }
+  @keyframes studio-chart-in {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+  @media (min-width: 761px) {
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-brand {
+      display: none !important;
+    }
+  }
+  @media (min-width: 761px) and (max-width: 1250px) {
+    html body .app-shell.ac-workspace.ac-studio {
+      --app-sidebar: 230px;
+    }
+    html body .app-shell.ac-workspace.ac-studio > .main {
+      padding-inline: 22px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-status-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-detail-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-costs {
+      grid-column: 1/-1;
+    }
+    html body .app-shell.ac-workspace.ac-studio .main .grid3 {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-row-cost {
+      white-space: normal;
+      flex-wrap: wrap;
+    }
+  }
+  @media (max-width: 760px) {
+    html body .app-shell.ac-workspace.ac-studio {
+      --app-sidebar: 0px;
+      font-size: 16px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio > .sidebar {
+      display: none !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio > .app-header.app-topbar {
+      left: 0 !important;
+      width: 100% !important;
+      height: 68px !important;
+      min-height: 68px !important;
+      padding: 0 14px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-title {
+      display: none !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-brand {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      font-size: 18px !important;
+      color: #f1f7ff !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-mark {
+      background: #3c80ef !important;
+      color: white !important;
+      padding: 8px !important;
+      border-radius: 9px !important;
+      display: flex !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-actions {
+      gap: 3px !important;
+      margin-left: auto !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio :is(.app-header-premium, .app-header-signout) {
+      display: none !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio > .main {
+      padding: 90px 16px 112px !important;
+      margin: 0 !important;
+      width: 100% !important;
+      overflow-x: clip !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .main h1 {
+      font-size: 28px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-home {
+      gap: 18px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-home-heading {
+      gap: 16px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-home-heading h1 {
+      font-size: 30px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-heading-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-heading-actions button {
+      font-size: 13px !important;
+      padding: 10px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-overview {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel {
+      min-height: 300px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-vehicle-overlay {
+      min-height: 300px;
+      padding: 23px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity h2 {
+      font-size: 25px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-mileage > strong {
+      font-size: 34px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-status-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .main .studio-maintenance-tile {
+      padding: 15px !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 10px !important;
+      min-height: 160px !important;
+      position: relative;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > svg {
+      position: absolute;
+      top: 16px;
+      right: 14px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile strong {
+      font-size: 19px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile small {
+      font-size: 12px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-detail-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+    html body .app-shell.ac-workspace.ac-studio :is(.studio-panel, .studio-priority) {
+      padding: 20px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-row-cost {
+      font-size: 12px;
+      white-space: normal;
+      gap: 4px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-tools-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 18px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-tools-row > div {
+      grid-column: 1/-1;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-tools-row button {
+      font-size: 12px !important;
+      padding: 10px !important;
+      justify-content: flex-start !important;
+      min-width: 0 !important;
+    }
+    html
+      body
+      .app-shell.ac-workspace.ac-studio
+      .main
+      :is(.grid2, .grid3, .ac-plan-grid, .app-account) {
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 18px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .main :is(.card, .app-section) {
+      padding: 20px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .page-head {
+      align-items: flex-start !important;
+      gap: 16px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 12px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .stats .card {
+      padding: 16px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .stats .value {
+      font-size: 20px !important;
+      overflow-wrap: anywhere !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table {
+      background: transparent !important;
+      border: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table :is(table, tbody) {
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table thead {
+      display: none !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table tr {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 16px !important;
+      padding: 20px !important;
+      margin-bottom: 16px !important;
+      border: 1px solid #516580 !important;
+      border-radius: 14px !important;
+      background: #253447 !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table td {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      white-space: normal !important;
+      overflow: visible !important;
+      max-height: none !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table td::before {
+      content: attr(data-label);
+      display: block !important;
+      font-size: 11px !important;
+      letter-spacing: 0.7px !important;
+      color: #aec8e9 !important;
+      margin-bottom: 7px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table td p {
+      white-space: pre-wrap !important;
+      overflow: visible !important;
+      max-height: none !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .row-actions button {
+      min-height: 44px !important;
+      flex: 1 1 110px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .dialog-backdrop {
+      padding: 8px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .dialog {
+      max-width: calc(100vw - 16px) !important;
+      width: 100% !important;
+      max-height: calc(100dvh - 16px) !important;
+      padding: 20px !important;
+      overflow-x: clip !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .dialog .form-grid {
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 18px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .dialog .record-form-footer {
+      bottom: -20px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .dialog .record-form-footer button {
+      flex: 1 1 110px !important;
+      min-height: 46px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-sales {
+      padding: 25px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-sales h2 {
+      font-size: 28px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison {
+      overflow-x: auto !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row'] {
+      min-width: 420px !important;
+      font-size: 13px !important;
+      grid-template-columns: 1.6fr 1fr 1fr !important;
+      gap: 14px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav {
+      background: #172438 !important;
+      border-top: 1px solid #536b8b !important;
+      padding: 8px 8px calc(8px + env(safe-area-inset-bottom)) !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav a {
+      color: #c2d1e6 !important;
+      font-size: 11px !important;
+      min-width: 0 !important;
+      gap: 5px !important;
+      padding: 6px 2px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav a.active {
+      background: #315b91 !important;
+      color: #fff !important;
+      border-radius: 9px !important;
+    }
+  }
+  @media (max-width: 360px) {
+    html body .app-shell.ac-workspace.ac-studio .stats .value {
+      font-size: 16px !important;
+      letter-spacing: -0.3px !important;
+      overflow-wrap: normal !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav a {
+      font-size: 9px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics strong {
+      font-size: 25px !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-row-icon {
+      display: none;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-heading-actions {
+      grid-template-columns: 1fr;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-status-row {
+      gap: 10px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html body .app-shell.ac-workspace.ac-studio *,
+    html body .app-shell.ac-workspace.ac-studio *::before,
+    html body .app-shell.ac-workspace.ac-studio *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+@layer autocare-workspace {
+  html body .app-shell.ac-workspace.ac-studio .studio-search-label {
+    font-size: 13px !important;
+    margin-left: 6px !important;
+    font-weight: 500 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-premium-offer {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 34px;
+    align-items: center;
+    background:
+      radial-gradient(ellipse at 0 0, #347bb542, transparent 70%),
+      linear-gradient(120deg, #22374f, #273d59);
+    border: 1px solid #6494c680;
+    border-radius: 18px;
+    padding: 34px;
+    margin-bottom: 24px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-premium-offer h2 {
+    font-size: 33px !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.8px !important;
+    margin: 14px 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-premium-offer p {
+    font-size: 16px !important;
+    max-width: 650px !important;
+    color: #d4e4fa !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: #ffffff07;
+    border: 1px solid #ffffff24;
+    border-radius: 7px;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: #cfe4ff;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips svg {
+    color: #9ee2c1;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+    border-left: 1px solid #ffffff26;
+    padding-left: 30px;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > span {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: #b6d2f3;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > strong {
+    font-size: 38px !important;
+    letter-spacing: -1px !important;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > strong small {
+    font-size: 16px !important;
+    letter-spacing: 0 !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > small {
+    font-size: 12px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-report-intro {
+    max-width: 900px !important;
+    display: grid;
+    gap: 18px;
+  }
+  @media (max-width: 1200px) {
+    html body .app-shell.ac-workspace.ac-studio .ac-plan-grid {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+  }
+  @media (max-width: 760px) {
+    html body .app-shell.ac-workspace.ac-studio .studio-search-label {
+      display: none !important;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-premium-offer {
+      grid-template-columns: 1fr;
+      padding: 25px;
+      gap: 25px;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-offer-price {
+      border-left: 0;
+      border-top: 1px solid #ffffff26;
+      padding: 24px 0 0;
+    }
+    html body .app-shell.ac-workspace.ac-studio .studio-premium-offer h2 {
+      font-size: 29px !important;
+    }
+  }
+}
