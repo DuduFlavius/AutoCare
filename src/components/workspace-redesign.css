@@ -301,3 +301,10 @@ html body .app-shell.ac-workspace .ws-context-nav a{color:#afc4e1!important;back
 html body .app-shell.ac-workspace .ws-context-nav a[aria-current=page]{background:#2c4770!important;color:#d3e5ff!important}
 @media(max-width:380px){html body .app-shell.ac-workspace .main .stats .value{font-size:14px!important;letter-spacing:-.3px!important;overflow-wrap:normal!important;word-break:normal!important}html body .app-shell.ac-workspace .app-bottom-nav a{font-size:9px!important;padding-inline:2px!important}}
 }
+@layer autocare-workspace {
+html body .app-shell.ac-workspace .dialog .quick-record-form :is(.form-grid,.record-technical-details,.record-cost-details,.record-extra){background:transparent!important;border-color:#35495f!important;color:#bdcfe8!important}
+html body .app-shell.ac-workspace .dialog .quick-record-form :is(.cost-field,.ac-filter-item,.ac-service-advice,.ac-service-summary>div){background:#213144!important;border-color:#3b516a!important;color:#b8cee9!important}
+html body .app-shell.ac-workspace .dialog .quick-record-form .record-category-grid>button{background:#203147!important;border-color:#3c536e!important;color:#c5d9f4!important}
+html body .app-shell.ac-workspace .dialog .quick-record-form .record-category-grid>button[aria-pressed=true]{background:#2b476a!important;border-color:#6593d2!important}
+html body .app-shell.ac-workspace .dialog .close{color:#cbdef8!important;border-color:#4c6380!important}
+}
