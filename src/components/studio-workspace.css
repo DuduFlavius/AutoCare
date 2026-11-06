@@ -1939,3 +1939,23 @@
  html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) button.primary svg {color:#fff !important;}
  html body .app-shell.ac-workspace.ac-studio .record-category-grid svg {background:#334e70 !important; color:#d6e8ff !important;}
 }
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio :is(.document-gallery,.maintenance-timeline) tbody tr {background:#253448 !important; border:1px solid #ffffff20 !important; box-shadow:0 12px 30px #0002 !important;}
+ html body .app-shell.ac-workspace.ac-studio .empty {background:#223044 !important; border:1px dashed #728aaa !important; color:#e5efff !important; padding:36px !important; border-radius:16px !important;}
+ html body .app-shell.ac-workspace.ac-studio .empty p {color:#c7d6eb !important; font-size:16px !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.drive-session-status,.drive-session-caption,.drive-session-details span,.ac-smartdrive-trip .ac-premium-kicker) {color:#bfd2ec !important; font-size:14px !important;}
+ html body .app-shell.ac-workspace.ac-studio .drive-session-details strong {color:#f3f7ff !important; font-size:20px !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.forecast-service-card,.forecast-reading-stamp,.forecast-thresholds,.ac-smartdrive-map) {background:#1a293b !important; color:#dceaff !important; border-color:#ffffff25 !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.forecast-service-card,.ac-smartdrive-map) :is(span,p,strong,small) {color:#d2e1f4 !important;}
+ html body .app-shell.ac-workspace.ac-studio .pill.valid {background:#183e36 !important; color:#a2efd7 !important; border-color:#41967b !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.pill.warning,.pill.expiring) {background:#4b3822 !important; color:#ffdda2 !important; border-color:#9d793e !important;}
+ html body .app-shell.ac-workspace.ac-studio .pill.expired {background:#502c37 !important; color:#ffbfca !important;}
+}
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips span {color:#d4e6ff !important; font-size:14px !important; opacity:1 !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-offer-price > span {color:#b6d2f3 !important; font-size:13px !important; opacity:1 !important; display:block !important;}
+ html body .app-shell.ac-workspace.ac-studio .membership-access {background:#182838 !important; border:1px solid #ffffff20 !important; border-radius:12px !important; padding:18px !important; gap:20px !important;}
+ html body .app-shell.ac-workspace.ac-studio .membership-access :is(span,p) {color:#c1d2e9 !important;}
+ html body .app-shell.ac-workspace.ac-studio .membership-access strong {color:#f3f7ff !important;}
+ html body .app-shell.ac-workspace.ac-studio .app-account-section button {margin-bottom:8px !important;}
+}
