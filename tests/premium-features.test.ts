@@ -136,7 +136,7 @@ test('save, reload, update mileage and deliver per-operation reminders through t
     .select()
     .from(s.notifications)
     .where(eq(s.notifications.recordId, savedId));
-  assert.deepEqual(notifications.map((n) => n.offset).sort(), [
+  assert.deepEqual(notifications.filter(n=>n.channel!=='app').map((n) => n.offset).sort(), [
     '14',
     'km-before-500',
   ]);

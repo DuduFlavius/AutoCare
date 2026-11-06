@@ -113,6 +113,7 @@ export default async function DesignPreview({
       cancelAtPeriodEnd: false,
       updatedAt: now,
     },
+    recentTrips: [],
     notifications: [],
     attachments: [],
     photos: [{ vehicleId: vehicles[0].id }],

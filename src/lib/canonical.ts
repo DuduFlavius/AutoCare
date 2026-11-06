@@ -1,5 +1,5 @@
-const projectAliases = new Set(['project-z0iz5.vercel.app', 'autocare-garaj-roomlyy.vercel.app']);
-const projectDeployment = /^autocare-garaj-[a-z0-9]+-roomlyy\.vercel\.app$/;
+const projectAliases = new Set(['project-z0iz5.vercel.app', 'autocare-garaj-roomlyy.vercel.app', 'project-sxage.vercel.app', 'autocarevercel-roomlyy.vercel.app']);
+const projectDeployment = /^(?:autocare-garaj-[a-z0-9]+|autocarevercel-(?:git-[a-z0-9-]+|[a-z0-9]+))-roomlyy\.vercel\.app$/;
 /** Normalize document navigation only. Never widen authentication/CSRF trust. */
 export function canonicalDocumentURL(
   requestURL: string,

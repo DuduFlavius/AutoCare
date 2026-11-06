@@ -87,6 +87,7 @@ export async function founderOverview(uid: string) {
     conversations: Object.fromEntries(threads.map((x) => [x.status, x.n])),
     pricing: price,
     founderConfigured: !!founderId(),
+    mailPending: Number((await db().select({ count: sql<number>`count(*)::int` }).from(s.settings).where(sql`(${s.settings.key} LIKE 'mail-review:%' AND ${s.settings.value}->>'status' = 'pending') OR ${s.settings.key} LIKE 'mail-automation-request:%'`))[0]?.count || 0),
   };
 }
 export async function founderUsers(uid: string, params: URLSearchParams) {
@@ -101,7 +102,7 @@ export async function founderUsers(uid: string, params: URLSearchParams) {
     string | null
   >`(SELECT max(ends)::text FROM (SELECT sp."periodEnd" AS ends FROM subscriptions sp WHERE sp."userId"=${s.user.id} AND sp.status='active' AND sp."subscriptionId" IS NOT NULL AND sp."periodEnd">now() UNION ALL SELECT pg."expiresAt" AS ends FROM premium_grants pg WHERE pg."userId"=${s.user.id} AND pg."revokedAt" IS NULL AND pg."expiresAt">now()) access_dates)`;
   const premiumFilter = params.get('premium');
-  const roleExpr = sql<string>`CASE WHEN ${s.user.id}=${founderId()} THEN 'founder' WHEN ${s.profiles.role} IN ('admin','assistant') THEN ${s.profiles.role} ELSE 'user' END`;
+  const roleExpr = sql<string>`CASE WHEN ${s.user.id}=${founderId()} THEN 'founder' WHEN ${s.profiles.role} IN ('superadmin','admin','assistant') THEN ${s.profiles.role} ELSE 'user' END`;
   const condition = and(
     premiumFilter === 'active'
       ? sql`(${paidExpr} OR ${manualExpr})`
@@ -118,7 +119,7 @@ export async function founderUsers(uid: string, params: URLSearchParams) {
           ilike(s.user.email, `%${q.replace(/[%_\\]/g, '\\$&')}%`),
         )
       : undefined,
-    role && ['user', 'admin', 'assistant', 'founder'].includes(role)
+    role && ['user', 'superadmin', 'admin', 'assistant', 'founder'].includes(role)
       ? sql`${roleExpr}=${role}`
       : undefined,
   );
@@ -206,7 +207,7 @@ export async function changeRole(uid: string, id: string, input: unknown) {
   await requireFounder(uid);
   protectFounder(id);
   const data = z
-    .object({ role: z.enum(['user', 'assistant', 'admin']), confirm: z.literal(true) })
+    .object({ role: z.enum(['user', 'assistant', 'admin', 'superadmin']), confirm: z.literal(true) })
     .strict()
     .parse(input);
   const u = await target(id);
@@ -237,7 +238,7 @@ export async function addTeamMember(uid: string, input: unknown) {
   const data = z
     .object({
       email: z.string().trim().toLowerCase().pipe(z.email()),
-      role: z.enum(['admin', 'assistant']),
+      role: z.enum(['admin', 'assistant', 'superadmin']),
       confirm: z.literal(true),
     })
     .strict()

@@ -46,3 +46,12 @@ test('a future planned source marked completed cannot hide its actual replacemen
   const result=upcomingMaintenance([planned,actual],111000,70,'UTC',today);
   assert.equal(result.length,1);assert.equal(result[0].service.id,'actual');
 });
+
+
+test('saved legacy oil records remain visible with their own interval',()=>{
+ for(const saved of [{...service,category:'Ulei',title:''},{...service,category:'Engine oil',title:'Service'},{...service,category:'Revizie',title:'Maintenance',nextKm:null,parts:'[ac:intervalUlei]: 15000'}]){
+  assert.equal(isOilMaintenance(saved),true);
+  assert.equal(upcomingMaintenance([saved],108000,70,'UTC',today)[0].status.remainingKm,7000);
+ }
+ assert.equal(isOilMaintenance({...service,category:'Cutie',title:'Schimb ulei cutie'}),false);
+});

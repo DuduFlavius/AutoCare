@@ -14,13 +14,17 @@ import CommunicationPreferences from './communication-preferences';
 import Membership from './membership';
 import SubscriptionPage from './subscription-page';
 import MobileInstall from './mobile-install';
+import {AppUpdateSettings} from './auto-update';
 import PushSettings from './push-settings';
+import {hasNativeTracking,nativeAutomation} from '@/lib/native-tracking';
+import NativeTripSync from './native-trip-sync';
 import SmartDriveTrip from './smartdrive-trip';
 import MaintenanceForecast from './maintenance-forecast';
 import {maintenanceTargets} from '@/lib/maintenance-schedule';
 import ServiceForecastCards from './service-forecast-cards';
 import SmartDriveHistory from './smartdrive-history';
 import RecordEditor from './record-editor';
+import ServiceMileage from './service-mileage';
 import {parseServiceDetails} from '@/lib/service-details';
 import {completedServiceSeed} from '@/lib/completed-service';
 import { filterRecords, documentCounts, serviceStats } from '@/lib/record-filters';
@@ -347,7 +351,10 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
   useEffect(() => {
     if (previewData) return;
     let lastUnread: number | null = null;
+    let unreadBusy = false;
     const check = () => {
+      if (document.hidden || !navigator.onLine || unreadBusy) return;
+      unreadBusy = true;
       void api('support/unread')
         .then(async (x) => {
           const count = Number(x.unread || 0);
@@ -367,20 +374,18 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
           lastUnread = count;
           setSupportUnread(count);
         })
-        .catch(() => {});
+        .catch(() => {}).finally(() => { unreadBusy = false; });
     };
     const notifications = () => {
       if (!document.hidden) void refresh(true);
       void check();
     };
-    const notificationTimer = setInterval(notifications, 15000);
+    const notificationTimer = setInterval(notifications, 45000);
     window.addEventListener('focus', notifications);
     window.addEventListener('online', notifications);
     document.addEventListener('visibilitychange', notifications);
     check();
-    const timer = setInterval(check, 15000);
     return () => {
-      clearInterval(timer);
       clearInterval(notificationTimer);
       window.removeEventListener('focus', notifications);
       window.removeEventListener('online', notifications);
@@ -714,7 +719,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     if (previewData || signingOut) return;
     if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
     setSigningOut(true); setError('');
-    try { const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
+    try { if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (
@@ -734,9 +739,9 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         <button type="button" className="ws-sidebar-search" data-workspace-ui onClick={()=>setLauncherOpen(true)} disabled={!!modal}><Search size={18}/><span>{language==='en'?'Search & actions':'Căutare și acțiuni'}</span><kbd>⌘ K</kbd></button>
         <div className="ws-sidebar-sections">
           <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} premium={!!data?.premium} path={previewData?'/previzualizare':'/cont'} />
-          {data?.profile.role === 'founder' && (
+          {['founder', 'superadmin', 'admin', 'assistant'].includes(data?.profile.role || '') && (
             <a className="founder-nav-link" href="/admin">
-              <Shield size={18} /> Panou Fondator <ArrowUpRight size={13} />
+              <Shield size={18} /> {data?.profile.role === 'founder' ? 'Panou Fondator' : 'Mail Center'} <ArrowUpRight size={13} />
             </a>
           )}
           {data?.profile.role === 'admin' && (
@@ -798,6 +803,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
           </div>
         </details>
       </aside>
+      {data&&!previewData&&<NativeTripSync ownerId={data.profile.userId} vehicles={data.vehicles.filter(v=>!v.archived)} onUpdated={refresh} onReview={()=>navigate('Plan întreținere')} english={language==='en'}/>}
       <SiteLanguage language={language} />
       <ApplicationHeader title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (workspaceSections.find(s=>s.id===tab)?.[language] ?? tab)} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
       <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'}/>
@@ -1462,6 +1468,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                                         ? 'Cost necunoscut'
                                         : moneyDisplay(r.amountBani)}
                                     </strong>
+                                    {r.kind==='service'&&data.vehicles.find(v=>v.id===r.vehicleId)&&<ServiceMileage currentKm={data.vehicles.find(v=>v.id===r.vehicleId)!.odometer} lastKm={r.odometer} nextKm={r.nextKm}/>}
                                     <div className="small muted">
                                       {r.odometer != null
                                         ? r.odometer.toLocaleString(locale) + ' km'
@@ -1713,7 +1720,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
               <div className="ws-settings-layout">
               <nav className="ws-settings-nav" aria-label={language==='en'?'Settings categories':'Categorii setări'} data-workspace-ui>{([['account','Profil și securitate','Profile & security'],['alerts','Notificări și email','Notifications & email'],['device','Aplicație și afișare','App & display'],['help','Ajutor','Help']] as const).map(([id,ro,en])=><button type="button" key={id} aria-current={settingsPanel===id?'page':undefined} onClick={()=>setSettingsPanel(id)}>{language==='en'?en:ro}<ArrowUpRight size={15}/></button>)}</nav>
               <div className="grid2 settings-workspace">
-                <section hidden={settingsPanel!=='device'} className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /><WorkspacePreferences language={language} currency={currency} onLanguage={changeLanguage} onCurrency={changeCurrency}/></section>
+                <section hidden={settingsPanel!=='device'} className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /><AppUpdateSettings /><WorkspacePreferences language={language} currency={currency} onLanguage={changeLanguage} onCurrency={changeCurrency}/></section>
                 <section hidden={settingsPanel!=='alerts'} className="card">
                   <div className="settings-section-title">
                     <span className="list-icon">

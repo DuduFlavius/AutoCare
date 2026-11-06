@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Search, CheckCircle2, ExternalLink } from 'lucide-react';
 export default function SearchConsoleSettings() {
+  const [appURL, setAppURL] = useState('');
   const [token, setToken] = useState(''),
     [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
@@ -13,7 +14,7 @@ export default function SearchConsoleSettings() {
       .then(async (response) => {
         const out = await response.json();
         if (!response.ok) throw new Error(out.error);
-        if (!cancelled) setToken(out.googleVerification || '');
+        if (!cancelled) { setToken(out.googleVerification || ''); setAppURL(out.appURL || ''); }
       })
       .catch((e) => {
         if (!cancelled) setError(e.message);
@@ -43,7 +44,7 @@ export default function SearchConsoleSettings() {
       <ol>
         <li>
           Deschide Search Console și adaugă proprietatea <strong>URL prefix</strong>:{' '}
-          <code>https://autocare-garaj.vercel.app/</code>.
+          <code>{appURL ? appURL + '/' : 'Se încarcă adresa oficială…'}</code>.
         </li>
         <li>
           Alege metoda <strong>Etichetă HTML / HTML tag</strong> și copiază eticheta primită.
@@ -115,7 +116,7 @@ export default function SearchConsoleSettings() {
       <p className="small muted">
         După confirmare, trimite sitemap-ul:{' '}
         <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer">
-          https://autocare-garaj.vercel.app/sitemap.xml
+          {appURL ? appURL + '/sitemap.xml' : 'Sitemap XML'}
         </a>
         . Salvarea codului nu înseamnă că Google a confirmat deja proprietatea.
       </p>

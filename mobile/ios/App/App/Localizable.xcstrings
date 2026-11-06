@@ -1,0 +1,102 @@
+{
+  "sourceLanguage": "ro",
+  "strings": {
+    "Mașină AutoCare": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AutoCare vehicle"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mașină AutoCare"
+          }
+        }
+      }
+    },
+    "Mașină": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehicle"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mașină"
+          }
+        }
+      }
+    },
+    "Pornește traseul AutoCare": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start AutoCare trip"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pornește traseul AutoCare"
+          }
+        }
+      }
+    },
+    "Încheie traseul AutoCare": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End AutoCare trip"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Încheie traseul AutoCare"
+          }
+        }
+      }
+    },
+    "Pornește înregistrarea pentru mașina configurată, cu permisiunea de localizare Întotdeauna.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start recording for the configured vehicle with Always location permission."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pornește înregistrarea pentru mașina configurată, cu permisiunea de localizare Întotdeauna."
+          }
+        }
+      }
+    },
+    "Încheie sesiunea automată după două minute dacă mașina nu se reconectează.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End the automatic trip after two minutes unless the vehicle reconnects."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Încheie sesiunea automată după două minute dacă mașina nu se reconectează."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

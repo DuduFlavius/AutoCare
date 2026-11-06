@@ -11,7 +11,7 @@ process.env.LOCAL_DATABASE_PATH = 'memory';
 process.env.BETTER_AUTH_SECRET = 'test-only-autocare-mail-secret-at-least-32-characters';
 process.env.GOOGLE_MAIL_CLIENT_ID = 'test-client';
 process.env.GOOGLE_MAIL_CLIENT_SECRET = 'test-client-secret';
-process.env.GOOGLE_MAIL_REDIRECT_URI = mail.GOOGLE_MAIL_CALLBACK;
+process.env.GOOGLE_MAIL_REDIRECT_URI = mail.googleMailCallback();
 process.env.GOOGLE_MAIL_FROM = 'contactautocare9@gmail.com';
 const uid = crypto.randomUUID(),
   admin = crypto.randomUUID(),
@@ -61,7 +61,7 @@ async function start() {
   return { ...result, state, cookie, fullCookie: result.cookie };
 }
 const callback = (state: string, cookie: string, extra = '') =>
-  new Request(`${mail.GOOGLE_MAIL_CALLBACK}?state=${state}&code=test-code${extra}`, {
+  new Request(`${mail.googleMailCallback()}?state=${state}&code=test-code${extra}`, {
     headers: { cookie },
   });
 test('Only configuration-bound Founder can connect, inspect, test or disconnect Gmail', async () => {
@@ -78,7 +78,7 @@ test('OAuth requests only gmail.send, offline consent and S256 with a secure bro
   const result = await start();
   const params = new URL(result.url).searchParams;
   assert.equal(params.get('scope'), mail.GOOGLE_MAIL_SCOPE);
-  assert.equal(params.get('redirect_uri'), mail.GOOGLE_MAIL_CALLBACK);
+  assert.equal(params.get('redirect_uri'), mail.googleMailCallback());
   assert.equal(params.get('code_challenge_method'), 'S256');
   assert.equal(params.get('access_type'), 'offline');
   assert.equal(params.get('include_granted_scopes'), 'false');
@@ -230,4 +230,20 @@ test('Provider errors are sanitized and config/key changes require reconnection'
   );
   process.env.GOOGLE_MAIL_REDIRECT_URI = 'https://other.invalid/callback';
   assert.equal((await mail.googleMailStatus(uid)).configured, false);
+});
+
+test('Rejected Gmail refresh authorization is surfaced as reconnect required instead of a healthy stale test',async()=>{
+  process.env.GOOGLE_MAIL_REDIRECT_URI=mail.googleMailCallback();
+  const connect=await start();await mail.completeGoogleMail(uid,session,callback(connect.state,connect.cookie));
+  const center=await import('../src/lib/mail-center');
+  const campaign=await center.saveCampaign(uid,{id:crypto.randomUUID(),template:'administrative',category:'transactional',subject:'Test authorization failure',message:'An isolated test with no real recipients.',ctaLabel:'Open account',ctaPath:'/cont',recipients:[client]});
+  await center.deliverCampaign(campaign.id,async()=>{throw new mail.GoogleDeliveryError('failed','GMAIL_AUTHORIZATION_FAILED');});
+  const status=await mail.googleMailStatus(uid);
+  assert.equal(status.connected,false);assert.equal(status.reconnectRequired,true);assert.equal(await mail.gmailReady(),false);
+});
+
+test('Google redirect follows the configured official origin after a domain migration',()=>{
+ const old=process.env.APP_URL;
+ try{process.env.APP_URL='https://autocare-premium.vercel.app/';assert.equal(mail.googleMailCallback(),'https://autocare-premium.vercel.app/api/v1/mail/google/callback');}
+ finally{if(old===undefined)delete process.env.APP_URL;else process.env.APP_URL=old;}
 });

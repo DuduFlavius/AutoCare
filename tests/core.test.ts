@@ -210,6 +210,7 @@ test('05 Records enforce owner, track changes, and keep expiry incomplete if omi
     category: 'RCA',
     title: 'RCA',
     vehicleId: crypto.randomUUID(),
+    expiresAt:'2030-04-09',
   });
   assert.equal(foreign.status, 404);
 });
@@ -273,7 +274,7 @@ test('07 Retry is bounded; parallel workers do not double claim; archive suppres
     await deliverReminders(new Date(now.getTime() + delta * 60000), transient);
   const n = (
     await db().select().from(s.notifications).where(eq(s.notifications.recordId, r.id))
-  )[0];
+  ).find(row=>row.channel==='email')!;
   assert.equal(n.status, 'failed');
   assert.equal(n.attempts, 4);
   await deliverReminders(new Date(now.getTime() + 35 * 60000), transient);
@@ -700,6 +701,7 @@ test('19aa Founder team API rejects anonymous users and authenticated clients', 
   );
 });
 test('Mail Center API rejects anonymous users, clients and foreign origins; Founder can preview and save safely', async () => {
+  await db().update(s.profiles).set({ role: 'user' }).where(eq(s.profiles.userId, uid));
   for (const route of ['founder/mail', 'founder/mail/campaigns/nonexistent']) {
     assert.equal((await call(route, 'GET', undefined, '')).status, 401);
     assert.equal((await call(route)).status, 403);
@@ -754,6 +756,7 @@ test('Mail Center API rejects anonymous users, clients and foreign origins; Foun
     const rows = await db().select().from(s.mailCampaigns);
     assert.ok(!JSON.stringify(rows).includes('token='));
   } finally {
+    await db().update(s.profiles).set({ role: 'admin' }).where(eq(s.profiles.userId, uid));
     if (original) process.env.AUTOCARE_FOUNDER_USER_ID = original;
     else delete process.env.AUTOCARE_FOUNDER_USER_ID;
   }
@@ -994,6 +997,26 @@ test('SmartDrive: explicit sync is atomic, idempotent, carries sub-km distance a
   assert.equal((await call(route,'POST',{...valid,id:crypto.randomUUID(),expectedOdometer:initial+1,distanceMeters:600})).status,201);
   assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer,initial+2);
   assert.deepEqual(await db().select().from(s.records).where(eq(s.records.vehicleId,id)),records);
+});
+test('SmartDrive: automatic trip batches commit once, preserve service records and stop on mileage conflicts',async()=>{
+ const id=car.id,route='smartdrive/vehicles/'+id+'/trip-batch';
+ const initial=(await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer;
+ const beforeTrips=await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId,id));
+ const carry=beforeTrips.filter(t=>t.source==='browser-gps-synced').reduce((n,t)=>n+t.distanceMeters,0)%1000;
+ const records=await db().select().from(s.records).where(eq(s.records.vehicleId,id));
+ const trip={id:crypto.randomUUID(),distanceMeters:1500,durationSeconds:600,startedAt:'2020-03-11T10:00:00.000Z',endedAt:'2020-03-11T10:10:00.000Z'};
+ const input={expectedOdometer:initial,trips:[trip,{...trip,id:crypto.randomUUID(),distanceMeters:800,startedAt:'2020-03-12T10:00:00.000Z',endedAt:'2020-03-12T10:10:00.000Z'}]};
+ assert.equal((await call(route,'POST',input)).status,201);
+ assert.equal((await call(route,'POST',input)).status,201);
+ assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer,initial+Math.floor((carry+2300)/1000));
+ const count=(await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId,id))).length;
+ assert.equal(count,beforeTrips.length+2);
+ assert.equal((await call(route,'POST',{...input,trips:[{...trip,id:crypto.randomUUID()}]})).status,409);
+ assert.equal((await db().select().from(s.gpsTrips).where(eq(s.gpsTrips.vehicleId,id))).length,count);
+ assert.equal((await call(route,'POST',{...input,syncMileage:false,trips:[{...trip,id:crypto.randomUUID()}]})).status,201);
+ assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer,initial+Math.floor((carry+2300)/1000));
+ assert.deepEqual(await db().select().from(s.records).where(eq(s.records.vehicleId,id)),records);
+ assert.equal((await call(route,'POST',input,'')).status,401);
 });
 test('SmartDrive: reminder preferences validate frequency and persist', async () => {
   let r = await call('smartdrive/preferences');

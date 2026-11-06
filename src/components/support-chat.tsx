@@ -216,9 +216,9 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
     void refresh();
     if (preview) return;
     const timer = setInterval(() => {
-      void refresh();
-    }, 8000);
-    const onFocus = () => void refresh();
+      if (!document.hidden && navigator.onLine) void refresh();
+    }, 15000);
+    const onFocus = () => { if (!document.hidden && navigator.onLine) void refresh(); };
     window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onFocus);
     return () => {

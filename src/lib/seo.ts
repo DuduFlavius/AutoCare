@@ -90,6 +90,7 @@ export const seoTitles: Record<string, string> = {
   'intrebari-frecvente': 'Întrebări frecvente despre AutoCare',
 };
 export const indexableSlugs = [
+  'aplicatie-auto',
   'functionalitati',
   'cum-functioneaza',
   ...Object.keys(publicTopics),

@@ -4,21 +4,67 @@ import { z } from 'zod';
 import { db } from './db';
 import * as s from './schema';
 import { requireFounder } from './founder';
-import { AppError, assertActiveAccount } from './service';
+import { isFounder } from './permissions';
+import { AppError, assertActiveAccount, profile } from './service';
 import {
   emailTemplates,
+  templateCategory,
   renderEmail,
   appLink,
   type EmailTemplate,
   type EmailContent,
 } from './email-templates';
-import { gmailReady, GoogleDeliveryError, sendGoogleMail } from './google-mail';
+import { gmailReady, GoogleDeliveryError, sendGoogleMail, verifyGoogleMailAuthorization } from './google-mail';
 import { billingMailValid, communicationPreference, recipientAllowed } from './mail-policy';
 import { automationState } from './mail-automation';
+export async function requireMailStaff(uid: string) {
+  await assertActiveAccount(uid);
+  const actor = await profile(uid);
+  if (!['founder', 'superadmin', 'admin', 'assistant'].includes(actor.role))
+    throw new AppError(403, 'Mail Center este disponibil doar echipei autorizate.');
+  return { role: actor.role, canApprove: actor.role === 'founder', directSend: ['founder', 'superadmin'].includes(actor.role) };
+}
+const reviewKey = (id: string) => 'mail-review:' + id;
+type MailReview = { campaignId: string; requestedBy: string; requestedAt: string; status: 'pending' | 'approved' | 'rejected'; reviewedBy?: string; reviewedAt?: string; fingerprint: string };
+async function reviews() {
+  return (await db().select().from(s.settings).where(sql`${s.settings.key} LIKE 'mail-review:%'`)).map(x => x.value as MailReview);
+}
+export async function requestCampaignApproval(uid: string, id: string) {
+  await requireMailStaff(uid);
+  const { campaign } = await campaignDetail(uid, id);
+  if (campaign.source !== 'manual') throw new AppError(400, 'Alege o comunicare manuală.');
+  const request: MailReview = { campaignId: id, requestedBy: uid, requestedAt: new Date().toISOString(), status: 'pending', fingerprint: campaign.fingerprint };
+  await db().insert(s.settings).values({ key: reviewKey(id), value: request }).onConflictDoNothing();
+  return { requested: true };
+}
+export async function reviewCampaign(uid: string, id: string, input: unknown) {
+  await requireFounder(uid);
+  const { approve } = z.object({ approve: z.boolean() }).strict().parse(input);
+  const { campaign } = await campaignDetail(uid, id);
+  const row = (await db().select().from(s.settings).where(eq(s.settings.key, reviewKey(id))))[0];
+  if (!row) throw new AppError(404, 'Cererea nu există.');
+  const review = row.value as MailReview;
+  if (review.fingerprint !== campaign.fingerprint) throw new AppError(409, 'Conținutul comunicării s-a schimbat.');
+  const value = { ...review, status: approve ? 'approved' : 'rejected', reviewedBy: uid, reviewedAt: new Date().toISOString() };
+  await db().update(s.settings).set({ value }).where(eq(s.settings.key, reviewKey(id)));
+  await db().insert(s.audit).values({ id: crypto.randomUUID(), actorId: uid, action: approve ? 'mail.review.approved' : 'mail.review.rejected', target: id });
+  return { ok: true };
+}
+async function campaignApproved(id: string, fingerprint: string) {
+  const row = (await db().select().from(s.settings).where(eq(s.settings.key, reviewKey(id))))[0];
+  const review = row?.value as MailReview | undefined;
+  return review?.status === 'approved' && review.fingerprint === fingerprint && !!review.reviewedBy && isFounder(review.reviewedBy);
+}
+export async function requestAutomationApproval(uid: string) {
+  await requireMailStaff(uid);
+  await db().insert(s.settings).values({ key: 'mail-automation-request:' + uid, value: { requestedBy: uid, requestedAt: new Date().toISOString() } }).onConflictDoUpdate({ target: s.settings.key, set: { value: { requestedBy: uid, requestedAt: new Date().toISOString() } } });
+  return { requested: true };
+}
 const templateIds = Object.keys(emailTemplates) as [EmailTemplate, ...EmailTemplate[]];
 const inputSchema = z
   .object({
     id: z.uuid(),
+    communicationType: z.string().trim().min(2).max(100).default('Informare cont'),
     template: z.enum(templateIds),
     category: z.enum(['transactional', 'promotional']),
     subject: z
@@ -66,8 +112,39 @@ export async function getCommunicationPreference(uid: string) {
   await assertActiveAccount(uid);
   return communicationPreference(uid);
 }
+const libraryEntrySchema = z.object({
+  id: z.uuid(), kind: z.enum(['template', 'communication']),
+  label: z.string().trim().min(2).max(100),
+  category: z.enum(['transactional', 'promotional']),
+  template: z.enum(templateIds).default('administrative'),
+  subject: z.string().trim().min(3).max(180).refine(x => !/[\r\n]/.test(x)),
+  message: z.string().trim().min(10).max(8000),
+  ctaLabel: z.string().trim().min(2).max(60),
+  ctaPath: z.string().max(400).refine(x => { try { appLink(x); return true; } catch { return false; } }),
+}).strict();
+export async function saveMailLibraryEntry(uid: string, input: unknown) {
+  await requireMailStaff(uid);
+  const entry = libraryEntrySchema.parse(input);
+  if (['verification', 'password_reset', 'gmail_test'].includes(entry.template))
+    throw new AppError(400, 'Șabloanele de securitate nu pot fi reutilizate manual.');
+  if (templateCategory(entry.template) === 'promotional' && entry.category !== 'promotional')
+    throw new AppError(400, 'Șablonul promoțional necesită acord promoțional.');
+  await db().insert(s.settings).values({ key: 'mail-library:' + entry.id, value: entry })
+    .onConflictDoUpdate({ target: s.settings.key, set: { value: entry } });
+  return entry;
+}
+export async function deleteMailLibraryEntry(uid: string, id: string) {
+  await requireMailStaff(uid);
+  z.uuid().parse(id);
+  await db().delete(s.settings).where(eq(s.settings.key, 'mail-library:' + id));
+  return { ok: true };
+}
+async function mailLibrary() {
+  const rows = await db().select().from(s.settings).where(sql`${s.settings.key} LIKE 'mail-library:%'`);
+  return rows.flatMap(row => { const parsed = libraryEntrySchema.safeParse(row.value); return parsed.success ? [parsed.data] : []; });
+}
 export async function mailCenterOverview(uid: string) {
-  await requireFounder(uid);
+  await requireMailStaff(uid);
   const [campaigns, users, automation] = await Promise.all([
     db().select().from(s.mailCampaigns).orderBy(desc(s.mailCampaigns.createdAt)).limit(50),
     db()
@@ -104,7 +181,11 @@ export async function mailCenterOverview(uid: string) {
         .groupBy(s.mailDeliveries.campaignId, s.mailDeliveries.status)
     : [];
   return {
+    permissions: await requireMailStaff(uid),
+    reviews: await reviews(),
+    automationRequests: (await db().select().from(s.settings).where(sql`${s.settings.key} LIKE 'mail-automation-request:%'`)).map(x => x.value as { requestedBy: string; requestedAt: string }),
     templates: emailTemplates,
+    library: await mailLibrary(),
     campaigns: campaigns.map((c) => ({
       ...c,
       counts: Object.fromEntries(
@@ -116,7 +197,7 @@ export async function mailCenterOverview(uid: string) {
   };
 }
 export async function previewMail(uid: string, input: unknown) {
-  await requireFounder(uid);
+  await requireMailStaff(uid);
   const data = z
     .object({
       template: z.enum(templateIds),
@@ -136,14 +217,14 @@ export async function previewMail(uid: string, input: unknown) {
   }
 }
 export async function saveCampaign(uid: string, input: unknown) {
-  await requireFounder(uid);
+  await requireMailStaff(uid);
   const data = inputSchema.parse(input);
   if (['verification', 'password_reset', 'gmail_test'].includes(data.template))
     throw new AppError(
       400,
       'Acest șablon se trimite exclusiv din fluxul securizat dedicat. Poți vedea previzualizarea aici.',
     );
-  if (data.template === 'promotional' && data.category !== 'promotional')
+  if (templateCategory(data.template) === 'promotional' && data.category !== 'promotional')
     throw new AppError(400, 'Șablonul promoțional necesită categoria promoțională.');
   const fingerprint = createHash('sha256').update(JSON.stringify(data)).digest('hex');
   return db().transaction(async (tx) => {
@@ -178,6 +259,7 @@ export async function saveCampaign(uid: string, input: unknown) {
       fingerprint,
       status: 'draft',
     });
+    await tx.insert(s.settings).values({ key: 'mail-kind:' + data.id, value: { label: data.communicationType } });
     await tx.insert(s.mailDeliveries).values(
       data.recipients.map((userId) => ({
         id: crypto.randomUUID(),
@@ -197,7 +279,7 @@ export async function saveCampaign(uid: string, input: unknown) {
   });
 }
 export async function campaignDetail(uid: string, id: string) {
-  await requireFounder(uid);
+  await requireMailStaff(uid);
   const campaign = (await db().select().from(s.mailCampaigns).where(eq(s.mailCampaigns.id, id)))[0];
   if (!campaign) throw new AppError(404, 'Email inexistent.');
   const deliveries = await db()
@@ -214,7 +296,8 @@ export async function campaignDetail(uid: string, id: string) {
     .innerJoin(s.user, eq(s.user.id, s.mailDeliveries.userId))
     .where(eq(s.mailDeliveries.campaignId, id))
     .limit(100);
-  return { campaign, deliveries };
+  const kind = (await db().select().from(s.settings).where(eq(s.settings.key, 'mail-kind:' + id)))[0]?.value as { label?: string } | undefined;
+  return { campaign, deliveries, communicationType: kind?.label || 'Informare cont' };
 }
 export type MailTransport = (to: string, content: EmailContent, id: string) => Promise<string>;
 export async function deliverCampaign(
@@ -224,6 +307,10 @@ export async function deliverCampaign(
 ) {
   const campaign = (await db().select().from(s.mailCampaigns).where(eq(s.mailCampaigns.id, id)))[0];
   if (!campaign) return { accepted: 0 };
+  if (campaign.source === 'manual' && campaign.actorId) {
+    const author = await requireMailStaff(campaign.actorId);
+    if (!author.directSend && !(await campaignApproved(id, campaign.fingerprint))) return { accepted: 0, held: true };
+  }
   if (campaign.source === 'automation' && !(await automationState()).enabled)
     return { accepted: 0, held: true };
   await db()
@@ -321,10 +408,18 @@ export async function deliverCampaign(
   return { accepted, remaining: !!remaining.length };
 }
 export async function sendCampaign(uid: string, id: string) {
-  await requireFounder(uid);
+  await requireMailStaff(uid);
   const { campaign } = await campaignDetail(uid, id);
   if (campaign.source !== 'manual')
     throw new AppError(403, 'Automatizările necesită aprobarea și activarea separată.');
+  const actor = await requireMailStaff(uid);
+  if (!actor.directSend && !(await campaignApproved(id, campaign.fingerprint))) {
+    await requestCampaignApproval(uid, id);
+    throw new AppError(403, 'Comunicarea a fost trimisă Fondatorului pentru aprobare.');
+  }
+  if (!(await gmailReady()))
+    throw new AppError(409, 'Reconectează Gmail și finalizează testul înainte de trimitere.');
+  await verifyGoogleMailAuthorization();
   if (!(await gmailReady()))
     throw new AppError(409, 'Conectează Gmail și finalizează testul manual înainte de trimitere.');
   const key = `mail-center:${uid}:${Math.floor(Date.now() / 60000)}`;
@@ -346,6 +441,17 @@ export async function sendCampaign(uid: string, id: string) {
     .values({ id: crypto.randomUUID(), actorId: uid, action: 'mail.manual.batch', target: id });
   return result;
 }
+export async function retryFailedCampaign(uid: string, id: string) {
+  const actor = await requireMailStaff(uid);
+  const { campaign } = await campaignDetail(uid, id);
+  if (campaign.source !== 'manual') throw new AppError(403, 'Doar comunicările manuale pot fi reîncercate aici.');
+  if (!actor.directSend && !(await campaignApproved(id, campaign.fingerprint))) throw new AppError(403, 'Este necesară aprobarea Fondatorului.');
+  const requeued = await db().update(s.mailDeliveries).set({status:'pending',error:null,attemptedAt:null})
+    .where(and(eq(s.mailDeliveries.campaignId,id),eq(s.mailDeliveries.status,'failed'),sql`${s.mailDeliveries.providerId} IS NULL`)).returning({id:s.mailDeliveries.id});
+  if (requeued.length) await db().update(s.mailCampaigns).set({status:'draft'}).where(eq(s.mailCampaigns.id,id));
+  await db().insert(s.audit).values({id:crypto.randomUUID(),actorId:uid,action:'mail.failed.requeued',target:id});
+  return { requeued: requeued.length };
+}
 export async function deliverAutomatedMail() {
   if (!(await automationState()).enabled) return { enabled: false, accepted: 0 };
   if (!(await gmailReady())) return { enabled: true, accepted: 0, blocked: 'GMAIL_TEST_REQUIRED' };
@@ -364,13 +470,9 @@ export async function deliverAutomatedMail() {
 }
 
 export async function approveMailAutomation(uid: string, input: unknown) {
-  await requireFounder(uid);
-  z.object({
-    confirmAllTemplatesTested: z.literal(true),
-    confirmInboxDeliveryVerified: z.literal(true),
-  })
-    .strict()
-    .parse(input);
+  const actor = await requireMailStaff(uid);
+  if (!actor.directSend) throw new AppError(403, 'Trimite cererea Fondatorului pentru aprobare.');
+  z.union([z.object({ confirmEnable: z.literal(true) }).strict(), z.object({ confirmAllTemplatesTested: z.literal(true), confirmInboxDeliveryVerified: z.literal(true) }).strict()]).parse(input);
   if (!(await gmailReady()))
     throw new AppError(409, 'Finalizează mai întâi testul Gmail și verificarea livrării.');
   const approvedAt = new Date().toISOString();
@@ -392,5 +494,6 @@ export async function approveMailAutomation(uid: string, input: unknown) {
       target: 'mail-center',
     });
   });
+  await db().delete(s.settings).where(sql`${s.settings.key} LIKE 'mail-automation-request:%'`);
   return automationState();
 }

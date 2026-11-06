@@ -128,3 +128,15 @@ test('maintenance ranking shows overdue and due work before future work and reca
  });
 
 test('completion carries individual filter intervals and never pre-fills a mileage below the previous service',async()=>{const {completedServiceSeed}=await import('../src/lib/completed-service');const {parseServiceDetails}=await import('../src/lib/service-details');const seed=completedServiceSeed({id:'f',title:'Filters',category:'Filtre',odometer:90000,nextKm:null,date:'2026-01-01',expiresAt:null,parts:'AutoCare · filtru0Km: 110000'},80000,'2026-10-30');assert.equal(seed.odometer,90000);assert.equal(parseServiceDetails(seed.parts||'').filtru0Interval,'20000');assert.equal(parseServiceDetails(seed.parts||'').filtru0Km,undefined);});
+
+
+test('oil forecast reads legacy oil intervals and alternate categories without inventing deadlines', () => {
+  const oil = {id:'oil-legacy',title:'Schimb ulei',category:'Revizie',odometer:79999,nextKm:null,date:'2026-10-26',expiresAt:null,parts:'[ac:intervalUlei]: 15000'};
+  const [target] = maintenanceTargets(oil);
+  assert.equal(target.nextKm,94999);
+  assert.equal(target.lastKm,79999);
+  assert.equal(target.lastDate,'2026-10-26');
+  assert.equal(maintenanceTargets({...oil,parts:''})[0].nextKm,null);
+  assert.equal(maintenanceTargets({...oil,parts:'AutoCare · intervalUlei: 12000\n[ac:intervalUlei]: 15000'})[0].nextKm,91999);
+  assert.deepEqual(maintenanceTargets({...oil,parts:'AutoCare · completedBy: next-record'}),[]);
+});

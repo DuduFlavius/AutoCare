@@ -35,13 +35,10 @@ export default function Home() {
           <div>
             <p className="eyebrow">GARAJUL TĂU DIGITAL</p>
             <h1>
-              Ai grijă de mașina ta.{' '}
-              <span className="accent">Toate informațiile, într-un singur loc.</span>
+              Mașina ta.{' '}<span className="accent">Totul în ordine.</span>
             </h1>
             <p>
-              AutoCare te ajută să îți organizezi documentele mașinii, să urmărești termenele
-              importante, să păstrezi istoricul de întreținere și să înțelegi cheltuielile auto. Mai
-              puțină dezordine, mai mult control asupra mașinii tale.
+              Documentele, reviziile și cheltuielile mașinii, la îndemână. Vezi ce urmează și păstrează istoricul fiecărui drum.
             </p>
             <div className="actions">
               <Link href="/inregistrare" className="button primary">
@@ -72,6 +69,7 @@ export default function Home() {
               alt="Ilustrație AutoCare cu documente, calendar și scut cu bifă"
             />
             <h3>Mai multă liniște, la fiecare drum.</h3>
+            <Link href="/aplicatie-auto" className="small accent">Descoperă aplicația AutoCare pentru Android și web →</Link>
             <p className="small muted">Documente, termene și istoric. În ordine, într-un singur loc.</p>
             <div className="list">
               <div className="list-row">
@@ -116,7 +114,7 @@ export default function Home() {
               [
                 BellRing,
                 'Mementouri la timp',
-                'Activează Web Push pe dispozitive compatibile. E-mailul necesită configurarea furnizorului.',
+                'Alege când și cum vrei să fii anunțat despre termenele mașinii.',
               ],
               [
                 Wrench,
@@ -218,9 +216,14 @@ export default function Home() {
               url: origin(),
               description: siteDescription,
               applicationCategory: 'LifestyleApplication',
-              operatingSystem: 'Web',
+              operatingSystem: 'Android, Web',
+              '@id': origin() + '/#application',
+              publisher: { '@id': origin() + '/#organization' },
+              featureList: ['Documente RCA, ITP și rovinietă', 'Istoric service și kilometraj', 'Cheltuieli auto', 'Sesiuni SmartDrive'],
               inLanguage: 'ro-RO',
               image: origin() + '/images/autocare-app-premium.webp',
+              screenshot: origin() + '/images/autocare-app-premium.webp',
+              installUrl: origin() + '/aplicatie-auto',
               offers: {
                 '@type': 'Offer',
                 price: '0',
@@ -233,7 +236,10 @@ export default function Home() {
               '@type': 'WebPage',
               url: origin(),
               name: 'AutoCare – Aplicație pentru Întreținerea și Gestionarea Mașinii',
-              primaryImageOfPage: origin() + '/images/autocare-app-premium.webp',
+              '@id': origin() + '/#webpage',
+              isPartOf: { '@id': origin() + '/#website' },
+              about: { '@id': origin() + '/#application' },
+              primaryImageOfPage: { '@type': 'ImageObject', url: origin() + '/images/autocare-app-premium.webp', caption: 'AutoCare — aplicație pentru documente, întreținere și cheltuieli auto' },
             },
           ],
         }}

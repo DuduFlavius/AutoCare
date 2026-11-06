@@ -1,10 +1,11 @@
+import {automaticTripBatch} from '@/lib/automatic-trips';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { filterRecords } from '@/lib/record-filters';
 import * as founder from '@/lib/founder';
 import { pricing, savings } from '@/lib/pricing';
 import * as supportChat from '@/lib/support-chat';
 import { emailWebhook } from '@/lib/email-events';
-import { and, eq, desc, sql, isNull } from 'drizzle-orm';
+import { and, eq, desc, sql, isNull, inArray } from 'drizzle-orm';
 import { ZodError, z } from 'zod';
 import { timingSafeEqual } from 'node:crypto';
 import { auth } from '@/lib/auth';
@@ -134,7 +135,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         return json(await googleMail.googleMailStatus(uid));
       if (route === 'mail/google/disconnect' && method === 'POST')
         return json(await googleMail.disconnectGoogleMail(uid));
-      if (new URL(req.url).origin !== new URL(googleMail.GOOGLE_MAIL_CALLBACK).origin)
+      if (new URL(req.url).origin !== new URL(googleMail.googleMailCallback()).origin)
         return json({ error: 'Conectarea și testarea Gmail sunt disponibile pe domeniul de producție configurat.' }, 403);
       if (route === 'mail/google/connect' && method === 'POST') {
         const result = await googleMail.beginGoogleMail(uid, sess.session.id);
@@ -163,17 +164,24 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     }
     if (path[0] === 'founder') {
       // Deny before reading inputs or dispatching any founder operation, including future routes.
-      await founder.requireFounder(uid);
+      if (path[1] === 'mail') await mailCenter.requireMailStaff(uid);
+      else await founder.requireFounder(uid);
       if (route === 'founder/mail' && method === 'GET') return json(await mailCenter.mailCenterOverview(uid));
+      if (route === 'founder/mail/approval-request' && method === 'POST') return json(await mailCenter.requestAutomationApproval(uid));
+      if (path.length === 5 && path[1] === 'mail' && path[2] === 'campaigns' && path[4] === 'request-approval' && method === 'POST') return json(await mailCenter.requestCampaignApproval(uid, path[3]));
+      if (path.length === 5 && path[1] === 'mail' && path[2] === 'campaigns' && path[4] === 'review' && method === 'POST') return json(await mailCenter.reviewCampaign(uid, path[3], await body(req)));
+      if (route === 'founder/mail/library' && method === 'POST') return json(await mailCenter.saveMailLibraryEntry(uid, await body(req)));
+      if (path.length === 4 && path[1] === 'mail' && path[2] === 'library' && method === 'DELETE') return json(await mailCenter.deleteMailLibraryEntry(uid, path[3]));
       if (route === 'founder/mail/approve' && method === 'POST') return json(await mailCenter.approveMailAutomation(uid, await body(req)));
       if (route === 'founder/mail/preview' && method === 'POST') return json(await mailCenter.previewMail(uid, await body(req)));
       if (route === 'founder/mail/campaigns' && method === 'POST') return json(await mailCenter.saveCampaign(uid, await body(req)));
       if (path[1] === 'mail' && path[2] === 'campaigns' && path[3]) {
         if (path.length === 4 && method === 'GET') return json(await mailCenter.campaignDetail(uid, path[3]));
+        if (path.length === 5 && path[4] === 'retry-failed' && method === 'POST') return json(await mailCenter.retryFailedCampaign(uid, path[3]));
         if (path.length === 5 && path[4] === 'send' && method === 'POST') return json(await mailCenter.sendCampaign(uid, path[3]));
       }
 
-      if (route === 'founder/seo' && method === 'GET') return json(await founder.founderSeo(uid));
+      if (route === 'founder/seo' && method === 'GET') return json({ ...await founder.founderSeo(uid), appURL: origin() });
       if (route === 'founder/seo' && method === 'PUT') {
         const result = await founder.saveFounderSeo(uid, await body(req));
         revalidateTag('autocare-google-verification', { expire: 0 });
@@ -222,10 +230,12 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     if (route === 'dashboard' && method === 'GET') return json(await svc.dashboard(uid));
     if (path.length === 2 && path[0] === 'notifications' && method === 'DELETE') {
       const id = uuid.parse(path[1]);
-      const removed = await db().delete(s.notifications)
-        .where(and(eq(s.notifications.id, id), eq(s.notifications.userId, uid)))
-        .returning({ id: s.notifications.id });
-      if (!removed.length) throw new svc.AppError(404, 'Notificare inexistentă.');
+      const notice=(await db().select().from(s.notifications).where(and(eq(s.notifications.id,id),eq(s.notifications.userId,uid))))[0];
+      if(!notice)throw new svc.AppError(404,'Notificare inexistentă.');
+      const group=and(eq(s.notifications.userId,uid),eq(s.notifications.recordId,notice.recordId),eq(s.notifications.revision,notice.revision),eq(s.notifications.offset,notice.offset),eq(s.notifications.localDate,notice.localDate));
+      await db().update(s.notifications).set({readAt:new Date()}).where(group);
+      await db().insert(s.notifications).values({...notice,id:crypto.randomUUID(),channel:'app',status:'dismissed',readAt:new Date()}).onConflictDoNothing();
+      await db().update(s.notifications).set({status:'dismissed'}).where(and(group,eq(s.notifications.channel,'app')));
       return json({ ok: true });
     }
     if (route === 'notifications/read' && method === 'POST') {
@@ -284,6 +294,29 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           });
           return json(result, 201);
         }
+      }
+      if(path[3]==='trip-batch'&&method==='POST'){
+        const input=automaticTripBatch.parse(await body(req));
+        if(input.trips.some(t=>Date.parse(t.endedAt)>Date.now()+60000))throw new svc.AppError(400,'Data traseului nu poate fi în viitor.');
+        const result=await db().transaction(async tx=>{
+          const vehicle=(await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid))).for('update'))[0];
+          if(!vehicle)throw new svc.AppError(404,'Mașina nu există.');
+          const ids=input.trips.map(t=>t.id),existing=await tx.select().from(s.gpsTrips).where(inArray(s.gpsTrips.id,ids));
+          if(existing.some(t=>t.userId!==uid||t.vehicleId!==vehicleId))throw new svc.AppError(409,'Identificator de traseu invalid.');
+          const known=new Set(existing.map(t=>t.id)),fresh=input.trips.filter(t=>!known.has(t.id));
+          if(!fresh.length)return {ids,odometer:vehicle.odometer};
+          let odometer=vehicle.odometer;
+          if(input.syncMileage){
+            if(vehicle.odometer!==input.expectedOdometer)throw new svc.AppError(409,'Kilometrajul a fost modificat între timp. Verifică traseele înainte de sincronizare.');
+            const previous=(await tx.select({meters:sql<string>`coalesce(sum(${s.gpsTrips.distanceMeters}),0)`}).from(s.gpsTrips).where(and(eq(s.gpsTrips.userId,uid),eq(s.gpsTrips.vehicleId,vehicleId),eq(s.gpsTrips.source,'browser-gps-synced'))))[0];
+            odometer+=Math.floor((Number(previous.meters)%1000+fresh.reduce((sum,t)=>sum+t.distanceMeters,0))/1000);
+            if(odometer>99999999)throw new svc.AppError(400,'Kilometraj invalid.');
+            await tx.update(s.vehicles).set({odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
+          }
+          await tx.insert(s.gpsTrips).values(fresh.map(t=>({...t,userId:uid,vehicleId,startedAt:new Date(t.startedAt),endedAt:new Date(t.endedAt),source:input.syncMileage?'browser-gps-synced':'browser-gps'})));
+          return {ids,odometer};
+        });
+        return json(result,201);
       }
       if (path[3] === 'trips') {
         if (method === 'GET') return json(await db().select().from(s.gpsTrips)

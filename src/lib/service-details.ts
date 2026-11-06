@@ -6,6 +6,9 @@ export function parseServiceDetails(parts: string) {
     const index = line.indexOf(': ', prefix.length);
     if (index > 0) out[line.slice(prefix.length, index)] = line.slice(index + 2);
   }
+  // Read the previous oil-interval format without rewriting historical records.
+  const legacyOil = parts.match(/(?:^|\n)\[ac:intervalUlei\]:\s*(\d+)\s*(?:\n|$)/)?.[1];
+  if (!out.intervalUlei && legacyOil) out.intervalUlei = legacyOil;
   return out;
 }
 /** Update submitted fields while preserving metadata from older editor versions. */

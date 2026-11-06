@@ -1,0 +1,107 @@
+name: Native GPS builds
+on:
+  push:
+    branches: [feature/autocare-native-gps-20261104]
+    paths: ["mobile/**", ".github/workflows/native-build.yml"]
+  pull_request:
+    branches: [feature/autocare-desktop-premium-20261102, feature/autocare-native-gps-20261104]
+    paths: ["mobile/**", ".github/workflows/native-build.yml"]
+  workflow_dispatch:
+    inputs:
+      signed_android_release:
+        description: 'Build a signed Google Play AAB using configured upload-key secrets'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - run: npm ci --prefix mobile
+      - run: cd mobile && npx cap sync android
+      - name: Compile Android debug app
+        run: |
+          export JAVA_HOME="$JAVA_HOME_21_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          cd mobile/android
+          ./gradlew :app:assembleDebug :app:bundleRelease
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-Android-debug
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+      - name: Archive unsigned Play-format bundle for verification only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-Android-unsigned-AAB-not-for-upload
+          path: mobile/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 7
+  android-release:
+    permissions:
+      contents: write
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.signed_android_release)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: android-release
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - run: npm ci --prefix mobile
+      - run: cd mobile && npx cap sync android
+      - name: Build signed Google Play AAB
+        env:
+          AUTOCARE_UPLOAD_KEYSTORE_BASE64: ${{ secrets.AUTOCARE_UPLOAD_KEYSTORE_BASE64 }}
+          AUTOCARE_UPLOAD_STORE_PASSWORD: ${{ secrets.AUTOCARE_UPLOAD_STORE_PASSWORD }}
+          AUTOCARE_UPLOAD_KEY_ALIAS: ${{ secrets.AUTOCARE_UPLOAD_KEY_ALIAS }}
+          AUTOCARE_UPLOAD_KEY_PASSWORD: ${{ secrets.AUTOCARE_UPLOAD_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for key in AUTOCARE_UPLOAD_KEYSTORE_BASE64 AUTOCARE_UPLOAD_STORE_PASSWORD AUTOCARE_UPLOAD_KEY_ALIAS AUTOCARE_UPLOAD_KEY_PASSWORD; do
+            if [ -z "${!key:-}" ]; then echo "Missing required Android upload signing configuration: $key"; exit 1; fi
+          done
+          export AUTOCARE_UPLOAD_KEYSTORE="$RUNNER_TEMP/autocare-upload.jks"
+          trap 'rm -f "$AUTOCARE_UPLOAD_KEYSTORE"' EXIT
+          umask 077
+          printf '%s' "$AUTOCARE_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$AUTOCARE_UPLOAD_KEYSTORE"
+          export JAVA_HOME="$JAVA_HOME_21_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          cd mobile/android
+          ./gradlew :app:bundleRelease :app:assembleRelease
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-Google-Play-signed-AAB
+          path: mobile/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 7
+      - name: Publish signed Android installer for in-app updates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          import json, pathlib, re, shutil
+          gradle=pathlib.Path('mobile/android/app/build.gradle').read_text()
+          version=re.search(r'versionName "([0-9.]+)"',gradle).group(1)
+          code=int(re.search(r'versionCode (\d+)',gradle).group(1))
+          folder=pathlib.Path('public/downloads');folder.mkdir(parents=True,exist_ok=True)
+          name=f'AutoCare-{version}.apk'
+          shutil.copyfile('mobile/android/app/build/outputs/apk/release/app-release.apk',folder/name)
+          (folder/'android-release.json').write_text(json.dumps({'version':version,'versionCode':code,'url':f'/downloads/{name}'}))
+          PYTHON
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/downloads
+          git diff --cached --quiet && exit 0
+          git commit -m "Publish signed Android installer for in-app updates"
+          git push origin HEAD:${{ github.ref_name }}
+  ios:
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - run: npm ci --prefix mobile
+      - run: cd mobile && npx cap sync ios
+      - name: Compile iOS simulator app without signing
+        run: xcodebuild -project mobile/ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath /tmp/autocare-ios CODE_SIGNING_ALLOWED=NO build

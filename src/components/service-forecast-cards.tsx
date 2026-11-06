@@ -72,7 +72,11 @@ export default function ServiceForecastCards({
       <DailyMileageInput key={vehicleId} usage={usage} />
       {rankMaintenanceForecasts(services, currentKm, dailyKm, timezone).map(
         ({ service, estimate, status, raw }) => {
-          if (!estimate) return null;
+          if (!estimate) return <article className="forecast-service-card" key={service.id}>
+            <strong data-user-content>{service.title}</strong>
+            <span className="forecast-maintenance-state">{en ? 'Interval not set' : 'Interval neconfigurat'}</span>
+            <p>{en ? 'Set the oil change interval in kilometers or months in the service record. No deadline is guessed.' : 'Completează intervalul schimbului de ulei în kilometri sau luni la editarea intervenției. Nu estimăm un termen fără date.'}</p>
+          </article>;
           const { remainingKm: kmLeft, calendarDays, progress } = status;
           const overdue = status.state === 'overdue',
             due = status.state === 'due';

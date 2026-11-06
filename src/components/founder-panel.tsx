@@ -45,6 +45,7 @@ const formatMoney = (b: number,locale:string) =>
   new Intl.NumberFormat(locale, { style: 'currency', currency: 'RON' }).format(b / 100);
 const labels: Record<string, string> = {
   founder: 'Fondator',
+  superadmin: 'Super Admin',
   admin: 'Administrator',
   assistant: 'Asistent',
   user: 'Client',
@@ -208,7 +209,7 @@ const [tab, setTab] = useState('Roluri și permisiuni'),
               onClick={() => navigate(label)}
             >
               <Icon size={17} />
-              {label}
+              {label}{label === 'Mail Center' && overview.mailPending > 0 && <span className="mail-pending-badge" aria-label="Cereri în așteptare">{overview.mailPending}</span>}
             </button>
           ))}
         </nav>
@@ -388,6 +389,7 @@ const [tab, setTab] = useState('Roluri și permisiuni'),
                     Acces
                     <select name="teamRole">
                       <option value="assistant">Asistent</option>
+                          <option value="superadmin">Super Admin</option>
                       <option value="admin">Administrator</option>
                     </select>
                   </label>
@@ -624,13 +626,14 @@ const [tab, setTab] = useState('Roluri și permisiuni'),
                         >
                           <option value="user">Client</option>
                           <option value="assistant">Asistent</option>
+                          <option value="superadmin">Super Admin</option>
                           <option value="admin">Administrator</option>
                         </select>
                       </label>
                       <button className="primary" disabled={busy}>
                         Salvează rolul
                       </button>
-                      {['admin', 'assistant'].includes(selected.role) && (
+                      {['superadmin', 'admin', 'assistant'].includes(selected.role) && (
                         <button
                           type="button"
                           className="danger"

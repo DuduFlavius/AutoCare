@@ -190,7 +190,7 @@ export function prepareRecordDraft(
     provider: str('provider'),
     number: str('number'),
     parts:
-      kind === 'service'
+      ['service','document'].includes(kind)
         ? serializeServiceDetails(
             f.has('parts') ? str('parts') : existingParts || '',
             f,

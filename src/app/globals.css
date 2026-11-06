@@ -962,3 +962,31 @@ html body .app-shell.ac-workspace main.main .ac-inline-mileage form>div{display:
 html body .app-shell.ac-workspace main.main .ac-inline-mileage button{min-height:44px!important;padding:10px 14px!important;background:#dce9ff!important;color:#173467!important;border:1px solid #afc5ed!important;border-radius:10px}
 html body .app-shell.ac-workspace main.main .ac-inline-mileage :is(small,p){font-size:12px!important;line-height:1.6;color:#466182!important;margin:0}
 html body .app-shell.ac-workspace main.main .ac-inline-mileage [role=alert]{color:#a12d35!important}
+
+/* Mail workspace: strong contrast, clear hierarchy and compact navigation. */
+.mail-center{color:#172b49;max-width:1380px;margin:0 auto;--mail-ink:#172b49}
+.mail-center [hidden]{display:none!important}
+.mail-center .card{background:#fff;border:1px solid #dde5f0;border-radius:20px;padding:28px;box-shadow:0 8px 28px #142b4d06}
+.mail-center h2{font-size:24px;line-height:1.3;color:#142b49!important;margin:0 0 12px}
+.mail-center h3,.mail-center label,.mail-center summary{color:#1d3556!important}
+.mail-center p,.mail-center .small,.mail-center .muted{color:#425773!important;line-height:1.65}
+.mail-center label{font-size:14px;font-weight:600;display:grid;gap:8px}
+.mail-center input:not([type=checkbox]),.mail-center select,.mail-center textarea{background:#f9fbfe!important;color:#172b49!important;border:1px solid #bdcce0!important;border-radius:10px;padding:12px 14px;font-size:15px;line-height:1.5;min-height:46px;width:100%}
+.mail-center input::placeholder,.mail-center textarea::placeholder{color:#60738d!important;opacity:1}
+.mail-center .stack{gap:20px}
+.mail-center details{border:1px solid #dbe4ef;border-radius:12px;padding:14px 16px;background:#f8fafd}
+.mail-center details[open]>label,.mail-center details[open]>.inline{margin-top:16px}
+.mail-center summary{cursor:pointer;font-weight:650;min-height:24px}
+.mail-tabs{display:flex;gap:8px;padding:7px;background:#e9eff7;border-radius:14px;margin:22px 0}
+.mail-tabs button{flex:1;padding:13px 18px;border:0!important;background:transparent!important;color:#344c6d!important;box-shadow:none;font-weight:650;border-radius:10px}
+.mail-tabs button[aria-pressed=true]{background:#fff!important;color:#174eaa!important;box-shadow:0 2px 8px #12356c12}
+.mail-automation-card{background:linear-gradient(135deg,#fff,#f0f5fd)!important}
+.mail-center .mail-status{font-size:18px;font-weight:700;color:#183d6a!important}
+.mail-center .notice{background:#edf4ff;color:#24486e!important;border:1px solid #c9daf2;border-radius:12px;padding:14px 18px}
+.mail-center .error{color:#9d2424!important;background:#fff2f2;border:1px solid #f2cccc;padding:14px;border-radius:10px}
+.mail-review-list{padding:20px;background:#f5f8fd;border:1px solid #d8e3f1;border-radius:14px;margin:20px 0}
+.mail-review-item{padding:16px 0;border-bottom:1px solid #dbe5f2}.mail-review-item button{margin:4px}
+.mail-staff-shell{padding:32px;background:#f4f7fb;min-height:100vh}
+@media(max-width:700px){.mail-center .card{padding:20px;border-radius:16px}.mail-tabs{gap:2px}.mail-tabs button{padding:12px 6px;font-size:13px}.mail-staff-shell{padding:16px}.mail-center-grid{grid-template-columns:1fr!important}}
+
+.mail-pending-badge{margin-left:auto;background:#e8efff;color:#163d8c;font-weight:750;border-radius:20px;padding:2px 8px;font-size:12px}

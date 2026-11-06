@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { parseServiceDetails } from '@/lib/service-details';
 import { useApplicationLanguage } from './application-locale';
-export default function OperationAlerts({ parts, premium }: { parts: string; premium: boolean }) {
+export default function OperationAlerts({ parts, premium, mileage=true }: { parts: string; premium: boolean; mileage?:boolean }) {
   const en = useApplicationLanguage() === 'en',
     saved = parseServiceDetails(parts),
     [custom, setCustom] = useState(saved.alertDays !== undefined || !!saved.alertKm),
@@ -43,7 +43,7 @@ export default function OperationAlerts({ parts, premium }: { parts: string; pre
               </label>
             ))}
           </div>
-          <label>
+          {mileage&&<label>
             {en
               ? 'Kilometer reminders · comma separated'
               : 'Alerte kilometraj · separate prin virgulă'}
@@ -54,7 +54,7 @@ export default function OperationAlerts({ parts, premium }: { parts: string; pre
               pattern="[0-9, ]*"
               maxLength={100}
             />
-          </label>
+          </label>}
         </>
       )}
       {!custom && (

@@ -66,3 +66,12 @@ test('Authentication failures explain wrong credentials, duplicate accounts and 
   assert.match(authErrorMessage('INVALID_ORIGIN'), /adresa oficială/);
   assert.equal(authErrorMessage('UNKNOWN', 'Mesaj util'), 'Mesaj util');
 });
+
+test('current domain migration redirects only known document hosts and keeps APIs protected',()=>{
+ const current='https://autocare-premium.vercel.app';
+ for(const legacy of ['https://project-sxage.vercel.app','https://autocarevercel-roomlyy.vercel.app','https://autocarevercel-o2i19pr9h-roomlyy.vercel.app']){
+  assert.equal(canonicalDocumentURL(legacy+'/cont?tab=Documente','GET',current,'production')?.href,current+'/cont?tab=Documente');
+  assert.equal(canonicalDocumentURL(legacy+'/api/auth/sign-in/email','POST',current,'production'),null);
+ }
+ assert.equal(canonicalDocumentURL('https://autocarevercel-evil-roomlyy.vercel.app.evil.invalid/cont','GET',current,'production'),null);
+});

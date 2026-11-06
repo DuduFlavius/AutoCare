@@ -4,7 +4,7 @@ import { effectiveRole } from './permissions';
 import { db } from './db';
 import * as s from './schema';
 import { AppError, profile, assertActiveAccount, detectMime } from './service';
-export const staffRoles = ['assistant', 'admin', 'founder'] as const;
+export const staffRoles = ['assistant', 'admin', 'superadmin', 'founder'] as const;
 export function isSupportStaff(role: string) {
   return (staffRoles as readonly string[]).includes(role);
 }
@@ -12,6 +12,7 @@ export const roleLabel = (role: string) =>
   ({
     assistant: 'Asistent',
     admin: 'Administrator',
+    superadmin: 'Super Admin',
     founder: 'Fondator',
     system: 'Sistem',
     user: 'Client',
@@ -143,8 +144,8 @@ export async function joinSupportThread(uid: string, id: string) {
       .onConflictDoNothing()
       .returning();
     if (joined.length) {
-      const title = { assistant: 'Asistentul', admin: 'Administratorul', founder: 'Fondatorul' }[
-        who.role as 'assistant' | 'admin' | 'founder'
+      const title = { assistant: 'Asistentul', admin: 'Administratorul', superadmin: 'Super Administratorul', founder: 'Fondatorul' }[
+        who.role as 'assistant' | 'admin' | 'superadmin' | 'founder'
       ];
       await tx.insert(s.supportChatMessages).values({
         id: crypto.randomUUID(),

@@ -51,3 +51,13 @@ test('Google verification accepts a real-format token or HTML tag, never arbitra
   assert.throws(() => parseGoogleVerification('<script>alert(1)</script>'));
   assert.throws(() => parseGoogleVerification(''));
 });
+
+test('Application discovery follows the canonical domain and exposes only public sources', async () => {
+  const { GET } = await import('../src/app/llms.txt/route');
+  const response = GET();
+  const content = await response.text();
+  assert.match(response.headers.get('content-type') || '', /text\/plain/);
+  assert.ok(content.includes(process.env.APP_URL + '/aplicatie-auto'));
+  assert.doesNotMatch(content, /\/cont|\/api\/|project-sxage/);
+  assert.ok(sitemap().some(entry => entry.url.endsWith('/aplicatie-auto')));
+});
