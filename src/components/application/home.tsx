@@ -30,7 +30,6 @@ import {
 } from '@/lib/application-home';
 import { forecastDuration } from '@/lib/service-forecast';
 import { AppEmpty, AppStatus } from './ui';
-import VehiclePhoto from './vehicle-photo';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type Row = Data['records'][number];
@@ -194,65 +193,44 @@ export default function ApplicationHome({
       ) : (
         <>
           <div className="studio-overview">
-            <section className="studio-vehicle-panel">
-              <VehiclePhoto
-                vehicleId={car.id}
-                name={car.brand + ' ' + car.model}
-                uploaded={data.photos.some((p) => p.vehicleId === car.id)}
-                preview={preview}
-                priority
-                illustration
-              />
-              <div className="studio-vehicle-overlay">
+            <section className="studio-vehicle-panel ac-vehicle-instrument" aria-labelledby="ac-instrument-title">
+              <div className="ac-instrument-heading">
                 <div className="studio-vehicle-identity">
                   <span className="studio-kicker">{t('MAȘINA SELECTATĂ', 'SELECTED VEHICLE')}</span>
-                  {cars.length > 1 ? (
-                    <select
-                      aria-label={t('Mașina selectată', 'Selected vehicle')}
-                      value={car.id}
-                      onChange={(e) => onSelectVehicle(e.target.value)}
-                    >
-                      {cars.map((v) => (
-                        <option value={v.id} key={v.id}>
-                          {v.brand} {v.model} · {v.plate}
-                        </option>
-                      ))}
+                  <h2 id="ac-instrument-title" data-user-content>{car.brand} {car.model}</h2>
+                  <div className="ac-instrument-identity">
+                    <span>{car.year} · <span data-user-content>{car.fuel}</span></span>
+                    <span className="studio-plate" data-user-content>{car.plate}</span>
+                  </div>
+                  {cars.length > 1 && (
+                    <select aria-label={t('Mașina selectată', 'Selected vehicle')} value={car.id} onChange={e => onSelectVehicle(e.target.value)}>
+                      {cars.map(v => <option value={v.id} key={v.id}>{v.brand} {v.model} · {v.plate}</option>)}
                     </select>
-                  ) : (
-                    <h2 data-user-content>
-                      {car.brand} {car.model}
-                    </h2>
                   )}
-                  <p>
-                    {car.year} · {car.fuel}{' '}
-                    <span className="studio-plate" data-user-content>
-                      {car.plate}
-                    </span>
-                  </p>
                 </div>
+                <svg className="ac-instrument-art" viewBox="0 0 360 226" fill="none" aria-hidden="true" focusable="false">
+                  <g stroke="currentColor" strokeWidth="1">
+                    <path opacity=".18" d="M8 113h344M180 10v206M38 52h42l24 24m218 98h-42l-24-24M38 174h42l24-24m218-98h-42l-24 24" />
+                    <circle cx="180" cy="113" r="91" opacity=".14" />
+                    <circle cx="180" cy="113" r="81" opacity=".22" strokeDasharray="2 7" />
+                    <circle cx="180" cy="113" r="68" opacity=".2" />
+                    <path opacity=".5" d="M98 99a83 83 0 0 1 83-69m81 95a83 83 0 0 1-82 71M119 137a66 66 0 0 0 40 39m82-87a66 66 0 0 0-40-39" />
+                    <path d="m180 68 42 24v43l-42 24-42-24V92Z" fill="#142842" fillOpacity=".56" opacity=".8" />
+                    <path opacity=".6" d="m138 92 42 25 42-25m-42 25v42m-28-43 28-17 28 17m-28-48v31" />
+                    <path opacity=".65" d="m126 100 54-31 54 31m0 26-54 31-54-31" strokeDasharray="2 4" />
+                    <circle cx="180" cy="117" r="3" fill="#a3cdff" stroke="none" />
+                    <path opacity=".45" d="M36 108v10m288-10v10M175 19h10m-10 188h10" />
+                  </g>
+                </svg>
+              </div>
+              <div className="ac-instrument-footer">
                 <div className="studio-mileage">
-                  <span>
-                    <Gauge size={18} />
-                    {t('Kilometraj confirmat', 'Confirmed mileage')}
-                  </span>
-                  <strong>
-                    {car.odometer.toLocaleString(locale)} <small>km</small>
-                  </strong>
-                  <InlineMileageEditor
-                    key={car.id}
-                    vehicleId={car.id}
-                    currentKm={car.odometer}
-                    preview={preview}
-                    onSaved={onRefresh}
-                  />
+                  <span><Gauge size={18} aria-hidden="true"/>{t('Kilometraj confirmat', 'Confirmed mileage')}</span>
+                  <strong>{car.odometer.toLocaleString(locale)} <small>km</small></strong>
+                  <InlineMileageEditor key={car.id} vehicleId={car.id} currentKm={car.odometer} preview={preview} onSaved={onRefresh}/>
                 </div>
-                <button
-                  type="button"
-                  className="studio-vehicle-open"
-                  onClick={() => onVehicle(car.id)}
-                  aria-label={t('Deschide detaliile mașinii', 'Open vehicle details')}
-                >
-                  <ArrowUpRight size={22} />
+                <button type="button" className="ac-instrument-details" onClick={() => onVehicle(car.id)}>
+                  {t('Fișa mașinii', 'Vehicle profile')} <ArrowUpRight size={16} aria-hidden="true"/>
                 </button>
               </div>
             </section>
