@@ -11,14 +11,16 @@ export const metadata = publicMetadata(
 export default function Guides() {
   return (
     <PublicShell>
-      <main className="content-page seo-content">
+      <main className="content-page seo-content ac-public-editorial">
         <Breadcrumbs items={[{ name: 'Ghiduri', path: '/ghiduri' }]} />
+        <header className="ac-editorial-hero">
         <p className="eyebrow">MAI PUȚINĂ DEZORDINE. MAI MULT CONTROL.</p>
         <h1>Un obicei bun pentru mașina ta.</h1>
         <p>
           Idei practice pentru un dosar auto organizat, un istoric de service coerent și cheltuieli
           mai ușor de înțeles.
         </p>
+        </header>
         <div className="seo-guide-grid">
           {Object.entries(guides).map(([slug, guide]) => (
             <article className="card" key={slug}>

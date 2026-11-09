@@ -1,8 +1,10 @@
+import { technologyPages } from './public-technology';
 import { publicTopics } from './seo';
 export const pages: Record<
   string,
   { title: string; intro: string; sections: Array<[string, string]> }
 > = {
+  ...Object.fromEntries(Object.entries(technologyPages).map(([key, page]) => [key, { ...page, sections: page.sections.map(([a, b]) => [a, b] as [string, string]) }])),
   ...Object.fromEntries(
     Object.entries(publicTopics).map(([key, value]) => [
       key,
@@ -32,7 +34,7 @@ export const pages: Record<
       ],
       [
         'Întreținere și costuri',
-        'Înregistrează revizii, reparații, piese și cheltuieli. Kilometrajul se actualizează manual. Intervalele de service sunt cele recomandate pentru mașina ta.',
+        'Înregistrează revizii, reparații, piese și cheltuieli. Kilometrajul poate fi actualizat manual sau prin sincronizarea călătoriilor GPS. Intervalele de service sunt cele recomandate pentru mașina ta.',
       ],
       [
         'Alerte configurabile',
@@ -84,7 +86,7 @@ export const pages: Record<
       ],
       [
         'Pot plăti acum?',
-        'Această versiune permite numai integrarea Stripe în mediul de testare. Încasările reale sunt dezactivate.',
+        'Poți vedea tarifele actuale în pagina Prețuri. Opțiunile de plată și starea abonamentului apar în cont, în secțiunea Abonament.',
       ],
     ],
   },
@@ -98,8 +100,8 @@ export const pages: Record<
         'Mesajul tău este salvat și poate fi consultat de administrator. Nu include parole, date de card sau documente sensibile în mesaj.',
       ],
       [
-        'Înainte de lansare',
-        'Datele operatorului comercial, adresa de contact și termenele de răspuns trebuie completate înainte de deschiderea serviciului public.',
+        'Ce să incluzi în solicitare',
+        'Spune ce încercai să faci, pe ce dispozitiv și ce mesaj ai primit. Pentru o întrebare despre o plată, poți menționa data și suma din cont.',
       ],
     ],
   },
@@ -111,6 +113,10 @@ export const pages: Record<
       [
         'Ce date prelucrăm',
         'Date de cont, email, datele mașinilor, documente, cheltuieli, preferințe și jurnalul tehnic necesar funcționării. Scopurile sunt furnizarea serviciului, securitatea și gestionarea abonamentului. Temeiurile și evaluarea interesului legitim vor fi confirmate juridic.',
+      ],
+      [
+        'Hartă și călătorii GPS',
+        'Coordonatele traseului rămân în arhiva locală a dispozitivului. În cont sunt salvate mașina, data, durata și distanța. Pentru căutarea de puncte auto, AutoCare cere OpenStreetMap informații despre zona aproximativă selectată pe hartă.',
       ],
       [
         'Furnizori și transferuri',

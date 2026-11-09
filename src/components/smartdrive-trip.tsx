@@ -10,7 +10,7 @@ import {hasNativeTracking,nativeTracking,type NativeTrip} from '@/lib/native-tra
 import { storeTripRoutes } from '@/lib/local-trip-routes';
 import { acceptGPSFix, type GPSFix as Sample } from '@/lib/gps-tracking';
 const RoadMapView=dynamic(()=>import('./road-map'),{ssr:false});
-export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId }: { preview: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; odometer:number }[]; onSaved:()=>Promise<unknown> }) {
+export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bluetoothOnly }: { preview: boolean; bluetoothOnly: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; odometer:number }[]; onSaved:()=>Promise<unknown> }) {
 
   const locale=useApplicationLocale();
   const [waitingCar,setWaitingCar]=useState(false);
@@ -189,7 +189,7 @@ const [active, setActive] = useState(false);
       const res = await fetch('/api/v1/smartdrive/vehicles/' + id + '/trips', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id:tripId.current, syncMileage, expectedOdometer:baseline.current, distanceMeters: Math.round(distanceRef.current), durationSeconds: Math.max(1, Math.round((finalEnd - started.current) / 1000)), startedAt: new Date(started.current).toISOString(), endedAt: new Date(finalEnd).toISOString() }) });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || 'Salvarea călătoriei a eșuat.');
-      storeTripRoutes(ownerId, [{ id: body.id, points: finalPoints }]);
+      await storeTripRoutes(ownerId, [{ id: body.id, points: finalPoints }]);
       if(nativeMode.current){try{await nativeTracking.clear(ownerId);}catch{throw Error('Călătoria a fost salvată, dar arhiva locală nu a putut fi curățată. Reîncearcă salvarea.');}}
       setSaved(true); setNotice(syncMileage ? 'Călătorie salvată. Distanța GPS a fost adăugată kilometrajului și planului de întreținere. Verifică periodic valoarea cu bordul mașinii.' : 'Călătoria GPS a fost salvată separat.'); setError('');
       window.dispatchEvent(new Event('autocare-trips-updated'));
@@ -210,7 +210,12 @@ const [active, setActive] = useState(false);
     void saveTrip();
     // Finalization, rather than each GPS poll, triggers one save attempt.
   },[native,finalizeOnStop,active,automatic,saved,startedAt,saveRetry]);
+  const lastPoint = routePoints.at(-1);
+  const speed = active && signal === 'ok' && lastPoint?.speed != null &&
+    Number.isFinite(lastPoint.speed) && lastPoint.speed >= 0 && lastPoint.speed <= 55
+    ? Math.round(lastPoint.speed * 3.6) : null;
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
+    <div className="ac-drive-live-content" hidden={bluetoothOnly}>
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Traseul tău, în timp real</h3></div>
     <div className="ac-drive-cockpit">
       <div className="ac-smartdrive-map">
@@ -220,6 +225,7 @@ const [active, setActive] = useState(false);
           active={active}
           english={locale.startsWith('en')}
         />
+        {speed !== null && <div className="ac-drive-speed"><strong>{speed}</strong><span>km/h</span></div>}
         <div className="ac-drive-map-footer">
           <span><MapPin size={16}/> {locale.startsWith('en') ? 'Recorded route · GPS estimate' : 'Traseu înregistrat · estimare GPS'}</span>
           {!active && routePoints.length === 0 && (
@@ -251,7 +257,8 @@ const [active, setActive] = useState(false);
 
     {waitingCar&&active&&<p role="status">{locale.startsWith('en')?'Car connection interrupted. Distance is paused while reconnection is checked.':'Conexiunea mașinii este întreruptă. Kilometrii sunt opriți cât se verifică reconectarea.'}</p>}
     {automatic&&!active&&!saved&&distance>0&&<p role="status">{locale.startsWith('en')?'Automatic trip saved on this device; waiting for safe account sync.':'Traseu automat păstrat pe dispozitiv; în așteptarea sincronizării sigure în cont.'}</p>}
-    <AutoDrivePanel ownerId={ownerId} vehicles={vehicles} english={locale.startsWith('en')} onUpdated={onSaved} preview={preview}/>
+    </div>
+    <div hidden={!bluetoothOnly}><AutoDrivePanel ownerId={ownerId} vehicles={vehicles} english={locale.startsWith('en')} onUpdated={onSaved} preview={preview}/></div>
     {notice && <p role="status">{notice}</p>}
     {error && <p className="ac-smartdrive-trip-error" role="alert">{error}</p>}
   </section>;

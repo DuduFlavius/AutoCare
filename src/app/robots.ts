@@ -8,6 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         '/cont',
         '/admin',
+        '/dosar',
         '/start',
         '/previzualizare',
         '/api/',

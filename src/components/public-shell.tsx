@@ -40,6 +40,10 @@ export function PublicShell({
               © {new Date().getFullYear()} {appName}
             </span>
             <div className="footer-links">
+              <Link href="/smart-gps">Smart GPS</Link>
+              <Link href="/bluetooth">Bluetooth</Link>
+              <Link href="/smart-maintenance">Smart Maintenance</Link>
+              <Link href="/autocare-maps">AutoCare Maps</Link>
               <Link href="/documente-auto">Documente auto</Link>
               <Link href="/intretinere-auto">Întreținere</Link>
               <Link href="/cheltuieli-auto">Cheltuieli</Link>
@@ -56,5 +60,5 @@ export function PublicShell({
       </div>
     </>
   );
-  return dark ? <div className="ac-public-dark">{content}</div> : content;
+  return <div className={'ac-public-shell' + (dark ? ' ac-public-dark' : '')}>{content}</div>;
 }

@@ -100,7 +100,7 @@ export default function ApplicationHome({
         .reduce((sum, r) => sum + r.amountBani, 0),
     };
   });
-  const lastTrip = data.recentTrips.find(trip => trip.vehicleId === car?.id);
+  const monthlyTrip = data.monthlyTrips?.find(trip => trip.vehicleId === car?.id);
   const monthCost = months.at(-1)?.value ?? 0,
     yearCost = costRows
       .filter((r) => r.date?.startsWith(today.slice(0, 4)))
@@ -189,7 +189,7 @@ export default function ApplicationHome({
               { Icon: Gauge, label: t('Kilometraj actual', 'Current mileage'), value: car.odometer.toLocaleString(locale) + ' km', section: 'Kilometraj' },
               { Icon: Wallet, label: t('Cheltuieli luna aceasta', 'Expenses this month'), value: money(monthCost), section: 'Cheltuieli' },
               { Icon: ShieldCheck, label: t('Documente de verificat', 'Documents to check'), value: attention.length.toLocaleString(locale), section: 'Documente' },
-              { Icon: Route, label: t('Ultima călătorie GPS', 'Last GPS trip'), value: lastTrip ? (lastTrip.distanceMeters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 }) + ' km' : '—', section: 'Plan întreținere' },
+              { Icon: Route, label: t('Distanță GPS luna aceasta', 'GPS distance this month'), value: monthlyTrip ? (monthlyTrip.meters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 }) + ' km' : '—', section: 'Plan întreținere' },
             ].map(({ Icon, label, value, section }) => (
               <button key={section} type="button" onClick={() => navigate(section)}>
                 <Icon size={17} aria-hidden="true"/>
@@ -261,114 +261,67 @@ export default function ApplicationHome({
                 </button>
               </div>
             </section>
-            <section className="studio-priority">
+            <section className="studio-panel studio-costs">
               <div className="studio-panel-head">
-                <h2>
-                  <Wrench size={19} />
-                  {t('Următoarea revizie', 'Next maintenance')}
-                </h2>
-                {next && (
-                  <AppStatus state={next.status.state}>{labels[next.status.state]}</AppStatus>
-                )}
+                <h2>{t('Costuri și evoluție', 'Costs & trends')}</h2>
+                <button className="studio-text-button" onClick={() => navigate('Cheltuieli')}>
+                  <ArrowUpRight size={18} />
+                  <span className="sr-only">{t('Deschide cheltuielile', 'Open expenses')}</span>
+                </button>
               </div>
-              {next ? (
-                <>
-                  <div className="studio-priority-main">
-                    <div
-                      className="studio-progress-ring"
-                      style={
-                        {
-                          '--progress': Math.max(0, Math.min(100, progress ?? 0)) + '%',
-                        } as CSSProperties
-                      }
-                      role={progress == null ? undefined : 'img'}
-                      aria-label={
-                        progress == null
-                          ? undefined
-                          : t('Interval parcurs: ', 'Interval used: ') + Math.round(progress) + '%'
-                      }
-                    >
-                      <span>
-                        <Wrench size={27} />
-                      </span>
-                    </div>
-                    <div>
-                      <h3 data-user-content>{next.service.title}</h3>
-                      <p>
-                        {next.service.nextKm != null
-                          ? next.service.nextKm.toLocaleString(locale) + ' km'
-                          : t('Termen calendaristic', 'Calendar deadline')}
-                        {next.raw ? ' · ' + date(next.raw) : ''}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="studio-deadline-metrics">
-                    <div>
-                      <strong>
-                        {next.status.remainingKm != null
-                          ? Math.abs(next.status.remainingKm).toLocaleString(locale)
-                          : '—'}
-                        {next.status.remainingKm != null && <small> km</small>}
-                      </strong>
-                      <span>
-                        {next.status.remainingKm != null
-                          ? next.status.remainingKm < 0
-                            ? t('peste prag', 'overdue')
-                            : t('rămași până la revizie', 'remaining to service')
-                          : t('Prag km neconfigurat', 'Mileage interval not set')}
-                      </span>
-                    </div>
-                    <div>
-                      <strong>
-                        {next.estimate?.days != null ? next.estimate.days : '—'}
-                        {next.estimate?.days != null && <small> {t('zile', 'days')}</small>}
-                      </strong>
-                      <span>
-                        {next.estimate?.days != null
-                          ? t('estimare din datele disponibile', 'estimate from available data')
-                          : t(
-                              'Date insuficiente pentru estimare',
-                              'More data needed for an estimate',
-                            )}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="studio-panel-footer">
+              <div className="studio-cost-total">
+                <strong>
+                  {money(
+                    selectedMonth
+                      ? (months.find((m) => m.key === selectedMonth)?.value ?? 0)
+                      : yearCost,
+                  )}
+                </strong>
+                <span>
+                  {selectedMonth ||
+                    t('Anul curent · mașina selectată', 'Current year · selected vehicle')}
+                </span>
+              </div>
+              {costRows.length ? (
+                <div
+                  className="studio-mini-chart"
+                  role="group"
+                  aria-label={t(
+                    'Cheltuieli pe ultimele șase luni',
+                    'Expenses over the last six months',
+                  )}
+                >
+                  {months.map((m) => (
                     <button
+                      key={m.key}
                       type="button"
-                      className="studio-text-button"
-                      onClick={() => openForecast(next)}
+                      onClick={() => setSelectedMonth((v) => (v === m.key ? null : m.key))}
+                      aria-label={m.key + ': ' + money(m.value)}
+                      aria-pressed={selectedMonth === m.key}
+                      title={m.key + ': ' + money(m.value)}
                     >
-                      {t('Vezi intervenția', 'View maintenance')}
-                      <ArrowRight size={17} />
+                      <span className="studio-chart-track">
+                        <i style={{ height: (m.value / maxCost) * 100 + '%' }} />
+                      </span>
+                      <small>{m.label}</small>
                     </button>
-                    <button
-                      type="button"
-                      className="studio-text-button"
-                      aria-expanded={editingEstimate}
-                      onClick={() => setEditingEstimate((v) => !v)}
-                    >
-                      <SlidersHorizontal size={16} />
-                      {t('Estimare', 'Estimate')}
-                    </button>
-                  </div>
-                  {editingEstimate && <DailyMileageInput usage={usage} />}
-                </>
-              ) : (
-                <div className="studio-priority-empty">
-                  <CalendarDays size={28} />
-                  <h3>{t('Nicio revizie programată', 'No maintenance scheduled')}</h3>
-                  <p>
-                    {t(
-                      'Configurează un interval pentru a vedea kilometrii și zilele rămase.',
-                      'Set an interval to see remaining mileage and days.',
-                    )}
-                  </p>
-                  <button type="button" onClick={() => onCreate('service', car.id)}>
-                    <Plus size={18} />
-                    {t('Configurează revizia', 'Set up maintenance')}
-                  </button>
+                  ))}
                 </div>
+              ) : (
+                <p className="studio-chart-empty">
+                  {t(
+                    'Graficul apare când înregistrezi primele costuri.',
+                    'Your chart appears when you record your first costs.',
+                  )}
+                </p>
+              )}
+              {currency === 'EUR' && (
+                <p className="studio-caption">
+                  {t(
+                    'Conversie orientativă: 1 EUR = 5 RON.',
+                    'Indicative conversion: EUR 1 = RON 5.',
+                  )}
+                </p>
               )}
             </section>
           </div>
@@ -592,67 +545,114 @@ export default function ApplicationHome({
                 <ArrowRight size={17} />
               </button>
             </section>
-            <section className="studio-panel studio-costs">
+            <section className="studio-priority">
               <div className="studio-panel-head">
-                <h2>{t('Costuri și evoluție', 'Costs & trends')}</h2>
-                <button className="studio-text-button" onClick={() => navigate('Cheltuieli')}>
-                  <ArrowUpRight size={18} />
-                  <span className="sr-only">{t('Deschide cheltuielile', 'Open expenses')}</span>
-                </button>
+                <h2>
+                  <Wrench size={19} />
+                  {t('Următoarea revizie', 'Next maintenance')}
+                </h2>
+                {next && (
+                  <AppStatus state={next.status.state}>{labels[next.status.state]}</AppStatus>
+                )}
               </div>
-              <div className="studio-cost-total">
-                <strong>
-                  {money(
-                    selectedMonth
-                      ? (months.find((m) => m.key === selectedMonth)?.value ?? 0)
-                      : yearCost,
-                  )}
-                </strong>
-                <span>
-                  {selectedMonth ||
-                    t('Anul curent · mașina selectată', 'Current year · selected vehicle')}
-                </span>
-              </div>
-              {costRows.length ? (
-                <div
-                  className="studio-mini-chart"
-                  role="group"
-                  aria-label={t(
-                    'Cheltuieli pe ultimele șase luni',
-                    'Expenses over the last six months',
-                  )}
-                >
-                  {months.map((m) => (
-                    <button
-                      key={m.key}
-                      type="button"
-                      onClick={() => setSelectedMonth((v) => (v === m.key ? null : m.key))}
-                      aria-label={m.key + ': ' + money(m.value)}
-                      aria-pressed={selectedMonth === m.key}
-                      title={m.key + ': ' + money(m.value)}
+              {next ? (
+                <>
+                  <div className="studio-priority-main">
+                    <div
+                      className="studio-progress-ring"
+                      style={
+                        {
+                          '--progress': Math.max(0, Math.min(100, progress ?? 0)) + '%',
+                        } as CSSProperties
+                      }
+                      role={progress == null ? undefined : 'img'}
+                      aria-label={
+                        progress == null
+                          ? undefined
+                          : t('Interval parcurs: ', 'Interval used: ') + Math.round(progress) + '%'
+                      }
                     >
-                      <span className="studio-chart-track">
-                        <i style={{ height: (m.value / maxCost) * 100 + '%' }} />
+                      <span>
+                        <Wrench size={27} />
                       </span>
-                      <small>{m.label}</small>
+                    </div>
+                    <div>
+                      <h3 data-user-content>{next.service.title}</h3>
+                      <p>
+                        {next.service.nextKm != null
+                          ? next.service.nextKm.toLocaleString(locale) + ' km'
+                          : t('Termen calendaristic', 'Calendar deadline')}
+                        {next.raw ? ' · ' + date(next.raw) : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="studio-deadline-metrics">
+                    <div>
+                      <strong>
+                        {next.status.remainingKm != null
+                          ? Math.abs(next.status.remainingKm).toLocaleString(locale)
+                          : '—'}
+                        {next.status.remainingKm != null && <small> km</small>}
+                      </strong>
+                      <span>
+                        {next.status.remainingKm != null
+                          ? next.status.remainingKm < 0
+                            ? t('peste prag', 'overdue')
+                            : t('rămași până la revizie', 'remaining to service')
+                          : t('Prag km neconfigurat', 'Mileage interval not set')}
+                      </span>
+                    </div>
+                    <div>
+                      <strong>
+                        {next.estimate?.days != null ? next.estimate.days : '—'}
+                        {next.estimate?.days != null && <small> {t('zile', 'days')}</small>}
+                      </strong>
+                      <span>
+                        {next.estimate?.days != null
+                          ? t('estimare din datele disponibile', 'estimate from available data')
+                          : t(
+                              'Date insuficiente pentru estimare',
+                              'More data needed for an estimate',
+                            )}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="studio-panel-footer">
+                    <button
+                      type="button"
+                      className="studio-text-button"
+                      onClick={() => openForecast(next)}
+                    >
+                      {t('Vezi intervenția', 'View maintenance')}
+                      <ArrowRight size={17} />
                     </button>
-                  ))}
-                </div>
+                    <button
+                      type="button"
+                      className="studio-text-button"
+                      aria-expanded={editingEstimate}
+                      onClick={() => setEditingEstimate((v) => !v)}
+                    >
+                      <SlidersHorizontal size={16} />
+                      {t('Estimare', 'Estimate')}
+                    </button>
+                  </div>
+                  {editingEstimate && <DailyMileageInput usage={usage} />}
+                </>
               ) : (
-                <p className="studio-chart-empty">
-                  {t(
-                    'Graficul apare când înregistrezi primele costuri.',
-                    'Your chart appears when you record your first costs.',
-                  )}
-                </p>
-              )}
-              {currency === 'EUR' && (
-                <p className="studio-caption">
-                  {t(
-                    'Conversie orientativă: 1 EUR = 5 RON.',
-                    'Indicative conversion: EUR 1 = RON 5.',
-                  )}
-                </p>
+                <div className="studio-priority-empty">
+                  <CalendarDays size={28} />
+                  <h3>{t('Nicio revizie programată', 'No maintenance scheduled')}</h3>
+                  <p>
+                    {t(
+                      'Configurează un interval pentru a vedea kilometrii și zilele rămase.',
+                      'Set an interval to see remaining mileage and days.',
+                    )}
+                  </p>
+                  <button type="button" onClick={() => onCreate('service', car.id)}>
+                    <Plus size={18} />
+                    {t('Configurează revizia', 'Set up maintenance')}
+                  </button>
+                </div>
               )}
             </section>
           </div>

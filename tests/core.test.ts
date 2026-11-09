@@ -49,7 +49,7 @@ async function call(path: string, method = 'GET', body?: unknown, session = cook
           : method === 'DELETE'
             ? DELETE
             : GET;
-  return handler(req, { params: Promise.resolve({ path: path.split('/') }) });
+  return handler(req, { params: Promise.resolve({ path: new URL(req.url).pathname.slice('/api/v1/'.length).split('/') }) });
 }
 async function authReq(path: string, body?: unknown) {
   return auth().handler(
@@ -983,6 +983,24 @@ test('SmartDrive: GPS trips validate payload and never modify dashboard odometer
   r = await call(route, 'GET', undefined, '');
   assert.equal(r.status, 401);
 });
+test('SmartDrive history filters by date in the account timezone and rejects malformed pagination', async () => {
+  const route = 'smartdrive/vehicles/' + car.id + '/trips';
+  const sameDay = await call(route + '?date=2020-03-10');
+  assert.equal(sameDay.status, 200);
+  assert.equal((await sameDay.json())[0].distanceMeters, 3200);
+  assert.deepEqual(await (await call(route + '?date=2020-03-11')).json(), []);
+  assert.deepEqual(await (await call(route + '?page=1')).json(), []);
+  assert.equal((await call(route + '?date=2020-02-30')).status, 400);
+  assert.equal((await call(route + '?page=-1')).status, 400);
+});
+
+test('AutoCare Maps requires a session and rejects invalid area and category inputs', async () => {
+  const path = 'smartdrive/auto-points';
+  assert.equal((await call(path, 'POST', { latitude: 45, longitude: 21, category: 'fuel' }, '')).status, 401);
+  assert.equal((await call(path, 'POST', { latitude: 91, longitude: 21, category: 'fuel' })).status, 400);
+  assert.equal((await call(path, 'POST', { latitude: 45, longitude: 21, category: 'invalid' })).status, 400);
+});
+
 test('SmartDrive: explicit sync is atomic, idempotent, carries sub-km distance and preserves interventions', async () => {
   const id=car.id, route='smartdrive/vehicles/'+id+'/trips';
   const initial=(await db().select().from(s.vehicles).where(eq(s.vehicles.id,id)))[0].odometer;

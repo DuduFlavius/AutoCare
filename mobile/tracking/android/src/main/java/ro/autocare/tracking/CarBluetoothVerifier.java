@@ -6,6 +6,11 @@ import java.util.concurrent.atomic.*;
 /** Exact live A2DP/Headset connection, never proximity or a saved pairing. */
 final class CarBluetoothVerifier {
  interface Result{void accept(boolean connected);}
+ static boolean isPairedCarAudio(BluetoothDevice device) {
+  BluetoothClass type = device.getBluetoothClass();
+  return device.getBondState() == BluetoothDevice.BOND_BONDED && type != null
+      && type.getDeviceClass() == BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO;
+ }
  static void verify(Context context,String address,Result callback){
   AtomicBoolean complete=new AtomicBoolean();AtomicInteger remaining=new AtomicInteger(2);
   Handler handler=new Handler(Looper.getMainLooper());
@@ -16,7 +21,7 @@ final class CarBluetoothVerifier {
    if(adapter==null||!adapter.isEnabled()){if(complete.compareAndSet(false,true))callback.accept(false);return;}
    for(int profile:new int[]{BluetoothProfile.A2DP,BluetoothProfile.HEADSET}){
     boolean requested=adapter.getProfileProxy(context,new BluetoothProfile.ServiceListener(){
-     @Override public void onServiceConnected(int type,BluetoothProfile proxy){boolean found=false;try{for(BluetoothDevice device:proxy.getConnectedDevices())if(address.equalsIgnoreCase(device.getAddress()))found=true;}catch(SecurityException ignored){}finally{adapter.closeProfileProxy(type,proxy);}finish.accept(found);}
+     @Override public void onServiceConnected(int type,BluetoothProfile proxy){boolean found=false;try{for(BluetoothDevice device:proxy.getConnectedDevices())if(address.equalsIgnoreCase(device.getAddress()) && isPairedCarAudio(device))found=true;}catch(SecurityException ignored){}finally{adapter.closeProfileProxy(type,proxy);}finish.accept(found);}
      @Override public void onServiceDisconnected(int type){}
     },profile);
     if(!requested)finish.accept(false);

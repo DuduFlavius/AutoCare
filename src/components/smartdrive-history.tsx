@@ -2,9 +2,8 @@
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { clearTripRoutes, readTripRoutes } from '@/lib/local-trip-routes';
+import { clearTripRoutes, readTripRoute } from '@/lib/local-trip-routes';
 import { driveDuration } from '@/lib/drive-display';
-import { localDate } from '@/lib/config';
 import { Gauge, History, Bell, Route } from 'lucide-react';
 import { mileageMetrics } from '@/lib/smartdrive-metrics';
 const RoadMapView = dynamic(() => import('./road-map'), { ssr: false });
@@ -26,37 +25,62 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
   const [revision,setRevision]=useState(0);
   useEffect(()=>{const refresh=()=>setRevision(v=>v+1);window.addEventListener('autocare-trips-updated',refresh);return()=>window.removeEventListener('autocare-trips-updated',refresh);},[]);
   const [selected, setSelected] = useState('');
-  const [routeArchive, setRouteArchive] = useState<ReturnType<typeof readTripRoutes>>({});
+  const [routeResult, setRouteResult] = useState<{ id: string; points: Awaited<ReturnType<typeof readTripRoute>> } | null>(null);
+  const [clearingRoutes, setClearingRoutes] = useState(false);
   const [resultVehicle, setResultVehicle] = useState('');
   const [selectedTripId, setSelectedTripId] = useState('');
   const [tripDate, setTripDate] = useState('');
+  const [page, setPage] = useState(0);
+  const [tripError, setTripError] = useState('');
+  const [tripResult, setTripResult] = useState<{ key: string; trips: Trip[] } | null>(null);
   const [readings, setReadings] = useState<Reading[]>([]);
-  const [loadedTrips, setTrips] = useState<Trip[]>([]);
   const [prefs, setPrefs] = useState<Preferences>({ frequencyDays: 3, enabled: true });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const vehicleId = vehicles.some(v => v.id === selected) ? selected : (vehicles[0]?.id || '');
   useEffect(() => {
-    if (!preview) setRouteArchive(readTripRoutes(ownerId));
-  }, [ownerId, preview, revision]);
-  useEffect(() => {
     if (preview || !vehicleId) return;
     let cancelled = false;
     Promise.all([
       request<Reading[]>('smartdrive/vehicles/' + vehicleId + '/readings'),
-      request<Trip[]>('smartdrive/vehicles/' + vehicleId + '/trips'),
       request<Preferences>('smartdrive/preferences'),
-    ]).then(([r,t,p]) => { if (!cancelled) { setReadings(r); setTrips(t); setResultVehicle(vehicleId); setPrefs(p); setError(''); } })
+    ]).then(([r,p]) => { if (!cancelled) { setReadings(r); setResultVehicle(vehicleId); setPrefs(p); setError(''); } })
       .catch(e => { if (!cancelled) setError(e instanceof Error ? e.message : 'Eroare SmartDrive.'); });
     return () => { cancelled = true; };
   }, [vehicleId, preview, revision, vehicles.map(v => v.odometer).join(',')]);
   const visibleReadings = resultVehicle === vehicleId ? readings : [];
-  const trips = resultVehicle === vehicleId ? loadedTrips : [];
-  const filteredTrips = tripDate
-    ? trips.filter(trip => localDate(new Date(trip.startedAt), timezone) === tripDate)
-    : trips;
+  const tripQuery = new URLSearchParams({ page: String(page), ...(tripDate ? { date: tripDate } : {}) });
+  const tripPath = 'smartdrive/vehicles/' + vehicleId + '/trips?' + tripQuery.toString();
+  useEffect(() => {
+    if (preview || !vehicleId) return;
+    let cancelled = false;
+    setTripError('');
+    request<Trip[]>(tripPath).then(trips => {
+      if (!cancelled) setTripResult({ key: tripPath, trips });
+    }).catch(error => {
+      if (!cancelled) setTripError(error.message);
+    });
+    return () => { cancelled = true; };
+  }, [tripPath, vehicleId, preview, revision]);
+  const filteredTrips = tripResult?.key === tripPath ? tripResult.trips : [];
   const selectedTrip = filteredTrips.find(trip => trip.id === selectedTripId) ?? filteredTrips[0];
-  const route = selectedTrip && routeArchive[selectedTrip.id];
+  const tripId = selectedTrip?.id;
+  useEffect(() => {
+    if (preview || !tripId) return;
+    let cancelled = false;
+    void readTripRoute(ownerId, tripId).then(points => {
+      if (!cancelled) setRouteResult({ id: tripId, points });
+    });
+    return () => { cancelled = true; };
+  }, [ownerId, tripId, preview, revision]);
+  const route = routeResult?.id === tripId ? routeResult?.points : undefined;
+  async function clearRoutes() {
+    if (!window.confirm(t('Ștergi toate traseele păstrate pe acest dispozitiv?', 'Delete all routes stored on this device?'))) return;
+    setClearingRoutes(true);
+    try { await clearTripRoutes(ownerId); setRouteResult(null); setRevision(value => value + 1); }
+    catch { setError(t('Traseele locale nu au putut fi șterse.', 'The local routes could not be deleted.')); }
+    finally { setClearingRoutes(false); }
+  }
   const { deltaKm, dailyKm, monthlyKm } = mileageMetrics(visibleReadings);
   const save = async () => {
     if (preview) return;
@@ -67,18 +91,23 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
   };
   return <section className="ac-smartdrive-history">
     <div className="ac-smartdrive-history-head"><div><span className="ac-premium-kicker"><History size={17}/> SMARTDRIVE · ISTORIC</span><h3>Citiri confirmate și călătorii</h3></div>
-      {vehicles.length > 1 && <label>Mașina <select value={vehicleId} onChange={e => setSelected(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}</div>
+      {vehicles.length > 1 && <label>Mașina <select value={vehicleId} onChange={e => { setSelected(e.target.value); setPage(0); }}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}</div>
     <div className="ac-trip-history-cockpit">
       <div className="ac-trip-history-list">
-        <label>{t('Data călătoriei', 'Trip date')} <input type="date" value={tripDate} onChange={event => setTripDate(event.target.value)} /></label>
-        {tripDate && <button type="button" onClick={() => setTripDate('')}>{t('Toate datele', 'All dates')}</button>}
+        <label>{t('Data călătoriei', 'Trip date')} <input type="date" value={tripDate} onChange={event => { setTripDate(event.target.value); setPage(0); }} /></label>
+        {tripDate && <button type="button" onClick={() => { setTripDate(''); setPage(0); }}>{t('Toate datele', 'All dates')}</button>}
         {filteredTrips.map(trip => (
           <button type="button" key={trip.id} aria-pressed={selectedTrip?.id === trip.id} onClick={() => setSelectedTripId(trip.id)}>
             <span>{new Date(trip.startedAt).toLocaleString(locale, { timeZone: timezone, dateStyle: 'medium', timeStyle: 'short' })}</span>
             <strong>{(trip.distanceMeters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 })} km · {driveDuration(trip.durationSeconds)}</strong>
           </button>
         ))}
-        {filteredTrips.length === 0 && <p className="small muted">{preview || resultVehicle === vehicleId ? t('Nu există călătorii salvate în această perioadă.', 'There are no saved trips in this period.') : t('Se încarcă istoricul…', 'Loading trip history…')}</p>}
+        {filteredTrips.length === 0 && <p className="small muted">{tripError || (preview || !vehicleId || tripResult?.key === tripPath ? t('Nu există călătorii salvate în această perioadă.', 'There are no saved trips in this period.') : t('Se încarcă istoricul…', 'Loading trip history…'))}</p>}
+        {(page > 0 || filteredTrips.length === 100) && <nav className="ac-trip-pages" aria-label={t('Paginile istoricului', 'History pages')}>
+          <button type="button" disabled={!page} onClick={() => setPage(page - 1)}>{t('Înapoi', 'Previous')}</button>
+          <span>{page + 1}</span>
+          <button type="button" disabled={filteredTrips.length < 100 || page >= 10000} onClick={() => setPage(page + 1)}>{t('Înainte', 'Next')}</button>
+        </nav>}
       </div>
       <div className="ac-trip-history-map">
         {route && route.length > 1 ? (
@@ -93,13 +122,9 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
             <p>{selectedTrip ? t('Coordonatele acestei călătorii nu sunt salvate pe acest dispozitiv.', 'This trip has no coordinates on this device.') : t('Călătoriile salvate vor apărea aici.', 'Saved trips will appear here.')}</p>
           </div>
         )}
-        <p className="small muted">{t('Coordonatele ultimelor 20 de trasee sunt păstrate doar pe dispozitivul care le-a înregistrat. Distanța și durata rămân în cont.', 'Coordinates for up to 20 routes stay on the recording device. Distance and duration stay in your account.')}</p>
-        {Object.keys(routeArchive).length > 0 && (
-          <button type="button" onClick={() => {
-            if (!window.confirm(t('Ștergi toate traseele păstrate pe acest dispozitiv?', 'Delete all routes stored on this device?'))) return;
-            try { clearTripRoutes(ownerId); setRouteArchive({}); }
-            catch { setError(t('Traseele locale nu au putut fi șterse.', 'The local routes could not be deleted.')); }
-          }}>{t('Șterge traseele de pe dispozitiv', 'Delete routes from this device')}</button>
+        <p className="small muted">{t('Coordonatele rămân pe dispozitivul care a înregistrat traseul. Distanța și durata rămân în cont.', 'Coordinates stay on the recording device. Distance and duration stay in your account.')}</p>
+        {!preview && vehicleId && (
+          <button type="button" disabled={clearingRoutes} onClick={() => void clearRoutes()}>{t('Șterge traseele de pe dispozitiv', 'Delete routes from this device')}</button>
         )}
       </div>
     </div>

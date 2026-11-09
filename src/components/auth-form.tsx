@@ -6,7 +6,7 @@ import './auth-premium.css';
 import { ShieldCheck, Files, Wrench, Eye, EyeOff } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { authErrorMessage } from '@/lib/auth-messages';
-export function AuthForm({ mode }: { mode: string }) {
+export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string }) {
   const [language, setLanguage] = useState<'ro' | 'en'>('ro');
   useEffect(() => {
     try {
@@ -56,7 +56,7 @@ export function AuthForm({ mode }: { mode: string }) {
             email,
             password,
             name: String(f.get('name')).trim(),
-            callbackURL: '/cont',
+            callbackURL: next,
           })
         : forgot
           ? await authClient.requestPasswordReset({
@@ -68,12 +68,12 @@ export function AuthForm({ mode }: { mode: string }) {
                 newPassword: password,
                 token: new URLSearchParams(window.location.search).get('token') || '',
               })
-            : await authClient.signIn.email({ email, password, callbackURL: '/cont' });
+            : await authClient.signIn.email({ email, password, callbackURL: next });
       if (result.error) throw new Error(authErrorMessage(result.error.code, result.error.message));
-      if (signup) window.location.assign('/cont');
+      if (signup) window.location.assign(next);
       else if (forgot) setMessage('Dacă există un cont, vei primi instrucțiunile prin email.');
       else if (reset) setMessage('Parola a fost schimbată. Te poți autentifica.');
-      else window.location.assign('/cont');
+      else window.location.assign(next);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Serviciul nu este disponibil.');
     } finally {
@@ -81,7 +81,7 @@ export function AuthForm({ mode }: { mode: string }) {
     }
   }
   return (
-    <div className="auth-layout ac-auth-premium">
+    <main className="auth-layout ac-auth-premium">
       <SiteLanguage language={language} />
       <aside className="auth-editorial">
         <img
@@ -93,7 +93,7 @@ export function AuthForm({ mode }: { mode: string }) {
           fetchPriority="high"
         />
         <div className="auth-editorial-content">
-          <span className="section-kicker">PENTRU DRUMURILE CARE URMEAZĂ</span>
+          <span className="section-kicker">AUTOCARE · GARAGE ACCESS</span>
           <h2>
             Grijă pentru mașină.
             <br />
@@ -121,10 +121,10 @@ export function AuthForm({ mode }: { mode: string }) {
       </aside>
       <div className="auth-box">
         <div
-          style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 18 }}
+          className="ac-auth-language"
           data-workspace-ui
         >
-          <label style={{ fontSize: 12, color: '#47607f' }}>
+          <label>
             {language === 'en' ? 'Language' : 'Limbă'}{' '}
             <select
               aria-label={language === 'en' ? 'Language' : 'Limbă'}
@@ -137,14 +137,6 @@ export function AuthForm({ mode }: { mode: string }) {
                 } catch {
                   /* Optional preference persistence. */
                 }
-              }}
-              style={{
-                minHeight: 40,
-                padding: '8px 12px',
-                border: '1px solid #d2deed',
-                borderRadius: 9,
-                background: '#fff',
-                color: '#193b68',
               }}
             >
               <option value="ro">Română</option>
@@ -285,6 +277,6 @@ export function AuthForm({ mode }: { mode: string }) {
           <Link href="/recuperare-parola">Recuperează parola</Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

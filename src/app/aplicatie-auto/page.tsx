@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { TechnologyNavigation } from '@/components/technology-navigation';
 import { PublicShell } from '@/components/public-shell';
 import { Breadcrumbs } from '@/components/seo-content';
 import { publicMetadata } from '@/lib/seo';
@@ -8,12 +9,15 @@ export const metadata = publicMetadata(
   '/aplicatie-auto',
 );
 export default function AppOverview() {
-  return <PublicShell><main className="content-page seo-content">
+  return <PublicShell><main className="content-page seo-content ac-public-editorial">
     <Breadcrumbs items={[{ name: 'Aplicație auto', path: '/aplicatie-auto' }]} />
+    <header className="ac-editorial-hero">
     <p className="eyebrow">AUTOCARE · ANDROID ȘI WEB</p>
     <h1>Aplicația care pune în ordine tot ce ține de mașina ta.</h1>
     <p>AutoCare este un garaj digital pentru documente, întreținere, kilometraj și cheltuieli auto. Ai aceeași evidență în contul tău, pe telefon și pe calculator.</p>
-    <img src="/images/autocare-app-premium.webp" width={1672} height={940} alt="Prezentare vizuală AutoCare: documente auto și termene organizate" style={{width:'100%',height:'auto',borderRadius:24}} />
+    </header>
+    <TechnologyNavigation/>
+    <img loading="lazy" src="/images/autocare-app-premium.webp" width={1672} height={940} alt="Prezentare vizuală AutoCare: documente auto și termene organizate" style={{width:'100%',height:'auto',borderRadius:24}} />
     <h2>Ce poți gestiona în AutoCare?</h2>
     <p><Link href="/documente-auto">RCA, ITP și rovinieta</Link>, cu date de expirare și mementouri configurabile. Păstrezi fotografii sau PDF-uri în cont, în limitele planului ales.</p>
     <p><Link href="/intretinere-auto">Revizii și intervenții</Link>, cu data, kilometrajul și costul lucrării. Urmărești schimbul de ulei și distribuția pe baza intervalelor completate pentru mașina ta.</p>

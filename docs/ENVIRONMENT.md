@@ -26,3 +26,5 @@ Niciun fișier `.env*` nu este inclus. Creează configurația numai local sau î
 - `AUTOCARE_REQUIRE_EMAIL_VERIFICATION`
 
 `DATABASE_URL` este exclusiv pe server; nu folosi prefixul NEXT_PUBLIC_ pentru secrete. `LOCAL_DATABASE_PATH` este pentru dezvoltare izolată, nu pentru producție. Rolul de Fondator este asociat configurării serverului; nu există un cont implicit în surse.
+
+`AUTOCARE_OVERPASS_URL` este opțional. AutoCare Maps folosește implicit interpretul Overpass public OpenStreetMap. Pentru o instanță dedicată, configurează URL-ul HTTPS complet al interpretorului. Cererile sunt explicite, folosesc centrul aproximativ al hărții și au limitare pe cont și cache comun de 30 de minute.

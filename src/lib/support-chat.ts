@@ -205,6 +205,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
           .values({ id: crypto.randomUUID(), userId: uid, title: data.message.slice(0, 80) })
           .returning()
       )[0];
+    const sentAt = new Date();
     // An actual welcome message in the conversation, not only a temporary banner.
     // Create it once, for newly opened client conversations.
     if (!who.staff && !data.conversationId) {
@@ -218,7 +219,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
           threadId: thread.id,
           authorId: null,
           authorName: 'AutoCare',
-          createdAt: sql`clock_timestamp()`,
+          createdAt: new Date(sentAt.getTime() - 1),
           authorRole: 'system',
           body: 'Bine ai venit la Centrul de suport AutoCare! Am primit mesajul tău. Un membru al echipei îți va răspunde aici cât mai curând posibil. Îți mulțumim pentru răbdare!',
         });
@@ -232,7 +233,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
           threadId: thread.id,
           authorId: uid,
           authorName: who.name,
-          createdAt: sql`clock_timestamp()`,
+          createdAt: sentAt,
           authorRole: who.role,
           body: data.message,
         })
@@ -240,7 +241,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
     )[0];
     await tx
       .update(s.supportThreads)
-      .set({ updatedAt: new Date() })
+      .set({ updatedAt: sentAt })
       .where(eq(s.supportThreads.id, thread.id));
     return { threadId: thread.id, message };
   });

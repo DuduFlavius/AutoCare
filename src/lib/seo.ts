@@ -1,7 +1,8 @@
+import { technologyPages } from './public-technology';
 import type { Metadata } from 'next';
 import { origin, appName } from './config';
 export const siteDescription =
-  'Gestionează simplu documentele auto, expirarea RCA, reviziile, istoricul de service și cheltuielile mașinii. Păstrează toate informațiile într-un singur loc cu AutoCare.';
+  'Înregistrează călătorii GPS, urmărește kilometrajul și gestionează reviziile, documentele și cheltuielile mașinii în garajul digital AutoCare.';
 export const publicTopics = {
   'documente-auto': {
     title: 'Organizează documentele auto și urmărește expirarea',
@@ -92,9 +93,12 @@ export const seoTitles: Record<string, string> = {
 export const indexableSlugs = [
   'despre-noi',
   'aplicatie-auto',
+  'instaleaza',
   'functionalitati',
   'cum-functioneaza',
   ...Object.keys(publicTopics),
+  ...Object.keys(technologyPages),
+  'contact',
   'preturi',
   'comparatie',
   'intrebari-frecvente',

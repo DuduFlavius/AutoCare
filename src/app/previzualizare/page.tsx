@@ -9,7 +9,7 @@ export const metadata = { title: 'Previzualizare design', robots: { index: false
 export default async function DesignPreview({
   searchParams,
 }: {
-  searchParams: Promise<{ echipa?: string; device?:string; tab?:string; plan?:string; garage?:string; view?:string }>;
+  searchParams: Promise<{ echipa?: string; device?:string; tab?:string; plan?:string; garage?:string; view?:string; drive?:string }>;
 }) {
   const previewOptions = await searchParams;
   if (process.env.VERCEL_ENV === 'production') notFound();
@@ -115,6 +115,7 @@ export default async function DesignPreview({
       updatedAt: now,
     },
     recentTrips: [],
+    monthlyTrips: [],
     notifications: [],
     attachments: [],
     photos: [{ vehicleId: vehicles[0].id }],
@@ -124,7 +125,7 @@ export default async function DesignPreview({
   };
   if(previewOptions.garage==='empty'){data.vehicles=[];data.records=[];data.photos=[];}
   if(previewOptions.garage==='multi'){data.vehicles.push({...vehicles[0],id:'design-car-2',brand:'A doua',model:'Mașină',plate:'DEMO 02',odometer:83000});}
-  const application=previewOptions.view==='public'?<PublicHome/>:<Dashboard name="Vizitator" previewData={data} initialTab={normalizeWorkspaceTab(previewOptions.tab)} />;
+  const application=previewOptions.view==='public'?<PublicHome/>:<Dashboard name="Vizitator" previewData={data} initialTab={normalizeWorkspaceTab(previewOptions.tab)} initialDrive={previewOptions.drive} />;
   const deviceWidth = previewOptions.device==='phone'?390:previewOptions.device==='small'?320:previewOptions.device==='tablet'?768:null;
   const frameParams=new URLSearchParams(Object.entries(previewOptions).filter(([key,value])=>key!=='device'&&typeof value==='string') as [string,string][]);
   if(deviceWidth) return <div style={{padding:24,background:'#eaf0f8',minHeight:'100vh'}}><p style={{textAlign:'center'}}>AutoCare · Verificare interfață · Date fictive · {deviceWidth}px</p><iframe title="AutoCare — verificare responsive cu date fictive" src={'/previzualizare?'+frameParams.toString()} style={{display:'block',width:deviceWidth,maxWidth:'100%',height:844,margin:'20px auto',border:'1px solid #cedaeb',borderRadius:22,background:'white'}}/></div>;

@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import type { Map as RoadMap, Marker, GeoJSONSource } from 'maplibre-gl';
 import { createRoadPositionMarker } from '@/lib/road-position-marker';
+import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { roadMapStyle, routeGeometry, streetOnlyStyle, tripBounds } from '@/lib/road-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -13,12 +14,20 @@ export default function RoadMapView({
   active,
   english = false,
   history = false,
+  initialArea,
+  onAreaChange,
+  autoPoints,
+  onAutoPoint,
 }: {
   points: GPSFix[];
   position?: GPSFix | null;
   active: boolean;
   english?: boolean;
   history?: boolean;
+  initialArea?: MapArea;
+  onAreaChange?: (area: MapArea) => void;
+  autoPoints?: AutoPoint[];
+  onAutoPoint?: (id: string) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
     map = useRef<RoadMap | null>(null),
@@ -54,8 +63,8 @@ export default function RoadMapView({
             container: host.current,
             style: roadMapStyle,
             transformStyle: (_previous, next) => streetOnlyStyle(next),
-            center: p ? [p.longitude, p.latitude] : [24.9668, 45.9432],
-            zoom: p ? 15.8 : 5.2,
+            center: initialArea ? [initialArea.longitude, initialArea.latitude] : p ? [p.longitude, p.latitude] : [24.9668, 45.9432],
+            zoom: initialArea?.zoom ?? (p ? 15.8 : 5.2),
             maxZoom: 19,
             pitch: 0,
             attributionControl: { compact: true },
@@ -63,6 +72,10 @@ export default function RoadMapView({
           });
           map.current = view;
           view.addControl(new lib.NavigationControl({ showCompass: false }), 'top-right');
+          if (onAreaChange) view.on('moveend', () => {
+            const center = view.getCenter().wrap();
+            onAreaChange({ latitude: center.lat, longitude: center.lng, zoom: view.getZoom() });
+          });
           view.on('dragstart', () => {
             follow.current = false;
             setFollowing(false);
@@ -146,7 +159,7 @@ export default function RoadMapView({
       map.current?.remove();
       map.current = null;
     };
-  }, [english, history]);
+  }, [english, history, initialArea, onAreaChange]);
   useEffect(() => {
     const view = map.current,
       p = position ?? points.at(-1);
@@ -179,8 +192,30 @@ export default function RoadMapView({
         duration: 750,
       });
   }, [points, position, english, history]);
+  useEffect(() => {
+    const view = map.current;
+    if (!view || loading || failed || !autoPoints?.length) return;
+    let cancelled = false;
+    const pins: Marker[] = [];
+    void import('maplibre-gl').then(({ Marker }) => {
+      if (cancelled || map.current !== view) return;
+      for (const point of autoPoints) {
+        const element = document.createElement('button');
+        element.type = 'button';
+        element.className = 'ac-auto-point-pin';
+        const category = autoPointCategories[point.category];
+        const label = point.name || (english ? category.english : category.label);
+        element.setAttribute('aria-label', label);
+        element.title = label;
+        element.style.setProperty('--poi-color', category.color);
+        element.addEventListener('click', () => onAutoPoint?.(point.id));
+        pins.push(new Marker({ element }).setLngLat([point.longitude, point.latitude]).addTo(view));
+      }
+    });
+    return () => { cancelled = true; pins.forEach(pin => pin.remove()); };
+  }, [autoPoints, loading, failed, english, onAutoPoint]);
   if (failed)
-    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} />;
+    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} />;
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -189,7 +224,7 @@ export default function RoadMapView({
         aria-label={english ? 'Interactive street map' : 'Hartă rutieră interactivă'}
       />
       <span className="ac-road-map-status">
-        {history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
+        {initialArea ? (english ? 'AUTO POINTS' : 'PUNCTE AUTO') : history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
           ? english
             ? 'GPS · RECORDING'
             : 'GPS · ÎNREGISTRARE'
@@ -197,7 +232,7 @@ export default function RoadMapView({
             ? 'STREET MAP'
             : 'HARTĂ RUTIERĂ'}
       </span>
-      {!history && <button
+      {!history && !initialArea && <button
         type="button"
         className="ac-road-map-center"
         disabled={!position && !points.length}

@@ -1,4 +1,5 @@
 'use client';
+import VehiclePhoto from './application/vehicle-photo';
 import {useApplicationLocale} from './application-locale';
 import {parseServiceDetails} from '@/lib/service-details';
 import InlineMileageEditor from './inline-mileage-editor';
@@ -733,6 +734,7 @@ export function VehicleSheet({
   edit,
   removeService,
   busy,
+  preview = false,
 }: {
   data: Data;
   id: string;
@@ -740,6 +742,7 @@ export function VehicleSheet({
   edit: () => void;
   removeService: (record: Entry) => void;
   busy: boolean;
+  preview?: boolean;
 }) {
 
   const locale=useApplicationLocale();
@@ -756,7 +759,7 @@ const v = data.vehicles.find((v) => v.id === id);
   return (
     <div className="vehicle-sheet">
       <header className="sheet-overview">
-        <div className="autocare-vehicle-sheet-symbol"><CarFront size={56} strokeWidth={1.5}/></div>
+        <VehiclePhoto vehicleId={v.id} name={v.brand + ' ' + v.model} uploaded={data.photos.some(photo => photo.vehicleId === v.id)} preview={preview}/>
         <div>
           <p className="eyebrow">AutoCare · {locale === 'ro-RO' ? 'Fișa vehiculului' : 'Vehicle report'}</p>
           <p className="small">

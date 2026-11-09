@@ -6,7 +6,7 @@ import Dashboard from '@/components/dashboard';
 import { PublicShell } from '@/components/public-shell';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Garajul meu', robots: { index: false, follow: false } };
-export default async function Account({searchParams}:{searchParams:Promise<{tab?:string}>}) {
+export default async function Account({searchParams}:{searchParams:Promise<{tab?:string;drive?:string}>}) {
   const params=await searchParams;
   let sess;
   try {
@@ -28,6 +28,6 @@ export default async function Account({searchParams}:{searchParams:Promise<{tab?
     !sess?.user ||
     (process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION === 'true' && !sess.user.emailVerified)
   )
-    redirect('/autentificare');
-  return <Dashboard name={sess.user.name} initialTab={normalizeWorkspaceTab(params.tab)} />;
+    redirect(params.tab ? '/autentificare?' + new URLSearchParams({ next: '/cont?' + new URLSearchParams({ tab: normalizeWorkspaceTab(params.tab), ...(params.drive ? { drive: params.drive } : {}) }) }).toString() : '/autentificare');
+  return <Dashboard name={sess.user.name} initialTab={normalizeWorkspaceTab(params.tab)} initialDrive={params.drive} />;
 }

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Map as LeafletMap, Marker, Polyline } from 'leaflet';
 import { createRoadPositionMarker } from '@/lib/road-position-marker';
+import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { routeGeometry, tripBounds } from '@/lib/road-map';
 import 'leaflet/dist/leaflet.css';
@@ -12,12 +13,20 @@ export default function RasterRoadMap({
   active,
   english,
   history,
+  initialArea,
+  onAreaChange,
+  autoPoints,
+  onAutoPoint,
 }: {
   points: GPSFix[];
   position?: GPSFix | null;
   active: boolean;
   english: boolean;
   history: boolean;
+  initialArea?: MapArea;
+  onAreaChange?: (area: MapArea) => void;
+  autoPoints?: AutoPoint[];
+  onAutoPoint?: (id: string) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
     map = useRef<LeafletMap | null>(null),
@@ -29,7 +38,8 @@ export default function RasterRoadMap({
   latestPosition.current = position;
   const follow = useRef(true),
     [following, setFollowing] = useState(true),
-    [tileError, setTileError] = useState(false);
+    [tileError, setTileError] = useState(false),
+    [ready, setReady] = useState(false);
   useEffect(() => {
     let disposed = false,
       resize: ResizeObserver | undefined;
@@ -41,7 +51,7 @@ export default function RasterRoadMap({
             zoomControl: false,
             attributionControl: true,
             preferCanvas: false,
-          }).setView(last ? [last.latitude, last.longitude] : [45.9432, 24.9668], last ? 16 : 6);
+          }).setView(initialArea ? [initialArea.latitude, initialArea.longitude] : last ? [last.latitude, last.longitude] : [45.9432, 24.9668], initialArea?.zoom ?? (last ? 16 : 6));
         map.current = view;
         L.control.zoom({ position: 'topright' }).addTo(view);
         const layer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -77,6 +87,11 @@ export default function RasterRoadMap({
               iconAnchor: [14, 14],
             }),
           }).addTo(view);
+        if (onAreaChange) view.on('moveend', () => {
+          const center = view.getCenter().wrap();
+          onAreaChange({ latitude: center.lat, longitude: center.lng, zoom: view.getZoom() });
+        });
+        setReady(true);
         view.on('dragstart', () => {
           follow.current = false;
           setFollowing(false);
@@ -95,7 +110,7 @@ export default function RasterRoadMap({
       marker.current = null;
       line.current = null;
     };
-  }, [english, history]);
+  }, [english, history, initialArea, onAreaChange]);
   useEffect(() => {
     const view = map.current,
       last = position ?? points.at(-1);
@@ -134,6 +149,27 @@ export default function RasterRoadMap({
         duration: 0.7,
       });
   }, [points, position, english, history]);
+  useEffect(() => {
+    const view = map.current;
+    if (!view || !ready || !autoPoints?.length) return;
+    let cancelled = false;
+    const markers: Marker[] = [];
+    void import('leaflet').then((L) => {
+      if (cancelled || map.current !== view) return;
+      for (const point of autoPoints) {
+        const category = autoPointCategories[point.category];
+        const label = point.name || (english ? category.english : category.label);
+        const dot = document.createElement('span');
+        dot.className = 'ac-auto-point-pin';
+        dot.style.setProperty('--poi-color', category.color);
+        markers.push(L.marker([point.latitude, point.longitude], {
+          icon: L.divIcon({ className: 'ac-auto-point-leaflet', html: dot, iconSize: [20, 20] }),
+          title: label, alt: label,
+        }).on('click', () => onAutoPoint?.(point.id)).addTo(view));
+      }
+    });
+    return () => { cancelled = true; markers.forEach(pin => pin.remove()); };
+  }, [autoPoints, ready, english, onAutoPoint]);
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -142,7 +178,7 @@ export default function RasterRoadMap({
         aria-label={english ? 'Interactive street map' : 'Hartă rutieră interactivă'}
       />
       <span className="ac-road-map-status">
-        {history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
+        {initialArea ? (english ? 'AUTO POINTS' : 'PUNCTE AUTO') : history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
           ? english
             ? 'GPS · RECORDING'
             : 'GPS · ÎNREGISTRARE'
@@ -150,7 +186,7 @@ export default function RasterRoadMap({
             ? 'STREET MAP'
             : 'HARTĂ RUTIERĂ'}
       </span>
-      {!history && <button
+      {!history && !initialArea && <button
         type="button"
         className="ac-road-map-center"
         disabled={!position && !points.length}

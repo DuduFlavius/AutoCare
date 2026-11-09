@@ -12,7 +12,7 @@ export default async function MechanicFolder({ params }: { params: Promise<{ tok
     share = await readMechanicShare(token);
   } catch {
     return (
-      <main className="card" style={{ maxWidth: 700, margin: '60px auto', padding: 28 }}>
+      <main className="ac-shared-folder ac-editorial-hero">
         <h1>Dosar indisponibil / Unavailable</h1>
         <p>
           Linkul a expirat sau accesul a fost revocat. / The link expired or access was revoked.
@@ -21,16 +21,18 @@ export default async function MechanicFolder({ params }: { params: Promise<{ tok
     );
   }
   return (
-    <main style={{ maxWidth: 860, margin: '40px auto', padding: 20 }}>
-      <p>AUTOCARE · DOSAR MECANIC / MECHANIC FOLDER</p>
+    <main className="ac-shared-folder">
+      <header className="ac-editorial-hero">
+      <p className="eyebrow">AUTOCARE · DOSAR MECANIC / MECHANIC FOLDER</p>
       <h1>{share.snapshot.vehicle}</h1>
       <p>
         Acces doar pentru citire / Read-only · Expiră / Expires:{' '}
         {share.expiresAt.toLocaleString('ro-RO', { timeZone: 'Europe/Bucharest' })}
       </p>
       <p>Informații selectate de proprietar. / Information selected by the owner.</p>
+      </header>
       {share.snapshot.records.map((r) => (
-        <article className="card" key={r.id} style={{ marginTop: 16, padding: 22 }}>
+        <article className="card" key={r.id}>
           <h2>{r.title}</h2>
           <p>
             {r.category} · {r.date || '—'} · {r.odometer?.toLocaleString('ro-RO') ?? '—'} km
@@ -39,7 +41,7 @@ export default async function MechanicFolder({ params }: { params: Promise<{ tok
         </article>
       ))}
       {share.snapshot.files.length > 0 && (
-        <section className="card" style={{ marginTop: 20, padding: 22 }}>
+        <section className="card">
           <h2>Documente / Documents</h2>
           {share.snapshot.files.map((f) => (
             <p key={f.id}>

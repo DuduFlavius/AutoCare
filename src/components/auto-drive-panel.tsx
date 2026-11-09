@@ -39,7 +39,7 @@ export default function AutoDrivePanel({
     ]);
     setStatus(s);
     setPending(p);
-    setSupported(s.apiVersion >= 4 && s.supported);
+    setSupported(s.platform === 'android' && s.apiVersion >= 5 && s.supported);
   }
   useEffect(() => {
     if (preview || !hasNativeTracking()) return;
@@ -49,7 +49,7 @@ export default function AutoDrivePanel({
       .then((s) => {
         if (!disposed) {
           setStatus(s);
-          setSupported(s.apiVersion >= 4 && s.supported);
+          setSupported(s.platform === 'android' && s.apiVersion >= 5 && s.supported);
         }
       })
       .catch((e) => {
@@ -109,8 +109,8 @@ export default function AutoDrivePanel({
       {!supported ? (
         <p>
           {english
-            ? 'Requires the updated native Android or iPhone app. Browser installation does not provide Bluetooth automation.'
-            : 'Necesită aplicația nativă actualizată pentru Android sau iPhone. Instalarea din browser nu oferă automatizare Bluetooth.'}
+            ? 'Automatic Bluetooth requires the updated native Android app and a compatible car audio system. Start GPS manually on the web or iPhone.'
+            : 'Pornirea prin Bluetooth necesită aplicația nativă Android actualizată și un sistem audio auto compatibil. În browser sau pe iPhone, pornește GPS-ul manual.'}
         </p>
       ) : (
         <>

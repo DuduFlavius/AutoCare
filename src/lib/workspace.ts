@@ -3,6 +3,7 @@ export const mobileWorkspaceSections = [
   { id: 'Garaj', ro: 'Garaj', en: 'Garage' },
   { id: 'Întreținere', ro: 'Intervenții', en: 'Maintenance' },
   { id: 'Documente', ro: 'Documente', en: 'Documents' },
+  { id: 'Plan întreținere', ro: 'GPS', en: 'GPS' },
   { id: 'Cont', ro: 'Cont', en: 'Account' },
 ] as const;
 export const workspaceSections = [

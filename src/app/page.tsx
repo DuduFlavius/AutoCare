@@ -1,3 +1,4 @@
+import { TechnologyNavigation } from '@/components/technology-navigation';
 import './product-intro.css';
 import Link from 'next/link';
 import {
@@ -7,9 +8,7 @@ import {
   Wrench,
   Files,
   CarFront,
-  LayoutDashboard,
   Wallet,
-  CalendarDays,
 } from 'lucide-react';
 import LuxuryExperience, { LuxuryMotion } from '@/components/luxury-experience';
 import { pricing, DEFAULT_PRICING } from '@/lib/pricing';
@@ -46,11 +45,10 @@ export default async function Home() {
             <div className="studio-landing-copy">
               <p className="lux-eyebrow">AUTOCARE PREMIUM</p>
               <h1>
-                Garajul tău, <span>la îndemână.</span>
+                Mașina ta. <span>Drumurile tale.</span>
               </h1>
               <p>
-                Ține evidența documentelor, reviziilor și cheltuielilor. Vezi din timp ce expiră și
-                când urmează următoarea lucrare.
+                Înregistrează călătoriile prin GPS și urmărește kilometrajul, reviziile, documentele și costurile fiecărei mașini din același garaj digital.
               </p>
               <div className="studio-landing-actions">
                 <Link href="/inregistrare" className="lux-primary">
@@ -106,66 +104,13 @@ export default async function Home() {
               Date private
             </span>
           </div>
-          <section className="product-tour" id="aplicatia" data-reveal>
-            <div>
-              <p className="lux-eyebrow">PANOU DE BORD</p>
-              <h2>Vezi ce se întâmplă în garajul tău</h2>
-              <p>
-                Alegi mașina, vezi kilometrajul și termenele, apoi adaugi o intervenție, un document
-                sau o cheltuială.
-              </p>
-              <Link className="lux-text-link" href="/aplicatie-auto">
-                Descoperă aplicația <ArrowUpRight size={17} />
-              </Link>
-            </div>
-            <figure className="product-mockup">
-              <div className="product-mockup-frame" aria-hidden="true">
-                <div className="product-mockup-rail">
-                  <strong>AutoCare</strong>
-                  <span>
-                    <LayoutDashboard size={15} /> Prezentare generală
-                  </span>
-                  <span>
-                    <CarFront size={15} /> Mașinile mele
-                  </span>
-                  <span>
-                    <Wrench size={15} /> Intervenții
-                  </span>
-                  <span>
-                    <Files size={15} /> Documente
-                  </span>
-                  <span>
-                    <Wallet size={15} /> Cheltuieli
-                  </span>
-                </div>
-                <div className="product-mockup-main">
-                  <h3>Garajul meu</h3>
-                  <div className="product-mockup-cards">
-                    <article>
-                      <CarFront size={21} />
-                      <strong>Mașina selectată</strong>
-                      <small>Kilometraj înregistrat</small>
-                    </article>
-                    <article>
-                      <CalendarDays size={21} />
-                      <strong>Următoarea revizie</strong>
-                      <small>Termene și intervenții</small>
-                    </article>
-                    <article>
-                      <Files size={21} />
-                      <strong>Documente</strong>
-                      <small>Expirări și atașamente</small>
-                    </article>
-                    <article>
-                      <Wallet size={21} />
-                      <strong>Cheltuieli lunare</strong>
-                      <small>Costuri înregistrate</small>
-                    </article>
-                  </div>
-                </div>
-              </div>
-              <figcaption>Prezentarea secțiunilor din panoul de bord.</figcaption>
-            </figure>
+          <section className="ac-product-systems" id="aplicatia">
+            <header>
+              <p className="lux-eyebrow">SISTEME AUTOCARE</p>
+              <h2>De la drum la următoarea revizie</h2>
+              <p>Înregistrezi drumul cu Smart GPS, apoi vezi kilometrii rămași până la următoarea lucrare. Harta te ajută să găsești servicii în zona pe care o alegi.</p>
+            </header>
+            <TechnologyNavigation/>
           </section>
           <LuxuryExperience />
           <section className="lux-premium" data-reveal>

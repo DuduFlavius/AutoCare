@@ -23,6 +23,7 @@ import PushSettings from './push-settings';
 import {hasNativeTracking,nativeAutomation} from '@/lib/native-tracking';
 import NativeTripSync from './native-trip-sync';
 import SmartDriveTrip from './smartdrive-trip';
+import AutoPointsMap from './auto-points-map';
 import MaintenanceForecast from './maintenance-forecast';
 import {maintenanceTargets} from '@/lib/maintenance-schedule';
 import ServiceForecastCards from './service-forecast-cards';
@@ -55,6 +56,8 @@ import {
   Search,
   Route,
   History,
+  MapPin,
+  Bluetooth,
 } from 'lucide-react';
 import { Brand } from './public-shell';
 import { VehicleJournal, VehicleSheet, ReminderInbox } from './garage-home';
@@ -180,12 +183,13 @@ function Dialog({
   );
 }
 
-function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false }: {
-  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean;
+type DriveView = 'live' | 'history' | 'points' | 'bluetooth';
+function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false, initialDrive }: {
+  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean; initialDrive?: string;
 }) {
 
   const locale=useApplicationLocale();
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [driveView, setDriveView] = useState<DriveView>(initialDrive === 'points' || initialDrive === 'bluetooth' || initialDrive === 'history' ? initialDrive : 'live');
   const [editing, setEditing] = useState<string | null>(null);
   useEffect(() => { if (window.location.hash === '#actualizeaza-km' && data.vehicles.length) { setEditing(data.vehicles[0].id); setKm(String(data.vehicles[0].odometer)); setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 150); } }, []);
   const [km, setKm] = useState('');
@@ -228,17 +232,24 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
       {!mileageOnly && (
         <>
           <div className="ac-smartdrive-views" role="group" aria-label="SmartDrive">
-            <button type="button" aria-pressed={!historyOpen} onClick={() => setHistoryOpen(false)}>
+            <button type="button" aria-pressed={driveView === 'live'} onClick={() => setDriveView('live')}>
               <Route size={17}/> {locale.startsWith('en') ? 'Live Drive Map' : 'Hartă în timp real'}
             </button>
-            <button type="button" aria-pressed={historyOpen} onClick={() => setHistoryOpen(true)}>
+            <button type="button" aria-pressed={driveView === 'history'} onClick={() => setDriveView('history')}>
               <History size={17}/> {locale.startsWith('en') ? 'Trip History' : 'Istoric trasee'}
             </button>
+            <button type="button" aria-pressed={driveView === 'points'} onClick={() => setDriveView('points')}>
+              <MapPin size={17}/> {locale.startsWith('en') ? 'Auto Points' : 'Puncte auto'}
+            </button>
+            <button type="button" aria-pressed={driveView === 'bluetooth'} onClick={() => setDriveView('bluetooth')}>
+              <Bluetooth size={17}/> Bluetooth
+            </button>
           </div>
-          <div hidden={historyOpen}>
-            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars}/>
+          <div hidden={driveView !== 'live' && driveView !== 'bluetooth'}>
+            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'}/>
           </div>
-          {historyOpen && (
+          {driveView === 'points' && <AutoPointsMap preview={preview}/>}
+          {driveView === 'history' && (
             <SmartDriveHistory ownerId={data.profile.userId} timezone={data.profile.timezone} vehicles={cars} preview={preview} onUpdateMileage={id => {
               const car = cars.find(vehicle => vehicle.id === id);
               if (!car) return;
@@ -286,9 +297,10 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   );
 }
 
-export default function Dashboard({ name, previewData, initialTab='Dashboard' }: { name: string; previewData?: Data; initialTab?:string }) {
+export default function Dashboard({ name, previewData, initialTab='Dashboard', initialDrive }: { name: string; previewData?: Data; initialTab?:string; initialDrive?: string }) {
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
+    [openedSmartDrive, setOpenedSmartDrive] = useState(normalizeWorkspaceTab(initialTab) === 'Plan întreținere'),
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [supportUnread, setSupportUnread] = useState(0),
@@ -493,6 +505,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     setModal(null);
     setRecordDirty(false);
     setTab(t);
+    if (t === 'Plan întreținere') setOpenedSmartDrive(true);
     setFilter(view?.filter||'');
     setQuery(view?.query||'');
     setRecordState(view?.recordState||'');
@@ -757,7 +770,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (
-    <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace ac-studio" data-language={language} data-settings-panel={settingsPanel}>
+    <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace ac-studio" data-language={language} data-settings-panel={settingsPanel} data-workspace-section={tab}>
       <WorkspaceViewport service={tab==='Întreținere'}/>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
       {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>{if(navigate('Garaj'))setVehicleDetail(id);}} /></Dialog>}
@@ -889,12 +902,12 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
           </div>
         ) : (
           <>
-            {!['Dashboard','Cont'].includes(tab) && <div className="page-head between">
+            {!['Dashboard','Cont'].includes(tab) && <header className="page-head between ac-workspace-hero">
               <div>
                 <p className="eyebrow">
                   {tab === 'Dashboard'
                     ? `Bună, ${name.split(' ')[0]} 👋`
-                    : 'GARAJUL TĂU DIGITAL'}
+                    : (language === 'en' ? 'AUTOCARE · WORKSPACE' : 'AUTOCARE · SPAȚIU DE LUCRU')}
                 </p>
                 <h1 id="workspace-page-title" tabIndex={-1}>
                   {tab === 'Dashboard'
@@ -970,7 +983,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                   <Plus size={16} /> Planifică o lucrare
                 </button>
               ) : null}
-            </div>}
+            </header>}
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
             {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={activeVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={setVehicleDetail} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
             {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
@@ -1174,6 +1187,20 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                   </section>
                 )}
                 {tab === 'Întreținere' && (
+                  <div className="ac-maintenance-views" role="group" aria-label={language === 'en' ? 'Service categories' : 'Categorii de service'}>
+                    {([
+                      ['', language === 'en' ? 'All service' : 'Tot istoricul', Wrench],
+                      ['Schimb ulei', language === 'en' ? 'Oil & filters' : 'Ulei și filtre', Gauge],
+                      ['Distribuție', language === 'en' ? 'Timing system' : 'Distribuție', CarFront],
+                      ['Revizie generală', language === 'en' ? 'General service' : 'Revizii', CalendarDays],
+                    ] as const).map(([category, label, Icon]) => (
+                      <button type="button" key={category} aria-pressed={categoryFilter === category} onClick={() => setCategoryFilter(category)}>
+                        <Icon size={17}/> {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {tab === 'Întreținere' && (
                   <div className="stats maintenance-statistics ac-premium-service-stats">
                     {[
                       ['Cost înregistrat', moneyDisplay(maintenanceStats.totalBani)],
@@ -1323,7 +1350,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                 )}
                 {tab === 'Întreținere' && <details open className="app-maintenance-plan" data-workspace-ui><summary><CalendarDays size={18}/>{language==='en'?'Maintenance plan · days & mileage':'Planul de întreținere · zile și kilometri'}<ChevronRight size={16}/></summary><MaintenanceForecast data={data} records={visible} preview={!!previewData} onUpdateMileage={()=>navigate('Kilometraj')} onUpgrade={()=>navigate('Abonament')}/></details>}
                 {tab === 'Cheltuieli' && (
-                  <div className="grid2" style={{ marginBottom: 20 }}>
+                  <div className="grid2 ac-expenses-board">
                     <section className="card">
                       <p className="eyebrow">REZUMAT FINANCIAR · TOATE MAȘINILE</p>
                       <h3>Costuri înregistrate</h3>
@@ -1711,7 +1738,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
               </section>
             )}
             {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
-            {tab === 'Plan întreținere' && <MileagePlanner data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
+            {openedSmartDrive && <div hidden={tab !== 'Plan întreținere'}><MileagePlanner data={data} initialDrive={initialDrive} preview={!!previewData} onUpdated={refresh} onError={setError} /></div>}
             {tab === 'Notificări' && (
               <div className="overview-stack">
                 <PushSettings
@@ -2033,6 +2060,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
         {vehicleDetail && data && (
           <Dialog title="Fișa mașinii" onClose={() => setVehicleDetail(null)}>
             <VehicleSheet
+              preview={!!previewData}
               data={data}
               id={vehicleDetail}
               busy={busy}

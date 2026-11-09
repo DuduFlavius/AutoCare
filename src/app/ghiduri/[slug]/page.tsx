@@ -34,7 +34,7 @@ export default async function Guide({ params }: { params: Promise<{ slug: string
   const url = origin() + '/ghiduri/' + slug;
   return (
     <PublicShell>
-      <main className="content-page seo-content">
+      <main className="content-page seo-content ac-public-editorial">
         <Breadcrumbs
           items={[
             { name: 'Ghiduri', path: '/ghiduri' },
@@ -42,17 +42,21 @@ export default async function Guide({ params }: { params: Promise<{ slug: string
           ]}
         />
         <article>
+          <header className="ac-editorial-hero">
           <p className="eyebrow">
             GHID AUTOCARE · <time dateTime="2026-10-20">20 octombrie 2026</time>
           </p>
           <h1>{guide.title}</h1>
           <p className="seo-intro">{guide.description}</p>
+          </header>
+          <div className="ac-editorial-sections">
           {guide.sections.map(([title, text]) => (
             <section key={title}>
               <h2>{title}</h2>
               <p>{text}</p>
             </section>
           ))}
+          </div>
           <aside className="card seo-next">
             <h2>Pune ordine, în ritmul tău.</h2>
             <p>Consultă funcțiile disponibile și începe cu informațiile pe care le ai deja.</p>
