@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowUpRight, Menu } from 'lucide-react';
 import { appName } from '@/lib/config';
 import { Brand } from './brand';
 import MobileInstall from './mobile-install';
@@ -23,8 +24,20 @@ export function PublicShell({
             <Link href="/ghiduri">Ghiduri</Link>
           </nav>
           <Link href="/autentificare" className="button ghost">
-            Intră în cont ↗
+            Intră în cont <ArrowUpRight size={16} aria-hidden="true"/>
           </Link>
+          <details className="ac-public-mobile-nav">
+            <summary><Menu size={18}/> Meniu</summary>
+            <nav aria-label="Navigare mobilă">
+              <Link href="/functionalitati">Funcționalități</Link>
+              <Link href="/smart-gps">SmartDrive GPS</Link>
+              <Link href="/bluetooth">Bluetooth</Link>
+              <Link href="/autocare-maps">AutoCare Maps</Link>
+              <Link href="/smart-maintenance">Smart Maintenance</Link>
+              <Link href="/preturi">Abonamente</Link>
+              <Link href="/ghiduri">Ghiduri</Link>
+            </nav>
+          </details>
         </header>
         {children}
         <section className="ac-install-banner" aria-label="Instalează AutoCare pe telefon">

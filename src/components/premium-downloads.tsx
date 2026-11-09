@@ -14,9 +14,13 @@ export default function PremiumDownloads({
 }) {
   const en = language === 'en',
     [vehicle, setVehicle] = useState(''),
+    [kind, setKind] = useState(''),
+    [from, setFrom] = useState(''),
+    [to, setTo] = useState(''),
     [busy, setBusy] = useState(''),
     [error, setError] = useState('');
   if (!data.premium) return null;
+  const invalidRange = !!from && !!to && from > to;
   async function download(format: 'pdf' | 'csv') {
     if (preview) {
       setError(
@@ -31,6 +35,9 @@ export default function PremiumDownloads({
     try {
       const query = new URLSearchParams({ format, archived: 'active' });
       if (vehicle) query.set('vehicleId', vehicle);
+      if (kind) query.set('kind', kind);
+      if (from) query.set('from', from);
+      if (to) query.set('to', to);
       const response = await fetch('/api/v1/export?' + query, { cache: 'no-store' });
       if (!response.ok) {
         const payload = await response.json();
@@ -60,6 +67,7 @@ export default function PremiumDownloads({
           ? 'Use the PDF with your mechanic or a buyer. CSV contains the selected records for further analysis.'
           : 'Trimite raportul PDF mecanicului sau unui cumpărător. Exportul CSV conține înregistrările selectate pentru analiză.'}
       </p>
+      <div className="ac-report-filters">
       <label>
         {en ? 'Vehicles included' : 'Mașini incluse'}
         <select value={vehicle} onChange={(e) => setVehicle(e.target.value)}>
@@ -71,8 +79,21 @@ export default function PremiumDownloads({
           ))}
         </select>
       </label>
+      <label>
+        {en ? 'Record type' : 'Tip de înregistrare'}
+        <select value={kind} onChange={event => setKind(event.target.value)}>
+          <option value="">{en ? 'All records' : 'Toate înregistrările'}</option>
+          <option value="document">{en ? 'Documents' : 'Documente'}</option>
+          <option value="service">{en ? 'Service' : 'Intervenții'}</option>
+          <option value="expense">{en ? 'Expenses' : 'Cheltuieli'}</option>
+        </select>
+      </label>
+      <label>{en ? 'From' : 'De la'}<input type="date" value={from} onChange={event => setFrom(event.target.value)}/></label>
+      <label>{en ? 'To' : 'Până la'}<input type="date" value={to} onChange={event => setTo(event.target.value)}/></label>
+      </div>
+      {invalidRange && <p role="alert">{en ? 'The end date must follow the start date.' : 'Data finală trebuie să fie egală cu sau după data de început.'}</p>}
       <div className="ac-premium-download-actions">
-        <button type="button" disabled={!!busy} onClick={() => void download('pdf')}>
+        <button type="button" disabled={!!busy || invalidRange} onClick={() => void download('pdf')}>
           <FileText size={18} />
           {busy === 'pdf'
             ? en
@@ -82,7 +103,7 @@ export default function PremiumDownloads({
               ? 'Download vehicle PDF'
               : 'Descarcă raport auto PDF'}
         </button>
-        <button type="button" disabled={!!busy} onClick={() => void download('csv')}>
+        <button type="button" disabled={!!busy || invalidRange} onClick={() => void download('csv')}>
           <Table2 size={18} />
           {busy === 'csv'
             ? en

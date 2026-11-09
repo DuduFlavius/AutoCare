@@ -1,5 +1,5 @@
 'use client';
-import { useState, useDeferredValue } from 'react';
+import { useState, useDeferredValue, type ReactNode } from 'react';
 import {
   LayoutDashboard,
   CarFront,
@@ -227,6 +227,43 @@ export function WorkspaceLauncher({
     </div>
   );
 }
+const moduleCopy: Record<string, { title: [string, string]; description: [string, string] }> = {
+  Garaj: { title: ['Garajul meu', 'My garage'], description: ['Alege o mașină pentru a deschide fișa, actele și istoricul ei.', 'Choose a vehicle to see its details, documents and history.'] },
+  'Întreținere': { title: ['Întreținere și service', 'Maintenance & service'], description: ['Ulei, distribuție și revizii, calculate după termenele și kilometrajul mașinii.', 'Oil, timing and service based on the vehicle’s mileage and due dates.'] },
+  Documente: { title: ['Documente auto', 'Vehicle documents'], description: ['Vezi actele valabile, cele care expiră și fișierele atașate.', 'See valid documents, upcoming expirations and attachments.'] },
+  Cheltuieli: { title: ['Cheltuieli auto', 'Vehicle expenses'], description: ['Compară costurile pe luni, categorii și mașini.', 'Compare costs by month, category and vehicle.'] },
+  Notificări: { title: ['Centrul de notificări', 'Notifications'], description: ['Consultă alertele de service și expirare și verifică opțiunile de livrare.', 'Review service and expiration alerts and check delivery options.'] },
+  Calendar: { title: ['Calendar auto', 'Vehicle calendar'], description: ['Consultă termenele și lucrările programate pentru luna aleasă.', 'Review deadlines and planned work for the selected month.'] },
+  Abonament: { title: ['Abonamentul meu', 'My subscription'], description: ['Vezi planul activ, beneficiile și facturile.', 'See your active plan, benefits and invoices.'] },
+  Rapoarte: { title: ['Rapoarte și exporturi', 'Reports & exports'], description: ['Consultă și exportă evidența din garajul tău.', 'Review and export the records in your garage.'] },
+  Premium: { title: ['Spațiul Premium', 'Premium workspace'], description: ['Acces la rapoarte și instrumentele avansate de întreținere.', 'Access reports and advanced maintenance tools.'] },
+  'Plan întreținere': { title: ['SmartDrive GPS', 'SmartDrive GPS'], description: ['Înregistrează o călătorie, consultă istoricul sau explorează AutoCare Maps.', 'Record a drive, review trip history or explore AutoCare Maps.'] },
+  Kilometraj: { title: ['Kilometrajul mașinilor', 'Vehicle mileage'], description: ['Actualizează citirile și urmărește distanța rămasă până la service.', 'Update readings and review the distance left until service.'] },
+  'Istoric auto': { title: ['Istoric auto', 'Vehicle history'], description: ['Consultă intervențiile, documentele și costurile în ordine cronologică.', 'Review service, documents and expenses in chronological order.'] },
+  'Setări': { title: ['Profil și setări', 'Profile & settings'], description: ['Gestionează datele contului, notificările și preferințele aplicației.', 'Manage account details, notifications and app preferences.'] },
+  'Centru de suport': { title: ['Centrul de suport', 'Support center'], description: ['Deschide o solicitare și consultă conversațiile cu echipa AutoCare.', 'Open a request and review conversations with the AutoCare team.'] },
+};
+
+export function WorkspaceModuleHeader({ tab, language, children }: { tab: string; language: Language; children?: ReactNode }) {
+  const section = workspaceSections.find(item => item.id === tab);
+  const Icon = section ? icons[section.icon] : Settings;
+  const copy = moduleCopy[tab];
+  const lang = language === 'en' ? 1 : 0;
+  return (
+    <header className="page-head between ac-workspace-hero ac-module-header" data-workspace-ui>
+      <div className="ac-module-heading">
+        <span className="ac-module-icon" aria-hidden="true"><Icon size={25} strokeWidth={1.65}/></span>
+        <div>
+          <p className="studio-kicker">AUTOCARE · {language === 'en' ? 'WORKSPACE' : 'SPAȚIU DE LUCRU'}</p>
+          <h1 id="workspace-page-title" tabIndex={-1}>{copy?.title[lang] ?? section?.[language] ?? tab}</h1>
+          {copy && <p className="muted small">{copy.description[lang]}</p>}
+        </div>
+      </div>
+      {children}
+    </header>
+  );
+}
+
 export function WorkspaceContext({
   tab,
   language,
@@ -237,7 +274,7 @@ export function WorkspaceContext({
   navigate: (tab: string) => boolean;
 }) {
   const section = workspaceSections.find((s) => s.id === tab);
-  if (!section || ['overview', 'help', 'account'].includes(section.group)) return null;
+  if (!section || ['Dashboard', 'Cont'].includes(tab)) return null;
   return (
     <nav
       className="ws-context-nav"

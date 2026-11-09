@@ -17,7 +17,7 @@ export const technologyPages = {
       ],
       [
         'Consultă călătoriile anterioare',
-        'Distanța și durata rămân asociate mașinii în cont. Harta traseului este disponibilă pe dispozitivul care a înregistrat coordonatele, dacă arhiva locală există.',
+        'Distanța, durata și statisticile călătoriilor rămân asociate mașinii în cont. Harta traseului este disponibilă pe dispozitivul care a înregistrat coordonatele, dacă arhiva locală există.',
       ],
     ],
   },
@@ -31,7 +31,7 @@ export const technologyPages = {
     sections: [
       [
         'Asociază sistemul audio al mașinii',
-        'Alege vehiculul în AutoCare și aprobă asocierea cu sistemul audio auto raportat de Android. Conexiunea activă și mișcarea susținută sunt verificate înainte de înregistrare.',
+        'Alege vehiculul în AutoCare și aprobă asocierea cu sistemul audio auto raportat de Android. Conexiunea activă și mișcarea susținută sunt verificate înainte de înregistrare. Cu APK-ul actualizat poți verifica starea conexiunii și deschide setările Android pentru reconectare.',
       ],
       [
         'Acordă permisiunile Android',
@@ -75,7 +75,7 @@ export const technologyPages = {
     sections: [
       [
         'Vezi poziția și traseul',
-        'În timpul înregistrării, harta urmărește poziția disponibilă prin GPS. În istoric poți alege mașina și data și poți vedea plecarea și sosirea dacă traseul este disponibil pe dispozitiv.',
+        'În timpul înregistrării, harta urmărește poziția disponibilă prin GPS și poate fi deschisă pe tot ecranul. În istoric poți alege mașina și data și poți vedea plecarea și sosirea dacă traseul este disponibil pe dispozitiv.',
       ],
       [
         'Caută în zona afișată',

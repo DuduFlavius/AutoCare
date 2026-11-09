@@ -433,3 +433,345 @@ html body .ac-workspace.ac-studio .vehicle-sheet .studio-vehicle-photo {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Workspace modules use the existing dashboard tokens without restyling Home. */
+.ac-module-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--ac-gap);
+  align-items: center;
+}
+.ac-module-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  color: var(--color-primary-ink);
+  border: 1px solid var(--ac-edge);
+  border-radius: 12px;
+  background: var(--ac-panel);
+}
+.ac-module-heading .studio-kicker {
+  color: var(--color-primary-ink);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+html body .ac-workspace.ac-studio .main .ac-module-header {
+  background: linear-gradient(145deg, var(--ac-panel), var(--ac-inset));
+}
+.ac-workspace .ac-module-header + .ws-context-nav {
+  padding: 7px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--ac-inset);
+}
+html body .ac-workspace .ac-module-header + .ws-context-nav button[aria-current='page'] {
+  border-color: var(--ac-edge);
+  color: var(--color-primary-ink);
+  background: var(--ac-panel);
+}
+html body .ac-workspace .ac-garage-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 275px), 1fr));
+  align-items: start;
+  gap: var(--ac-gap);
+}
+html body .ac-workspace .ac-garage-grid .car-card {
+  background: var(--ac-panel);
+  border-color: var(--color-border);
+  border-radius: 15px;
+}
+html body .ac-workspace .ac-garage-grid .car-card[data-selected='true'] {
+  border-color: var(--ac-edge);
+  box-shadow: inset 0 2px var(--color-primary);
+}
+.ac-garage-toolbar:empty {
+  display: none !important;
+}
+.ac-vehicle-sheet-tabs,
+.ac-map-stage-bar,
+.ac-map-stage-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ac-vehicle-sheet-tabs {
+  padding: 7px;
+  margin-block: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--ac-inset);
+}
+html body .ac-workspace .ac-vehicle-sheet-tabs button[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  color: var(--color-primary-ink);
+}
+.ac-vehicle-records[hidden] {
+  display: none !important;
+}
+.ac-account-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--ac-gap);
+}
+.ac-account-hub-grid > * {
+  min-width: 0;
+}
+
+html body .ac-workspace.ac-studio .ac-map-stage {
+  inset: auto;
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  color: var(--color-text);
+  border: 1px solid var(--ac-edge);
+  border-radius: 14px;
+  background: var(--ac-inset);
+  overflow: hidden;
+}
+html body .ac-workspace.ac-studio .ac-map-stage:modal {
+  inset: 0;
+  position: fixed;
+  max-width: none;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right))
+    max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 0;
+}
+.ac-map-stage::backdrop {
+  background: var(--ac-inset);
+}
+.ac-map-stage-bar {
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--ac-panel);
+  font-size: 13px;
+  font-weight: 700;
+}
+.ac-map-stage:modal .ac-map-stage-bar {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+}
+html body .ac-workspace.ac-studio .ac-map-stage:modal .ac-road-map-canvas {
+  height: max(260px, calc(100dvh - 135px)) !important;
+}
+html body .ac-workspace.ac-studio .ac-auto-points .ac-map-stage:modal .ac-road-map-canvas {
+  height: max(260px, calc(100dvh - 225px)) !important;
+}
+.ac-auto-points .ac-map-stage .ac-auto-point-categories {
+  padding: 8px 12px 12px;
+}
+.ac-auto-points .ac-map-stage .ac-auto-point-location {
+  margin: 9px 12px 0;
+}
+.ac-auto-points .ac-map-stage .ac-auto-points-layout {
+  padding: 0 12px 12px;
+}
+.ac-drive-console {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--ac-panel);
+}
+.ac-drive-console > label {
+  display: grid;
+  gap: 6px;
+}
+.ac-drive-console > label.ac-smartdrive-sync {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+}
+.ac-drive-console > label.ac-smartdrive-sync input {
+  width: auto;
+  flex: none;
+}
+html body .ac-workspace.ac-studio .ac-drive-stop {
+  background: var(--color-danger-soft, #3a252a) !important;
+  border-color: var(--color-danger) !important;
+  color: var(--color-text) !important;
+}
+.ac-drive-signal-warning {
+  padding: 12px 14px;
+  border: 1px solid var(--color-warning);
+  border-radius: 12px;
+  background: var(--color-warning-soft, var(--ac-panel));
+  color: var(--color-text);
+}
+.ac-trip-totals {
+  margin-block: 10px 16px;
+}
+.ac-bluetooth-workspace header .eyebrow,
+.ac-bluetooth-grid h4,
+.ac-bluetooth-status {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.ac-bluetooth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ac-gap);
+}
+.ac-bluetooth-grid > section {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: var(--ac-gap);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--ac-panel);
+}
+.ac-bluetooth-grid h4 {
+  margin: 0 0 4px;
+}
+.ac-bluetooth-devices {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.ac-bluetooth-devices li + li {
+  margin-top: 6px;
+}
+.ac-bluetooth-devices button {
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+}
+.ac-bluetooth-devices small,
+.ac-bluetooth-status small {
+  display: block;
+  color: var(--color-muted);
+}
+.ac-bluetooth-status {
+  padding: 10px;
+  border-radius: 9px;
+  border: 1px solid var(--ac-edge);
+  background: var(--ac-inset);
+}
+.ac-public-mobile-nav {
+  display: none;
+}
+@media (max-width: 1050px) {
+  .ac-account-hub-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  html body .ac-public-shell .public-nav {
+    flex-wrap: wrap;
+  }
+  html body .ac-public-shell .ac-public-mobile-nav {
+    display: block;
+    flex: 1 0 100%;
+    min-width: 0;
+  }
+  .ac-public-mobile-nav summary {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    cursor: pointer;
+    min-height: 40px;
+  }
+  .ac-public-mobile-nav nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding-block: 8px;
+  }
+  .ac-public-mobile-nav nav a {
+    padding: 9px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--ac-panel);
+  }
+  .ac-bluetooth-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ac-drive-console {
+    order: -1;
+  }
+}
+@media print {
+  html body .ac-workspace .ac-vehicle-sheet-tabs {
+    display: none !important;
+  }
+  html body .ac-workspace .ac-vehicle-records[hidden] {
+    display: block !important;
+  }
+}
+
+html body .ac-workspace .ac-document-stat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  justify-content: start;
+  text-align: left;
+  gap: 7px 9px;
+}
+.ac-document-stat .value {
+  grid-column: 1 / -1;
+}
+html body .ac-workspace .ac-document-stat[aria-pressed='true'],
+html body .ac-workspace .ac-notification-controls button[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  color: var(--color-primary-ink);
+}
+.ac-notification-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ac-alert-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  background: var(--ac-panel);
+}
+@media (max-width: 650px) {
+  .ac-alert-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ac-report-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--ac-inset);
+}
+.ac-report-filters label { display: grid; gap: 6px; min-width: 0; }
+.ac-report-filters :is(input, select) { min-width: 0; width: 100%; }
+.ac-journal-heading { display: flex; align-items: baseline; gap: 10px; padding: 9px 0; }
+.ac-journal-heading strong { font-size: 25px; color: var(--color-primary-ink); }
+.ac-journal-heading span { color: var(--color-muted); }
+html body .ac-workspace .ac-subscription-workspace > .card:first-child {
+  border-color: var(--ac-edge);
+  background: linear-gradient(145deg, var(--ac-panel), var(--ac-inset));
+}
+@media (max-width: 480px) {
+  .ac-report-filters { grid-template-columns: minmax(0, 1fr); }
+}

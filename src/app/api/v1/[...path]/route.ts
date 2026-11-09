@@ -332,18 +332,26 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         });
         return json(result,201);
       }
-      if (path[3] === 'trips') {
-        if (method === 'GET') {
-          const query = new URL(req.url).searchParams;
-          const date = z.iso.date().optional().parse(query.get('date') ?? undefined);
-          const page = z.coerce.number().int().min(0).max(10000).parse(query.get('page') ?? 0);
-          const timezone = date ? (await svc.profile(uid)).timezone : undefined;
-          return json(await db().select().from(s.gpsTrips)
-            .where(and(eq(s.gpsTrips.userId, uid), eq(s.gpsTrips.vehicleId, vehicleId), date
-              ? sql`${s.gpsTrips.startedAt} >= (${date}::date::timestamp AT TIME ZONE ${timezone})
-                AND ${s.gpsTrips.startedAt} < ((${date}::date + 1)::timestamp AT TIME ZONE ${timezone})` : undefined))
-            .orderBy(desc(s.gpsTrips.startedAt), desc(s.gpsTrips.id)).limit(100).offset(page * 100));
+      if (method === 'GET' && ['trips', 'trip-stats'].includes(path[3])) {
+        const query = new URL(req.url).searchParams;
+        const date = z.iso.date().optional().parse(query.get('date') ?? undefined);
+        const timezone = date ? (await svc.profile(uid)).timezone : undefined;
+        const scope = and(eq(s.gpsTrips.userId, uid), eq(s.gpsTrips.vehicleId, vehicleId), date
+          ? sql`${s.gpsTrips.startedAt} >= (${date}::date::timestamp AT TIME ZONE ${timezone})
+            AND ${s.gpsTrips.startedAt} < ((${date}::date + 1)::timestamp AT TIME ZONE ${timezone})` : undefined);
+        if (path[3] === 'trip-stats') {
+          const [stats] = await db().select({
+            count: sql<number>`count(*)`.mapWith(Number),
+            meters: sql<number>`coalesce(sum(${s.gpsTrips.distanceMeters}), 0)`.mapWith(Number),
+            seconds: sql<number>`coalesce(sum(${s.gpsTrips.durationSeconds}), 0)`.mapWith(Number),
+          }).from(s.gpsTrips).where(scope);
+          return json(stats);
         }
+        const page = z.coerce.number().int().min(0).max(10000).parse(query.get('page') ?? 0);
+        return json(await db().select().from(s.gpsTrips).where(scope)
+          .orderBy(desc(s.gpsTrips.startedAt), desc(s.gpsTrips.id)).limit(100).offset(page * 100));
+      }
+      if (path[3] === 'trips') {
         if (method === 'POST') {
           const value = z.object({
             id: z.string().uuid().optional(),

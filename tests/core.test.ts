@@ -994,6 +994,13 @@ test('SmartDrive history filters by date in the account timezone and rejects mal
   assert.equal((await call(route + '?page=-1')).status, 400);
 });
 
+test('SmartDrive trip statistics aggregate saved trips by vehicle and date', async () => {
+  const route = 'smartdrive/vehicles/' + car.id + '/trip-stats';
+  assert.deepEqual(await (await call(route + '?date=2020-03-10')).json(), { count: 1, meters: 3200, seconds: 600 });
+  assert.deepEqual(await (await call(route + '?date=2020-03-11')).json(), { count: 0, meters: 0, seconds: 0 });
+  assert.equal((await call(route, 'GET', undefined, '')).status, 401);
+});
+
 test('AutoCare Maps requires a session and rejects invalid area and category inputs', async () => {
   const path = 'smartdrive/auto-points';
   assert.equal((await call(path, 'POST', { latitude: 45, longitude: 21, category: 'fuel' }, '')).status, 401);

@@ -45,6 +45,8 @@ interface TrackingPlugin {
     address?: string;
   }): Promise<unknown>;
   disableAutomation(input: { ownerId: string; vehicleId?: string }): Promise<void>;
+  vehicleConnection(input: { ownerId: string; vehicleId: string }): Promise<VehicleConnection>;
+  openBluetoothSettings(): Promise<void>;
   openLocationSettings(): Promise<void>;
   pendingTrips(input: { ownerId: string }): Promise<{ trips: unknown[] }>;
   acknowledgeTrips(input: { ownerId: string; ids: string[] }): Promise<void>;
@@ -115,6 +117,10 @@ export type AutoBinding = {
   enabled: boolean;
   address?: string;
 };
+export type VehicleConnection = {
+  state: 'connected' | 'not-detected' | 'off' | 'permission' | 'unpaired';
+  name?: string;
+};
 export type AutoStatus = {
   apiVersion: number;
   platform: 'android' | 'ios';
@@ -149,6 +155,12 @@ export const nativeAutomation = {
   },
   async disable(ownerId: string, vehicleId?: string) {
     await plugin.disableAutomation({ ownerId, vehicleId });
+  },
+  async vehicleConnection(ownerId: string, vehicleId: string) {
+    return plugin.vehicleConnection({ ownerId, vehicleId });
+  },
+  async openBluetoothSettings() {
+    await plugin.openBluetoothSettings();
   },
   async openSettings() {
     await plugin.openLocationSettings();

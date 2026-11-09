@@ -83,8 +83,58 @@ public class AutoCareTrackingPlugin extends Plugin {
 
     @PluginMethod public void automationStatus(PluginCall call){
         try{String owner=call.getString("ownerId","");JSONArray list=new JSONArray();JSONObject all=AutoDrive.bindings(getContext());for(java.util.Iterator<String> it=all.keys();it.hasNext();){JSONObject row=all.getJSONObject(it.next());if(owner.equals(row.optString("ownerId")))list.put(row);}
-            JSObject result=new JSObject();result.put("apiVersion",5);result.put("platform","android");result.put("supported",Build.VERSION.SDK_INT>=26);result.put("bindings",list);result.put("pendingCount",AutoDrive.pending(getContext(),owner).length());result.put("backgroundLocation",Build.VERSION.SDK_INT<29||getContext().checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)==PackageManager.PERMISSION_GRANTED);result.put("error",AutoDrive.prefs(getContext()).getString("error",""));call.resolve(result);
+            JSObject result=new JSObject();result.put("apiVersion",6);result.put("platform","android");result.put("supported",Build.VERSION.SDK_INT>=26);result.put("bindings",list);result.put("pendingCount",AutoDrive.pending(getContext(),owner).length());result.put("backgroundLocation",Build.VERSION.SDK_INT<29||getContext().checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)==PackageManager.PERMISSION_GRANTED);result.put("error",AutoDrive.prefs(getContext()).getString("error",""));call.resolve(result);
         }catch(Exception e){call.reject("Unable to read automation status",e);}
+    }
+    @PluginMethod public void vehicleConnection(PluginCall call) {
+        try {
+            String owner = call.getString("ownerId", "");
+            String vehicle = call.getString("vehicleId", "");
+            JSONObject all = AutoDrive.bindings(getContext());
+            for (java.util.Iterator<String> keys = all.keys(); keys.hasNext();) {
+                String address = keys.next();
+                JSONObject binding = all.optJSONObject(address);
+                if (binding == null || !binding.optBoolean("enabled")
+                        || !owner.equals(binding.optString("ownerId"))
+                        || !vehicle.equals(binding.optString("vehicleId"))) continue;
+                if (Build.VERSION.SDK_INT >= 31 && getPermissionState("bluetooth") != PermissionState.GRANTED) {
+                    resolveConnection(call, "permission", null);
+                    return;
+                }
+                BluetoothManager manager = getContext().getSystemService(BluetoothManager.class);
+                BluetoothAdapter adapter = manager == null ? null : manager.getAdapter();
+                if (adapter == null || !adapter.isEnabled()) {
+                    resolveConnection(call, "off", null);
+                    return;
+                }
+                for (BluetoothDevice device : adapter.getBondedDevices()) {
+                    if (!address.equalsIgnoreCase(device.getAddress()) || !CarBluetoothVerifier.isPairedCarAudio(device)) continue;
+                    String name = device.getName();
+                    CarBluetoothVerifier.verify(getContext(), address, connected ->
+                        resolveConnection(call, connected ? "connected" : "not-detected", name));
+                    return;
+                }
+                resolveConnection(call, "unpaired", null);
+                return;
+            }
+            resolveConnection(call, "unpaired", null);
+        } catch (Exception error) {
+            call.reject("Nu s-a putut verifica starea Bluetooth.", error);
+        }
+    }
+    private void resolveConnection(PluginCall call, String state, String name) {
+        JSObject value = new JSObject();
+        value.put("state", state);
+        if (name != null) value.put("name", name);
+        call.resolve(value);
+    }
+    @PluginMethod public void openBluetoothSettings(PluginCall call) {
+        try {
+            getActivity().startActivity(new Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS));
+            call.resolve();
+        } catch (Exception error) {
+            call.reject("Deschide manual setările Bluetooth ale telefonului.", error);
+        }
     }
     @PluginMethod public void pairedDevices(PluginCall call){if(Build.VERSION.SDK_INT>=31&&getPermissionState("bluetooth")!=PermissionState.GRANTED){requestPermissionForAlias("bluetooth",call,"pairedPermission");return;}listDevices(call);}
     @PermissionCallback private void pairedPermission(PluginCall call){if(getPermissionState("bluetooth")!=PermissionState.GRANTED){call.reject("Permite accesul la dispozitivele Bluetooth.");return;}listDevices(call);}

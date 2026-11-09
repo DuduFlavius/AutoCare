@@ -7,10 +7,11 @@ import dynamic from 'next/dynamic';
 import { MapPin, Play, Square, Route } from 'lucide-react';
 
 import {hasNativeTracking,nativeTracking,type NativeTrip} from '@/lib/native-tracking';
+import MapStage from './map-stage';
 import { storeTripRoutes } from '@/lib/local-trip-routes';
 import { acceptGPSFix, type GPSFix as Sample } from '@/lib/gps-tracking';
 const RoadMapView=dynamic(()=>import('./road-map'),{ssr:false});
-export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bluetoothOnly }: { preview: boolean; bluetoothOnly: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; odometer:number }[]; onSaved:()=>Promise<unknown> }) {
+export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bluetoothOnly, bluetoothVisible }: { preview: boolean; bluetoothOnly: boolean; bluetoothVisible: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; odometer:number }[]; onSaved:()=>Promise<unknown> }) {
 
   const locale=useApplicationLocale();
   const [waitingCar,setWaitingCar]=useState(false);
@@ -210,14 +211,18 @@ const [active, setActive] = useState(false);
     void saveTrip();
     // Finalization, rather than each GPS poll, triggers one save attempt.
   },[native,finalizeOnStop,active,automatic,saved,startedAt,saveRetry]);
+  const english = locale.startsWith('en');
+  const currentCar = vehicles.find(vehicle => vehicle.id === vehicleId) ?? vehicles[0];
   const lastPoint = routePoints.at(-1);
   const speed = active && signal === 'ok' && lastPoint?.speed != null &&
     Number.isFinite(lastPoint.speed) && lastPoint.speed >= 0 && lastPoint.speed <= 55
     ? Math.round(lastPoint.speed * 3.6) : null;
+  const driveButton = (!active ? <button type="button" className="primary" disabled={saving || preview || !currentCar || (automatic&&!saved)} onClick={start}><Play size={17}/> {automatic&&!saved ? (locale.startsWith('en')?'Awaiting trip sync':'În așteptarea sincronizării') : distance>0&&!saved ? (english ? 'Resume drive' : 'Reia călătoria') : (english ? 'Start Drive' : 'Pornește călătoria')}</button> : <button type="button" className="ac-drive-stop" onClick={stop}><Square size={17}/> {english ? 'Stop Drive' : 'Oprește călătoria'}</button>);
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-drive-live-content" hidden={bluetoothOnly}>
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Traseul tău, în timp real</h3></div>
     <div className="ac-drive-cockpit">
+      <MapStage title={english ? 'Live route' : 'Traseu în timp real'} english={english} actions={driveButton}>
       <div className="ac-smartdrive-map">
         <RoadMapView
           points={routePoints}
@@ -236,20 +241,26 @@ const [active, setActive] = useState(false);
         </div>
         {locationMessage && !active && <p className="small muted" role="status">{locationMessage}</p>}
       </div>
+      </MapStage>
+    <div className="ac-drive-console">
     <DriveSessionSummary distance={distance} seconds={trackingSeconds} phase={saving?'saving':waitingCar&&active?'reconnecting':active&&awaitingMotion?'waiting':active?'driving':saved&&distance>0?'saved':'ready'} accuracy={mapPosition?.accuracy??null} english={locale.startsWith('en')}/>
-    </div>
     {vehicles.length > 0 && <label>Mașina pentru călătorie <select value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active || (distance>0 && !saved)} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}
-    {!automatic&&<label className="ac-smartdrive-sync"><input type="checkbox" checked={syncMileage} disabled={saving||saved} onChange={e=>setSyncMileage(e.target.checked)}/> Adaugă distanța GPS la kilometraj la salvare. Actualizează automat uleiul, distribuția și celelalte intervale, păstrând kilometrajul intervențiilor.</label>}
     <div className="ac-smartdrive-trip-controls">
-      {!active ? <button type="button" className="primary" disabled={saving||(automatic&&!saved)} onClick={start}><Play size={17}/> {automatic&&!saved ? (locale.startsWith('en')?'Awaiting trip sync':'În așteptarea sincronizării') : distance>0&&!saved ? 'Reia GPS' : 'Pornește GPS'}</button> : <button type="button" className="primary" style={{background:"#b42332",color:"#fff",borderColor:"#b42332"}} onClick={stop}><Square size={17}/> Oprește GPS</button>}
+      {driveButton}
       {!active && !automatic && distance > 0 && <button type="button" disabled={saving || preview || saved} onClick={() => void saveTrip()}>{saved ? 'Călătorie salvată' : saving ? 'Se salvează…' : syncMileage ? 'Salvează și sincronizează' : 'Salvează călătoria GPS'}</button>}
       {!active && !automatic && (distance>0 || (native&&startedAt!==null)) && !saved && <button type="button" disabled={saving} onClick={()=>{if(!window.confirm('Renunți la traseul nesalvat?'))return;if(nativeMode.current){void nativeTracking.clear(ownerId).then(()=>{distanceRef.current=0;started.current=null;setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');}).catch(e=>setError(e instanceof Error?e.message:'GPS indisponibil.'));return;}distanceRef.current=0;started.current=null;previous.current=null;setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');try{localStorage.removeItem(draftKey);}catch{/* Storage unavailable. */}}}>Renunță la traseu</button>}
       <span><MapPin size={15}/> {active ? 'GPS activ' : 'GPS oprit'}</span>
     </div>
-    <div className="service-reminder-box" data-workspace-ui><strong>{locale.startsWith('en')?'Current vehicle mileage: ':'Kilometraj actual al mașinii: '}{(vehicles.find(v=>v.id===vehicleId)??vehicles[0])?.odometer.toLocaleString(locale)} km</strong><p>{locale.startsWith('en')?'Saved sessions update maintenance mileage.':'Sesiunile salvate actualizează kilometrajul folosit pentru întreținere.'}</p><a href="?tab=%C3%8Entre%C8%9Binere">{locale.startsWith('en')?'View maintenance and remaining kilometres':'Vezi intervențiile și kilometrii rămași'}</a></div>
-    {active && signal === 'lost' && <div role="alert" style={{background:'#fff3df',color:'#8a4600',border:'1px solid #ffd18a',borderRadius:12,padding:13,margin:'12px 0',fontWeight:700}}>Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și permisiunile telefonului. Distanța nu crește fără puncte valide.</div>}
+    {!automatic&&<label className="ac-smartdrive-sync"><input type="checkbox" checked={syncMileage} disabled={saving||saved} onChange={e=>setSyncMileage(e.target.checked)}/> Adaugă distanța GPS la kilometraj la salvare. Actualizează automat uleiul, distribuția și celelalte intervale, păstrând kilometrajul intervențiilor.</label>}
+    </div>
+    </div>
+    {currentCar && <div className="service-reminder-box" data-workspace-ui>
+      <strong>{english ? 'Vehicle mileage: ' : 'Kilometrajul mașinii: '}{currentCar.odometer.toLocaleString(locale)} km</strong>
+      <p>{english ? 'A saved trip updates maintenance mileage if mileage sync is enabled.' : 'O călătorie salvată actualizează kilometrajul de întreținere când sincronizarea este bifată.'}</p>
+      <a href="?tab=%C3%8Entre%C8%9Binere">{english ? 'View service intervals' : 'Vezi termenele de întreținere'}</a>
+    </div>}
+    {active && signal === 'lost' && <div role="alert" className="ac-drive-signal-warning">Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și permisiunile telefonului. Distanța nu crește fără puncte valide.</div>}
     {active && signal === 'waiting' && <p role="status" style={{color:'#815500'}}>Se caută semnal GPS de precizie…</p>}
-    <p role="status">{active ? 'Urmărire în desfășurare' : 'Urmărire oprită'}</p>
     <p role="status"><strong>{native ? 'GPS Android/iOS nativ · disponibil în fundal' : 'GPS în browser · fără urmărire în fundal'}</strong></p>
     {native && <button type="button" onClick={() => void import('@/lib/native-tracking').then(({nativeAutomation}) => nativeAutomation.openSettings()).catch(() => setError('Deschide Setările telefonului → Aplicații → AutoCare.'))}>Deschide permisiunile telefonului</button>}
     {native && <p className="small muted">După Pornește GPS trebuie să apară notificarea permanentă „AutoCare · GPS activ”. Pe Android, verifică în Setări → Aplicații → AutoCare: locație precisă, notificări permise și Baterie → Fără restricții. Pentru pornirea automată prin Bluetooth, permite locația „Tot timpul”.</p>}
@@ -258,7 +269,7 @@ const [active, setActive] = useState(false);
     {waitingCar&&active&&<p role="status">{locale.startsWith('en')?'Car connection interrupted. Distance is paused while reconnection is checked.':'Conexiunea mașinii este întreruptă. Kilometrii sunt opriți cât se verifică reconectarea.'}</p>}
     {automatic&&!active&&!saved&&distance>0&&<p role="status">{locale.startsWith('en')?'Automatic trip saved on this device; waiting for safe account sync.':'Traseu automat păstrat pe dispozitiv; în așteptarea sincronizării sigure în cont.'}</p>}
     </div>
-    <div hidden={!bluetoothOnly}><AutoDrivePanel ownerId={ownerId} vehicles={vehicles} english={locale.startsWith('en')} onUpdated={onSaved} preview={preview}/></div>
+    <div hidden={!bluetoothOnly}><AutoDrivePanel ownerId={ownerId} vehicles={vehicles} english={locale.startsWith('en')} onUpdated={onSaved} preview={preview} visible={bluetoothVisible}/></div>
     {notice && <p role="status">{notice}</p>}
     {error && <p className="ac-smartdrive-trip-error" role="alert">{error}</p>}
   </section>;

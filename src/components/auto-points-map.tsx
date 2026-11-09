@@ -10,6 +10,7 @@ import {
   type AutoPointCategory,
 } from '@/lib/auto-points';
 import { segmentMeters, type GPSFix } from '@/lib/gps-tracking';
+import MapStage from './map-stage';
 import { useApplicationLocale } from './application-locale';
 
 const RoadMap = dynamic(() => import('./road-map'), { ssr: false });
@@ -108,115 +109,125 @@ export default function AutoPointsMap({ preview }: { preview: boolean }) {
           <span className="eyebrow">AUTOCARE MAPS</span>
           <h3>{t('Puncte auto în zona aleasă', 'Auto points in your area')}</h3>
         </div>
-        <button type="button" onClick={locate} disabled={locating || busy || preview}>
+      </header>
+      <MapStage title="AutoCare Maps" english={english}>
+        <button
+          className="ac-auto-point-location"
+          type="button"
+          onClick={locate}
+          disabled={locating || busy || preview}
+        >
           <Crosshair size={17} />
           {t('Poziția mea', 'My location')}
         </button>
-      </header>
-      <div
-        className="ac-auto-point-categories"
-        role="group"
-        aria-label={t('Categorii', 'Categories')}
-      >
-        {(Object.keys(autoPointCategories) as AutoPointCategory[]).map((key) => {
-          const Icon = icons[key];
-          const meta = autoPointCategories[key];
-          return (
-            <button
-              key={key}
-              type="button"
-              aria-pressed={category === key}
-              disabled={busy}
-              onClick={() => {
-                if (key !== category) {
-                  setCategory(key);
-                  setResults(null);
-                  setSelected('');
-                }
-              }}
-            >
-              <Icon size={17} />
-              {english ? meta.english : meta.label}
-            </button>
-          );
-        })}
-      </div>
-      <div className="ac-auto-points-layout">
-        <div>
-          <RoadMap
-            points={noRoute}
-            active={false}
-            english={english}
-            initialArea={initialArea}
-            key={initialArea.latitude + ':' + initialArea.longitude}
-            onAreaChange={setArea}
-            autoPoints={results ?? undefined}
-            onAutoPoint={setSelected}
-          />
-          <div className="ac-drive-map-footer">
-            <span>
-              <MapPin size={16} />
-              {t(
-                'Rază de căutare aprox. 4 km · OpenStreetMap',
-                'Approx. 4 km search radius · OpenStreetMap',
-              )}
-            </span>
-            <button
-              className="primary"
-              type="button"
-              onClick={() => void search()}
-              disabled={busy || locating || preview || area.zoom < 11}
-            >
-              <Search size={17} />
-              {busy
-                ? t('Se caută…', 'Searching…')
-                : t('Caută în zona hărții', 'Search this map area')}
-            </button>
-          </div>
+        <div
+          className="ac-auto-point-categories"
+          role="group"
+          aria-label={t('Categorii', 'Categories')}
+        >
+          {(Object.keys(autoPointCategories) as AutoPointCategory[]).map((key) => {
+            const Icon = icons[key];
+            const meta = autoPointCategories[key];
+            return (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={category === key}
+                disabled={busy}
+                onClick={() => {
+                  if (key !== category) {
+                    setCategory(key);
+                    setResults(null);
+                    setSelected('');
+                  }
+                }}
+              >
+                <Icon size={17} />
+                {english ? meta.english : meta.label}
+              </button>
+            );
+          })}
         </div>
-        <aside>
-          <p className="small muted" role="status">
-            {error ||
-              (area.zoom < 11
-                ? t('Mărește harta pentru a căuta în această zonă.', 'Zoom in to search this area.')
-                : results
-                  ? results.length + t(' rezultate găsite', ' results found')
-                  : t(
-                      'Mută harta în zona dorită și pornește căutarea.',
-                      'Move the map to the desired area and start the search.',
-                    ))}
-          </p>
-          {point && (
-            <a
-              className="button primary"
-              href={`https://www.google.com/maps/dir/?api=1&destination=${point.latitude},${point.longitude}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t('Navighează în Google Maps', 'Navigate in Google Maps')} ↗
-            </a>
-          )}
-          <ul>
-            {results?.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  aria-pressed={selected === item.id}
-                  onClick={() => setSelected(item.id)}
-                >
-                  <MapPin size={15} />
-                  <span data-user-content>
-                    {item.name ||
-                      (english
-                        ? autoPointCategories[item.category].english
-                        : autoPointCategories[item.category].label)}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
-      </div>
+        <div className="ac-auto-points-layout">
+          <div>
+            <RoadMap
+              points={noRoute}
+              active={false}
+              english={english}
+              initialArea={initialArea}
+              key={initialArea.latitude + ':' + initialArea.longitude}
+              onAreaChange={setArea}
+              autoPoints={results ?? undefined}
+              onAutoPoint={setSelected}
+            />
+            <div className="ac-drive-map-footer">
+              <span>
+                <MapPin size={16} />
+                {t(
+                  'Rază de căutare aprox. 4 km · OpenStreetMap',
+                  'Approx. 4 km search radius · OpenStreetMap',
+                )}
+              </span>
+              <button
+                className="primary"
+                type="button"
+                onClick={() => void search()}
+                disabled={busy || locating || preview || area.zoom < 11}
+              >
+                <Search size={17} />
+                {busy
+                  ? t('Se caută…', 'Searching…')
+                  : t('Caută în zona hărții', 'Search this map area')}
+              </button>
+            </div>
+          </div>
+          <aside>
+            <p className="small muted" role="status">
+              {error ||
+                (area.zoom < 11
+                  ? t(
+                      'Mărește harta pentru a căuta în această zonă.',
+                      'Zoom in to search this area.',
+                    )
+                  : results
+                    ? results.length + t(' rezultate găsite', ' results found')
+                    : t(
+                        'Mută harta în zona dorită și pornește căutarea.',
+                        'Move the map to the desired area and start the search.',
+                      ))}
+            </p>
+            {point && (
+              <a
+                className="button primary"
+                href={`https://www.google.com/maps/dir/?api=1&destination=${point.latitude},${point.longitude}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t('Navighează în Google Maps', 'Navigate in Google Maps')} ↗
+              </a>
+            )}
+            <ul>
+              {results?.map((item) => (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    aria-pressed={selected === item.id}
+                    onClick={() => setSelected(item.id)}
+                  >
+                    <MapPin size={15} />
+                    <span data-user-content>
+                      {item.name ||
+                        (english
+                          ? autoPointCategories[item.category].english
+                          : autoPointCategories[item.category].label)}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        </div>
+      </MapStage>
     </section>
   );
 }

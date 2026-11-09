@@ -654,7 +654,11 @@ const [car, setCar] = useState(''),
     )
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   return (
-    <section className="card">
+    <section className="card ac-vehicle-journal">
+      <div className="ac-journal-heading">
+        <strong>{rows.length.toLocaleString(locale)}</strong>
+        <span>{locale.startsWith('en') ? 'Matching records' : 'Înregistrări afișate'}</span>
+      </div>
       <div className="toolbar">
         <select aria-label="Mașină" value={car} onChange={(e) => setCar(e.target.value)}>
           <option value="">Toate mașinile</option>
@@ -746,13 +750,15 @@ export function VehicleSheet({
 }) {
 
   const locale=useApplicationLocale();
+  const [section, setSection] = useState<'document' | 'service' | 'expense' | 'mileage'>('document');
+  const en = locale.startsWith('en');
   const date=(value:string|null)=>formatDate(value,locale);
   const money=(value:number)=>formatMoney(value,locale);
 const v = data.vehicles.find((v) => v.id === id);
   if (!v) return null;
   const entries = data.records.filter((r) => r.vehicleId === id);
   const active = entries.filter((r) => !r.cancelled);
-  const cost = active.reduce((sum, r) => sum + r.amountBani, 0);
+  const cost = active.filter(record => record.amountKnown !== false).reduce((sum, r) => sum + r.amountBani, 0);
   const readings = active
     .filter((r) => r.kind === 'service' && r.odometer != null)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
@@ -803,7 +809,17 @@ const v = data.vehicles.find((v) => v.id === id);
           <p data-user-content className="small">{v.notes}</p>
         </section>
       )}
-      <section className="card">
+      <nav className="ac-vehicle-sheet-tabs" aria-label={en ? 'Vehicle records' : 'Datele vehiculului'}>
+        {([
+          ['document', en ? 'Documents' : 'Documente'],
+          ['service', en ? 'Service' : 'Intervenții'],
+          ['expense', en ? 'Expenses' : 'Cheltuieli'],
+          ['mileage', en ? 'Mileage history' : 'Istoric kilometraj'],
+        ] as const).map(([id, label]) => (
+          <button type="button" aria-pressed={section === id} key={id} onClick={() => setSection(id)}>{label}</button>
+        ))}
+      </nav>
+      <section className="card ac-vehicle-records" hidden={section !== 'mileage'}>
         <h3>{locale === 'ro-RO' ? 'Kilometraj la intervenții' : 'Mileage at service'}</h3>
         {readings.length ? (
           readings.map((r) => (
@@ -836,7 +852,7 @@ const v = data.vehicles.find((v) => v.id === id);
           ? active.filter((r) => r.kind === 'expense' || (r.kind === 'service' && r.amountKnown !== false && r.amountBani > 0))
           : entries.filter((r) => r.kind === kind);
         return (
-        <section className="card" key={kind}>
+        <section className="card ac-vehicle-records" hidden={section !== kind} key={kind}>
           <h3>
             {kind === 'document'
               ? 'Documente și atașamente'

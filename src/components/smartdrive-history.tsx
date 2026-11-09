@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { clearTripRoutes, readTripRoute } from '@/lib/local-trip-routes';
 import { driveDuration } from '@/lib/drive-display';
-import { Gauge, History, Bell, Route } from 'lucide-react';
+import MapStage from './map-stage';
+import { Gauge, History, Bell, Route, Clock3 } from 'lucide-react';
 import { mileageMetrics } from '@/lib/smartdrive-metrics';
 const RoadMapView = dynamic(() => import('./road-map'), { ssr: false });
 type Vehicle = { id: string; brand: string; model: string; odometer: number };
 type Reading = { id: string; odometer: number; recordedAt: string; source: string };
 type Trip = { id: string; distanceMeters: number; durationSeconds: number; startedAt: string };
+type TripStats = { count: number; meters: number; seconds: number };
 type Preferences = { frequencyDays: number; enabled: boolean };
 async function request<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
   const res = await fetch('/api/v1/' + path, { method, headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
@@ -32,6 +34,8 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
   const [tripDate, setTripDate] = useState('');
   const [page, setPage] = useState(0);
   const [tripError, setTripError] = useState('');
+  const [stats, setStats] = useState<{ path: string; value: TripStats } | null>(null);
+  const [statsError, setStatsError] = useState(false);
   const [tripResult, setTripResult] = useState<{ key: string; trips: Trip[] } | null>(null);
   const [readings, setReadings] = useState<Reading[]>([]);
   const [prefs, setPrefs] = useState<Preferences>({ frequencyDays: 3, enabled: true });
@@ -62,6 +66,17 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
     });
     return () => { cancelled = true; };
   }, [tripPath, vehicleId, preview, revision]);
+  const statsPath = 'smartdrive/vehicles/' + vehicleId + '/trip-stats' + (tripDate ? '?' + new URLSearchParams({ date: tripDate }) : '');
+  useEffect(() => {
+    if (preview || !vehicleId) return;
+    let cancelled = false;
+    setStatsError(false);
+    request<TripStats>(statsPath).then(value => {
+      if (!cancelled) setStats({ path: statsPath, value });
+    }).catch(() => { if (!cancelled) setStatsError(true); });
+    return () => { cancelled = true; };
+  }, [statsPath, vehicleId, preview, revision]);
+  const totals = stats?.path === statsPath ? stats.value : null;
   const filteredTrips = tripResult?.key === tripPath ? tripResult.trips : [];
   const selectedTrip = filteredTrips.find(trip => trip.id === selectedTripId) ?? filteredTrips[0];
   const tripId = selectedTrip?.id;
@@ -92,6 +107,15 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
   return <section className="ac-smartdrive-history">
     <div className="ac-smartdrive-history-head"><div><span className="ac-premium-kicker"><History size={17}/> SMARTDRIVE · ISTORIC</span><h3>Citiri confirmate și călătorii</h3></div>
       {vehicles.length > 1 && <label>Mașina <select value={vehicleId} onChange={e => { setSelected(e.target.value); setPage(0); }}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}</div>
+    <section aria-label={t('Statistici GPS', 'GPS statistics')}>
+      <p className="small muted">{tripDate ? t('Total pentru data selectată', 'Selected date totals') : t('Total pentru toate călătoriile mașinii', 'All trips for this vehicle')}</p>
+      <div className="ac-smartdrive-history-metrics ac-trip-totals">
+        <div><History size={18}/><span>{t('Călătorii', 'Trips')}</span><strong>{totals?.count.toLocaleString(locale) ?? '—'}</strong></div>
+        <div><Route size={18}/><span>{t('Distanță', 'Distance')}</span><strong>{totals ? (totals.meters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 }) + ' km' : '—'}</strong></div>
+        <div><Clock3 size={18}/><span>{t('Durată', 'Duration')}</span><strong>{totals ? driveDuration(totals.seconds) : '—'}</strong></div>
+      </div>
+      {statsError && <p className="small muted" role="status">{t('Statisticile nu s-au putut încărca.', 'Statistics could not be loaded.')}</p>}
+    </section>
     <div className="ac-trip-history-cockpit">
       <div className="ac-trip-history-list">
         <label>{t('Data călătoriei', 'Trip date')} <input type="date" value={tripDate} onChange={event => { setTripDate(event.target.value); setPage(0); }} /></label>
@@ -111,10 +135,10 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
       </div>
       <div className="ac-trip-history-map">
         {route && route.length > 1 ? (
-          <>
+          <MapStage title={t('Traseu salvat', 'Saved route')} english={english}>
             <RoadMapView key={selectedTrip.id} points={route} history active={false} english={english} />
             <div className="ac-trip-map-legend"><span>{t('Plecare', 'Start')}</span><span>{t('Sosire', 'End')}</span></div>
-          </>
+          </MapStage>
         ) : (
           <div className="ac-trip-map-empty">
             <Route size={28}/>

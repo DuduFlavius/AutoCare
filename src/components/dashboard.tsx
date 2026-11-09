@@ -5,7 +5,7 @@ import './app-workspace.css';
 import './studio-workspace.css';
 import VehiclePhoto from './application/vehicle-photo';
 import WorkspaceViewport from './workspace-viewport';
-import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspacePreferences } from './app-workspace';
+import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspacePreferences, WorkspaceModuleHeader } from './app-workspace';
 import { normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
 import SiteLanguage from './site-language';
 import ApplicationHome from './application/home';
@@ -184,8 +184,8 @@ function Dialog({
 }
 
 type DriveView = 'live' | 'history' | 'points' | 'bluetooth';
-function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false, initialDrive }: {
-  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean; initialDrive?: string;
+function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false, initialDrive, driveVisible = false }: {
+  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean; initialDrive?: string; driveVisible?: boolean;
 }) {
 
   const locale=useApplicationLocale();
@@ -246,7 +246,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
             </button>
           </div>
           <div hidden={driveView !== 'live' && driveView !== 'bluetooth'}>
-            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'}/>
+            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible}/>
           </div>
           {driveView === 'points' && <AutoPointsMap preview={preview}/>}
           {driveView === 'history' && (
@@ -317,6 +317,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     [query, setQuery] = useState(''),
     [vehicleDetail, setVehicleDetail] = useState<string | null>(null),
     [recordState, setRecordState] = useState(''),
+    [unreadOnly, setUnreadOnly] = useState(false),
     [categoryFilter, setCategoryFilter] = useState(''),
     [period, setPeriod] = useState('all'),
     [recordDirty, setRecordDirty] = useState(false),
@@ -902,56 +903,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
           </div>
         ) : (
           <>
-            {!['Dashboard','Cont'].includes(tab) && <header className="page-head between ac-workspace-hero">
-              <div>
-                <p className="eyebrow">
-                  {tab === 'Dashboard'
-                    ? `Bună, ${name.split(' ')[0]} 👋`
-                    : (language === 'en' ? 'AUTOCARE · WORKSPACE' : 'AUTOCARE · SPAȚIU DE LUCRU')}
-                </p>
-                <h1 id="workspace-page-title" tabIndex={-1}>
-                  {tab === 'Dashboard'
-                    ? 'Acasă, în garaj.'
-                    : tab === 'Garaj'
-                      ? 'Garajul tău'
-                      : tab === 'Întreținere'
-                        ? 'Întreținere și service'
-                        : tab === 'Documente'
-                          ? 'Documente auto'
-                          : tab === 'Cheltuieli'
-                            ? 'Cheltuieli auto'
-                            : tab === 'Notificări'
-                              ? 'Centrul de notificări'
-                              : tab === 'Calendar'
-                                ? 'Calendar auto'
-                                : tab === 'Abonament'
-                                  ? 'Abonamentul tău'
-                                  : tab === 'Rapoarte' ? 'Rapoarte și exporturi' : tab === 'Premium' ? 'Spațiul tău Premium'
-                                  : tab === 'Plan întreținere' ? 'SmartDrive GPS'
-                                  : tab === 'Setări'
-                                    ? 'Profil și preferințe'
-                                    : tab}
-                </h1>
-                <p className="muted small">
-                  {tab === 'Dashboard'
-                    ? 'Totul despre mașinile tale, într-un singur loc.'
-                    : (
-                        {
-                          Garaj: 'Toate mașinile tale, într-un singur loc.',
-                          Documente: 'Toate actele mașinilor tale, organizate și ușor de găsit.',
-                          Întreținere:
-                            'Păstrează un istoric clar și planifică următoarele intervenții.',
-                          Calendar: 'Toate termenele și lucrările programate, la îndemână.',
-                          Cheltuieli: 'Urmărește costurile mașinilor tale.',
-                          Notificări: 'Documente și lucrări care au nevoie de atenția ta.',
-                          Abonament:'Planul actual, beneficiile și istoricul facturării.',
-                          Premium:'Întreținerea, rapoartele și toate instrumentele tale Premium.',
-                          Setări: 'Alege cum primești mementourile și gestionează datele contului.',
-                        } as Record<string, string>
-                      )[tab] || 'Informațiile înregistrate de tine, organizate în siguranță.'}
-                </p>
-              </div>
-              {['Dashboard', 'Garaj'].includes(tab) ? (
+            {!['Dashboard','Cont'].includes(tab) && <WorkspaceModuleHeader tab={tab} language={language}>
+              {tab === 'Garaj' ? (
                 <button className="primary" onClick={() => setModal({ kind: 'vehicle' })}>
                   <Plus size={17} />
                   Adaugă o mașină
@@ -983,14 +936,14 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                   <Plus size={16} /> Planifică o lucrare
                 </button>
               ) : null}
-            </header>}
+            </WorkspaceModuleHeader>}
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
             {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={activeVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={setVehicleDetail} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
             {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
             {tab === 'Istoric auto' && <VehicleJournal data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
             {tab === 'Garaj' && (
               <>
-                <div className="toolbar">
+                <div className="toolbar ac-garage-toolbar">
                   {data.vehicles.length > 1 && <input
                     aria-label="Caută o mașină"
                     placeholder="Caută marcă, model sau număr…"
@@ -1012,7 +965,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                     action={() => setModal({ kind: 'vehicle' })}
                   />
                 ) : (
-                  <div className="grid3">
+                  <div className="grid3 ac-garage-grid">
                     {data.vehicles
                       .filter(
                         (v) =>
@@ -1024,7 +977,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                               .includes(query.toLowerCase())),
                       )
                       .map((v) => (
-                        <article key={v.id} className="card car-card">
+                        <article key={v.id} className="card car-card" data-selected={!v.archived && (activeVehicleId || activeCars[0]?.id) === v.id || undefined}>
                           <div className="between">
                             <span className="eyebrow">
                               {v.year} · {v.fuel}
@@ -1141,16 +1094,18 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 {tab === 'Documente' && (
                   <>
                     <div className="stats document-statistics">
-                      {[
-                        ['Total documente', docStats.total],
-                        ['În termen', docStats.valid],
-                        ['Expiră în 30 de zile', docStats.soon],
-                        ['Expirate', docStats.expired],
-                      ].map(([label, value]) => (
-                        <section key={label} className="card stat">
+                      {([
+                        ['', language === 'en' ? 'All documents' : 'Total documente', docStats.total],
+                        ['valid', language === 'en' ? 'Valid' : 'În termen', docStats.valid],
+                        ['soon', language === 'en' ? 'Expiring soon' : 'Expiră în 30 de zile', docStats.soon],
+                        ['expired', language === 'en' ? 'Expired' : 'Expirate', docStats.expired],
+                      ] as const).map(([state, label, value]) => (
+                        <button key={state} type="button" className="card stat ac-document-stat" aria-pressed={recordState === state}
+                          onClick={() => setRecordState(recordState === state ? '' : state)}>
+                          <Files size={17} aria-hidden="true"/>
                           <span className="small muted">{label}</span>
-                          <div className="value">{value}</div>
-                        </section>
+                          <strong className="value">{value}</strong>
+                        </button>
                       ))}
                     </div>
                     {docStats.incomplete > 0 && (
@@ -1280,9 +1235,9 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                             </option>
                           ))}
                       </select>
-                      {tab === 'Întreținere' && (
+                      {(tab === 'Întreținere' || tab === 'Cheltuieli') && (
                         <select
-                          aria-label="Perioada jurnalului"
+                          aria-label={language === 'en' ? 'Date range' : 'Perioada înregistrărilor'}
                           value={period}
                           onChange={(e) => setPeriod(e.target.value)}
                         >
@@ -1666,6 +1621,9 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                       onChange={(e) => setCalendarMonth(e.target.value)}
                     />
                   </label>
+                  <button type="button" onClick={() => setCalendarMonth(nowDate.slice(0, 7))} disabled={calendarMonth === nowDate.slice(0, 7)}>
+                    <CalendarDays size={17}/> {language === 'en' ? 'Current month' : 'Luna curentă'}
+                  </button>
                   <span className="small muted">Scadențele documentelor și lucrărilor active</span>
                 </div>
                 <div className="toolbar">
@@ -1738,7 +1696,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
               </section>
             )}
             {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
-            {openedSmartDrive && <div hidden={tab !== 'Plan întreținere'}><MileagePlanner data={data} initialDrive={initialDrive} preview={!!previewData} onUpdated={refresh} onError={setError} /></div>}
+            {openedSmartDrive && <div hidden={tab !== 'Plan întreținere'}><MileagePlanner data={data} initialDrive={initialDrive} driveVisible={tab === 'Plan întreținere'} preview={!!previewData} onUpdated={refresh} onError={setError} /></div>}
             {tab === 'Notificări' && (
               <div className="overview-stack">
                 <PushSettings
@@ -1761,23 +1719,36 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 />
                 <section className="card autocare-notifications">
                   <div className="autocare-notifications-header">
-                    <div><h3>Notificările tale</h3><p>Apasă pe o notificare pentru a o elimina din listă.</p></div>
-                    <button type="button" className="autocare-notifications-settings" onClick={() => navigate('Setări')}>Preferințe</button>
+                    <div><h3>{language === 'en' ? 'Your alerts' : 'Alertele tale'}</h3><p>{language === 'en' ? 'Review, mark as read or dismiss.' : 'Consultă, marchează ca citite sau elimină alertele.'}</p></div>
+                    <button type="button" className="autocare-notifications-settings" onClick={() => { if (navigate('Setări')) setSettingsPanel('alerts'); }}>
+                      {language === 'en' ? 'Preferences' : 'Preferințe'}
+                    </button>
                   </div>
-                  {!data.notifications.length ? <Empty text="Nu ai notificări. Ești la zi!" /> : (
+                  <div className="ac-notification-controls">
+                    <button type="button" aria-pressed={unreadOnly} onClick={() => setUnreadOnly(value => !value)}>{language === 'en' ? 'Unread only' : 'Doar necitite'}</button>
+                    <button type="button" disabled={busy || !data.notifications.some(item => !item.readAt)} onClick={() => void act(() => api('notifications/read', 'POST'))}>
+                      {language === 'en' ? 'Mark all as read' : 'Marchează toate ca citite'}
+                    </button>
+                  </div>
+                  {data.notifications.some(item => !unreadOnly || !item.readAt) ? (
                     <div className="autocare-notifications-list">
-                      {data.notifications.map(n => (
-                        <button key={n.id} type="button" className="autocare-notification" disabled={busy}
-                          onClick={() => void act(() => api('notifications/' + n.id, 'DELETE'))}
-                          aria-label={`Elimină notificarea: ${n.message}`}>
-                          <span className="autocare-notification-content">
-                            <strong>{n.message}</strong><small>{n.localDate} · {n.channel}</small>
-                          </span>
-                          <span className="autocare-notification-remove">Elimină <X size={16} /></span>
-                        </button>
+                      {data.notifications.filter(item => !unreadOnly || !item.readAt).map(item => (
+                        <article key={item.id} className="ac-alert-row">
+                          <div className="autocare-notification-content">
+                            <strong data-user-content>{item.message}</strong><small>{item.localDate} · {item.channel}</small>
+                          </div>
+                          <div className="ac-notification-controls">
+                            {!item.readAt && <button type="button" disabled={busy} onClick={() => void act(() => api('notifications/' + item.id + '/read', 'PATCH', { read: true }))}>
+                              {language === 'en' ? 'Mark as read' : 'Marchează citită'}
+                            </button>}
+                            <button type="button" disabled={busy} onClick={() => void act(() => api('notifications/' + item.id, 'DELETE'))}>
+                              {language === 'en' ? 'Dismiss' : 'Elimină'} <X size={16}/>
+                            </button>
+                          </div>
+                        </article>
                       ))}
                     </div>
-                  )}
+                  ) : <Empty text={language === 'en' ? 'No alerts to show.' : 'Nu există alerte de afișat.'}/>}
                 </section>
               </div>
             )}

@@ -40,7 +40,7 @@ export default function SubscriptionPage({
       ['active', 'trialing'].includes(data.subscription.status),
     cancelled = data.subscription?.cancelAtPeriodEnd;
   return (
-    <div className="stack" data-workspace-ui>
+    <div className="stack ac-subscription-workspace" data-workspace-ui>
       <section className="card">
         <p className="eyebrow">AUTOCARE · {en ? 'SUBSCRIPTION' : 'ABONAMENT'}</p>
         <h2>
