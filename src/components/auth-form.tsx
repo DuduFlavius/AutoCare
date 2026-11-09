@@ -155,16 +155,16 @@ export function AuthForm({ mode }: { mode: string }) {
         <p className="eyebrow">GARAJUL TĂU DIGITAL</p>
         <h1>
           {signup
-            ? 'Bine ai venit.'
+            ? 'Creează cont'
             : forgot
               ? 'Ai uitat parola?'
               : reset
                 ? 'Alege o parolă nouă.'
-                : 'Bine ai revenit.'}
+                : 'Intră în cont'}
         </h1>
         <p className="muted small">
           {signup
-            ? 'Contul se creează imediat, fără confirmare prin email.'
+            ? 'Creează-ți contul pentru a adăuga prima mașină.'
             : 'Documentele și istoricul mașinii tale, la îndemână.'}
         </p>
         <form
@@ -243,7 +243,7 @@ export function AuthForm({ mode }: { mode: string }) {
                 </button>
               </div>
               {(signup || reset) && (
-                <span className="micro">Minimum 12 caractere. Contul se activează imediat.</span>
+                <span className="micro">Cel puțin 12 caractere.</span>
               )}
             </label>
           )}

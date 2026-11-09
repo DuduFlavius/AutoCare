@@ -1,0 +1,180 @@
+/* Shared visual identity for the public product and its authenticated workspace. */
+:where(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-subtle);
+  opacity: 1;
+}
+:where(label, h1, h2, h3, p, strong, small) {
+  overflow-wrap: anywhere;
+}
+html body .ac-lux-public.ac-studio-public .lux-primary {
+  background: var(--color-primary) !important;
+  color: var(--color-on-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+html body .ac-lux-public.ac-studio-public .lux-primary:hover {
+  background: var(--color-primary-hover) !important;
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-hero {
+  gap: clamp(22px, 4vw, 60px);
+  padding-block: clamp(32px, 6vw, 90px);
+}
+.product-hero-photo {
+  margin: 0;
+}
+.product-hero-photo picture,
+.product-hero-photo img {
+  display: block;
+  width: 100%;
+}
+.product-hero-photo img {
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+.product-tour {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr);
+  align-items: center;
+  gap: clamp(22px, 5vw, 74px);
+  max-width: 1440px;
+  margin: auto;
+  padding: clamp(32px, 6vw, 96px) 4%;
+}
+.product-tour h2 {
+  font-size: clamp(30px, 3.7vw, 55px);
+  line-height: 1.08;
+  margin-block: 0 15px;
+}
+.product-tour p:not(.lux-eyebrow) {
+  color: var(--color-muted);
+}
+.product-mockup {
+  margin: 0;
+  min-width: 0;
+}
+.product-mockup-frame {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.5fr);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.product-mockup-rail {
+  padding: 16px 12px;
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.product-mockup-rail strong {
+  color: var(--color-primary-ink);
+  font-size: 17px;
+}
+.product-mockup-rail span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.product-mockup-rail span:first-of-type {
+  color: var(--color-primary-ink);
+}
+.product-mockup-rail svg {
+  flex: none;
+}
+.product-mockup-main {
+  padding: 16px;
+}
+.product-mockup-main h3 {
+  margin: 0 0 10px;
+}
+.product-mockup-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.product-mockup-cards article {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+}
+.product-mockup-cards svg {
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+.product-mockup-cards strong {
+  font-size: 13px;
+}
+.product-mockup figcaption,
+.product-mockup-cards small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.product-mockup figcaption {
+  margin-top: 8px;
+}
+.public-faq details {
+  padding: 16px 20px;
+  margin-block: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.public-faq summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.public-faq details p {
+  margin-bottom: 0;
+}
+.studio-create-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+html body .ac-workspace.ac-studio .main .studio-create-row button {
+  min-height: 48px;
+  justify-content: flex-start;
+  text-align: left;
+  border-color: var(--color-border-strong) !important;
+}
+.studio-create-row svg {
+  flex: none;
+  color: var(--color-primary);
+}
+@media (max-width: 760px) {
+  .product-tour {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .product-mockup-frame {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .product-mockup-rail {
+    display: none;
+  }
+  .studio-create-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .public-nav :is(.button, a) {
+    min-height: 42px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .product-hero-photo img {
+    animation: none;
+  }
+}

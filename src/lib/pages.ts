@@ -9,6 +9,15 @@ export const pages: Record<
       { ...value, sections: value.sections.map(([a, b]) => [a, b] as [string, string]) },
     ]),
   ),
+  'despre-noi': {
+    title: 'Despre AutoCare',
+    intro: 'AutoCare este un garaj digital pentru administrarea mașinii personale și a istoricului ei.',
+    sections: [
+      ['Un dosar pentru fiecare mașină', 'Păstrezi actele, datele de expirare, lucrările de service și cheltuielile în același loc.'],
+      ['Acces de pe telefon și calculator', 'Garajul este disponibil din browser și poate fi instalat pe ecranul principal al unui telefon compatibil.'],
+      ['Începi cu o mașină', 'Planul gratuit include o mașină activă. Cu Premium poți administra mai multe mașini și consulta rapoarte detaliate.'],
+    ],
+  },
   functionalitati: {
     title: 'Un loc pentru tot ce ține de mașina ta',
     intro: 'Construiește un istoric pe care îl poți consulta oricând, direct de pe telefon.',
@@ -82,7 +91,7 @@ export const pages: Record<
   contact: {
     title: 'Suntem aici pentru întrebările tale',
     intro:
-      'Pentru o solicitare legată de cont, folosește formularul de suport din zona Setări, după autentificare.',
+      'Pentru o solicitare legată de cont, folosește Centrul de suport din aplicație, după autentificare.',
     sections: [
       [
         'Suport în aplicație',

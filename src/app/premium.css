@@ -41,13 +41,13 @@ button:disabled {
 }
 .primary {
   background: var(--color-text);
-  color: var(--color-surface);
+  color: var(--color-text);
   border-color: var(--color-text);
-  box-shadow: 0 4px 10px rgba(21, 27, 38, 0.125);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--color-nav) 13%, transparent);
 }
 .primary:hover {
   background: var(--color-text);
-  color: white;
+  color: var(--color-text);
 }
 a:hover {
   color: var(--color-text);
@@ -75,7 +75,7 @@ textarea:focus {
   background: var(--panel);
   border-radius: 21px;
   padding: 25px;
-  box-shadow: 0 5px 22px rgba(21, 27, 38, 0.016);
+  box-shadow: 0 5px 22px color-mix(in srgb, var(--color-nav) 2%, transparent);
 }
 .sidebar {
   background: var(--color-text);
@@ -95,7 +95,7 @@ textarea:focus {
 }
 .sidebar nav button:hover {
   background: rgba(255, 255, 255, 0.075);
-  color: white;
+  color: var(--color-text);
 }
 .sidebar nav button.active:hover {
   background: var(--color-primary-soft);
@@ -222,7 +222,7 @@ td {
   padding: 8px 12px;
 }
 .dialog-backdrop {
-  background: rgba(21, 27, 38, 0.6);
+  background: color-mix(in srgb, var(--color-nav) 60%, transparent);
   backdrop-filter: blur(5px);
 }
 .dialog {
@@ -230,7 +230,7 @@ td {
   background: var(--color-surface);
   border-color: var(--color-border);
   padding: 32px;
-  box-shadow: 0 30px 100px rgba(21, 27, 38, 0.251);
+  box-shadow: 0 30px 100px color-mix(in srgb, var(--color-nav) 25%, transparent);
 }
 .dialog h2 {
   font-size: 26px;
@@ -531,7 +531,7 @@ td {
 .cockpit {
   background: var(--color-primary-soft);
   border-color: var(--color-primary-soft);
-  box-shadow: 0 30px 70px rgba(21, 27, 38, 0.063);
+  box-shadow: 0 30px 70px color-mix(in srgb, var(--color-nav) 6%, transparent);
 }
 .hero {
   padding-top: 65px;
@@ -732,8 +732,8 @@ label,
 }
 .sidebar-bottom {
   margin-top: auto;
-  border: 1px solid rgba(21, 27, 38, 0.4);
-  background: rgba(21, 27, 38, 0.333);
+  border: 1px solid color-mix(in srgb, var(--color-nav) 40%, transparent);
+  background: color-mix(in srgb, var(--color-nav) 33%, transparent);
   border-radius: 9px;
   padding: 16px 13px;
 }
@@ -766,7 +766,7 @@ label,
 }
 .sidebar-profile:hover {
   background: transparent;
-  color: white;
+  color: var(--color-text);
 }
 .sidebar-profile strong {
   display: block;
@@ -822,12 +822,12 @@ label,
   background: linear-gradient(var(--color-text), var(--color-nav));
   border-color: var(--color-text);
   border-radius: 7px;
-  box-shadow: 0 3px 8px rgba(21, 27, 38, 0.063);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--color-nav) 6%, transparent);
 }
 .card {
   border-radius: 9px;
   padding: 20px;
-  box-shadow: 0 2px 5px rgba(21, 27, 38, 0.012);
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--color-nav) 1%, transparent);
 }
 button,
 .button {
@@ -919,7 +919,7 @@ h3 {
 }
 .attention-panel .pill {
   background: var(--color-muted);
-  color: white;
+  color: var(--color-text);
   border-radius: 5px;
   font-size: 10px;
   padding: 2px 5px;
@@ -1305,7 +1305,7 @@ h3 {
 }
 .filter-pills button[aria-pressed='true'] {
   background: var(--color-text);
-  color: white;
+  color: var(--color-text);
   border-color: var(--color-text);
 }
 .chart .bar {
@@ -1775,7 +1775,7 @@ h3 {
   border-radius: 5px;
 }
 .row-actions .primary {
-  color: white;
+  color: var(--color-text);
 }
 .workspace-garage .row-actions {
   padding-top: 4px;
@@ -1981,7 +1981,7 @@ h3 {
   overflow: hidden;
   min-height: 600px;
   height: min(760px, calc(100dvh - 190px));
-  box-shadow: 0 17px 50px rgba(21, 27, 38, 0.063);
+  box-shadow: 0 17px 50px color-mix(in srgb, var(--color-nav) 6%, transparent);
 }
 .support-sidebar {
   display: flex;
@@ -2044,7 +2044,7 @@ h3 {
 }
 .support-filters button[aria-pressed='true'] {
   background: var(--color-text);
-  color: white;
+  color: var(--color-text);
   border-color: var(--color-text);
 }
 .support-filters button span {
@@ -2056,7 +2056,7 @@ h3 {
   align-items: center;
   flex-direction: row;
   gap: 8px;
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 0 10px;
@@ -2288,7 +2288,7 @@ h3 {
   padding: 14px 17px;
   border-radius: 13px;
   flex-shrink: 0;
-  box-shadow: 0 2px 5px rgba(21, 27, 38, 0.024);
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--color-nav) 2%, transparent);
   overflow-wrap: anywhere;
 }
 .support-message.from-client {

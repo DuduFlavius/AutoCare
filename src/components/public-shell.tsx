@@ -37,13 +37,14 @@ export function PublicShell({
         <footer className="footer">
           <div className="between">
             <span>
-              © {new Date().getFullYear()} {appName}. Mai mult control. Mai puține griji.
+              © {new Date().getFullYear()} {appName}
             </span>
             <div className="footer-links">
               <Link href="/documente-auto">Documente auto</Link>
               <Link href="/intretinere-auto">Întreținere</Link>
               <Link href="/cheltuieli-auto">Cheltuieli</Link>
               <Link href="/ghiduri">Ghiduri</Link>
+              <Link href="/despre-noi">Despre noi</Link>
               <Link href="/contact">Contact</Link>
               <Link href="/intrebari-frecvente">Întrebări</Link>
               <Link href="/confidentialitate">Confidențialitate</Link>

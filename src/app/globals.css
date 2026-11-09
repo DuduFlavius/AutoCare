@@ -210,7 +210,7 @@ h3 {
     radial-gradient(ellipse at 80% 10%, var(--color-text) 0, transparent 60%), var(--color-nav);
   border-radius: 24px;
   padding: 28px;
-  box-shadow: 0 25px 100px rgba(21, 27, 38, 0.533);
+  box-shadow: 0 25px 100px color-mix(in srgb, var(--color-nav) 53%, transparent);
   transform: rotate(1deg);
 }
 .cockpit .car-art {
@@ -468,7 +468,7 @@ h3 {
 .plate:before {
   content: 'RO';
   background: var(--color-text);
-  color: var(--color-surface);
+  color: var(--color-text);
   font-size: 9px;
   padding: 5px 4px;
   margin-left: -8px;
@@ -525,7 +525,7 @@ h3 {
 .dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(21, 27, 38, 0.733);
+  background: color-mix(in srgb, var(--color-nav) 73%, transparent);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -866,10 +866,10 @@ summary + p {
   }
 }
 
-.mail-center button.primary{background:#12366f!important;color:#fff!important;border-color:#12366f!important;opacity:1!important;font-weight:700}
-.mail-center button.primary:hover:not(:disabled){background:#09244d!important}
-.mail-center button.primary:disabled{background:#d7e0ee!important;color:#263a56!important;border-color:#b6c6dc!important}
-.mail-center button:focus-visible{outline:3px solid #f5b82e;outline-offset:3px}
+.mail-center button.primary{background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-border)!important;opacity:1!important;font-weight:700}
+.mail-center button.primary:hover:not(:disabled){background:var(--color-surface)!important}
+.mail-center button.primary:disabled{background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
+.mail-center button:focus-visible{outline:3px solid var(--color-warning);outline-offset:3px}
 
 /* Mail Center: high-contrast primary sending action, including disabled state */
 .mail-center .mail-send-action {
@@ -880,18 +880,18 @@ summary + p {
   width: 100% !important;
   min-height: 58px !important;
   padding: 15px 20px !important;
-  background: #175cd3 !important;
-  border: 2px solid #124aa8 !important;
-  color: #ffffff !important;
+  background: var(--color-primary-deep) !important;
+  border: 2px solid var(--color-border) !important;
+  color: var(--color-text) !important;
   font-size: 16px !important;
   font-weight: 800 !important;
   opacity: 1 !important;
-  box-shadow: 0 6px 18px rgba(20, 78, 164, .24) !important;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary) 24%, transparent) !important;
 }
 .mail-center .mail-send-action:disabled {
-  background: #e4eaf4 !important;
-  border-color: #bdcbe1 !important;
-  color: #304563 !important;
+  background: var(--color-surface-muted) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
   opacity: 1 !important;
   box-shadow: none !important;
   cursor: not-allowed;
@@ -901,9 +901,9 @@ summary + p {
 /* Always legible, even with no recipient selected. */
 .mail-center button.mail-send-action,
 .mail-center button.mail-send-action:disabled {
-  background: #174ea6 !important;
-  border: 2px solid #0b3476 !important;
-  color: #fff !important;
+  background: var(--color-primary-deep) !important;
+  border: 2px solid var(--color-border) !important;
+  color: var(--color-text) !important;
   opacity: 1 !important;
   -webkit-text-fill-color: #fff !important;
   font-size: 16px !important;
@@ -911,82 +911,82 @@ summary + p {
   text-shadow: none !important;
 }
 .mail-center button.mail-send-action:disabled {
-  background: #36577f !important;
-  border-color: #243f63 !important;
+  background: var(--color-surface-muted) !important;
+  border-color: var(--color-border) !important;
   cursor: not-allowed !important;
 }
 .mail-center button.mail-send-action:disabled svg {
-  color: #fff !important;
+  color: var(--color-text) !important;
   opacity: 1 !important;
 }
 
 /* Readable notification inbox */
-.autocare-notifications{background:#fff;color:#17243b}
+.autocare-notifications{background:var(--color-surface);color:var(--color-text)}
 .autocare-notifications-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:18px}
-.autocare-notifications-header h3{color:#14233d;font-size:1.25rem;font-weight:750;margin:0 0 5px}
-.autocare-notifications-header p{color:#46566f;font-size:.94rem;margin:0;line-height:1.5}
-.autocare-notifications-settings{background:#155eef!important;color:#fff!important;border:1px solid #155eef!important;border-radius:11px;padding:11px 17px;font-weight:700;min-height:44px}
+.autocare-notifications-header h3{color:var(--color-text);font-size:1.25rem;font-weight:750;margin:0 0 5px}
+.autocare-notifications-header p{color:var(--color-muted);font-size:.94rem;margin:0;line-height:1.5}
+.autocare-notifications-settings{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border:1px solid var(--color-border-strong)!important;border-radius:11px;padding:11px 17px;font-weight:700;min-height:44px}
 .autocare-notifications-list{display:grid;gap:12px}
-.autocare-notification{width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;text-align:left;background:#f7faff!important;border:1px solid #dbe5f5!important;border-radius:14px;padding:17px 18px;color:#17243b!important;min-height:78px;cursor:pointer}
-.autocare-notification:hover{background:#edf4ff!important;border-color:#90b5f7!important}
-.autocare-notification:focus-visible,.autocare-notifications-settings:focus-visible{outline:3px solid #4e91ff;outline-offset:3px}
+.autocare-notification{width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;text-align:left;background:var(--color-surface-muted)!important;border:1px solid var(--color-border)!important;border-radius:14px;padding:17px 18px;color:var(--color-text)!important;min-height:78px;cursor:pointer}
+.autocare-notification:hover{background:var(--color-surface-muted)!important;border-color:var(--color-border-strong)!important}
+.autocare-notification:focus-visible,.autocare-notifications-settings:focus-visible{outline:3px solid var(--color-primary);outline-offset:3px}
 .autocare-notification-content{display:grid;gap:7px;min-width:0}
-.autocare-notification-content strong{color:#17243b!important;font-size:1rem;line-height:1.55;font-weight:650;overflow-wrap:anywhere}
-.autocare-notification-content small{color:#46566f!important;font-size:.83rem;line-height:1.4}
-.autocare-notification-remove{display:inline-flex;gap:6px;align-items:center;flex-shrink:0;background:#e5efff;color:#174ea6!important;border-radius:9px;padding:9px 12px;font-size:.85rem;font-weight:750}
+.autocare-notification-content strong{color:var(--color-text)!important;font-size:1rem;line-height:1.55;font-weight:650;overflow-wrap:anywhere}
+.autocare-notification-content small{color:var(--color-muted)!important;font-size:.83rem;line-height:1.4}
+.autocare-notification-remove{display:inline-flex;gap:6px;align-items:center;flex-shrink:0;background:var(--color-surface-muted);color:var(--color-primary-ink)!important;border-radius:9px;padding:9px 12px;font-size:.85rem;font-weight:750}
 @media(max-width:600px){.autocare-notification{padding:14px;align-items:flex-start;flex-direction:column}.autocare-notification-remove{align-self:flex-end}}
 
 .ac-daily-usage{display:block;text-align:left;font-weight:400;max-width:100%;margin-top:10px}
-.ac-daily-usage summary{cursor:pointer;font-size:12px;color:#3158a4;padding:8px 0}
+.ac-daily-usage summary{cursor:pointer;font-size:12px;color:var(--color-primary-ink);padding:8px 0}
 .ac-daily-usage-body{display:flex;flex-wrap:wrap;align-items:end;gap:8px;max-width:100%}
 .ac-daily-usage label{display:grid;gap:5px;flex:1 1 120px;min-width:0;font-size:12px}
-.ac-daily-usage input{width:100%;min-width:0;box-sizing:border-box;min-height:40px;border:1px solid #afc5ed;border-radius:10px;padding:8px;background:#f4f7ff;color:#173467}
-.ac-daily-usage button{min-height:40px;border:1px solid #afc5ed;border-radius:10px;padding:8px 12px;background:#e4edff;color:#173467;font-size:12px}
+.ac-daily-usage input{width:100%;min-width:0;box-sizing:border-box;min-height:40px;border:1px solid var(--color-border);border-radius:10px;padding:8px;background:var(--color-surface-muted);color:var(--color-primary-ink)}
+.ac-daily-usage button{min-height:40px;border:1px solid var(--color-border);border-radius:10px;padding:8px 12px;background:var(--color-surface-muted);color:var(--color-primary-ink);font-size:12px}
 .ac-daily-usage small{flex-basis:100%;font-size:11px;line-height:1.5}
 .ac-daily-usage button:disabled{opacity:.6}
-.ac-workspace .ac-daily-usage>summary{background:transparent!important;color:#3158a4!important;border:0!important;padding:8px 0!important;font-weight:600;line-height:1.5}
-.ac-workspace .ac-daily-usage button{background:#e4edff!important;color:#173467!important;border:1px solid #afc5ed!important;padding:8px 12px!important;min-height:40px}
+.ac-workspace .ac-daily-usage>summary{background:transparent!important;color:var(--color-primary-ink)!important;border:0!important;padding:8px 0!important;font-weight:600;line-height:1.5}
+.ac-workspace .ac-daily-usage button{background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;border:1px solid var(--color-border)!important;padding:8px 12px!important;min-height:40px}
 .ac-workspace .ac-oil-countdown-row{display:block}
 .ac-workspace .ac-oil-countdown-row>strong{display:block;width:100%;text-align:left;margin-top:8px}
 .ac-workspace .ac-oil-countdown-row .oil-countdown{text-align:left;align-items:flex-start;width:100%}
-html body .app-shell.ac-workspace main.main .ac-daily-usage>summary{background:transparent!important;color:#3158a4!important;-webkit-text-fill-color:#3158a4!important;border:0!important;padding:8px 0!important;opacity:1!important}
-html body .app-shell.ac-workspace main.main .ac-daily-usage button{background:#e4edff!important;color:#173467!important;border:1px solid #afc5ed!important;padding:8px 12px!important;min-height:40px!important;text-align:center!important}
+html body .app-shell.ac-workspace main.main .ac-daily-usage>summary{background:transparent!important;color:var(--color-primary-ink)!important;-webkit-text-fill-color:#3158a4!important;border:0!important;padding:8px 0!important;opacity:1!important}
+html body .app-shell.ac-workspace main.main .ac-daily-usage button{background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;border:1px solid var(--color-border)!important;padding:8px 12px!important;min-height:40px!important;text-align:center!important}
 html body .app-shell.ac-workspace main.main .ac-premium-dashboard .ac-oil-detail.ac-oil-countdown-row{display:block!important}
 html body .app-shell.ac-workspace main.main .ac-premium-dashboard .ac-oil-detail.ac-oil-countdown-row>strong{display:block!important;width:100%!important;max-width:100%!important;text-align:left!important;align-items:flex-start!important;margin-top:8px}
 html body .app-shell.ac-workspace main.main .ac-premium-dashboard .ac-oil-detail.ac-oil-countdown-row>span{max-width:100%!important}
 html body .app-shell.ac-workspace main.main .ac-inline-mileage{width:100%;min-width:0;margin:12px 0}
-html body .app-shell.ac-workspace main.main .ac-inline-mileage form{display:grid;gap:12px;padding:16px;border:1px solid #cbd9ed;border-radius:14px;background:#f5f8fd}
-html body .app-shell.ac-workspace main.main .ac-inline-mileage label{display:grid;gap:8px;font-size:13px;color:#24466f!important}
-html body .app-shell.ac-workspace main.main .ac-inline-mileage input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;font-size:16px;color:#173467!important;background:#fff!important;border:1px solid #afc5ed;border-radius:10px;padding:10px}
+html body .app-shell.ac-workspace main.main .ac-inline-mileage form{display:grid;gap:12px;padding:16px;border:1px solid var(--color-border);border-radius:14px;background:var(--color-surface-muted)}
+html body .app-shell.ac-workspace main.main .ac-inline-mileage label{display:grid;gap:8px;font-size:13px;color:var(--color-text)!important}
+html body .app-shell.ac-workspace main.main .ac-inline-mileage input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;font-size:16px;color:var(--color-primary-ink)!important;background:var(--color-surface)!important;border:1px solid var(--color-border);border-radius:10px;padding:10px}
 html body .app-shell.ac-workspace main.main .ac-inline-mileage form>div{display:flex;flex-wrap:wrap;gap:8px}
-html body .app-shell.ac-workspace main.main .ac-inline-mileage button{min-height:44px!important;padding:10px 14px!important;background:#dce9ff!important;color:#173467!important;border:1px solid #afc5ed!important;border-radius:10px}
-html body .app-shell.ac-workspace main.main .ac-inline-mileage :is(small,p){font-size:12px!important;line-height:1.6;color:#466182!important;margin:0}
-html body .app-shell.ac-workspace main.main .ac-inline-mileage [role=alert]{color:#a12d35!important}
+html body .app-shell.ac-workspace main.main .ac-inline-mileage button{min-height:44px!important;padding:10px 14px!important;background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;border:1px solid var(--color-border)!important;border-radius:10px}
+html body .app-shell.ac-workspace main.main .ac-inline-mileage :is(small,p){font-size:12px!important;line-height:1.6;color:var(--color-muted)!important;margin:0}
+html body .app-shell.ac-workspace main.main .ac-inline-mileage [role=alert]{color:var(--color-danger-ink)!important}
 
 /* Mail workspace: strong contrast, clear hierarchy and compact navigation. */
-.mail-center{color:#172b49;max-width:1380px;margin:0 auto;--mail-ink:#172b49}
+.mail-center{color:var(--color-text);max-width:1380px;margin:0 auto;--mail-ink:var(--color-text)}
 .mail-center [hidden]{display:none!important}
-.mail-center .card{background:#fff;border:1px solid #dde5f0;border-radius:20px;padding:28px;box-shadow:0 8px 28px #142b4d06}
-.mail-center h2{font-size:24px;line-height:1.3;color:#142b49!important;margin:0 0 12px}
-.mail-center h3,.mail-center label,.mail-center summary{color:#1d3556!important}
-.mail-center p,.mail-center .small,.mail-center .muted{color:#425773!important;line-height:1.65}
+.mail-center .card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:20px;padding:28px;box-shadow:0 8px 28px color-mix(in srgb, var(--color-primary) 2%, transparent)}
+.mail-center h2{font-size:24px;line-height:1.3;color:var(--color-text)!important;margin:0 0 12px}
+.mail-center h3,.mail-center label,.mail-center summary{color:var(--color-text)!important}
+.mail-center p,.mail-center .small,.mail-center .muted{color:var(--color-muted)!important;line-height:1.65}
 .mail-center label{font-size:14px;font-weight:600;display:grid;gap:8px}
-.mail-center input:not([type=checkbox]),.mail-center select,.mail-center textarea{background:#f9fbfe!important;color:#172b49!important;border:1px solid #bdcce0!important;border-radius:10px;padding:12px 14px;font-size:15px;line-height:1.5;min-height:46px;width:100%}
-.mail-center input::placeholder,.mail-center textarea::placeholder{color:#60738d!important;opacity:1}
+.mail-center input:not([type=checkbox]),.mail-center select,.mail-center textarea{background:var(--color-surface)!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;border-radius:10px;padding:12px 14px;font-size:15px;line-height:1.5;min-height:46px;width:100%}
+.mail-center input::placeholder,.mail-center textarea::placeholder{color:var(--color-muted)!important;opacity:1}
 .mail-center .stack{gap:20px}
-.mail-center details{border:1px solid #dbe4ef;border-radius:12px;padding:14px 16px;background:#f8fafd}
+.mail-center details{border:1px solid var(--color-border);border-radius:12px;padding:14px 16px;background:var(--color-surface-muted)}
 .mail-center details[open]>label,.mail-center details[open]>.inline{margin-top:16px}
 .mail-center summary{cursor:pointer;font-weight:650;min-height:24px}
-.mail-tabs{display:flex;gap:8px;padding:7px;background:#e9eff7;border-radius:14px;margin:22px 0}
-.mail-tabs button{flex:1;padding:13px 18px;border:0!important;background:transparent!important;color:#344c6d!important;box-shadow:none;font-weight:650;border-radius:10px}
-.mail-tabs button[aria-pressed=true]{background:#fff!important;color:#174eaa!important;box-shadow:0 2px 8px #12356c12}
-.mail-automation-card{background:linear-gradient(135deg,#fff,#f0f5fd)!important}
-.mail-center .mail-status{font-size:18px;font-weight:700;color:#183d6a!important}
-.mail-center .notice{background:#edf4ff;color:#24486e!important;border:1px solid #c9daf2;border-radius:12px;padding:14px 18px}
-.mail-center .error{color:#9d2424!important;background:#fff2f2;border:1px solid #f2cccc;padding:14px;border-radius:10px}
-.mail-review-list{padding:20px;background:#f5f8fd;border:1px solid #d8e3f1;border-radius:14px;margin:20px 0}
-.mail-review-item{padding:16px 0;border-bottom:1px solid #dbe5f2}.mail-review-item button{margin:4px}
-.mail-staff-shell{padding:32px;background:#f4f7fb;min-height:100vh}
+.mail-tabs{display:flex;gap:8px;padding:7px;background:var(--color-surface-muted);border-radius:14px;margin:22px 0}
+.mail-tabs button{flex:1;padding:13px 18px;border:0!important;background:transparent!important;color:var(--color-muted)!important;box-shadow:none;font-weight:650;border-radius:10px}
+.mail-tabs button[aria-pressed=true]{background:var(--color-surface)!important;color:var(--color-primary-ink)!important;box-shadow:0 2px 8px color-mix(in srgb, var(--color-primary) 7%, transparent)}
+.mail-automation-card{background:linear-gradient(135deg,var(--color-surface),var(--color-surface-muted))!important}
+.mail-center .mail-status{font-size:18px;font-weight:700;color:var(--color-primary-ink)!important}
+.mail-center .notice{background:var(--color-surface-muted);color:var(--color-text)!important;border:1px solid var(--color-border);border-radius:12px;padding:14px 18px}
+.mail-center .error{color:var(--color-danger-ink)!important;background:var(--color-surface-muted);border:1px solid var(--color-danger);padding:14px;border-radius:10px}
+.mail-review-list{padding:20px;background:var(--color-surface-muted);border:1px solid var(--color-border);border-radius:14px;margin:20px 0}
+.mail-review-item{padding:16px 0;border-bottom:1px solid var(--color-border)}.mail-review-item button{margin:4px}
+.mail-staff-shell{padding:32px;background:var(--color-surface-muted);min-height:100vh}
 @media(max-width:700px){.mail-center .card{padding:20px;border-radius:16px}.mail-tabs{gap:2px}.mail-tabs button{padding:12px 6px;font-size:13px}.mail-staff-shell{padding:16px}.mail-center-grid{grid-template-columns:1fr!important}}
 
-.mail-pending-badge{margin-left:auto;background:#e8efff;color:#163d8c;font-weight:750;border-radius:20px;padding:2px 8px;font-size:12px}
+.mail-pending-badge{margin-left:auto;background:var(--color-surface-muted);color:var(--color-primary-ink);font-weight:750;border-radius:20px;padding:2px 8px;font-size:12px}

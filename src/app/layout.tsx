@@ -9,6 +9,7 @@ import './premium-unified.css';
 import './premium-dashboard.css';
 import './mobile-app.css';
 import './product-finish.css';
+import './product-identity.css';
 import { siteDescription } from '@/lib/seo';
 import { appName, origin } from '@/lib/config';
 export const metadata: Metadata = {
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
     ],
   },
 };
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#151B26' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#101820' };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ro">

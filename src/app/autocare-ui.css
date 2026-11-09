@@ -40,13 +40,13 @@ button:disabled {
 .primary:visited {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: var(--color-surface);
-  box-shadow: 0 4px 10px rgba(52, 120, 246, 0.14);
+  color: var(--color-text);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 .primary:hover {
   background: var(--color-primary-hover);
   border-color: var(--color-primary-hover);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .danger {
   color: var(--color-danger-ink);
@@ -98,17 +98,17 @@ label,
 }
 .sidebar {
   background: var(--color-nav);
-  color: var(--color-surface);
+  color: var(--color-text);
   border-right: 1px solid var(--color-nav-raised);
 }
 .sidebar .brand {
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .brandmark,
 .sidebar .brandmark,
 .public-nav .brandmark {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
   border-radius: 9px;
 }
 .sidebar nav button {
@@ -118,16 +118,16 @@ label,
 }
 .sidebar nav button.active,
 .sidebar nav button.active:hover {
-  background: rgba(52, 120, 246, 0.16);
-  color: var(--color-surface);
-  border-color: rgba(52, 120, 246, 0.26);
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  color: var(--color-text);
+  border-color: color-mix(in srgb, var(--color-primary) 26%, transparent);
 }
 .sidebar nav button.active svg {
   color: var(--color-primary);
 }
 .sidebar nav button:hover {
   background: var(--color-nav-raised);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .sidebar .muted,
 .sidebar .eyebrow,
@@ -144,12 +144,12 @@ label,
   background: transparent;
 }
 .sidebar-profile {
-  color: var(--color-surface);
+  color: var(--color-text);
   border-color: rgba(255, 255, 255, 0.12);
 }
 .sidebar-profile:hover {
   background: transparent;
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .profile-avatar {
   background: var(--color-primary-soft);
@@ -157,7 +157,7 @@ label,
 }
 .sidebar-profile .profile-avatar {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .main h1 {
   letter-spacing: -0.045em;
@@ -211,7 +211,7 @@ label,
 }
 .plate:before {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .featured-vehicle {
   background: var(--color-surface);
@@ -305,7 +305,7 @@ label,
 }
 .workspace-garage .row-actions .primary {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .workspace-garage .row-actions > button:not(.primary),
 .workspace-garage .row-actions > label {
@@ -323,7 +323,7 @@ label,
 .document-intro .primary,
 .service-intro .primary {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .calendar-day {
   background: var(--color-surface);
@@ -350,7 +350,7 @@ label,
 }
 .filter-pills button[aria-pressed='true'] {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
   border-color: var(--color-primary);
 }
 .chart .bar-fill {
@@ -391,7 +391,7 @@ label,
   box-shadow: var(--shadow-md);
 }
 .dialog-backdrop {
-  background: rgba(21, 27, 38, 0.54);
+  background: color-mix(in srgb, var(--color-nav) 54%, transparent);
   backdrop-filter: blur(6px);
 }
 th {
@@ -477,7 +477,7 @@ a:hover {
 }
 .support-filters button[aria-pressed='true'] {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
   border-color: var(--color-primary);
 }
 .support-search {
@@ -498,7 +498,7 @@ a:hover {
 }
 .support-avatar.strong {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .support-preview-text,
 .support-thread-select small,
@@ -575,7 +575,7 @@ a:hover {
 }
 .support-rank.rank-founder {
   background: var(--color-nav);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .support-rank.rank-admin {
   background: var(--color-primary-soft);
@@ -793,7 +793,7 @@ a:hover {
 }
 .record-view-switch button[aria-pressed='true'] {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
   border-color: var(--color-primary);
 }
 .maintenance-timeline > .table-scroll {
@@ -985,11 +985,11 @@ a:hover {
 .annual-option {
   border: 1px solid var(--color-primary);
   background: var(--color-surface);
-  box-shadow: 0 12px 35px rgba(52, 120, 246, 0.07);
+  box-shadow: 0 12px 35px color-mix(in srgb, var(--color-primary) 7%, transparent);
 }
 .annual-option .subscription-symbol {
   background: var(--color-primary);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .best-plan {
   position: absolute;
@@ -1045,12 +1045,12 @@ a:hover {
   font-size: 12px;
   padding: 13px;
   margin-top: 7px;
-  border: 1px solid rgba(52, 120, 246, 0.25);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
   border-radius: 8px;
-  background: rgba(52, 120, 246, 0.1);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 .founder-nav-link:hover {
-  color: var(--color-surface);
+  color: var(--color-text);
   background: var(--color-nav-raised);
 }
 .founder-shell {
@@ -1065,7 +1065,7 @@ a:hover {
   height: 100dvh;
   padding: 30px 20px 23px;
   background: var(--color-nav);
-  color: var(--color-surface);
+  color: var(--color-text);
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--color-nav-raised);
@@ -1074,7 +1074,7 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 11px;
-  color: var(--color-surface);
+  color: var(--color-text);
   font-size: 23px;
   font-weight: 600;
   letter-spacing: -0.04em;
@@ -1126,12 +1126,12 @@ a:hover {
 }
 .founder-sidebar nav button:hover {
   background: var(--color-nav-raised);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .founder-sidebar nav button.active {
-  background: rgba(52, 120, 246, 0.16);
-  border-color: rgba(52, 120, 246, 0.23);
-  color: var(--color-surface);
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 23%, transparent);
+  color: var(--color-text);
 }
 .founder-sidebar nav button.active svg {
   color: var(--color-primary);
@@ -1213,7 +1213,7 @@ a:hover {
   gap: 7px;
   white-space: nowrap;
   background: var(--color-nav);
-  color: var(--color-surface);
+  color: var(--color-text);
   font-size: 11px;
   padding: 8px 12px;
   border-radius: 6px;
@@ -1358,7 +1358,7 @@ a:hover {
 }
 .role-founder {
   background: var(--color-nav);
-  color: var(--color-surface);
+  color: var(--color-text);
 }
 .role-admin {
   background: var(--color-primary-soft);
@@ -1681,7 +1681,7 @@ a:hover {
   padding: 8px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: white;
+  background: var(--color-surface);
   color: var(--color-text);
 }
 .support-upload {
@@ -1725,7 +1725,7 @@ a:hover {
   font-size: 10px;
   padding: 2px 6px;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   border-radius: 8px;
 }
 .founder-response {
@@ -1740,7 +1740,7 @@ a:hover {
   overflow: hidden;
   border-radius: 20px;
   background: var(--color-nav);
-  color: white;
+  color: var(--color-text);
   isolation: isolate;
 }
 .automotive-copy {
@@ -1750,12 +1750,12 @@ a:hover {
   align-self: center;
 }
 .automotive-copy .eyebrow {
-  color: #9dbbfa;
+  color: var(--color-primary-ink);
   letter-spacing: 0.16em;
   font-size: 10px;
 }
 .automotive-greeting {
-  color: #c4cedd;
+  color: var(--color-text);
   margin: 20px 0 10px;
   font-size: 14px;
 }
@@ -1768,10 +1768,10 @@ a:hover {
   max-width: 570px;
 }
 .automotive-copy h2 span {
-  color: #b7c7df;
+  color: var(--color-text);
 }
 .automotive-description {
-  color: #c4cedd;
+  color: var(--color-text);
   font-size: 14px;
   line-height: 1.7;
   max-width: 400px;
@@ -1792,7 +1792,7 @@ a:hover {
 .automotive-actions button:not(.primary) {
   background: #ffffff0d;
   border-color: #ffffff35;
-  color: white;
+  color: var(--color-text);
 }
 .automotive-image {
   position: relative;
@@ -1813,7 +1813,7 @@ a:hover {
   inset: 0;
   background:
     linear-gradient(90deg, var(--color-nav), transparent 45%),
-    linear-gradient(0deg, #151b26aa, transparent 50%);
+    linear-gradient(0deg, color-mix(in srgb, var(--color-nav) 67%, transparent), transparent 50%);
   pointer-events: none;
 }
 .personal-photo .automotive-image img {
@@ -1824,7 +1824,7 @@ a:hover {
   right: 24px;
   bottom: 20px;
   z-index: 1;
-  color: #e0e7f3;
+  color: var(--color-muted);
   font-size: 9px;
   letter-spacing: 0.15em;
 }
@@ -1837,12 +1837,12 @@ a:hover {
   gap: 8px;
   z-index: 3;
   font-size: 10px;
-  color: #b7c7df;
+  color: var(--color-text);
 }
 .hero-photo-picker select {
   max-width: 210px;
   background: var(--color-nav-raised);
-  color: #e7edf9;
+  color: var(--color-text);
   border: 1px solid #ffffff25;
   border-radius: 6px;
   padding: 5px;
@@ -1855,8 +1855,8 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: 20px;
-  color: #8eafed;
-  background: radial-gradient(ellipse at center, #3478f633, transparent 70%);
+  color: var(--color-primary-ink);
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--color-primary) 20%, transparent), transparent 70%);
 }
 .for-you-section {
   margin-top: 4px;
@@ -2120,7 +2120,7 @@ a:hover {
   min-height: 640px;
   overflow: hidden;
   background: var(--color-nav);
-  color: white;
+  color: var(--color-text);
 }
 .auth-editorial > img {
   position: absolute;
@@ -2133,7 +2133,7 @@ a:hover {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, #151b26f5, #151b26aa 55%, #151b2633);
+  background: linear-gradient(0deg, color-mix(in srgb, var(--color-nav) 96%, transparent), color-mix(in srgb, var(--color-nav) 67%, transparent) 55%, color-mix(in srgb, var(--color-nav) 20%, transparent));
 }
 .auth-editorial-content {
   position: relative;
@@ -2145,7 +2145,7 @@ a:hover {
   padding: 44px;
 }
 .auth-editorial-content .section-kicker {
-  color: #b8cefa;
+  color: var(--color-text);
   font-size: 10px;
   letter-spacing: 0.16em;
 }
@@ -2157,12 +2157,12 @@ a:hover {
 }
 .auth-editorial em {
   font-style: normal;
-  color: #b8cefa;
+  color: var(--color-text);
 }
 .auth-editorial p {
   font-size: 14px;
   line-height: 1.7;
-  color: #d0d9e7;
+  color: var(--color-text);
   max-width: 350px;
 }
 .auth-editorial-content > div {
@@ -2176,7 +2176,7 @@ a:hover {
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  color: #d0d9e7;
+  color: var(--color-text);
 }
 .auth-image-caption {
   position: absolute;
@@ -2184,7 +2184,7 @@ a:hover {
   bottom: 15px;
   left: 44px;
   font-size: 9px;
-  color: #b1bfd4;
+  color: var(--color-muted);
 }
 .auth-layout .auth-box {
   width: 100%;
@@ -2566,7 +2566,7 @@ a:hover {
   padding: 20px 24px;
   min-height: 104px;
   border: 1px solid var(--color-border);
-  box-shadow: 0 3px 14px #172b4610;
+  box-shadow: 0 3px 14px color-mix(in srgb, var(--color-primary) 6%, transparent);
 }
 .document-statistics .value,
 .maintenance-statistics .value {
@@ -2628,7 +2628,7 @@ a:hover {
   border: 1px solid var(--color-border);
   border-radius: 12px;
   font-size: 13px;
-  background: white;
+  background: var(--color-surface);
   list-style: none;
 }
 .record-filter-panel > summary::-webkit-details-marker {
@@ -2648,7 +2648,7 @@ a:hover {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   padding: 18px;
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 12px;
   margin-top: 10px;
@@ -2695,10 +2695,10 @@ a:hover {
   position: relative;
   padding: 24px;
   margin: 0;
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 18px;
-  box-shadow: 0 5px 20px #172b4608;
+  box-shadow: 0 5px 20px color-mix(in srgb, var(--color-primary) 3%, transparent);
   align-items: start;
 }
 .document-gallery tbody td {
@@ -2813,14 +2813,14 @@ a:hover {
 }
 .workspace-service .empty,
 .workspace-documents .empty {
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 18px;
   padding: 48px 24px;
   min-height: 230px;
   max-width: 100%;
   margin: 20px 0;
-  box-shadow: 0 5px 20px #172b4608;
+  box-shadow: 0 5px 20px color-mix(in srgb, var(--color-primary) 3%, transparent);
 }
 .workspace-service .empty > svg,
 .workspace-documents .empty > svg {
@@ -3027,26 +3027,26 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 0;
-  background: linear-gradient(165deg, #151e30, #0b111e 78%);
-  border-right: 1px solid #263249;
-  color: #fff;
+  background: linear-gradient(165deg, var(--color-surface), var(--color-nav) 78%);
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text);
   z-index: 40;
 }
 .sidebar .brand {
   padding: 0 8px;
   font-size: 25px;
   gap: 9px;
-  color: #fff;
+  color: var(--color-text);
 }
 .sidebar .brand-word {
   letter-spacing: -1px;
 }
 .sidebar .brand .accent {
-  color: #5790ff;
+  color: var(--color-primary-ink);
 }
 .sidebar-tagline {
   padding: 5px 8px 24px 48px;
-  color: #a4b3cb;
+  color: var(--color-muted);
   font-size: 8px;
   letter-spacing: 0.13em;
 }
@@ -3071,7 +3071,7 @@ a:hover {
   border: 0;
   border-radius: 9px;
   background: transparent;
-  color: #b7c3d8;
+  color: var(--color-text);
   font-size: 13px;
   text-align: left;
   text-decoration: none;
@@ -3088,22 +3088,22 @@ a:hover {
 }
 .sidebar nav > button:hover,
 .sidebar nav > a:hover {
-  color: white;
-  background: #3478f619;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 .sidebar nav > button.active,
 .sidebar nav > button.active:hover {
-  color: white;
-  background: linear-gradient(110deg, #2867d8, #264680);
+  color: var(--color-text);
+  background: linear-gradient(110deg, var(--color-primary-deep), var(--color-primary-deep));
   box-shadow:
-    inset 3px 0 #68a2ff,
+    inset 3px 0 var(--color-shadow-color),
     0 4px 12px #0002;
 }
 .sidebar .nav-unread {
   margin-left: auto;
   border-radius: 20px;
-  background: #e34258;
-  color: #fff;
+  background: var(--color-danger-soft);
+  color: var(--color-text);
   padding: 2px 6px;
   font-size: 10px;
   min-width: 19px;
@@ -3112,30 +3112,30 @@ a:hover {
 .sidebar .sidebar-bottom {
   margin: 8px 0 12px;
   padding: 16px;
-  border: 1px solid #344057;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: #152239;
+  background: var(--color-surface);
   flex-shrink: 0;
 }
 .sidebar .membership-promo {
   background:
     linear-gradient(180deg, #111c35cc, #111c35f5),
     url('/design-car.jpg') center/cover;
-  border-color: #7c70424d;
+  border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
 }
 .sidebar-bottom p {
   font-size: 12px;
   line-height: 1.6;
-  color: #d7deeb;
+  color: var(--color-text);
 }
 .sidebar-bottom .eyebrow {
-  color: #ddc58e;
+  color: var(--color-warning-ink);
   font-size: 9px;
 }
 .sidebar-bottom button {
-  background: #253957;
-  border: 1px solid #496085;
-  color: white;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
   font-size: 11px;
   padding: 9px;
   width: 100%;
@@ -3146,9 +3146,9 @@ a:hover {
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  border-top: 1px solid #2a3549;
+  border-top: 1px solid var(--color-border);
   padding: 14px 4px 0;
-  color: #fff;
+  color: var(--color-text);
   background: transparent;
   width: 100%;
 }
@@ -3166,13 +3166,13 @@ a:hover {
 }
 .sidebar-profile small {
   display: block;
-  color: #9caec9;
+  color: var(--color-muted);
   font-size: 11px;
   margin-top: 4px;
 }
 .sidebar-profile .profile-avatar {
-  background: linear-gradient(140deg, #3478f6, #244caa);
-  color: white;
+  background: linear-gradient(140deg, var(--color-primary-deep), var(--color-primary-deep));
+  color: var(--color-text);
   width: 36px;
   height: 36px;
   display: grid;
@@ -3188,7 +3188,7 @@ a:hover {
   z-index: 100;
 }
 .navigation-overlay .dialog-backdrop {
-  background: #060e20a3;
+  background: color-mix(in srgb, var(--color-nav) 64%, transparent);
   justify-content: flex-start;
   padding: 0;
 }
@@ -3199,8 +3199,8 @@ a:hover {
   max-height: 100dvh;
   height: 100dvh;
   border-radius: 0;
-  background: #101b2e;
-  color: white;
+  background: var(--color-nav);
+  color: var(--color-text);
   overflow-y: auto;
   padding: 22px 16px;
   margin: 0;
@@ -3224,12 +3224,12 @@ a:hover {
   border: 0;
   text-align: left;
   background: transparent;
-  color: #c2cee1;
+  color: var(--color-text);
   text-decoration: none;
 }
 .navigation-overlay nav [aria-current='page'] {
-  background: #2867d8;
-  color: white;
+  background: var(--color-primary-deep);
+  color: var(--color-text);
 }
 .drawer-outside {
   position: fixed;
@@ -3256,7 +3256,7 @@ a:hover {
 .panoramic-hero {
   display: block;
   min-height: 460px;
-  background: #101c2c;
+  background: var(--color-nav);
 }
 .panoramic-hero .automotive-copy {
   max-width: 620px;
@@ -3274,7 +3274,7 @@ a:hover {
 }
 .panoramic-hero .automotive-image:after {
   background:
-    linear-gradient(90deg, #0a1429ef 0%, #0a1429b0 38%, #0a142922 75%),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-nav) 94%, transparent) 0%, color-mix(in srgb, var(--color-nav) 69%, transparent) 38%, color-mix(in srgb, var(--color-primary) 13%, transparent) 75%),
     linear-gradient(0deg, #08101b99, transparent 50%);
 }
 .panoramic-hero .automotive-copy h2 {
@@ -3284,11 +3284,11 @@ a:hover {
   max-width: 400px;
 }
 .panoramic-hero .automotive-caption {
-  color: #d8e7ff;
+  color: var(--color-muted);
 }
 .sidebar :focus-visible,
 .navigation-overlay :focus-visible {
-  outline: 2px solid #8eb8ff;
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 @media (max-width: 1000px) {
@@ -3325,7 +3325,7 @@ a:hover {
     padding: 30px 22px 65px;
   }
   .panoramic-hero .automotive-image:after {
-    background: linear-gradient(180deg, #0a1429e8, #0a1429b0 50%, #0a142944);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-nav) 91%, transparent), color-mix(in srgb, var(--color-nav) 69%, transparent) 50%, color-mix(in srgb, var(--color-primary) 27%, transparent));
   }
   .panoramic-hero .automotive-image img {
     object-position: 62% center;
@@ -3368,8 +3368,8 @@ a:hover {
   left: 0;
   right: 0;
   padding: 8px;
-  background: #1b2940;
-  border: 1px solid #354662;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   box-shadow: 0 12px 36px #0005;
 }
@@ -3381,18 +3381,18 @@ a:hover {
   width: 100%;
   background: transparent;
   border: 0;
-  color: white;
+  color: var(--color-text);
   text-align: left;
   font-size: 12px;
 }
 .profile-actions button:hover {
-  background: #3478f622;
+  background: color-mix(in srgb, var(--color-primary) 13%, transparent);
 }
 .navigation-overlay .nav-unread {
   margin-left: auto;
   border-radius: 16px;
-  background: #e34258;
-  color: white;
+  background: var(--color-danger-soft);
+  color: var(--color-text);
   padding: 2px 7px;
   font-size: 11px;
 }
@@ -3407,10 +3407,10 @@ a:hover {
   gap: 12px;
   align-items: center;
   padding: 16px;
-  background: #111d31e8;
-  border: 1px solid #789dd84d;
+  background: color-mix(in srgb, var(--color-nav) 91%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
   border-radius: 12px;
-  color: #fff;
+  color: var(--color-text);
   box-shadow: 0 8px 24px #0002;
 }
 .hero-next-deadline > span {
@@ -3422,14 +3422,14 @@ a:hover {
 .hero-next-deadline small {
   font-size: 8px;
   letter-spacing: 0.12em;
-  color: #a8c4ed;
+  color: var(--color-muted);
 }
 .hero-next-deadline strong {
   font-size: 16px;
 }
 .hero-next-deadline span span {
   font-size: 12px;
-  color: #d4deee;
+  color: var(--color-text);
 }
 @media (max-width: 1200px) {
   .hero-next-deadline {
@@ -3446,49 +3446,48 @@ a:hover {
 
 /* Removed obsolete dark premium v2 rules; light theme is authoritative. */
 /* AutoCare reference-aligned UI v3: dark navigation, luminous workspace */
-.app-shell { background:#f3f7fd;color:#101d35; }
-.app-shell .main { background:linear-gradient(155deg,#edf4ff 0%,#f7faff 42%,#f2f6fc 100%);color:#12213b; }
-.app-shell .app-header { background:#f6f9ff;color:#233450;border-bottom:1px solid #dce5f3; }
-.app-shell .main h1,.app-shell .main h2,.app-shell .main h3,.app-shell .main strong {color:#101d35;}
-.app-shell .main .small,.app-shell .main small,.app-shell .main .eyebrow {color:#647a9d;}
-.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty,.app-shell .main .for-you-card,.app-shell .main .dashboard-secondary-stats button {background:#ffffff;border:1px solid #e0e9f7;color:#15233d;box-shadow:0 8px 26px #233e6810;border-radius:18px;}
-.app-shell .main .card:hover,.app-shell .main .for-you-card:hover,.app-shell .main .dashboard-secondary-stats button:hover {border-color:#a7c2f9;box-shadow:0 13px 32px #254d8e1c;}
-.app-shell .main input,.app-shell .main select,.app-shell .main textarea {background:#fff;color:#13213a;border-color:#d6e2f2;}
-.app-shell .main input::placeholder,.app-shell .main textarea::placeholder {color:#7185a3;}
-.app-shell .main button:not(.primary):not(.active),.app-shell .main .button:not(.primary) {border-color:#dce6f5;color:#1b3154;background:#f7faff;}
-.app-shell .main .stat .value,.app-shell .main .dashboard-secondary-stats .value {color:#1764ed;}
-.app-shell .main .chart {color:#5a7398;}
-.app-shell .main .chart > * {border-color:#d7e4f5;}
-.app-shell .main .panoramic-hero {background:#08162c;border:1px solid #1c3c6c;}
-.app-shell .main .panoramic-hero .automotive-copy h2,.app-shell .main .panoramic-hero .automotive-copy strong {color:#fff;}
-.app-shell .main .hero-next-deadline strong {color:#fff;}
-.app-shell > .sidebar {width:256px;background:linear-gradient(165deg,#071426 0%,#06101e 100%);border-right:1px solid #1b2b47;}
-.app-shell > .sidebar nav button.active,.app-shell > .sidebar nav a.active {background:linear-gradient(100deg,#2875f8,#173a79);color:#fff;box-shadow:0 6px 18px #1b62d633;}
-.app-shell > .sidebar nav button:hover,.app-shell > .sidebar nav a:hover {background:#18345a;color:#fff;}
+.app-shell { background:var(--color-surface-muted);color:var(--color-text); }
+.app-shell .main { background:linear-gradient(155deg,var(--color-surface-muted) 0%,var(--color-surface-muted) 42%,var(--color-surface-muted) 100%);color:var(--color-text); }
+.app-shell .app-header { background:var(--color-surface-muted);color:var(--color-text);border-bottom:1px solid var(--color-border); }
+.app-shell .main h1,.app-shell .main h2,.app-shell .main h3,.app-shell .main strong {color:var(--color-text);}
+.app-shell .main .small,.app-shell .main small,.app-shell .main .eyebrow {color:var(--color-muted);}
+.app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty,.app-shell .main .for-you-card,.app-shell .main .dashboard-secondary-stats button {background:var(--color-surface);border:1px solid var(--color-border);color:var(--color-text);box-shadow:0 8px 26px color-mix(in srgb, var(--color-primary) 6%, transparent);border-radius:18px;}
+.app-shell .main .card:hover,.app-shell .main .for-you-card:hover,.app-shell .main .dashboard-secondary-stats button:hover {border-color:var(--color-border);box-shadow:0 13px 32px color-mix(in srgb, var(--color-primary) 11%, transparent);}
+.app-shell .main input,.app-shell .main select,.app-shell .main textarea {background:var(--color-surface);color:var(--color-text);border-color:var(--color-border);}
+.app-shell .main input::placeholder,.app-shell .main textarea::placeholder {color:var(--color-muted);}
+.app-shell .main button:not(.primary):not(.active),.app-shell .main .button:not(.primary) {border-color:var(--color-border);color:var(--color-text);background:var(--color-surface-muted);}
+.app-shell .main .stat .value,.app-shell .main .dashboard-secondary-stats .value {color:var(--color-primary-ink);}
+.app-shell .main .chart {color:var(--color-muted);}
+.app-shell .main .chart > * {border-color:var(--color-border);}
+.app-shell .main .panoramic-hero {background:var(--color-nav);border:1px solid var(--color-border);}
+.app-shell .main .panoramic-hero .automotive-copy h2,.app-shell .main .panoramic-hero .automotive-copy strong {color:var(--color-text);}
+.app-shell .main .hero-next-deadline strong {color:var(--color-text);}
+.app-shell > .sidebar {width:256px;background:linear-gradient(165deg,var(--color-nav) 0%,var(--color-nav) 100%);border-right:1px solid var(--color-border);}
+.app-shell > .sidebar nav button.active,.app-shell > .sidebar nav a.active {background:linear-gradient(100deg,var(--color-primary-deep),var(--color-primary-deep));color:var(--color-text);box-shadow:0 6px 18px color-mix(in srgb, var(--color-primary) 20%, transparent);}
+.app-shell > .sidebar nav button:hover,.app-shell > .sidebar nav a:hover {background:var(--color-surface);color:var(--color-text);}
 .app-shell .main .dashboard-secondary-stats button {min-height:115px;}
 .app-shell .main .for-you-card {min-height:100px;}
 .app-shell .main .maintenance-overview > .card {min-height:190px;}
 @media(max-width:760px) { .app-shell > .sidebar {width:auto;} .app-shell .main .panoramic-hero {min-height:350px;} }
 
 /* Direct legacy dark-shell replacement: no black bands or charcoal actions. */
-.app-shell,.app-shell > header,.app-shell > .app-header,.app-shell .app-header,header.app-header{background:#e1ecfa!important;background-image:none!important;color:#1c416e!important;border-color:#c3d6ee!important}
-.app-shell .app-header :is(span,p,small,a,strong,button){color:#24476f!important}
-.app-shell .main .autocare-simple-actions>button{background:#edf4fc!important;background-image:none!important;color:#194a84!important;border:1px solid #bed3ec!important}
-.app-shell .main .autocare-simple-actions>button :is(span,strong,small,svg){color:#194a84!important}
-.app-shell .main .autocare-simple-actions>button:hover{background:#dceafa!important}
-.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(135deg,#245c9d,#194779)!important}
+.app-shell,.app-shell > header,.app-shell > .app-header,.app-shell .app-header,header.app-header{background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-primary-ink)!important;border-color:var(--color-border)!important}
+.app-shell .app-header :is(span,p,small,a,strong,button){color:var(--color-muted)!important}
+.app-shell .main .autocare-simple-actions>button{background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-primary-ink)!important;border:1px solid var(--color-border)!important}
+.app-shell .main .autocare-simple-actions>button :is(span,strong,small,svg){color:var(--color-primary-ink)!important}
+.app-shell .main .autocare-simple-actions>button:hover{background:var(--color-surface-muted)!important}
+.app-shell .main .autocare-simple-hero,.app-shell .main .autocare-simple-actions,.app-shell .main .autocare-simple-due{background:linear-gradient(135deg,var(--color-primary-deep),var(--color-primary-deep))!important}
 
 /* Unified secondary-workspace surfaces; overrides dark legacy tiles at source. */
 .app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) {
- --color-bg:#eaf0f8;--color-surface:#f3f7fd;--color-surface-muted:#eaf2fc;--color-text:#19385f;--color-muted:#526d8b;--color-primary:#205eb0;--color-primary-soft:#e3efff;--color-border:#c8d9ec;
- background:#eaf0f8!important;color:#19385f!important;
+ background:var(--color-surface-muted)!important;color:var(--color-text)!important;
 }
 .app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.page-head,.toolbar,.card,.empty,.table-scroll,.record-search,.record-filter-panel>summary,.record-filter-fields,.document-gallery tbody tr,.calendar,.calendar-day,.calendar-event,.maintenance-overview,.record-aside,.record-tools,.section-title,.filter-pills,.list-item,.notice,.stat) {
- background-color:#f2f6fc!important;background-image:none!important;color:#19385f!important;border-color:#c8d9ec!important;
+ background-color:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-text)!important;border-color:var(--color-border)!important;
 }
-.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.page-head,.card,.empty,.table-scroll,.record-search,.record-filter-panel,.document-gallery,.calendar,.calendar-day,.maintenance-overview,.record-aside,.record-tools,.section-title,.filter-pills) :is(h1,h2,h3,h4,strong){color:#173b6b!important}
-.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.page-head,.card,.empty,.table-scroll,.record-search,.record-filter-panel,.document-gallery,.calendar,.calendar-day,.maintenance-overview,.record-aside,.record-tools,.section-title,.filter-pills) :is(p,small,label){color:#476381!important}
-.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.toolbar,.filter-pills,.row-actions,.record-tools,.calendar) button:not(.primary):not(.active):not([aria-pressed=true]){background:#e3eefc!important;background-image:none!important;color:#194678!important;border-color:#b8d0eb!important}
-.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.toolbar,.filter-pills,.row-actions,.record-tools,.calendar) button:not(.primary):not(.active):not([aria-pressed=true]) :is(span,strong,small,svg){color:#194678!important}
-.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.toolbar,.filter-pills,.calendar) button:is(.active,[aria-pressed=true]),.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general) button.primary{background:#205eb0!important;color:#fff!important;border-color:#205eb0!important}
-.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(input,textarea,select){background:#f8fbff!important;color:#19385f!important;border-color:#b7cce6!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.page-head,.card,.empty,.table-scroll,.record-search,.record-filter-panel,.document-gallery,.calendar,.calendar-day,.maintenance-overview,.record-aside,.record-tools,.section-title,.filter-pills) :is(h1,h2,h3,h4,strong){color:var(--color-primary-ink)!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.page-head,.card,.empty,.table-scroll,.record-search,.record-filter-panel,.document-gallery,.calendar,.calendar-day,.maintenance-overview,.record-aside,.record-tools,.section-title,.filter-pills) :is(p,small,label){color:var(--color-muted)!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.toolbar,.filter-pills,.row-actions,.record-tools,.calendar) button:not(.primary):not(.active):not([aria-pressed=true]){background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-primary-ink)!important;border-color:var(--color-primary)!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.toolbar,.filter-pills,.row-actions,.record-tools,.calendar) button:not(.primary):not(.active):not([aria-pressed=true]) :is(span,strong,small,svg){color:var(--color-primary-ink)!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.toolbar,.filter-pills,.calendar) button:is(.active,[aria-pressed=true]),.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general) button.primary{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-primary)!important}
+.app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(input,textarea,select){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}

@@ -1,19 +1,19 @@
 html{scroll-behavior:smooth}body{-webkit-font-smoothing:antialiased}
-:where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid #3478f6;outline-offset:3px}
+:where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid var(--color-primary);outline-offset:3px}
 html body .ac-workspace .app-home{max-width:1180px;margin-inline:auto;gap:24px}
-html body .ac-workspace .app-home .app-section{background:#fff!important;border:1px solid #e2e8f0!important;border-radius:22px!important;box-shadow:0 4px 22px #151b2605!important;padding:24px!important}
+html body .ac-workspace .app-home .app-section{background:var(--color-surface)!important;border:1px solid var(--color-border)!important;border-radius:22px!important;box-shadow:0 4px 22px color-mix(in srgb, var(--color-nav) 2%, transparent)!important;padding:24px!important}
 html body .ac-workspace .app-home .app-section-head{margin-bottom:20px;gap:12px;flex-wrap:wrap}
 html body .ac-workspace .app-home .app-section-head h2{font-size:17px;letter-spacing:-.025em}
-html body .ac-workspace .app-home .app-caption{font-size:12px;line-height:1.65;color:#64748b!important}
+html body .ac-workspace .app-home .app-caption{font-size:12px;line-height:1.65;color:var(--color-muted)!important}
 html body .ac-workspace .app-home .app-highlight-description small{line-height:1.6}
 html body .ac-workspace .app-home .app-maintenance-highlights{gap:14px}
-html body .ac-workspace .app-home .app-maintenance-highlights>button{border-radius:18px!important;background:#fff!important;border:1px solid #e2e8f0!important}
+html body .ac-workspace .app-home .app-maintenance-highlights>button{border-radius:18px!important;background:var(--color-surface)!important;border:1px solid var(--color-border)!important}
 html body .ac-workspace .app-home .app-record-row{min-height:64px;padding-block:14px}
 html body .ac-workspace .app-home .app-record-row>span{min-width:0}
 html body .ac-workspace .app-home .app-record-row strong{overflow-wrap:anywhere}
-html body .ac-workspace .app-estimate-settings{margin-block:16px;border-top:1px solid #e2e8f0;padding-top:12px}
-html body .ac-workspace .app-estimate-settings summary{cursor:pointer;font-size:13px;font-weight:600;color:#1d57b0;padding-block:10px}
-html body .ac-workspace .app-home .app-upcoming{border:1px solid #e2e8f0;border-radius:18px;background:#fff;padding:16px 20px}
+html body .ac-workspace .app-estimate-settings{margin-block:16px;border-top:1px solid var(--color-border);padding-top:12px}
+html body .ac-workspace .app-estimate-settings summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--color-primary-ink);padding-block:10px}
+html body .ac-workspace .app-home .app-upcoming{border:1px solid var(--color-border);border-radius:18px;background:var(--color-surface);padding:16px 20px}
 html body .ac-workspace .app-home .app-upcoming summary{cursor:pointer;min-height:28px;font-size:14px;font-weight:600}
 html body .ac-workspace .app-home .app-upcoming>.app-section{border:0!important;box-shadow:none!important;padding:16px 0 0!important}
 html body .ac-workspace :is(.app-icon-button,.app-avatar-button){min-width:44px;min-height:44px}
@@ -35,27 +35,27 @@ html body .ac-workspace .quick-record-form :is(label,fieldset,.field,.service-re
  html body .ac-workspace .ac-premium-record-table:has(.ac-maintenance-record){overflow:visible!important}
  html body .ac-workspace .ac-premium-record-table:has(.ac-maintenance-record) :is(table,tbody){display:block;width:100%;min-width:0!important}
  html body .ac-workspace .ac-premium-record-table:has(.ac-maintenance-record) thead{display:none}
- html body .ac-workspace .ac-maintenance-record{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;margin:0 0 14px!important;padding:18px!important;background:#fff!important;border:1px solid #e2e8f0!important;border-radius:16px!important}
+ html body .ac-workspace .ac-maintenance-record{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;margin:0 0 14px!important;padding:18px!important;background:var(--color-surface)!important;border:1px solid var(--color-border)!important;border-radius:16px!important}
  html body .ac-workspace .ac-maintenance-record td{display:block!important;min-width:0!important;max-width:100%!important;width:auto!important;padding:0!important;border:0!important;white-space:normal!important;overflow-wrap:anywhere}
  html body .ac-workspace .ac-maintenance-record .row-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
  html body .ac-workspace .ac-maintenance-record .row-actions :is(button,.button){flex:1 1 110px!important;min-height:44px!important;white-space:normal!important}
 }
 /* Clear connection state and measured trip data without administrative clutter. */
-html body .ac-workspace .drive-session{padding:26px;border:1px solid #dfe7f1;border-radius:24px;background:linear-gradient(135deg,#fff,#f6f9ff);margin:16px 0 22px;color:#17263d}
-html body .ac-workspace .drive-session-status{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:650;color:#52657e;flex-wrap:wrap}
-html body .ac-workspace .drive-session-dot{width:7px;height:7px;border-radius:50%;background:#94a3b8;flex-shrink:0}
-html body .ac-workspace .drive-session--driving .drive-session-dot{background:#18b89a;box-shadow:0 0 0 4px #18b89a16}
-html body .ac-workspace :is(.drive-session--waiting,.drive-session--reconnecting) .drive-session-dot{background:#d99829}
+html body .ac-workspace .drive-session{padding:26px;border:1px solid var(--color-border);border-radius:24px;background:linear-gradient(135deg,var(--color-surface),var(--color-surface-muted));margin:16px 0 22px;color:var(--color-text)}
+html body .ac-workspace .drive-session-status{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:650;color:var(--color-muted);flex-wrap:wrap}
+html body .ac-workspace .drive-session-dot{width:7px;height:7px;border-radius:50%;background:var(--color-surface-muted);flex-shrink:0}
+html body .ac-workspace .drive-session--driving .drive-session-dot{background:var(--color-success);box-shadow:0 0 0 4px color-mix(in srgb, var(--color-success) 9%, transparent)}
+html body .ac-workspace :is(.drive-session--waiting,.drive-session--reconnecting) .drive-session-dot{background:var(--color-warning)}
 html body .ac-workspace .drive-session-distance{display:flex;align-items:baseline;gap:10px;margin:24px 0 2px;font-variant-numeric:tabular-nums;letter-spacing:-.055em;line-height:1}
 html body .ac-workspace .drive-session-distance>span{font-size:clamp(48px,8vw,74px);font-weight:700}
-html body .ac-workspace .drive-session-distance>small{font-size:22px;font-weight:550;letter-spacing:-.02em;color:#60718a}
-html body .ac-workspace .drive-session-caption{margin:10px 0 22px;font-size:12px;color:#64748b}
-html body .ac-workspace .drive-session-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;border-top:1px solid #e4eaf2;padding-top:18px}
+html body .ac-workspace .drive-session-distance>small{font-size:22px;font-weight:550;letter-spacing:-.02em;color:var(--color-muted)}
+html body .ac-workspace .drive-session-caption{margin:10px 0 22px;font-size:12px;color:var(--color-muted)}
+html body .ac-workspace .drive-session-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;border-top:1px solid var(--color-border);padding-top:18px}
 html body .ac-workspace .drive-session-details>div{display:flex;flex-direction:column;gap:7px;min-width:0}
-html body .ac-workspace .drive-session-details svg{color:#3478f6}
-html body .ac-workspace .drive-session-details span{font-size:11px;color:#64748b}
+html body .ac-workspace .drive-session-details svg{color:var(--color-primary-ink)}
+html body .ac-workspace .drive-session-details span{font-size:11px;color:var(--color-muted)}
 html body .ac-workspace .drive-session-details strong{font-size:17px;font-weight:650;letter-spacing:-.025em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-html body .ac-workspace .ac-smartdrive-map{padding:8px!important;border-radius:22px!important;border-color:#dfe7f1!important;overflow:hidden}
+html body .ac-workspace .ac-smartdrive-map{padding:8px!important;border-radius:22px!important;border-color:var(--color-border)!important;overflow:hidden}
 html body .ac-workspace .ac-smartdrive-trip-controls{display:flex;flex-wrap:wrap;gap:10px}
 html body .ac-workspace .ac-smartdrive-trip-controls button{min-height:48px;border-radius:13px}
 @media(max-width:480px){html body .ac-workspace .drive-session{padding:20px;border-radius:20px}html body .ac-workspace .drive-session-details{gap:10px}html body .ac-workspace .drive-session-details strong{font-size:14px}html body .ac-workspace .drive-session-details span{font-size:10px}html body .ac-workspace .ac-smartdrive-trip-controls button{flex:1 1 140px}}

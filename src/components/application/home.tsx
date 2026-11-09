@@ -148,25 +148,21 @@ export default function ApplicationHome({
         <div>
           <span className="studio-kicker">AUTOCARE · {t('PREZENTARE GENERALĂ', 'OVERVIEW')}</span>
           <h1 id="workspace-page-title" tabIndex={-1}>
-            {t('Totul la vedere.', 'Everything in view.')}
+            {t('Garajul meu', 'My garage')}
           </h1>
           <p>
             {t('Bună, ', 'Hello, ')}
             <span data-user-content>{name.split(' ')[0]}</span>.{' '}
             {t(
-              'Iată ce contează pentru mașina ta astăzi.',
-              'Here is what matters for your car today.',
+              'Aici găsești termenele, kilometrajul și cheltuielile.',
+              'Review deadlines, mileage and expenses.',
             )}
           </p>
         </div>
         <div className="studio-heading-actions">
-          <button
-            type="button"
-            className="primary"
-            onClick={() => onCreate(car ? 'service' : 'vehicle', car?.id)}
-          >
+          <button type="button" className="primary" onClick={() => onCreate('vehicle')}>
             <Plus size={19} />
-            {car ? t('Adaugă intervenție', 'Add maintenance') : t('Adaugă mașină', 'Add vehicle')}
+            {t('Adaugă mașină', 'Add vehicle')}
           </button>
           <button type="button" onClick={() => navigate('Plan întreținere')}>
             <Route size={18} />
@@ -177,7 +173,7 @@ export default function ApplicationHome({
       {!car ? (
         <AppEmpty
           Icon={CarFront}
-          title={t('Primul pas: mașina ta.', 'First step: your car.')}
+          title={t('Adaugă prima mașină', 'Add your first vehicle')}
           description={t(
             'Adaugă mașina pentru a organiza documentele, întreținerea și cheltuielile.',
             'Add a vehicle to organize documents, maintenance and costs.',
@@ -359,6 +355,17 @@ export default function ApplicationHome({
                 </div>
               )}
             </section>
+          </div>
+          <div className="studio-create-row" aria-label={t('Adăugare rapidă', 'Quick add')}>
+            <button type="button" onClick={() => onCreate('service', car.id)}>
+              <Wrench size={18} /> {t('Adaugă intervenție', 'Add maintenance')}
+            </button>
+            <button type="button" onClick={() => onCreate('document', car.id)}>
+              <Files size={18} /> {t('Adaugă document', 'Add document')}
+            </button>
+            <button type="button" onClick={() => onCreate('expense', car.id)}>
+              <Wallet size={18} /> {t('Adaugă cheltuială', 'Add expense')}
+            </button>
           </div>
           <div className="studio-status-row">
             {[

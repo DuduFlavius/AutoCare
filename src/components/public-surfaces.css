@@ -3,14 +3,14 @@
   html body .ac-public-dark {
     color-scheme: dark;
     min-height: 100dvh;
-    background: #151f2d !important;
-    color: #eef5ff !important;
-    --bg: #151f2d;
-    --panel: #223248;
-    --panel2: #1a2a3e;
-    --border: #415771;
-    --muted: #bdcde2;
-    --text: #eef5ff;
+    background: var(--color-nav) !important;
+    color: var(--color-text) !important;
+    --bg: var(--color-bg);
+    --panel: var(--color-surface);
+    --panel2: var(--color-surface-muted);
+    --border: var(--color-border);
+    --muted: var(--color-muted);
+    --text: var(--color-text);
   }
   html body .ac-public-dark .wrap {
     max-width: 1320px !important;
@@ -18,20 +18,20 @@
     background: transparent !important;
   }
   html body .ac-public-dark .public-nav {
-    background: #151f2d !important;
+    background: var(--color-nav) !important;
     border-color: #ffffff20 !important;
   }
   html body .ac-public-dark :is(.brand, .navlinks a, .footer a) {
-    color: #d6e6fc !important;
+    color: var(--color-text) !important;
   }
   html body .ac-public-dark .content-page {
     background: transparent !important;
     max-width: 1120px !important;
     padding-block: 48px !important;
-    color: #d4e2f5 !important;
+    color: var(--color-text) !important;
   }
   html body .ac-public-dark :is(h1, h2, h3, h4, strong) {
-    color: #f0f6ff !important;
+    color: var(--color-text) !important;
   }
   html body .ac-public-dark h1 {
     font-size: clamp(34px, 4.5vw, 56px) !important;
@@ -40,68 +40,68 @@
   html body .ac-public-dark :is(p, li, label, td) {
     font-size: 16px !important;
     line-height: 1.75 !important;
-    color: #c5d6eb !important;
+    color: var(--color-text) !important;
   }
   html body .ac-public-dark :is(.eyebrow, .muted, .small, .breadcrumbs) {
-    color: #adcaed !important;
+    color: var(--color-muted) !important;
   }
   html body .ac-public-dark :is(a, .content-page a) {
-    color: #9bcfff !important;
+    color: var(--color-primary-ink) !important;
   }
   html
     body
     .ac-public-dark
     :is(.card, .subscription-option, .ac-install-banner, .content-page section, details) {
-    background: #223248 !important;
+    background: var(--color-surface) !important;
     border: 1px solid #ffffff20 !important;
     border-radius: 15px !important;
     box-shadow: 0 14px 36px #0002 !important;
-    color: #dbe9fc !important;
+    color: var(--color-text) !important;
   }
   html body .ac-public-dark .content-page section {
     padding: 26px !important;
     margin-block: 22px !important;
   }
   html body .ac-public-dark :is(.subscription-symbol, .best-plan, .subscription-saving) {
-    background: #2b4869 !important;
-    color: #d6eaff !important;
-    border-color: #5e7da5 !important;
+    background: var(--color-surface-muted) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border-strong) !important;
   }
   html body .ac-public-dark .subscription-price {
-    color: #f3f7ff !important;
+    color: var(--color-text) !important;
   }
   html body .ac-public-dark :is(button, .button) {
-    background: #2a4363 !important;
-    border: 1px solid #6180a5 !important;
-    color: #eaf4ff !important;
+    background: var(--color-surface-muted) !important;
+    border: 1px solid var(--color-border-strong) !important;
+    color: var(--color-text) !important;
     min-height: 44px !important;
     font-size: 15px !important;
   }
   html body .ac-public-dark :is(.primary, .button.primary) {
-    background: #3478ed !important;
-    color: #fff !important;
-    border-color: #6aa9ff !important;
+    background: var(--color-primary-deep) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border-strong) !important;
   }
   html body .ac-public-dark :is(input, select, textarea) {
-    background: #142236 !important;
-    color: #eff6ff !important;
-    border-color: #6480a2 !important;
+    background: var(--color-surface) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border-strong) !important;
     font-size: 16px !important;
   }
   html body .ac-public-dark :is(th, td) {
-    background: #1b2c42 !important;
+    background: var(--color-surface) !important;
     border-color: #ffffff20 !important;
-    color: #dceaff !important;
+    color: var(--color-text) !important;
   }
   html body .ac-public-dark summary {
     background: transparent !important;
-    color: #dceaff !important;
+    color: var(--color-text) !important;
     padding: 18px !important;
     font-size: 16px !important;
   }
   html body .ac-public-dark .footer {
     background: transparent !important;
-    color: #b5c7df !important;
+    color: var(--color-text) !important;
     border-color: #ffffff20 !important;
   }
   html body .ac-public-dark .ac-install-banner {

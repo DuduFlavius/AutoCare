@@ -14,15 +14,15 @@
     min-height: 0 !important;
     height: auto !important;
     padding: 24px !important;
-    border: 1px solid #dce5f2 !important;
+    border: 1px solid var(--color-border) !important;
     border-radius: 18px !important;
-    background: #fff !important;
-    box-shadow: 0 6px 22px #17345508 !important;
+    background: var(--color-surface) !important;
+    box-shadow: 0 6px 22px color-mix(in srgb, var(--color-primary) 3%, transparent) !important;
     position: relative !important;
   }
   .ac-plan-grid > .annual-option {
-    border-color: #88a8de !important;
-    background: linear-gradient(150deg, #f6f9ff, #fff) !important;
+    border-color: var(--color-border-strong) !important;
+    background: linear-gradient(150deg, var(--color-surface-muted), var(--color-surface)) !important;
   }
   .ac-plan-card .subscription-symbol {
     display: grid !important;
@@ -32,8 +32,8 @@
     min-height: 0 !important;
     border: 0 !important;
     border-radius: 11px !important;
-    background: #edf3fe !important;
-    color: #315e9d !important;
+    background: var(--color-surface-muted) !important;
+    color: var(--color-primary-ink) !important;
     margin: 0 0 16px !important;
   }
   .ac-plan-card .eyebrow {
@@ -53,7 +53,7 @@
     line-height: 1.2 !important;
     margin: 0 0 7px !important;
     letter-spacing: -1px !important;
-    color: #20477d !important;
+    color: var(--color-primary-ink) !important;
   }
   .ac-plan-card .subscription-price > span {
     font-size: 11px !important;
@@ -67,15 +67,15 @@
     line-height: 1.6 !important;
     min-height: 36px !important;
     margin: 0 0 14px !important;
-    color: #647a97 !important;
+    color: var(--color-muted) !important;
   }
   .ac-plan-card .savings {
     padding: 7px 9px !important;
-    border: 1px solid #b4d9ce !important;
+    border: 1px solid var(--color-success) !important;
     border-radius: 8px !important;
-    background: #edf7f3 !important;
+    background: var(--color-surface-muted) !important;
     align-self: flex-start !important;
-    color: #28604e !important;
+    color: var(--color-success-ink) !important;
   }
   .ac-plan-card ul {
     display: grid !important;
@@ -91,13 +91,13 @@
     align-items: flex-start !important;
     font-size: 11px !important;
     line-height: 1.65 !important;
-    color: #536c8b !important;
+    color: var(--color-muted) !important;
     margin: 0 !important;
   }
   .ac-plan-card li > svg {
     flex: 0 0 15px !important;
     margin-top: 2px !important;
-    color: #2d6a99 !important;
+    color: var(--color-primary-ink) !important;
   }
   .ac-plan-card > .button {
     display: flex !important;
@@ -108,19 +108,19 @@
     width: 100% !important;
     padding: 11px 12px !important;
     margin-top: auto !important;
-    border: 1px solid #b6ccee !important;
+    border: 1px solid var(--color-border) !important;
     border-radius: 10px !important;
-    background: #e7effd !important;
-    color: #214d8a !important;
+    background: var(--color-surface-muted) !important;
+    color: var(--color-primary-ink) !important;
     font-size: 12px !important;
     font-weight: 650 !important;
     white-space: normal !important;
     box-sizing: border-box !important;
   }
   .ac-plan-card.annual-option > .button {
-    background: #2b59a5 !important;
-    color: white !important;
-    border-color: #2b59a5 !important;
+    background: var(--color-primary-deep) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
   }
   .ac-plan-card .best-plan {
     position: static !important;
@@ -130,18 +130,18 @@
     padding: 5px 7px !important;
     font-size: 8px !important;
     line-height: 1.4 !important;
-    background: #e4edfc !important;
-    color: #345b95 !important;
+    background: var(--color-surface-muted) !important;
+    color: var(--color-primary-ink) !important;
     border: 0 !important;
     border-radius: 5px !important;
   }
   .ac-premium-tools {
-    border: 1px solid #dce5f2 !important;
+    border: 1px solid var(--color-border) !important;
     border-radius: 18px !important;
-    background: white !important;
+    background: var(--color-surface) !important;
     padding: 24px !important;
     margin: 20px 0 !important;
-    color: #203b5b !important;
+    color: var(--color-text) !important;
   }
   .ac-premium-tools > header {
     display: flex !important;
@@ -153,28 +153,28 @@
     height: 44px;
     display: grid;
     place-items: center;
-    background: #edf4ff;
+    background: var(--color-surface-muted);
     border-radius: 12px;
-    color: #38639e;
+    color: var(--color-primary-ink);
     flex: none;
   }
   .ac-premium-tools header p {
     font-size: 9px !important;
     letter-spacing: 1.3px !important;
     margin: 0 0 5px !important;
-    color: #7188a5 !important;
+    color: var(--color-muted) !important;
   }
   .ac-premium-tools h2 {
     font-size: 22px !important;
     line-height: 1.35 !important;
     margin: 0 !important;
-    color: #203b5b !important;
+    color: var(--color-text) !important;
   }
   .ac-premium-tools > p,
   .ac-premium-priorities > p {
     font-size: 12px !important;
     line-height: 1.7 !important;
-    color: #6a809c !important;
+    color: var(--color-muted) !important;
     margin: 14px 0 20px !important;
   }
   .ac-premium-tools-grid {
@@ -190,11 +190,11 @@
     gap: 10px !important;
     text-align: left !important;
     padding: 16px !important;
-    border: 1px solid #e1e8f2 !important;
+    border: 1px solid var(--color-border) !important;
     border-radius: 12px !important;
-    background: #f9fbff !important;
+    background: var(--color-surface) !important;
     min-width: 0 !important;
-    color: #28538b !important;
+    color: var(--color-primary-ink) !important;
     box-shadow: none !important;
     height: auto !important;
     white-space: normal !important;
@@ -202,12 +202,12 @@
   .ac-premium-tools-grid strong {
     font-size: 12px !important;
     line-height: 1.45 !important;
-    color: #24466e !important;
+    color: var(--color-text) !important;
   }
   .ac-premium-tools-grid span {
     font-size: 11px !important;
     line-height: 1.65 !important;
-    color: #6b809c !important;
+    color: var(--color-muted) !important;
   }
   .ac-premium-tools-grid svg:last-child:not(:first-child) {
     position: absolute;
@@ -216,19 +216,19 @@
   }
   .ac-premium-tools button:focus-visible,
   .ac-plan-card > .button:focus-visible {
-    outline: 3px solid #9dbbe9 !important;
+    outline: 3px solid var(--color-primary) !important;
     outline-offset: 3px !important;
   }
   .ac-premium-priorities {
     margin-top: 24px !important;
-    border-top: 1px solid #e2e9f2 !important;
+    border-top: 1px solid var(--color-border) !important;
     padding-top: 20px !important;
   }
   .ac-premium-priorities > header {
     display: flex !important;
     align-items: center !important;
     gap: 9px !important;
-    color: #a27832 !important;
+    color: var(--color-warning-ink) !important;
   }
   .ac-premium-priorities h3 {
     font-size: 16px !important;
@@ -238,9 +238,9 @@
     margin-left: auto;
     padding: 4px 8px;
     border-radius: 6px;
-    background: #edf3fb;
+    background: var(--color-surface-muted);
     font-size: 11px;
-    color: #385d88;
+    color: var(--color-primary-ink);
   }
   .ac-premium-priorities > button {
     display: flex !important;
@@ -249,10 +249,10 @@
     width: 100% !important;
     padding: 13px 10px !important;
     border: 0 !important;
-    border-bottom: 1px solid #e9edf4 !important;
+    border-bottom: 1px solid var(--color-border) !important;
     border-radius: 0 !important;
-    background: white !important;
-    color: #315b8c !important;
+    background: var(--color-surface) !important;
+    color: var(--color-primary-ink) !important;
     text-align: left !important;
     box-shadow: none !important;
     white-space: normal !important;
@@ -273,10 +273,10 @@
   .ac-premium-priorities small {
     font-size: 10px !important;
     line-height: 1.5 !important;
-    color: #6d829c !important;
+    color: var(--color-muted) !important;
   }
   .ac-premium-priorities .is-due > span:nth-child(2) small {
-    color: #a14c41 !important;
+    color: var(--color-danger-ink) !important;
   }
   .ac-premium-clear {
     display: flex;
@@ -284,8 +284,8 @@
     gap: 9px;
     padding: 15px;
     border-radius: 10px;
-    background: #f0f8f4;
-    color: #36765b;
+    background: var(--color-surface-muted);
+    color: var(--color-success-ink);
     font-size: 12px;
     line-height: 1.7;
   }
@@ -347,8 +347,8 @@
   .ac-premium-sales,
   .ac-premium-overview-dashboard > header {
     padding: 28px !important;
-    background: linear-gradient(130deg, #0e2541, #234c7b) !important;
-    color: #fff !important;
+    background: linear-gradient(130deg, var(--color-surface), var(--color-primary-deep)) !important;
+    color: var(--color-text) !important;
     border-radius: 18px !important;
     margin: 22px 0 !important;
   }
@@ -356,7 +356,7 @@
   .ac-premium-overview-dashboard > header > p {
     font-size: 10px !important;
     letter-spacing: 1.6px !important;
-    color: #b1d3fc !important;
+    color: var(--color-text) !important;
   }
   .ac-premium-sales h2,
   .ac-premium-overview-dashboard > header h2 {
@@ -364,13 +364,13 @@
     font-size: 30px !important;
     line-height: 1.3 !important;
     margin: 14px 0 !important;
-    color: #fff !important;
+    color: var(--color-text) !important;
   }
   .ac-premium-sales > p,
   .ac-premium-overview-dashboard > header > span {
     font-size: 13px !important;
     line-height: 1.8 !important;
-    color: #cfdef1 !important;
+    color: var(--color-text) !important;
     max-width: 70ch !important;
   }
   .ac-premium-sales > a {
@@ -378,8 +378,8 @@
     align-items: center;
     min-height: 44px;
     padding: 10px 16px;
-    background: #fff;
-    color: #234d7c;
+    background: var(--color-surface);
+    color: var(--color-primary-ink);
     border-radius: 10px;
     font-size: 13px;
     font-weight: 650;
@@ -388,12 +388,12 @@
   .ac-premium-sales > small {
     display: block;
     font-size: 11px;
-    color: #bbd0eb;
+    color: var(--color-muted);
     line-height: 1.7;
     margin-top: 8px;
   }
   .ac-premium-faq details {
-    border-top: 1px solid #dfe7f2;
+    border-top: 1px solid var(--color-border);
     padding: 15px 0;
   }
   .ac-premium-faq summary {
@@ -405,7 +405,7 @@
   .ac-premium-faq details p {
     font-size: 12px;
     line-height: 1.8;
-    color: #667b96;
+    color: var(--color-muted);
   }
   .ac-premium-overview-dashboard .ac-premium-summary-grid {
     display: grid !important;
@@ -416,9 +416,9 @@
   .ac-premium-summary-grid > article,
   .ac-premium-target-grid > article {
     padding: 18px;
-    border: 1px solid #dce5f2;
+    border: 1px solid var(--color-border);
     border-radius: 13px;
-    background: #fff;
+    background: var(--color-surface);
     display: grid;
     gap: 9px;
     min-width: 0;
@@ -426,20 +426,20 @@
   .ac-premium-summary-grid article > span,
   .ac-premium-target-grid article > span {
     font-size: 11px;
-    color: #6b7e97;
+    color: var(--color-muted);
     line-height: 1.5;
   }
   .ac-premium-summary-grid article > strong,
   .ac-premium-target-grid article > strong {
     font-size: 22px;
-    color: #234970;
+    color: var(--color-primary-ink);
   }
   .ac-premium-summary-grid strong > small,
   .ac-premium-target-grid small {
     font-size: 10px;
     line-height: 1.6;
     font-weight: 400;
-    color: #71869f;
+    color: var(--color-muted);
     display: block;
   }
   .ac-premium-target-grid {
@@ -451,16 +451,16 @@
   .ac-premium-target-grid button {
     min-height: 38px !important;
     font-size: 11px !important;
-    background: #edf3fc !important;
-    border: 1px solid #d6e1f0 !important;
+    background: var(--color-surface-muted) !important;
+    border: 1px solid var(--color-border) !important;
     border-radius: 8px !important;
-    color: #2b5790 !important;
+    color: var(--color-primary-ink) !important;
   }
   .ac-premium-recent {
     padding: 20px;
-    border: 1px solid #dce5f2;
+    border: 1px solid var(--color-border);
     border-radius: 13px;
-    background: #fff;
+    background: var(--color-surface);
     margin: 18px 0;
   }
   .ac-premium-recent > p {
@@ -468,9 +468,9 @@
     justify-content: space-between;
     gap: 10px;
     padding: 11px 0;
-    border-bottom: 1px solid #e6ecf4;
+    border-bottom: 1px solid var(--color-border);
     font-size: 11px;
-    color: #647c98;
+    color: var(--color-muted);
     line-height: 1.6;
   }
   .ac-premium-downloads h3 {
@@ -492,8 +492,8 @@
     align-items: center !important;
     gap: 9px !important;
     min-height: 46px !important;
-    background: #285ca6 !important;
-    color: #fff !important;
+    background: var(--color-primary-deep) !important;
+    color: var(--color-text) !important;
     border: 0 !important;
     border-radius: 9px !important;
     padding: 11px 16px !important;
@@ -504,17 +504,17 @@
   }
   .ac-premium-locked {
     padding: 23px !important;
-    border: 1px solid #cbdcf2 !important;
-    background: #f4f8ff !important;
+    border: 1px solid var(--color-border) !important;
+    background: var(--color-surface-muted) !important;
     border-radius: 14px !important;
   }
   .ac-premium-locked p {
     font-size: 12px !important;
     line-height: 1.8 !important;
-    color: #5c7799 !important;
+    color: var(--color-muted) !important;
   }
   .ac-operation-alerts {
-    border: 1px solid #d7e3f1;
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 16px;
     margin: 14px 0;
@@ -522,7 +522,7 @@
   .ac-operation-alerts legend {
     font-size: 12px;
     font-weight: 650;
-    color: #375a84;
+    color: var(--color-primary-ink);
     padding: 0 7px;
   }
   .ac-alert-offsets {
@@ -537,9 +537,9 @@
   }
   .forecast-reading-stamp {
     padding: 12px;
-    border: 1px solid #dce6f1;
+    border: 1px solid var(--color-border);
     border-radius: 9px;
-    background: #f7faff;
+    background: var(--color-surface-muted);
     margin: 15px 0;
     font-size: 11px;
     line-height: 1.8;
@@ -547,9 +547,9 @@
   .forecast-reading-stamp > button {
     min-height: 38px !important;
     font-size: 11px !important;
-    background: #edf3fc !important;
-    color: #28558e !important;
-    border: 1px solid #ccdbef !important;
+    background: var(--color-surface-muted) !important;
+    color: var(--color-primary-ink) !important;
+    border: 1px solid var(--color-border) !important;
     border-radius: 7px !important;
     padding: 8px 12px !important;
   }
@@ -563,16 +563,16 @@
     margin: 8px 0 !important;
   }
   .forecast-maintenance-state.is-due {
-    color: #a24b3b !important;
-    background: #fff0eb !important;
+    color: var(--color-danger-ink) !important;
+    background: var(--color-surface-muted) !important;
   }
   .forecast-maintenance-state.is-soon {
-    color: #8b6727 !important;
-    background: #fff7e7 !important;
+    color: var(--color-warning-ink) !important;
+    background: var(--color-surface-muted) !important;
   }
   .forecast-maintenance-state.is-valid {
-    color: #36745d !important;
-    background: #edf7f1 !important;
+    color: var(--color-success-ink) !important;
+    background: var(--color-surface-muted) !important;
   }
   .forecast-thresholds {
     display: grid;
@@ -589,7 +589,7 @@
   .forecast-thresholds progress {
     width: 100%;
     height: 7px;
-    accent-color: #3979bf;
+    accent-color: var(--color-primary-ink);
   }
   @media (max-width: 850px) {
     .ac-premium-overview-dashboard .ac-premium-summary-grid {
@@ -664,7 +664,7 @@
       gap: 10px !important;
       align-items: start !important;
       padding: 12px 0 !important;
-      border-bottom: 1px solid #d7e2f1 !important;
+      border-bottom: 1px solid var(--color-border) !important;
     }
     .membership-workspace .membership-access > div:last-child {
       border-bottom: 0 !important;
@@ -688,7 +688,7 @@
       gap: 10px !important;
       align-items: start !important;
       padding: 12px 0 !important;
-      border-bottom: 1px solid #d7e2f1 !important;
+      border-bottom: 1px solid var(--color-border) !important;
     }
     .membership-workspace .membership-access > div:last-child {
       border-bottom: 0 !important;

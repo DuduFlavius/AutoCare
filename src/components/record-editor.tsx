@@ -9,7 +9,7 @@ import ServiceDetailFields, {
   serializeServiceDetails,
   parseServiceDetails,
 } from './service-detail-fields';
-import { CarFront, Paperclip, ChevronDown } from 'lucide-react';
+import { Files, Wallet, Wrench, Paperclip, ChevronDown } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type RecordItem = Data['records'][number];
@@ -81,6 +81,7 @@ export default function RecordEditor({
   const custom =
     !recordCategory(kind, category) ||
     ['Alt document', 'Altă operațiune', 'Altele'].includes(category);
+  const IntroIcon = kind === 'expense' ? Wallet : kind === 'document' ? Files : Wrench;
   const selectedCategory = recordCategory(kind, category);
   const rememberDetails = () => {
     if (formRef.current && kind === 'service')
@@ -201,14 +202,14 @@ export default function RecordEditor({
         </div>
         <div className="record-editor-intro">
           <span>
-            <CarFront size={21} />
+            <IntroIcon size={21} aria-hidden="true" />
           </span>
           <p>
             {kind === 'service'
-              ? 'Ține evidența întreținerii și a costurilor mașinii tale. Completează rapid datele esențiale și, opțional, detaliile tehnice.'
+              ? 'Înregistrează o revizie sau o reparație. Poți adăuga costul și următorul termen.'
               : kind === 'document'
-                ? 'Alege tipul actului, completează data expirării și apasă Salvează.'
-                : 'Adaugă rapid un cost în istoricul mașinii.'}
+                ? 'Completează datele actului. Dacă are termen de expirare, introdu data pentru a o urmări.'
+                : 'Completează mașina, suma și data cheltuielii.'}
           </p>
         </div>
         {error && (
@@ -217,7 +218,7 @@ export default function RecordEditor({
           </div>
         )}
         <label>
-          Pentru ce mașină?
+          Mașină
           <select name="vehicleId" value={car} required onChange={(e) => setCar(e.target.value)}>
             <option value="" disabled>
               Alege mașina
@@ -230,7 +231,21 @@ export default function RecordEditor({
           </select>
         </label>
         <input name="category" value={category} readOnly hidden />
-        {kind==='service'&&<section className="service-reminder-box" data-workspace-ui><h3>{en?'Service mileage':'Kilometrii intervenției'}</h3><ServiceMileage currentKm={data.vehicles.find(v=>v.id===car)?.odometer??0} lastKm={record?.odometer??null} nextKm={record?.nextKm??null}/><small>{en?'Saved trips update current mileage and remaining distance. Historical service mileage stays fixed.':'Sesiunile salvate actualizează kilometrajul actual și distanța rămasă. Kilometrajul intervenției rămâne fix.'}</small></section>}
+        {kind === 'service' && (
+          <section className="service-reminder-box" data-workspace-ui>
+            <h3>{en ? 'Service mileage' : 'Kilometrii intervenției'}</h3>
+            <ServiceMileage
+              currentKm={data.vehicles.find((v) => v.id === car)?.odometer ?? 0}
+              lastKm={record?.odometer ?? null}
+              nextKm={record?.nextKm ?? null}
+            />
+            <small>
+              {en
+                ? 'Saved trips update current mileage and remaining distance. Historical service mileage stays fixed.'
+                : 'Sesiunile salvate actualizează kilometrajul actual și distanța rămasă. Kilometrajul intervenției rămâne fix.'}
+            </small>
+          </section>
+        )}
         <label>
           {kind === 'document'
             ? 'Denumirea documentului'
@@ -269,9 +284,26 @@ export default function RecordEditor({
           </label>
           {kind === 'document' ? (
             <label>
-              {category==='RCA'?(en?'RCA expiry date · required':'Data expirării RCA · obligatorie'):'Data expirării · dacă este cazul'}
-              <input type="date" name="expiresAt" required={category==='RCA'} defaultValue={record?.expiresAt || ''} />
-              <small data-workspace-ui>{category==='RCA'?(en?'Used for your expiry reminders.':'Folosită pentru notificările de expirare.'):(en?'Leave blank for documents without expiry.':'Lasă liber dacă documentul nu are termen de expirare.')}</small>
+              {category === 'RCA'
+                ? en
+                  ? 'RCA expiry date · required'
+                  : 'Data expirării RCA · obligatorie'
+                : 'Data expirării · dacă este cazul'}
+              <input
+                type="date"
+                name="expiresAt"
+                required={category === 'RCA'}
+                defaultValue={record?.expiresAt || ''}
+              />
+              <small data-workspace-ui>
+                {category === 'RCA'
+                  ? en
+                    ? 'Used for your expiry reminders.'
+                    : 'Folosită pentru notificările de expirare.'
+                  : en
+                    ? 'Leave blank for documents without expiry.'
+                    : 'Lasă liber dacă documentul nu are termen de expirare.'}
+              </small>
             </label>
           ) : (
             <label>
@@ -396,7 +428,17 @@ export default function RecordEditor({
             )}
           </>
         )}
-        {kind==='document'&&<section className="service-reminder-box" data-workspace-ui><h3>{en?'Document expiry reminders':'Notificări pentru expirarea documentului'}</h3><p>{en?'General reminders follow your account preferences in Settings → Notifications and email.':'Mementourile respectă preferințele din Setări → Notificări și email.'}</p><OperationAlerts parts={record?.parts||''} premium={data.premium} mileage={false}/></section>}
+        {kind === 'document' && (
+          <section className="service-reminder-box" data-workspace-ui>
+            <h3>{en ? 'Document expiry reminders' : 'Notificări pentru expirarea documentului'}</h3>
+            <p>
+              {en
+                ? 'General reminders follow your account preferences in Settings → Notifications and email.'
+                : 'Mementourile respectă preferințele din Setări → Notificări și email.'}
+            </p>
+            <OperationAlerts parts={record?.parts || ''} premium={data.premium} mileage={false} />
+          </section>
+        )}
         {kind === 'document' && (
           <label>
             Număr sau serie · opțional
@@ -405,13 +447,31 @@ export default function RecordEditor({
         )}
         {kind !== 'document' && (
           <div className="cost-field ac-cost-breakdown">
-            {data.premium && kind==='service' && <label data-workspace-ui>{en?'Estimated budget · RON (optional)':'Buget estimat · RON (opțional)'}<input name="ac_budgetEstimat" type="number" min="0" max="1000000" step="0.01" defaultValue={parseServiceDetails(record?.parts||'').budgetEstimat||''}/><small>{en?'Planning only. It does not count as an actual expense.':'Doar pentru planificare. Nu se adaugă la cheltuielile reale.'}</small></label>}
-            <h3>{kind === 'service' ? 'Costurile intervenției' : 'Valoarea cheltuielii'}</h3>
-            <p className="micro">
-              {kind === 'service'
-                ? 'Completează suma totală sau defalcarea. Pentru filtre, costurile individuale sunt incluse în total o singură dată.'
-                : 'Înregistrează suma plătită. Cheltuiala se adaugă o singură dată în istoricul mașinii.'}
-            </p>
+            {data.premium && kind === 'service' && (
+              <label data-workspace-ui>
+                {en ? 'Estimated budget · RON (optional)' : 'Buget estimat · RON (opțional)'}
+                <input
+                  name="ac_budgetEstimat"
+                  type="number"
+                  min="0"
+                  max="1000000"
+                  step="0.01"
+                  defaultValue={parseServiceDetails(record?.parts || '').budgetEstimat || ''}
+                />
+                <small>
+                  {en
+                    ? 'Planning only. It does not count as an actual expense.'
+                    : 'Doar pentru planificare. Nu se adaugă la cheltuielile reale.'}
+                </small>
+              </label>
+            )}
+            <h3>{kind === 'service' ? 'Costurile intervenției' : 'Suma plătită'}</h3>
+            {kind === 'service' && (
+              <p className="micro">
+                Introdu totalul sau completează costurile pe categorii. Include costul filtrelor o
+                singură dată.
+              </p>
+            )}
             {kind === 'service' && (
               <div className="record-cost-mode" data-workspace-ui>
                 <span>
@@ -504,7 +564,7 @@ export default function RecordEditor({
               </details>
             )}
             <label>
-              {kind === 'service' ? 'Cost total · RON' : 'Cost · RON'}
+              {kind === 'service' ? 'Cost total · RON' : 'Sumă (lei)'}
               <input
                 key={costEdited ? 'computed-cost' : 'manual-cost'}
                 type="number"
@@ -524,7 +584,7 @@ export default function RecordEditor({
                     : manualAmount
                 }
                 onChange={(event) => setManualAmount(event.target.value)}
-                placeholder="Introdu suma sau completează defalcarea"
+                placeholder={kind === 'expense' ? '0,00' : 'Introdu costul total'}
               />
             </label>
             {kind === 'service' &&
@@ -544,12 +604,9 @@ export default function RecordEditor({
                   mark();
                 }}
               />
-              Costul nu este cunoscut încă
+              Nu cunosc încă suma
             </label>
-            <p className="micro">
-              Dacă suma este zero, introdu 0 RON. Dacă nu cunoști costul, bifează opțiunea de mai
-              sus.
-            </p>
+            <p className="micro">Introdu 0 lei dacă nu ai plătit nimic.</p>
           </div>
         )}
 
@@ -565,7 +622,7 @@ export default function RecordEditor({
             {kind !== 'document' && (
               <>
                 <label>
-                  {kind === 'service' ? 'Service sau mecanic' : 'Furnizor'}
+                  {kind === 'service' ? 'Service sau mecanic' : 'Furnizor sau comerciant'}
                   <input name="provider" maxLength={250} defaultValue={record?.provider || ''} />
                 </label>
                 <label>

@@ -876,7 +876,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                         : tab === 'Documente'
                           ? 'Documente auto'
                           : tab === 'Cheltuieli'
-                            ? 'Cheltuielile garajului'
+                            ? 'Cheltuieli auto'
                             : tab === 'Notificări'
                               ? 'Centrul de notificări'
                               : tab === 'Calendar'
@@ -899,7 +899,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                           Întreținere:
                             'Păstrează un istoric clar și planifică următoarele intervenții.',
                           Calendar: 'Toate termenele și lucrările programate, la îndemână.',
-                          Cheltuieli: 'Vezi costurile înregistrate și cum se împart în timp.',
+                          Cheltuieli: 'Urmărește costurile mașinilor tale.',
                           Notificări: 'Documente și lucrări care au nevoie de atenția ta.',
                           Abonament:'Planul actual, beneficiile și istoricul facturării.',
                           Premium:'Întreținerea, rapoartele și toate instrumentele tale Premium.',
@@ -1283,7 +1283,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                       </p>
                       <p className="small">
                         {data.summary.costPerKm == null
-                          ? (language==='en'?'Cost per km unavailable: at least two distinct readings are required.':'Cost/km indisponibil: sunt necesare minimum două citiri distincte.')
+                          ? (language==='en'?'Cost per km unavailable: at least two distinct readings are required.':'Adaugă cel puțin două citiri distincte pentru a vedea costul pe kilometru.')
                           : (language==='en'?`Estimated cost per km: ${moneyDisplay(data.summary.costPerKm*100)} (partial data coverage)`:`Cost/km estimativ: ${moneyDisplay(data.summary.costPerKm*100)} (acoperire parțială a datelor)`)}
                       </p>
                       {Object.entries(data.summary.categories).map(([category, value]) => (

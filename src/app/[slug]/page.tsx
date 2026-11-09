@@ -58,11 +58,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             ]}
           />
           <p className="eyebrow">AUTOCARE PREMIUM</p>
-          <h1>
-            Un garaj organizat.
-            <br />
-            Un plan pe măsură.
-          </h1>
+          <h1>Abonamente AutoCare</h1>
           <p>
             O mașină este inclusă în planul gratuit. Alege Premium pentru mai multe mașini, rapoarte
             și opțiuni avansate.
@@ -95,19 +91,33 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             height={420}
           />
         )}
-        {p.sections.map(([title, text]) => (
-          <section key={title}>
-            <h2>{title}</h2>
-            <p>{text}</p>
-          </section>
-        ))}
+        {slug === 'intrebari-frecvente' ? (
+          <div className="public-faq">
+            {p.sections.map(([title, text]) => (
+              <details key={title}>
+                <summary>{title}</summary>
+                <p>{text}</p>
+              </details>
+            ))}
+          </div>
+        ) : (
+          p.sections.map(([title, text]) => (
+            <section key={title}>
+              <h2>{title}</h2>
+              <p>{text}</p>
+            </section>
+          ))
+        )}
         {topic && (
           <p>
             <Link href="/ghiduri">Ghiduri practice pentru organizarea mașinii →</Link>
           </p>
         )}
-        <Link href="/inregistrare" className="button primary">
-          Creează cont gratuit ↗
+        <Link
+          href={slug === 'contact' ? '/cont?tab=Centru%20de%20suport' : '/inregistrare'}
+          className="button primary"
+        >
+          {slug === 'contact' ? 'Deschide Centrul de suport' : 'Creează cont gratuit'} ↗
         </Link>
       </main>
     </PublicShell>

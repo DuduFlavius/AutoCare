@@ -1,5 +1,17 @@
 // Reviewed application copy. Keys are whitespace-normalized Romanian UI messages.
 export const applicationCopy: Record<string, string> = {
+  "Înregistrează o revizie sau o reparație. Poți adăuga costul și următorul termen.": "Record maintenance or a repair. You can add the cost and the next deadline.",
+  "Completează datele actului. Dacă are termen de expirare, introdu data pentru a o urmări.": "Enter the document details and its expiry date, if applicable.",
+  "Completează mașina, suma și data cheltuielii.": "Select the vehicle and enter the amount and expense date.",
+  "Introdu totalul sau completează costurile pe categorii. Include costul filtrelor o singură dată.": "Enter the total or break down the costs. Include filter costs only once.",
+  "Suma plătită": "Amount paid",
+  "Sumă (lei)": "Amount (RON)",
+  "Nu cunosc încă suma": "I do not know the amount yet",
+  "Introdu 0 lei dacă nu ai plătit nimic.": "Enter 0 RON if there was no charge.",
+  "Furnizor sau comerciant": "Supplier or merchant",
+  "Introdu costul total": "Enter the total cost",
+  "Urmărește costurile mașinilor tale.": "Track your vehicle costs.",
+  "Adaugă cel puțin două citiri distincte pentru a vedea costul pe kilometru.": "Add at least two distinct mileage readings to see the cost per kilometre.",
   "Denumirea documentului": "Document title",
   "Denumirea cheltuielii": "Expense title",
   "Cu ce te putem ajuta?": "How can we help you?",
