@@ -1,4 +1,5 @@
 // AutoCare PWA — private pages and API responses are never cached.
+// The install refreshes the anonymous Midnight Titanium offline page.
 const OFFLINE_CACHE = 'autocare-public-offline-v1';
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(OFFLINE_CACHE).then(cache => cache.add('/offline.html')).then(() => self.skipWaiting()));

@@ -6,7 +6,7 @@
   --muted: var(--color-muted);
   --text: var(--color-text);
   --accent: var(--color-primary);
-  --cyan: var(--color-primary);
+  --cyan: var(--ice-cyan);
   --danger: var(--color-danger);
   --warning: var(--color-warning);
 }
@@ -866,10 +866,10 @@ summary + p {
   }
 }
 
-.mail-center button.primary{background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-border)!important;opacity:1!important;font-weight:700}
-.mail-center button.primary:hover:not(:disabled){background:var(--color-surface)!important}
+.mail-center button.primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-primary)!important;opacity:1!important;font-weight:700}
+.mail-center button.primary:hover:not(:disabled){background:var(--color-primary-hover)!important}
 .mail-center button.primary:disabled{background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
-.mail-center button:focus-visible{outline:3px solid var(--color-warning);outline-offset:3px}
+.mail-center button:focus-visible{outline:3px solid var(--color-primary);outline-offset:3px}
 
 /* Mail Center: high-contrast primary sending action, including disabled state */
 .mail-center .mail-send-action {
@@ -990,3 +990,10 @@ html body .app-shell.ac-workspace main.main .ac-inline-mileage [role=alert]{colo
 @media(max-width:700px){.mail-center .card{padding:20px;border-radius:16px}.mail-tabs{gap:2px}.mail-tabs button{padding:12px 6px;font-size:13px}.mail-staff-shell{padding:16px}.mail-center-grid{grid-template-columns:1fr!important}}
 
 .mail-pending-badge{margin-left:auto;background:var(--color-surface-muted);color:var(--color-primary-ink);font-weight:750;border-radius:20px;padding:2px 8px;font-size:12px}
+
+.mail-center button.mail-send-action:not(:disabled) {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-on-primary) !important;
+  -webkit-text-fill-color: var(--color-on-primary) !important;
+}

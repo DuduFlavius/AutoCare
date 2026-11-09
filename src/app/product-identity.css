@@ -183,7 +183,7 @@ html body .ac-workspace.ac-studio .main .studio-create-row button {
 .product-mockup-frame {
   padding: 8px;
   gap: 8px;
-  background: linear-gradient(145deg, #344a72, #192335 55%, #101820);
+  background: linear-gradient(145deg, var(--color-primary-deep), var(--graphite) 55%, var(--midnight-navy));
   border-color: #50627c;
 }
 .product-mockup-rail {

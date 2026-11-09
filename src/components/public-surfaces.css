@@ -78,8 +78,8 @@
     font-size: 15px !important;
   }
   html body .ac-public-dark :is(.primary, .button.primary) {
-    background: var(--color-primary-deep) !important;
-    color: var(--color-text) !important;
+    background: var(--color-primary) !important;
+    color: var(--color-on-primary) !important;
     border-color: var(--color-border-strong) !important;
   }
   html body .ac-public-dark :is(input, select, textarea) {

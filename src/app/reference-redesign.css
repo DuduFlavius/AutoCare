@@ -913,7 +913,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell .main .autocare-simple-home input,.app-shell .main .autocare-simple-home select{background:var(--color-surface-muted)!important;color:var(--color-text)!important}
 @media(max-width:760px){.autocare-simple-home,.autocare-simple-home button,.autocare-simple-home strong{color:var(--color-text)!important}.autocare-simple-hero,.autocare-simple-actions,.autocare-simple-due{background:var(--color-surface)!important}.autocare-simple-actions>button{background:var(--color-surface-muted)!important}}
 
-/* AutoCare Signature — warm porcelain, graphite and champagne bronze. */
+/* AutoCare surface and control defaults. */
 :root{--ac-ink:var(--color-text);--ac-blue:var(--color-warning-soft);--ac-line:var(--color-border)}
 .app-shell{background:var(--color-surface-muted)!important}
 .app-shell>.sidebar{background:linear-gradient(170deg,var(--color-surface),var(--color-nav))!important;border-right:1px solid var(--color-border)!important}
@@ -957,7 +957,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell .main .card,.app-shell .main .stat,.app-shell .main .empty{color:var(--color-text)!important}
 }
 
-/* AUT OCARE | Obsidian + Glacier: unified cool-neutral premium palette, no gold/brown. */
+/* AutoCare dark surfaces. */
 :root{--ac-ink:var(--color-text);--ac-blue:var(--color-surface-muted);--ac-line:var(--color-border);color-scheme:dark}
 html,body{background:var(--color-nav)}
 .app-shell,.app-shell .main,.app-shell .main:has(.autocare-simple-home),.app-shell .main:has(.autocare-dashboard-feature){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
@@ -1113,7 +1113,7 @@ html,body{background:var(--color-surface-muted)!important}
 .app-shell .main .card:hover,.app-shell .main .for-you-card:hover{border-color:var(--color-border-strong)!important;box-shadow:0 15px 35px color-mix(in srgb, var(--color-primary) 12%, transparent)!important}
 .app-shell .main .stat .value,.app-shell .main .for-you-card>svg:first-child{color:var(--color-primary-ink)!important}
 .app-shell .main .for-you-card>svg:first-child{background:var(--color-surface-muted)!important}
-.app-shell .main .primary,.app-shell .main button.primary{background:linear-gradient(120deg,var(--color-primary-deep),var(--color-primary-deep))!important;color:var(--color-text)!important;border-color:var(--color-border)!important;box-shadow:0 8px 20px color-mix(in srgb, var(--color-primary) 16%, transparent)!important}
+.app-shell .main .primary,.app-shell .main button.primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border)!important;box-shadow:0 8px 20px color-mix(in srgb, var(--color-primary) 16%, transparent)!important}
 .app-shell .main input,.app-shell .main textarea,.app-shell .main select{background:var(--color-surface)!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;color-scheme:dark}
 .app-shell .main input::placeholder,.app-shell .main textarea::placeholder{color:var(--color-muted)!important;opacity:1}
 .app-shell .main .muted,.app-shell .main .micro,.app-shell .main small,.app-shell .main .for-you-card p{color:var(--color-muted)!important}
@@ -1208,7 +1208,7 @@ html,body,.app-shell,.app-shell .main,.app-shell .main:has(.autocare-simple-home
 .app-shell .main :is(.page-head,.page-headline,.workspace-heading,.workspace-header,.page-header,.page-banner,.page-hero,.workspace-hero,.section-hero,.page-intro,.calendar-hero,.calendar-header,.hero-section,.hero,.banner,.intro-panel) :is(p,span,small,label){color:var(--color-muted)!important}
 .app-shell .main :is(.page-head,.page-headline,.workspace-heading,.workspace-header,.page-header,.page-banner,.page-hero,.workspace-hero,.section-hero,.page-intro,.calendar-hero,.calendar-header,.hero-section,.hero,.banner,.intro-panel)::before,.app-shell .main :is(.page-head,.page-headline,.workspace-heading,.workspace-header,.page-header,.page-banner,.page-hero,.workspace-hero,.section-hero,.page-intro,.calendar-hero,.calendar-header,.hero-section,.hero,.banner,.intro-panel)::after{background-image:none!important}
 .app-shell .main :is(.page-head,.page-headline,.workspace-heading,.workspace-header,.page-header,.page-banner,.page-hero,.workspace-hero,.section-hero,.page-intro,.calendar-hero,.calendar-header,.hero-section,.hero,.banner,.intro-panel) button{color:var(--color-primary-ink)!important;border-color:var(--color-border)!important;background:var(--color-surface-muted)!important}
-.app-shell .main :is(.page-head,.page-headline,.workspace-heading,.workspace-header,.page-header,.page-banner,.page-hero,.workspace-hero,.section-hero,.page-intro,.calendar-hero,.calendar-header,.hero-section,.hero,.banner,.intro-panel) button.primary{background:var(--color-primary-deep)!important;color:var(--color-text)!important}
+.app-shell .main :is(.page-head,.page-headline,.workspace-heading,.workspace-header,.page-header,.page-banner,.page-hero,.workspace-hero,.section-hero,.page-intro,.calendar-hero,.calendar-header,.hero-section,.hero,.banner,.intro-panel) button.primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important}
 
 /* Screenshot-specific fix: top black navigation strip + charcoal action tiles. */
 html body .app-shell .app-header,html body .app-shell:has(.workspace-dashboard) .app-header,html body .app-shell:has(.workspace-garage) .app-header{background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-primary-ink)!important;border-bottom:1px solid var(--color-border)!important;box-shadow:0 2px 12px color-mix(in srgb, var(--color-primary) 6%, transparent)!important}
@@ -1248,7 +1248,7 @@ html body .app-shell .main button:not(.primary):not(.active):not([aria-pressed="
  background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-primary-ink)!important;border:1px solid var(--color-primary)!important;
 }
 html body .app-shell .main :is(.toolbar,.filter-pills,.calendar,.calendar-day,.record-aside,.document-intro,.maintenance-overview,.empty,.card,.table-scroll) button:not(.primary):not(.active):not([aria-pressed="true"]) :is(span,strong,small,svg){color:var(--color-primary-ink)!important}
-html body .app-shell .main button.primary,html body .app-shell .main .primary{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
+html body .app-shell .main button.primary,html body .app-shell .main .primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border)!important}
 html body .app-shell .main :is(.toolbar,.filter-pills) button[aria-pressed="true"],html body .app-shell .main :is(.toolbar,.filter-pills) button.active{background:var(--color-primary-deep)!important;color:var(--color-text)!important}
 html body .app-shell .main :is(.calendar-day,.calendar-event){background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;border-color:var(--color-border)!important}
 html body .app-shell .main :is(.empty,.card,.stat,.notice) :is(svg){color:var(--color-primary-ink)!important}
@@ -1461,11 +1461,11 @@ html body .app-shell main.main :is(.subscription-option,.membership-current,.pri
 html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) :is(ul,ol){padding-block:12px}
 html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) li{padding-block:5px}
 html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) :is(button.primary,.button.primary,button[type=submit],a.primary){
- background:var(--color-primary-deep)!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;
+ background:var(--color-primary)!important;color:var(--color-on-primary)!important;border:1px solid var(--color-border)!important;
  border-radius:11px!important;min-height:48px!important;font-weight:700!important;
 }
 html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) :is(button.primary,.button.primary,button[type=submit],a.primary) :is(span,strong,svg){color:var(--color-text)!important}
-html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) :is(button.primary,.button.primary,button[type=submit],a.primary):hover{background:var(--color-primary-deep)!important}
+html body .app-shell main.main :is(.subscription-option,.pricing-card,.plan-card,.premium-card) :is(button.primary,.button.primary,button[type=submit],a.primary):hover{background:var(--color-primary-hover)!important}
 html body .app-shell main.main :is(.membership-workspace,.workspace-membership,.subscription-workspace) :is(.micro,.muted,.caption){color:var(--color-muted)!important;opacity:1!important}
 html body .app-shell main.main :is(.membership-workspace,.workspace-membership,.subscription-workspace) :is(.invoice-history,.billing-history,.subscription-history,.table-scroll){background:var(--color-surface)!important;border:1px solid var(--color-border)!important;border-radius:16px!important;padding:18px!important}
 html body .app-shell main.main :is(.card,.stat,.panel,.tile,.empty,.journal,.support-chat-panel,.autocare-advanced-settings){border-radius:16px;box-shadow:0 5px 22px color-mix(in srgb, var(--color-primary) 5%, transparent)!important}
@@ -1481,7 +1481,7 @@ html body .app-shell main.main.workspace-garage :is(.car-card,.add-car-tile) :is
 html body .app-shell main.main.workspace-garage .car-card .car-metrics{background:var(--color-surface-muted)!important;border:1px solid var(--color-border)!important}
 html body .app-shell main.main.workspace-garage .car-card .car-metrics :is(span,small){color:var(--color-muted)!important}
 html body .app-shell main.main.workspace-garage .car-card .car-metrics strong{color:var(--color-primary-ink)!important}
-html body .app-shell main.main.workspace-garage .car-card .row-actions button.primary{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
+html body .app-shell main.main.workspace-garage .car-card .row-actions button.primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border)!important}
 html body .app-shell main.main.workspace-garage .car-card .row-actions button.primary :is(span,strong,svg){color:var(--color-text)!important}
 html body .app-shell main.main.workspace-garage .car-card .row-actions button.danger{background:var(--color-surface-muted)!important;color:var(--color-danger-ink)!important;border-color:var(--color-danger)!important}
 html body .app-shell main.main.workspace-garage .add-car-tile button{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
@@ -1514,7 +1514,7 @@ html body .app-shell main.main.workspace-garage button.add-car-tile>span.button{
 html body .app-shell main.main.workspace-garage button.add-car-tile>span.button :is(svg,strong,span){color:var(--color-text)!important}
 html body .app-shell main.main.workspace-garage .car-card .car-metrics :is(span,strong,small){color:var(--color-primary-ink)!important;opacity:1!important}
 html body .app-shell main.main.workspace-garage .car-card .row-actions :is(button,.button){color:var(--color-primary-ink)!important}
-html body .app-shell main.main.workspace-garage .car-card .row-actions button.primary{color:var(--color-text)!important;background:var(--color-primary-deep)!important}
+html body .app-shell main.main.workspace-garage .car-card .row-actions button.primary{color:var(--color-text)!important;background:var(--color-primary)!important}
 html body .app-shell main.main.workspace-garage .car-card .row-actions button.danger{color:var(--color-danger-ink)!important;background:var(--color-surface-muted)!important}
 @media(max-width:760px){html body .app-shell main.main.workspace-garage .grid3{grid-template-columns:minmax(0,1fr)!important}html body .app-shell main.main.workspace-garage button.add-car-tile{min-height:245px!important}}
 
@@ -1734,7 +1734,7 @@ html body .app-shell .quick-record-form .operation-picker button[aria-pressed=tr
 html body .app-shell .quick-record-form .operation-picker button[aria-pressed=true] svg{color:var(--color-text)!important}
 html body .app-shell .quick-record-form .service-oil-planner{padding:18px;border:1px solid var(--color-border);border-radius:14px;margin-block:14px}
 html body .app-shell .quick-record-form .service-oil-planner output{display:block;padding:12px;background:var(--color-surface-muted);color:var(--color-primary-ink);font-weight:750;border-radius:10px}
-html body .app-shell .quick-record-form .record-form-footer button.primary{background:var(--color-primary-deep)!important;color:var(--color-text)!important}
+html body .app-shell .quick-record-form .record-form-footer button.primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important}
 html body .app-shell main.main :is(.founder-workspace,.founder-panel,.founder-dashboard,.admin-workspace,.admin-panel,.admin-dashboard,.founder-card,.admin-card){background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;color-scheme:dark!important;border-color:var(--color-border)!important}
 html body .app-shell main.main :is(.founder-workspace,.founder-panel,.founder-dashboard,.admin-workspace,.admin-panel,.admin-dashboard,.founder-card,.admin-card) :is(h1,h2,h3,p,label,small,span,strong){color:var(--color-primary-ink)!important;opacity:1!important}
 html body .app-shell main.main :is(.founder-workspace,.founder-panel,.founder-dashboard,.admin-workspace,.admin-panel,.admin-dashboard) :is(input,textarea,select){background:var(--color-surface)!important;color:var(--color-primary-ink)!important;border-color:var(--color-border)!important}
@@ -1746,7 +1746,7 @@ html body .app-shell>.sidebar .sidebar-profile .profile-avatar{width:42px!import
 html body .app-shell>.sidebar .sidebar-profile :is(strong,small){color:var(--color-muted)!important;opacity:1!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon{width:48px!important;height:48px!important;display:grid!important;place-items:center!important;margin:12px 0 16px!important;background:var(--color-surface-muted)!important;background-image:none!important;border:1px solid var(--color-border)!important;border-radius:13px!important;box-shadow:none!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg{width:27px!important;height:27px!important;color:var(--color-primary-ink)!important;stroke:var(--color-border)!important}
-html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
+html body .founder-shell .founder-main :is(button.primary,button[type=submit]){background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border)!important}
 html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.table-scroll,.founder-user-list,.founder-table-wrap){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
 
 /* Stable record editing, maintenance timeline and founder console. */
@@ -1866,8 +1866,8 @@ html body .quick-record-form .ac-service-summary>div span{color:var(--color-mute
 html body .quick-record-form .ac-service-summary>div strong{color:var(--color-primary-ink)!important;text-align:right!important}
 html body .quick-record-form .record-form-footer{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:12px!important;position:sticky!important;bottom:-27px!important;z-index:3!important;margin:0 -26px -27px!important;padding:16px 26px!important;background:var(--color-surface)!important;border-top:1px solid var(--color-border)!important;box-shadow:0 -8px 20px color-mix(in srgb, var(--color-primary) 4%, transparent)!important}
 html body .quick-record-form .record-form-footer button{min-height:46px!important;padding:11px 22px!important;border-radius:10px!important;font-weight:750!important;background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;border:1px solid var(--color-border)!important}
-html body .quick-record-form .record-form-footer button.primary{background:var(--color-primary-deep)!important;background-image:none!important;color:var(--color-text)!important;border-color:var(--color-border)!important;box-shadow:0 5px 15px color-mix(in srgb, var(--color-primary) 17%, transparent)!important}
-html body .quick-record-form .record-form-footer button.primary:hover{background:var(--color-primary-deep)!important}
+html body .quick-record-form .record-form-footer button.primary{background:var(--color-primary)!important;background-image:none!important;color:var(--color-on-primary)!important;border-color:var(--color-border)!important;box-shadow:0 5px 15px color-mix(in srgb, var(--color-primary) 17%, transparent)!important}
+html body .quick-record-form .record-form-footer button.primary:hover{background:var(--color-primary-hover)!important}
 html body .quick-record-form .error{background:var(--color-surface-muted)!important;color:var(--color-danger-ink)!important;border:1px solid var(--color-danger)!important;border-radius:10px!important;padding:12px!important}
 @media(max-width:700px){html body .dialog:has(.quick-record-form){width:calc(100vw - 16px)!important;max-height:96dvh!important;border-radius:16px!important}html body .quick-record-form{padding:16px!important;gap:15px!important}html body .quick-record-form .operation-picker>div{grid-template-columns:repeat(2,minmax(0,1fr))!important}html body .quick-record-form .operation-picker button{min-height:68px!important}html body .quick-record-form .form-grid{grid-template-columns:minmax(0,1fr)!important}html body .quick-record-form :is(.ac-service-details,.service-detail-fields,.cost-field,.record-extra,.service-reminder-box,.ac-service-summary){padding:15px!important}html body .quick-record-form .record-form-footer{margin:0 -16px -16px!important;padding:12px 16px!important;bottom:-16px!important}html body .quick-record-form .record-form-footer button{flex:1!important;padding:10px!important}}
 @media(min-width:701px) and (max-width:980px){html body .quick-record-form .operation-picker>div{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
@@ -1889,7 +1889,7 @@ html body .quick-record-form .ac-filter-item{background:var(--color-surface)!imp
 html body .quick-record-form .ac-service-summary>div{border-bottom:1px solid var(--color-border)!important;padding-block:8px!important}
 html body .quick-record-form .ac-service-summary>div :is(span,strong){color:var(--color-primary-ink)!important}
 html body .quick-record-form .record-form-footer{position:sticky!important;bottom:0!important;z-index:4!important;background:var(--color-surface)!important;border-top:1px solid var(--color-border)!important;padding:14px!important}
-html body .quick-record-form .record-form-footer button[type=submit]{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
+html body .quick-record-form .record-form-footer button[type=submit]{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border)!important}
 html body .quick-record-form .record-form-footer button[type=button]{background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;border-color:var(--color-border)!important}
 @media(max-width:760px){html body .dialog:has(.quick-record-form){width:calc(100vw - 12px)!important;max-height:97dvh!important;border-radius:13px!important}html body .quick-record-form .form-grid{grid-template-columns:minmax(0,1fr)!important}html body .quick-record-form .operation-picker>div{grid-template-columns:repeat(2,minmax(0,1fr))!important}html body .quick-record-form .record-form-footer{margin:0!important;padding:10px!important}}
 /* Sidebar identity and garage car symbol. */
@@ -1936,7 +1936,7 @@ html body .quick-record-form :is(input,select,textarea){background:var(--color-s
 html body .quick-record-form textarea{min-height:96px!important;resize:vertical!important}
 html body .quick-record-form .operation-picker button[aria-pressed=true]{background:var(--color-surface-muted)!important;border:2px solid var(--color-primary)!important;color:var(--color-primary-ink)!important}
 html body .quick-record-form .operation-picker button[aria-pressed=true] :is(svg,span){color:var(--color-primary-ink)!important}
-html body .quick-record-form :is(.record-form-footer button.primary,.ac-add-filter){background:var(--color-primary-deep)!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;border-radius:11px!important}
+html body .quick-record-form :is(.record-form-footer button.primary,.ac-add-filter){background:var(--color-primary)!important;color:var(--color-on-primary)!important;border:1px solid var(--color-border)!important;border-radius:11px!important}
 html body .quick-record-form .record-extra>summary{cursor:pointer;padding:6px!important}
 html body .quick-record-form .ac-service-advice{background:var(--color-surface-muted)!important;border:1px solid var(--color-border)!important;border-radius:12px!important;padding:14px!important}
 html body .quick-record-form .ac-service-advice :is(strong,p){color:var(--color-primary-ink)!important}
@@ -1950,7 +1950,7 @@ html body .founder-shell .founder-main :is(.card,.stat,.founder-response,.founde
 html body .founder-shell .founder-main :is(h1,h2,h3,h4,p,span,small,label,strong,td,th,.muted,.micro,.value){color:var(--color-muted)!important;opacity:1!important}
 html body .founder-shell .founder-main :is(input,select,textarea){background:var(--color-surface)!important;color:var(--color-primary-ink)!important;border:1px solid var(--color-border)!important;color-scheme:dark!important}
 html body .founder-shell .founder-main button:not(.danger):not(.primary){background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;border-color:var(--color-border)!important}
-html body .founder-shell .founder-main button.primary{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
+html body .founder-shell .founder-main button.primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border)!important}
 html body .founder-shell .founder-main button.primary :is(span,strong,svg){color:var(--color-text)!important}
 html body .founder-shell .founder-main :is(.founder-role-badge,.role-badge,.pill.valid){background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important}
 html body .founder-shell .founder-sidebar{background:var(--color-surface)!important;color:var(--color-text)!important}
@@ -1962,7 +1962,7 @@ html body .app-shell .quick-record-form .ac-service-details,html body .app-shell
 html body .app-shell .quick-record-form :is(input,select,textarea){background:var(--color-surface)!important;color:var(--color-primary-ink)!important;border:1px solid var(--color-border)!important;min-height:43px!important;border-radius:10px!important}
 html body .app-shell .quick-record-form textarea{min-height:100px!important;resize:vertical!important}
 html body .app-shell .quick-record-form .operation-picker button[aria-pressed=true]{background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;border:2px solid var(--color-primary)!important}
-html body .app-shell .quick-record-form .record-form-footer button.primary{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
+html body .app-shell .quick-record-form .record-form-footer button.primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border)!important}
 @media(max-width:760px){html body .app-shell .quick-record-form .ac-service-details,html body .app-shell .quick-record-form .ac-service-summary{padding:14px!important}html body .app-shell .quick-record-form .form-grid{grid-template-columns:minmax(0,1fr)!important}}
 
 /* Founder Mail Center: scoped, responsive composition and isolated email preview. */

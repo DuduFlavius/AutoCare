@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { Crosshair } from 'lucide-react';
 import type { Map as LeafletMap, Marker, Polyline } from 'leaflet';
-import { createRoadPositionMarker } from '@/lib/road-position-marker';
+import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { routeGeometry, tripBounds } from '@/lib/road-map';
@@ -17,6 +18,9 @@ export default function RasterRoadMap({
   onAreaChange,
   autoPoints,
   onAutoPoint,
+  onLocate,
+  plannedRoute,
+  onDestination,
 }: {
   points: GPSFix[];
   position?: GPSFix | null;
@@ -27,15 +31,21 @@ export default function RasterRoadMap({
   onAreaChange?: (area: MapArea) => void;
   autoPoints?: AutoPoint[];
   onAutoPoint?: (id: string) => void;
+  onLocate?: () => void;
+  plannedRoute?: [number, number][];
+  onDestination?: (point: { latitude: number; longitude: number }) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
     map = useRef<LeafletMap | null>(null),
     marker = useRef<Marker | null>(null),
     line = useRef<Polyline | null>(null),
+    planned = useRef<Polyline | null>(null),
     latest = useRef(points);
   latest.current = points;
   const latestPosition = useRef(position);
   latestPosition.current = position;
+  const destinationAction = useRef(onDestination);
+  destinationAction.current = onDestination;
   const follow = useRef(true),
     [following, setFollowing] = useState(true),
     [tileError, setTileError] = useState(false),
@@ -66,19 +76,20 @@ export default function RasterRoadMap({
         layer.on('load', () => {
           if (!disposed) setTileError(false);
         });
+        planned.current = L.polyline([], { color: '#56d6e8', weight: 6, dashArray: '9 5', interactive: false }).addTo(view);
         line.current = L.polyline(
           routeGeometry(latest.current).features.map((f) =>
             f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
           ),
-          { color: history ? '#77d8b8' : '#92abff', weight: 4, lineCap: 'round', lineJoin: 'round' },
+          { color: history ? '#56d6e8' : '#398bff', weight: 4, lineCap: 'round', lineJoin: 'round' },
         ).addTo(view);
         if (history && last && latest.current.length > 1) {
           const first = latest.current[0];
-          L.circleMarker([first.latitude, first.longitude], { radius: 6, color: '#83e0bb', fillOpacity: 1 }).addTo(view);
-          L.circleMarker([last.latitude, last.longitude], { radius: 6, color: '#f3d696', fillOpacity: 1 }).addTo(view);
+          L.circleMarker([first.latitude, first.longitude], { radius: 6, color: '#75c9ac', fillOpacity: 1 }).addTo(view);
+          L.circleMarker([last.latitude, last.longitude], { radius: 6, color: '#56d6e8', fillOpacity: 1 }).addTo(view);
           const [sw, ne] = tripBounds(latest.current);
           view.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], { padding: [48, 48], maxZoom: 16, animate: false });
-        } else if (last)
+        } else if (last) {
           marker.current = L.marker([last.latitude, last.longitude], {
             icon: L.divIcon({
               className: 'ac-road-marker-host',
@@ -87,10 +98,12 @@ export default function RasterRoadMap({
               iconAnchor: [14, 14],
             }),
           }).addTo(view);
+        }
         if (onAreaChange) view.on('moveend', () => {
           const center = view.getCenter().wrap();
           onAreaChange({ latitude: center.lat, longitude: center.lng, zoom: view.getZoom() });
         });
+        view.on('click', ({ latlng }) => destinationAction.current?.({ longitude: latlng.wrap().lng, latitude: latlng.lat }));
         setReady(true);
         view.on('dragstart', () => {
           follow.current = false;
@@ -109,6 +122,7 @@ export default function RasterRoadMap({
       map.current = null;
       marker.current = null;
       line.current = null;
+      planned.current = null;
     };
   }, [english, history, initialArea, onAreaChange]);
   useEffect(() => {
@@ -134,10 +148,12 @@ export default function RasterRoadMap({
           marker.current.setLatLng([last.latitude, last.longitude]);
           return;
         }
+        const element = createRoadPositionMarker(english);
+        updateRoadPositionMarker(element, active, last, points);
         marker.current = L.marker([last.latitude, last.longitude], {
           icon: L.divIcon({
             className: 'ac-road-marker-host',
-            html: createRoadPositionMarker(english),
+            html: element,
             iconSize: [28, 28],
             iconAnchor: [14, 14],
           }),
@@ -148,7 +164,11 @@ export default function RasterRoadMap({
         animate: true,
         duration: 0.7,
       });
-  }, [points, position, english, history]);
+    updateRoadPositionMarker(marker.current?.getElement()?.querySelector<HTMLElement>('.ac-road-position'), active, last, points);
+  }, [points, position, english, history, active, ready]);
+  useEffect(() => {
+    planned.current?.setLatLngs(plannedRoute?.map(([lon, lat]) => [lat, lon]) ?? []);
+  }, [plannedRoute, ready]);
   useEffect(() => {
     const view = map.current;
     if (!view || !ready || !autoPoints?.length) return;
@@ -186,25 +206,20 @@ export default function RasterRoadMap({
             ? 'STREET MAP'
             : 'HARTĂ RUTIERĂ'}
       </span>
-      {!history && !initialArea && <button
+      {!history && (!initialArea || onLocate) && <button
         type="button"
         className="ac-road-map-center"
-        disabled={!position && !points.length}
+        disabled={!onLocate && !position && !points.length}
         aria-pressed={following}
         onClick={() => {
           follow.current = true;
           setFollowing(true);
+          onLocate?.();
           const p = position ?? points.at(-1);
           if (p) map.current?.setView([p.latitude, p.longitude], 16, { animate: true });
         }}
       >
-        {following
-          ? english
-            ? 'Following you'
-            : 'Te urmărește'
-          : english
-            ? 'Recenter on me'
-            : 'Recentrează pe mine'}
+        <Crosshair size={16}/>{english ? 'My location' : 'Poziția mea'}
       </button>}
       {tileError && (
         <p className="ac-road-map-message" role="status">

@@ -23,7 +23,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     if (!navigator.geolocation) { setLocationMessage(locale.startsWith('en') ? 'Location is not supported on this device.' : 'Localizarea nu este disponibilă pe acest dispozitiv.'); return; }
     setLocating(true); setLocationMessage('');
     navigator.geolocation.getCurrentPosition(position => {
-      setMapPosition({latitude:position.coords.latitude,longitude:position.coords.longitude,accuracy:position.coords.accuracy,timestamp:position.timestamp});
+      setMapPosition({latitude:position.coords.latitude,longitude:position.coords.longitude,accuracy:position.coords.accuracy,heading:position.coords.heading,timestamp:position.timestamp});
       setLocating(false);
       setLocationMessage(locale.startsWith('en') ? `Position located · accuracy approximately ${Math.round(position.coords.accuracy)} m. This does not record a trip or change mileage.` : `Poziție localizată · precizie aproximativă ${Math.round(position.coords.accuracy)} m. Nu înregistrează un traseu și nu modifică kilometrajul.`);
     }, error => {
@@ -152,7 +152,7 @@ const [active, setActive] = useState(false);
     tick.current = setInterval(() => { setTrackingSeconds(Math.floor((Date.now() - (started.current ?? Date.now())) / 1000)); setClock(new Date().toLocaleTimeString(locale)); }, 1000);
     watcher.current = navigator.geolocation.watchPosition(
       ({ coords, timestamp }) => {
-        const next: Sample = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, speed:coords.speed, timestamp };
+        const next: Sample = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, speed:coords.speed, heading:coords.heading, timestamp };
         if(![next.latitude,next.longitude,next.accuracy,next.timestamp].every(Number.isFinite)||next.accuracy>50||next.accuracy<0)return;
         if(timestamp>Date.now()+5000 || Date.now()-timestamp>15000)return;
         lastFix.current=Date.now(); setSignal('ok');
@@ -226,18 +226,15 @@ const [active, setActive] = useState(false);
       <div className="ac-smartdrive-map">
         <RoadMapView
           points={routePoints}
-          position={routePoints.at(-1) && (!active || !mapPosition || routePoints.at(-1)!.timestamp >= mapPosition.timestamp) ? routePoints.at(-1) : mapPosition}
+          position={mapPosition && (!lastPoint || mapPosition.timestamp >= lastPoint.timestamp) ? mapPosition : lastPoint}
+          onLocate={!active && !preview && !locating ? locate : undefined}
           active={active}
           english={locale.startsWith('en')}
         />
         {speed !== null && <div className="ac-drive-speed"><strong>{speed}</strong><span>km/h</span></div>}
         <div className="ac-drive-map-footer">
           <span><MapPin size={16}/> {locale.startsWith('en') ? 'Recorded route · GPS estimate' : 'Traseu înregistrat · estimare GPS'}</span>
-          {!active && routePoints.length === 0 && (
-            <button type="button" disabled={locating || preview} onClick={locate}>
-              {locating ? 'Se caută poziția…' : locale.startsWith('en') ? 'Show my location' : 'Arată poziția mea'}
-            </button>
-          )}
+
         </div>
         {locationMessage && !active && <p className="small muted" role="status">{locationMessage}</p>}
       </div>
@@ -260,7 +257,7 @@ const [active, setActive] = useState(false);
       <a href="?tab=%C3%8Entre%C8%9Binere">{english ? 'View service intervals' : 'Vezi termenele de întreținere'}</a>
     </div>}
     {active && signal === 'lost' && <div role="alert" className="ac-drive-signal-warning">Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și permisiunile telefonului. Distanța nu crește fără puncte valide.</div>}
-    {active && signal === 'waiting' && <p role="status" style={{color:'#815500'}}>Se caută semnal GPS de precizie…</p>}
+    {active && signal === 'waiting' && <p role="status" style={{color:'var(--color-muted)'}}>Se caută semnal GPS de precizie…</p>}
     <p role="status"><strong>{native ? 'GPS Android/iOS nativ · disponibil în fundal' : 'GPS în browser · fără urmărire în fundal'}</strong></p>
     {native && <button type="button" onClick={() => void import('@/lib/native-tracking').then(({nativeAutomation}) => nativeAutomation.openSettings()).catch(() => setError('Deschide Setările telefonului → Aplicații → AutoCare.'))}>Deschide permisiunile telefonului</button>}
     {native && <p className="small muted">După Pornește GPS trebuie să apară notificarea permanentă „AutoCare · GPS activ”. Pe Android, verifică în Setări → Aplicații → AutoCare: locație precisă, notificări permise și Baterie → Fără restricții. Pentru pornirea automată prin Bluetooth, permite locația „Tot timpul”.</p>}

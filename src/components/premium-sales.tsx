@@ -106,8 +106,8 @@ export default function PremiumSales({
         <button type="button" onClick={onChoosePlan}>{en ? 'Choose your plan' : 'Alege planul potrivit'} ↗</button>
         <small>
           {en
-            ? 'All Premium plans include the same tools. Only the billing period differs.'
-            : 'Toate planurile Premium includ aceleași instrumente. Diferă doar perioada de facturare.'}
+            ? 'Premium tools are included with every plan. Each billing option highlights a different quick report.'
+            : 'Instrumentele Premium sunt incluse în fiecare plan. Fiecare perioadă de facturare are o scurtătură proprie de raportare.'}
         </small>
       </section>
       <section className="card" data-workspace-ui>

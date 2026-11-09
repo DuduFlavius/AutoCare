@@ -44,7 +44,7 @@ export const pages: Record<
   },
   'cum-functioneaza': {
     title: 'De la cont la primul memento',
-    intro: 'Câțiva pași simpli pentru un garaj organizat.',
+    intro: 'Configurezi garajul o singură dată. Apoi vezi ce urmează pentru fiecare mașină și decizi ce călătorii actualizează kilometrajul.',
     sections: [
       [
         '01. Creează contul',
@@ -60,7 +60,19 @@ export const pages: Record<
       ],
       [
         '04. Alege alertele',
-        'Configurează fusul orar și intervalele disponibile. Consultă istoricul notificărilor pentru statusul fiecărei trimiteri.',
+        'Alege intervalele și ora mementourilor. Pentru alerte prin email, confirmă adresa și activează canalul din Setări. Istoricul notificărilor arată starea trimiterilor.',
+      ],
+      [
+        '05. Pornește o călătorie cu SmartDrive',
+        'Selectează mașina și permite locația precisă. La salvare poți adăuga distanța GPS la kilometraj. Scadențele de întreținere folosesc kilometrajul nou și intervalele pe care le-ai configurat.',
+      ],
+      [
+        '06. Găsește următoarea oprire',
+        'În AutoCare Maps, centrează harta pe poziția ta și caută un service, o benzinărie sau o parcare. Alege un rezultat sau marchează destinația pe hartă pentru indicații și estimarea sosirii.',
+      ],
+      [
+        '07. Configurează Bluetooth-ul mașinii',
+        'În aplicația Android, asociază mai întâi telefonul cu sistemul audio al mașinii. Alege apoi acel dispozitiv pentru mașina potrivită în AutoCare și acordă permisiunile de localizare în fundal.',
       ],
     ],
   },

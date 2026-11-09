@@ -6,8 +6,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Garajul tău digital',
     start_url: '/cont',
     display: 'standalone',
-    background_color: '#f4f7fb',
-    theme_color: '#151B26',
+    background_color: '#090d14',
+    theme_color: '#111925',
     lang: 'ro',
     icons: [
       { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

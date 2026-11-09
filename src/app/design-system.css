@@ -1,23 +1,32 @@
 :root {
   color-scheme: dark;
-  --color-on-primary: #19150e;
-  --color-primary-deep: #665035;
+  /* Midnight Titanium */
+  --obsidian-black: #090d14;
+  --midnight-navy: #111925;
+  --graphite: #1b2633;
+  --steel: #344253;
+  --electric-blue: #398bff;
+  --ice-cyan: #56d6e8;
+  --titanium-silver: #b8c4d2;
+  --titanium-white: #f3f6fa;
+  --color-on-primary: var(--obsidian-black);
+  --color-primary-deep: color-mix(in srgb, var(--electric-blue) 23%, var(--midnight-navy));
   --color-shadow-color: #0005;
-  --color-platinum: #d5d9dc;
-  --color-nav: #101820;
-  --color-nav-raised: #1b252e;
-  --color-primary: #c6a56b;
-  --color-primary-hover: #ddbc82;
-  --color-primary-soft: #332d24;
-  --color-primary-ink: #e5c88f;
-  --color-bg: #101820;
-  --color-surface: #1b252e;
-  --color-surface-muted: #24313b;
-  --color-border: #374651;
-  --color-border-strong: #566571;
-  --color-text: #f4f2ed;
-  --color-muted: #b8c1c8;
-  --color-subtle: #a4afb7;
+  --color-platinum: var(--titanium-silver);
+  --color-nav: var(--midnight-navy);
+  --color-nav-raised: var(--graphite);
+  --color-primary: var(--electric-blue);
+  --color-primary-hover: color-mix(in srgb, var(--electric-blue) 83%, var(--titanium-white));
+  --color-primary-soft: color-mix(in srgb, var(--electric-blue) 13%, var(--midnight-navy));
+  --color-primary-ink: color-mix(in srgb, var(--electric-blue) 42%, var(--titanium-white));
+  --color-bg: var(--obsidian-black);
+  --color-surface: var(--midnight-navy);
+  --color-surface-muted: var(--graphite);
+  --color-border: var(--steel);
+  --color-border-strong: color-mix(in srgb, var(--steel) 78%, var(--titanium-silver));
+  --color-text: var(--titanium-white);
+  --color-muted: var(--titanium-silver);
+  --color-subtle: color-mix(in srgb, var(--titanium-silver) 86%, var(--steel));
   --color-success: #75c9ac;
   --color-success-ink: #a6e7cf;
   --color-success-soft: #203c35;
@@ -46,7 +55,7 @@
   --muted: var(--color-muted);
   --border: var(--color-border);
   --accent: var(--color-primary);
-  --cyan: var(--color-primary);
+  --cyan: var(--ice-cyan);
   --danger: var(--color-danger);
   --warning: var(--color-warning);
 }

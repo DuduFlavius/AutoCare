@@ -1,3 +1,5 @@
+import { loadDrivingRoutes, roadCoordinate } from '@/lib/road-navigation-server';
+import { autoPointCategories } from '@/lib/auto-points';
 import { loadAutoPoints } from '@/lib/auto-points-server';
 import {automaticTripBatch} from '@/lib/automatic-trips';
 import { revalidatePath, revalidateTag } from 'next/cache';
@@ -130,12 +132,17 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     const uid = sess.user.id;
     await svc.assertActiveAccount(uid);
     await rate(uid);
+    if (route === 'smartdrive/directions' && method === 'POST') {
+      await rate(uid, 'smartdrive-directions', 8);
+      const { start, end } = z.object({ start: roadCoordinate, end: roadCoordinate }).parse(await body(req));
+      return json(await loadDrivingRoutes(start, end));
+    }
     if (route === 'smartdrive/auto-points' && method === 'POST') {
       await rate(uid, 'auto-points', 10);
       const { latitude, longitude, category } = z.object({
         latitude: z.number().min(-90).max(90),
         longitude: z.number().min(-180).max(180),
-        category: z.enum(['service', 'fuel', 'parking', 'charging']),
+        category: z.enum(Object.keys(autoPointCategories) as [keyof typeof autoPointCategories, ...(keyof typeof autoPointCategories)[]]),
       }).parse(await body(req));
       try {
         return json(await loadAutoPoints(Number(latitude.toFixed(2)), Number(longitude.toFixed(2)), category));

@@ -1,12 +1,12 @@
 /* Shared editorial, workspace and map surfaces. Colors originate in design-system.css. */
 :root {
-  --ac-inset: color-mix(in srgb, var(--color-bg) 80%, #070b14);
-  --ac-panel: color-mix(in srgb, var(--color-surface) 84%, #17213a);
-  --ac-edge: color-mix(in srgb, var(--color-border) 85%, var(--color-primary));
+  --ac-inset: var(--obsidian-black);
+  --ac-panel: var(--midnight-navy);
+  --ac-edge: var(--steel);
   --ac-gap: clamp(12px, 2vw, 22px);
   --ac-frame: clamp(18px, 4vw, 44px);
   --ac-hero:
-    radial-gradient(ellipse at 88% 0%, #334469 0%, transparent 57%),
+    radial-gradient(ellipse at 88% 0%, var(--color-primary-deep) 0%, transparent 57%),
     linear-gradient(140deg, var(--color-surface), var(--ac-inset) 75%);
 }
 .ac-public-shell {
@@ -237,7 +237,7 @@ html body .ac-workspace.ac-studio .studio-overview .studio-mini-chart {
   min-height: 130px;
 }
 html body .ac-workspace.ac-studio .studio-mini-chart .studio-chart-track > i {
-  background: linear-gradient(to top, #735833, var(--color-primary-ink));
+  background: linear-gradient(to top, var(--electric-blue), var(--ice-cyan));
 }
 .ac-expenses-board {
   margin-bottom: var(--ac-gap);
@@ -775,3 +775,91 @@ html body .ac-workspace .ac-subscription-workspace > .card:first-child {
 @media (max-width: 480px) {
   .ac-report-filters { grid-template-columns: minmax(0, 1fr); }
 }
+
+.ac-road-position {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: #f3f6fa;
+  border: 4px solid #f3f6fa;
+  border-radius: 50%;
+  background: #398bff;
+  box-shadow: 0 0 0 7px #398bff33, 0 3px 12px #090d1473;
+  pointer-events: none;
+}
+.ac-road-position svg { visibility: hidden; }
+.ac-road-position.is-driving {
+  border: 0;
+  border-radius: 8px;
+  transform: none;
+  background: #0d2442;
+  outline: 1px solid #56d6e8;
+  box-shadow: 0 4px 14px #090d14cc;
+}
+.ac-road-position.is-driving svg { visibility: visible; rotate: var(--gps-bearing, 0deg); }
+.ac-navigation-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.ac-navigation-tools :is(a, button) { display: inline-flex; gap: 6px; align-items: center; min-height: 42px; }
+.ac-navigation-card {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  overflow-wrap: anywhere;
+}
+.ac-next-turn { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }
+.ac-next-turn small { display: block; color: var(--color-muted); }
+.ac-next-turn > small { grid-column: 2; }
+.ac-map-selecting .ac-road-map-canvas { cursor: crosshair; }
+.ac-auto-points-layout li button small { margin-inline-start: auto; white-space: nowrap; }
+
+html:has(.app-shell), body:has(.app-shell) { overscroll-behavior-x: none; }
+html body .app-shell :is(.main, .support-workspace, .support-chat-panel, .support-header-title, .support-thread-select > span) { min-inline-size: 0; }
+html body .app-shell :is(.support-header-title, .support-thread-select, .support-message) { overflow-wrap: anywhere; }
+html body .app-shell .support-workspace :is(.support-filters, .support-header-actions) { flex-wrap: wrap; }
+@media (max-width: 760px) {
+  body:has(.app-shell) { overflow-x: clip; }
+  html body .app-shell .main { max-inline-size: 100%; }
+  html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock {
+    inline-size: auto !important;
+    inset-inline: 0 !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    padding-inline: max(3px, env(safe-area-inset-left)) max(3px, env(safe-area-inset-right)) !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock a {
+    min-inline-size: 0 !important;
+    min-block-size: 48px;
+    padding-inline: 1px !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock a span {
+    font-size: clamp(8px, 2.55vw, 11px) !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap;
+  }
+  html body .app-shell .support-workspace .support-chat-header { flex-wrap: wrap; }
+  html body .app-shell .support-workspace :is(.support-sidebar, .support-composer) { max-inline-size: 100%; }
+}
+
+.ac-plan-report {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+.ac-plan-report > span { color: var(--color-muted); font-size: 10px; letter-spacing: .08em; }
+.ac-plan-report a { display: inline-flex; align-items: center; gap: 6px; text-decoration: underline; text-underline-offset: 3px; }
+
+.ac-map-stage > .ac-next-turn {
+  padding: 10px 12px;
+  border: 1px solid var(--color-primary);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+}
+.ac-map-stage:modal > .ac-next-turn { position: sticky; inset-block-start: 48px; z-index: 12; }
+.ac-road-map-center { display: inline-flex; gap: 6px; align-items: center; }

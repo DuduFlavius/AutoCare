@@ -132,7 +132,7 @@ export default function AutoUpdate() {
       window.location.reload();
     }}>{installing ? (en ? 'Installing…' : 'Se instalează…') : (en ? 'Install update' : 'Instalează actualizarea')}</button>
     {installError && <p role="alert">{en ? 'Could not open the installer. Try again after saving your trip.' : 'Kitul de instalare nu a putut fi deschis. Reîncearcă după salvarea traseului.'}</p>}
-    {gpsBlocked && <p style={{color:'#fbd38d',margin:'10px 0 0'}}>{en ? 'Stop and save your GPS trip before installing.' : 'Oprește și salvează traseul GPS înainte de instalare.'}</p>}
+    {gpsBlocked && <p style={{color:'var(--color-warning-ink)',margin:'10px 0 0'}}>{en ? 'Stop and save your GPS trip before installing.' : 'Oprește și salvează traseul GPS înainte de instalare.'}</p>}
   </aside>;
 }
 

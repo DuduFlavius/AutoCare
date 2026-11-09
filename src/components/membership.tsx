@@ -8,6 +8,7 @@ import './membership-premium.css';
 import { useApplicationLocale } from './application-locale';
 import { Check, ArrowUpRight, CreditCard, ShieldCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
+import { localDate } from '@/lib/config';
 import { savings } from '@/lib/pricing-display';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 const amount = (b: number) =>
@@ -19,6 +20,7 @@ export function PriceCards({
   busy = false,
   prepaid = false,
   language = 'ro',
+  reportTimezone,
 }: {
   monthlyBani: number;
   annualBani: number;
@@ -26,6 +28,7 @@ export function PriceCards({
   busy?: boolean;
   prepaid?: boolean;
   language?: 'ro' | 'en';
+  reportTimezone?: string;
 }) {
   const locale = useApplicationLocale();
   const s = savings(monthlyBani, annualBani);
@@ -37,6 +40,12 @@ export function PriceCards({
       maximumFractionDigits: 2,
     }).format(b / 500);
   const price = (b: number) => (en ? euro(b) : amount(b));
+  const to = reportTimezone ? localDate(new Date(), reportTimezone) : '';
+  function reportLink(months: number, kind: 'service' | 'expense' | '', format: 'pdf' | 'csv') {
+    const [year, month] = to.split('-').map(Number);
+    const from = new Date(Date.UTC(year, month - months, 1)).toISOString().slice(0, 10);
+    return '/api/v1/export?' + new URLSearchParams({ format, archived: 'active', from, to, ...(kind && { kind }) });
+  }
   return (
     <div className="subscription-options ac-plan-grid">
       <article className="card subscription-option ac-plan-card">
@@ -86,6 +95,10 @@ export function PriceCards({
             <Check size={15} /> {en?'Manage in the billing portal':'Gestionare din portalul de facturare'}
           </li>
         </ul>
+        <div className="ac-plan-report">
+          <span>{en ? 'QUICK REPORT' : 'RAPORT RAPID'}</span>
+          {reportTimezone ? <a href={reportLink(1, 'service', 'pdf')}>{en ? 'Monthly service PDF' : 'Fișa de revizii a lunii'} <ArrowUpRight size={14}/></a> : <strong>{en ? 'Monthly service PDF' : 'Fișa de revizii a lunii'}</strong>}
+        </div>
         {checkout ? (
           <button className="button" disabled={busy} onClick={() => checkout('monthly')}>
             {prepaid?(en?'Add 1 month':'Adaugă 1 lună'):(en?'Choose monthly':'Alege lunar')} <ArrowUpRight size={15} />
@@ -143,6 +156,10 @@ export function PriceCards({
             <Check size={15} /> {en?'Manage in the billing portal':'Gestionare din portalul de facturare'}
           </li>
         </ul>
+        <div className="ac-plan-report">
+          <span>{en ? 'QUICK REPORT' : 'RAPORT RAPID'}</span>
+          {reportTimezone ? <a href={reportLink(3, 'expense', 'csv')}>{en ? 'Three-month expense CSV' : 'Cheltuieli pe 3 luni'} <ArrowUpRight size={14}/></a> : <strong>{en ? 'Three-month expense CSV' : 'Cheltuieli pe 3 luni'}</strong>}
+        </div>
         {checkout ? (
           <button className="button" disabled={busy} onClick={() => checkout('quarterly')}>
             {prepaid?(en?'Add 3 months':'Adaugă 3 luni'):(en?'Choose 3 months':'Alege 3 luni')} <ArrowUpRight size={15} />
@@ -211,6 +228,10 @@ export function PriceCards({
             {s.savingBani>0?(en?'Lower cost than 12 monthly payments':'Cost mai mic față de 12 plăți lunare'):(en?'One payment per year':'O singură plată pe an')}
           </li>
         </ul>
+        <div className="ac-plan-report">
+          <span>{en ? 'QUICK REPORT' : 'RAPORT RAPID'}</span>
+          {reportTimezone ? <a href={reportLink(12, '', 'pdf')}>{en ? '12-month garage PDF' : 'Dosarul garajului pe 12 luni'} <ArrowUpRight size={14}/></a> : <strong>{en ? '12-month garage PDF' : 'Dosarul garajului pe 12 luni'}</strong>}
+        </div>
         {checkout ? (
           <button className="primary" disabled={busy} onClick={() => checkout('annual')}>
             {prepaid?(en?'Add 12 months':'Adaugă 12 luni'):(en?'Choose annual':'Alege anual')} <ArrowUpRight size={15} />

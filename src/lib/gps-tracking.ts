@@ -1,5 +1,5 @@
 /** Accepted fixes form distance anchors, so small real movements accumulate. */
-export type GPSFix = { latitude: number; longitude: number; accuracy: number; timestamp: number; speed?: number | null; breakBefore?: boolean };
+export type GPSFix = { latitude: number; longitude: number; accuracy: number; timestamp: number; speed?: number | null; heading?: number | null; breakBefore?: boolean };
 const radians = (n: number) => n * Math.PI / 180;
 export function segmentMeters(a: GPSFix, b: GPSFix): number {
   const h = Math.sin(radians(b.latitude-a.latitude)/2)**2 + Math.cos(radians(a.latitude))*Math.cos(radians(b.latitude))*Math.sin(radians(b.longitude-a.longitude)/2)**2;

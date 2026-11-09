@@ -75,9 +75,9 @@
     font-weight: 500 !important;
   }
   html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a.active {
-    background: linear-gradient(105deg, var(--color-primary-deep), var(--color-primary-deep)) !important;
+    background: var(--color-primary-soft) !important;
     color: var(--color-text) !important;
-    box-shadow: 0 5px 16px #0002 !important;
+    box-shadow: inset 2px 0 var(--electric-blue) !important;
     font-weight: 650 !important;
   }
   html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a:hover:not(.active) {
@@ -239,13 +239,13 @@
     border-color: var(--color-border-strong) !important;
   }
   html body .app-shell.ac-workspace.ac-studio .main :is(button.primary, .button.primary) {
-    background: var(--color-primary-deep) !important;
+    background: var(--color-primary) !important;
     border-color: var(--color-border-strong) !important;
-    color: var(--color-text) !important;
+    color: var(--color-on-primary) !important;
     box-shadow: 0 5px 16px color-mix(in srgb, var(--color-primary) 11%, transparent) !important;
   }
   html body .app-shell.ac-workspace.ac-studio .main :is(button.primary, .button.primary):hover {
-    background: var(--color-primary-deep) !important;
+    background: var(--color-primary-hover) !important;
   }
   html body .app-shell.ac-workspace.ac-studio .main :is(button.danger, .danger) {
     background: var(--color-danger-soft) !important;
@@ -846,7 +846,7 @@
     display: block;
     width: 100%;
     min-height: 0;
-    background: linear-gradient(var(--color-primary-deep), var(--color-primary-deep));
+    background: linear-gradient(to top, var(--electric-blue), var(--ice-cyan));
     border-radius: 5px 5px 0 0;
     transform-origin: bottom;
     animation: studio-chart-in 0.55s ease-out both;
@@ -1166,7 +1166,7 @@
     min-width: 0 !important;
   }
   html body .app-shell.ac-workspace.ac-studio .chart .bar-fill {
-    background: linear-gradient(var(--color-surface-muted), var(--color-primary-deep)) !important;
+    background: linear-gradient(to top, var(--electric-blue), var(--ice-cyan)) !important;
     border-radius: 6px 6px 0 0 !important;
     transform-origin: bottom;
     animation: studio-chart-in 0.6s ease both;
@@ -1249,9 +1249,9 @@
     min-height: 48px !important;
     margin-top: auto !important;
     font-size: 15px !important;
-    background: var(--color-primary-deep) !important;
+    background: var(--color-primary) !important;
     border-color: var(--color-border-strong) !important;
-    color: var(--color-text) !important;
+    color: var(--color-on-primary) !important;
   }
   html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row'] {
     display: grid !important;
@@ -1355,9 +1355,9 @@
     border-radius: 9px !important;
   }
   html body .app-shell.ac-workspace.ac-studio .dialog button.primary {
-    background: var(--color-primary-deep) !important;
+    background: var(--color-primary) !important;
     border-color: var(--color-border-strong) !important;
-    color: var(--color-text) !important;
+    color: var(--color-on-primary) !important;
   }
   html
     body
@@ -1936,7 +1936,7 @@
 }
 @layer autocare-workspace {
  html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) svg {color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) button.primary svg {color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) button.primary svg {color:var(--color-on-primary) !important;}
  html body .app-shell.ac-workspace.ac-studio .record-category-grid svg {background:var(--color-surface-muted) !important; color:var(--color-text) !important;}
 }
 @layer autocare-workspace {

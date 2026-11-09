@@ -1,3 +1,4 @@
+import { queueAutomatedMail } from './mail-automation';
 import { and, eq, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { effectiveRole } from './permissions';
@@ -243,6 +244,9 @@ export async function sendSupportMessage(uid: string, input: unknown) {
       .update(s.supportThreads)
       .set({ updatedAt: sentAt })
       .where(eq(s.supportThreads.id, thread.id));
+    if (who.staff) {
+      await queueAutomatedMail(thread.userId, 'support_reply', `support-reply:${thread.id}:${sentAt.toISOString().slice(0, 13)}`, {}, tx);
+    }
     return { threadId: thread.id, message };
   });
 }

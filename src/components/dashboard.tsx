@@ -239,7 +239,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
               <History size={17}/> {locale.startsWith('en') ? 'Trip History' : 'Istoric trasee'}
             </button>
             <button type="button" aria-pressed={driveView === 'points'} onClick={() => setDriveView('points')}>
-              <MapPin size={17}/> {locale.startsWith('en') ? 'Auto Points' : 'Puncte auto'}
+              <MapPin size={17}/> {locale.startsWith('en') ? 'Maps & auto points' : 'Hartă și puncte auto'}
             </button>
             <button type="button" aria-pressed={driveView === 'bluetooth'} onClick={() => setDriveView('bluetooth')}>
               <Bluetooth size={17}/> Bluetooth
@@ -274,7 +274,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
             <div className="mileage-planner-odometer"><span>Kilometraj înregistrat</span><strong>{fmt(v.odometer)}</strong></div>
             {editing === v.id ? <div className="mileage-planner-edit">
               <label>Kilometraj actual (km)<input id={'ac-mileage-'+v.id} type="number" min={v.odometer} step="1" value={km} onChange={e => {setKm(e.target.value);setConfirmedJump(null)}} /></label>
-              {confirmedJump === v.id+':'+Number(km) && <div role="alert" style={{padding:16,border:'1px solid #f0c68b',background:'linear-gradient(125deg,#fffaf0,#fff2dd)',color:'#6e410c',borderRadius:14,margin:'12px 0'}}><strong style={{display:'block',fontSize:16}}>Ești sigur că ai parcurs atât?</strong><p style={{margin:'7px 0'}}>Ai introdus o creștere de <b>{(Number(km)-v.odometer).toLocaleString(locale)} km</b> față de ultima valoare confirmată. Verifică cifra de pe bord înainte de salvare.</p><p style={{fontSize:12,margin:0}}>Poți corecta valoarea în câmpul de mai sus sau confirma înregistrarea. Nu modificăm automat kilometrajul.</p></div>}
+              {confirmedJump === v.id+':'+Number(km) && <div role="alert" style={{padding:16,border:'1px solid var(--color-warning)',background:'var(--color-warning-soft)',color:'var(--color-warning-ink)',borderRadius:14,margin:'12px 0'}}><strong style={{display:'block',fontSize:16}}>Ești sigur că ai parcurs atât?</strong><p style={{margin:'7px 0'}}>Ai introdus o creștere de <b>{(Number(km)-v.odometer).toLocaleString(locale)} km</b> față de ultima valoare confirmată. Verifică cifra de pe bord înainte de salvare.</p><p style={{fontSize:12,margin:0}}>Poți corecta valoarea în câmpul de mai sus sau confirma înregistrarea. Nu modificăm automat kilometrajul.</p></div>}
               <button className="primary" disabled={saving} onClick={() => void saveKm(v)}>{saving ? 'Se salvează…' : 'Actualizează km'}</button>
               <button disabled={saving} onClick={() => setEditing(null)}>Anulează</button>
             </div> : <button onClick={() => {setEditing(v.id);setKm(String(v.odometer));setConfirmedJump(null);}}>Actualizează kilometrajul</button>}

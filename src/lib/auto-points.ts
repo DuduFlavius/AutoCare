@@ -4,8 +4,11 @@ export const autoPointCategories = {
     value: 'car_repair',
     label: 'Service',
     english: 'Repair shop',
-    color: '#f2c47f',
+    color: '#b8c4d2',
   },
+  tyres: { tag: 'shop', value: 'tyres', label: 'Vulcanizare', english: 'Tyre shop', color: '#a4bbd4' },
+  wash: { tag: 'amenity', value: 'car_wash', label: 'Spălătorie', english: 'Car wash', color: '#56d6e8' },
+  parts: { tag: 'shop', value: 'car_parts', label: 'Piese auto', english: 'Car parts', color: '#b8c4d2' },
   fuel: {
     tag: 'amenity',
     value: 'fuel',
@@ -37,6 +40,9 @@ export type AutoPoint = {
   longitude: number;
   category: AutoPointCategory;
   name: string | null;
+  address?: string;
+  hours?: string;
+  phone?: string;
 };
 
 export const defaultAutoPointsArea: MapArea = { latitude: 45.75, longitude: 21.23, zoom: 13 };
@@ -61,13 +67,20 @@ export function parseAutoPoints(data: unknown, category: AutoPointCategory): Aut
       !['node', 'way', 'relation'].includes(row.type)
     )
       return [];
-    const name = row.tags?.name ?? row.tags?.brand;
+    const tags = row.tags;
+    const clean = (value: unknown) => typeof value === 'string' ? value.trim().slice(0, 240) || undefined : undefined;
+    const name = tags?.name ?? tags?.brand ?? tags?.operator;
+    const street = [clean(tags?.['addr:street']), clean(tags?.['addr:housenumber'])].filter(Boolean).join(' ');
+    const phone = clean(tags?.['contact:phone'] ?? tags?.phone);
     return [
       {
         id: row.type + '/' + row.id,
         latitude,
         longitude,
         category,
+        address: clean(tags?.['addr:full']) ?? ([street, clean(tags?.['addr:city'])].filter(Boolean).join(', ') || undefined),
+        hours: clean(tags?.opening_hours),
+        phone: phone && /^\+?[\d ().-]{5,25}$/.test(phone) ? phone : undefined,
         name: typeof name === 'string' ? name.trim().slice(0, 160) || null : null,
       },
     ];

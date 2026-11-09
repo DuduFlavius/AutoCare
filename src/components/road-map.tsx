@@ -1,8 +1,9 @@
 'use client';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
+import { Crosshair } from 'lucide-react';
 import type { Map as RoadMap, Marker, GeoJSONSource } from 'maplibre-gl';
-import { createRoadPositionMarker } from '@/lib/road-position-marker';
+import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { roadMapStyle, routeGeometry, streetOnlyStyle, tripBounds } from '@/lib/road-map';
@@ -18,6 +19,9 @@ export default function RoadMapView({
   onAreaChange,
   autoPoints,
   onAutoPoint,
+  onLocate,
+  plannedRoute,
+  onDestination,
 }: {
   points: GPSFix[];
   position?: GPSFix | null;
@@ -28,6 +32,9 @@ export default function RoadMapView({
   onAreaChange?: (area: MapArea) => void;
   autoPoints?: AutoPoint[];
   onAutoPoint?: (id: string) => void;
+  onLocate?: () => void;
+  plannedRoute?: [number, number][];
+  onDestination?: (point: { latitude: number; longitude: number }) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
     map = useRef<RoadMap | null>(null),
@@ -36,6 +43,8 @@ export default function RoadMapView({
   latest.current = points;
   const latestPosition = useRef(position);
   latestPosition.current = position;
+  const destinationAction = useRef(onDestination);
+  destinationAction.current = onDestination;
   const follow = useRef(true);
   const [failed, setFailed] = useState(false),
     [loading, setLoading] = useState(true),
@@ -76,6 +85,7 @@ export default function RoadMapView({
             const center = view.getCenter().wrap();
             onAreaChange({ latitude: center.lat, longitude: center.lng, zoom: view.getZoom() });
           });
+          view.on('click', ({ lngLat }) => destinationAction.current?.({ longitude: lngLat.wrap().lng, latitude: lngLat.lat }));
           view.on('dragstart', () => {
             follow.current = false;
             setFollowing(false);
@@ -83,19 +93,25 @@ export default function RoadMapView({
           view.on('load', () => {
             if (disposed) return;
             window.clearTimeout(fallbackTimer);
+            view.addSource('directions', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+            view.addLayer({
+              id: 'directions-line', type: 'line', source: 'directions',
+              paint: { 'line-color': '#56d6e8', 'line-width': 6, 'line-dasharray': [2, 1] },
+              layout: { 'line-cap': 'round', 'line-join': 'round' },
+            });
             view.addSource('trip', { type: 'geojson', data: routeGeometry(latest.current) });
             view.addLayer({
               id: 'trip-outline',
               type: 'line',
               source: 'trip',
-              paint: { 'line-color': '#1a2541', 'line-width': 9 },
+              paint: { 'line-color': '#111925', 'line-width': 9 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addLayer({
               id: 'trip-line',
               type: 'line',
               source: 'trip',
-              paint: { 'line-color': history ? '#77d8b8' : '#92abff', 'line-width': 4 },
+              paint: { 'line-color': history ? '#56d6e8' : '#398bff', 'line-width': 4 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             const element = createRoadPositionMarker(english);
@@ -108,7 +124,7 @@ export default function RoadMapView({
             // has a usable map. Apply the latest fix when loading completes.
             if (history && latest.current.length > 1) {
               const first = latest.current[0], last = latest.current.at(-1)!;
-              for (const [point, color] of [[first, '#83e0bb'], [last, '#f3d696']] as const) {
+              for (const [point, color] of [[first, '#75c9ac'], [last, '#56d6e8']] as const) {
                 new lib.Marker({ color, scale: 0.72 }).setLngLat([point.longitude, point.latitude]).addTo(view);
               }
               view.fitBounds(tripBounds(latest.current), { padding: 52, maxZoom: 16, duration: 0 });
@@ -180,6 +196,7 @@ export default function RoadMapView({
           return;
         }
         const element = createRoadPositionMarker(english);
+        updateRoadPositionMarker(element, active, p, points);
         marker.current = new lib.Marker({ element })
           .setLngLat([p.longitude, p.latitude])
           .addTo(view);
@@ -191,7 +208,15 @@ export default function RoadMapView({
         zoom: Math.max(15, view.getZoom()),
         duration: 750,
       });
-  }, [points, position, english, history]);
+    updateRoadPositionMarker(marker.current?.getElement(), active, p, points);
+  }, [points, position, english, history, active, loading]);
+  useEffect(() => {
+    const view = map.current;
+    const source = view?.getSource('directions') as GeoJSONSource | undefined;
+    source?.setData({ type: 'FeatureCollection', features: plannedRoute?.length ? [{
+      type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: plannedRoute },
+    }] : [] });
+  }, [plannedRoute, loading]);
   useEffect(() => {
     const view = map.current;
     if (!view || loading || failed || !autoPoints?.length) return;
@@ -208,14 +233,14 @@ export default function RoadMapView({
         element.setAttribute('aria-label', label);
         element.title = label;
         element.style.setProperty('--poi-color', category.color);
-        element.addEventListener('click', () => onAutoPoint?.(point.id));
+        element.addEventListener('click', event => { event.stopPropagation(); onAutoPoint?.(point.id); });
         pins.push(new Marker({ element }).setLngLat([point.longitude, point.latitude]).addTo(view));
       }
     });
     return () => { cancelled = true; pins.forEach(pin => pin.remove()); };
   }, [autoPoints, loading, failed, english, onAutoPoint]);
   if (failed)
-    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} />;
+    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} onDestination={onDestination} plannedRoute={plannedRoute} />;
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -232,26 +257,21 @@ export default function RoadMapView({
             ? 'STREET MAP'
             : 'HARTĂ RUTIERĂ'}
       </span>
-      {!history && !initialArea && <button
+      {!history && (!initialArea || onLocate) && <button
         type="button"
         className="ac-road-map-center"
-        disabled={!position && !points.length}
+        disabled={!onLocate && !position && !points.length}
         aria-pressed={following}
         onClick={() => {
           follow.current = true;
           setFollowing(true);
+          onLocate?.();
           const p = position ?? points.at(-1);
           if (p)
             map.current?.easeTo({ center: [p.longitude, p.latitude], zoom: 16, duration: 700 });
         }}
       >
-        {following
-          ? english
-            ? 'Following you'
-            : 'Te urmărește'
-          : english
-            ? 'Recenter on me'
-            : 'Recentrează pe mine'}
+        <Crosshair size={16}/>{english ? 'My location' : 'Poziția mea'}
       </button>}
       {loading && !failed && (
         <p className="ac-road-map-message" role="status">

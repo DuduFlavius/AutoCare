@@ -62,9 +62,9 @@ html body .ac-workspace .ac-smartdrive-trip-controls button{min-height:48px;bord
 
 /* Cockpit surfaces shared by the garage, maintenance and SmartDrive. */
 .ac-workspace.ac-studio {
-  --cockpit-night: #151e2b;
-  --cockpit-edge: #3b4a5d;
-  --cockpit-blue: #a2b6ff;
+  --cockpit-night: var(--midnight-navy);
+  --cockpit-edge: var(--steel);
+  --cockpit-blue: var(--electric-blue);
 }
 .studio-dashboard-metrics {
   display: grid;
@@ -83,13 +83,13 @@ html body .ac-workspace.ac-studio .studio-dashboard-metrics button {
   gap: 7px 8px;
   min-width: 0;
   padding: 14px 22px 14px 14px;
-  background: linear-gradient(145deg, #253345, var(--cockpit-night));
+  background: linear-gradient(145deg, var(--graphite), var(--cockpit-night));
   border: 1px solid var(--cockpit-edge);
 }
 .studio-dashboard-metrics button > span { color: var(--color-muted); font-size: 12px; }
 .studio-dashboard-metrics button > strong {
   grid-column: 1 / -1;
-  color: var(--color-warm, #f4f2ed);
+  color: var(--color-text);
   font-size: clamp(17px, 2vw, 24px);
   font-variant-numeric: tabular-nums;
 }
@@ -99,12 +99,12 @@ html body .ac-workspace.ac-studio .studio-overview,
 html body .ac-workspace.ac-studio .studio-detail-grid { gap: 14px; }
 html body .ac-workspace.ac-studio .studio-home .studio-panel,
 html body .ac-workspace.ac-studio .studio-home .studio-priority {
-  background: linear-gradient(155deg, #1d2937, var(--cockpit-night));
+  background: linear-gradient(155deg, var(--graphite), var(--cockpit-night));
   border-color: var(--cockpit-edge);
 }
 html body .ac-workspace.ac-studio .studio-home .studio-vehicle-photo,
 html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo {
-  background: radial-gradient(ellipse at 76% 28%, #364b73, #1b283c 44%, #101820 80%);
+  background: radial-gradient(ellipse at 76% 28%, var(--color-primary-deep), var(--graphite) 44%, var(--midnight-navy) 80%);
 }
 .ac-service-garage {
   min-width: 0;
@@ -174,8 +174,8 @@ html body .ac-workspace.ac-studio .ac-drive-cockpit .ac-smartdrive-map {
   flex-wrap: wrap;
   gap: 10px;
   padding: 12px 14px;
-  background: linear-gradient(100deg, #1a2536, #27314d);
-  color: #e4ebfc;
+  background: linear-gradient(100deg, var(--midnight-navy), var(--graphite));
+  color: var(--color-text);
   font-size: 13px;
 }
 .ac-drive-map-footer span { display: inline-flex; gap: 7px; align-items: center; }
@@ -225,9 +225,9 @@ html body .ac-workspace .ac-trip-history-list button {
   height: 9px;
   margin-inline-end: 7px;
   border-radius: 50%;
-  background: #83e0bb;
+  background: var(--color-success);
 }
-.ac-trip-map-legend span + span::before { background: #f3d696; }
+.ac-trip-map-legend span + span::before { background: var(--ice-cyan); }
 .ac-mileage-history-callout {
   display: flex;
   align-items: center;
@@ -257,10 +257,10 @@ html body .ac-workspace .ac-trip-history-list button {
 }
 
 html body .app-shell.ac-workspace.ac-studio :is(.sidebar, .app-topbar, .autocare-mobile-dock) {
-  background: linear-gradient(150deg, #1c293a, #101820 62%) !important;
+  background: linear-gradient(150deg, var(--graphite), var(--midnight-navy) 70%) !important;
 }
 html body .app-shell.ac-workspace.ac-studio .ws-navigation a.active {
-  background: linear-gradient(100deg, #34496c, #25354d) !important;
+  background: var(--color-primary-soft) !important;
   box-shadow: inset 2px 0 var(--cockpit-blue) !important;
 }
 
@@ -281,4 +281,109 @@ html body .ac-workspace .ac-smartdrive-views button[aria-pressed='true'] {
   border-color: var(--cockpit-blue);
   background: #293953;
   color: #e5ebff;
+}
+
+/* Midnight Titanium cockpit. Each figure is driven by the selected vehicle. */
+html body .ac-workspace.ac-studio .studio-home {
+  gap: clamp(12px, 1.4vw, 19px) !important;
+}
+.studio-home-heading {
+  min-width: 0;
+  padding: clamp(16px, 2vw, 27px);
+  border: 1px solid var(--steel);
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at 82% 0%, color-mix(in srgb, var(--electric-blue) 20%, transparent), transparent 65%),
+    repeating-linear-gradient(90deg, transparent 0 47px, #b8c4d20a 47px 48px),
+    var(--midnight-navy);
+}
+.studio-telemetry {
+  min-width: 0;
+  border: 1px solid var(--steel);
+  border-radius: 14px;
+  background: var(--midnight-navy);
+}
+.studio-telemetry-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--steel);
+}
+.studio-telemetry-heading h2 { margin: 0; font-size: 15px; }
+.studio-telemetry-heading > span { color: var(--titanium-silver); font-size: 12px; }
+.studio-telemetry .studio-dashboard-metrics { gap: 0; margin: 0; }
+html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button {
+  min-height: 88px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  border-inline-end: 1px solid var(--steel) !important;
+  background: transparent !important;
+}
+html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:last-child {
+  border-inline-end: 0 !important;
+}
+html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:hover {
+  background: var(--color-primary-soft) !important;
+}
+.studio-telemetry .studio-dashboard-metrics svg { color: var(--color-primary-ink); }
+.studio-vehicle-illustration {
+  position: absolute;
+  inset: auto 0 20% auto;
+  display: grid;
+  place-items: center;
+  width: min(75%, 480px);
+  aspect-ratio: 2.5;
+}
+.studio-vehicle-illustration::before {
+  position: absolute;
+  inset: 57% 3% -6%;
+  content: '';
+  border: 1px solid color-mix(in srgb, var(--electric-blue) 55%, transparent);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--electric-blue) 22%, transparent), transparent 69%);
+}
+.studio-vehicle-illustration .car-art { position: relative; width: 100%; height: auto; }
+html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-mini-chart {
+  padding-inline: 10px;
+  margin-top: 8px;
+  background: repeating-linear-gradient(to top, transparent 0 27px, #b8c4d219 27px 28px);
+  border-radius: 9px;
+}
+html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-chart-track {
+  background: transparent;
+}
+html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-chart-track > i {
+  width: min(78%, 38px);
+  background: linear-gradient(to top, var(--electric-blue) 25%, var(--ice-cyan));
+}
+html body .ac-workspace.ac-studio .studio-telemetry-chart button[aria-pressed='true'] .studio-chart-track > i {
+  background: linear-gradient(to top, var(--electric-blue), var(--titanium-silver));
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-hero {
+  background:
+    radial-gradient(ellipse at 84% 6%, var(--color-primary-deep), transparent 60%),
+    repeating-linear-gradient(90deg, transparent 0 71px, #b8c4d209 71px 72px),
+    var(--obsidian-black);
+}
+html body .ac-lux-public.ac-studio-public .studio-landing-photography {
+  border-color: var(--steel);
+  box-shadow: 0 22px 70px #0006, 0 0 40px color-mix(in srgb, var(--electric-blue) 12%, transparent);
+}
+@media (max-width: 720px) {
+  html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:nth-child(-n+2) {
+    border-bottom: 1px solid var(--steel) !important;
+  }
+  html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:nth-child(2) {
+    border-inline-end: 0 !important;
+  }
+  .studio-vehicle-illustration { width: 80%; bottom: 23%; }
+}
+
+html body .app-shell.ac-workspace.ac-studio .sidebar .brand .brandmark svg,
+html body .ac-public-shell .brandmark svg {
+  color: var(--ice-cyan) !important;
+  stroke: currentColor !important;
 }

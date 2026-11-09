@@ -70,6 +70,19 @@ before(async () => {
       mail.push(JSON.parse(String(init?.body)));
       return Response.json({ id: 'mail-' + mail.length });
     }
+    if (String(input).startsWith('https://routing.openstreetmap.de/routed-car/route/v1/driving/')) {
+      const url = new URL(String(input));
+      assert.equal(url.searchParams.get('steps'), 'true');
+      assert.equal(url.searchParams.get('alternatives'), 'true');
+      const coordinates = [[21.2, 45.7], [21.21, 45.71]];
+      const geometry = { coordinates };
+      return Response.json({ code: 'Ok', routes: [{
+        distance: 1200, duration: 110, geometry, legs: [{ steps: [
+          { name: 'Test road', distance: 1200, duration: 110, geometry,
+            maneuver: { type: 'depart', modifier: 'straight', location: coordinates[0] } },
+        ] }],
+      }] });
+    }
     throw new Error('Unexpected network request in isolated test');
   }) as typeof fetch;
   await migrate();
@@ -121,6 +134,20 @@ test('01 Registration, email verification, login, session and wrong password', a
   });
   assert.equal(r.status, 401);
 });
+test('SmartDrive directions require a session, validate coordinates and return real provider fields', async () => {
+  const request = { start: { latitude: 45.7, longitude: 21.2 }, end: { latitude: 45.71, longitude: 21.21 } };
+  assert.equal((await call('smartdrive/directions', 'POST', request, '')).status, 401);
+  const invalid = await call('smartdrive/directions', 'POST', { ...request, end: { latitude: 100, longitude: 1 } });
+  assert.equal(invalid.status, 400);
+  const result = await call('smartdrive/directions', 'POST', request);
+  assert.equal(result.status, 200);
+  assert.equal(result.headers.get('cache-control'), 'private, no-store');
+  const [route] = await result.json();
+  assert.equal(route.distance, 1200);
+  assert.equal(route.legs[0].steps[0].maneuver.type, 'depart');
+});
+
+
 test('02 Password recovery token is required and can reset a password', async () => {
   let r = await authReq('request-password-reset', {
     email: 'alice@example.invalid',

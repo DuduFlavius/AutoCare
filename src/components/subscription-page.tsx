@@ -118,6 +118,7 @@ export default function SubscriptionPage({
             language={language}
             busy={busy||lifetime}
             prepaid={data.premium}
+            reportTimezone={data.premium ? data.profile.timezone : undefined}
             checkout={(interval) => checkout(interval, data.premium)}
           />
         </>

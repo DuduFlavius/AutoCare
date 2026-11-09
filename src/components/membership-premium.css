@@ -118,8 +118,8 @@
     box-sizing: border-box !important;
   }
   .ac-plan-card.annual-option > .button {
-    background: var(--color-primary-deep) !important;
-    color: var(--color-text) !important;
+    background: var(--color-primary) !important;
+    color: var(--color-on-primary) !important;
     border-color: var(--color-border) !important;
   }
   .ac-plan-card .best-plan {

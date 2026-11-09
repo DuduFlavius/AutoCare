@@ -56,7 +56,7 @@
   .ac-workspace .main .grid2 { gap: var(--app-gap) !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
   .ac-workspace .main .grid3 { gap: var(--app-gap) !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
   .ac-workspace :where(.main) :is(button,.button), .ac-workspace :where(.dialog) button { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; min-height: 42px !important; width: auto !important; padding: 10px 15px !important; border: 1px solid var(--app-line) !important; background: var(--color-surface) !important; background-image: none !important; color: var(--color-muted) !important; -webkit-text-fill-color: currentColor !important; border-radius: 11px !important; box-shadow: none !important; font-size: 13px !important; font-weight: 600 !important; line-height: 1.4 !important; text-transform: none !important; letter-spacing: 0 !important; }
-  .ac-workspace .main button.primary, .ac-workspace .dialog button.primary { background: var(--app-blue) !important; color: var(--color-text) !important; border-color: var(--app-blue) !important; }
+  .ac-workspace .main button.primary, .ac-workspace .dialog button.primary { background: var(--app-blue) !important; color: var(--color-on-primary) !important; border-color: var(--app-blue) !important; }
   .ac-workspace :is(.main,.dialog) button.primary :is(span,svg,strong) { color: inherit !important; }
   .ac-workspace .main button.danger { background: var(--color-surface-muted) !important; color: var(--color-danger-ink) !important; border-color: var(--color-danger) !important; }
   .ac-workspace :is(.main,.dialog) :is(input,select,textarea) { min-height: 44px !important; background: var(--color-surface) !important; background-image: none !important; color: var(--app-ink) !important; -webkit-text-fill-color: currentColor !important; border: 1px solid var(--color-border) !important; border-radius: 10px !important; padding: 10px 12px !important; font-size: 15px !important; line-height: 1.5 !important; min-width: 0 !important; max-width: 100% !important; box-shadow: none !important; }
@@ -96,7 +96,7 @@
   .ac-workspace .founder-nav-link { display: flex !important; gap: 10px !important; align-items: center !important; padding: 14px 10px !important; color: var(--color-muted) !important; font-size: 12px !important; }
   .app-shell.ac-workspace > .app-header.app-topbar { position: fixed !important; top: 0 !important; left: var(--app-sidebar) !important; right: 0 !important; height: 72px !important; width: auto !important; margin: 0 !important; min-height: 0 !important; padding: 0 clamp(24px,4vw,56px) !important; display: flex !important; align-items: center !important; gap: 16px !important; background: color-mix(in srgb, var(--color-nav) 96%, transparent) !important; border: 0 !important; border-bottom: 1px solid var(--color-border) !important; box-shadow: none !important; z-index: 60 !important; backdrop-filter: blur(16px) !important; }
   .ac-workspace .app-topbar-brand { display: none !important; align-items: center !important; gap: 8px !important; font-size: 17px !important; }
-  .ac-workspace .app-topbar-mark { color: var(--color-text) !important; display: grid !important; place-items: center !important; background: var(--app-blue) !important; color: var(--color-text) !important; font-weight: 750 !important; border-radius: 9px !important; width: 30px !important; height: 30px !important; }
+  .ac-workspace .app-topbar-mark { color: var(--color-text) !important; display: grid !important; place-items: center !important; background: var(--app-blue) !important; color: var(--color-on-primary) !important; font-weight: 750 !important; border-radius: 9px !important; width: 30px !important; height: 30px !important; }
   .ac-workspace .app-topbar-title { color: var(--app-muted) !important; font-size: 13px !important; }
   .ac-workspace .app-topbar-actions { margin-left: auto !important; display: flex !important; align-items: center !important; gap: 10px !important; }
   .ac-workspace .app-topbar-actions button { min-width: 40px !important; min-height: 40px !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 7px !important; padding: 8px !important; border: 1px solid var(--app-line) !important; border-radius: 12px !important; color: var(--color-muted) !important; background: var(--color-surface) !important; box-shadow: none !important; font-size: 12px !important; }
@@ -400,7 +400,7 @@
   .ac-workspace .ac-premium-sales :is(p,small) { color: var(--color-muted) !important; }
   .ac-workspace .main :is(button,a.button) { transition: background-color .16s ease,border-color .16s ease,box-shadow .16s ease !important; }
   .ac-workspace .main button:hover:not(:disabled) { border-color: var(--color-border-strong) !important; }
-  .ac-workspace .main button.primary:hover:not(:disabled) { background: var(--color-primary-deep) !important; }
+  .ac-workspace .main button.primary:hover:not(:disabled) { background: var(--color-primary-hover) !important; }
 
   @media (max-width: 900px) {
     .app-shell.ac-workspace { --app-sidebar: 0px; --app-gap: 16px; }

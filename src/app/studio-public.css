@@ -73,9 +73,9 @@ html body .ac-lux-public.ac-studio-public :is(.lux-primary, .lux-secondary) {
   border-radius: 9px !important;
 }
 html body .ac-lux-public.ac-studio-public .lux-primary {
-  background: var(--color-primary-deep) !important;
+  background: var(--color-primary) !important;
   border-color: var(--color-border-strong) !important;
-  color: var(--color-text) !important;
+  color: var(--color-on-primary) !important;
   box-shadow: 0 6px 25px color-mix(in srgb, var(--color-primary) 13%, transparent) !important;
 }
 html body .ac-lux-public.ac-studio-public .lux-secondary {

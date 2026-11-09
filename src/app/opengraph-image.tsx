@@ -11,8 +11,8 @@ export default async function Image() {
         width: '100%',
         height: '100%',
         display: 'flex',
-        background: '#151B26',
-        color: 'white',
+        background: '#090D14',
+        color: '#F3F6FA',
         position: 'relative',
       }}
     >
@@ -35,7 +35,7 @@ export default async function Image() {
           width: 1200,
           height: 630,
           background:
-            'linear-gradient(90deg, #151B26 0%, #151B26 34%, rgba(21,27,38,0.88) 52%, rgba(21,27,38,0.05) 100%)',
+            'linear-gradient(90deg, #090D14 0%, #090D14 34%, rgba(9,13,20,0.88) 52%, rgba(9,13,20,0.05) 100%)',
           display: 'flex',
         }}
       />
@@ -50,7 +50,7 @@ export default async function Image() {
       >
         <div style={{ display: 'flex', alignItems: 'center', fontSize: 37, fontWeight: 700 }}>
           <svg width="48" height="48" viewBox="0 0 48 48" style={{ marginRight: 14 }}>
-            <rect width="48" height="48" rx="14" fill="#3478F6" />
+            <rect width="48" height="48" rx="14" fill="#398BFF" />
             <path
               d="M12 31a14 14 0 1 1 24 0M24 24l8-8"
               stroke="white"
@@ -60,7 +60,7 @@ export default async function Image() {
             />
             <circle cx="24" cy="24" r="3" fill="white" />
           </svg>
-          AutoCare<span style={{ color: '#3478F6' }}>.</span>
+          AutoCare<span style={{ color: '#398BFF' }}>.</span>
         </div>
         <div
           style={{
@@ -80,7 +80,7 @@ export default async function Image() {
           style={{
             display: 'flex',
             marginTop: 26,
-            color: '#C1CCDC',
+            color: '#B8C4D2',
             fontSize: 26,
             lineHeight: 1.45,
             maxWidth: 560,
@@ -93,7 +93,7 @@ export default async function Image() {
             display: 'flex',
             marginTop: 45,
             fontSize: 19,
-            color: '#91B6FF',
+            color: '#56D6E8',
             letterSpacing: '2px',
           }}
         >

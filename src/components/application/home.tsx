@@ -184,21 +184,27 @@ export default function ApplicationHome({
         />
       ) : (
         <>
-          <div className="studio-dashboard-metrics">
-            {[
-              { Icon: Gauge, label: t('Kilometraj actual', 'Current mileage'), value: car.odometer.toLocaleString(locale) + ' km', section: 'Kilometraj' },
-              { Icon: Wallet, label: t('Cheltuieli luna aceasta', 'Expenses this month'), value: money(monthCost), section: 'Cheltuieli' },
-              { Icon: ShieldCheck, label: t('Documente de verificat', 'Documents to check'), value: attention.length.toLocaleString(locale), section: 'Documente' },
-              { Icon: Route, label: t('Distanță GPS luna aceasta', 'GPS distance this month'), value: monthlyTrip ? (monthlyTrip.meters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 }) + ' km' : '—', section: 'Plan întreținere' },
-            ].map(({ Icon, label, value, section }) => (
-              <button key={section} type="button" onClick={() => navigate(section)}>
-                <Icon size={17} aria-hidden="true"/>
-                <span>{label}</span>
-                <strong>{value}</strong>
-                <ArrowUpRight className="studio-metric-arrow" size={15} aria-hidden="true"/>
-              </button>
-            ))}
-          </div>
+          <section className="studio-telemetry" aria-labelledby="studio-telemetry-title">
+            <div className="studio-telemetry-heading">
+              <h2 id="studio-telemetry-title">{t('Starea garajului', 'Garage overview')}</h2>
+              <span>{new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: data.profile.timezone }).format(new Date())}</span>
+            </div>
+            <div className="studio-dashboard-metrics">
+              {[
+                { Icon: Gauge, label: t('Kilometraj actual', 'Current mileage'), value: car.odometer.toLocaleString(locale) + ' km', section: 'Kilometraj' },
+                { Icon: Wallet, label: t('Cheltuieli luna aceasta', 'Expenses this month'), value: money(monthCost), section: 'Cheltuieli' },
+                { Icon: ShieldCheck, label: t('Documente de verificat', 'Documents to check'), value: attention.length.toLocaleString(locale), section: 'Documente' },
+                { Icon: Route, label: t('Distanță GPS luna aceasta', 'GPS distance this month'), value: monthlyTrip ? (monthlyTrip.meters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 }) + ' km' : '—', section: 'Plan întreținere' },
+              ].map(({ Icon, label, value, section }) => (
+                <button key={section} type="button" onClick={() => navigate(section)}>
+                  <Icon size={17} aria-hidden="true"/>
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                  <ArrowUpRight className="studio-metric-arrow" size={15} aria-hidden="true"/>
+                </button>
+              ))}
+            </div>
+          </section>
           <div className="studio-overview">
             <section className="studio-vehicle-panel">
               <VehiclePhoto
@@ -207,6 +213,7 @@ export default function ApplicationHome({
                 uploaded={data.photos.some((p) => p.vehicleId === car.id)}
                 preview={preview}
                 priority
+                illustration
               />
               <div className="studio-vehicle-overlay">
                 <div className="studio-vehicle-identity">
@@ -261,7 +268,7 @@ export default function ApplicationHome({
                 </button>
               </div>
             </section>
-            <section className="studio-panel studio-costs">
+            <section className="studio-panel studio-costs studio-telemetry-chart">
               <div className="studio-panel-head">
                 <h2>{t('Costuri și evoluție', 'Costs & trends')}</h2>
                 <button className="studio-text-button" onClick={() => navigate('Cheltuieli')}>

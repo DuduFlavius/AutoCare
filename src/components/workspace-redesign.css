@@ -105,8 +105,8 @@ html body .app-shell.ac-workspace .app-home-history{grid-column:1/-1!important}
 html body .app-shell.ac-workspace .app-estimate-settings > summary{background:transparent!important;color:var(--color-primary-ink)!important;border:0!important;border-radius:0!important;padding:10px 0!important;font-size:12px!important;min-height:40px!important}
 /***** All account screens: real controls, clear tables and forms. *****/
 html body .app-shell.ac-workspace :is(button,.button){transition:background-color .18s,border-color .18s,box-shadow .18s!important}
-html body .app-shell.ac-workspace .main :is(button.primary,.button.primary){background:var(--color-primary-deep)!important;border:1px solid var(--color-border-strong)!important;color:var(--color-text)!important;border-radius:9px!important;padding:11px 18px!important;box-shadow:0 3px 7px color-mix(in srgb, var(--color-primary) 9%, transparent)!important}
-html body .app-shell.ac-workspace .main button.primary:hover{background:var(--color-primary-deep)!important}
+html body .app-shell.ac-workspace .main :is(button.primary,.button.primary){background:var(--color-primary)!important;border:1px solid var(--color-border-strong)!important;color:var(--color-on-primary)!important;border-radius:9px!important;padding:11px 18px!important;box-shadow:0 3px 7px color-mix(in srgb, var(--color-primary) 9%, transparent)!important}
+html body .app-shell.ac-workspace .main button.primary:hover{background:var(--color-primary-hover)!important}
 html body .app-shell.ac-workspace :is(input,select,textarea){border-radius:9px!important;min-width:0!important}
 html body .app-shell.ac-workspace :is(input,select,textarea):focus{border-color:var(--color-primary)!important;box-shadow:0 0 0 3px color-mix(in srgb, var(--color-primary) 7%, transparent)!important}
 html body .app-shell.ac-workspace .page-head{padding-bottom:22px!important;border-bottom:1px solid var(--color-border)!important;margin-bottom:24px!important;align-items:flex-end!important;flex-wrap:wrap!important}
@@ -215,7 +215,7 @@ html body .app-shell.ac-workspace .app-topbar-brand{color:var(--color-text)!impo
 html body .app-shell.ac-workspace .main :is(.card,.app-section,.app-upcoming,.app-empty,.app-account-identity){background:var(--app-surface)!important;border-color:var(--app-line)!important;box-shadow:0 8px 32px #0000000d!important}
 html body .app-shell.ac-workspace .main :is(p,small,.muted,.micro){color:var(--app-muted)!important}
 html body .app-shell.ac-workspace .main :is(button,.button){background:var(--color-surface)!important;border-color:#ffffff16!important;color:var(--color-text)!important}
-html body .app-shell.ac-workspace .main :is(button.primary,.button.primary){background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-border-strong)!important}
+html body .app-shell.ac-workspace .main :is(button.primary,.button.primary){background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border-strong)!important}
 html body .app-shell.ac-workspace .main button.danger{background:var(--color-danger-soft)!important;color:var(--color-danger-ink)!important;border-color:var(--color-danger)!important}
 html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,select,textarea){background:var(--color-nav)!important;border-color:var(--color-border)!important;color:var(--color-text)!important;caret-color:var(--color-primary-ink)!important}
 html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,textarea)::placeholder{color:var(--color-muted)!important;-webkit-text-fill-color:#8093ab!important}
@@ -251,7 +251,7 @@ html body .app-shell.ac-workspace .dialog{background:var(--color-surface)!import
 html body .app-shell.ac-workspace .dialog :is(h2,h3,strong){color:var(--color-text)!important}
 html body .app-shell.ac-workspace .dialog :is(p,small){color:var(--color-muted)!important}
 html body .app-shell.ac-workspace .dialog :is(button,summary){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
-html body .app-shell.ac-workspace .dialog button.primary{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border-color:var(--color-border-strong)!important}
+html body .app-shell.ac-workspace .dialog button.primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border-strong)!important}
 html body .app-shell.ac-workspace .dialog :is(.service-reminder-box,.record-selected-category,.ac-service-summary,.record-form-stage,.record-extra){background:transparent!important;border-color:var(--color-primary)!important;color:var(--color-text)!important}
 html body .app-shell.ac-workspace .dialog .record-form-footer{background:var(--color-surface)!important;border-color:#ffffff14!important}
 html body .app-shell.ac-workspace .dialog .record-category-card{background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
@@ -269,7 +269,7 @@ html body .app-shell.ac-workspace .ac-plan-card li{color:var(--color-muted)!impo
 html body .app-shell.ac-workspace .ac-premium-comparison [role=row]{border-color:#ffffff14!important;color:var(--color-text)!important}
 html body .app-shell.ac-workspace .ac-premium-comparison [role=row]:first-child{background:var(--color-surface)!important}
 html body .app-shell.ac-workspace .chart .bar{background:transparent!important;border:0!important}
-html body .app-shell.ac-workspace .chart .bar-fill{background:linear-gradient(var(--color-surface-muted),var(--color-primary-deep))!important;transform-origin:bottom;animation:ac-chart-enter .5s ease-out both;border-radius:5px 5px 0 0!important}
+html body .app-shell.ac-workspace .chart .bar-fill{background:linear-gradient(to top,var(--electric-blue),var(--ice-cyan))!important;transform-origin:bottom;animation:ac-chart-enter .5s ease-out both;border-radius:5px 5px 0 0!important}
 html body .app-shell.ac-workspace .notice{background:var(--color-success-soft)!important;border-color:var(--color-success)!important;color:var(--color-success-ink)!important}
 html body .app-shell.ac-workspace .error{background:var(--color-danger-soft)!important;border-color:var(--color-danger)!important;color:var(--color-danger-ink)!important}
 html body .app-shell.ac-workspace .ac-system-checks{grid-column:1/-1;border:1px solid #ffffff14;border-radius:14px;padding:18px 22px;background:var(--color-surface)}

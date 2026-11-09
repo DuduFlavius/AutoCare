@@ -27,7 +27,7 @@
 .ac-premium-metric-strip{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:auto;padding:12px;background:var(--color-surface-muted);border-radius:10px}
 .ac-premium-metric-strip span{display:grid;gap:5px;font-size:11px;color:var(--color-muted)}
 .ac-premium-metric-strip strong{font-size:15px;color:var(--color-primary-ink)}
-.ac-premium-dashboard button.ac-premium-primary{background:var(--color-primary-deep)!important;color:var(--color-text)!important;border:0!important;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:750;margin-top:auto}
+.ac-premium-dashboard button.ac-premium-primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border:0!important;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:750;margin-top:auto}
 .ac-premium-next-record{display:grid;gap:8px;text-align:left;padding:14px!important;background:var(--color-surface-muted)!important;border:1px solid var(--color-border)!important;border-radius:12px}
 .ac-premium-next-record strong{font-size:15px}.ac-premium-next-record span{color:var(--color-primary-ink);font-weight:750}.ac-premium-next-record small{display:flex;align-items:center;gap:5px;color:var(--color-muted)}
 .ac-premium-bottom-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:stretch}

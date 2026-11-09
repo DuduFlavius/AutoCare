@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
+import { CarArt } from '../car-art';
 /** Keep uploaded owner photos; use a graphic identity when none exists. */
 export default function VehiclePhoto({
   vehicleId,
@@ -8,12 +9,14 @@ export default function VehiclePhoto({
   uploaded = false,
   preview = false,
   priority = false,
+  illustration = false,
 }: {
   vehicleId: string;
   name: string;
   uploaded?: boolean;
   preview?: boolean;
   priority?: boolean;
+  illustration?: boolean;
 }) {
   const [failed, setFailed] = useState('');
   const original =
@@ -34,6 +37,8 @@ export default function VehiclePhoto({
             if (original) setFailed(original);
           }}
         />
+      ) : illustration ? (
+        <div className="studio-vehicle-illustration" aria-hidden="true"><CarArt /></div>
       ) : (
         <div className="studio-brand-emblem" aria-label="Garaj digital AutoCare">
           <ShieldCheck size={64} strokeWidth={1.25} />

@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     ],
   },
 };
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#101820' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#090d14' };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ro">
