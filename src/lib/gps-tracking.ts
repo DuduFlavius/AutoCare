@@ -16,3 +16,15 @@ export function acceptGPSFix(anchor: GPSFix | null, next: GPSFix) {
   if(meters/seconds>55 || meters<Math.max(8,Math.min(35,anchor.accuracy+next.accuracy))) return null;
   return {point:next,meters};
 }
+
+/** Map display may use an approximate fix. Trip distance has its own stricter filter. */
+export function browserGPSFix({ coords, timestamp }: GeolocationPosition): GPSFix | null {
+  const { latitude, longitude, accuracy, heading, speed } = coords;
+  if (![latitude, longitude, accuracy, timestamp].every(Number.isFinite)
+    || Math.abs(latitude) > 90 || Math.abs(longitude) > 180 || accuracy < 0 || timestamp <= 0) return null;
+  return { latitude, longitude, accuracy, timestamp, heading, speed };
+}
+
+export function latestGPSFix(first: GPSFix | null, second: GPSFix | null) {
+  return first && (!second || first.timestamp >= second.timestamp) ? first : second;
+}

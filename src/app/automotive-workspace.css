@@ -780,20 +780,20 @@ html body .ac-workspace .ac-subscription-workspace > .card:first-child {
   box-sizing: border-box;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   color: #f3f6fa;
-  border: 4px solid #f3f6fa;
+  border: 3px solid #f3f6fa;
   border-radius: 50%;
   background: #398bff;
   box-shadow: 0 0 0 7px #398bff33, 0 3px 12px #090d1473;
   pointer-events: none;
+  z-index: 2;
 }
 .ac-road-position svg { visibility: hidden; }
 .ac-road-position.is-driving {
   border: 0;
   border-radius: 8px;
-  transform: none;
   background: #0d2442;
   outline: 1px solid #56d6e8;
   box-shadow: 0 4px 14px #090d14cc;
@@ -862,4 +862,26 @@ html body .app-shell .support-workspace :is(.support-filters, .support-header-ac
   background: var(--color-surface-muted);
 }
 .ac-map-stage:modal > .ac-next-turn { position: sticky; inset-block-start: 48px; z-index: 12; }
-.ac-road-map-center { display: inline-flex; gap: 6px; align-items: center; }
+html body .app-shell.ac-workspace .ac-road-map .ac-road-map-center {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #111925 !important;
+  border-color: #398bff !important;
+  color: #f3f6fa !important;
+}
+.ac-road-map-center svg { color: #56d6e8; }
+.ac-map-location-state {
+  position: absolute;
+  inset-inline-start: 14px;
+  inset-block-end: 82px;
+  z-index: 4;
+  margin: 0;
+  max-inline-size: calc(100% - 28px);
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: #111925;
+  color: #f3f6fa;
+  font-size: 11px;
+  pointer-events: none;
+}

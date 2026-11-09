@@ -4,18 +4,15 @@ import dynamic from 'next/dynamic';
 import { ArrowUp, Crosshair, Droplets, Fuel, LocateFixed, MapPin, Navigation, ParkingCircle, Phone, Search, Wrench, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { autoPointCategories, defaultAutoPointsArea, type AutoPoint, type AutoPointCategory, type MapArea } from '@/lib/auto-points';
-import { segmentMeters, type GPSFix } from '@/lib/gps-tracking';
+import { browserGPSFix, latestGPSFix, segmentMeters, type GPSFix } from '@/lib/gps-tracking';
 import { navigationProgress, type Coordinate, type DrivingRoute, type Turn } from '@/lib/road-navigation';
 import MapStage from './map-stage';
+import { mapGPSOptions, mapLocationError, useMapLocation } from './use-map-location';
 import { useApplicationLocale } from './application-locale';
 
 const RoadMap = dynamic(() => import('./road-map'), { ssr: false });
 const icons = { service: Wrench, fuel: Fuel, parking: ParkingCircle, charging: Zap, tyres: LocateFixed, wash: Droplets, parts: Wrench };
 const noRoute: GPSFix[] = [];
-const gpsOptions = { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 };
-const toFix = ({ coords, timestamp }: GeolocationPosition): GPSFix => ({
-  latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, heading: coords.heading, timestamp,
-});
 const asFix = (point: Coordinate): GPSFix => ({ ...point, accuracy: 0, timestamp: 0 });
 const googleDirections = (point: Coordinate) =>
   `https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${point.latitude},${point.longitude}`;
@@ -33,13 +30,14 @@ function turnText(turn: Turn, english: boolean) {
   return english ? 'Continue straight' : 'Continuă înainte';
 }
 
-export default function AutoPointsMap({ preview }: { preview: boolean }) {
+export default function AutoPointsMap({ preview, visible }: { preview: boolean; visible: boolean }) {
   const locale = useApplicationLocale();
   const english = locale.startsWith('en');
   const t = (ro: string, en: string) => english ? en : ro;
   const [area, setArea] = useState<MapArea>(defaultAutoPointsArea);
-  const [position, setPosition] = useState<GPSFix | null>(null);
-  const [watchLocation, setWatchLocation] = useState(false);
+  const location = useMapLocation(visible && !preview, english);
+  const [oneShotPosition, setOneShotPosition] = useState<GPSFix | null>(null);
+  const position = latestGPSFix(location.position, oneShotPosition);
   const [category, setCategory] = useState<AutoPointCategory>('service');
   const [results, setResults] = useState<AutoPoint[] | null>(null);
   const [searchCenter, setSearchCenter] = useState<Coordinate>(defaultAutoPointsArea);
@@ -62,39 +60,26 @@ export default function AutoPointsMap({ preview }: { preview: boolean }) {
   const distance = (meters: number) => meters >= 1000 ? `${(meters / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} km` : `${Math.round(meters)} m`;
 
   useEffect(() => () => { pending.current?.abort(); routingRequest.current?.abort(); }, []);
-  useEffect(() => {
-    if (!watchLocation || !navigator.geolocation) return;
-    const watch = navigator.geolocation.watchPosition(fix => {
-      setPosition(toFix(fix));
-      setLocationError('');
-    }, failure => {
-      setLocationError(failure.code === 1 ? (english ? 'Location permission denied.' : 'Accesul la locație a fost refuzat.') : (english ? 'GPS signal unavailable.' : 'Semnal GPS indisponibil.'));
-      if (failure.code === 1) setWatchLocation(false);
-    }, gpsOptions);
-    return () => navigator.geolocation.clearWatch(watch);
-  }, [watchLocation, english]);
-
-  function locate(after?: (fix: GPSFix) => void) {
+  function locate(after: (fix: GPSFix) => void) {
     if (preview) return;
     if (!navigator.geolocation) {
-      setLocationError(t('Localizarea nu este disponibilă.', 'Location is unavailable.'));
+      setLocationError(mapLocationError(0, english));
+      return;
+    }
+    if (position && Date.now() - position.timestamp < 10000) {
+      setLocationError('');
+      after(position);
       return;
     }
     setLocationError(t('Se caută poziția GPS…', 'Finding GPS position…'));
-    if (!after) {
-      setWatchLocation(true);
-      if (position) setLocationError('');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(fix => {
-      const next = toFix(fix);
-      setPosition(next);
-      setWatchLocation(true);
+    navigator.geolocation.getCurrentPosition(value => {
+      const next = browserGPSFix(value);
+      if (!next) { setLocationError(mapLocationError(0, english)); return; }
+      setOneShotPosition(next);
       setLocationError('');
+      location.locate();
       after(next);
-    }, failure => setLocationError(failure.code === 1
-      ? t('Accesul la locație a fost refuzat. Poți căuta și direct pe hartă.', 'Location permission denied. You can search the map instead.')
-      : t('Semnal GPS indisponibil. Încearcă din nou.', 'GPS signal unavailable. Try again.')), gpsOptions);
+    }, failure => setLocationError(mapLocationError(failure.code, english)), mapGPSOptions);
   }
 
   async function search(center: Coordinate, kind: AutoPointCategory, nearest = false) {
@@ -214,7 +199,8 @@ export default function AutoPointsMap({ preview }: { preview: boolean }) {
         <div className="ac-auto-points-layout">
           <div className={selecting ? 'ac-map-selecting' : undefined}>
             <RoadMap points={noRoute} position={position} active={navigating} english={english}
-              initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview ? undefined : () => locate()}
+              initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview ? undefined : location.locate}
+              locating={location.waiting} locationError={location.error}
               autoPoints={results ?? undefined} onAutoPoint={setSelected}
               plannedRoute={route?.geometry.coordinates} onDestination={selecting ? choose : undefined}/>
             <div className="ac-drive-map-footer">
@@ -233,7 +219,7 @@ export default function AutoPointsMap({ preview }: { preview: boolean }) {
                 <label>{t('Traseu', 'Route')}<select value={alternative} onChange={event => setAlternative(Number(event.target.value))}>
                   {routes.map((option, index) => <option key={index} value={index}>{index + 1} · {distance(option.distance)} · {Math.ceil(option.duration / 60)} min</option>)}
                 </select></label>
-                <button type="button" className="primary" onClick={() => { setNavigating(true); setWatchLocation(true); lastReroute.current = Date.now(); }}><Navigation size={16}/>{t('Pornește navigația', 'Start navigation')}</button>
+                <button type="button" className="primary" onClick={() => { setNavigating(true); location.locate(); lastReroute.current = Date.now(); }}><Navigation size={16}/>{t('Pornește navigația', 'Start navigation')}</button>
               </>}
               <div className="ac-navigation-tools">
                 {navigating ? <button type="button" onClick={() => { setNavigating(false); setStepIndex(0); }}>{t('Oprește ghidarea', 'Stop guidance')}</button>

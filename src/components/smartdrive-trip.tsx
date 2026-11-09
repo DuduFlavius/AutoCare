@@ -9,33 +9,22 @@ import { MapPin, Play, Square, Route } from 'lucide-react';
 import {hasNativeTracking,nativeTracking,type NativeTrip} from '@/lib/native-tracking';
 import MapStage from './map-stage';
 import { storeTripRoutes } from '@/lib/local-trip-routes';
-import { acceptGPSFix, type GPSFix as Sample } from '@/lib/gps-tracking';
+import { useMapLocation } from './use-map-location';
+import { acceptGPSFix, browserGPSFix, latestGPSFix, type GPSFix as Sample } from '@/lib/gps-tracking';
 const RoadMapView=dynamic(()=>import('./road-map'),{ssr:false});
-export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bluetoothOnly, bluetoothVisible }: { preview: boolean; bluetoothOnly: boolean; bluetoothVisible: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; odometer:number }[]; onSaved:()=>Promise<unknown> }) {
+export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bluetoothOnly, bluetoothVisible, liveVisible }: { preview: boolean; bluetoothOnly: boolean; bluetoothVisible: boolean; liveVisible: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; odometer:number }[]; onSaved:()=>Promise<unknown> }) {
 
   const locale=useApplicationLocale();
   const [waitingCar,setWaitingCar]=useState(false);
   const [awaitingMotion,setAwaitingMotion]=useState(false);
   const [mapPosition,setMapPosition]=useState<Sample|null>(null);
-  const [locating,setLocating]=useState(false);
-  const [locationMessage,setLocationMessage]=useState('');
-  const locate = () => {
-    if (!navigator.geolocation) { setLocationMessage(locale.startsWith('en') ? 'Location is not supported on this device.' : 'Localizarea nu este disponibilă pe acest dispozitiv.'); return; }
-    setLocating(true); setLocationMessage('');
-    navigator.geolocation.getCurrentPosition(position => {
-      setMapPosition({latitude:position.coords.latitude,longitude:position.coords.longitude,accuracy:position.coords.accuracy,heading:position.coords.heading,timestamp:position.timestamp});
-      setLocating(false);
-      setLocationMessage(locale.startsWith('en') ? `Position located · accuracy approximately ${Math.round(position.coords.accuracy)} m. This does not record a trip or change mileage.` : `Poziție localizată · precizie aproximativă ${Math.round(position.coords.accuracy)} m. Nu înregistrează un traseu și nu modifică kilometrajul.`);
-    }, error => {
-      setLocating(false);
-      setLocationMessage(error.code===1 ? (locale.startsWith('en') ? 'Allow location access in your phone or browser settings.' : 'Permite accesul la locație din setările telefonului sau browserului.') : (locale.startsWith('en') ? 'Position unavailable. Check GPS and try again outdoors.' : 'Poziția nu este disponibilă. Verifică GPS-ul și încearcă din nou în aer liber.'));
-    }, {enableHighAccuracy:true,maximumAge:0,timeout:20000});
-  };
   const [automatic,setAutomatic]=useState(false);
   const [native,setNative]=useState(false);
   const nativeMode=useRef(false);
   const nativeStarting=useRef(false);
-const [active, setActive] = useState(false);
+  const [active, setActive] = useState(false);
+  const english = locale.startsWith('en');
+  const idleLocation = useMapLocation(liveVisible && !active && !preview, english);
   useEffect(() => {
     document.documentElement.dataset.autocareGpsActive = active ? 'true' : 'false';
     return () => { delete document.documentElement.dataset.autocareGpsActive; };
@@ -147,14 +136,14 @@ const [active, setActive] = useState(false);
     if(!resume){baseline.current=car.odometer; tripId.current=crypto.randomUUID();} endedAt.current=null; setSaved(false);
     setClock(new Date().toLocaleTimeString(locale));
     if(!resume){setStartedAt(Date.now());setDistance(0);distanceRef.current=0;setRoutePoints([]);setTrackingSeconds(0);started.current=Date.now();}
-    setMapPosition(null);setLocationMessage('');
     setSignal('waiting');lastFix.current=0;setError('');setNotice('');previous.current=null;
     tick.current = setInterval(() => { setTrackingSeconds(Math.floor((Date.now() - (started.current ?? Date.now())) / 1000)); setClock(new Date().toLocaleTimeString(locale)); }, 1000);
     watcher.current = navigator.geolocation.watchPosition(
-      ({ coords, timestamp }) => {
-        const next: Sample = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, speed:coords.speed, heading:coords.heading, timestamp };
-        if(![next.latitude,next.longitude,next.accuracy,next.timestamp].every(Number.isFinite)||next.accuracy>50||next.accuracy<0)return;
-        if(timestamp>Date.now()+5000 || Date.now()-timestamp>15000)return;
+      value => {
+        const next = browserGPSFix(value);
+        if (!next || next.timestamp > Date.now() + 5000 || Date.now() - next.timestamp > 15000) return;
+        setMapPosition(previous => latestGPSFix(previous, next));
+        if (next.accuracy > 50) return;
         lastFix.current=Date.now(); setSignal('ok');
         const accepted=acceptGPSFix(previous.current,next);
         if(!accepted) return;
@@ -211,12 +200,11 @@ const [active, setActive] = useState(false);
     void saveTrip();
     // Finalization, rather than each GPS poll, triggers one save attempt.
   },[native,finalizeOnStop,active,automatic,saved,startedAt,saveRetry]);
-  const english = locale.startsWith('en');
   const currentCar = vehicles.find(vehicle => vehicle.id === vehicleId) ?? vehicles[0];
-  const lastPoint = routePoints.at(-1);
-  const speed = active && signal === 'ok' && lastPoint?.speed != null &&
-    Number.isFinite(lastPoint.speed) && lastPoint.speed >= 0 && lastPoint.speed <= 55
-    ? Math.round(lastPoint.speed * 3.6) : null;
+  const currentPosition = latestGPSFix(mapPosition, idleLocation.position);
+  const speed = active && signal === 'ok' && currentPosition?.speed != null &&
+    Number.isFinite(currentPosition.speed) && currentPosition.speed >= 0 && currentPosition.speed <= 55
+    ? Math.round(currentPosition.speed * 3.6) : null;
   const driveButton = (!active ? <button type="button" className="primary" disabled={saving || preview || !currentCar || (automatic&&!saved)} onClick={start}><Play size={17}/> {automatic&&!saved ? (locale.startsWith('en')?'Awaiting trip sync':'În așteptarea sincronizării') : distance>0&&!saved ? (english ? 'Resume drive' : 'Reia călătoria') : (english ? 'Start Drive' : 'Pornește călătoria')}</button> : <button type="button" className="ac-drive-stop" onClick={stop}><Square size={17}/> {english ? 'Stop Drive' : 'Oprește călătoria'}</button>);
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-drive-live-content" hidden={bluetoothOnly}>
@@ -226,8 +214,10 @@ const [active, setActive] = useState(false);
       <div className="ac-smartdrive-map">
         <RoadMapView
           points={routePoints}
-          position={mapPosition && (!lastPoint || mapPosition.timestamp >= lastPoint.timestamp) ? mapPosition : lastPoint}
-          onLocate={!active && !preview && !locating ? locate : undefined}
+          position={currentPosition}
+          onLocate={!active && !preview ? idleLocation.locate : undefined}
+          locating={idleLocation.waiting || (active && signal === 'waiting')}
+          locationError={!active ? idleLocation.error : undefined}
           active={active}
           english={locale.startsWith('en')}
         />
@@ -236,11 +226,10 @@ const [active, setActive] = useState(false);
           <span><MapPin size={16}/> {locale.startsWith('en') ? 'Recorded route · GPS estimate' : 'Traseu înregistrat · estimare GPS'}</span>
 
         </div>
-        {locationMessage && !active && <p className="small muted" role="status">{locationMessage}</p>}
       </div>
       </MapStage>
     <div className="ac-drive-console">
-    <DriveSessionSummary distance={distance} seconds={trackingSeconds} phase={saving?'saving':waitingCar&&active?'reconnecting':active&&awaitingMotion?'waiting':active?'driving':saved&&distance>0?'saved':'ready'} accuracy={mapPosition?.accuracy??null} english={locale.startsWith('en')}/>
+    <DriveSessionSummary distance={distance} seconds={trackingSeconds} phase={saving?'saving':waitingCar&&active?'reconnecting':active&&awaitingMotion?'waiting':active?'driving':saved&&distance>0?'saved':'ready'} accuracy={currentPosition?.accuracy??null} english={locale.startsWith('en')}/>
     {vehicles.length > 0 && <label>Mașina pentru călătorie <select value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active || (distance>0 && !saved)} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}
     <div className="ac-smartdrive-trip-controls">
       {driveButton}

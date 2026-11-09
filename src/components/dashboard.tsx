@@ -246,9 +246,9 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
             </button>
           </div>
           <div hidden={driveView !== 'live' && driveView !== 'bluetooth'}>
-            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible}/>
+            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible} liveVisible={driveView === 'live' && driveVisible}/>
           </div>
-          {driveView === 'points' && <AutoPointsMap preview={preview}/>}
+          {driveView === 'points' && <AutoPointsMap preview={preview} visible={driveVisible}/>}
           {driveView === 'history' && (
             <SmartDriveHistory ownerId={data.profile.userId} timezone={data.profile.timezone} vehicles={cars} preview={preview} onUpdateMileage={id => {
               const car = cars.find(vehicle => vehicle.id === id);

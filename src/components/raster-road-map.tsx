@@ -19,6 +19,8 @@ export default function RasterRoadMap({
   autoPoints,
   onAutoPoint,
   onLocate,
+  locating = false,
+  locationError,
   plannedRoute,
   onDestination,
 }: {
@@ -32,6 +34,8 @@ export default function RasterRoadMap({
   autoPoints?: AutoPoint[];
   onAutoPoint?: (id: string) => void;
   onLocate?: () => void;
+  locating?: boolean;
+  locationError?: string;
   plannedRoute?: [number, number][];
   onDestination?: (point: { latitude: number; longitude: number }) => void;
 }) {
@@ -56,7 +60,7 @@ export default function RasterRoadMap({
     void import('leaflet')
       .then((L) => {
         if (disposed || !host.current) return;
-        const last = latestPosition.current ?? latest.current.at(-1),
+        const last = history ? latest.current.at(-1) : latestPosition.current,
           view = L.map(host.current, {
             zoomControl: false,
             attributionControl: true,
@@ -94,8 +98,8 @@ export default function RasterRoadMap({
             icon: L.divIcon({
               className: 'ac-road-marker-host',
               html: createRoadPositionMarker(english),
-              iconSize: [28, 28],
-              iconAnchor: [14, 14],
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
             }),
           }).addTo(view);
         }
@@ -127,13 +131,8 @@ export default function RasterRoadMap({
   }, [english, history, initialArea, onAreaChange]);
   useEffect(() => {
     const view = map.current,
-      last = position ?? points.at(-1);
+      last = position;
     if (!view || history) return;
-    line.current?.setLatLngs(
-      routeGeometry(points).features.map((f) =>
-        f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
-      ),
-    );
     if (!last) {
       marker.current?.remove();
       marker.current = null;
@@ -142,7 +141,7 @@ export default function RasterRoadMap({
     if (marker.current) marker.current.setLatLng([last.latitude, last.longitude]);
     else
       void import('leaflet').then((L) => {
-        if (map.current !== view || (latestPosition.current ?? latest.current.at(-1)) !== last)
+        if (map.current !== view || latestPosition.current !== last)
           return;
         if (marker.current) {
           marker.current.setLatLng([last.latitude, last.longitude]);
@@ -154,8 +153,8 @@ export default function RasterRoadMap({
           icon: L.divIcon({
             className: 'ac-road-marker-host',
             html: element,
-            iconSize: [28, 28],
-            iconAnchor: [14, 14],
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
           }),
         }).addTo(view);
       });
@@ -166,6 +165,13 @@ export default function RasterRoadMap({
       });
     updateRoadPositionMarker(marker.current?.getElement()?.querySelector<HTMLElement>('.ac-road-position'), active, last, points);
   }, [points, position, english, history, active, ready]);
+  useEffect(() => {
+    line.current?.setLatLngs(
+      routeGeometry(points).features.map((f) =>
+        f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
+      ),
+    );
+  }, [points, ready]);
   useEffect(() => {
     planned.current?.setLatLngs(plannedRoute?.map(([lon, lat]) => [lat, lon]) ?? []);
   }, [plannedRoute, ready]);
@@ -206,21 +212,27 @@ export default function RasterRoadMap({
             ? 'STREET MAP'
             : 'HARTĂ RUTIERĂ'}
       </span>
-      {!history && (!initialArea || onLocate) && <button
+      {!history && (onLocate || active || position) && <button
         type="button"
         className="ac-road-map-center"
-        disabled={!onLocate && !position && !points.length}
         aria-pressed={following}
         onClick={() => {
           follow.current = true;
           setFollowing(true);
           onLocate?.();
-          const p = position ?? points.at(-1);
+          const p = position;
           if (p) map.current?.setView([p.latitude, p.longitude], 16, { animate: true });
         }}
       >
-        <Crosshair size={16}/>{english ? 'My location' : 'Poziția mea'}
+        <Crosshair size={17}/>{locating && !position
+          ? (english ? 'Finding position…' : 'Se caută poziția…')
+          : (english ? 'My location' : 'Poziția mea')}
       </button>}
+      {!history && (position || locationError) && (
+        <p className="ac-map-location-state" role="status">
+          {locationError || (position && (english ? 'GPS accuracy ±' : 'Precizie GPS ±') + Math.round(position.accuracy) + ' m')}
+        </p>
+      )}
       {tileError && (
         <p className="ac-road-map-message" role="status">
           {english
