@@ -962,3 +962,9 @@ html body .app-shell.ac-workspace .ac-road-map .ac-road-map-center {
 .ac-journey-stops > div + div { border-color: #56d6e8; }
 .ac-journey-stops span, .ac-journey-stops small { color: var(--color-muted); }
 .ac-auto-points-layout.is-guiding { grid-template-columns: minmax(0, 1fr); padding-top: 10px; }
+
+html body .ac-workspace.ac-studio .ac-map-compact .ac-map-stage:not(:modal) .ac-road-map-canvas {
+  height: clamp(245px, 38vh, 360px) !important;
+}
+.ac-map-compact .ac-auto-points-layout { grid-template-columns: minmax(0, 1fr); }
+.ac-navigation-background { color: var(--color-muted); }

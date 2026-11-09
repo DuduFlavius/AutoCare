@@ -21,7 +21,11 @@ export type NativeTrip = {
   points: GPSFix[];
   lastPosition?: GPSFix;
 };
+type NativeNavigationStep = { coordinates: [number, number][]; meters: number; instruction: string };
 interface TrackingPlugin {
+  navigationStart(input: { ownerId: string; destination: string; english: boolean; steps: NativeNavigationStep[] }): Promise<void>;
+  navigationSnapshot(input: { ownerId: string }): Promise<unknown>;
+  navigationStop(input: { ownerId: string }): Promise<void>;
   openAndroidUpdate(input: {url: string}): Promise<void>;
   appVersion(): Promise<{version: string; versionCode: number}>;
   start(input: {
@@ -109,6 +113,22 @@ export const nativeTracking = {
   },
 };
 
+export const nativeNavigation = {
+  available: () => hasNativeTracking() && Capacitor.getPlatform() === 'android',
+  async start(ownerId: string, destination: string, english: boolean, steps: NativeNavigationStep[]) {
+    await plugin.navigationStart({ ownerId, destination: destination.slice(0, 200), english, steps });
+  },
+  async snapshot(ownerId: string) {
+    return z.object({
+      active: z.boolean(),
+      position: point.extend({ heading: z.number().optional() }).optional(),
+    }).parse(await plugin.navigationSnapshot({ ownerId }));
+  },
+  async stop(ownerId: string) {
+    await plugin.navigationStop({ ownerId });
+  },
+};
+
 export type AutoBinding = {
   ownerId: string;
   vehicleId: string;
@@ -180,6 +200,7 @@ export const nativeAutomation = {
     await plugin.updateAutomationVehicle({ ownerId, vehicleId, baseline });
   },
   async signOut(ownerId: string) {
+    if (nativeNavigation.available()) await nativeNavigation.stop(ownerId).catch(() => {});
     try {
       await plugin.disableAutomation({ ownerId });
     } catch (e) {

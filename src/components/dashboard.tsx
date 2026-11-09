@@ -239,7 +239,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
               <History size={17}/> {locale.startsWith('en') ? 'Trip History' : 'Istoric trasee'}
             </button>
             <button type="button" aria-pressed={driveView === 'points'} onClick={() => setDriveView('points')}>
-              <MapPin size={17}/> {locale.startsWith('en') ? 'Maps & auto points' : 'Hartă și puncte auto'}
+              <MapPin size={17}/> {locale.startsWith('en') ? 'Map and navigation' : 'Hartă și navigație'}
             </button>
             <button type="button" aria-pressed={driveView === 'bluetooth'} onClick={() => setDriveView('bluetooth')}>
               <Bluetooth size={17}/> Bluetooth
@@ -248,7 +248,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
           <div hidden={driveView !== 'live' && driveView !== 'bluetooth'}>
             <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible} liveVisible={driveView === 'live' && driveVisible}/>
           </div>
-          {driveView === 'points' && <AutoPointsMap preview={preview} visible={driveVisible}/>}
+          {driveView === 'points' && <AutoPointsMap preview={preview} visible={driveVisible} ownerId={data.profile.userId}/>}
           {driveView === 'history' && (
             <SmartDriveHistory ownerId={data.profile.userId} timezone={data.profile.timezone} vehicles={cars} preview={preview} onUpdateMileage={id => {
               const car = cars.find(vehicle => vehicle.id === id);

@@ -1,22 +1,19 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { ArrowUp, Crosshair, Droplets, Fuel, LocateFixed, MapPin, Navigation, ParkingCircle, Phone, Search, Wrench, Zap } from 'lucide-react';
+import { ArrowUp, MapPin, Navigation } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { autoPointCategories, defaultAutoPointsArea, type AutoPoint, type AutoPointCategory, type MapArea } from '@/lib/auto-points';
-import { browserGPSFix, latestGPSFix, segmentMeters, type GPSFix } from '@/lib/gps-tracking';
+import { defaultAutoPointsArea, type MapArea } from '@/lib/auto-points';
+import { browserGPSFix, latestGPSFix, type GPSFix } from '@/lib/gps-tracking';
 import { navigationProgress, type Coordinate, type DrivingRoute, type Turn } from '@/lib/road-navigation';
 import MapStage from './map-stage';
+import { nativeMethodMissing, nativeNavigation } from '@/lib/native-tracking';
 import DriveDestinationSearch from './drive-destination-search';
 import { mapGPSOptions, mapLocationError, useMapLocation } from './use-map-location';
 import { useApplicationLocale } from './application-locale';
 
 const RoadMap = dynamic(() => import('./road-map'), { ssr: false });
-const icons = { service: Wrench, fuel: Fuel, parking: ParkingCircle, charging: Zap, tyres: LocateFixed, wash: Droplets, parts: Wrench };
 const noRoute: GPSFix[] = [];
-const asFix = (point: Coordinate): GPSFix => ({ ...point, accuracy: 0, timestamp: 0 });
-const googleDirections = (point: Coordinate) =>
-  `https://www.google.com/maps/dir/?api=1&travelmode=driving&dir_action=navigate&destination=${point.latitude},${point.longitude}`;
 
 function turnText(turn: Turn, english: boolean) {
   const left = turn.modifier?.includes('left');
@@ -31,22 +28,19 @@ function turnText(turn: Turn, english: boolean) {
   return english ? 'Continue straight' : 'Continuă înainte';
 }
 
-export default function AutoPointsMap({ preview, visible }: { preview: boolean; visible: boolean }) {
+export default function AutoPointsMap({ preview, visible, ownerId }: { preview: boolean; visible: boolean; ownerId: string }) {
   const locale = useApplicationLocale();
   const english = locale.startsWith('en');
   const t = (ro: string, en: string) => english ? en : ro;
   const [area, setArea] = useState<MapArea>(defaultAutoPointsArea);
   const location = useMapLocation(visible && !preview, english);
   const [oneShotPosition, setOneShotPosition] = useState<GPSFix | null>(null);
-  const position = latestGPSFix(location.position, oneShotPosition);
-  const [category, setCategory] = useState<AutoPointCategory>('service');
-  const [results, setResults] = useState<AutoPoint[] | null>(null);
-  const [searchCenter, setSearchCenter] = useState<Coordinate>(defaultAutoPointsArea);
-  const [selected, setSelected] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [nativePosition, setNativePosition] = useState<GPSFix | null>(null);
+  const position = latestGPSFix(latestGPSFix(location.position, oneShotPosition), nativePosition);
+  const [background, setBackground] = useState<'idle' | 'active' | 'upgrade' | 'blocked'>('idle');
+  const wantsNavigation = useRef(false);
   const [locationError, setLocationError] = useState('');
   const [findingLocation, setFindingLocation] = useState(false);
-  const [error, setError] = useState('');
   const [destination, setDestination] = useState<(Coordinate & { name?: string; details?: string }) | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [routes, setRoutes] = useState<DrivingRoute[]>([]);
@@ -55,19 +49,21 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
   const [routeError, setRouteError] = useState('');
   const [navigating, setNavigating] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
-  const pending = useRef<AbortController | null>(null);
   const routingRequest = useRef<AbortController | null>(null);
   const routeCard = useRef<HTMLElement>(null);
-  const placeCard = useRef<HTMLElement>(null);
   const destinationRevision = useRef(0);
   const locationRevision = useRef(0);
   const lastReroute = useRef(0);
   const deviation = useRef(0);
   const distance = (meters: number) => meters >= 1000 ? `${(meters / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} km` : `${Math.round(meters)} m`;
 
-  useEffect(() => () => { ++locationRevision.current; pending.current?.abort(); routingRequest.current?.abort(); }, []);
+  useEffect(() => () => {
+    wantsNavigation.current = false;
+    ++locationRevision.current;
+    routingRequest.current?.abort();
+    if (nativeNavigation.available()) void nativeNavigation.stop(ownerId).catch(() => {});
+  }, [ownerId]);
   useEffect(() => { if (destination) routeCard.current?.scrollIntoView({ block: 'nearest' }); }, [destination]);
-  useEffect(() => { if (selected) placeCard.current?.scrollIntoView({ block: 'nearest' }); }, [selected]);
   function locate(after: (fix: GPSFix) => void) {
     if (preview) return;
     const revision = ++locationRevision.current;
@@ -97,37 +93,6 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
       setFindingLocation(false);
       setLocationError(mapLocationError(failure.code, english));
     }, mapGPSOptions);
-  }
-
-  async function search(center: Coordinate, kind: AutoPointCategory, nearest = false) {
-    if (preview) return;
-    pending.current?.abort();
-    const controller = new AbortController();
-    pending.current = controller;
-    setBusy(true);
-    setError('');
-    setResults(null);
-    setSelected('');
-    setCategory(kind);
-    setSearchCenter(center);
-    try {
-      const { latitude, longitude } = center;
-      const response = await fetch('/api/v1/smartdrive/auto-points', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ latitude, longitude, category: kind }), signal: controller.signal,
-      });
-      if (!response.ok) throw new Error('Points unavailable');
-      const points: AutoPoint[] = await response.json();
-      if (controller.signal.aborted) return;
-      const meters = (point: Coordinate) => segmentMeters(asFix(center), asFix(point));
-      points.sort((a, b) => meters(a) - meters(b));
-      setResults(points);
-      if (nearest && points.length) setSelected(points[0].id);
-    } catch {
-      if (!controller.signal.aborted) setError(t('Furnizorul de puncte auto este indisponibil. Reîncearcă.', 'The auto points provider is unavailable. Try again.'));
-    } finally {
-      if (!controller.signal.aborted) setBusy(false);
-    }
   }
 
   async function plan(start: GPSFix, end: Coordinate, startGuidance = false) {
@@ -183,6 +148,48 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
 
   const route = routes[alternative];
   const routeStart = route?.geometry.coordinates[0];
+  const destinationName = destination?.name;
+  wantsNavigation.current = navigating;
+  useEffect(() => {
+    if (!nativeNavigation.available() || preview) return;
+    if (!navigating || !route) {
+      setBackground('idle');
+      setNativePosition(null);
+      void nativeNavigation.stop(ownerId).catch(() => {});
+      return;
+    }
+    let live = true;
+    let subscribed = false;
+    const steps = route.legs.flatMap(leg => leg.steps.map(step => ({
+      coordinates: step.geometry.coordinates, meters: step.distance,
+      instruction: [turnText(step.maneuver, english), step.name].filter(Boolean).join(' · ').slice(0, 200),
+    })));
+    void nativeNavigation.start(ownerId, destinationName || t('Navigație AutoCare', 'AutoCare navigation'), english, steps)
+      .then(() => {
+        if (!wantsNavigation.current) { void nativeNavigation.stop(ownerId).catch(() => {}); return; }
+        if (live) { subscribed = true; setBackground('active'); }
+      }).catch(failure => {
+        if (live) setBackground(nativeMethodMissing(failure) ? 'upgrade' : 'blocked');
+      });
+    const refresh = async () => {
+      if (!live || !subscribed || document.visibilityState !== 'visible') return;
+      try {
+        const state = await nativeNavigation.snapshot(ownerId);
+        if (!live) return;
+        if (!state.active) { setNavigating(false); return; }
+        const fix = state.position;
+        if (fix) setNativePosition(previous => previous?.timestamp === fix.timestamp ? previous : fix);
+      } catch { /* Browser GPS remains available in the foreground. */ }
+    };
+    const timer = window.setInterval(() => void refresh(), 1200);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      live = false;
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [navigating, route, destinationName, english, ownerId, preview]);
+
   const precisePosition = position && position.accuracy <= 50 && Date.now() - position.timestamp <= 15000 ? position : null;
   const progress = navigating && route && precisePosition ? navigationProgress(route, precisePosition, stepIndex) : null;
   useEffect(() => {
@@ -198,12 +205,10 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
     // Only a new GPS reading can confirm a deviation.
   }, [position, navigating, route, destination]);
 
-  const point = results?.find(item => item.id === selected);
-  const pointLabel = (item: AutoPoint) => item.name || (english ? autoPointCategories[item.category].english : autoPointCategories[item.category].label);
   const arrived = !!progress && progress.distance < 35 && progress.gap < 30;
   return (
-    <section className="ac-auto-points" aria-label="AutoCare Maps">
-      <header><div><span className="eyebrow">AUTOCARE MAPS</span><h3>{t('Navigație și puncte auto', 'Navigation and auto points')}</h3></div></header>
+    <section className="ac-auto-points ac-map-compact" aria-label="AutoCare Maps">
+      <header><div><span className="eyebrow">AUTOCARE MAPS</span><h3>{t('Hartă și navigație', 'Map and navigation')}</h3></div></header>
       <MapStage title={navigating ? t('Ghidare AutoCare', 'AutoCare guidance') : 'AutoCare Maps'} english={english}>
         {!navigating && <DriveDestinationSearch area={area} disabled={preview} english={english} onChoose={point => choose(point)}/>}
         {navigating && progress && <div className="ac-next-turn">
@@ -212,21 +217,10 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
                 {progress.next && !arrived && <small>{distance(progress.untilTurn)}{progress.next.name ? ` · ${progress.next.name}` : ''}</small>}</div>
                 <small>{distance(progress.distance)} · {Math.ceil(progress.seconds / 60)} min · ETA {new Date(Date.now() + progress.seconds * 1000).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</small>
               </div>}
-        {!navigating && <><div className="ac-navigation-tools">
-          <button type="button" disabled={preview || busy || findingLocation} onClick={() => locate(fix => void search(fix, 'service', true))}><Wrench size={17}/>{t('Cel mai apropiat service', 'Nearest repair shop')}</button>
+        {!navigating && <div className="ac-navigation-tools">
           <button type="button" disabled={preview} aria-pressed={selecting} onClick={() => setSelecting(!selecting)}><MapPin size={17}/>{t('Alege destinația pe hartă', 'Pick destination on map')}</button>
-        </div>
-        <div className="ac-auto-point-categories" role="group" aria-label={t('Categorii', 'Categories')}>
-          {(Object.keys(autoPointCategories) as AutoPointCategory[]).map(key => {
-            const Icon = icons[key];
-            const meta = autoPointCategories[key];
-            return <button key={key} type="button" aria-pressed={category === key} disabled={preview || busy || (!position && area.zoom < 11)}
-              onClick={() => { if (position) void search(position, key); else if (area.zoom >= 11) void search(area, key); }}>
-              <Icon size={17}/>{english ? meta.english : meta.label}
-            </button>;
-          })}
-        </div>
-        </>}
+          {selecting && <span role="status">{t('Atinge harta pentru destinație.', 'Tap the map for your destination.')}</span>}
+        </div>}
         {destination && <section ref={routeCard} className="ac-navigation-card ac-navigation-destination" aria-label={t('Navigație', 'Navigation')}>
           <span className="eyebrow">{t('DESTINAȚIE', 'DESTINATION')}</span>
           <div className="ac-journey-stops">
@@ -247,44 +241,25 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
           <div className="ac-navigation-tools">
             {navigating ? <button type="button" onClick={() => { setNavigating(false); setStepIndex(0); }}>{t('Oprește ghidarea', 'Stop guidance')}</button>
               : !route && !routing && !findingLocation && <button type="button" onClick={() => choose(destination, true)}>{t('Calculează traseul', 'Calculate route')}</button>}
-            <a href={googleDirections(destination)} target="_blank" rel="noreferrer">{t('Deschide în Google Maps', 'Open in Google Maps')} ↗</a>
           </div>
-          <small>{t('Estimare rutieră fără trafic live.', 'Road estimate without live traffic.')}</small>
+          {navigating && <small className="ac-navigation-background" role="status">
+            {background === 'active'
+              ? t('Ghidarea în fundal este activă. Indicațiile apar în notificarea AutoCare.', 'Background guidance is active. Directions appear in the AutoCare notification.')
+              : background === 'upgrade'
+                ? t('Pentru ghidare în fundal, ai nevoie de o versiune Android actualizată.', 'Background guidance requires an updated Android app.')
+                : background === 'blocked'
+                  ? t('Ghidarea în fundal nu a pornit. Verifică permisiunile pentru locație precisă și notificări.', 'Background guidance could not start. Check precise location and notification permissions.')
+                  : t('Ține această pagină deschisă pentru ghidare. Modul în fundal este disponibil în aplicația Android compatibilă.', 'Keep this page open for guidance. Background mode is available in the compatible Android app.')}
+          </small>}
           <button type="button" onClick={() => { ++destinationRevision.current; ++locationRevision.current; routingRequest.current?.abort(); setFindingLocation(false); setRouting(false); setNavigating(false); setRoutes([]); setDestination(null); setRouteError(''); setLocationError(''); }}>{t('Șterge destinația', 'Clear destination')}</button>
         </section>}
-        <div className={navigating ? "ac-auto-points-layout is-guiding" : "ac-auto-points-layout"}>
+        <div className="ac-auto-points-layout is-guiding">
           <div className={selecting ? 'ac-map-selecting' : undefined}>
             <RoadMap points={noRoute} position={position} active={navigating} english={english}
               initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview ? undefined : location.locate}
               locating={location.waiting} locationError={location.error}
-              autoPoints={results ?? undefined} onAutoPoint={setSelected}
               plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting ? choose : undefined}/>
-            {!navigating && <div className="ac-drive-map-footer">
-              <span><Crosshair size={16}/>{selecting ? t('Atinge harta pentru destinație', 'Tap the map for your destination') : t('Rază aprox. 4 km · OpenStreetMap', 'Approx. 4 km radius · OpenStreetMap')}</span>
-              <button type="button" onClick={() => void search(area, category)} disabled={busy || preview || area.zoom < 11}><Search size={17}/>{t('Caută în zona hărții', 'Search this map area')}</button>
-            </div>}
           </div>
-          {!navigating && <aside aria-label={t('Puncte auto în apropiere', 'Nearby auto points')}>
-            <p className="small muted" role="status">{(!destination && (locationError || (findingLocation && t('Se caută poziția GPS…', 'Finding GPS position…')))) || error || (busy ? t('Se caută…', 'Searching…') : results
-              ? results.length + t(' rezultate · distanțe în linie dreaptă', ' results · straight-line distances')
-              : t('Alege o categorie sau caută pe hartă.', 'Choose a category or search the map.'))}</p>
-            {point && <section ref={placeCard} className="ac-navigation-card">
-              <strong>{pointLabel(point)}</strong>
-              {point.address && <span>{point.address}</span>}
-              {point.hours && <span>{t('Program', 'Hours')} · {point.hours}</span>}
-              <div className="ac-navigation-tools">
-                <button type="button" className="primary" onClick={() => choose({ ...point, name: pointLabel(point) }, true)}><Navigation size={16}/>{t('Navighează', 'Navigate')}</button>
-                <a href={googleDirections(point)} target="_blank" rel="noreferrer">Google Maps ↗</a>
-                {point.phone && <a href={'tel:' + point.phone.replace(/[^+\d]/g, '')}><Phone size={16}/>{t('Sună', 'Call')}</a>}
-                <a href={'https://www.openstreetmap.org/' + point.id} target="_blank" rel="noreferrer">{t('Detalii pe hartă', 'Map details')} ↗</a>
-              </div>
-            </section>}
-            <ul aria-label={t('Rezultate din apropiere', 'Nearby results')}>
-              {results?.map(item => <li key={item.id}><button type="button" aria-pressed={selected === item.id} onClick={() => setSelected(item.id)}>
-                <MapPin size={15}/><span data-user-content>{pointLabel(item)}</span><small>{distance(segmentMeters(asFix(searchCenter), asFix(item)))}</small>
-              </button></li>)}
-            </ul>
-          </aside>}
         </div>
       </MapStage>
     </section>

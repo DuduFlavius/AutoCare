@@ -81,6 +81,104 @@ public class AutoCareTrackingPlugin extends Plugin {
     @PluginMethod public void stop(PluginCall call){JSONObject state=TrackingStore.read(getContext());if(owned(call,state))AutoDrive.suppress(getContext());if(state.has("id")&&!owned(call,state)){snapshot(call);return;}try{TrackingStore.stop(getContext());getContext().stopService(new Intent(getContext(),TrackingService.class));snapshot(call);}catch(Exception e){call.reject("Unable to stop GPS",e);}}
     @PluginMethod public void clear(PluginCall call){JSONObject state=TrackingStore.forOwner(getContext(),call.getString("ownerId",""));if(state.optBoolean("active")){call.reject("Stop GPS before clearing");return;}try{TrackingStore.clearOwner(getContext(),call.getString("ownerId",""));call.resolve();}catch(Exception e){call.reject("Unable to clear GPS trip",e);}}
 
+    @PluginMethod public void navigationStart(PluginCall call) {
+        if (getPermissionState("location") != PermissionState.GRANTED) {
+            requestPermissionForAlias("location", call, "navigationLocation");
+            return;
+        }
+        navigationLocation(call);
+    }
+
+    @PermissionCallback private void navigationLocation(PluginCall call) {
+        if (getContext().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            call.reject("Permite locația precisă pentru navigarea în fundal.");
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= 33 && getPermissionState("notifications") != PermissionState.GRANTED) {
+            requestPermissionForAlias("notifications", call, "navigationNotifications");
+            return;
+        }
+        navigationNotifications(call);
+    }
+
+    @PermissionCallback private void navigationNotifications(PluginCall call) {
+        if (Build.VERSION.SDK_INT >= 33 && getPermissionState("notifications") != PermissionState.GRANTED) {
+            call.reject("Permite notificările pentru a vedea indicațiile în fundal.");
+            return;
+        }
+        NavigationService.Session previous = NavigationService.session;
+        try {
+            String owner = call.getString("ownerId", "");
+            String destination = call.getString("destination", "");
+            JSArray input = call.getArray("steps");
+            if (owner.isEmpty() || destination.isEmpty() || destination.length() > 200 || input == null || input.length() == 0 || input.length() > 2500) {
+                call.reject("Traseu invalid pentru navigarea în fundal.");
+                return;
+            }
+            if (previous != null && !owner.equals(previous.owner)) {
+                call.reject("Există o navigare activă pe alt cont.");
+                return;
+            }
+            LocationManager manager = getContext().getSystemService(LocationManager.class);
+            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                call.reject("Activează GPS-ul telefonului.");
+                return;
+            }
+            NavigationProgress.Step[] steps = new NavigationProgress.Step[input.length()];
+            int vertices = 0;
+            for (int i = 0; i < input.length(); i++) {
+                JSONObject step = input.getJSONObject(i);
+                JSONArray coordinates = step.getJSONArray("coordinates");
+                vertices += coordinates.length();
+                if (coordinates.length() == 0 || vertices > 30000) throw new JSONException("Invalid route size");
+                double[][] points = new double[coordinates.length()][2];
+                for (int j = 0; j < coordinates.length(); j++) {
+                    JSONArray coordinate = coordinates.getJSONArray(j);
+                    double lon = coordinate.getDouble(0), lat = coordinate.getDouble(1);
+                    if (!Double.isFinite(lon) || !Double.isFinite(lat) || Math.abs(lon) > 180 || Math.abs(lat) > 90) throw new JSONException("Invalid coordinates");
+                    points[j] = new double[]{lon, lat};
+                }
+                double meters = step.getDouble("meters");
+                String instruction = step.getString("instruction");
+                if (!Double.isFinite(meters) || meters < 0 || instruction.length() > 200) throw new JSONException("Invalid step");
+                steps[i] = new NavigationProgress.Step(points, meters, instruction);
+            }
+            NavigationService.Session active = new NavigationService.Session(owner, destination, steps, Boolean.TRUE.equals(call.getBoolean("english")));
+            if (previous != null) active.lastPosition = previous.lastPosition;
+            NavigationService.session = active;
+            Intent service = new Intent(getContext(), NavigationService.class);
+            if (Build.VERSION.SDK_INT >= 26) getContext().startForegroundService(service);
+            else getContext().startService(service);
+            call.resolve();
+        } catch (Exception failure) {
+            NavigationService.session = previous;
+            call.reject("Nu s-a putut porni navigarea în fundal.", failure);
+        }
+    }
+
+    @PluginMethod public void navigationSnapshot(PluginCall call) {
+        NavigationService.Session active = NavigationService.session;
+        boolean owned = active != null && active.owner.equals(call.getString("ownerId", ""));
+        JSObject result = new JSObject();
+        result.put("active", owned);
+        if (owned && active.lastPosition != null) {
+            android.location.Location fix = active.lastPosition;
+            JSObject position = new JSObject();
+            position.put("latitude", fix.getLatitude());
+            position.put("longitude", fix.getLongitude());
+            position.put("accuracy", fix.hasAccuracy() ? fix.getAccuracy() : 1000);
+            position.put("timestamp", fix.getTime());
+            if (fix.hasBearing()) position.put("heading", fix.getBearing());
+            result.put("position", position);
+        }
+        call.resolve(result);
+    }
+
+    @PluginMethod public void navigationStop(PluginCall call) {
+        NavigationService.stop(getContext(), call.getString("ownerId", ""));
+        call.resolve();
+    }
+
     @PluginMethod public void automationStatus(PluginCall call){
         try{String owner=call.getString("ownerId","");JSONArray list=new JSONArray();JSONObject all=AutoDrive.bindings(getContext());for(java.util.Iterator<String> it=all.keys();it.hasNext();){JSONObject row=all.getJSONObject(it.next());if(owner.equals(row.optString("ownerId")))list.put(row);}
             JSObject result=new JSObject();result.put("apiVersion",6);result.put("platform","android");result.put("supported",Build.VERSION.SDK_INT>=26);result.put("bindings",list);result.put("pendingCount",AutoDrive.pending(getContext(),owner).length());result.put("backgroundLocation",Build.VERSION.SDK_INT<29||getContext().checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)==PackageManager.PERMISSION_GRANTED);result.put("error",AutoDrive.prefs(getContext()).getString("error",""));call.resolve(result);
