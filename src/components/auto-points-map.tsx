@@ -7,6 +7,7 @@ import { autoPointCategories, defaultAutoPointsArea, type AutoPoint, type AutoPo
 import { browserGPSFix, latestGPSFix, segmentMeters, type GPSFix } from '@/lib/gps-tracking';
 import { navigationProgress, type Coordinate, type DrivingRoute, type Turn } from '@/lib/road-navigation';
 import MapStage from './map-stage';
+import DriveDestinationSearch from './drive-destination-search';
 import { mapGPSOptions, mapLocationError, useMapLocation } from './use-map-location';
 import { useApplicationLocale } from './application-locale';
 
@@ -46,7 +47,7 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
   const [locationError, setLocationError] = useState('');
   const [findingLocation, setFindingLocation] = useState(false);
   const [error, setError] = useState('');
-  const [destination, setDestination] = useState<(Coordinate & { name?: string }) | null>(null);
+  const [destination, setDestination] = useState<(Coordinate & { name?: string; details?: string }) | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [routes, setRoutes] = useState<DrivingRoute[]>([]);
   const [alternative, setAlternative] = useState(0);
@@ -163,7 +164,7 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
     }
   }
 
-  function choose(point: Coordinate & { name?: string }, startGuidance = false) {
+  function choose(point: Coordinate & { name?: string; details?: string }, startGuidance = false) {
     const revision = ++destinationRevision.current;
     routingRequest.current?.abort();
     setRouting(false);
@@ -181,6 +182,7 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
   }
 
   const route = routes[alternative];
+  const routeStart = route?.geometry.coordinates[0];
   const precisePosition = position && position.accuracy <= 50 && Date.now() - position.timestamp <= 15000 ? position : null;
   const progress = navigating && route && precisePosition ? navigationProgress(route, precisePosition, stepIndex) : null;
   useEffect(() => {
@@ -202,14 +204,15 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
   return (
     <section className="ac-auto-points" aria-label="AutoCare Maps">
       <header><div><span className="eyebrow">AUTOCARE MAPS</span><h3>{t('Navigație și puncte auto', 'Navigation and auto points')}</h3></div></header>
-      <MapStage title="AutoCare Maps" english={english}>
+      <MapStage title={navigating ? t('Ghidare AutoCare', 'AutoCare guidance') : 'AutoCare Maps'} english={english}>
+        {!navigating && <DriveDestinationSearch area={area} disabled={preview} english={english} onChoose={point => choose(point)}/>}
         {navigating && progress && <div className="ac-next-turn">
                 <ArrowUp size={24} style={{ rotate: progress.next?.maneuver.modifier?.includes('left') ? '-90deg' : progress.next?.maneuver.modifier?.includes('right') ? '90deg' : undefined }}/>
                 <div><strong>{arrived ? t('Ai ajuns', 'You arrived') : progress.next ? turnText(progress.next.maneuver, english) : t('Continuă către destinație', 'Continue to destination')}</strong>
                 {progress.next && !arrived && <small>{distance(progress.untilTurn)}{progress.next.name ? ` · ${progress.next.name}` : ''}</small>}</div>
                 <small>{distance(progress.distance)} · {Math.ceil(progress.seconds / 60)} min · ETA {new Date(Date.now() + progress.seconds * 1000).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</small>
               </div>}
-        <div className="ac-navigation-tools">
+        {!navigating && <><div className="ac-navigation-tools">
           <button type="button" disabled={preview || busy || findingLocation} onClick={() => locate(fix => void search(fix, 'service', true))}><Wrench size={17}/>{t('Cel mai apropiat service', 'Nearest repair shop')}</button>
           <button type="button" disabled={preview} aria-pressed={selecting} onClick={() => setSelecting(!selecting)}><MapPin size={17}/>{t('Alege destinația pe hartă', 'Pick destination on map')}</button>
         </div>
@@ -223,9 +226,14 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
             </button>;
           })}
         </div>
+        </>}
         {destination && <section ref={routeCard} className="ac-navigation-card ac-navigation-destination" aria-label={t('Navigație', 'Navigation')}>
           <span className="eyebrow">{t('DESTINAȚIE', 'DESTINATION')}</span>
-          <strong>{destination.name || t('Destinație aleasă pe hartă', 'Destination picked on map')}</strong>
+          <div className="ac-journey-stops">
+            <div><span>{t('Plecare', 'Start')}</span><strong>{t('Poziția ta GPS', 'Your GPS location')}</strong></div>
+            <div><span>{t('Sosire', 'Destination')}</span><strong data-user-content>{destination.name || t('Punctul ales pe hartă', 'Point picked on map')}</strong>
+            {destination.details && <small data-user-content>{destination.details}</small>}</div>
+          </div>
           {findingLocation && <p role="status">{t('Se caută poziția GPS…', 'Finding GPS position…')}</p>}
           {(routeError || locationError) && <p className="ac-navigation-alert" role="alert">{routeError || locationError}</p>}
           {navigating && !progress && !routing && <p role="status">{t('Traseul este afișat. Indicațiile live pornesc când GPS-ul are o poziție mai precisă.', 'Route shown. Live guidance resumes once GPS has a more accurate fix.')}</p>}
@@ -234,7 +242,7 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
             <label>{t('Traseu', 'Route')}<select value={alternative} onChange={event => { setAlternative(Number(event.target.value)); setStepIndex(0); deviation.current = 0; lastReroute.current = Date.now(); }}>
               {routes.map((option, index) => <option key={index} value={index}>{index + 1} · {distance(option.distance)} · {Math.ceil(option.duration / 60)} min</option>)}
             </select></label>
-            {!navigating && <button type="button" className="primary" onClick={() => { setNavigating(true); location.locate(); lastReroute.current = Date.now(); }}><Navigation size={16}/>{t('Pornește navigația', 'Start navigation')}</button>}
+            {!navigating && <button type="button" className="primary" onClick={() => { setNavigating(true); location.locate(); lastReroute.current = Date.now(); }}><Navigation size={16}/>{t('Navighează aici', 'Navigate here')}</button>}
           </>}
           <div className="ac-navigation-tools">
             {navigating ? <button type="button" onClick={() => { setNavigating(false); setStepIndex(0); }}>{t('Oprește ghidarea', 'Stop guidance')}</button>
@@ -244,19 +252,19 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
           <small>{t('Estimare rutieră fără trafic live.', 'Road estimate without live traffic.')}</small>
           <button type="button" onClick={() => { ++destinationRevision.current; ++locationRevision.current; routingRequest.current?.abort(); setFindingLocation(false); setRouting(false); setNavigating(false); setRoutes([]); setDestination(null); setRouteError(''); setLocationError(''); }}>{t('Șterge destinația', 'Clear destination')}</button>
         </section>}
-        <div className="ac-auto-points-layout">
+        <div className={navigating ? "ac-auto-points-layout is-guiding" : "ac-auto-points-layout"}>
           <div className={selecting ? 'ac-map-selecting' : undefined}>
             <RoadMap points={noRoute} position={position} active={navigating} english={english}
               initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview ? undefined : location.locate}
               locating={location.waiting} locationError={location.error}
               autoPoints={results ?? undefined} onAutoPoint={setSelected}
-              plannedRoute={route?.geometry.coordinates} destination={destination} onDestination={selecting ? choose : undefined}/>
-            <div className="ac-drive-map-footer">
+              plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting ? choose : undefined}/>
+            {!navigating && <div className="ac-drive-map-footer">
               <span><Crosshair size={16}/>{selecting ? t('Atinge harta pentru destinație', 'Tap the map for your destination') : t('Rază aprox. 4 km · OpenStreetMap', 'Approx. 4 km radius · OpenStreetMap')}</span>
               <button type="button" onClick={() => void search(area, category)} disabled={busy || preview || area.zoom < 11}><Search size={17}/>{t('Caută în zona hărții', 'Search this map area')}</button>
-            </div>
+            </div>}
           </div>
-          <aside aria-label={t('Puncte auto în apropiere', 'Nearby auto points')}>
+          {!navigating && <aside aria-label={t('Puncte auto în apropiere', 'Nearby auto points')}>
             <p className="small muted" role="status">{(!destination && (locationError || (findingLocation && t('Se caută poziția GPS…', 'Finding GPS position…')))) || error || (busy ? t('Se caută…', 'Searching…') : results
               ? results.length + t(' rezultate · distanțe în linie dreaptă', ' results · straight-line distances')
               : t('Alege o categorie sau caută pe hartă.', 'Choose a category or search the map.'))}</p>
@@ -276,7 +284,7 @@ export default function AutoPointsMap({ preview, visible }: { preview: boolean; 
                 <MapPin size={15}/><span data-user-content>{pointLabel(item)}</span><small>{distance(segmentMeters(asFix(searchCenter), asFix(item)))}</small>
               </button></li>)}
             </ul>
-          </aside>
+          </aside>}
         </div>
       </MapStage>
     </section>

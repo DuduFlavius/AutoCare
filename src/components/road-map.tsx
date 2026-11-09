@@ -24,6 +24,7 @@ export default function RoadMapView({
   locationError,
   plannedRoute,
   destination,
+  routeStart,
   onDestination,
 }: {
   points: GPSFix[];
@@ -40,6 +41,7 @@ export default function RoadMapView({
   locationError?: string;
   plannedRoute?: [number, number][];
   destination?: { latitude: number; longitude: number } | null;
+  routeStart?: [number, number];
   onDestination?: (point: { latitude: number; longitude: number }) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
@@ -52,6 +54,7 @@ export default function RoadMapView({
   const destinationAction = useRef(onDestination);
   destinationAction.current = onDestination;
   const shownRoute = useRef(false);
+  const wasActive = useRef(false);
   const follow = useRef(true);
   const [failed, setFailed] = useState(false),
     [loading, setLoading] = useState(true),
@@ -109,8 +112,13 @@ export default function RoadMapView({
             window.clearTimeout(fallbackTimer);
             view.addSource('directions', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
             view.addLayer({
+              id: 'directions-outline', type: 'line', source: 'directions',
+              paint: { 'line-color': '#10192a', 'line-width': 11 },
+              layout: { 'line-cap': 'round', 'line-join': 'round' },
+            });
+            view.addLayer({
               id: 'directions-line', type: 'line', source: 'directions',
-              paint: { 'line-color': '#56d6e8', 'line-width': 6, 'line-dasharray': [2, 1] },
+              paint: { 'line-color': '#56a8ff', 'line-width': 7 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addSource('trip', { type: 'geojson', data: routeGeometry(latest.current) });
@@ -213,6 +221,11 @@ export default function RoadMapView({
           .addTo(view);
       });
     }
+    if (active && !wasActive.current) {
+      follow.current = true;
+      setFollowing(true);
+    }
+    wasActive.current = active;
     if (follow.current)
       view.easeTo({
         center: [p.longitude, p.latitude],
@@ -231,20 +244,27 @@ export default function RoadMapView({
     source?.setData({ type: 'FeatureCollection', features: plannedRoute?.length ? [{
       type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: plannedRoute },
     }] : [] });
-    if (source && plannedRoute?.length && !shownRoute.current) showRoute();
+    if (source && plannedRoute?.length && !active && !shownRoute.current) showRoute();
     shownRoute.current = !!source && !!plannedRoute?.length;
   }, [plannedRoute, loading]);
   useEffect(() => {
     const view = map.current;
     if (!view || loading || !destination) return;
     let disposed = false;
-    let pin: Marker | undefined;
+    const pins: Marker[] = [];
     void import('maplibre-gl').then(({ Marker }) => {
       if (disposed || map.current !== view) return;
-      pin = new Marker({ color: '#56d6e8', scale: 0.9 }).setLngLat([destination.longitude, destination.latitude]).addTo(view);
+      const finish = new Marker({ color: '#56d6e8', scale: 0.9 }).setLngLat([destination.longitude, destination.latitude]).addTo(view);
+      finish.getElement().setAttribute('aria-label', english ? 'Destination' : 'Sosire');
+      pins.push(finish);
+      if (routeStart) {
+        const departure = new Marker({ color: '#76e3b1', scale: 0.75 }).setLngLat(routeStart).addTo(view);
+        departure.getElement().setAttribute('aria-label', english ? 'Route start' : 'Plecare');
+        pins.push(departure);
+      }
     });
-    return () => { disposed = true; pin?.remove(); };
-  }, [destination, loading]);
+    return () => { disposed = true; pins.forEach(pin => pin.remove()); };
+  }, [destination, routeStart, loading, english]);
   useEffect(() => {
     const view = map.current;
     if (!view || loading || failed || !autoPoints?.length) return;
@@ -268,7 +288,7 @@ export default function RoadMapView({
     return () => { cancelled = true; pins.forEach(pin => pin.remove()); };
   }, [autoPoints, loading, failed, english, onAutoPoint]);
   if (failed)
-    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} />;
+    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart} />;
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div

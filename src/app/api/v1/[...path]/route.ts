@@ -1,3 +1,4 @@
+import { findRoadDestinations } from '@/lib/road-geocoding';
 import { loadDrivingRoutes, roadCoordinate } from '@/lib/road-navigation-server';
 import { autoPointCategories } from '@/lib/auto-points';
 import { loadAutoPoints } from '@/lib/auto-points-server';
@@ -132,6 +133,11 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     const uid = sess.user.id;
     await svc.assertActiveAccount(uid);
     await rate(uid);
+    if (route === 'smartdrive/destinations' && method === 'POST') {
+      await rate(uid, 'smartdrive-destinations', 12);
+      const { query, area } = z.object({ query: z.string().trim().min(3).max(160), area: roadCoordinate }).parse(await body(req));
+      return json(await findRoadDestinations(query, area.latitude, area.longitude));
+    }
     if (route === 'smartdrive/directions' && method === 'POST') {
       await rate(uid, 'smartdrive-directions', 8);
       const { start, end, startAccuracy } = z.object({ start: roadCoordinate, end: roadCoordinate, startAccuracy: z.number().min(0).max(500).optional() }).parse(await body(req));

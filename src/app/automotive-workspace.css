@@ -940,3 +940,25 @@ html body .app-shell.ac-workspace .ac-road-map .ac-road-map-center {
 .ac-auto-points .ac-road-map .maplibregl-ctrl-group button + button {
   border-top: 1px solid var(--color-border) !important;
 }
+
+.ac-destination-search {
+  min-width: 0;
+  margin: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+.ac-destination-search form { display: grid; gap: 7px; }
+.ac-destination-search form label { font-size: 16px !important; font-weight: 700 !important; }
+.ac-destination-search-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.ac-destination-search-row input { min-width: 0; width: 100%; font-size: 16px !important; }
+.ac-destination-search ul { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 5px; }
+.ac-destination-search li button { width: 100% !important; justify-content: flex-start !important; text-align: left; white-space: normal !important; }
+.ac-destination-search li button svg { flex: none; color: var(--color-primary-ink); }
+.ac-destination-search li button small { display: block; color: var(--color-muted); }
+.ac-journey-stops { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ac-journey-stops > div { display: grid; gap: 2px; border-inline-start: 3px solid #76e3b1; padding-inline-start: 9px; }
+.ac-journey-stops > div + div { border-color: #56d6e8; }
+.ac-journey-stops span, .ac-journey-stops small { color: var(--color-muted); }
+.ac-auto-points-layout.is-guiding { grid-template-columns: minmax(0, 1fr); padding-top: 10px; }

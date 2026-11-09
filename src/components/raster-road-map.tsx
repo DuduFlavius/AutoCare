@@ -23,6 +23,7 @@ export default function RasterRoadMap({
   locationError,
   plannedRoute,
   destination,
+  routeStart,
   onDestination,
 }: {
   points: GPSFix[];
@@ -39,6 +40,7 @@ export default function RasterRoadMap({
   locationError?: string;
   plannedRoute?: [number, number][];
   destination?: { latitude: number; longitude: number } | null;
+  routeStart?: [number, number];
   onDestination?: (point: { latitude: number; longitude: number }) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
@@ -53,6 +55,7 @@ export default function RasterRoadMap({
   const destinationAction = useRef(onDestination);
   destinationAction.current = onDestination;
   const shownRoute = useRef(false);
+  const wasActive = useRef(false);
   const follow = useRef(true),
     [following, setFollowing] = useState(true),
     [tileError, setTileError] = useState(false),
@@ -91,7 +94,7 @@ export default function RasterRoadMap({
         layer.on('load', () => {
           if (!disposed) setTileError(false);
         });
-        planned.current = L.polyline([], { color: '#56d6e8', weight: 6, dashArray: '9 5', interactive: false }).addTo(view);
+        planned.current = L.polyline([], { color: '#56a8ff', weight: 7, interactive: false }).addTo(view);
         line.current = L.polyline(
           routeGeometry(latest.current).features.map((f) =>
             f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
@@ -169,6 +172,11 @@ export default function RasterRoadMap({
           }),
         }).addTo(view);
       });
+    if (active && !wasActive.current) {
+      follow.current = true;
+      setFollowing(true);
+    }
+    wasActive.current = active;
     if (follow.current)
       view.setView([last.latitude, last.longitude], Math.max(15, view.getZoom()), {
         animate: true,
@@ -185,20 +193,21 @@ export default function RasterRoadMap({
   }, [points, ready]);
   useEffect(() => {
     planned.current?.setLatLngs(plannedRoute?.map(([lon, lat]) => [lat, lon]) ?? []);
-    if (ready && plannedRoute?.length && !shownRoute.current) showRoute();
+    if (ready && plannedRoute?.length && !active && !shownRoute.current) showRoute();
     shownRoute.current = ready && !!plannedRoute?.length;
   }, [plannedRoute, ready]);
   useEffect(() => {
     const view = map.current;
     if (!view || !ready || !destination) return;
     let disposed = false;
-    let pin: import('leaflet').CircleMarker | undefined;
+    const pins: import('leaflet').CircleMarker[] = [];
     void import('leaflet').then(L => {
       if (disposed || map.current !== view) return;
-      pin = L.circleMarker([destination.latitude, destination.longitude], { radius: 8, color: '#56d6e8', fillOpacity: 1 }).addTo(view);
+      pins.push(L.circleMarker([destination.latitude, destination.longitude], { radius: 8, color: '#56d6e8', fillOpacity: 1 }).addTo(view));
+      if (routeStart) pins.push(L.circleMarker([routeStart[1], routeStart[0]], { radius: 7, color: '#76e3b1', fillOpacity: 1 }).addTo(view));
     });
-    return () => { disposed = true; pin?.remove(); };
-  }, [destination, ready]);
+    return () => { disposed = true; pins.forEach(pin => pin.remove()); };
+  }, [destination, routeStart, ready]);
   useEffect(() => {
     const view = map.current;
     if (!view || !ready || !autoPoints?.length) return;

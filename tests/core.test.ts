@@ -71,6 +71,15 @@ before(async () => {
       mail.push(JSON.parse(String(init?.body)));
       return Response.json({ id: 'mail-' + mail.length });
     }
+    if (String(input).startsWith('https://photon.komoot.io/api/')) {
+      const url = new URL(String(input));
+      assert.equal(url.searchParams.get('q'), 'Calea Șagului 100');
+      assert.equal(url.searchParams.get('lat'), '45.7');
+      return Response.json({ features: [
+        { geometry: { type: 'Point', coordinates: [21.1987, 45.7247] }, properties: { street: 'Calea Șagului', housenumber: '100', city: 'Timișoara' } },
+        { geometry: { type: 'Point', coordinates: [200, 45.72] }, properties: { name: 'Invalid place' } },
+      ] });
+    }
     if (String(input).startsWith('https://routing.openstreetmap.de/routed-car/route/v1/driving/')) {
       const url = new URL(String(input));
       assert.equal(url.searchParams.get('steps'), 'true');
@@ -136,6 +145,16 @@ test('01 Registration, email verification, login, session and wrong password', a
   });
   assert.equal(r.status, 401);
 });
+test('destination search authenticates, validates input, and normalizes provider addresses', async () => {
+  const payload = { query: 'Calea Șagului 100', area: { latitude: 45.7247, longitude: 21.1987 } };
+  assert.equal((await call('smartdrive/destinations', 'POST', payload, '')).status, 401);
+  assert.equal((await call('smartdrive/destinations', 'POST', { ...payload, query: ' a ' })).status, 400);
+  const response = await call('smartdrive/destinations', 'POST', payload);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('cache-control'), 'private, no-store');
+  assert.deepEqual(await response.json(), [{ latitude: 45.7247, longitude: 21.1987, name: 'Calea Șagului 100', details: 'Timișoara' }]);
+});
+
 test('SmartDrive directions require a session, validate coordinates and return real provider fields', async () => {
   const request = { start: { latitude: 45.7, longitude: 21.2 }, end: { latitude: 45.71, longitude: 21.21 } };
   assert.equal((await call('smartdrive/directions', 'POST', request, '')).status, 401);
