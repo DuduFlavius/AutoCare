@@ -27,6 +27,7 @@ process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_placeholder';
 process.env.STRIPE_MONTHLY_PRICE_ID = 'price_monthly';
 const realFetch = globalThis.fetch;
 const mail: Array<{ to: string[]; text: string; html: string }> = [];
+let requestRadius: string | null = null;
 let uid: string, other: string, cookie: string, car: typeof s.vehicles.$inferSelect;
 const now = new Date('2030-03-10T10:00:00Z');
 async function call(path: string, method = 'GET', body?: unknown, session = cookie) {
@@ -74,6 +75,7 @@ before(async () => {
       const url = new URL(String(input));
       assert.equal(url.searchParams.get('steps'), 'true');
       assert.equal(url.searchParams.get('alternatives'), 'true');
+      requestRadius = url.searchParams.get('radiuses');
       const coordinates = [[21.2, 45.7], [21.21, 45.71]];
       const geometry = { coordinates };
       return Response.json({ code: 'Ok', routes: [{
@@ -145,6 +147,12 @@ test('SmartDrive directions require a session, validate coordinates and return r
   const [route] = await result.json();
   assert.equal(route.distance, 1200);
   assert.equal(route.legs[0].steps[0].maneuver.type, 'depart');
+  assert.equal(requestRadius, '250;250');
+  assert.equal((await call('smartdrive/directions', 'POST', { ...request, startAccuracy: 202 })).status, 200);
+  assert.equal(requestRadius, '250;250');
+  assert.equal((await call('smartdrive/directions', 'POST', { ...request, startAccuracy: 320 })).status, 200);
+  assert.equal(requestRadius, '320;250');
+  assert.equal((await call('smartdrive/directions', 'POST', { ...request, startAccuracy: 999 })).status, 400);
 });
 
 

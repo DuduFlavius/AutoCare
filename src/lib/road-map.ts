@@ -31,3 +31,16 @@ export function tripBounds(points: GPSFix[]): [[number, number], [number, number
   const north = Math.max(...points.map(point => point.latitude));
   return [[west, south], [east, north]];
 }
+
+export function plannedRouteBounds(coordinates: [number, number][]): [[number, number], [number, number]] {
+  const [first] = coordinates;
+  const southwest: [number, number] = [...first];
+  const northeast: [number, number] = [...first];
+  for (const [longitude, latitude] of coordinates) {
+    southwest[0] = Math.min(southwest[0], longitude);
+    southwest[1] = Math.min(southwest[1], latitude);
+    northeast[0] = Math.max(northeast[0], longitude);
+    northeast[1] = Math.max(northeast[1], latitude);
+  }
+  return [southwest, northeast];
+}

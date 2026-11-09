@@ -6,7 +6,7 @@ import type { Map as RoadMap, Marker, GeoJSONSource } from 'maplibre-gl';
 import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
-import { roadMapStyle, routeGeometry, streetOnlyStyle, tripBounds } from '@/lib/road-map';
+import { roadMapStyle, plannedRouteBounds, routeGeometry, streetOnlyStyle, tripBounds } from '@/lib/road-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
 const RasterRoadMap = dynamic(() => import('./raster-road-map'), { ssr: false });
 export default function RoadMapView({
@@ -23,6 +23,7 @@ export default function RoadMapView({
   locating = false,
   locationError,
   plannedRoute,
+  destination,
   onDestination,
 }: {
   points: GPSFix[];
@@ -38,6 +39,7 @@ export default function RoadMapView({
   locating?: boolean;
   locationError?: string;
   plannedRoute?: [number, number][];
+  destination?: { latitude: number; longitude: number } | null;
   onDestination?: (point: { latitude: number; longitude: number }) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
@@ -49,10 +51,18 @@ export default function RoadMapView({
   latestPosition.current = position;
   const destinationAction = useRef(onDestination);
   destinationAction.current = onDestination;
+  const shownRoute = useRef(false);
   const follow = useRef(true);
   const [failed, setFailed] = useState(false),
     [loading, setLoading] = useState(true),
     [following, setFollowing] = useState(true);
+  function showRoute() {
+    const view = map.current;
+    if (!view || !plannedRoute?.length) return;
+    follow.current = false;
+    setFollowing(false);
+    view.fitBounds(plannedRouteBounds(plannedRoute), { padding: 58, maxZoom: 16, duration: 650 });
+  }
   useEffect(() => {
     let disposed = false,
       resize: ResizeObserver | undefined;
@@ -221,7 +231,20 @@ export default function RoadMapView({
     source?.setData({ type: 'FeatureCollection', features: plannedRoute?.length ? [{
       type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: plannedRoute },
     }] : [] });
+    if (source && plannedRoute?.length && !shownRoute.current) showRoute();
+    shownRoute.current = !!source && !!plannedRoute?.length;
   }, [plannedRoute, loading]);
+  useEffect(() => {
+    const view = map.current;
+    if (!view || loading || !destination) return;
+    let disposed = false;
+    let pin: Marker | undefined;
+    void import('maplibre-gl').then(({ Marker }) => {
+      if (disposed || map.current !== view) return;
+      pin = new Marker({ color: '#56d6e8', scale: 0.9 }).setLngLat([destination.longitude, destination.latitude]).addTo(view);
+    });
+    return () => { disposed = true; pin?.remove(); };
+  }, [destination, loading]);
   useEffect(() => {
     const view = map.current;
     if (!view || loading || failed || !autoPoints?.length) return;
@@ -245,7 +268,7 @@ export default function RoadMapView({
     return () => { cancelled = true; pins.forEach(pin => pin.remove()); };
   }, [autoPoints, loading, failed, english, onAutoPoint]);
   if (failed)
-    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} />;
+    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} />;
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -278,6 +301,9 @@ export default function RoadMapView({
         <Crosshair size={17}/>{locating && !position
           ? (english ? 'Finding position…' : 'Se caută poziția…')
           : (english ? 'My location' : 'Poziția mea')}
+      </button>}
+      {!!plannedRoute?.length && <button type="button" className="ac-road-map-overview" onClick={showRoute}>
+        {english ? 'Show full route' : 'Vezi traseul complet'}
       </button>}
       {!history && (position || locationError) && (
         <p className="ac-map-location-state" role="status">

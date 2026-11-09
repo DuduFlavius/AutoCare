@@ -5,7 +5,7 @@ import type { Map as LeafletMap, Marker, Polyline } from 'leaflet';
 import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
-import { routeGeometry, tripBounds } from '@/lib/road-map';
+import { plannedRouteBounds, routeGeometry, tripBounds } from '@/lib/road-map';
 import 'leaflet/dist/leaflet.css';
 /** Flat street tiles are the compatibility path for devices without WebGL. */
 export default function RasterRoadMap({
@@ -22,6 +22,7 @@ export default function RasterRoadMap({
   locating = false,
   locationError,
   plannedRoute,
+  destination,
   onDestination,
 }: {
   points: GPSFix[];
@@ -37,6 +38,7 @@ export default function RasterRoadMap({
   locating?: boolean;
   locationError?: string;
   plannedRoute?: [number, number][];
+  destination?: { latitude: number; longitude: number } | null;
   onDestination?: (point: { latitude: number; longitude: number }) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
@@ -50,10 +52,19 @@ export default function RasterRoadMap({
   latestPosition.current = position;
   const destinationAction = useRef(onDestination);
   destinationAction.current = onDestination;
+  const shownRoute = useRef(false);
   const follow = useRef(true),
     [following, setFollowing] = useState(true),
     [tileError, setTileError] = useState(false),
     [ready, setReady] = useState(false);
+  function showRoute() {
+    const view = map.current;
+    if (!view || !plannedRoute?.length) return;
+    follow.current = false;
+    setFollowing(false);
+    const [[west, south], [east, north]] = plannedRouteBounds(plannedRoute);
+    view.fitBounds([[south, west], [north, east]], { padding: [48, 48], maxZoom: 16 });
+  }
   useEffect(() => {
     let disposed = false,
       resize: ResizeObserver | undefined;
@@ -174,7 +185,20 @@ export default function RasterRoadMap({
   }, [points, ready]);
   useEffect(() => {
     planned.current?.setLatLngs(plannedRoute?.map(([lon, lat]) => [lat, lon]) ?? []);
+    if (ready && plannedRoute?.length && !shownRoute.current) showRoute();
+    shownRoute.current = ready && !!plannedRoute?.length;
   }, [plannedRoute, ready]);
+  useEffect(() => {
+    const view = map.current;
+    if (!view || !ready || !destination) return;
+    let disposed = false;
+    let pin: import('leaflet').CircleMarker | undefined;
+    void import('leaflet').then(L => {
+      if (disposed || map.current !== view) return;
+      pin = L.circleMarker([destination.latitude, destination.longitude], { radius: 8, color: '#56d6e8', fillOpacity: 1 }).addTo(view);
+    });
+    return () => { disposed = true; pin?.remove(); };
+  }, [destination, ready]);
   useEffect(() => {
     const view = map.current;
     if (!view || !ready || !autoPoints?.length) return;
@@ -227,6 +251,9 @@ export default function RasterRoadMap({
         <Crosshair size={17}/>{locating && !position
           ? (english ? 'Finding position…' : 'Se caută poziția…')
           : (english ? 'My location' : 'Poziția mea')}
+      </button>}
+      {!!plannedRoute?.length && <button type="button" className="ac-road-map-overview" onClick={showRoute}>
+        {english ? 'Show full route' : 'Vezi traseul complet'}
       </button>}
       {!history && (position || locationError) && (
         <p className="ac-map-location-state" role="status">

@@ -134,8 +134,8 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     await rate(uid);
     if (route === 'smartdrive/directions' && method === 'POST') {
       await rate(uid, 'smartdrive-directions', 8);
-      const { start, end } = z.object({ start: roadCoordinate, end: roadCoordinate }).parse(await body(req));
-      return json(await loadDrivingRoutes(start, end));
+      const { start, end, startAccuracy } = z.object({ start: roadCoordinate, end: roadCoordinate, startAccuracy: z.number().min(0).max(500).optional() }).parse(await body(req));
+      return json(await loadDrivingRoutes(start, end, startAccuracy));
     }
     if (route === 'smartdrive/auto-points' && method === 'POST') {
       await rate(uid, 'auto-points', 10);
