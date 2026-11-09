@@ -28,7 +28,7 @@ test('Android background guidance follows the route and detects a missed turn', 
           if (arrived.remaining() > 1 || arrived.gap() > 1) throw new AssertionError(arrived);
         }
       }`);
-    const compile = spawnSync('javac', ['-d', directory, resolve('mobile/tracking/android/src/main/java/ro/autocare/tracking/NavigationProgress.java'), harness], { encoding: 'utf8' });
+    const compile = spawnSync('java', ['com.sun.tools.javac.Main', '-d', directory, resolve('mobile/tracking/android/src/main/java/ro/autocare/tracking/NavigationProgress.java'), harness], { encoding: 'utf8' });
     assert.equal(compile.status, 0, compile.stderr);
     const run = spawnSync('java', ['-cp', directory, 'ro.autocare.tracking.NavigationHarness'], { encoding: 'utf8' });
     assert.equal(run.status, 0, run.stderr);
