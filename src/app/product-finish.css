@@ -59,3 +59,226 @@ html body .ac-workspace .ac-smartdrive-map{padding:8px!important;border-radius:2
 html body .ac-workspace .ac-smartdrive-trip-controls{display:flex;flex-wrap:wrap;gap:10px}
 html body .ac-workspace .ac-smartdrive-trip-controls button{min-height:48px;border-radius:13px}
 @media(max-width:480px){html body .ac-workspace .drive-session{padding:20px;border-radius:20px}html body .ac-workspace .drive-session-details{gap:10px}html body .ac-workspace .drive-session-details strong{font-size:14px}html body .ac-workspace .drive-session-details span{font-size:10px}html body .ac-workspace .ac-smartdrive-trip-controls button{flex:1 1 140px}}
+
+/* Cockpit surfaces shared by the garage, maintenance and SmartDrive. */
+.ac-workspace.ac-studio {
+  --cockpit-night: #151e2b;
+  --cockpit-edge: #3b4a5d;
+  --cockpit-blue: #a2b6ff;
+}
+.studio-dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+html body .ac-workspace.ac-studio .studio-dashboard-metrics button {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  justify-content: start;
+  align-content: center;
+  align-items: start;
+  text-align: left;
+  gap: 7px 8px;
+  min-width: 0;
+  padding: 14px 22px 14px 14px;
+  background: linear-gradient(145deg, #253345, var(--cockpit-night));
+  border: 1px solid var(--cockpit-edge);
+}
+.studio-dashboard-metrics button > span { color: var(--color-muted); font-size: 12px; }
+.studio-dashboard-metrics button > strong {
+  grid-column: 1 / -1;
+  color: var(--color-warm, #f4f2ed);
+  font-size: clamp(17px, 2vw, 24px);
+  font-variant-numeric: tabular-nums;
+}
+.studio-dashboard-metrics svg { color: var(--color-primary-ink); }
+.studio-metric-arrow { position: absolute; inset: 9px 7px auto auto; opacity: .7; }
+html body .ac-workspace.ac-studio .studio-overview,
+html body .ac-workspace.ac-studio .studio-detail-grid { gap: 14px; }
+html body .ac-workspace.ac-studio .studio-home .studio-panel,
+html body .ac-workspace.ac-studio .studio-home .studio-priority {
+  background: linear-gradient(155deg, #1d2937, var(--cockpit-night));
+  border-color: var(--cockpit-edge);
+}
+html body .ac-workspace.ac-studio .studio-home .studio-vehicle-photo,
+html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo {
+  background: radial-gradient(ellipse at 76% 28%, #364b73, #1b283c 44%, #101820 80%);
+}
+.ac-service-garage {
+  min-width: 0;
+  margin-block: 0 16px;
+  padding: 14px;
+  border: 1px solid var(--cockpit-edge);
+  border-radius: 16px;
+  background: var(--cockpit-night);
+}
+.ac-service-vehicles { display: flex; flex-wrap: wrap; gap: 8px; }
+.ac-service-vehicles button { min-width: 0; }
+.ac-service-vehicles button[aria-pressed='true'],
+.ac-trip-history-list button[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 1px var(--cockpit-blue);
+  color: var(--cockpit-blue);
+}
+.ac-service-vehicle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 13px;
+  background: linear-gradient(115deg, #1b2737, #202d43);
+}
+.ac-service-vehicle p { color: var(--color-muted); margin-block: 6px; }
+html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo {
+  height: clamp(100px, 16vw, 205px);
+}
+.ac-drive-cockpit,
+.ac-trip-history-cockpit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(215px, 26%);
+  gap: 14px;
+  align-items: start;
+}
+.ac-trip-history-cockpit { grid-template-columns: minmax(210px, 30%) minmax(0, 1fr); }
+html body .ac-workspace.ac-studio .ac-drive-cockpit .ac-smartdrive-map {
+  padding: 0 !important;
+  border: 1px solid var(--cockpit-edge) !important;
+  border-radius: 16px !important;
+  background: var(--cockpit-night) !important;
+}
+.ac-workspace .ac-drive-cockpit .ac-road-map,
+.ac-workspace .ac-trip-history-map .ac-road-map {
+  border: 0 !important;
+  border-radius: 15px 15px 0 0 !important;
+  background: #172231 !important;
+}
+.ac-workspace .ac-road-map .ac-road-map-message {
+  background: var(--cockpit-night) !important;
+  color: var(--color-text) !important;
+}
+.ac-road-map .ac-dark-road-tiles { filter: invert(.91) hue-rotate(172deg) saturate(.75) brightness(.85); }
+.ac-road-map .maplibregl-ctrl-group .maplibregl-ctrl-icon { filter: invert(1); }
+.ac-workspace .ac-road-map .maplibregl-ctrl-attrib {
+  background: var(--cockpit-night);
+  color: var(--color-muted);
+}
+.ac-workspace .ac-road-map .maplibregl-ctrl-attrib-button { filter: invert(1); }
+.ac-drive-map-footer,
+.ac-trip-map-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(100deg, #1a2536, #27314d);
+  color: #e4ebfc;
+  font-size: 13px;
+}
+.ac-drive-map-footer span { display: inline-flex; gap: 7px; align-items: center; }
+.ac-smartdrive-map > p { margin: 10px 14px; }
+html body .ac-workspace.ac-studio .ac-drive-cockpit .drive-session { padding: 16px !important; min-width: 0; }
+html body .ac-workspace.ac-studio .ac-drive-cockpit .drive-session-distance > span {
+  font-size: clamp(34px, 4vw, 52px) !important;
+}
+html body .ac-workspace .ac-drive-cockpit .drive-session-details { grid-template-columns: minmax(0, 1fr); }
+.ac-trip-history-list {
+  display: grid;
+  gap: 8px;
+  max-height: 450px;
+  overflow: auto;
+  padding: 3px;
+}
+.ac-trip-history-list label { display: grid; gap: 6px; }
+.ac-trip-history-list input { min-width: 0; width: 100%; }
+html body .ac-workspace .ac-trip-history-list button {
+  display: grid;
+  justify-content: start;
+  text-align: left;
+  gap: 4px;
+  background: var(--cockpit-night);
+}
+.ac-trip-history-list button span { font-size: 12px; }
+.ac-trip-history-map { min-width: 0; }
+.ac-trip-map-empty {
+  min-height: 225px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 18px;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 10%, #263653, var(--cockpit-night));
+  border: 1px solid var(--cockpit-edge);
+  border-radius: 14px;
+}
+.ac-trip-map-empty svg { color: var(--cockpit-blue); }
+.ac-trip-map-empty p { color: var(--color-muted); margin: 0; }
+.ac-trip-map-legend { justify-content: start; gap: 20px; }
+.ac-trip-map-legend span::before {
+  display: inline-block;
+  content: '';
+  width: 9px;
+  height: 9px;
+  margin-inline-end: 7px;
+  border-radius: 50%;
+  background: #83e0bb;
+}
+.ac-trip-map-legend span + span::before { background: #f3d696; }
+.ac-mileage-history-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px;
+  margin-block: 14px;
+  border: 1px solid var(--cockpit-edge);
+  border-radius: 12px;
+  background: var(--cockpit-night);
+}
+.ac-mileage-history-callout p { margin: 4px 0 0; }
+@media (max-width: 1150px) {
+  .ac-drive-cockpit { grid-template-columns: minmax(0, 1fr); }
+  html body .ac-workspace .ac-drive-cockpit .drive-session-details { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .studio-dashboard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .ac-trip-history-cockpit { grid-template-columns: minmax(0, 1fr); }
+  .ac-trip-history-list { max-height: 265px; }
+  .ac-workspace .ac-road-map .ac-road-map-canvas { height: clamp(240px, 42vh, 390px) !important; }
+}
+@media (max-width: 390px) {
+  html body .ac-workspace .ac-drive-cockpit .drive-session-details,
+  .ac-service-vehicle { grid-template-columns: minmax(0, 1fr); }
+}
+
+html body .app-shell.ac-workspace.ac-studio :is(.sidebar, .app-topbar, .autocare-mobile-dock) {
+  background: linear-gradient(150deg, #1c293a, #101820 62%) !important;
+}
+html body .app-shell.ac-workspace.ac-studio .ws-navigation a.active {
+  background: linear-gradient(100deg, #34496c, #25354d) !important;
+  box-shadow: inset 2px 0 var(--cockpit-blue) !important;
+}
+
+.ac-smartdrive-views {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px;
+  border: 1px solid var(--cockpit-edge);
+  border-radius: 13px;
+  background: var(--cockpit-night);
+}
+html body .ac-workspace .ac-smartdrive-views button {
+  flex: 1 1 135px;
+  justify-content: center;
+}
+html body .ac-workspace .ac-smartdrive-views button[aria-pressed='true'] {
+  border-color: var(--cockpit-blue);
+  background: #293953;
+  color: #e5ebff;
+}

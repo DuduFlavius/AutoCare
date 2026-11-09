@@ -100,6 +100,7 @@ export default function ApplicationHome({
         .reduce((sum, r) => sum + r.amountBani, 0),
     };
   });
+  const lastTrip = data.recentTrips.find(trip => trip.vehicleId === car?.id);
   const monthCost = months.at(-1)?.value ?? 0,
     yearCost = costRows
       .filter((r) => r.date?.startsWith(today.slice(0, 4)))
@@ -183,6 +184,21 @@ export default function ApplicationHome({
         />
       ) : (
         <>
+          <div className="studio-dashboard-metrics">
+            {[
+              { Icon: Gauge, label: t('Kilometraj actual', 'Current mileage'), value: car.odometer.toLocaleString(locale) + ' km', section: 'Kilometraj' },
+              { Icon: Wallet, label: t('Cheltuieli luna aceasta', 'Expenses this month'), value: money(monthCost), section: 'Cheltuieli' },
+              { Icon: ShieldCheck, label: t('Documente de verificat', 'Documents to check'), value: attention.length.toLocaleString(locale), section: 'Documente' },
+              { Icon: Route, label: t('Ultima călătorie GPS', 'Last GPS trip'), value: lastTrip ? (lastTrip.distanceMeters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 }) + ' km' : '—', section: 'Plan întreținere' },
+            ].map(({ Icon, label, value, section }) => (
+              <button key={section} type="button" onClick={() => navigate(section)}>
+                <Icon size={17} aria-hidden="true"/>
+                <span>{label}</span>
+                <strong>{value}</strong>
+                <ArrowUpRight className="studio-metric-arrow" size={15} aria-hidden="true"/>
+              </button>
+            ))}
+          </div>
           <div className="studio-overview">
             <section className="studio-vehicle-panel">
               <VehiclePhoto

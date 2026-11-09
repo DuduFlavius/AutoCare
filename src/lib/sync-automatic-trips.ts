@@ -1,4 +1,5 @@
 import { nativeAutomation, nativeTracking, type NativeTrip } from './native-tracking';
+import { storeTripRoutes } from './local-trip-routes';
 type Car = { id: string; odometer: number };
 const locks = new Map<string, Promise<number>>();
 export async function syncAutomaticTrips(
@@ -52,6 +53,7 @@ export async function syncAutomaticTrips(
       if (!response.ok) throw Error(value.error || 'Nu s-au putut sincroniza traseele.');
       if (!Array.isArray(value.ids) || rows.some((t) => !value.ids.includes(t.id)))
         throw Error('Serverul nu a confirmat toate traseele.');
+      storeTripRoutes(ownerId, rows);
       await nativeAutomation.acknowledge(ownerId, value.ids);
       if (Number.isSafeInteger(value.odometer)) confirmedOdometers.set(id, value.odometer);
       count += rows.length;

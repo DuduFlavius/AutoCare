@@ -53,6 +53,8 @@ import {
   MessageSquare,
   SlidersHorizontal,
   Search,
+  Route,
+  History,
 } from 'lucide-react';
 import { Brand } from './public-shell';
 import { VehicleJournal, VehicleSheet, ReminderInbox } from './garage-home';
@@ -183,6 +185,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
 }) {
 
   const locale=useApplicationLocale();
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   useEffect(() => { if (window.location.hash === '#actualizeaza-km' && data.vehicles.length) { setEditing(data.vehicles[0].id); setKm(String(data.vehicles[0].odometer)); setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 150); } }, []);
   const [km, setKm] = useState('');
@@ -222,8 +225,35 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
         <span className="mileage-planner-icon"><Gauge size={27}/></span>
       </div>
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
-      {!mileageOnly && <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer:v.odometer }))} />}
-      {!mileageOnly && <details className="ac-gps-history-details"><summary>Istoric și preferințe kilometraj</summary><SmartDriveHistory vehicles={cars.map(v => ({ id: v.id, brand: v.brand, model: v.model, odometer: v.odometer }))} preview={preview} onUpdateMileage={id=>{const car=cars.find(v=>v.id===id);if(!car)return;setEditing(id);setKm(String(car.odometer));setConfirmedJump(null);requestAnimationFrame(()=>{const input=document.getElementById('ac-mileage-'+id);input?.focus({preventScroll:true});input?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});});}} /></details>}
+      {!mileageOnly && (
+        <>
+          <div className="ac-smartdrive-views" role="group" aria-label="SmartDrive">
+            <button type="button" aria-pressed={!historyOpen} onClick={() => setHistoryOpen(false)}>
+              <Route size={17}/> {locale.startsWith('en') ? 'Live Drive Map' : 'Hartă în timp real'}
+            </button>
+            <button type="button" aria-pressed={historyOpen} onClick={() => setHistoryOpen(true)}>
+              <History size={17}/> {locale.startsWith('en') ? 'Trip History' : 'Istoric trasee'}
+            </button>
+          </div>
+          <div hidden={historyOpen}>
+            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars}/>
+          </div>
+          {historyOpen && (
+            <SmartDriveHistory ownerId={data.profile.userId} timezone={data.profile.timezone} vehicles={cars} preview={preview} onUpdateMileage={id => {
+              const car = cars.find(vehicle => vehicle.id === id);
+              if (!car) return;
+              setEditing(id);
+              setKm(String(car.odometer));
+              setConfirmedJump(null);
+              requestAnimationFrame(() => {
+                const input = document.getElementById('ac-mileage-' + id);
+                input?.focus({ preventScroll: true });
+                input?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'center' });
+              });
+            }}/>
+          )}
+        </>
+      )}
       <div className="mileage-planner-grid" id="ac-mileage-editor">
         {cars.map(v => {
           const planned = services.filter(r=>r.vehicleId===v.id);
@@ -1117,6 +1147,31 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard' }:
                       </p>
                     )}
                   </>
+                )}
+                {tab === 'Întreținere' && activeCars.length > 0 && (
+                  <section className="ac-service-garage" data-workspace-ui aria-label={language === 'en' ? 'Service vehicles' : 'Mașini pentru întreținere'}>
+                    <div className="ac-service-vehicles">
+                      <button type="button" aria-pressed={!filter} onClick={() => setFilter('')}>
+                        <CarFront size={17}/> {language === 'en' ? 'All vehicles' : 'Toate mașinile'}
+                      </button>
+                      {activeCars.map(vehicle => (
+                        <button type="button" key={vehicle.id} aria-pressed={filter === vehicle.id} onClick={() => setFilter(vehicle.id)}>
+                          <CarFront size={17}/> <span data-user-content>{vehicle.brand} {vehicle.model}</span>
+                        </button>
+                      ))}
+                    </div>
+                    {activeCars.filter(vehicle => vehicle.id === (filter || activeVehicleId || activeCars[0].id)).map(vehicle => (
+                      <div className="ac-service-vehicle" key={vehicle.id}>
+                        <div>
+                          <span className="eyebrow">{language === 'en' ? 'Vehicle in focus' : 'Mașină selectată'}</span>
+                          <h2 data-user-content>{vehicle.brand} {vehicle.model}</h2>
+                          <p data-user-content>{[vehicle.year, vehicle.engine, vehicle.fuel].filter(Boolean).join(' · ')}</p>
+                          <strong>{vehicle.odometer.toLocaleString(locale)} km</strong>
+                        </div>
+                        <VehiclePhoto vehicleId={vehicle.id} name={vehicle.brand + ' ' + vehicle.model} uploaded={data.photos.some(photo => photo.vehicleId === vehicle.id)} preview={!!previewData}/>
+                      </div>
+                    ))}
+                  </section>
                 )}
                 {tab === 'Întreținere' && (
                   <div className="stats maintenance-statistics ac-premium-service-stats">

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Map as RoadMap, Marker, GeoJSONSource } from 'maplibre-gl';
 import { createRoadPositionMarker } from '@/lib/road-position-marker';
 import type { GPSFix } from '@/lib/gps-tracking';
-import { roadMapStyle, routeGeometry, streetOnlyStyle } from '@/lib/road-map';
+import { roadMapStyle, routeGeometry, streetOnlyStyle, tripBounds } from '@/lib/road-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
 const RasterRoadMap = dynamic(() => import('./raster-road-map'), { ssr: false });
 export default function RoadMapView({
@@ -12,11 +12,13 @@ export default function RoadMapView({
   position,
   active,
   english = false,
+  history = false,
 }: {
   points: GPSFix[];
   position?: GPSFix | null;
   active: boolean;
   english?: boolean;
+  history?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null),
     map = useRef<RoadMap | null>(null),
@@ -73,30 +75,36 @@ export default function RoadMapView({
               id: 'trip-outline',
               type: 'line',
               source: 'trip',
-              paint: { 'line-color': '#ffffff', 'line-width': 10 },
+              paint: { 'line-color': '#1a2541', 'line-width': 9 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addLayer({
               id: 'trip-line',
               type: 'line',
               source: 'trip',
-              paint: { 'line-color': '#2677f4', 'line-width': 6 },
+              paint: { 'line-color': history ? '#77d8b8' : '#92abff', 'line-width': 4 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             const element = createRoadPositionMarker(english);
             const position = latestPosition.current ?? latest.current.at(-1);
-            if (position)
+            if (position && !history)
               marker.current = new lib.Marker({ element })
                 .setLngLat([position.longitude, position.latitude])
                 .addTo(view);
             // GPS can arrive while the style is loading, before the points effect
             // has a usable map. Apply the latest fix when loading completes.
-            if (position && follow.current)
+            if (history && latest.current.length > 1) {
+              const first = latest.current[0], last = latest.current.at(-1)!;
+              for (const [point, color] of [[first, '#83e0bb'], [last, '#f3d696']] as const) {
+                new lib.Marker({ color, scale: 0.72 }).setLngLat([point.longitude, point.latitude]).addTo(view);
+              }
+              view.fitBounds(tripBounds(latest.current), { padding: 52, maxZoom: 16, duration: 0 });
+            } else if (position && follow.current)
               view.jumpTo({ center: [position.longitude, position.latitude], zoom: 16 });
             setLoading(false);
           });
           view.on('error', () => {
-            if (!disposed) {
+            if (!disposed && !view.loaded() && !view.getSource('trip')) {
               window.clearTimeout(fallbackTimer);
               resize?.disconnect();
               marker.current?.remove();
@@ -138,11 +146,11 @@ export default function RoadMapView({
       map.current?.remove();
       map.current = null;
     };
-  }, [english]);
+  }, [english, history]);
   useEffect(() => {
     const view = map.current,
       p = position ?? points.at(-1);
-    if (!view) return;
+    if (!view || history) return;
     const source = view.getSource('trip') as GeoJSONSource | undefined;
     source?.setData(routeGeometry(points));
     if (!p) {
@@ -170,9 +178,9 @@ export default function RoadMapView({
         zoom: Math.max(15, view.getZoom()),
         duration: 750,
       });
-  }, [points, position, english]);
+  }, [points, position, english, history]);
   if (failed)
-    return <RasterRoadMap points={points} position={position} active={active} english={english} />;
+    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} />;
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -181,7 +189,7 @@ export default function RoadMapView({
         aria-label={english ? 'Interactive street map' : 'Hartă rutieră interactivă'}
       />
       <span className="ac-road-map-status">
-        {active
+        {history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
           ? english
             ? 'GPS · RECORDING'
             : 'GPS · ÎNREGISTRARE'
@@ -189,7 +197,7 @@ export default function RoadMapView({
             ? 'STREET MAP'
             : 'HARTĂ RUTIERĂ'}
       </span>
-      <button
+      {!history && <button
         type="button"
         className="ac-road-map-center"
         disabled={!position && !points.length}
@@ -209,17 +217,10 @@ export default function RoadMapView({
           : english
             ? 'Recenter on me'
             : 'Recentrează pe mine'}
-      </button>
+      </button>}
       {loading && !failed && (
         <p className="ac-road-map-message" role="status">
           {english ? 'Loading street map…' : 'Se încarcă harta rutieră…'}
-        </p>
-      )}
-      {failed && (
-        <p className="ac-road-map-message" role="status">
-          {english
-            ? 'Map tiles are unavailable. GPS recording is independent and can continue.'
-            : 'Harta nu se poate încărca momentan. Înregistrarea GPS este independentă și poate continua.'}
         </p>
       )}
     </div>

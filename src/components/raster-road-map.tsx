@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Map as LeafletMap, Marker, Polyline } from 'leaflet';
 import { createRoadPositionMarker } from '@/lib/road-position-marker';
 import type { GPSFix } from '@/lib/gps-tracking';
-import { routeGeometry } from '@/lib/road-map';
+import { routeGeometry, tripBounds } from '@/lib/road-map';
 import 'leaflet/dist/leaflet.css';
 /** Flat street tiles are the compatibility path for devices without WebGL. */
 export default function RasterRoadMap({
@@ -11,11 +11,13 @@ export default function RasterRoadMap({
   position,
   active,
   english,
+  history,
 }: {
   points: GPSFix[];
   position?: GPSFix | null;
   active: boolean;
   english: boolean;
+  history: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null),
     map = useRef<LeafletMap | null>(null),
@@ -44,6 +46,7 @@ export default function RasterRoadMap({
         L.control.zoom({ position: 'topright' }).addTo(view);
         const layer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
+          className: 'ac-dark-road-tiles',
           attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>',
         }).addTo(view);
@@ -57,9 +60,15 @@ export default function RasterRoadMap({
           routeGeometry(latest.current).features.map((f) =>
             f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
           ),
-          { color: '#2677f4', weight: 6, lineCap: 'round', lineJoin: 'round' },
+          { color: history ? '#77d8b8' : '#92abff', weight: 4, lineCap: 'round', lineJoin: 'round' },
         ).addTo(view);
-        if (last)
+        if (history && last && latest.current.length > 1) {
+          const first = latest.current[0];
+          L.circleMarker([first.latitude, first.longitude], { radius: 6, color: '#83e0bb', fillOpacity: 1 }).addTo(view);
+          L.circleMarker([last.latitude, last.longitude], { radius: 6, color: '#f3d696', fillOpacity: 1 }).addTo(view);
+          const [sw, ne] = tripBounds(latest.current);
+          view.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], { padding: [48, 48], maxZoom: 16, animate: false });
+        } else if (last)
           marker.current = L.marker([last.latitude, last.longitude], {
             icon: L.divIcon({
               className: 'ac-road-marker-host',
@@ -86,11 +95,11 @@ export default function RasterRoadMap({
       marker.current = null;
       line.current = null;
     };
-  }, [english]);
+  }, [english, history]);
   useEffect(() => {
     const view = map.current,
       last = position ?? points.at(-1);
-    if (!view) return;
+    if (!view || history) return;
     line.current?.setLatLngs(
       routeGeometry(points).features.map((f) =>
         f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
@@ -124,7 +133,7 @@ export default function RasterRoadMap({
         animate: true,
         duration: 0.7,
       });
-  }, [points, position, english]);
+  }, [points, position, english, history]);
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div
@@ -133,7 +142,7 @@ export default function RasterRoadMap({
         aria-label={english ? 'Interactive street map' : 'Hartă rutieră interactivă'}
       />
       <span className="ac-road-map-status">
-        {active
+        {history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
           ? english
             ? 'GPS · RECORDING'
             : 'GPS · ÎNREGISTRARE'
@@ -141,7 +150,7 @@ export default function RasterRoadMap({
             ? 'STREET MAP'
             : 'HARTĂ RUTIERĂ'}
       </span>
-      <button
+      {!history && <button
         type="button"
         className="ac-road-map-center"
         disabled={!position && !points.length}
@@ -160,7 +169,7 @@ export default function RasterRoadMap({
           : english
             ? 'Recenter on me'
             : 'Recentrează pe mine'}
-      </button>
+      </button>}
       {tileError && (
         <p className="ac-road-map-message" role="status">
           {english

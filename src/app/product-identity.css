@@ -178,3 +178,25 @@ html body .ac-workspace.ac-studio .main .studio-create-row button {
     animation: none;
   }
 }
+
+/* The public tour uses the same compact panel treatment as the real dashboard. */
+.product-mockup-frame {
+  padding: 8px;
+  gap: 8px;
+  background: linear-gradient(145deg, #344a72, #192335 55%, #101820);
+  border-color: #50627c;
+}
+.product-mockup-rail {
+  border: 1px solid #364358;
+  border-radius: 9px;
+  background: #141e2b;
+}
+.product-mockup-main {
+  border: 1px solid #364358;
+  border-radius: 9px;
+  background: #141e2b;
+}
+.product-mockup-cards article {
+  background: linear-gradient(155deg, #25354d, #192334);
+  border-color: #3b4a61;
+}

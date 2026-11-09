@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { MapPin, Play, Square, Route } from 'lucide-react';
 
 import {hasNativeTracking,nativeTracking,type NativeTrip} from '@/lib/native-tracking';
+import { storeTripRoutes } from '@/lib/local-trip-routes';
 import { acceptGPSFix, type GPSFix as Sample } from '@/lib/gps-tracking';
 const RoadMapView=dynamic(()=>import('./road-map'),{ssr:false});
 export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId }: { preview: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; odometer:number }[]; onSaved:()=>Promise<unknown> }) {
@@ -29,35 +30,6 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId }: 
       setLocationMessage(error.code===1 ? (locale.startsWith('en') ? 'Allow location access in your phone or browser settings.' : 'Permite accesul la locație din setările telefonului sau browserului.') : (locale.startsWith('en') ? 'Position unavailable. Check GPS and try again outdoors.' : 'Poziția nu este disponibilă. Verifică GPS-ul și încearcă din nou în aer liber.'));
     }, {enableHighAccuracy:true,maximumAge:0,timeout:20000});
   };
-  useEffect(() => {
-    if (preview || !navigator.geolocation) return;
-    const watch = navigator.geolocation.watchPosition(
-      ({ coords, timestamp }) => {
-        if (![coords.latitude, coords.longitude, coords.accuracy, timestamp].every(Number.isFinite))
-          return;
-        setMapPosition({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-          accuracy: coords.accuracy,
-          timestamp,
-        });
-        setLocationMessage('');
-      },
-      (error) => {
-        setLocationMessage(
-          error.code === 1
-            ? locale.startsWith('en')
-              ? 'Allow precise location in your phone settings to show your position.'
-              : 'Permite locația precisă în setările telefonului pentru afișarea poziției tale.'
-            : locale.startsWith('en')
-              ? 'Waiting for your GPS position…'
-              : 'Se așteaptă poziția ta GPS…',
-        );
-      },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 },
-    );
-    return () => navigator.geolocation.clearWatch(watch);
-  }, [preview, locale]);
   const [automatic,setAutomatic]=useState(false);
   const [native,setNative]=useState(false);
   const nativeMode=useRef(false);
@@ -174,6 +146,7 @@ const [active, setActive] = useState(false);
     if(!resume){baseline.current=car.odometer; tripId.current=crypto.randomUUID();} endedAt.current=null; setSaved(false);
     setClock(new Date().toLocaleTimeString(locale));
     if(!resume){setStartedAt(Date.now());setDistance(0);distanceRef.current=0;setRoutePoints([]);setTrackingSeconds(0);started.current=Date.now();}
+    setMapPosition(null);setLocationMessage('');
     setSignal('waiting');lastFix.current=0;setError('');setNotice('');previous.current=null;
     tick.current = setInterval(() => { setTrackingSeconds(Math.floor((Date.now() - (started.current ?? Date.now())) / 1000)); setClock(new Date().toLocaleTimeString(locale)); }, 1000);
     watcher.current = navigator.geolocation.watchPosition(
@@ -203,10 +176,12 @@ const [active, setActive] = useState(false);
     saveInFlight.current=true;
     setSaving(true);
     try {
+      let finalPoints = routePoints;
       // Read the durable final snapshot, not a potentially stale two-second UI poll.
       if(nativeMode.current){
         const finalTrip=await nativeTracking.snapshot(ownerId);
         if(!finalTrip || finalTrip.active || finalTrip.id!==tripId.current)throw Error('Traseul GPS nu este încă finalizat. Reîncearcă salvarea.');
+        finalPoints = finalTrip.points;
         distanceRef.current=finalTrip.distance;
         endedAt.current=finalTrip.endedAt??finalTrip.updatedAt;
       }
@@ -214,6 +189,7 @@ const [active, setActive] = useState(false);
       const res = await fetch('/api/v1/smartdrive/vehicles/' + id + '/trips', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id:tripId.current, syncMileage, expectedOdometer:baseline.current, distanceMeters: Math.round(distanceRef.current), durationSeconds: Math.max(1, Math.round((finalEnd - started.current) / 1000)), startedAt: new Date(started.current).toISOString(), endedAt: new Date(finalEnd).toISOString() }) });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || 'Salvarea călătoriei a eșuat.');
+      storeTripRoutes(ownerId, [{ id: body.id, points: finalPoints }]);
       if(nativeMode.current){try{await nativeTracking.clear(ownerId);}catch{throw Error('Călătoria a fost salvată, dar arhiva locală nu a putut fi curățată. Reîncearcă salvarea.');}}
       setSaved(true); setNotice(syncMileage ? 'Călătorie salvată. Distanța GPS a fost adăugată kilometrajului și planului de întreținere. Verifică periodic valoarea cu bordul mașinii.' : 'Călătoria GPS a fost salvată separat.'); setError('');
       window.dispatchEvent(new Event('autocare-trips-updated'));
@@ -236,9 +212,28 @@ const [active, setActive] = useState(false);
   },[native,finalizeOnStop,active,automatic,saved,startedAt,saveRetry]);
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-smartdrive-trip-heading"><span className="ac-premium-kicker"><Route size={18}/> SMARTDRIVE · GPS</span><h3>Traseul tău, în timp real</h3></div>
+    <div className="ac-drive-cockpit">
+      <div className="ac-smartdrive-map">
+        <RoadMapView
+          points={routePoints}
+          position={routePoints.at(-1) && (!active || !mapPosition || routePoints.at(-1)!.timestamp >= mapPosition.timestamp) ? routePoints.at(-1) : mapPosition}
+          active={active}
+          english={locale.startsWith('en')}
+        />
+        <div className="ac-drive-map-footer">
+          <span><MapPin size={16}/> {locale.startsWith('en') ? 'Recorded route · GPS estimate' : 'Traseu înregistrat · estimare GPS'}</span>
+          {!active && routePoints.length === 0 && (
+            <button type="button" disabled={locating || preview} onClick={locate}>
+              {locating ? 'Se caută poziția…' : locale.startsWith('en') ? 'Show my location' : 'Arată poziția mea'}
+            </button>
+          )}
+        </div>
+        {locationMessage && !active && <p className="small muted" role="status">{locationMessage}</p>}
+      </div>
     <DriveSessionSummary distance={distance} seconds={trackingSeconds} phase={saving?'saving':waitingCar&&active?'reconnecting':active&&awaitingMotion?'waiting':active?'driving':saved&&distance>0?'saved':'ready'} accuracy={mapPosition?.accuracy??null} english={locale.startsWith('en')}/>
+    </div>
     {vehicles.length > 0 && <label>Mașina pentru călătorie <select value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active || (distance>0 && !saved)} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}
-    {!automatic&&<label className="ac-smartdrive-sync" style={{display:'flex',gap:12,alignItems:'center',padding:16,border:'1px solid #dbe5f3',borderRadius:14,marginBottom:16}}><input type="checkbox" checked={syncMileage} disabled={saving||saved} onChange={e=>setSyncMileage(e.target.checked)}/> Adaugă distanța GPS la kilometraj la salvare. Actualizează automat uleiul, distribuția și celelalte intervale, păstrând kilometrajul intervențiilor.</label>}
+    {!automatic&&<label className="ac-smartdrive-sync"><input type="checkbox" checked={syncMileage} disabled={saving||saved} onChange={e=>setSyncMileage(e.target.checked)}/> Adaugă distanța GPS la kilometraj la salvare. Actualizează automat uleiul, distribuția și celelalte intervale, păstrând kilometrajul intervențiilor.</label>}
     <div className="ac-smartdrive-trip-controls">
       {!active ? <button type="button" className="primary" disabled={saving||(automatic&&!saved)} onClick={start}><Play size={17}/> {automatic&&!saved ? (locale.startsWith('en')?'Awaiting trip sync':'În așteptarea sincronizării') : distance>0&&!saved ? 'Reia GPS' : 'Pornește GPS'}</button> : <button type="button" className="primary" style={{background:"#b42332",color:"#fff",borderColor:"#b42332"}} onClick={stop}><Square size={17}/> Oprește GPS</button>}
       {!active && !automatic && distance > 0 && <button type="button" disabled={saving || preview || saved} onClick={() => void saveTrip()}>{saved ? 'Călătorie salvată' : saving ? 'Se salvează…' : syncMileage ? 'Salvează și sincronizează' : 'Salvează călătoria GPS'}</button>}
@@ -246,13 +241,6 @@ const [active, setActive] = useState(false);
       <span><MapPin size={15}/> {active ? 'GPS activ' : 'GPS oprit'}</span>
     </div>
     <div className="service-reminder-box" data-workspace-ui><strong>{locale.startsWith('en')?'Current vehicle mileage: ':'Kilometraj actual al mașinii: '}{(vehicles.find(v=>v.id===vehicleId)??vehicles[0])?.odometer.toLocaleString(locale)} km</strong><p>{locale.startsWith('en')?'Saved sessions update maintenance mileage.':'Sesiunile salvate actualizează kilometrajul folosit pentru întreținere.'}</p><a href="?tab=%C3%8Entre%C8%9Binere">{locale.startsWith('en')?'View maintenance and remaining kilometres':'Vezi intervențiile și kilometrii rămași'}</a></div>
-    <div className="ac-smartdrive-map" style={{margin:'18px 0',padding:12,background:'#fff',border:'1px solid #dbe5f3',borderRadius:18}}>
-      <strong style={{display:'block',marginBottom:8,color:'#172b48'}}>Hartă rutieră · GPS în timp real</strong>
-      {!active && routePoints.length===0 && <button type="button" disabled={locating||preview} onClick={locate} style={{marginBottom:12}}><MapPin size={17}/> {locating ? (locale.startsWith('en')?'Locating…':'Se caută poziția…') : (locale.startsWith('en')?'Show my location':'Arată poziția mea')}</button>}
-      {locationMessage && !active && <p role="status" style={{fontSize:13,marginBottom:12}}>{locationMessage}</p>}
-      <RoadMapView points={routePoints} position={mapPosition && (!routePoints.at(-1) || mapPosition.timestamp >= routePoints.at(-1)!.timestamp) ? mapPosition : routePoints.at(-1)} active={active} english={locale.startsWith('en')}/>
-      <p style={{fontSize:12,color:'#536681',margin:'9px 0 0'}}>Traseul parcurs este afișat în albastru. Coordonatele rămân pe acest dispozitiv pentru recuperarea traseului și nu sunt trimise la server.</p>
-    </div>
     {active && signal === 'lost' && <div role="alert" style={{background:'#fff3df',color:'#8a4600',border:'1px solid #ffd18a',borderRadius:12,padding:13,margin:'12px 0',fontWeight:700}}>Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și permisiunile telefonului. Distanța nu crește fără puncte valide.</div>}
     {active && signal === 'waiting' && <p role="status" style={{color:'#815500'}}>Se caută semnal GPS de precizie…</p>}
     <p role="status">{active ? 'Urmărire în desfășurare' : 'Urmărire oprită'}</p>

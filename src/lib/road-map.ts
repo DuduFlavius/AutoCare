@@ -19,7 +19,15 @@ export function routeGeometry(points: GPSFix[]): FeatureCollection<LineString> {
       })),
   };
 }
-export const roadMapStyle = 'https://tiles.openfreemap.org/styles/bright';
+export const roadMapStyle = 'https://tiles.openfreemap.org/styles/fiord';
 
 /** Street mode deliberately excludes imagery and terrain shading. */
 export function streetOnlyStyle(style:StyleSpecification):StyleSpecification{return {...style,layers:style.layers.filter(layer=>layer.type!=="raster"&&layer.type!=="hillshade")};}
+
+export function tripBounds(points: GPSFix[]): [[number, number], [number, number]] {
+  const west = Math.min(...points.map(point => point.longitude));
+  const south = Math.min(...points.map(point => point.latitude));
+  const east = Math.max(...points.map(point => point.longitude));
+  const north = Math.max(...points.map(point => point.latitude));
+  return [[west, south], [east, north]];
+}
