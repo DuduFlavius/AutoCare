@@ -297,7 +297,7 @@ export default function RoadMapView({
         aria-label={english ? 'Interactive street map' : 'Hartă rutieră interactivă'}
       />
       <span className="ac-road-map-status">
-        {initialArea ? (english ? 'AUTO POINTS' : 'PUNCTE AUTO') : history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
+        {initialArea && active ? (english ? 'GPS · GUIDANCE' : 'GPS · GHIDARE') : history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
           ? english
             ? 'GPS · RECORDING'
             : 'GPS · ÎNREGISTRARE'
