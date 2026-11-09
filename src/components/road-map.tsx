@@ -51,6 +51,8 @@ export default function RoadMapView({
   latest.current = points;
   const latestPosition = useRef(position);
   latestPosition.current = position;
+  const autoPointAction = useRef(onAutoPoint);
+  autoPointAction.current = onAutoPoint;
   const destinationAction = useRef(onDestination);
   destinationAction.current = onDestination;
   const shownRoute = useRef(false);
@@ -281,12 +283,12 @@ export default function RoadMapView({
         element.setAttribute('aria-label', label);
         element.title = label;
         element.style.setProperty('--poi-color', category.color);
-        element.addEventListener('click', event => { event.stopPropagation(); onAutoPoint?.(point.id); });
+        element.addEventListener('click', event => { event.stopPropagation(); autoPointAction.current?.(point.id); });
         pins.push(new Marker({ element }).setLngLat([point.longitude, point.latitude]).addTo(view));
       }
     });
     return () => { cancelled = true; pins.forEach(pin => pin.remove()); };
-  }, [autoPoints, loading, failed, english, onAutoPoint]);
+  }, [autoPoints, loading, failed, english]);
   if (failed)
     return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart} />;
   return (

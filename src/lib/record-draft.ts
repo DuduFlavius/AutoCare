@@ -1,3 +1,4 @@
+import { writeFuelFill } from './fuel-log';
 import { maintenanceSchedule } from './maintenance-schedule';
 import { recordCategory } from './record-categories';
 import { serializeServiceDetails } from './service-details';
@@ -201,6 +202,12 @@ export function prepareRecordDraft(
           : existingParts || '',
     notes: str('notes'),
   };
+  if (kind === 'expense' && category === 'Combustibil') {
+    const liters = num('fuelLiters');
+    if (liters !== null && (!Number.isFinite(liters) || liters <= 0 || liters > 2500 || payload.odometer === null))
+      throw new Error('Pentru consum, introdu litrii alimentați și kilometrajul.');
+    payload.parts = writeFuelFill(payload.parts || '', liters === null ? null : { liters, full: f.has('fuelFull') });
+  }
   if (['Alt document', 'Altă operațiune', 'Altele'].includes(category) && !str('title'))
     throw new Error('Completează denumirea înregistrării.');
   if (kind !== 'document' && !str('date')) throw new Error('Completează data înregistrării.');

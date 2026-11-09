@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent } from 'react';
 import OperationAlerts from './operation-alerts';
 import ServiceMileage from './service-mileage';
 import RecordCategoryPicker from './record-category-picker';
+import { readFuelFill } from '@/lib/fuel-log';
 import { recordCategory } from '@/lib/record-categories';
 import ServiceDetailFields, {
   serializeServiceDetails,
@@ -330,6 +331,13 @@ export default function RecordEditor({
             </label>
           )}
         </div>
+        {kind === 'expense' && category === 'Combustibil' && (
+          <div className="form-grid" data-workspace-ui>
+            <label>{en ? 'Litres added' : 'Litri alimentați'}<input type="number" name="fuelLiters" min="0.01" max="2500" step="0.01" defaultValue={readFuelFill(record?.parts)?.liters ?? ''}/></label>
+            <label className="check"><input type="checkbox" name="fuelFull" defaultChecked={readFuelFill(record?.parts)?.full ?? false}/>{en ? 'Filled the tank' : 'Am făcut plinul'}</label>
+            <p className="small muted">{en ? 'Log the odometer and all fill-ups between two full tanks to calculate consumption.' : 'Notează kilometrajul și toate alimentările dintre două plinuri pentru a calcula consumul.'}</p>
+          </div>
+        )}
         {kind === 'service' && category === 'Distribuție' && (
           <section className="service-reminder-box" data-workspace-ui>
             <h3>

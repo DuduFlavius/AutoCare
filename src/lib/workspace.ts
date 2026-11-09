@@ -65,9 +65,12 @@ export function normalizeWorkspaceTab(value: string | null | undefined) {
   const tab = value ? aliases[value] || value : 'Dashboard';
   return workspaceSections.some((s) => s.id === tab) || tab === 'Administrare' ? tab : 'Dashboard';
 }
-export function workspaceHref(path: string, tab: string) {
+export function workspaceHref(path: string, tab: string, vehicle?: string | null) {
   const url = new URL(path, 'https://autocare.invalid');
-  url.searchParams.set('tab', normalizeWorkspaceTab(tab));
+  const section = normalizeWorkspaceTab(tab);
+  url.searchParams.set('tab', section);
+  if (section === 'Garaj' && vehicle) url.searchParams.set('vehicle', vehicle);
+  else url.searchParams.delete('vehicle');
   return url.pathname + url.search + url.hash;
 }
 export const normalizeWorkspaceSearch = (value: string) =>

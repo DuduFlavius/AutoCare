@@ -52,6 +52,8 @@ export default function RasterRoadMap({
   latest.current = points;
   const latestPosition = useRef(position);
   latestPosition.current = position;
+  const autoPointAction = useRef(onAutoPoint);
+  autoPointAction.current = onAutoPoint;
   const destinationAction = useRef(onDestination);
   destinationAction.current = onDestination;
   const shownRoute = useRef(false);
@@ -224,11 +226,11 @@ export default function RasterRoadMap({
         markers.push(L.marker([point.latitude, point.longitude], {
           icon: L.divIcon({ className: 'ac-auto-point-leaflet', html: dot, iconSize: [20, 20] }),
           title: label, alt: label,
-        }).on('click', () => onAutoPoint?.(point.id)).addTo(view));
+        }).on('click', () => autoPointAction.current?.(point.id)).addTo(view));
       }
     });
     return () => { cancelled = true; markers.forEach(pin => pin.remove()); };
-  }, [autoPoints, ready, english, onAutoPoint]);
+  }, [autoPoints, ready, english]);
   return (
     <div className="ac-road-map" data-workspace-ui>
       <div

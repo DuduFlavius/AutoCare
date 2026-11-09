@@ -2,7 +2,7 @@
 import { House, CarFront, Wrench, Files, CircleUserRound, Route } from 'lucide-react';
 import { useApplicationLanguage } from '../application-locale';
 import { mobileWorkspaceSections, workspaceHref } from '@/lib/workspace';
-const icons = [House, CarFront, Wrench, Files, CircleUserRound, Route];
+const icons = [House, CarFront, Wrench, Files, Route, CircleUserRound];
 export default function MobileNavigation({ tab, navigate, path }: { tab: string; navigate: (tab: string) => boolean; path: string }) {
   const language = useApplicationLanguage();
   return <nav className="autocare-mobile-dock app-bottom-nav" aria-label={language === 'en' ? 'Main navigation' : 'Navigare principală'} data-workspace-ui>{mobileWorkspaceSections.map((section,index) => {

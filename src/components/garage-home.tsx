@@ -1,6 +1,7 @@
 'use client';
 import VehiclePhoto from './application/vehicle-photo';
 import {useApplicationLocale} from './application-locale';
+import { fuelConsumption } from '@/lib/fuel-log';
 import {parseServiceDetails} from '@/lib/service-details';
 import InlineMileageEditor from './inline-mileage-editor';
 import OilChangeCountdown from './oil-change-countdown';
@@ -759,13 +760,14 @@ const v = data.vehicles.find((v) => v.id === id);
   const entries = data.records.filter((r) => r.vehicleId === id);
   const active = entries.filter((r) => !r.cancelled);
   const cost = active.filter(record => record.amountKnown !== false).reduce((sum, r) => sum + r.amountBani, 0);
+  const consumption = fuelConsumption(active);
   const readings = active
     .filter((r) => r.kind === 'service' && r.odometer != null)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   return (
     <div className="vehicle-sheet">
       <header className="sheet-overview">
-        <VehiclePhoto vehicleId={v.id} name={v.brand + ' ' + v.model} uploaded={data.photos.some(photo => photo.vehicleId === v.id)} preview={preview}/>
+        <VehiclePhoto vehicleId={v.id} name={v.brand + ' ' + v.model} uploaded={data.photos.some(photo => photo.vehicleId === v.id)} preview={preview} illustration priority/>
         <div>
           <p className="eyebrow">AutoCare · {locale === 'ro-RO' ? 'Fișa vehiculului' : 'Vehicle report'}</p>
           <p className="small">
@@ -801,6 +803,11 @@ const v = data.vehicles.find((v) => v.id === id);
         <div className="card">
           <span className="micro">Documente active</span>
           <h3>{active.filter((r) => r.kind === 'document').length}</h3>
+        </div>
+        <div className="card">
+          <span className="micro">{en ? 'Measured consumption' : 'Consum măsurat'}</span>
+          <h3>{consumption ? consumption.litersPer100Km.toLocaleString(locale, { maximumFractionDigits: 1 }) + ' L/100 km' : '—'}</h3>
+          <small>{consumption ? consumption.distance.toLocaleString(locale) + ' km' : en ? 'Requires two recorded full tanks' : 'Necesită două plinuri înregistrate'}</small>
         </div>
       </div>
       {v.notes && (

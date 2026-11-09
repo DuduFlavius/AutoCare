@@ -6,7 +6,7 @@ import Dashboard from '@/components/dashboard';
 import { PublicShell } from '@/components/public-shell';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Garajul meu', robots: { index: false, follow: false } };
-export default async function Account({searchParams}:{searchParams:Promise<{tab?:string;drive?:string}>}) {
+export default async function Account({searchParams}:{searchParams:Promise<{tab?:string;drive?:string;vehicle?:string}>}) {
   const params=await searchParams;
   let sess;
   try {
@@ -28,6 +28,6 @@ export default async function Account({searchParams}:{searchParams:Promise<{tab?
     !sess?.user ||
     (process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION === 'true' && !sess.user.emailVerified)
   )
-    redirect(params.tab ? '/autentificare?' + new URLSearchParams({ next: '/cont?' + new URLSearchParams({ tab: normalizeWorkspaceTab(params.tab), ...(params.drive ? { drive: params.drive } : {}) }) }).toString() : '/autentificare');
-  return <Dashboard name={sess.user.name} initialTab={normalizeWorkspaceTab(params.tab)} initialDrive={params.drive} />;
+    redirect(params.tab ? '/autentificare?' + new URLSearchParams({ next: '/cont?' + new URLSearchParams({ tab: normalizeWorkspaceTab(params.tab), ...(params.drive ? { drive: params.drive } : {}), ...(params.vehicle && normalizeWorkspaceTab(params.tab) === 'Garaj' ? { vehicle: params.vehicle } : {}) }) }).toString() : '/autentificare');
+  return <Dashboard name={sess.user.name} initialTab={normalizeWorkspaceTab(params.tab)} initialDrive={params.drive} initialVehicle={normalizeWorkspaceTab(params.tab) === 'Garaj' ? params.vehicle : undefined} />;
 }

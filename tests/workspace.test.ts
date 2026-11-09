@@ -59,3 +59,9 @@ test('Translation follows a changed page title and can restore Romanian after En
  assert.equal(translationSource('Settings',{source:'Setări',rendered:'Settings'}),'Setări');
  assert.equal(translationSource('Date noi',undefined),'Date noi');
 });
+
+test('vehicle profiles have addressable URLs and other sections clear the vehicle', () => {
+  assert.equal(workspaceHref('/cont?tab=Dashboard', 'Garaj', 'car-a'), '/cont?tab=Garaj&vehicle=car-a');
+  assert.equal(workspaceHref('/cont?tab=Garaj&vehicle=car-a', 'Garaj'), '/cont?tab=Garaj');
+  assert.equal(workspaceHref('/cont?tab=Garaj&vehicle=car-a', 'Documente'), '/cont?tab=Documente');
+});

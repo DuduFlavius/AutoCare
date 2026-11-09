@@ -3,11 +3,12 @@
 import dynamic from 'next/dynamic';
 import { ArrowUp, MapPin, Navigation } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { defaultAutoPointsArea, type MapArea } from '@/lib/auto-points';
+import { autoPointCategories, defaultAutoPointsArea, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import { browserGPSFix, latestGPSFix, type GPSFix } from '@/lib/gps-tracking';
 import { navigationProgress, type Coordinate, type DrivingRoute, type Turn } from '@/lib/road-navigation';
 import MapStage from './map-stage';
 import { nativeMethodMissing, nativeNavigation } from '@/lib/native-tracking';
+import NearbyDrivePlaces from './nearby-drive-places';
 import DriveDestinationSearch from './drive-destination-search';
 import { mapGPSOptions, mapLocationError, useMapLocation } from './use-map-location';
 import { useApplicationLocale } from './application-locale';
@@ -32,6 +33,7 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
   const locale = useApplicationLocale();
   const english = locale.startsWith('en');
   const t = (ro: string, en: string) => english ? en : ro;
+  const [nearby, setNearby] = useState<AutoPoint[]>([]);
   const [area, setArea] = useState<MapArea>(defaultAutoPointsArea);
   const location = useMapLocation(visible && !preview, english);
   const [oneShotPosition, setOneShotPosition] = useState<GPSFix | null>(null);
@@ -205,6 +207,10 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
     // Only a new GPS reading can confirm a deviation.
   }, [position, navigating, route, destination]);
 
+  function chooseNearby(point: AutoPoint) {
+    const label = autoPointCategories[point.category];
+    choose({ ...point, name: point.name || (english ? label.english : label.label) });
+  }
   const arrived = !!progress && progress.distance < 35 && progress.gap < 30;
   return (
     <section className="ac-auto-points ac-map-compact" aria-label="AutoCare Maps">
@@ -258,9 +264,14 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
             <RoadMap points={noRoute} position={position} active={navigating} english={english}
               initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview ? undefined : location.locate}
               locating={location.waiting} locationError={location.error}
+              autoPoints={navigating ? undefined : nearby} onAutoPoint={id => {
+                const match = nearby.find(point => point.id === id);
+                if (match) chooseNearby(match);
+              }}
               plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting ? choose : undefined}/>
           </div>
         </div>
+        {!navigating && !preview && <NearbyDrivePlaces area={area} position={position} english={english} onResults={setNearby} onChoose={chooseNearby}/>}
       </MapStage>
     </section>
   );

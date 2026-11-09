@@ -613,16 +613,16 @@
 @layer autocare-workspace {
 
 @media print {
-  html:has(.dialog .vehicle-sheet),
-  body:has(.dialog .vehicle-sheet) {
+  html:has(:is(.dialog, .ac-vehicle-profile) .vehicle-sheet),
+  body:has(:is(.dialog, .ac-vehicle-profile) .vehicle-sheet) {
     overflow: visible !important;
     height: auto !important;
     background: var(--color-surface) !important;
   }
-  body:has(.dialog .vehicle-sheet) :not(:has(.vehicle-sheet)):not(.vehicle-sheet):not(.vehicle-sheet *) {
+  body:has(:is(.dialog, .ac-vehicle-profile) .vehicle-sheet) :not(:has(.vehicle-sheet)):not(.vehicle-sheet):not(.vehicle-sheet *) {
     display: none !important;
   }
-  body:has(.dialog .vehicle-sheet) :has(.vehicle-sheet) {
+  body:has(:is(.dialog, .ac-vehicle-profile) .vehicle-sheet) :has(.vehicle-sheet) {
     position: static !important;
     display: block !important;
     overflow: visible !important;

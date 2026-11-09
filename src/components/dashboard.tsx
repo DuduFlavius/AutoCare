@@ -1,4 +1,5 @@
 'use client';
+import dynamic from 'next/dynamic';
 import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
@@ -6,7 +7,7 @@ import './studio-workspace.css';
 import VehiclePhoto from './application/vehicle-photo';
 import WorkspaceViewport from './workspace-viewport';
 import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspacePreferences, WorkspaceModuleHeader } from './app-workspace';
-import { normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
+import { normalizeWorkspaceSearch, normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
 import SiteLanguage from './site-language';
 import ApplicationHome from './application/home';
 import ApplicationHeader from './application/header';
@@ -22,12 +23,9 @@ import {AppUpdateSettings} from './auto-update';
 import PushSettings from './push-settings';
 import {hasNativeTracking,nativeAutomation} from '@/lib/native-tracking';
 import NativeTripSync from './native-trip-sync';
-import SmartDriveTrip from './smartdrive-trip';
-import AutoPointsMap from './auto-points-map';
 import MaintenanceForecast from './maintenance-forecast';
 import {maintenanceTargets} from '@/lib/maintenance-schedule';
 import ServiceForecastCards from './service-forecast-cards';
-import SmartDriveHistory from './smartdrive-history';
 import RecordEditor from './record-editor';
 import ServiceMileage from './service-mileage';
 import {parseServiceDetails} from '@/lib/service-details';
@@ -63,6 +61,12 @@ import { Brand } from './public-shell';
 import { VehicleJournal, VehicleSheet, ReminderInbox } from './garage-home';
 import { authClient } from '@/lib/auth-client';
 import type { dashboard } from '@/lib/service';
+const SmartDriveTrip = dynamic(() => import('./smartdrive-trip'), { loading: DriveModuleLoading });
+const AutoPointsMap = dynamic(() => import('./auto-points-map'), { loading: DriveModuleLoading });
+const SmartDriveHistory = dynamic(() => import('./smartdrive-history'), { loading: DriveModuleLoading });
+function DriveModuleLoading() {
+  return <div className="ws-loading" role="status"><span className="sr-only">SmartDrive GPS</span><div className="ws-loading-grid" aria-hidden="true"><span/><span/></div></div>;
+}
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type Vehicle = Data['vehicles'][number];
 type RecordItem = Data['records'][number];
@@ -297,7 +301,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   );
 }
 
-export default function Dashboard({ name, previewData, initialTab='Dashboard', initialDrive }: { name: string; previewData?: Data; initialTab?:string; initialDrive?: string }) {
+export default function Dashboard({ name, previewData, initialTab='Dashboard', initialDrive, initialVehicle }: { name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
     [openedSmartDrive, setOpenedSmartDrive] = useState(normalizeWorkspaceTab(initialTab) === 'Plan întreținere'),
@@ -315,7 +319,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     [modal, setModal] = useState<Modal>(null),
     [filter, setFilter] = useState(''),
     [query, setQuery] = useState(''),
-    [vehicleDetail, setVehicleDetail] = useState<string | null>(null),
+    [vehicleDetail, setVehicleDetail] = useState<string | null>(initialVehicle || null),
     [recordState, setRecordState] = useState(''),
     [unreadOnly, setUnreadOnly] = useState(false),
     [categoryFilter, setCategoryFilter] = useState(''),
@@ -494,7 +498,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     }
   }
   const workspaceViews = useRef(new Map<string,{filter:string;query:string;recordState:string;categoryFilter:string;period:string;showArchived:boolean;scroll:number}>());
-  function navigate(t: string, historyMode: 'push' | 'none' = 'push') {
+  function navigate(t: string, historyMode: 'push' | 'none' = 'push', vehicle: string | null = null) {
     t=normalizeWorkspaceTab(t);
 
     if (recordSaving || busy) return false;
@@ -506,6 +510,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     setModal(null);
     setRecordDirty(false);
     setTab(t);
+    setVehicleDetail(t === 'Garaj' ? vehicle : null);
     if (t === 'Plan întreținere') setOpenedSmartDrive(true);
     setFilter(view?.filter||'');
     setQuery(view?.query||'');
@@ -515,26 +520,27 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     setShowArchived(view?.showArchived||false);
     setError('');
     setNotice('');
-    if (historyMode === 'push' && new URLSearchParams(window.location.search).get('tab') !== t)
+    const current = new URLSearchParams(window.location.search);
+    if (historyMode === 'push' && (current.get('tab') !== t || current.get('vehicle') !== vehicle))
       window.history.pushState(
         null,
         '',
-        workspaceHref(window.location.pathname+window.location.search,t),
+        workspaceHref(window.location.pathname+window.location.search,t,vehicle),
       );
     return true;
   }
   useEffect(()=>{if(!data?.profile.userId)return;try{setActiveVehicleId(sessionStorage.getItem('autocare-active-vehicle:'+data.profile.userId)||'');}catch { /* Selection stays active for this session when storage is blocked. */ }},[data?.profile.userId]);
-  const displayedTabRef = useRef(tab);
-  displayedTabRef.current = tab;
+  const displayedViewRef = useRef({ tab, vehicleDetail });
+  displayedViewRef.current = { tab, vehicleDetail };
   const navigationRef = useRef(navigate);
   navigationRef.current = navigate;
   useEffect(() => {
     const back = () => {
-      const next = new URLSearchParams(window.location.search).get('tab') || 'Dashboard';
-      if (navigationRef.current(next, 'none') === false) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('tab', displayedTabRef.current);
-        window.history.pushState(null, '', url);
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get('tab') || 'Dashboard';
+      if (navigationRef.current(next, 'none', params.get('vehicle')) === false) {
+        const { tab: current, vehicleDetail: vehicle } = displayedViewRef.current;
+        window.history.pushState(null, '', workspaceHref(window.location.pathname + window.location.search, current, vehicle));
       }
     };
     window.addEventListener('popstate', back);
@@ -555,7 +561,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
       window.scrollTo({top:workspaceViews.current.get(tab)?.scroll||0,behavior:'instant'});
     });
     return()=>cancelAnimationFrame(frame);
-  },[tab,language]);
+  },[tab,language,vehicleDetail]);
   useEffect(()=>{
     const shortcut=(event:KeyboardEvent)=>{
       if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'&&!modal&&!recordDirty&&!recordSaving){event.preventDefault();setLauncherOpen(v=>!v);}
@@ -570,6 +576,11 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     setCurrency(next);try{localStorage.setItem('autocare-currency',next);}catch{ /* Storage may be unavailable. */ }
   }
   const activeCars = data?.vehicles.filter((v) => !v.archived) || [];
+  const garageQuery = normalizeWorkspaceSearch(query);
+  const garageCars = tab === 'Garaj' && !vehicleDetail
+    ? data?.vehicles.filter(v => (!filter || v.id === filter) && (showArchived || !v.archived) &&
+        normalizeWorkspaceSearch(`${v.brand} ${v.model} ${v.plate}`).includes(garageQuery)) || []
+    : [];
   const visible =
     data?.records.filter(
       (r) =>
@@ -774,7 +785,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace ac-studio" data-language={language} data-settings-panel={settingsPanel} data-workspace-section={tab}>
       <WorkspaceViewport service={tab==='Întreținere'}/>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
-      {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>{if(navigate('Garaj'))setVehicleDetail(id);}} /></Dialog>}
+      {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>navigate('Garaj', 'push', id)} /></Dialog>}
       <aside className="sidebar">
         <Brand
           href={previewData ? '/previzualizare' : '/cont'}
@@ -892,8 +903,9 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
           </div>
         )}
         {notice && (
-          <div role="status" className="notice">
-            {notice}
+          <div className="notice ac-workspace-toast">
+            <span role="status">{notice}</span>
+            <button type="button" onClick={() => setNotice('')} aria-label={language === 'en' ? 'Dismiss notification' : 'Închide notificarea'}><X size={16}/></button>
           </div>
         )}
         {!data ? (
@@ -938,10 +950,36 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
               ) : null}
             </WorkspaceModuleHeader>}
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
-            {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={activeVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={setVehicleDetail} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
+            {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={activeVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
             {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
             {tab === 'Istoric auto' && <VehicleJournal data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
-            {tab === 'Garaj' && (
+        {tab === 'Garaj' && vehicleDetail && (
+          <section className="ac-vehicle-profile" aria-label={language === 'en' ? 'Vehicle profile' : 'Profilul vehiculului'}>
+            <button className="studio-text-button" type="button" onClick={() => navigate('Garaj')}>{language === 'en' ? '← Back to garage' : '← Înapoi în garaj'}</button>
+            {data.vehicles.some(car => car.id === vehicleDetail) ? (
+            <VehicleSheet
+              key={vehicleDetail}
+              preview={!!previewData}
+              data={data}
+              id={vehicleDetail}
+              busy={busy}
+              removeService={(record) => {
+                const question = locale === 'ro-RO'
+                  ? 'Arhivezi intervenția și oprești alertele ei?'
+                  : 'Archive this service entry and stop its reminders?';
+                if (confirm(question)) void act(() => api('records/' + record.id, 'DELETE'));
+              }}
+              edit={() => {
+                const v = data.vehicles.find((v) => v.id === vehicleDetail);
+                if (v) setModal({ kind: 'vehicle', vehicle: v });
+              }}
+              open={(record) => {
+                setModal({ kind: record.kind as 'document' | 'service' | 'expense', record });
+              }}
+            />) : <p role="status">{language === 'en' ? 'This vehicle is unavailable in your garage.' : 'Mașina nu este disponibilă în garajul tău.'}</p>}
+          </section>
+        )}
+            {tab === 'Garaj' && !vehicleDetail && (
               <>
                 <div className="toolbar ac-garage-toolbar">
                   {data.vehicles.length > 1 && <input
@@ -966,17 +1004,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                   />
                 ) : (
                   <div className="grid3 ac-garage-grid">
-                    {data.vehicles
-                      .filter(
-                        (v) =>
-                          (!filter || v.id === filter) &&
-                          (showArchived || !v.archived) &&
-                          (!query ||
-                            `${v.brand} ${v.model} ${v.plate}`
-                              .toLowerCase()
-                              .includes(query.toLowerCase())),
-                      )
-                      .map((v) => (
+                    {garageCars.length === 0 && <p className="card" role="status">{language === 'en' ? 'No vehicles match the current filters.' : 'Nicio mașină nu corespunde filtrelor active.'}</p>}
+                    {garageCars                      .map((v) => (
                         <article key={v.id} className="card car-card" data-selected={!v.archived && (activeVehicleId || activeCars[0]?.id) === v.id || undefined}>
                           <div className="between">
                             <span className="eyebrow">
@@ -986,7 +1015,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                               {v.archived ? 'Arhivată' : 'Activă'}
                             </span>
                           </div>
-                          <VehiclePhoto vehicleId={v.id} name={v.brand+' '+v.model} uploaded={data.photos.some(p=>p.vehicleId===v.id)} preview={!!previewData}/>
+                          <VehiclePhoto vehicleId={v.id} name={v.brand+' '+v.model} uploaded={data.photos.some(p=>p.vehicleId===v.id)} preview={!!previewData} illustration/>
                           <h2 data-user-content>
                             {v.brand} {v.model}
                           </h2>
@@ -1044,7 +1073,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                           {v.notes && <p data-user-content className="small">{v.notes}</p>}
                           {!v.archived && <><button className="app-select-vehicle" type="button" aria-pressed={(activeVehicleId || activeCars[0]?.id)===v.id} onClick={()=>selectVehicle(v.id)}>{(activeVehicleId || activeCars[0]?.id)===v.id ? (language==='en'?'Selected for Home':'Selectată pentru Acasă') : (language==='en'?'Select for Home':'Selectează pentru Acasă')}</button><InlineMileageEditor key={v.id} vehicleId={v.id} currentKm={v.odometer} preview={!!previewData} onSaved={refresh}/></>}
                           <div className="row-actions">
-                            <button className="primary" onClick={() => setVehicleDetail(v.id)}>
+                            <button className="primary" onClick={() => navigate('Garaj', 'push', v.id)}>
                               Vezi mașina <ArrowUpRight size={14} />
                             </button>
                             <button
@@ -2026,31 +2055,6 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
               <span className="stripe-checkout-mark" aria-hidden="true">stripe</span>
               {language === 'en' ? 'Continue to Stripe' : 'Continuă către Stripe'}
             </a>
-          </Dialog>
-        )}
-        {vehicleDetail && data && (
-          <Dialog title="Fișa mașinii" onClose={() => setVehicleDetail(null)}>
-            <VehicleSheet
-              preview={!!previewData}
-              data={data}
-              id={vehicleDetail}
-              busy={busy}
-              removeService={(record) => {
-                const question = locale === 'ro-RO'
-                  ? 'Arhivezi intervenția și oprești alertele ei?'
-                  : 'Archive this service entry and stop its reminders?';
-                if (confirm(question)) void act(() => api('records/' + record.id, 'DELETE'));
-              }}
-              edit={() => {
-                const v = data.vehicles.find((v) => v.id === vehicleDetail);
-                setVehicleDetail(null);
-                if (v) setModal({ kind: 'vehicle', vehicle: v });
-              }}
-              open={(record) => {
-                setVehicleDetail(null);
-                setModal({ kind: record.kind as 'document' | 'service' | 'expense', record });
-              }}
-            />
           </Dialog>
         )}
         {deleteOpen && (

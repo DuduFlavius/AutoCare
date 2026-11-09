@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
-import { CarArt } from '../car-art';
+import Image from 'next/image';
+import { useApplicationLanguage } from '../application-locale';
 /** Keep uploaded owner photos; use a graphic identity when none exists. */
 export default function VehiclePhoto({
   vehicleId,
@@ -18,6 +19,7 @@ export default function VehiclePhoto({
   priority?: boolean;
   illustration?: boolean;
 }) {
+  const language = useApplicationLanguage();
   const [failed, setFailed] = useState('');
   const original =
     uploaded && !preview ? '/api/v1/vehicles/' + encodeURIComponent(vehicleId) + '/photo' : '';
@@ -27,7 +29,7 @@ export default function VehiclePhoto({
       {owned ? (
         <img
           src={original}
-          alt={'Fotografia mașinii ' + name}
+          alt={(language === 'en' ? 'Vehicle photo: ' : 'Fotografia mașinii ') + name}
           width={1200}
           height={675}
           loading={priority ? 'eager' : 'lazy'}
@@ -38,7 +40,10 @@ export default function VehiclePhoto({
           }}
         />
       ) : illustration ? (
-        <div className="studio-vehicle-illustration" aria-hidden="true"><CarArt /></div>
+        <div className="studio-vehicle-illustration">
+          <Image src="/images/autocare-studio-coupe.webp" alt="" fill sizes="(max-width: 760px) 100vw, 55vw" loading={priority ? 'eager' : 'lazy'} />
+          <span className="ac-illustrative-photo">{language === 'en' ? 'Illustration' : 'Imagine ilustrativă'}</span>
+        </div>
       ) : (
         <div className="studio-brand-emblem" aria-label="Garaj digital AutoCare">
           <ShieldCheck size={64} strokeWidth={1.25} />

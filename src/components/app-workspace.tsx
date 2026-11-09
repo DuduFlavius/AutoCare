@@ -102,13 +102,14 @@ export function WorkspaceLauncher({
   const match = (text: string) => terms.every((t) => normalizeWorkspaceSearch(text).includes(t));
   const sections = workspaceSections.filter((s) => match(`${s.ro} ${s.en} ${s.id}`));
   const cars = data?.vehicles.filter((v) => !v.archived) || [];
+  const carById = new Map(cars.map(car => [car.id, car]));
   const records = terms.length
     ? data?.records.filter(
         (r) =>
           !r.cancelled &&
-          cars.some((v) => v.id === r.vehicleId) &&
+          carById.has(r.vehicleId) &&
           match(
-            `${r.title} ${r.category} ${r.provider || ''} ${cars.find((v) => v.id === r.vehicleId)?.plate || ''}`,
+            `${r.title} ${r.category} ${r.provider || ''} ${carById.get(r.vehicleId)?.plate || ''}`,
           ),
       ) || []
     : [];
@@ -124,6 +125,11 @@ export function WorkspaceLauncher({
         <input
           autoFocus
           type="search"
+          onKeyDown={event => {
+            if (event.key !== 'ArrowDown') return;
+            const first = event.currentTarget.closest('.ws-launcher')?.querySelector<HTMLButtonElement>('.ws-launch-results button');
+            if (first) { event.preventDefault(); first.focus(); }
+          }}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t(
@@ -155,7 +161,17 @@ export function WorkspaceLauncher({
           ))}
         </div>
       )}
-      <div className="ws-launch-results" aria-live="polite">
+      <div className="ws-launch-results" aria-live="polite" onKeyDown={event => {
+        if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+        const buttons = Array.from(event.currentTarget.querySelectorAll('button'));
+        const index = buttons.findIndex(button => button === event.target);
+        if (index < 0) return;
+        const next = index + (event.key === 'ArrowDown' ? 1 : -1);
+        if (next === buttons.length) return;
+        event.preventDefault();
+        if (next < 0) event.currentTarget.closest('.ws-launcher')?.querySelector('input')?.focus();
+        else buttons[next]?.focus();
+      }}>
         {!!sections.length && (
           <>
             <h3>{t('Navigare rapidă', 'Quick navigation')}</h3>
@@ -199,7 +215,7 @@ export function WorkspaceLauncher({
                 <span>
                   <strong data-user-content>{r.title}</strong>
                   <small>
-                    {r.category} · {cars.find((v) => v.id === r.vehicleId)?.plate}
+                    {r.category} · {carById.get(r.vehicleId)?.plate}
                   </small>
                 </span>
                 <ArrowUpRight size={16} />
