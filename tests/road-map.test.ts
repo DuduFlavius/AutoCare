@@ -10,3 +10,15 @@ test('street mode removes imagery and terrain while keeping road layers',()=>{co
 test('route overview includes bends outside the start and destination viewport', () => {
   assert.deepEqual(plannedRouteBounds([[21, 45], [21.5, 44.5], [21.1, 45.1]]), [[21, 44.5], [21.5, 45.1]]);
 });
+
+test('street style removes square base markers and railway ties while keeping streets and labels', () => {
+  const style = streetOnlyStyle({version: 8, sources: {}, layers: [
+    {id: 'railway_dashline', type: 'line', source: 'roads'},
+    {id: 'railway_service_dashline', type: 'line', source: 'roads'},
+    {id: 'railway_service', type: 'line', source: 'roads'},
+    {id: 'place_town', type: 'symbol', source: 'places', layout: {'icon-image': 'square', 'text-field': '{name}'}},
+    {id: 'poi', type: 'symbol', source: 'places', layout: {'icon-image': 'poi'}},
+  ]});
+  assert.deepEqual(style.layers.map(layer => layer.id), ['railway_service', 'place_town']);
+  assert.deepEqual(style.layers[1].layout, {'text-field': '{name}'});
+});

@@ -21,8 +21,21 @@ export function routeGeometry(points: GPSFix[]): FeatureCollection<LineString> {
 }
 export const roadMapStyle = 'https://tiles.openfreemap.org/styles/fiord';
 
-/** Street mode deliberately excludes imagery and terrain shading. */
-export function streetOnlyStyle(style:StyleSpecification):StyleSpecification{return {...style,layers:style.layers.filter(layer=>layer.type!=="raster"&&layer.type!=="hillshade")};}
+/** Keep street and place labels while hiding basemap icons and railway ties. */
+export function streetOnlyStyle(style: StyleSpecification): StyleSpecification {
+  return {
+    ...style,
+    layers: style.layers
+      .filter(layer => layer.type !== 'raster' && layer.type !== 'hillshade' && !/^railway.*_dashline$/.test(layer.id))
+      .flatMap(layer => {
+        if (layer.type !== 'symbol' || !layer.layout?.['icon-image']) return [layer];
+        if (!layer.layout['text-field']) return [];
+        const layout = { ...layer.layout };
+        delete layout['icon-image'];
+        return [{ ...layer, layout }];
+      }),
+  };
+}
 
 export function tripBounds(points: GPSFix[]): [[number, number], [number, number]] {
   const west = Math.min(...points.map(point => point.longitude));
