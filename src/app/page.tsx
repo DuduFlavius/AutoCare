@@ -8,7 +8,6 @@ import {
   Wrench,
   Files,
   CarFront,
-  Wallet,
 } from 'lucide-react';
 import LuxuryExperience, { LuxuryMotion } from '@/components/luxury-experience';
 import { pricing, DEFAULT_PRICING } from '@/lib/pricing';
