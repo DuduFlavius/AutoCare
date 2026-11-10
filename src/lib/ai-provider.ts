@@ -75,17 +75,19 @@ async function generateGemini(instructions: string, input: string | { role: 'use
     const result: unknown = await response.json();
     const parsed = z.object({
       candidates: z.array(z.object({
+        finishReason: z.string().optional(),
         content: z.object({ parts: z.array(z.object({ text: z.string().optional() }).passthrough()) }).optional(),
       })).optional(),
     }).parse(result);
     const answer = parsed.candidates?.[0]?.content?.parts.map(part => part.text || '').join('\n').trim();
-    if (answer) return answer.slice(0, 5000);
+    if (parsed.candidates?.[0]?.finishReason === 'MAX_TOKENS') throw new AppError(502, 'Răspunsul AI a depășit limita de generare. Reformulează întrebarea mai specific sau cere analiza pe secțiuni.');
+    if (answer) return answer;
     throw new AppError(502, 'Gemini nu a returnat text. Reîncearcă.');
   }
   throw new AppError(502, 'Niciun model Gemini text disponibil nu a acceptat cererea. Verifică accesul la modele în Google AI Studio.');
 }
 
-export async function generateAi(instructions: string, input: string | { role: 'user'; content: InputPart[] }[], maxTokens = 950) {
+export async function generateAi(instructions: string, input: string | { role: 'user'; content: InputPart[] }[], maxTokens = 2600) {
   if (!autoAssistantConfigured()) throw new AppError(503, 'Furnizorul AI nu este configurat.');
   if (process.env.GEMINI_API_KEY?.trim()) return generateGemini(instructions, input, maxTokens);
   try {
@@ -106,14 +108,17 @@ export async function generateAi(instructions: string, input: string | { role: '
       }),
     });
     if (!response.ok) throw Error('Provider error');
-    const answer = responseSchema.parse(await response.json()).output
+    const providerResult: unknown = await response.json();
+    if (z.object({ status: z.string().optional() }).parse(providerResult).status === 'incomplete') throw new AppError(502, 'Furnizorul AI a întrerupt răspunsul. Încearcă o întrebare mai specifică.');
+    const answer = responseSchema.parse(providerResult).output
       .filter(item => item.type === 'message')
       .flatMap(item => item.content ?? [])
       .filter(item => item.type === 'output_text')
       .map(item => item.text ?? '').join('\n').trim();
     if (!answer) throw Error('No response');
-    return answer.slice(0, 5000);
-  } catch {
+    return answer;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
     throw new AppError(502, 'Furnizorul AI nu a putut răspunde. Reîncearcă mai târziu.');
   }
 }
