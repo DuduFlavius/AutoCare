@@ -14,18 +14,18 @@ async function main() {
     if (url.hostname.endsWith('.neon.tech')) url.hostname = url.hostname.replace('-pooler.', '.');
     process.env.DATABASE_URL = url.toString();
   }
-  const source = (await readFile('migrations/0010_mail_center.sql', 'utf8'))+'\n--> statement-breakpoint\n'+(await readFile('migrations/0011_mechanic_shares.sql', 'utf8'))+'\n--> statement-breakpoint\n'+(await readFile('migrations/0012_subscription_extensions.sql', 'utf8'));
+  const migrations = ['0010_mail_center.sql', '0011_mechanic_shares.sql', '0012_subscription_extensions.sql', '0013_ai_support_workspace.sql'];
+  const sources = await Promise.all(migrations.map(name => readFile('migrations/' + name, 'utf8')));
+  const source = sources.join('\n--> statement-breakpoint\n');
   await db().transaction(async (tx) => {
     for (const statement of source.split('--> statement-breakpoint').filter((x) => x.trim()))
       await tx.execute(sql.raw(statement));
     await tx.execute(
       sql`CREATE TABLE IF NOT EXISTS autocare_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())`,
     );
-    await tx.execute(
-      sql`INSERT INTO autocare_migrations(name) VALUES('0010_mail_center.sql') ON CONFLICT DO NOTHING`,
-    );
+    for (const name of migrations) await tx.execute(sql`INSERT INTO autocare_migrations(name) VALUES(${name}) ON CONFLICT DO NOTHING`);
   });
-  console.log('Mail Center and mechanic sharing additive migrations completed.');
+  console.log('Additive migrations completed.');
 }
 main()
   .then(async () => {

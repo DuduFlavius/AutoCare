@@ -259,3 +259,68 @@ test('Support: assignment, read markers and private attachments enforce permissi
     }),
   );
 });
+
+test('Support: private operations, live typing, message search, transfer and satisfaction stay scoped', async () => {
+  const client = crypto.randomUUID();
+  const outsider = crypto.randomUUID();
+  await db().insert(s.user).values({ id: outsider, name: 'Unrelated client', email: outsider + '@example.invalid' });
+  await db().insert(s.user).values({ id: client, name: 'Operator QA client', email: client + '@example.invalid', emailVerified: true });
+  const { threadId: id } = await chat.sendSupportMessage(client, { message: 'Primul mesaj pentru flux.' });
+  await chat.sendSupportMessage(client, { conversationId: id, message: 'Al doilea mesaj conține codul CĂUTARE-TEST-92.' });
+  assert.equal((await chat.listSupportThreads(admin, 'open', 'CĂUTARE-TEST-92')).threads[0].id, id);
+  assert.equal((await chat.listSupportThreads(outsider, 'open', 'CĂUTARE-TEST-92')).threads.some(thread => thread.id === id), false);
+  await assert.rejects(() => chat.supportCustomerContext(client, id), status(403));
+  await assert.rejects(() => chat.supportStatistics(client), status(403));
+  await assert.rejects(() => chat.updateSupportOperations(client, id, { note: 'Nu este permis' }), status(403));
+  await chat.joinSupportThread(admin, id);
+  await chat.setSupportTyping(admin, id, {});
+  assert.equal((await chat.readSupportThread(client, id)).operatorOnline, true);
+  assert.equal((await chat.readSupportThread(client, id)).typing, false);
+  await chat.setSupportTyping(admin, id, { typing: true });
+  assert.equal((await chat.readSupportThread(client, id)).typing, true);
+  await chat.setSupportTyping(admin, id, { typing: false });
+  assert.equal((await chat.readSupportThread(client, id)).typing, false);
+  await chat.setSupportTyping(client, id, { typing: true });
+  assert.equal((await chat.readSupportThread(admin, id)).typing, true);
+  await chat.updateSupportOperations(admin, id, { priority: 'urgent', workflow: 'waiting', note: 'Notă privată QA' });
+  const context = await chat.supportCustomerContext(admin, id);
+  assert.equal(context.operations?.priority, 'urgent');
+  assert.equal(context.operations?.workflow, 'waiting');
+  assert.equal(context.notes[0].body, 'Notă privată QA');
+  assert.doesNotMatch(JSON.stringify(await chat.readSupportThread(client, id)), /Notă privată QA/);
+  await assert.rejects(() => chat.updateSupportOperations(assistant, id, { priority: 'high' }), status(403));
+  await chat.assignSupportThread(admin, id, { assigneeId: assistant });
+  assert.equal((await chat.readSupportThread(client, id)).operatorOnline, false);
+  await assert.rejects(() => chat.sendSupportMessage(admin, { conversationId: id, message: 'Transferată' }), status(409));
+  await chat.sendSupportMessage(assistant, { conversationId: id, message: 'Cazul a fost verificat.' });
+  await assert.rejects(() => chat.rateSupportThread(client, id, { rating: 5 }), status(409));
+  await chat.changeSupportThread(assistant, id, { action: 'complete' });
+  await assert.rejects(() => chat.rateSupportThread(outsider, id, { rating: 1 }), status(404));
+  await chat.rateSupportThread(client, id, { rating: 5 });
+  const stats = await chat.supportStatistics(admin);
+  assert.equal(stats.ratings, 1);
+  assert.equal(stats.satisfaction, 5);
+  assert.ok(stats.activity.some(operator => operator.name === 'Mihai Suport'));
+  assert.equal((await chat.readSupportThread(client, id)).rating, 5);
+});
+
+test('Support AI requires staff for drafts and sends only the explicitly submitted brief', async t => {
+  await assert.rejects(() => chat.draftSupportReply(customer, { brief: 'Unde sunt setările?' }), status(403));
+  process.env.OPENAI_API_KEY = 'test-only';
+  process.env.AUTOCARE_AI_MODEL = 'test-model';
+  const provider = t.mock.method(globalThis, 'fetch', async (_url: string, request: RequestInit) => {
+    const payload = JSON.parse(String(request.body));
+    assert.equal(payload.store, false);
+    assert.equal(JSON.parse(payload.input).brief, 'Unde sunt setările?');
+    assert.doesNotMatch(payload.input, /Notă privată QA|@example.invalid/);
+    return Response.json({ output: [{ type: 'message', content: [{ type: 'output_text', text: 'Deschide Cont, apoi Setări.' }] }] });
+  });
+  try {
+    assert.equal((await chat.draftSupportReply(admin, { brief: 'Unde sunt setările?' })).answer, 'Deschide Cont, apoi Setări.');
+    assert.equal((await chat.draftSupportReply(customer, { brief: 'Unde sunt setările?' }, true)).answer, 'Deschide Cont, apoi Setări.');
+    assert.equal(provider.mock.callCount(), 2);
+  } finally {
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.AUTOCARE_AI_MODEL;
+  }
+});

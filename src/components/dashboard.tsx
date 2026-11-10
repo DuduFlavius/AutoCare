@@ -10,6 +10,7 @@ import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspacePref
 import { normalizeWorkspaceSearch, normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
 import SiteLanguage from './site-language';
 import ApplicationHome from './application/home';
+import { AutoAiWorkspace } from './application/auto-ai-workspace';
 import ApplicationHeader from './application/header';
 import MobileNavigation from './application/mobile-navigation';
 import AccountHub from './application/account';
@@ -512,7 +513,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     setModal(null);
     setRecordDirty(false);
     setTab(t);
-    setVehicleDetail(t === 'Garaj' ? vehicle : null);
+    setVehicleDetail(t === 'Garaj' || t === 'AutoCare AI' ? vehicle : null);
     if (t === 'Plan întreținere') setOpenedSmartDrive(true);
     setFilter(view?.filter||'');
     setQuery(view?.query||'');
@@ -953,6 +954,12 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             </WorkspaceModuleHeader>}
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
             {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
+            {tab === 'AutoCare AI' && <AutoAiWorkspace
+              vehicles={activeCars}
+              vehicleId={selectActiveVehicle(activeCars, vehicleDetail ?? primaryVehicleId)?.id ?? ''}
+              onVehicle={id => navigate('AutoCare AI', 'push', id)}
+              premium={data.premium} available={data.autoAssistantAvailable} preview={!!previewData} onSaved={refresh}
+            />}
             {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
             {tab === 'Istoric auto' && <VehicleJournal data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
         {tab === 'Garaj' && vehicleDetail && (
@@ -961,6 +968,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             {data.vehicles.some(car => car.id === vehicleDetail) ? (
             <VehicleSheet
               key={vehicleDetail}
+              onAi={() => navigate('AutoCare AI', 'push', vehicleDetail)}
               preview={!!previewData}
               onCreate={(kind) => {
                 setFilter(vehicleDetail);
@@ -992,6 +1000,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 money={moneyDisplay} onQuery={setQuery} onShowArchived={setShowArchived}
                 onAdd={() => setModal({ kind: 'vehicle' })}
                 onDetails={id => navigate('Garaj', 'push', id)}
+                onAi={id => navigate('AutoCare AI', 'push', id)}
                 onEdit={vehicle => setModal({ kind: 'vehicle', vehicle })}
                 onDocuments={id => {
                   if (!navigate('Documente')) return;

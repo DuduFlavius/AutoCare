@@ -7,7 +7,7 @@ import { closeLocalDb, db } from '../src/lib/db';
 import { gpsTrips, records, subscriptions, user, vehicles } from '../src/lib/schema';
 import { dashboard } from '../src/lib/service';
 import { garageOverview, garageVehicleSummary } from '../src/lib/garage-overview';
-import { DELETE, PATCH, POST, PUT } from '../src/app/api/v1/[...path]/route';
+import { DELETE, GET, PATCH, POST, PUT } from '../src/app/api/v1/[...path]/route';
 
 delete process.env.DATABASE_URL;
 delete process.env.OPENAI_API_KEY;
@@ -94,6 +94,43 @@ test('assistant requires Premium, checks ownership, and limits context sent to t
   assert.equal(response.status, 200);
   assert.equal((await response.json()).answer, 'ITP expiră pe 31 ianuarie 2030.');
   assert.equal(provider.mock.callCount(), 1);
+});
+
+test('AutoCare AI stores scoped history, validates scans and handles provider failure without saving a document', async t => {
+  const site = 'http://localhost:3000';
+  const headers = { Origin: site, Cookie: cookie };
+  const getHistory = (vehicleId: string) => GET(new Request(site + '/api/v1/auto-assistant/history?vehicleId=' + vehicleId, { headers }), { params: Promise.resolve({ path: ['auto-assistant', 'history'] }) });
+  assert.equal((await getHistory(foreignCarId)).status, 404);
+  const history = await (await getHistory(carId)).json();
+  assert.equal(history.turns.length, 1);
+  assert.equal(history.turns[0].answer, 'ITP expiră pe 31 ianuarie 2030.');
+  const scan = (bytes: Uint8Array) => {
+    const form = new FormData();
+    form.set('vehicleId', carId);
+    form.set('file', new File([Buffer.from(bytes)], 'scan.jpg', { type: 'image/jpeg' }));
+    return POST(new Request(site + '/api/v1/auto-assistant/scan', { method: 'POST', headers, body: form }), { params: Promise.resolve({ path: ['auto-assistant', 'scan'] }) });
+  };
+  const bytes = new Uint8Array([255, 216, 255, 0, 0]);
+  assert.equal((await scan(new Uint8Array([1, 2, 3]))).status, 400);
+  const recordCount = (await dashboard(ownerId)).records.length;
+  let badResponse = false;
+  t.mock.method(globalThis, 'fetch', async (_url: string, request: RequestInit) => {
+    const body = JSON.parse(String(request.body));
+    assert.equal(body.input[0].content[1].type, 'input_image');
+    if (badResponse) return new Response(null, { status: 503 });
+    return Response.json({ output: [{ type: 'message', content: [{ type: 'output_text', text: JSON.stringify({
+      category: 'ITP', number: 'A12', date: '2026-11-10', expiresAt: '2027-11-10', amountRon: null,
+    }) }] }] });
+  });
+  const result = await scan(bytes);
+  assert.equal(result.status, 200);
+  assert.equal((await result.json()).number, 'A12');
+  assert.equal((await dashboard(ownerId)).records.length, recordCount);
+  badResponse = true;
+  assert.equal((await scan(bytes)).status, 502);
+  const cleared = await DELETE(new Request(site + '/api/v1/auto-assistant/history', { method: 'DELETE', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ vehicleId: carId }) }), { params: Promise.resolve({ path: ['auto-assistant', 'history'] }) });
+  assert.equal(cleared.status, 200);
+  assert.deepEqual((await (await getHistory(carId)).json()).turns, []);
 });
 
 test('garage totals include history, and primary vehicle is persisted only for an active owned vehicle', async () => {

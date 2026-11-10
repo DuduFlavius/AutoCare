@@ -12,6 +12,7 @@ test('Application navigation preserves every existing functional section, includ
   const expected = [
     'Dashboard',
     'Garaj',
+    'AutoCare AI',
     'Documente',
     'Calendar',
     'Întreținere',
@@ -64,4 +65,10 @@ test('vehicle profiles have addressable URLs and other sections clear the vehicl
   assert.equal(workspaceHref('/cont?tab=Dashboard', 'Garaj', 'car-a'), '/cont?tab=Garaj&vehicle=car-a');
   assert.equal(workspaceHref('/cont?tab=Garaj&vehicle=car-a', 'Garaj'), '/cont?tab=Garaj');
   assert.equal(workspaceHref('/cont?tab=Garaj&vehicle=car-a', 'Documente'), '/cont?tab=Documente');
+});
+
+test('AutoCare AI URLs preserve the selected vehicle', () => {
+  const href = workspaceHref('/cont?tab=Garaj&vehicle=old', 'AutoCare AI', 'selected');
+  assert.equal(href, '/cont?tab=AutoCare+AI&vehicle=selected');
+  assert.equal(workspaceHref(href, 'Documente'), '/cont?tab=Documente');
 });

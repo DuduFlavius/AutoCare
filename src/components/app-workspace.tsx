@@ -68,7 +68,7 @@ export function WorkspaceNavigation({
       data-workspace-ui
     >
       {([
-        { ro:'GARAJUL TĂU',en:'YOUR GARAGE', ids:['Dashboard','Garaj','Întreținere','Documente'] },
+        { ro:'GARAJUL TĂU',en:'YOUR GARAGE', ids:['Dashboard','Garaj','AutoCare AI','Întreținere','Documente'] },
         { ro:'EVIDENȚĂ ȘI PLANIFICARE',en:'TRACKING & PLANNING', ids:['Kilometraj','Calendar','Cheltuieli','Rapoarte','Istoric auto','Plan întreținere'] },
         { ro:'CONTUL TĂU',en:'YOUR ACCOUNT', ids:['Premium','Abonament','Notificări','Setări','Centru de suport','Cont'] },
       ]).map(group => <div className="ws-nav-group" key={group.en}><p>{group[language]}</p>{group.ids.map(id => {
@@ -244,6 +244,7 @@ export function WorkspaceLauncher({
   );
 }
 const moduleCopy: Record<string, { title: [string, string]; description: [string, string] }> = {
+  'AutoCare AI': { title: ['AutoCare AI', 'AutoCare AI'], description: ['Analiză, conversații și scanare documente pentru vehiculul tău.', 'Analysis, conversations and document scanning for your vehicle.'] },
   Garaj: { title: ['Garajul meu', 'My garage'], description: ['Alege o mașină pentru a deschide fișa, actele și istoricul ei.', 'Choose a vehicle to see its details, documents and history.'] },
   'Întreținere': { title: ['Întreținere și service', 'Maintenance & service'], description: ['Ulei, distribuție și revizii, calculate după termenele și kilometrajul mașinii.', 'Oil, timing and service based on the vehicle’s mileage and due dates.'] },
   Documente: { title: ['Documente auto', 'Vehicle documents'], description: ['Vezi actele valabile, cele care expiră și fișierele atașate.', 'See valid documents, upcoming expirations and attachments.'] },

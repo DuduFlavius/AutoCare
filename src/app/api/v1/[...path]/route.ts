@@ -1,4 +1,4 @@
-import { askAutoAssistant } from '@/lib/auto-assistant';
+import { aiModes, askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, scanAutoDocument } from '@/lib/auto-assistant';
 import { findRoadDestinations } from '@/lib/road-geocoding';
 import { loadDrivingRoutes, roadCoordinate } from '@/lib/road-navigation-server';
 import { autoPointCategories } from '@/lib/auto-points';
@@ -36,8 +36,8 @@ const json = (value: unknown, status = 200) =>
     headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' },
   });
 const uuid = z.string().uuid();
-async function rate(uid: string, bucket = 'api', limit = 90) {
-  const key = `${bucket}:${uid}:${Math.floor(Date.now() / 60000)}`;
+async function rate(uid: string, bucket = 'api', limit = 90, windowMs = 60000) {
+  const key = `${bucket}:${uid}:${Math.floor(Date.now() / windowMs)}`;
   const out = await db()
     .insert(s.requestLimits)
     .values({ key, window: new Date() })
@@ -47,7 +47,7 @@ async function rate(uid: string, bucket = 'api', limit = 90) {
     })
     .returning();
   if (out[0].count > limit)
-    throw new svc.AppError(429, 'Prea multe cereri. Reîncearcă într-un minut.');
+    throw new svc.AppError(429, windowMs === 60000 ? 'Prea multe cereri. Reîncearcă într-un minut.' : 'Limita zilnică pentru AI a fost atinsă. Reîncearcă mâine.');
 }
 function secret(req: Request) {
   const value = req.headers.get('authorization') || '';
@@ -134,15 +134,35 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     const uid = sess.user.id;
     await svc.assertActiveAccount(uid);
     await rate(uid);
-    if (route === 'auto-assistant' && method === 'POST') {
-      await rate(uid, 'auto-assistant', 4);
+    if (route === 'auto-assistant/history' && method === 'DELETE') {
+      const { vehicleId } = z.object({ vehicleId: uuid }).parse(await body(req));
+      return json(await clearAutoAssistantHistory(uid, vehicleId));
+    }
+    if (path[0] === 'auto-assistant') {
       if (!await svc.premium(uid)) throw new svc.AppError(403, 'Asistentul AI este disponibil în Premium.');
-      const { vehicleId, question, language } = z.object({
-        vehicleId: uuid,
-        question: z.string().trim().min(4).max(500),
-        language: z.enum(['ro', 'en']).default('ro'),
-      }).parse(await body(req));
-      return json(await askAutoAssistant(uid, vehicleId, question, language));
+      if (route === 'auto-assistant/history' && method === 'GET')
+        return json(await autoAssistantHistory(uid, uuid.parse(new URL(req.url).searchParams.get('vehicleId'))));
+      if (route === 'auto-assistant' && method === 'POST') {
+        const { vehicleId, question, language, mode } = z.object({
+          vehicleId: uuid,
+          question: z.string().trim().min(4).max(600),
+          language: z.enum(['ro', 'en']).default('ro'),
+          mode: z.enum(aiModes).default('chat'),
+        }).parse(await body(req));
+        await rate(uid, 'auto-assistant', 4);
+        await rate(uid, 'auto-assistant-day', 24, 86400000);
+        await rate('all', 'ai-provider-day', 600, 86400000);
+        return json(await askAutoAssistant(uid, vehicleId, question, language, mode));
+      }
+      if (route === 'auto-assistant/scan' && method === 'POST') {
+        await rate(uid, 'auto-assistant-scan-day', 6, 86400000);
+        await rate('all', 'ai-provider-scan-day', 100, 86400000);
+        const data = await form(req);
+        const file = data.get('file');
+        if (!(file instanceof File) || file.size < 1 || file.size > 2097152)
+          throw new svc.AppError(400, 'Încarcă un document de maximum 2 MB.');
+        return json(await scanAutoDocument(uid, uuid.parse(data.get('vehicleId')), Buffer.from(await file.arrayBuffer())));
+      }
     }
     if (route === 'smartdrive/destinations' && method === 'POST') {
       await rate(uid, 'smartdrive-destinations', 12);
@@ -607,6 +627,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           })
           .from(s.session)
           .where(eq(s.session.userId, uid));
+        const aiHistory = await db().select().from(s.autoAiTurns).where(eq(s.autoAiTurns.userId, uid));
         const communicationPreferences = await mailCenter.getCommunicationPreference(uid);
         const emailHistory = await db().select({status:s.mailDeliveries.status,attemptedAt:s.mailDeliveries.attemptedAt,subject:s.mailCampaigns.subject,category:s.mailCampaigns.category}).from(s.mailDeliveries).innerJoin(s.mailCampaigns,eq(s.mailDeliveries.campaignId,s.mailCampaigns.id)).where(eq(s.mailDeliveries.userId,uid));
         const pushSubscriptions = await db()
@@ -627,6 +648,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               photos,
               sessions,
               communicationPreferences,
+              aiHistory,
               emailHistory,
               pushSubscriptions,
             },
@@ -743,6 +765,18 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           .where(eq(s.invoices.userId, uid))
           .orderBy(desc(s.invoices.createdAt)),
       );
+    if (route === 'support/statistics' && method === 'GET') return json(await supportChat.supportStatistics(uid));
+    if (route === 'support/guide' && method === 'POST') {
+      await rate(uid, 'support-guide-day', 5, 86400000);
+      await rate('all', 'support-guide-global-day', 180, 86400000);
+      return json(await supportChat.draftSupportReply(uid, await body(req), true));
+    }
+    if (route === 'support/draft' && method === 'POST') {
+      if (!supportChat.isSupportStaff((await svc.profile(uid)).role)) throw new svc.AppError(403, 'Acces rezervat echipei.');
+      await rate(uid, 'support-ai-day', 20, 86400000);
+      await rate('all', 'ai-provider-day', 600, 86400000);
+      return json(await supportChat.draftSupportReply(uid, await body(req)));
+    }
     if (route === 'support/team' && method === 'GET')
       return json(await supportChat.supportTeam(uid));
     if (route === 'support/unread' && method === 'GET')
@@ -760,6 +794,14 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       });
     }
     if (path[0] === 'support' && path[1] === 'chat') {
+      if (path.length === 4 && path[3] === 'context' && method === 'GET')
+        return json(await supportChat.supportCustomerContext(uid, path[2]));
+      if (path.length === 4 && path[3] === 'operations' && method === 'POST')
+        return json(await supportChat.updateSupportOperations(uid, path[2], await body(req)));
+      if (path.length === 4 && path[3] === 'typing' && method === 'POST')
+        return json(await supportChat.setSupportTyping(uid, path[2], await body(req)));
+      if (path.length === 4 && path[3] === 'rating' && method === 'POST')
+        return json(await supportChat.rateSupportThread(uid, path[2], await body(req)));
       if (path.length === 4 && path[3] === 'assign' && method === 'POST')
         return json(await supportChat.assignSupportThread(uid, path[2], await body(req)));
       if (path.length === 4 && path[3] === 'read' && method === 'POST')
@@ -783,6 +825,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           await supportChat.listSupportThreads(
             uid,
             new URL(req.url).searchParams.get('status') || 'open',
+            new URL(req.url).searchParams.get('q') || '',
           ),
         );
       if (path.length === 2 && method === 'POST') {

@@ -23,7 +23,13 @@ export default function NearbyDrivePlaces({ area, position, english, onResults, 
   const request = useRef<AbortController | null>(null);
   const t = (ro: string, en: string) => english ? en : ro;
 
-  useEffect(() => () => request.current?.abort(), []);
+  useEffect(() => {
+    if (window.location.hash === '#service-finder' && disclosure.current) {
+      disclosure.current.open = true;
+      disclosure.current.scrollIntoView({ block: 'nearest' });
+    }
+    return () => request.current?.abort();
+  }, []);
   async function search(next: Category) {
     request.current?.abort();
     const controller = new AbortController();
@@ -56,7 +62,7 @@ export default function NearbyDrivePlaces({ area, position, english, onResults, 
   }
 
   return (
-    <details ref={disclosure} className="ac-nearby-places" onToggle={event => onResults(event.currentTarget.open ? results || [] : [])}>
+    <details id="service-finder" ref={disclosure} className="ac-nearby-places" onToggle={event => onResults(event.currentTarget.open ? results || [] : [])}>
       <summary><MapPin size={17}/>{t('Locuri în apropiere', 'Nearby places')}</summary>
       <div className="ac-nearby-categories">{(Object.keys(categories) as Category[]).map(key => {
         const Icon = categories[key];

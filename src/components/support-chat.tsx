@@ -1,10 +1,13 @@
 'use client';
+import { SupportAiDraft, SupportCustomerPanel, SupportStatistics } from './support-operations';
+import './support-center.css';
 import {translateApplicationCopy} from '@/lib/application-language';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   Headset,
   Paperclip,
+  PanelRight,
   Search,
   Send,
   CheckCheck,
@@ -32,6 +35,8 @@ type Thread = {
   workingAt?: string | null;
   assignedTo?: string | null;
   unreadCount?: number;
+  priority?: string | null;
+  workflow?: string | null;
 };
 type Message = {
   id: string;
@@ -45,6 +50,9 @@ type Detail = {
   thread: { id: string; status: string; assignedTo?: string | null };
   messages: Message[];
   hasMore: boolean;
+  typing?: boolean;
+  operatorOnline?: boolean;
+  rating?: number | null;
   attachments?: { id: string; messageId: string; name: string }[];
   receipts?: { userId: string; lastReadAt: string }[];
 };
@@ -83,17 +91,22 @@ export default function SupportChat({
 }) {
 
   const locale=useApplicationLocale();
-const staff = ['assistant', 'admin', 'founder'].includes(role);
+const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   const [status, setStatus] = useState('open'),
     [threads, setThreads] = useState<Thread[]>([]),
     [counts, setCounts] = useState<Record<string, number>>({}),
     [selected, setSelected] = useState<string | null>(null),
     [detail, setDetail] = useState<Detail | null>(null),
     [query, setQuery] = useState(''),
+    [priorityFilter, setPriorityFilter] = useState(''),
+    [assigneeFilter, setAssigneeFilter] = useState(''),
+    [unreadOnly, setUnreadOnly] = useState(false),
+    [profileOpen, setProfileOpen] = useState(false),
     [text, setText] = useState(''),
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [busy, setBusy] = useState(false),
+    [aiAvailable, setAiAvailable] = useState(false),
     [loading, setLoading] = useState(!preview),
     [mobileThread, setMobileThread] = useState(false),
     [entered, setEntered] = useState(false),
@@ -101,6 +114,14 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
     [olderBusy, setOlderBusy] = useState(false);
   const [team, setTeam] = useState<{ id: string; name: string; role: string }[]>([]);
   const [selfId, setSelfId] = useState('');
+  const [serverQuery, setServerQuery] = useState('');
+  const queryRef = useRef('');
+  const jumpTo = useRef<string | null>(null);
+  const typingAt = useRef(0);
+  useEffect(() => {
+    const timer = setTimeout(() => setServerQuery(query.trim().slice(0, 120)), 330);
+    return () => clearTimeout(timer);
+  }, [query]);
   const selectedRef = useRef<string | null>(null),
     statusRef = useRef(status),
     epoch = useRef(0),
@@ -114,6 +135,7 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
     notifiedMessages = useRef(new Map<string, string>()),
     notificationEnabled = useRef(false);
   statusRef.current = status;
+  queryRef.current = serverQuery;
   useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10000); return () => clearInterval(timer); }, []);
   function merge(id: string, messages: Message[]) {
     const rows = Array.from(
@@ -152,12 +174,14 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
     if (preview || polling.current) return;
     polling.current = true;
     const currentStatus = statusRef.current;
+    const currentQuery = queryRef.current;
     try {
-      const out = await request('?status=' + currentStatus);
-      if (currentStatus !== statusRef.current) return;
+      const out = await request('?' + new URLSearchParams({ status: currentStatus, ...(staff && currentQuery ? { q: currentQuery } : {}) }));
+      if (currentStatus !== statusRef.current || currentQuery !== queryRef.current) return;
       setThreads(out.threads);
       setCounts(out.counts);
-      if (staff && currentStatus === 'open') {
+      setAiAvailable(!!out.aiAvailable);
+      if (staff && currentStatus === 'open' && !currentQuery) {
         const next = new Map<string, string>();
         for (const thread of out.threads as Thread[]) {
           if (thread.status !== 'open' || (thread.assignedTo && thread.assignedTo !== selfId)) continue;
@@ -178,7 +202,9 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
         notificationBaseline.current = true;
       }
       const current =
-        out.threads.find((t: Thread) => t.id === selectedRef.current) || out.threads[0];
+        out.threads.find((t: Thread) => t.id === (jumpTo.current || selectedRef.current)) || out.threads[0];
+      const jumped = current?.id && jumpTo.current === current.id;
+      jumpTo.current = null;
       if (!current) {
         ++epoch.current;
         selectedRef.current = null;
@@ -188,9 +214,8 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
       }
       if (current.id !== selectedRef.current) {
         setEntered(false);
-        setMobileThread(false);
         await openThread(current, false);
-        setMobileThread(false);
+        if (!jumped) setMobileThread(false);
       } else {
         const turn = epoch.current;
         const result: Detail = await request('/' + current.id);
@@ -208,7 +233,7 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
     } finally {
       setLoading(false);
       polling.current = false;
-      if (currentStatus !== statusRef.current) void refresh();
+      if (currentStatus !== statusRef.current || currentQuery !== queryRef.current) void refresh();
     }
   }
   useEffect(() => {
@@ -217,7 +242,7 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
     if (preview) return;
     const timer = setInterval(() => {
       if (!document.hidden && navigator.onLine) void refresh();
-    }, 15000);
+    }, 4000);
     const onFocus = () => { if (!document.hidden && navigator.onLine) void refresh(); };
     window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onFocus);
@@ -227,7 +252,7 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
       clearInterval(timer);
       ++epoch.current;
     };
-  }, [status, preview]);
+  }, [status, preview, serverQuery, selfId]);
   useEffect(() => {
     if (staff && typeof Notification !== 'undefined') notificationEnabled.current = Notification.permission === 'granted';
   }, [staff]);
@@ -251,12 +276,13 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
       return;
     void request('/' + selected + '/read', 'POST', { messageId: lastId }).catch(() => {});
   }, [selected, lastId, preview, staff, mobileThread]);
-  async function _assign(assigneeId: string) {
+  async function assign(assigneeId: string) {
     if (!selected || preview) return;
     setBusy(true);
     setError('');
     try {
       await request('/' + selected + '/assign', 'POST', { assigneeId: assigneeId || null });
+      setEntered(false);
       await refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -306,9 +332,16 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
         ...(selected && detail?.thread.status === 'open' ? { conversationId: selected } : {}),
       });
       setText('');
+      if (selected) void request('/' + selected + '/typing', 'POST', { typing: false }).catch(() => {});
+      typingAt.current = 0;
       selectedRef.current = out.threadId;
       setSelected(out.threadId);
       follow.current = true;
+      if (out.message) {
+        const messages = merge(out.threadId, [out.message]);
+        setDetail(previous => previous && previous.thread.id === out.threadId ? { ...previous, messages }
+          : { thread: { id: out.threadId, status: 'open' }, messages, hasMore: false });
+      }
       await refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -360,77 +393,48 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
     }
   }
   const current = threads.find((t) => t.id === selected);
-  const visible = threads.filter((t) =>
-    `${t.name} ${t.email} ${t.title}`
-      .toLocaleLowerCase('ro')
-      .includes(query.toLocaleLowerCase('ro')),
+  const visible = threads.filter(thread =>
+    (!unreadOnly || !!thread.unreadCount) &&
+    (!priorityFilter || (thread.priority ?? 'normal') === priorityFilter) &&
+    (!assigneeFilter || (assigneeFilter === 'mine' ? !!selfId && thread.assignedTo === selfId : !thread.assignedTo)),
   );
   const canWrite = staff
     ? !!current && current.status === 'open' && detail?.thread.id === selected && !!selfId && current.assignedTo === selfId && entered
     : true;
-  const _actions = (thread: Thread) => (
-    <div className="support-row-actions">
-      {thread.status === 'open' && (
-        <button
-          disabled={busy}
-          aria-label={'Finalizează conversația cu ' + thread.name}
-          title="Finalizează conversația"
-          onClick={(e) => {
-            e.stopPropagation();
-            void change(thread, 'complete');
-          }}
-        >
-          <CheckCheck size={16} />
-        </button>
-      )}
-      {thread.status === 'completed' && (
-        <>
-          <button
-            disabled={busy}
-            aria-label={'Redeschide conversația cu ' + thread.name}
-            title="Redeschide"
-            onClick={(e) => {
-              e.stopPropagation();
-              void change(thread, 'reopen');
-            }}
-          >
-            <RotateCcw size={15} />
-          </button>
-          <button
-            className="support-trash"
-            disabled={busy}
-            aria-label={'Mută în coș conversația cu ' + thread.name}
-            title="Mută în coșul de gunoi"
-            onClick={(e) => {
-              e.stopPropagation();
-              void change(thread, 'trash');
-            }}
-          >
-            <Trash2 size={16} />
-          </button>
-        </>
-      )}
-      {thread.status === 'trashed' && (
-        <button
-          disabled={busy}
-          aria-label={'Restaurează conversația cu ' + thread.name}
-          title="Restaurează"
-          onClick={(e) => {
-            e.stopPropagation();
-            void change(thread, 'restore');
-          }}
-        >
-          <RotateCcw size={16} />
-        </button>
-      )}
-    </div>
-  );
+  useEffect(() => {
+    if (!staff || !canWrite || !selected || preview) return;
+    const ping = () => {
+      if (!document.hidden && navigator.onLine) void request('/' + selected + '/typing', 'POST', {}).catch(() => {});
+    };
+    ping();
+    const timer = setInterval(ping, 20000);
+    return () => clearInterval(timer);
+  }, [staff, canWrite, selected, preview]);
+  function updateText(value: string) {
+    setText(value);
+    if (!selected || preview || detail?.thread.status !== 'open' || !canWrite) return;
+    const now = Date.now();
+    if (value.trim() && now - typingAt.current < 3500) return;
+    if (!value.trim() && !typingAt.current) return;
+    typingAt.current = value.trim() ? now : 0;
+    void request('/' + selected + '/typing', 'POST', { typing: !!value.trim() }).catch(() => {});
+  }
+  async function rateConversation(rating: number) {
+    if (!selected || busy || preview) return;
+    setBusy(true); setError('');
+    try {
+      const result = await request('/' + selected + '/rating', 'POST', { rating });
+      setDetail(previous => previous?.thread.id === selected ? { ...previous, rating: result.rating } : previous);
+    } catch (error) { setError((error as Error).message); }
+    finally { setBusy(false); }
+  }
   return (
     <section
       className={
-        'support-workspace ' +
+        'support-workspace ac-support-center ' +
         (staff ? 'support-team' : 'support-client') +
-        (mobileThread ? ' support-mobile-thread' : '')
+        (mobileThread ? ' support-mobile-thread' : '') +
+        (profileOpen && staff && current ? ' ac-support-with-profile' : '')
       }
     >
       {staff && (
@@ -470,11 +474,24 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
             <Search size={16} />
             <input
               aria-label="Caută conversații"
-              placeholder="Caută după nume sau e-mail"
+              placeholder="Nume, e-mail sau mesaj…"
               value={query}
+              maxLength={120}
               onChange={(e) => setQuery(e.target.value)}
             />
           </label>
+          <div className="support-inbox-tools">
+            <label><input type="checkbox" checked={unreadOnly} onChange={event => setUnreadOnly(event.target.checked)} /> Doar necitite</label>
+            <details><summary>Filtre inbox</summary>
+              <label>Prioritate<select value={priorityFilter} onChange={event => setPriorityFilter(event.target.value)}>
+                <option value="">Toate</option><option value="normal">Normală</option><option value="high">Ridicată</option><option value="urgent">Urgentă</option>
+              </select></label>
+              <label>Responsabil<select value={assigneeFilter} onChange={event => setAssigneeFilter(event.target.value)}>
+                <option value="">Toți</option><option value="mine">Atribuite mie</option><option value="unassigned">Neatribuite</option>
+              </select></label>
+            </details>
+            <SupportStatistics preview={preview} />
+          </div>
           <div className="support-thread-list">
             {loading ? (
               <p className="support-placeholder">Se încarcă conversațiile…</p>
@@ -506,7 +523,7 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
                         month: 'short',
                       })}
                     </time>
-                    <span className="support-thread-status">{thread.assignedTo ? 'Preluată' : 'În așteptare'}</span>
+                    <span className="support-thread-status">{thread.priority === 'urgent' ? 'Urgentă · ' : thread.priority === 'high' ? 'Prioritară · ' : ''}{thread.status !== 'open' ? (thread.status === 'completed' ? 'Finalizată' : 'În coș') : thread.workflow === 'waiting' ? 'În așteptare' : thread.assignedTo ? 'În lucru' : 'Neatribuită'}</span>
                   </div>
                 </article>
               ))
@@ -529,11 +546,21 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
             </button>
           </nav>
         )}
+        {!staff && threads.length > 1 && (
+          <label className="support-own-history">Istoric conversații
+            <select value={selected ?? ''} onChange={event => {
+              const thread = threads.find(item => item.id === event.target.value);
+              if (thread) void openThread(thread, false);
+            }}>
+              {threads.map(thread => <option key={thread.id} value={thread.id}>{new Date(thread.createdAt).toLocaleDateString(locale)} · {thread.title}</option>)}
+            </select>
+          </label>
+        )}
         {!staff && status !== 'trashed' && (
           <div className="support-client-intro" role="status">
             <span className="support-intro-dot" />
-            <span>{current?.assignedTo
-              ? 'Un asistent este disponibil în conversație.'
+            <span>{detail?.operatorOnline ? 'Operator activ în conversație.' : current?.assignedTo
+              ? 'Un operator este atribuit conversației.'
               : current && clock - new Date(current.createdAt).getTime() >= 60000
                 ? 'Mesajul tău este în așteptare. Revenim cât mai curând.'
                 : 'Bine ai venit! Suntem aici să te ajutăm.'}</span>
@@ -564,14 +591,14 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
             <div className="support-header-actions">
               <span className={'pill ' + (current.status === 'open' ? 'valid' : 'archived')}>
                 {current.status === 'open'
-                  ? current.workingAt
+                  ? current.workflow === 'waiting' ? 'În așteptare' : current.workingAt
                     ? 'În lucru'
                     : 'Nouă'
                   : current.status === 'completed'
                     ? 'Finalizată'
                     : 'În coș'}
               </span>
-              <span className="support-header-role">{current.assignedTo ? 'Responsabil desemnat' : 'În așteptare'}</span>
+              <button type="button" aria-expanded={profileOpen} aria-controls="support-customer-panel" disabled={preview} onClick={() => setProfileOpen(open => !open)}><PanelRight size={17} /> Profil</button>
             </div>
           ) : (
             <div className="support-header-actions">
@@ -692,14 +719,16 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
                   {detail.attachments
                     ?.filter((f) => f.messageId === message.id)
                     .map((f) => (
-                      <a key={f.id} className="support-file" href={'/api/v1/support/files/' + f.id}>
-                        {f.name} · Descarcă securizat
-                      </a>
+                      <div key={f.id} className="support-file">
+                        <a href={'/api/v1/support/files/' + f.id + '?view=1'} target="_blank" rel="noopener noreferrer">{f.name} · Previzualizează</a>
+                        <a href={'/api/v1/support/files/' + f.id}>Descarcă</a>
+                      </div>
                     ))}
                   {message.authorId &&
                     detail.receipts?.some(
                       (r) =>
                         r.userId !== message.authorId &&
+                        (message.authorRole === 'user' ? r.userId === current?.assignedTo : r.userId === current?.userId) &&
                         new Date(r.lastReadAt) >= new Date(message.createdAt),
                     ) && <small className="support-read-receipt">Citit</small>}
                   <time>
@@ -727,6 +756,16 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
             </div>
           )}
         </div>
+        {detail?.typing && <p className="support-typing-label" role="status">{staff ? 'Clientul scrie…' : 'Operatorul scrie…'}</p>}
+        {!staff && current?.status === 'completed' && (
+          <section className="support-rating" aria-label="Evaluează conversația">
+            <strong>{detail?.rating ? 'Evaluarea ta: ' + detail.rating + '/5' : 'Cum a fost experiența cu suportul?'}</strong>
+            <div>{[1, 2, 3, 4, 5].map(value => <button type="button" key={value} aria-pressed={detail?.rating === value} disabled={busy || preview} onClick={() => void rateConversation(value)}>{value}</button>)}</div>
+          </section>
+        )}
+        {!staff && current?.status === 'trashed' && <button type="button" disabled={busy || preview} onClick={() => void change(current, 'restore')}><RotateCcw size={15} /> Restaurează conversația</button>}
+        {canWrite && staff && selected && !preview && <SupportAiDraft available={aiAvailable} key={selected} onDraft={value => setText(value)} />}
+        {!staff && !preview && status !== 'trashed' && <SupportAiDraft available={aiAvailable} />}
         {(staff && !canWrite) || (!staff && status === 'trashed') ? (
           <footer className="support-readonly">
             <ShieldCheck size={16} />
@@ -775,12 +814,21 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
                 />
               </label>
             )}
+            {staff && <label className="support-quick-reply">Răspuns rapid
+              <select value="" onChange={event => { if (event.target.value) setText(previous => previous ? previous + '\n' + event.target.value : event.target.value); }}>
+                <option value="">Alege un răspuns</option>
+                <option value="Bună ziua! Îți mulțumim pentru mesaj. Cum te putem ajuta?">Salut și preluare</option>
+                <option value="Ne poți spune în ce secțiune apare problema și ce mesaj vezi pe ecran?">Cere detalii</option>
+                <option value="Dacă mai ai nevoie de ajutor, scrie-ne aici. Îți mulțumim!">Încheiere</option>
+              </select>
+            </label>}
             <div>
               <textarea
                 aria-label="Mesaj către suport"
                 placeholder={staff ? 'Scrie un răspuns clientului…' : 'Scrie mesajul tău…'}
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={e => updateText(e.target.value)}
+                onKeyDown={event => { if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }}
                 maxLength={4000}
                 rows={2}
                 required
@@ -803,6 +851,17 @@ const staff = ['assistant', 'admin', 'founder'].includes(role);
           </form>
         )}
       </div>
+      {staff && profileOpen && current && !preview && <SupportCustomerPanel
+        key={current.id} id={current.id} locale={locale} editable={!!selfId && current.assignedTo === selfId && current.status === 'open'}
+        assignedName={team.find(person => person.id === current.assignedTo)?.name ?? (current.assignedTo ? 'Membru al echipei' : 'Neatribuit')}
+        transfer={role !== 'assistant' && selfId && current.status === 'open' && (!current.assignedTo || current.assignedTo === selfId) ? { value: current.assignedTo ?? '', team, onAssign: assign } : undefined}
+        onChange={refresh} onClose={() => setProfileOpen(false)} openHistory={(id, nextStatus) => {
+          jumpTo.current = id;
+          setQuery(''); setUnreadOnly(false);
+          if (nextStatus !== status) setStatus(nextStatus);
+          else void refresh();
+        }}
+      />}
     </section>
   );
 }

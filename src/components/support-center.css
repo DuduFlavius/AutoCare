@@ -1,0 +1,68 @@
+html body .ac-workspace.ac-studio .ac-support-center {
+  --support-edge: #2a4165;
+  --support-panel: #111c2d;
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr);
+  min-width:0; height:auto !important; max-height:none !important; min-height:0 !important; overflow:visible !important;
+  gap:9px; padding:8px;
+  background:linear-gradient(145deg,#13223a,#0a1323 70%) !important;
+  border:1px solid var(--support-edge) !important;
+  border-radius:17px;
+}
+html body .ac-workspace.ac-studio .ac-support-center.support-team {
+  grid-template-columns:minmax(185px,.7fr) minmax(0,1.75fr);
+}
+html body .ac-workspace.ac-studio .ac-support-center.ac-support-with-profile {
+  grid-template-columns:minmax(180px,.73fr) minmax(0,1.7fr) minmax(210px,.85fr);
+}
+html body .ac-workspace.ac-studio .ac-support-center :is(.support-sidebar,.support-chat-panel,.support-customer-panel) {
+  min-width:0; background:#0c1628 !important; border:1px solid var(--support-edge) !important;
+  border-radius:13px !important; overflow-wrap:anywhere;
+}
+html body .ac-workspace.ac-studio .ac-support-center .support-sidebar {
+  padding:10px; min-height:0 !important;
+}
+.ac-support-center .support-sidebar h2,.ac-support-center .support-sidebar p { margin:5px 0; }
+html body .ac-workspace.ac-studio .ac-support-center .support-chat-panel { display:flex; flex-direction:column; min-height:420px !important; }
+html body .ac-workspace.ac-studio .ac-support-center .support-messages { min-height:180px !important; max-height:min(55dvh,630px); overflow:auto; }
+html body .ac-workspace.ac-studio .ac-support-center .support-messages .from-team { background:#17345d !important; border-color:#355c91 !important; }
+html body .ac-workspace.ac-studio .ac-support-center .support-messages .from-client { background:#172338 !important; border-color:#2f4466 !important; }
+.ac-support-center :is(.support-header-actions,.support-session-actions,.support-filters,.support-file) { display:flex; flex-wrap:wrap; gap:5px; min-width:0; }
+.ac-support-center :is(.support-thread-select,.support-header-title,.support-thread-list) { min-width:0; }
+.ac-support-center .support-thread-select > span:last-child { min-width:0; overflow-wrap:anywhere; }
+.ac-support-center .support-thread-list { max-height: min(58dvh,650px); overflow:auto; }
+.ac-support-center .support-quick-reply { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.ac-support-center :is(select,textarea,input[type=search]) { max-width:100%; min-width:0; }
+.support-inbox-tools,.support-stats-block,.support-customer-panel,.support-customer-panel form,.support-ai-draft form { display:grid; gap:7px; }
+.support-inbox-tools label { display:flex; gap:6px; align-items:center; }
+.support-customer-panel { align-content:start; padding:10px; }
+.support-customer-panel header,.support-rating,.support-rating > div { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.support-customer-panel header { justify-content:space-between; }
+.support-customer-panel :is(header span,summary),.support-ai-draft summary { display:flex; gap:5px; align-items:center; }
+.support-customer-card,.support-kpis > div,.support-internal-note,.support-ai-draft,.support-rating { padding:9px; border:1px solid #263c5f; border-radius:9px; background:#101c31; }
+.support-customer-card :is(h3,p,dl,dd),.support-kpis :is(dd,dt) { margin:0; }
+.support-customer-card dl { display:grid; gap:5px; margin-top:6px; }
+.support-customer-card dl > div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:2px 6px; }
+.support-customer-panel label,.support-ai-draft label { display:grid; gap:3px; }
+.support-customer-panel ul,.support-stats-block ul { padding-inline-start:16px; }
+.support-customer-panel time,.support-typing-label { color:#9ac8ff; font-size:12px; }
+.support-typing-label,.support-ai-draft,.support-rating { margin:5px 10px; }
+.support-ai-draft summary,.support-customer-panel summary { cursor:pointer; }
+.support-ai-draft p,.support-internal-note p { white-space:pre-wrap; overflow-wrap:anywhere; }
+.support-kpis { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; margin:6px 0; }
+.support-kpis dt { font-size:11px; }
+.support-kpis dd { font-weight:700; overflow-wrap:anywhere; }
+@media(max-width:1160px){
+  html body .ac-workspace.ac-studio .ac-support-center.ac-support-with-profile { grid-template-columns:minmax(180px,.7fr) minmax(0,1.75fr); }
+  .ac-support-center .support-customer-panel { grid-column:1/-1; }
+}
+@media(max-width:760px){
+  html body .ac-workspace.ac-studio .ac-support-center.support-team { grid-template-columns:minmax(0,1fr); }
+  html body .ac-workspace.ac-studio .ac-support-center.support-team:not(.support-mobile-thread) :is(.support-chat-panel,.support-customer-panel),
+  html body .ac-workspace.ac-studio .ac-support-center.support-team.support-mobile-thread .support-sidebar { display:none !important; }
+  html body .ac-workspace.ac-studio .ac-support-center .support-chat-panel { min-height:0 !important; }
+  html body .ac-workspace.ac-studio .ac-support-center .support-composer { position:sticky; bottom:calc(68px + env(safe-area-inset-bottom, 0px)); z-index:2; }
+  .ac-support-center .support-session-actions button { min-width:0; white-space:normal !important; }
+}
+
+.support-own-history { display:flex; flex-wrap:wrap; align-items:center; gap:7px; padding:8px 10px; min-width:0; }

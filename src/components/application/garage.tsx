@@ -2,7 +2,7 @@
 
 import {
   Archive, ArrowUpRight, CalendarDays, CarFront, Check, FileText, Gauge, Layers3,
-  Pencil, Plus, Search, Wallet, Wrench,
+  Pencil, Plus, Search, Sparkles, Wallet, Wrench,
 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { garageOverview, garageVehicleSummary } from '@/lib/garage-overview';
@@ -28,6 +28,7 @@ type Props = {
   onShowArchived: (show: boolean) => void;
   onAdd: () => void;
   onDetails: (id: string) => void;
+  onAi: (id: string) => void;
   onEdit: (vehicle: Vehicle) => void;
   onDocuments: (id: string) => void;
   onArchive: (vehicle: Vehicle) => void;
@@ -37,7 +38,7 @@ type Props = {
 
 export function ApplicationGarage({
   data, vehicles, primaryId, today, query, showArchived, busy, preview, money,
-  onQuery, onShowArchived, onAdd, onDetails, onEdit, onDocuments, onArchive, onSelect, onRefresh,
+  onQuery, onShowArchived, onAdd, onDetails, onAi, onEdit, onDocuments, onArchive, onSelect, onRefresh,
 }: Props) {
   const english = useApplicationLanguage() === 'en';
   const locale = useApplicationLocale();
@@ -110,6 +111,7 @@ export function ApplicationGarage({
                 </div>
                 {!vehicle.archived && (
                   <div className="ac-garage-secondary">
+                    <button type="button" onClick={() => onAi(vehicle.id)}><Sparkles size={15} />{t('Analizează cu AI', 'Analyze with AI')}</button>
                     <InlineMileageEditor vehicleId={vehicle.id} currentKm={vehicle.odometer} preview={preview} onSaved={onRefresh} />
                     <button type="button" aria-pressed={primary} disabled={busy} onClick={() => onSelect(vehicle.id)}>
                       {primary ? t('Selectat pentru Acasă', 'Selected for Home') : t('Setează ca principal', 'Set as primary')}

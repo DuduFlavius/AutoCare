@@ -10,6 +10,7 @@ export const workspaceSections = [
   { id: 'Cont', ro: 'Cont', en: 'Account', group: 'account', icon: 'settings' },
   { id: 'Dashboard', ro: 'Prezentare generală', en: 'Overview', group: 'overview', icon: 'home' },
   { id: 'Garaj', ro: 'Mașinile mele', en: 'My vehicles', group: 'garage', icon: 'car' },
+  { id: 'AutoCare AI', ro: 'AutoCare AI', en: 'AutoCare AI', group: 'garage', icon: 'premium' },
   { id: 'Documente', ro: 'Documente', en: 'Documents', group: 'garage', icon: 'files' },
   {
     id: 'Istoric auto',
@@ -69,7 +70,7 @@ export function workspaceHref(path: string, tab: string, vehicle?: string | null
   const url = new URL(path, 'https://autocare.invalid');
   const section = normalizeWorkspaceTab(tab);
   url.searchParams.set('tab', section);
-  if (section === 'Garaj' && vehicle) url.searchParams.set('vehicle', vehicle);
+  if ((section === 'Garaj' || section === 'AutoCare AI') && vehicle) url.searchParams.set('vehicle', vehicle);
   else url.searchParams.delete('vehicle');
   return url.pathname + url.search + url.hash;
 }

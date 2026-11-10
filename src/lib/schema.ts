@@ -489,3 +489,34 @@ export const mechanicShares=pgTable('mechanic_shares',{
 export const subscriptionExtensions=pgTable('subscription_extensions',{
  id:text().primaryKey(),userId:text().notNull().references(()=>user.id,{onDelete:'cascade'}),sessionId:text().notNull().unique(),paymentIntent:text(),months:integer().notNull(),amountBani:integer().notNull(),status:text().notNull().default('pending'),startsAt:timestamp({withTimezone:true}),endsAt:timestamp({withTimezone:true}),createdAt:timestamp({withTimezone:true}).notNull().defaultNow(),
 },t=>[index('subscription_extension_owner').on(t.userId),uniqueIndex('subscription_extension_pending').on(t.userId).where(sql`${t.status} IN ('pending','processing')`)]);
+
+export const autoAiTurns = pgTable('autocare_ai_turns', {
+  id: text().primaryKey(),
+  userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),
+  vehicleId: text().notNull().references(() => vehicles.id, { onDelete: 'cascade' }),
+  question: text().notNull(),
+  answer: text().notNull(),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+}, t => [index('autocare_ai_owner_vehicle').on(t.userId, t.vehicleId, t.createdAt)]);
+
+export const supportOperations = pgTable('support_thread_operations', {
+  threadId: text().primaryKey().references(() => supportThreads.id, { onDelete: 'cascade' }),
+  priority: text().notNull().default('normal'),
+  workflow: text().notNull().default('working'),
+  rating: integer(),
+});
+
+export const supportInternalNotes = pgTable('support_internal_notes', {
+  id: text().primaryKey(),
+  threadId: text().notNull().references(() => supportThreads.id, { onDelete: 'cascade' }),
+  authorId: text().references(() => user.id, { onDelete: 'set null' }),
+  body: text().notNull(),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+}, t => [index('support_notes_thread_time').on(t.threadId, t.createdAt)]);
+
+export const supportTyping = pgTable('support_typing', {
+  threadId: text().notNull().references(() => supportThreads.id, { onDelete: 'cascade' }),
+  userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),
+  typingAt: timestamp({ withTimezone: true }),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});

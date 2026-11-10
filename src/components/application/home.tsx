@@ -252,7 +252,7 @@ export default function ApplicationHome({
                 )}
               </div>
             </section>
-            <AutoAssistant key={car.id} vehicleId={car.id} available={!preview && data.autoAssistantAvailable} premium={data.premium} en={en} onPremium={() => navigate('Premium')} />
+            <AutoAssistant key={car.id} vehicleId={car.id} available={!preview && data.autoAssistantAvailable} premium={data.premium} en={en} onPremium={() => navigate('Premium')} onOpen={() => navigate('AutoCare AI')} />
           </div>
           </div>
           <div className="ac-cockpit-data">

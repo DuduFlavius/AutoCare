@@ -4,13 +4,14 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowUpRight, Send, Sparkles } from 'lucide-react';
 
 export function AutoAssistant({
-  vehicleId, available, premium, en, onPremium,
+  vehicleId, available, premium, en, onPremium, onOpen,
 }: {
   vehicleId: string;
   available: boolean;
   premium: boolean;
   en: boolean;
   onPremium: () => void;
+  onOpen: () => void;
 }) {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -65,6 +66,7 @@ export function AutoAssistant({
         ) : (
           <p>{premium ? (en ? 'The AI provider is not configured for this installation.' : 'Furnizorul AI încă nu este configurat.') : (en ? 'A Premium feature, subject to AI provider availability.' : 'Funcție Premium, disponibilă când este configurat furnizorul AI.')}</p>
         )}
+        {premium && <button type="button" className="studio-text-button" onClick={onOpen}>{en ? 'Open AutoCare AI' : 'Deschide AutoCare AI'} <ArrowUpRight size={14} /></button>}
         {!premium && <button type="button" className="studio-text-button" onClick={onPremium}>Premium <ArrowUpRight size={14} /></button>}
       </div>
     </section>

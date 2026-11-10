@@ -743,6 +743,7 @@ export function VehicleSheet({
   busy,
   preview,
   onCreate,
+  onAi,
 }: {
   data: Data;
   id: string;
@@ -751,6 +752,7 @@ export function VehicleSheet({
   removeService: (record: Entry) => void;
   busy: boolean;
   preview: boolean;
+  onAi: () => void;
   onCreate: (kind: 'document' | 'service') => void;
 }) {
 
@@ -815,6 +817,7 @@ export function VehicleSheet({
           </p>
         </div>
         <div className="vehicle-sheet-actions">
+          {!v.archived && <button type="button" className="primary" onClick={onAi}><Sparkles size={16} />{t('Analizează cu AI', 'Analyze with AI')}</button>}
           <button type="button" onClick={edit}>{t('Editează', 'Edit')}</button>
           <button type="button" onClick={() => onCreate('document')}><Files size={16} />{t('Adaugă document', 'Add document')}</button>
           <button type="button" className="primary" onClick={() => onCreate('service')}><CalendarDays size={16} />{t('Planifică mentenanța', 'Plan maintenance')}</button>

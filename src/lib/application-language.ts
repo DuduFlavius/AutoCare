@@ -260,6 +260,33 @@ Object.assign(dictionary,{'Istoric și preferințe kilometraj':'Mileage history 
 Object.assign(dictionary,{"Urmărirea nativă continuă în fundal, cu permisiunea telefonului, până alegi Oprește GPS. Oprirea forțată a aplicației sau restricțiile telefonului pot întrerupe înregistrarea.": "Native tracking continues in the background with your phone’s permission until you choose Stop GPS. Force-quitting the app or phone restrictions may interrupt recording.", "Nu se poate citi starea GPS. Redeschide aplicația.": "Unable to read GPS status. Reopen the app.", "Călătoria a fost salvată, dar arhiva locală nu a putut fi curățată. Reîncearcă salvarea.": "The trip was saved, but its local archive could not be cleared. Retry saving."});
 Object.assign(dictionary,{"Semnal GPS pierdut sau întârziat peste 25 secunde. Verifică locația și permisiunile telefonului. Distanța nu crește fără puncte valide.": "GPS signal lost or delayed by more than 25 seconds. Check location and phone permissions. Distance does not increase without valid fixes.", "După Pornește GPS trebuie să apară notificarea permanentă „AutoCare · GPS activ”. Pe Android, verifică în Setări → Aplicații → AutoCare: locație precisă, notificări permise și Baterie → Fără restricții. Pentru pornirea automată prin Bluetooth, permite locația „Tot timpul”.": "After Start GPS, the persistent AutoCare GPS notification should appear. On Android, check Settings → Apps → AutoCare: precise location, notifications allowed and Battery → Unrestricted. For Bluetooth auto-start, allow location all the time.", "Traseul GPS nu este încă finalizat. Reîncearcă salvarea.": "The GPS trip has not finished yet. Retry saving."});
 Object.assign(dictionary,{'Acces rezervat Fondatorului. Șabloanele salvate sunt disponibile pe toate dispozitivele tale.':'Founder access only. Saved templates are available across your devices.','Alege un șablon sau tip propriu':'Choose a template or custom type','Nume șablon / tip nou':'Template name / new type','Gestionează biblioteca':'Manage library'});
+Object.assign(dictionary, {
+  'Normală': 'Normal', 'Ridicată': 'High', 'Urgentă': 'Urgent', 'Toți': 'All', 'Toate': 'All',
+  'Istoric conversații': 'Conversation history', '· Previzualizează': '· Preview', 'Descarcă': 'Download',
+  'Răspuns rapid': 'Quick reply', 'Alege un răspuns': 'Choose a reply', 'Salut și preluare': 'Welcome and acknowledge',
+  'Încheiere': 'Closing', 'Cere detalii': 'Ask for details', 'Doar necitite': 'Unread only',
+  'Filtre inbox': 'Inbox filters', 'Prioritate': 'Priority', 'Responsabil': 'Assignee',
+  'Atribuite mie': 'Assigned to me', 'Neatribuite': 'Unassigned', 'Statistici suport': 'Support statistics',
+  'Profil client': 'Customer profile', 'Vehicule active': 'Active vehicles', 'Status cont': 'Account status',
+  'Responsabil conversație': 'Conversation assignee', 'Fără responsabil': 'Unassigned', 'Flux de lucru': 'Workflow',
+  'În lucru': 'In progress', 'În așteptare': 'Waiting', 'Note interne ·': 'Internal notes ·',
+  'Furnizorul AI nu este configurat.': 'The AI provider is not configured.',
+  'Salvează nota': 'Save note', 'Istoric acțiuni echipă': 'Team activity history', 'Evaluare client': 'Customer rating',
+  'Folosește în editor': 'Use in composer', 'Clientul scrie…': 'Customer is typing…', 'Operatorul scrie…': 'Operator is typing…',
+  'Operator activ în conversație.': 'Operator is active in this conversation.',
+  'Cum a fost experiența cu suportul?': 'How was your support experience?',
+  'Descrie problema, fără date personale sau credențiale': 'Describe the issue without personal information or credentials',
+  'Doar textul scris aici este trimis furnizorului AI.': 'Only the text entered here is sent to the AI provider.',
+  'Verifică propunerea înainte de trimitere.': 'Review the draft before sending.',
+  'Pentru acces la cont și cazuri specifice, scrie echipei.': 'Contact the team for account access or individual cases.',
+  'Generează propunerea': 'Generate draft', 'Întreabă asistentul': 'Ask the assistant', 'Se generează…': 'Generating…',
+  'Răspunsuri ale echipei în ultimele 7 zile': 'Team replies in the last 7 days',
+  'Nu există răspunsuri în acest interval.': 'No replies in this period.',
+  'Se încarcă profilul…': 'Loading profile…', 'Se calculează statisticile…': 'Calculating statistics…',
+  'Datele apar în centrul de suport al echipei.': 'Data is available in the team support center.',
+  'Necitite pentru tine': 'Unread for you', 'Primul răspuns': 'First reply', 'Rezolvare medie': 'Average resolution',
+  'Satisfacție': 'Satisfaction', 'Verificat': 'Verified', 'Email neconfirmat': 'Email unverified', 'Suspendat': 'Suspended',
+});
 const normalizedDictionary=Object.fromEntries(Object.entries(dictionary).map(([ro,en])=>[normalizeCopy(ro),en]));
  const templates: [RegExp,(...parts:string[])=>string][]=[
  [/^Bună,(.*)$/,(_,name)=>'Hello,'+name],
