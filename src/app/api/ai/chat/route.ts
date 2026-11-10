@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
     if (!requestOrigin || !host || new URL(requestOrigin).host !== host)
       return reply({ error: 'Origine invalidă.' }, 403);
-    const session = await auth.api.getSession({ headers: req.headers });
+    const session = await auth().api.getSession({ headers: req.headers });
     if (!session?.user?.id) return reply({ error: 'Autentifică-te pentru a discuta cu AutoCare AI.' }, 401);
     const key = process.env.GEMINI_API_KEY;
     if (!key) return reply({ error: 'AutoCare AI nu este configurat încă.' }, 503);
