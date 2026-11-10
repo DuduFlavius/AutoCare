@@ -153,9 +153,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           mode: z.enum(aiModes).default('chat'),
           localFallback: z.boolean().default(false),
         }).parse(await body(req));
-        await rate(uid, 'auto-assistant', 4);
-        await rate(uid, 'auto-assistant-day', 24, 86400000);
-        await rate('all', 'ai-provider-day', 600, 86400000);
+        await rate(uid, 'auto-assistant-v2', 12);
+        await rate(uid, 'auto-assistant-day-v2', 120, 86400000);
+        await rate('all', 'ai-provider-day-v2', 3000, 86400000);
         return json(await askAutoAssistant(uid, vehicleId, question, language, mode, localFallback));
       }
       if (route === 'auto-assistant/scan' && method === 'POST') {
