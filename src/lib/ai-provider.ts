@@ -38,11 +38,12 @@ async function availableGeminiModels(key: string, preferred: string): Promise<st
   })).default([]) }).parse(data);
   const available = parsed.models.filter(m => m.supportedGenerationMethods?.includes('generateContent'))
     .map(m => m.name.replace(/^models\//, ''));
-  const priority = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', preferred];
-  const candidates = [...new Set([...priority, ...available.filter(m => /^gemini-.*flash/.test(m))])]
-    .filter(m => available.includes(m) && /^gemini-.*flash/.test(m));
+  const priority = [preferred, 'gemini-3-flash-preview', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+  const candidates = [...new Set([...priority, ...available.filter(m => /^gemini-.*(?:flash|pro)/.test(m))])]
+    .filter(m => available.includes(m) && /^gemini-.*(?:flash|pro)/.test(m) && !/(?:tts|audio|image|live|embedding|robotics|computer-use)/i.test(m));
   if (!candidates.length) throw new AppError(503, 'Cheia API nu are niciun model Gemini Flash disponibil pentru generateContent.');
-  return candidates.slice(0, 5);
+  console.info('AutoCare Gemini compatible models', { models: candidates });
+  return candidates.slice(0, 10);
 }
 
 async function generateGemini(instructions: string, input: string | { role: 'user'; content: InputPart[] }[], maxTokens: number) {
@@ -60,16 +61,16 @@ async function generateGemini(instructions: string, input: string | { role: 'use
       method: 'POST', cache: 'no-store', signal: AbortSignal.timeout(22000),
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: payload,
     });
-    if (response.status === 404) {
+    if (response.status === 404 || response.status === 400) {
       const details = await response.json().catch(() => ({}));
-      console.error('AutoCare Gemini model returned 404', { model, errorCode: (details as {error?:{status?:string}}).error?.status });
+      console.error('AutoCare Gemini model rejected request', { model, httpStatus: response.status, errorCode: (details as {error?:{status?:string}}).error?.status, detail: String((details as {error?:{message?:string}}).error?.message || '').slice(0, 450) });
       continue;
     }
     if (response.status === 429) throw new AppError(429, 'Limita gratuită Gemini a fost atinsă. Încearcă mai târziu.');
     if (response.status === 401 || response.status === 403) throw new AppError(502, 'Cheia Gemini nu are acces la model. Verifică GEMINI_API_KEY.');
     if (!response.ok) {
       console.error('AutoCare Gemini request failed', { status: response.status, model });
-      throw new AppError(502, response.status === 400 ? 'Gemini a respins formatul cererii.' : 'Gemini nu a putut răspunde.');
+      throw new AppError(502, 'Gemini nu a putut răspunde.');
     }
     const result: unknown = await response.json();
     const parsed = z.object({
@@ -81,7 +82,7 @@ async function generateGemini(instructions: string, input: string | { role: 'use
     if (answer) return answer.slice(0, 5000);
     throw new AppError(502, 'Gemini nu a returnat text. Reîncearcă.');
   }
-  throw new AppError(502, 'Modelele Gemini disponibile returnează 404. Verifică accesul API din Google AI Studio.');
+  throw new AppError(502, 'Niciun model Gemini text disponibil nu a acceptat cererea. Verifică accesul la modele în Google AI Studio.');
 }
 
 export async function generateAi(instructions: string, input: string | { role: 'user'; content: InputPart[] }[], maxTokens = 950) {
