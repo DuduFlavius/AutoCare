@@ -24,7 +24,7 @@ const turnsFor = (uid: string, vehicleId: string) => and(eq(autoAiTurns.userId, 
 export async function autoAssistantHistory(uid: string, vehicleId: string) {
   await activeVehicle(uid, vehicleId);
   const turns = await db().select({ id: autoAiTurns.id, question: autoAiTurns.question, answer: autoAiTurns.answer, createdAt: autoAiTurns.createdAt })
-    .from(autoAiTurns).where(turnsFor(uid, vehicleId)).orderBy(desc(autoAiTurns.createdAt), desc(autoAiTurns.id)).limit(30);
+    .from(autoAiTurns).where(turnsFor(uid, vehicleId)).orderBy(desc(autoAiTurns.createdAt), desc(autoAiTurns.id)).limit(150);
   return { turns: turns.reverse() };
 }
 
@@ -155,7 +155,7 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
     await tx.select({ id: user.id }).from(user).where(eq(user.id, uid)).for('update');
     const [saved] = await tx.insert(autoAiTurns).values({ id: crypto.randomUUID(), userId: uid, vehicleId, question, answer }).returning();
     await tx.delete(autoAiTurns).where(sql`${turnsFor(uid, vehicleId)} and ${autoAiTurns.id} in
-      (select id from autocare_ai_turns where "userId"=${uid} and "vehicleId"=${vehicleId} order by "createdAt" desc, id desc offset 30)`);
+      (select id from autocare_ai_turns where "userId"=${uid} and "vehicleId"=${vehicleId} order by "createdAt" desc, id desc offset 200)`);
     return { id: saved.id, question: saved.question, answer: saved.answer, createdAt: saved.createdAt };
   });
   return { answer, turn, source };
