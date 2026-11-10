@@ -959,6 +959,11 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             {data.vehicles.some(car => car.id === vehicleDetail) ? (
             <VehicleSheet
               key={vehicleDetail}
+              preview={!!previewData}
+              onCreate={(kind) => {
+                setFilter(vehicleDetail);
+                setModal({ kind });
+              }}
               data={data}
               id={vehicleDetail}
               busy={busy}

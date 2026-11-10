@@ -378,3 +378,135 @@ html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titaniu
   html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-insights { grid-template-columns: minmax(0,1fr); }
   .ac-vehicle-profile .ac-vehicle-sheet-tabs { position: static; }
 }
+
+/* Compact dashboard and vehicle overview. */
+.ac-cockpit-home :is(.ac-cockpit-lead, .ac-cockpit-data, .ac-cockpit-bottom),
+.ac-vehicle-overview {
+  display: grid;
+  gap: clamp(8px, 1vw, 15px);
+  align-items: stretch;
+  min-width: 0;
+}
+.ac-cockpit-lead { grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); }
+.ac-cockpit-data { grid-template-columns: repeat(2, minmax(0, 1.25fr)) repeat(2, minmax(0, 1fr)); }
+.ac-cockpit-bottom { grid-template-columns: minmax(0, .9fr) minmax(0, 1.35fr) minmax(0, 1fr); }
+.ac-cockpit-home :is(.ac-cockpit-lead, .ac-cockpit-data, .ac-cockpit-bottom) > *,
+.ac-vehicle-overview > * { min-width: 0; }
+html body .ac-workspace.ac-studio .ac-cockpit-home { gap: clamp(10px, 1.15vw, 16px); }
+html body .ac-workspace.ac-studio .ac-cockpit-home .studio-home-heading h1 {
+  font-size: clamp(28px, 2.55vw, 42px) !important;
+}
+.ac-cockpit-home .studio-home-heading { padding-block: 4px 10px; }
+.ac-cockpit-home .ac-readiness-panel {
+  grid-area: auto;
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  padding: clamp(12px, 1.5vw, 20px);
+  background: radial-gradient(ellipse at 15% 0,#112a59,transparent 72%), linear-gradient(142deg,#0c162c,#080e1c);
+  border-color: #28487a;
+}
+.ac-cockpit-lead .ac-titanium-action-deck { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+.ac-cockpit-lead .ac-titanium-action-deck > section { padding: 11px; }
+.ac-care-content { display: grid; grid-template-columns: minmax(100px, .7fr) minmax(0, 1.65fr); gap: 12px; }
+.ac-cockpit-home .ac-care-content .ac-readiness-value { flex-direction: column; justify-content: center; text-align: center; gap: 5px; }
+.ac-care-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: center; gap: 6px; }
+html body .ac-workspace.ac-studio .ac-care-metrics button {
+  display: flex; align-items: center; justify-content: flex-start; gap: 7px;
+  min-width: 0; padding: 6px !important; text-align: left; white-space: normal !important;
+}
+.ac-care-metrics svg, .ac-cockpit-quick svg { flex-shrink: 0; color: #5fb5ff; }
+.ac-care-metrics span { font-size: 11px; color: var(--color-muted); overflow-wrap: anywhere; }
+.ac-care-metrics strong { display: block; color: var(--color-text); font-size: 13px; }
+.ac-cockpit-home .ac-readiness-actions { display: flex; flex-wrap: wrap; }
+html body .ac-workspace.ac-studio .ac-cockpit-home .ac-readiness-actions button { width: auto !important; }
+html body .ac-workspace.ac-studio .ac-cockpit-home :is(.ac-cockpit-data, .ac-cockpit-bottom) :is(.studio-panel, .studio-priority) {
+  padding: clamp(10px, 1.1vw, 16px) !important;
+  background: linear-gradient(145deg,#0e1a32,#080f20) !important;
+  border-color: #233c64 !important;
+}
+.ac-cockpit-home :is(.ac-cockpit-data, .ac-cockpit-bottom) h2 { font-size: 15px; overflow-wrap: anywhere; }
+.ac-cockpit-home :is(.ac-cockpit-data, .ac-cockpit-bottom) .studio-panel-head { flex-wrap: wrap; }
+.ac-cockpit-home .ac-cockpit-data .studio-mini-chart {
+  position: relative;
+  height: 98px;
+  min-height: 98px;
+  gap: 0;
+  padding-top: 72px;
+}
+.ac-cost-line, .ac-vehicle-line { width: 100%; color: #4faaff; overflow: visible; }
+.ac-cost-line { position: absolute; inset: 0 0 auto; height: 72px; pointer-events: none; }
+.ac-cost-gridlines { fill: none; stroke: #20375c; stroke-width: 1; }
+:is(.ac-cost-line, .ac-vehicle-line) polyline { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+:is(.ac-cost-line, .ac-vehicle-line) circle { fill: currentColor; }
+.ac-cost-line polygon { fill: #398bff21; }
+html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-data .studio-priority-main { gap: 8px; }
+.ac-cockpit-data .studio-progress-ring { width: 38px; height: 38px; }
+.ac-cockpit-data .studio-progress-ring svg { width: 17px; }
+.ac-cockpit-data .studio-deadline-metrics { gap: 4px; }
+.ac-cockpit-data .studio-deadline-metrics strong { font-size: 16px; }
+.ac-cockpit-data .studio-priority-empty { min-height: 0; }
+.ac-cockpit-data .studio-priority h3 { font-size: 14px; }
+.ac-cockpit-bottom .ac-activity-panel { grid-column: auto; }
+html body .ac-workspace.ac-studio .ac-cockpit-bottom .ac-vehicle-instrument {
+  grid-area: auto; grid-template-rows: auto auto; min-height: 0; gap: 6px;
+  padding: 12px;
+}
+.ac-cockpit-bottom .ac-instrument-heading { grid-template-columns: minmax(0, 1fr); }
+.ac-cockpit-bottom .ac-instrument-footer { align-items: center; padding-top: 7px; gap: 5px; }
+html body .app-shell.ac-workspace.ac-studio .ac-cockpit-bottom .ac-vehicle-instrument .studio-mileage > strong { font-size: 20px !important; }
+.ac-cockpit-quick > div { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 70px), 1fr)); gap: 6px; }
+html body .ac-workspace.ac-studio .ac-cockpit-quick button {
+  display: grid; justify-items: center; align-content: center; gap: 5px;
+  min-width: 0; min-height: 55px; padding: 6px !important; font-size: 11px !important;
+  text-align: center; white-space: normal !important; overflow-wrap: anywhere;
+}
+
+html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titanium-vehicle {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: start;
+}
+.ac-titanium-vehicle .vehicle-sheet-actions { justify-content: flex-end; }
+.ac-vehicle-overview { grid-template-columns: repeat(2, minmax(0,1.2fr)) repeat(2,minmax(0,1fr)); }
+.ac-vehicle-overview .card { display: grid; align-content: start; gap: 7px; padding: 13px; background: linear-gradient(145deg,#101d34,#090f20); border-color: #243c60; overflow-wrap: anywhere; }
+.ac-vehicle-overview :is(h3,p,dl,dd) { margin: 0; }
+.ac-vehicle-overview h3 { font-size: 15px; }
+.ac-vehicle-overview .ac-vehicle-notes { grid-column: 1/-1; }
+.ac-vehicle-care-content { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.ac-vehicle-care-content .ac-care-ring { width: 74px; }
+.ac-vehicle-care-content .ac-care-ring strong { font-size: 23px; }
+.ac-vehicle-care-content dl { display: grid; gap: 6px; }
+.ac-vehicle-care-content dt { font-size: 11px; color: var(--color-muted); }
+.ac-vehicle-care-content dd { font-weight: 650; }
+.ac-vehicle-line { height: 74px; }
+.ac-vehicle-chart-labels { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 9px; font-size: 11px; color: var(--color-muted); }
+.ac-vehicle-documents .event-line { display: flex; align-items: center; gap: 6px; min-width: 0; text-align: start; }
+.ac-vehicle-documents .event-line svg { flex: none; }
+.ac-vehicle-documents .event-line small { display: block; color: var(--color-muted); }
+.ac-vehicle-sheet-tabs button[aria-pressed='true'] { color: #79caff; border-color: #398bff; }
+@media (max-width: 1250px) {
+  .ac-cockpit-data, .ac-vehicle-overview { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 900px) {
+  .ac-cockpit-lead, .ac-cockpit-bottom { grid-template-columns: minmax(0, 1fr); }
+  .ac-cockpit-lead .ac-titanium-action-deck { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 620px) {
+  .ac-cockpit-data, .ac-vehicle-overview, .ac-cockpit-lead .ac-titanium-action-deck,
+  html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titanium-vehicle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ac-titanium-vehicle .vehicle-sheet-actions { justify-content: flex-start; }
+}
+@media (max-width: 390px) {
+  .ac-care-content { grid-template-columns: minmax(0, 1fr); }
+  .ac-cockpit-home .ac-care-content .ac-readiness-value { flex-direction: row; text-align: start; justify-content: flex-start; gap: 8px; }
+}
+.ac-vehicle-reading-list { list-style: none; display: grid; gap: 4px; padding: 0; }
+.ac-vehicle-reading-list li { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #20375c; padding-block: 4px; }
+html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-data .studio-mini-chart { padding-inline: 0; background: transparent; }
+.ac-cockpit-home .ac-cockpit-data .studio-mini-chart button[aria-pressed='true'] small { color: #7ed2ff; }
+
+@media print {
+  .ac-vehicle-profile .vehicle-sheet .ac-vehicle-records[hidden] { display: block !important; }
+}

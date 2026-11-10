@@ -25,6 +25,7 @@ export function useMileageUsage(vehicleId: string, currentKm: number, preview = 
     key: string;
     value: ReturnType<typeof recentMileageUsage>;
     lastReadingAt: string | null;
+    readings: OdometerReading[];
   } | null>(null);
   const [settled, setSettled] = useState('');
   useEffect(() => {
@@ -45,6 +46,7 @@ export function useMileageUsage(vehicleId: string, currentKm: number, preview = 
           setSnapshot({
             key,
             value: recentMileageUsage(rows, new Date()),
+            readings: rows,
             lastReadingAt:
               rows
                 .filter((r) => Number.isFinite(Date.parse(r.recordedAt)))
@@ -79,6 +81,7 @@ export function useMileageUsage(vehicleId: string, currentKm: number, preview = 
       window.dispatchEvent(new Event('autocare-daily-usage'));
     },
     confirmed: snapshot?.key === key ? snapshot.value : null,
+    readings: snapshot?.key === key ? snapshot.readings : null,
     lastReadingAt: snapshot?.key === key ? snapshot.lastReadingAt : null,
     loading: !preview && !!vehicleId && settled !== key,
   };

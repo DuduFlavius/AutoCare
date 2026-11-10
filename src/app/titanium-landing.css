@@ -7,7 +7,7 @@ html body .ac-lux-public.ac-studio-public .ac-titanium-hero {
   grid-template-columns: minmax(0, .91fr) minmax(0, 1.2fr);
   gap: clamp(16px, 3vw, 48px);
   min-height: 0;
-  padding-block: clamp(30px, 5vw, 75px) 34px;
+  padding-block: clamp(23px, 2.5vw, 43px) 24px;
   overflow: clip;
   background: radial-gradient(ellipse at 78% 70%, #0b2356 0, transparent 55%);
 }
@@ -55,7 +55,7 @@ html body .ac-lux-public.ac-studio-public .ac-titanium-hero .lux-primary {
   container-type: inline-size;
 }
 .ac-landing-cockpit figcaption { margin-top: 12px; text-align: center; color: #afc0d7; font-size: 11px; }
-.ac-preview-devices { position: relative; aspect-ratio: 1.61; perspective: 850px; }
+.ac-preview-devices { position: relative; aspect-ratio: 1.7; perspective: 850px; }
 .ac-preview-laptop {
   position: absolute;
   inset: 5% 10% 7% 2%;
@@ -146,7 +146,7 @@ html body .ac-lux-public.ac-studio-public .ac-titanium-hero .lux-primary {
 .ac-landing-features h2, .ac-landing-discovery h2 { margin: 0; font-size: clamp(20px, 2vw, 28px); }
 .ac-landing-features p, .ac-landing-discovery p { color: #bac9dd; font-size: 14px; margin: 5px 0 0; }
 .ac-landing-feature-grid { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 10px; }
-.ac-landing-feature-grid a, .ac-landing-map-card, .ac-landing-plans, .ac-landing-plans a {
+.ac-landing-feature-grid a, .ac-landing-map-card, .ac-landing-plans, .ac-landing-plans a, .ac-landing-assistant {
   min-width: 0;
   background: linear-gradient(145deg,#101e36,#0a1222);
   border: 1px solid #203553;
@@ -158,7 +158,7 @@ html body .ac-lux-public.ac-studio-public .ac-titanium-hero .lux-primary {
 .ac-landing-feature-grid p { flex: 1; margin: 0 0 5px; font-size: 13px; }
 .ac-landing-feature-grid span, .ac-landing-plans a span { display: flex; align-items: center; gap: 4px; color: #73c4ff; font-size: 12px; }
 .ac-landing-feature-grid a:hover, .ac-landing-plans a:hover { border-color: #398bff; background: #142748; }
-.ac-landing-discovery { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.6fr); gap: 12px; }
+.ac-landing-discovery { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.65fr) minmax(0, .85fr); gap: 12px; }
 .ac-landing-map-card { display: grid; grid-template-columns: minmax(0,.7fr) minmax(0,1fr); align-items: center; gap: 12px; }
 .ac-landing-map-symbol {
   min-height: 108px;
@@ -169,18 +169,26 @@ html body .ac-lux-public.ac-studio-public .ac-titanium-hero .lux-primary {
   background: radial-gradient(ellipse at center,#154f9e,transparent 75%), repeating-linear-gradient(22deg,transparent 0 13px,#20385a 14px,transparent 15px 25px);
 }
 .ac-landing-map-symbol svg { filter: drop-shadow(0 0 10px #398bff); }
-.ac-landing-map-card .lux-text-link { margin-top: 7px; }
+.ac-landing-map-card .lux-text-link, .ac-landing-assistant .lux-text-link { margin-top: 7px; }
+.ac-landing-assistant > svg { color: #56b6ff; }
+.ac-landing-assistant h2 { font-size: 17px; }
 .ac-landing-plans h2 { font-size: 18px; margin-bottom: 9px; }
 .ac-landing-plans > div { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
 .ac-landing-plans a { padding: 10px; font-size: 13px; }
 .ac-landing-plans a strong { font-size: 22px; line-height: 1.2; }
 .ac-landing-plans a small { color: #bac9dd; font-size: 11px; }
 .ac-landing-plans .ac-landing-plan-featured { border-color: #398bff; box-shadow: inset 0 0 18px #398bff27; }
-@media (max-width: 1100px) { .ac-landing-feature-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+@media (max-width: 1100px) {
+  .ac-landing-feature-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .ac-landing-discovery { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .ac-landing-plans { grid-row: span 2; }
+  .ac-landing-assistant { grid-column: 1; }
+}
 @media (max-width: 820px) {
   html body .ac-lux-public.ac-studio-public .ac-titanium-hero { grid-template-columns: minmax(0,1fr); gap: 10px; }
   .ac-landing-cockpit { width: min(100%,600px); justify-self: center; }
   .ac-landing-discovery { grid-template-columns: minmax(0,1fr); }
+  .ac-landing-plans { grid-row: auto; }
 }
 @media (max-width: 480px) {
   .ac-landing-feature-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }

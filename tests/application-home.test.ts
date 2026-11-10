@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { selectActiveVehicle, upcomingMaintenance, isOilMaintenance } from '../src/lib/application-home';
+import { selectActiveVehicle, upcomingMaintenance, isOilMaintenance, vehicleCareScore } from '../src/lib/application-home';
 import { mobileWorkspaceSections, workspaceSections } from '../src/lib/workspace';
 const today = new Date('2030-01-01T12:00:00Z');
 const service = { id:'oil',title:'Oil',category:'Schimb ulei',kind:'service',cancelled:false,date:'2029-12-01',odometer:100000,nextKm:115000,expiresAt:null,parts:null };
@@ -55,4 +55,14 @@ test('saved legacy oil records remain visible with their own interval',()=>{
   assert.equal(upcomingMaintenance([saved],108000,70,'UTC',today)[0].status.remainingKm,7000);
  }
  assert.equal(isOilMaintenance({...service,category:'Cutie',title:'Schimb ulei cutie'}),false);
+});
+
+test('vehicle care score uses only dated documents and scheduled maintenance', () => {
+  assert.deepEqual(vehicleCareScore([{ status: { days: null } }], [{ status: { state: 'unscheduled' } }]), {
+    total: 0, valid: 0, percent: null,
+  });
+  assert.deepEqual(vehicleCareScore(
+    [null, -1, 30, 31].map(days => ({ status: { days } })),
+    ['unscheduled', 'overdue', 'valid'].map(state => ({ status: { state } })),
+  ), { total: 5, valid: 2, percent: 40 });
 });

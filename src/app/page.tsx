@@ -13,6 +13,7 @@ import {
   MapPin,
   CircleCheck,
   CirclePlay,
+  Sparkles,
 } from 'lucide-react';
 import LuxuryExperience, { LuxuryMotion } from '@/components/luxury-experience';
 import { pricing, DEFAULT_PRICING } from '@/lib/pricing';
@@ -106,6 +107,12 @@ export default async function Home() {
                 <Link href="/preturi"><b>Premium anual</b><strong>{money(prices.annualBani)} <small>RON / an</small></strong><span>Vezi abonamentul <ArrowUpRight size={14} /></span></Link>
               </div>
             </section>
+            <article className="ac-landing-assistant">
+              <Sparkles size={26} aria-hidden="true" />
+              <h2>AI Auto Assistant</h2>
+              <p>Întrebări despre documente, revizii și cheltuieli, cu răspunsuri bazate pe datele mașinii. Disponibil când este configurat furnizorul AI.</p>
+              <Link href="/cont" className="lux-text-link">Intră în cont <ArrowUpRight size={16} /></Link>
+            </article>
           </section>
           <section className="ac-product-systems" id="aplicatia">
             <header>

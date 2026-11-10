@@ -2,7 +2,6 @@
 import { useState, type CSSProperties } from 'react';
 import {
   ArrowUpRight,
-  Activity,
   Bell,
   ArrowRight,
   Plus,
@@ -27,6 +26,7 @@ import {
   upcomingMaintenance,
   currentHomeMaintenance,
   isOilMaintenance,
+  vehicleCareScore,
 } from '@/lib/application-home';
 import { forecastDuration } from '@/lib/service-forecast';
 import { AppEmpty, AppStatus } from './ui';
@@ -76,12 +76,6 @@ export default function ApplicationHome({
     ? upcomingMaintenance(planningRows, car.odometer, usage.dailyKm, data.profile.timezone)
     : [];
   const next = maintenance[0];
-  const careStates = [
-    ...rows.filter(record => record.kind === 'document' && record.status.days !== null).map(record => record.status.days! > 30),
-    ...maintenance.filter(item => item.status.state !== 'unscheduled').map(item => item.status.state === 'valid'),
-  ];
-  const healthyChecks = careStates.filter(Boolean).length;
-  const careScore = careStates.length ? Math.round(healthyChecks / careStates.length * 100) : null;
   const recordIds = new Set(rows.map(item => item.id));
   const reminders = data.notifications.filter(item => recordIds.has(item.recordId) && !item.readAt).length;
   const activity = rows.filter(item => item.date).sort((a,b) => (b.date ?? '').localeCompare(a.date ?? '')).slice(0, 4);
@@ -91,6 +85,7 @@ export default function ApplicationHome({
   const docs = rows
     .filter((r) => r.kind === 'document')
     .sort((a, b) => (a.status.days ?? Infinity) - (b.status.days ?? Infinity));
+  const care = vehicleCareScore(docs, maintenance);
   const attention = docs.filter((r) => r.status.days !== null && r.status.days <= 30);
   const recent = rows
     .filter((r) => r.kind === 'service')
@@ -116,11 +111,14 @@ export default function ApplicationHome({
   const tripMonths = (data.annualTrips ?? []).filter(trip => trip.vehicleId === car?.id);
   const annualDistance = tripMonths.reduce((total, month) => total + month.meters, 0);
   const maxTripMonth = Math.max(1, ...tripMonths.map(month => month.meters));
+  const totalCost = rows.reduce((sum, record) => sum + (record.amountKnown === false ? 0 : record.amountBani), 0);
   const monthCost = months.at(-1)?.value ?? 0,
     yearCost = costRows
       .filter((r) => r.date?.startsWith(today.slice(0, 4)))
       .reduce((sum, r) => sum + r.amountBani, 0);
   const maxCost = Math.max(1, ...months.map((m) => m.value));
+  const costPoints = months.map((month, index) => [8 + index * 56, 67 - (month.value / maxCost) * 58]);
+  const costLine = costPoints.map(point => point.join(',')).join(' ');
   const money = (bani: number) =>
     new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(
       bani / (currency === 'EUR' ? 500 : 100),
@@ -198,59 +196,31 @@ export default function ApplicationHome({
         />
       ) : (
         <>
-          <div className="studio-overview">
-            <section className="studio-vehicle-panel ac-vehicle-instrument" aria-labelledby="ac-instrument-title">
-              <TitaniumWave />
-              <div className="ac-instrument-heading">
-                <div className="studio-vehicle-identity">
-                  <span className="studio-kicker">{t('MAȘINA SELECTATĂ', 'SELECTED VEHICLE')}</span>
-                  <h2 id="ac-instrument-title" data-user-content>{car.brand} {car.model}</h2>
-                  <div className="ac-instrument-identity">
-                    <span>{car.year} · <span data-user-content>{car.fuel}</span></span>
-                    <span className="studio-plate" data-user-content>{car.plate}</span>
-                  </div>
-                  {cars.length > 1 && (
-                    <select aria-label={t('Mașina selectată', 'Selected vehicle')} value={car.id} onChange={e => onSelectVehicle(e.target.value)}>
-                      {cars.map(v => <option value={v.id} key={v.id}>{v.brand} {v.model} · {v.plate}</option>)}
-                    </select>
-                  )}
-                </div>
-                <svg className="ac-instrument-art" viewBox="0 0 360 226" fill="none" aria-hidden="true" focusable="false">
-                  <g stroke="currentColor" strokeWidth="1">
-                    <path opacity=".18" d="M8 113h344M180 10v206M38 52h42l24 24m218 98h-42l-24-24M38 174h42l24-24m218-98h-42l-24 24" />
-                    <circle cx="180" cy="113" r="91" opacity=".14" />
-                    <circle cx="180" cy="113" r="81" opacity=".22" strokeDasharray="2 7" />
-                    <circle cx="180" cy="113" r="68" opacity=".2" />
-                    <path opacity=".5" d="M98 99a83 83 0 0 1 83-69m81 95a83 83 0 0 1-82 71M119 137a66 66 0 0 0 40 39m82-87a66 66 0 0 0-40-39" />
-                    <path d="m180 68 42 24v43l-42 24-42-24V92Z" fill="#142842" fillOpacity=".56" opacity=".8" />
-                    <path opacity=".6" d="m138 92 42 25 42-25m-42 25v42m-28-43 28-17 28 17m-28-48v31" />
-                    <path opacity=".65" d="m126 100 54-31 54 31m0 26-54 31-54-31" strokeDasharray="2 4" />
-                    <circle cx="180" cy="117" r="3" fill="#a3cdff" stroke="none" />
-                    <path opacity=".45" d="M36 108v10m288-10v10M175 19h10m-10 188h10" />
-                  </g>
-                </svg>
-              </div>
-              <div className="ac-instrument-footer">
-                <div className="studio-mileage">
-                  <span><Gauge size={18} aria-hidden="true"/>{t('Kilometraj confirmat', 'Confirmed mileage')}</span>
-                  <strong>{car.odometer.toLocaleString(locale)} <small>km</small></strong>
-                  <InlineMileageEditor key={car.id} vehicleId={car.id} currentKm={car.odometer} preview={preview} onSaved={onRefresh}/>
-                </div>
-                <button type="button" className="ac-instrument-details" onClick={() => onVehicle(car.id)}>
-                  {t('Fișa mașinii', 'Vehicle profile')} <ArrowUpRight size={16} aria-hidden="true"/>
-                </button>
-              </div>
-            </section>
+          <div className="ac-cockpit-lead">
             <section className="ac-readiness-panel" aria-labelledby="ac-readiness-title">
-              <div className="ac-readiness-heading"><span className="studio-kicker">{t('CENTRU DE CONTROL', 'CONTROL CENTRE')}</span><Activity size={19}/></div>
-              <h2 id="ac-readiness-title">{t('Starea întreținerii', 'Care status')}</h2>
+              <TitaniumWave />
+              <h2 id="ac-readiness-title">{t('Starea vehiculului', 'Vehicle status')}</h2>
+              <div className="ac-care-content">
               <div className="ac-readiness-value">
-                <div className="ac-care-ring" style={{ '--ac-care-score': (careScore ?? 0) + '%' } as CSSProperties}>
-                  <strong>{careScore === null ? '—' : careScore + '%'}</strong>
+                <div className="ac-care-ring" style={{ '--ac-care-score': (care.percent ?? 0) + '%' } as CSSProperties}>
+                  <strong>{care.percent === null ? '—' : care.percent + '%'}</strong>
                 </div>
-                <span>{careScore === null
+                <span>{care.percent === null
                   ? t('Adaugă termene pentru a vedea scorul.', 'Add deadlines to see your score.')
-                  : `${healthyChecks} / ${careStates.length} ${t('termene în regulă', 'deadlines in good standing')}`}</span>
+                  : `${care.valid} / ${care.total} ${t('termene în regulă', 'deadlines in good standing')}`}</span>
+              </div>
+                <div className="ac-care-metrics">
+                  {[
+                    { Icon: Gauge, label: t('Kilometraj actual', 'Current mileage'), value: car.odometer.toLocaleString(locale) + ' km', tab: 'Kilometraj' },
+                    { Icon: Wallet, label: t('Cheltuieli lunare', 'Monthly expenses'), value: money(monthCost), tab: 'Cheltuieli' },
+                    { Icon: Route, label: t('Distanță GPS lunară', 'Monthly GPS distance'), value: monthlyTrip ? (monthlyTrip.meters / 1000).toLocaleString(locale, { maximumFractionDigits: 1 }) + ' km' : '—', tab: 'Plan întreținere' },
+                    { Icon: Wrench, label: t('Ultima intervenție', 'Last service'), value: recent[0]?.date ? date(recent[0].date) : '—', tab: 'Întreținere' },
+                  ].map(({ Icon, label, value, tab }) => (
+                    <button type="button" key={label} onClick={() => navigate(tab)}>
+                      <Icon size={18} aria-hidden="true" /><span>{label}<strong>{value}</strong></span>
+                    </button>
+                  ))}
+                </div>
               </div>
               <p>{t('Scor din scadențele documentelor și intervalele de service înregistrate.', 'Score from recorded document deadlines and maintenance intervals.')}</p>
               <div className="ac-readiness-actions">
@@ -258,7 +228,6 @@ export default function ApplicationHome({
                 <button type="button" onClick={() => navigate('Notificări')}><Bell size={16}/>{t('Notificări', 'Notifications')}{reminders > 0 && <span>{reminders}</span>}<ArrowUpRight size={14}/></button>
               </div>
             </section>
-          </div>
           <div className="ac-titanium-action-deck">
             <section className="ac-titanium-reminder" aria-labelledby="ac-next-reminder">
               <TitaniumWave />
@@ -285,139 +254,8 @@ export default function ApplicationHome({
             </section>
             <AutoAssistant key={car.id} vehicleId={car.id} available={!preview && data.autoAssistantAvailable} premium={data.premium} en={en} onPremium={() => navigate('Premium')} />
           </div>
-          <section className="studio-telemetry" aria-labelledby="studio-telemetry-title">
-            <div className="studio-telemetry-heading">
-              <h2 id="studio-telemetry-title">{t('Starea garajului', 'Garage overview')}</h2>
-              <span>{new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: data.profile.timezone }).format(new Date())}</span>
-            </div>
-            <div className="studio-dashboard-metrics">
-              {[
-                { Icon: Gauge, label: t('Kilometraj actual', 'Current mileage'), value: car.odometer.toLocaleString(locale) + ' km', section: 'Kilometraj' },
-                { Icon: Wallet, label: t('Cheltuieli luna aceasta', 'Expenses this month'), value: money(monthCost), section: 'Cheltuieli' },
-                { Icon: Wallet, label: t('Cheltuieli anul acesta', 'Expenses this year'), value: money(yearCost), section: 'Cheltuieli' },
-                { Icon: ShieldCheck, label: t('Documente de verificat', 'Documents to check'), value: attention.length.toLocaleString(locale), section: 'Documente' },
-                { Icon: Route, label: t('Distanță GPS luna aceasta', 'GPS distance this month'), value: monthlyTrip ? (monthlyTrip.meters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 }) + ' km' : '—', section: 'Plan întreținere' },
-              ].map(({ Icon, label, value, section }) => (
-                <button key={label} type="button" onClick={() => navigate(section)}>
-                  <Icon size={17} aria-hidden="true"/>
-                  <span>{label}</span>
-                  <strong>{value}</strong>
-                  <ArrowUpRight className="studio-metric-arrow" size={15} aria-hidden="true"/>
-                </button>
-              ))}
-            </div>
-          </section>
-          <div className="studio-create-row" aria-label={t('Adăugare rapidă', 'Quick add')}>
-            <button type="button" onClick={() => onCreate('service', car.id)}>
-              <Wrench size={18} /> {t('Adaugă intervenție', 'Add maintenance')}
-            </button>
-            <button type="button" onClick={() => onCreate('document', car.id)}>
-              <Files size={18} /> {t('Adaugă document', 'Add document')}
-            </button>
-            <button type="button" onClick={() => onCreate('expense', car.id)}>
-              <Wallet size={18} /> {t('Adaugă cheltuială', 'Add expense')}
-            </button>
           </div>
-          <div className="studio-status-row">
-            {[
-              {
-                Icon: Droplets,
-                title: t('Schimb de ulei', 'Oil change'),
-                record: oil,
-                allowed: true,
-              },
-              {
-                Icon: Settings2,
-                title: t('Distribuție', 'Timing service'),
-                record: timing,
-                allowed: data.premium,
-              },
-            ].map((item) => {
-              const forecast =
-                item.record && item.allowed
-                  ? upcomingMaintenance(
-                      [item.record],
-                      car.odometer,
-                      usage.dailyKm,
-                      data.profile.timezone,
-                    )[0]
-                  : null;
-              return (
-                <button
-                  key={item.title}
-                  type="button"
-                  className="studio-maintenance-tile"
-                  onClick={() =>
-                    item.record ? onRecord(item.record) : onCreate('service', car.id)
-                  }
-                >
-                  <span className="studio-tile-icon">
-                    <item.Icon size={23} />
-                  </span>
-                  <span>
-                    <span className="studio-tile-label">{item.title}</span>
-                    <strong>
-                      {forecast?.status.remainingKm != null
-                        ? Math.abs(forecast.status.remainingKm).toLocaleString(locale) + ' km'
-                        : item.record
-                          ? t('Înregistrat', 'Recorded')
-                          : t('De completat', 'Add service')}
-                    </strong>
-                    <small>
-                      {forecast?.estimate?.days != null
-                        ? forecastDuration(forecast.estimate.days, language)
-                        : item.record?.date
-                          ? date(item.record.date)
-                          : t('Adaugă ultima intervenție', 'Add the last service')}
-                    </small>
-                  </span>
-                  <ArrowUpRight size={17} />
-                </button>
-              );
-            })}
-            <button
-              type="button"
-              className={
-                'studio-maintenance-tile ' + (attention.length ? 'studio-tile-warning' : '')
-              }
-              onClick={() => navigate('Documente')}
-            >
-              <span className="studio-tile-icon">
-                <ShieldCheck size={23} />
-              </span>
-              <span>
-                <span className="studio-tile-label">
-                  {t('Documente în atenție', 'Documents to review')}
-                </span>
-                <strong>
-                  {attention.length}{' '}
-                  {attention.length === 1 ? t('document', 'document') : t('documente', 'documents')}
-                </strong>
-                <small>
-                  {t('Expirate sau în următoarele 30 zile', 'Expired or due within 30 days')}
-                </small>
-              </span>
-              <ArrowUpRight size={17} />
-            </button>
-            <button
-              type="button"
-              className="studio-maintenance-tile"
-              onClick={() => navigate('Cheltuieli')}
-            >
-              <span className="studio-tile-icon">
-                <Wallet size={23} />
-              </span>
-              <span>
-                <span className="studio-tile-label">
-                  {t('Cheltuieli luna aceasta', 'Costs this month')}
-                </span>
-                <strong>{money(monthCost)}</strong>
-                <small>{t('Doar costurile înregistrate', 'Recorded costs only')}</small>
-              </span>
-              <ArrowUpRight size={17} />
-            </button>
-          </div>
-          <div className="ac-cockpit-insights">
+          <div className="ac-cockpit-data">
             <section className="studio-panel studio-costs studio-telemetry-chart">
               <div className="studio-panel-head">
                 <h2>{t('Costuri și evoluție', 'Costs & trends')}</h2>
@@ -448,6 +286,12 @@ export default function ApplicationHome({
                     'Expenses over the last six months',
                   )}
                 >
+                  <svg viewBox="0 0 296 76" preserveAspectRatio="none" aria-hidden="true" className="ac-cost-line">
+                    <path d="M0 20h296M0 40h296M0 60h296" className="ac-cost-gridlines" />
+                    <polygon points={'8,76 ' + costLine + ' 288,76'} />
+                    <polyline points={costLine} />
+                    {costPoints.map(([x, y], index) => <circle key={x} cx={x} cy={y} r={selectedMonth === months[index].key ? 4 : 2.6} />)}
+                  </svg>
                   {months.map((m) => (
                     <button
                       key={m.key}
@@ -457,9 +301,6 @@ export default function ApplicationHome({
                       aria-pressed={selectedMonth === m.key}
                       title={m.key + ': ' + money(m.value)}
                     >
-                      <span className="studio-chart-track">
-                        <i style={{ height: (m.value / maxCost) * 100 + '%' }} />
-                      </span>
                       <small>{m.label}</small>
                     </button>
                   ))}
@@ -507,61 +348,6 @@ export default function ApplicationHome({
                   </ul>
                 </>
               ) : <p className="studio-chart-empty">{t('Distanța apare după ce salvezi prima călătorie GPS.', 'Distance appears after your first saved GPS trip.')}</p>}
-            </section>
-            <section className="studio-panel ac-activity-panel">
-              <div className="studio-panel-head"><h2>{t('Activitate recentă', 'Recent activity')}</h2><button type="button" className="studio-text-button" onClick={() => navigate('Istoric auto')}>{t('Istoric', 'History')}<ArrowUpRight size={16}/></button></div>
-              {activity.length ? <ul>{activity.map(item => {
-                const Icon = item.kind === 'expense' ? Wallet : item.kind === 'document' ? Files : Wrench;
-                return <li key={item.id}><button type="button" onClick={() => onRecord(item)}><Icon size={18}/><span><strong data-user-content>{item.title}</strong><small>{item.date && date(item.date)}</small></span><ArrowUpRight size={15}/></button></li>;
-              })}</ul> : <p>{t('Documentele, cheltuielile și intervențiile vor apărea aici după ce le înregistrezi.', 'Documents, expenses and maintenance appear here after you record them.')}</p>}
-            </section>
-          </div>
-          <div className="studio-detail-grid">
-            <section className="studio-panel studio-recent">
-              <div className="studio-panel-head">
-                <h2>{t('Ultimele intervenții', 'Recent maintenance')}</h2>
-                <button className="studio-text-button" onClick={() => navigate('Întreținere')}>
-                  {t('Toate', 'View all')}
-                  <ArrowUpRight size={17} />
-                </button>
-              </div>
-              {recent.length ? (
-                <div className="studio-service-list">
-                  {recent.map((r) => (
-                    <button type="button" key={r.id} onClick={() => onRecord(r)}>
-                      <span className="studio-row-icon">
-                        <Wrench size={19} />
-                      </span>
-                      <span>
-                        <strong data-user-content>{r.title || r.category}</strong>
-                        <small>
-                          {r.date ? date(r.date) : t('Dată necompletată', 'No date recorded')}
-                          {r.odometer != null
-                            ? ' · ' + r.odometer.toLocaleString(locale) + ' km'
-                            : ''}
-                        </small>
-                      </span>
-                      <span className="studio-row-cost">
-                        {r.amountKnown !== false ? money(r.amountBani) : '—'}
-                        <ArrowUpRight size={16} />
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="studio-empty-inline">
-                  <Wrench size={26} />
-                  <p>
-                    {t(
-                      'Istoricul apare după prima intervenție.',
-                      'Your history starts with the first service.',
-                    )}
-                  </p>
-                  <button onClick={() => onCreate('service', car.id)}>
-                    {t('Adaugă intervenție', 'Add maintenance')}
-                  </button>
-                </div>
-              )}
             </section>
             <section className="studio-panel studio-documents">
               <div className="studio-panel-head">
@@ -737,30 +523,200 @@ export default function ApplicationHome({
               )}
             </section>
           </div>
-          <section className="studio-tools-row">
+          <div className="ac-cockpit-bottom">
+            <section className="studio-vehicle-panel ac-vehicle-instrument" aria-labelledby="ac-instrument-title">
+              <TitaniumWave />
+              <div className="ac-instrument-heading">
+                <div className="studio-vehicle-identity">
+                  <span className="studio-kicker">{t('MAȘINA SELECTATĂ', 'SELECTED VEHICLE')}</span>
+                  <h2 id="ac-instrument-title" data-user-content>{car.brand} {car.model}</h2>
+                  <div className="ac-instrument-identity">
+                    <span>{car.year} · <span data-user-content>{car.fuel}</span></span>
+                    <span className="studio-plate" data-user-content>{car.plate}</span>
+                  </div>
+                  {cars.length > 1 && (
+                    <select aria-label={t('Mașina selectată', 'Selected vehicle')} value={car.id} onChange={e => onSelectVehicle(e.target.value)}>
+                      {cars.map(v => <option value={v.id} key={v.id}>{v.brand} {v.model} · {v.plate}</option>)}
+                    </select>
+                  )}
+                </div>
+              </div>
+              <div className="ac-instrument-footer">
+                <div className="studio-mileage">
+                  <span>{t('Cost total înregistrat', 'Total recorded costs')}</span>
+                  <strong>{money(totalCost)}</strong>
+                  <InlineMileageEditor key={car.id} vehicleId={car.id} currentKm={car.odometer} preview={preview} onSaved={onRefresh}/>
+                </div>
+                <button type="button" className="ac-instrument-details" onClick={() => onVehicle(car.id)}>
+                  {t('Fișa mașinii', 'Vehicle profile')} <ArrowUpRight size={16} aria-hidden="true"/>
+                </button>
+              </div>
+            </section>
+          <section className="studio-panel ac-cockpit-quick">
+            <h2>{t('Funcții rapide', 'Quick actions')}</h2>
             <div>
-              <h2>{t('Acces rapid', 'Quick access')}</h2>
-              <p>
-                {t('Acțiunile zilnice, la un click distanță.', 'Everyday actions, one click away.')}
-              </p>
+              {[
+                { Icon: Route, label: 'SmartDrive GPS', action: () => navigate('Plan întreținere') },
+                { Icon: Wrench, label: t('Adaugă intervenție', 'Add service'), action: () => onCreate('service', car.id) },
+                { Icon: Wallet, label: t('Adaugă cheltuială', 'Add expense'), action: () => onCreate('expense', car.id) },
+                { Icon: Files, label: t('Adaugă document', 'Add document'), action: () => onCreate('document', car.id) },
+                { Icon: CalendarDays, label: t('Raport anual', 'Annual report'), action: () => navigate('Rapoarte') },
+              ].map(({ Icon, label, action }) => <button type="button" key={label} onClick={action}><Icon size={19} />{label}</button>)}
             </div>
-            <button onClick={() => onCreate('document', car.id)}>
-              <Files size={20} />
-              {t('Adaugă document', 'Add document')}
-            </button>
-            <button onClick={() => onCreate('expense', car.id)}>
-              <Wallet size={20} />
-              {t('Adaugă cheltuială', 'Add expense')}
-            </button>
-            <button onClick={() => navigate('Kilometraj')}>
-              <Gauge size={20} />
-              {t('Istoric kilometraj', 'Mileage history')}
-            </button>
-            <button onClick={() => navigate('Premium')}>
-              <ArrowUpRight size={20} />
-              {t('Rapoarte și instrumente', 'Reports & tools')}
-            </button>
           </section>
+            <section className="studio-panel ac-activity-panel">
+              <div className="studio-panel-head"><h2>{t('Activitate recentă', 'Recent activity')}</h2><button type="button" className="studio-text-button" onClick={() => navigate('Istoric auto')}>{t('Istoric', 'History')}<ArrowUpRight size={16}/></button></div>
+              {activity.length ? <ul>{activity.map(item => {
+                const Icon = item.kind === 'expense' ? Wallet : item.kind === 'document' ? Files : Wrench;
+                return <li key={item.id}><button type="button" onClick={() => onRecord(item)}><Icon size={18}/><span><strong data-user-content>{item.title}</strong><small>{item.date && date(item.date)}</small></span><ArrowUpRight size={15}/></button></li>;
+              })}</ul> : <p>{t('Documentele, cheltuielile și intervențiile vor apărea aici după ce le înregistrezi.', 'Documents, expenses and maintenance appear here after you record them.')}</p>}
+            </section>
+          </div>
+          <div className="studio-status-row">
+            {[
+              {
+                Icon: Droplets,
+                title: t('Schimb de ulei', 'Oil change'),
+                record: oil,
+                allowed: true,
+              },
+              {
+                Icon: Settings2,
+                title: t('Distribuție', 'Timing service'),
+                record: timing,
+                allowed: data.premium,
+              },
+            ].map((item) => {
+              const forecast =
+                item.record && item.allowed
+                  ? upcomingMaintenance(
+                      [item.record],
+                      car.odometer,
+                      usage.dailyKm,
+                      data.profile.timezone,
+                    )[0]
+                  : null;
+              return (
+                <button
+                  key={item.title}
+                  type="button"
+                  className="studio-maintenance-tile"
+                  onClick={() =>
+                    item.record ? onRecord(item.record) : onCreate('service', car.id)
+                  }
+                >
+                  <span className="studio-tile-icon">
+                    <item.Icon size={23} />
+                  </span>
+                  <span>
+                    <span className="studio-tile-label">{item.title}</span>
+                    <strong>
+                      {forecast?.status.remainingKm != null
+                        ? Math.abs(forecast.status.remainingKm).toLocaleString(locale) + ' km'
+                        : item.record
+                          ? t('Înregistrat', 'Recorded')
+                          : t('De completat', 'Add service')}
+                    </strong>
+                    <small>
+                      {forecast?.estimate?.days != null
+                        ? forecastDuration(forecast.estimate.days, language)
+                        : item.record?.date
+                          ? date(item.record.date)
+                          : t('Adaugă ultima intervenție', 'Add the last service')}
+                    </small>
+                  </span>
+                  <ArrowUpRight size={17} />
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              className={
+                'studio-maintenance-tile ' + (attention.length ? 'studio-tile-warning' : '')
+              }
+              onClick={() => navigate('Documente')}
+            >
+              <span className="studio-tile-icon">
+                <ShieldCheck size={23} />
+              </span>
+              <span>
+                <span className="studio-tile-label">
+                  {t('Documente în atenție', 'Documents to review')}
+                </span>
+                <strong>
+                  {attention.length}{' '}
+                  {attention.length === 1 ? t('document', 'document') : t('documente', 'documents')}
+                </strong>
+                <small>
+                  {t('Expirate sau în următoarele 30 zile', 'Expired or due within 30 days')}
+                </small>
+              </span>
+              <ArrowUpRight size={17} />
+            </button>
+            <button
+              type="button"
+              className="studio-maintenance-tile"
+              onClick={() => navigate('Cheltuieli')}
+            >
+              <span className="studio-tile-icon">
+                <Wallet size={23} />
+              </span>
+              <span>
+                <span className="studio-tile-label">
+                  {t('Cheltuieli luna aceasta', 'Costs this month')}
+                </span>
+                <strong>{money(monthCost)}</strong>
+                <small>{t('Doar costurile înregistrate', 'Recorded costs only')}</small>
+              </span>
+              <ArrowUpRight size={17} />
+            </button>
+          </div>
+            <section className="studio-panel studio-recent">
+              <div className="studio-panel-head">
+                <h2>{t('Ultimele intervenții', 'Recent maintenance')}</h2>
+                <button className="studio-text-button" onClick={() => navigate('Întreținere')}>
+                  {t('Toate', 'View all')}
+                  <ArrowUpRight size={17} />
+                </button>
+              </div>
+              {recent.length ? (
+                <div className="studio-service-list">
+                  {recent.map((r) => (
+                    <button type="button" key={r.id} onClick={() => onRecord(r)}>
+                      <span className="studio-row-icon">
+                        <Wrench size={19} />
+                      </span>
+                      <span>
+                        <strong data-user-content>{r.title || r.category}</strong>
+                        <small>
+                          {r.date ? date(r.date) : t('Dată necompletată', 'No date recorded')}
+                          {r.odometer != null
+                            ? ' · ' + r.odometer.toLocaleString(locale) + ' km'
+                            : ''}
+                        </small>
+                      </span>
+                      <span className="studio-row-cost">
+                        {r.amountKnown !== false ? money(r.amountBani) : '—'}
+                        <ArrowUpRight size={16} />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="studio-empty-inline">
+                  <Wrench size={26} />
+                  <p>
+                    {t(
+                      'Istoricul apare după prima intervenție.',
+                      'Your history starts with the first service.',
+                    )}
+                  </p>
+                  <button onClick={() => onCreate('service', car.id)}>
+                    {t('Adaugă intervenție', 'Add maintenance')}
+                  </button>
+                </div>
+              )}
+            </section>
         </>
       )}
     </div>

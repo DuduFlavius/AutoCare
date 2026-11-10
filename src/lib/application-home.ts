@@ -19,3 +19,15 @@ export function currentHomeMaintenance<T extends MaintenanceSource & {kind: stri
 export function upcomingMaintenance(records: Array<MaintenanceSource & { kind: string; cancelled: boolean }>, currentKm: number, dailyKm: number | null, timezone: string, today = new Date()) {
   return rankMaintenanceForecasts(currentHomeMaintenance(records).flatMap(maintenanceTargets), currentKm, dailyKm, timezone, today);
 }
+
+export function vehicleCareScore(
+  documents: ReadonlyArray<{ status: { days: number | null } }>,
+  maintenance: ReadonlyArray<{ status: { state: string } }>,
+) {
+  const dated = documents.filter(record => record.status.days != null);
+  const scheduled = maintenance.filter(item => item.status.state !== 'unscheduled');
+  const total = dated.length + scheduled.length;
+  const valid = dated.filter(record => (record.status.days ?? 0) > 30).length
+    + scheduled.filter(item => item.status.state === 'valid').length;
+  return { total, valid, percent: total ? Math.round(valid / total * 100) : null };
+}

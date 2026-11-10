@@ -6,7 +6,9 @@ import {parseServiceDetails} from '@/lib/service-details';
 import InlineMileageEditor from './inline-mileage-editor';
 import OilChangeCountdown from './oil-change-countdown';
 import { maintenanceSchedule } from '@/lib/maintenance-schedule';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
+import { useMileageUsage } from './use-mileage-usage';
+import { isOilMaintenance, upcomingMaintenance, vehicleCareScore } from '@/lib/application-home';
 import { dashboardHome } from '@/lib/dashboard-home';
 import {
   ArrowUpRight,
@@ -739,6 +741,8 @@ export function VehicleSheet({
   edit,
   removeService,
   busy,
+  preview,
+  onCreate,
 }: {
   data: Data;
   id: string;
@@ -746,14 +750,17 @@ export function VehicleSheet({
   edit: () => void;
   removeService: (record: Entry) => void;
   busy: boolean;
+  preview: boolean;
+  onCreate: (kind: 'document' | 'service') => void;
 }) {
 
   const locale=useApplicationLocale();
-  const [section, setSection] = useState<'document' | 'service' | 'expense' | 'mileage'>('document');
+  const [section, setSection] = useState<'overview' | 'document' | 'service' | 'expense' | 'mileage'>('overview');
   const en = locale.startsWith('en');
   const date=(value:string|null)=>formatDate(value,locale);
   const money=(value:number)=>formatMoney(value,locale);
-const v = data.vehicles.find((v) => v.id === id);
+  const v = data.vehicles.find((vehicle) => vehicle.id === id);
+  const usage = useMileageUsage(id, v?.odometer ?? 0, preview);
   if (!v) return null;
   const entries = data.records.filter((r) => r.vehicleId === id);
   const active = entries.filter((r) => !r.cancelled);
@@ -762,6 +769,31 @@ const v = data.vehicles.find((v) => v.id === id);
   const readings = active
     .filter((r) => r.kind === 'service' && r.odometer != null)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const docs = active.filter(record => record.kind === 'document')
+    .sort((a, b) => (a.status.days ?? Infinity) - (b.status.days ?? Infinity));
+  const upcoming = upcomingMaintenance(data.premium ? active : active.filter(isOilMaintenance), v.odometer, usage.dailyKm, data.profile.timezone);
+  const next = upcoming[0];
+  const care = vehicleCareScore(docs, upcoming);
+  const t = (ro: string, english: string) => en ? english : ro;
+  const odometerByDay = new Map<string, { time: number; km: number }>();
+  for (const reading of [...(usage.readings ?? [])].reverse()) {
+    const time = Date.parse(reading.recordedAt);
+    if (!Number.isFinite(time)) continue;
+    const day = new Date(time).toLocaleDateString('en-CA', { timeZone: data.profile.timezone });
+    odometerByDay.set(day, { time, km: reading.odometer });
+  }
+  const timeline = [...odometerByDay.values()].slice(-12);
+  const firstReading = timeline[0];
+  const lastReading = timeline.at(-1);
+  const minKm = firstReading ? Math.min(...timeline.map(reading => reading.km)) : 0;
+  const maxKm = lastReading ? Math.max(...timeline.map(reading => reading.km)) : 0;
+  const kmCoordinates = timeline.map(reading => [
+    8 + 264 * (reading.time - firstReading.time) / Math.max(1, (lastReading?.time ?? reading.time) - firstReading.time),
+    66 - 56 * (reading.km - minKm) / Math.max(1, maxKm - minKm),
+  ]);
+  const chartDate = (time: number) => new Intl.DateTimeFormat(locale, {
+    day: 'numeric', month: 'short', timeZone: data.profile.timezone,
+  }).format(time);
   return (
     <div className="vehicle-sheet">
       <header className="sheet-overview ac-titanium-vehicle">
@@ -781,41 +813,17 @@ const v = data.vehicles.find((v) => v.id === id);
             <br />
             VIN: {v.vin || 'Necompletat'}
           </p>
-          <div className="vehicle-sheet-actions">
-            <button type="button" onClick={edit}>Editează datele mașinii</button>
-            <button type="button" className="primary" onClick={() => window.print()}>
-              {locale === 'ro-RO' ? 'Printează / Salvează PDF' : 'Print / Save PDF'}
-            </button>
-          </div>
+        </div>
+        <div className="vehicle-sheet-actions">
+          <button type="button" onClick={edit}>{t('Editează', 'Edit')}</button>
+          <button type="button" onClick={() => onCreate('document')}><Files size={16} />{t('Adaugă document', 'Add document')}</button>
+          <button type="button" className="primary" onClick={() => onCreate('service')}><CalendarDays size={16} />{t('Planifică mentenanța', 'Plan maintenance')}</button>
+          <button type="button" onClick={() => window.print()}>PDF</button>
         </div>
       </header>
-      <div className="stats">
-        <div className="card">
-          <span className="micro">Kilometraj actual</span>
-          <h3>{v.odometer.toLocaleString(locale)} km</h3>
-        </div>
-        <div className="card">
-          <span className="micro">Cost total înregistrat</span>
-          <h3>{money(cost)}</h3>
-        </div>
-        <div className="card">
-          <span className="micro">Documente active</span>
-          <h3>{active.filter((r) => r.kind === 'document').length}</h3>
-        </div>
-        <div className="card">
-          <span className="micro">{en ? 'Measured consumption' : 'Consum măsurat'}</span>
-          <h3>{consumption ? consumption.litersPer100Km.toLocaleString(locale, { maximumFractionDigits: 1 }) + ' L/100 km' : '—'}</h3>
-          <small>{consumption ? consumption.distance.toLocaleString(locale) + ' km' : en ? 'Requires two recorded full tanks' : 'Necesită două plinuri înregistrate'}</small>
-        </div>
-      </div>
-      {v.notes && (
-        <section className="card">
-          <h3>Notițe</h3>
-          <p data-user-content className="small">{v.notes}</p>
-        </section>
-      )}
       <nav className="ac-vehicle-sheet-tabs" aria-label={en ? 'Vehicle records' : 'Datele vehiculului'}>
         {([
+          ['overview', t('Prezentare', 'Overview')],
           ['document', en ? 'Documents' : 'Documente'],
           ['service', en ? 'Service' : 'Intervenții'],
           ['expense', en ? 'Expenses' : 'Cheltuieli'],
@@ -824,8 +832,67 @@ const v = data.vehicles.find((v) => v.id === id);
           <button type="button" aria-pressed={section === id} key={id} onClick={() => setSection(id)}>{label}</button>
         ))}
       </nav>
+      {section === 'overview' && (
+        <div className="ac-vehicle-overview">
+          <section className="card ac-vehicle-care">
+            <h3>{t('Starea vehiculului', 'Vehicle status')}</h3>
+            <div className="ac-vehicle-care-content">
+              <div className="ac-care-ring" style={{ '--ac-care-score': (care.percent ?? 0) + '%' } as CSSProperties}>
+                <strong>{care.percent === null ? '—' : care.percent + '%'}</strong>
+              </div>
+              <dl>
+                <div><dt>{t('Kilometraj', 'Odometer')}</dt><dd>{v.odometer.toLocaleString(locale)} km</dd></div>
+                <div><dt>{t('Consum măsurat', 'Measured consumption')}</dt><dd>{consumption ? consumption.litersPer100Km.toLocaleString(locale, { maximumFractionDigits: 1 }) + ' L/100 km' : '—'}</dd></div>
+                <div><dt>{t('Cost total înregistrat', 'Total recorded costs')}</dt><dd>{money(cost)}</dd></div>
+              </dl>
+            </div>
+            <small>{care.total ? `${care.valid} / ${care.total} ${t('termene în regulă', 'deadlines in good standing')}` : t('Adaugă termene pentru a vedea scorul.', 'Add deadlines to see your score.')}</small>
+          </section>
+          <section className="card ac-vehicle-history-chart">
+            <h3>{t('Evoluția kilometrajului', 'Odometer history')}</h3>
+            {timeline.length > 1 && firstReading && lastReading ? (
+              <>
+                <svg viewBox="0 0 280 72" aria-hidden="true" className="ac-vehicle-line">
+                  <path d="M0 18h280M0 36h280M0 54h280" className="ac-cost-gridlines" />
+                  <polyline points={kmCoordinates.map(point => point.join(',')).join(' ')} />
+                  {kmCoordinates.map(([x, y], index) => <circle key={timeline[index].time} cx={x} cy={y} r="2.5"><title>{chartDate(timeline[index].time)} · {timeline[index].km.toLocaleString(locale)} km</title></circle>)}
+                </svg>
+                <div className="ac-vehicle-chart-labels"><span>{chartDate(firstReading.time)} · {firstReading.km.toLocaleString(locale)} km</span><span>{chartDate(lastReading.time)} · {lastReading.km.toLocaleString(locale)} km</span></div>
+              </>
+            ) : <p className="muted">{usage.loading ? t('Se încarcă citirile…', 'Loading readings…') : t('Graficul apare după citiri înregistrate în zile diferite.', 'The chart appears after readings on different days.')}</p>}
+            <button className="studio-text-button" type="button" onClick={() => setSection('mileage')}>{t('Vezi istoricul', 'View history')} <ArrowUpRight size={14} /></button>
+          </section>
+          <section className="card ac-vehicle-upcoming">
+            <h3><Wrench size={18} /> {t('Mentenanță viitoare', 'Upcoming maintenance')}</h3>
+            {next ? (
+              <>
+                <strong data-user-content>{next.service.title}</strong>
+                {next.status.remainingKm != null && <p>{Math.abs(next.status.remainingKm).toLocaleString(locale)} km {next.status.remainingKm < 0 ? t('peste prag', 'overdue') : t('până la termen', 'remaining')}</p>}
+                {next.raw && <p>{date(next.raw)}</p>}
+              </>
+            ) : <p className="muted">{t('Adaugă un termen sau un interval de service.', 'Add a service deadline or interval.')}</p>}
+            <button type="button" className="studio-text-button" onClick={() => next ? setSection('service') : onCreate('service')}>{next ? t('Vezi intervențiile', 'View maintenance') : t('Planifică mentenanța', 'Plan maintenance')} <ArrowUpRight size={14} /></button>
+          </section>
+          <section className="card ac-vehicle-documents">
+            <h3>{t('Documente importante', 'Important documents')}</h3>
+            {docs.length ? docs.slice(0, 3).map(record => (
+              <button className="event-line" key={record.id} type="button" onClick={() => open(record)}>
+                <FileText size={17} /><span><strong data-user-content>{record.category}</strong><small>{record.expiresAt ? date(record.expiresAt) : t('Fără expirare', 'No expiry recorded')}</small></span><ArrowUpRight size={14} />
+              </button>
+            )) : <p className="muted">{t('Adaugă primele documente pentru această mașină.', 'Add the first documents for this vehicle.')}</p>}
+            <button type="button" className="studio-text-button" onClick={() => setSection('document')}>{t('Toate documentele', 'All documents')} <ArrowUpRight size={14} /></button>
+          </section>
+          {v.notes && <section className="card ac-vehicle-notes"><h3>{t('Notițe', 'Notes')}</h3><p data-user-content>{v.notes}</p></section>}
+        </div>
+      )}
       <section className="card ac-vehicle-records" hidden={section !== 'mileage'}>
-        <h3>{locale === 'ro-RO' ? 'Kilometraj la intervenții' : 'Mileage at service'}</h3>
+        <h3>{t('Citiri ale kilometrajului', 'Odometer readings')}</h3>
+        {timeline.length ? (
+          <ul className="ac-vehicle-reading-list">
+            {[...timeline].reverse().map(reading => <li key={reading.time}><span>{chartDate(reading.time)}</span><strong>{reading.km.toLocaleString(locale)} km</strong></li>)}
+          </ul>
+        ) : <p className="muted small">{usage.loading ? t('Se încarcă citirile…', 'Loading readings…') : t('Nu există citiri salvate.', 'No saved readings.')}</p>}
+        <h3>{t('Kilometraj la intervenții', 'Mileage at service')}</h3>
         {readings.length ? (
           readings.map((r) => (
             <div className="between small list-row vehicle-mileage-row" key={r.id}>
@@ -857,7 +924,7 @@ const v = data.vehicles.find((v) => v.id === id);
           ? active.filter((r) => r.kind === 'expense' || (r.kind === 'service' && r.amountKnown !== false && r.amountBani > 0))
           : entries.filter((r) => r.kind === kind);
         return (
-        <section className="card ac-vehicle-records" hidden={section !== kind} key={kind}>
+        <section className="card ac-vehicle-records" hidden={section !== kind && !(section === 'overview' && kind === 'service')} key={kind}>
           <h3>
             {kind === 'document'
               ? 'Documente și atașamente'
