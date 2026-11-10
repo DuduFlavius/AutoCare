@@ -137,12 +137,12 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     const uid = sess.user.id;
     await svc.assertActiveAccount(uid);
     await rate(uid);
-    if (route === 'auto-assistant/history' && method === 'DELETE') {
-      const { vehicleId } = z.object({ vehicleId: uuid }).parse(await body(req));
-      return json(await clearAutoAssistantHistory(uid, vehicleId));
-    }
     if (path[0] === 'auto-assistant') {
       if (!await svc.premium(uid)) throw new svc.AppError(403, 'Asistentul AI este disponibil în Premium.');
+      if (route === 'auto-assistant/history' && method === 'DELETE') {
+        const { vehicleId } = z.object({ vehicleId: uuid }).parse(await body(req));
+        return json(await clearAutoAssistantHistory(uid, vehicleId));
+      }
       if (route === 'auto-assistant/history' && method === 'GET')
         return json(await autoAssistantHistory(uid, uuid.parse(new URL(req.url).searchParams.get('vehicleId'))));
       if (route === 'auto-assistant' && method === 'POST') {
