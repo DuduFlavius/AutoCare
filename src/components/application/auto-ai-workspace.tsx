@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, Bot, ShieldCheck, Copy, Square } from 'lucide-react';
+import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, Bot, ShieldCheck, Copy, Square, History, ChevronDown } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { TitaniumWave } from '../titanium-wave';
@@ -49,8 +49,11 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const en = language === 'en';
   const t = (ro: string, english: string) => en ? english : ro;
   const [turns, setTurns] = useState<Turn[]>([]);
-  const visibleTurns = turns.filter(turn => !/^Analiză locală\s*[·:]/i.test(turn.answer.trim()));
+  const visibleTurns = turns.filter(turn => (!historyDay || turn.createdAt.slice(0, 10) === historyDay) && !/^Analiză locală\s*[·:]/i.test(turn.answer.trim()));
   const [question, setQuestion] = useState('');
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyDay, setHistoryDay] = useState<string | null>(null);
+  const historyDays = Array.from(new Set(turns.map(turn => turn.createdAt.slice(0, 10)))).sort().reverse();
   const [pending, setPending] = useState(false);
   const [loading, setLoading] = useState(!preview);
   const [error, setError] = useState('');
@@ -87,7 +90,8 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
     autoScroll.current = true;
     void run(async signal => {
       const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode, localFallback: false }), signal });
-      setTurns(previous => [...previous, data.turn].slice(-30));
+      setHistoryDay(null);
+      setTurns(previous => [...previous, data.turn].slice(-150));
       setQuestion('');
     });
   }
@@ -128,12 +132,13 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   return (
     <div className="ac-ai-layout">
       <section className="card ac-ai-chat" aria-label={t('Conversație AutoCare AI', 'AutoCare AI conversation')}>
-        <div className="ac-ai-heading"><h3><Bot size={20} /> {t('Conversație', 'Conversation')}</h3><span className="ac-ai-online"><span /> Gemini AI</span>
+        <div className="ac-ai-heading"><h3><Bot size={20} /> {t('Conversație', 'Conversation')}</h3><span className="ac-ai-online"><span /> Gemini AI</span><button className="ac-ai-history-toggle" type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)}><History size={15} /> {t('Istoric', 'History')} <ChevronDown size={13} /></button>
           {turns.length > 0 && <button type="button" disabled={pending || loading} onClick={() => {
             if (window.confirm(t('Ștergi istoricul AI pentru această mașină?', 'Clear AI history for this vehicle?')))
-              void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); });
+              void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); setHistoryDay(null); setHistoryOpen(false); });
           }}><Trash2 size={16} />{t('Șterge istoricul', 'Clear history')}</button>}
         </div>
+        {historyOpen && <nav className="ac-ai-history" aria-label={t('Istoricul conversațiilor', 'Conversation history')}><button type="button" className={historyDay === null ? 'active' : ''} onClick={() => setHistoryDay(null)}>{t('Toate mesajele', 'All messages')} <span>{turns.length}</span></button>{historyDays.map(day => <button type="button" className={historyDay === day ? 'active' : ''} key={day} onClick={() => setHistoryDay(day)}>{new Date(day + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}<span>{turns.filter(turn => turn.createdAt.startsWith(day)).length}</span></button>)}{!historyDays.length && <p>{t('Nu există conversații salvate.', 'No saved conversations yet.')}</p>}</nav>}
         {!available && <p className="ac-ai-state" role="status">{t('Conexiunea AI nu este configurată. Contactează administratorul.', 'AI is not configured. Contact support.')}</p>}
         {loading ? <p role="status">{t('Se încarcă istoricul…', 'Loading history…')}</p> :
           visibleTurns.length ? <ol ref={historyList} onScroll={event => { const el = event.currentTarget; autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 140; }} className="ac-ai-turns" aria-live="polite">{visibleTurns.map(turn => <li key={turn.id}><p className="ac-ai-question" data-user-content>{turn.question}</p><div className="ac-ai-answer"><strong><Sparkles size={16} /> {t('Asistent', 'Assistant')}</strong><AiMarkdown text={turn.answer} /><button type="button" className="ac-ai-copy" title={t('Copiază răspunsul', 'Copy answer')} onClick={() => void navigator.clipboard.writeText(turn.answer).then(() => setNotice(t('Răspuns copiat.', 'Answer copied.'))).catch(() => setError(t('Nu s-a putut copia răspunsul.', 'Could not copy answer.')))}><Copy size={14} /> {t('Copiază', 'Copy')}</button><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></li>)}<li className="ac-ai-scroll-anchor" ref={bottom} aria-hidden="true" /></ol>
