@@ -1,5 +1,4 @@
 import { auth } from '@/lib/auth';
-import { origin } from '@/lib/config';
 import { db } from '@/lib/db';
 import { requestLimits } from '@/lib/schema';
 import { sql } from 'drizzle-orm';
@@ -21,7 +20,10 @@ const reply = (data: unknown, status = 200) =>
 
 export async function POST(req: Request) {
   try {
-    if (req.headers.get('origin') !== origin()) return reply({ error: 'Origine invalidă.' }, 403);
+    const requestOrigin = req.headers.get('origin');
+    const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
+    if (!requestOrigin || !host || new URL(requestOrigin).host !== host)
+      return reply({ error: 'Origine invalidă.' }, 403);
     const session = await auth.api.getSession({ headers: req.headers });
     if (!session?.user?.id) return reply({ error: 'Autentifică-te pentru a discuta cu AutoCare AI.' }, 401);
     const key = process.env.GEMINI_API_KEY;
