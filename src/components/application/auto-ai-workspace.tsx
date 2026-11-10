@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, Bot, ShieldCheck, Copy, Square, History, ChevronDown } from 'lucide-react';
+import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, Bot, ShieldCheck, Copy, Square, History, ChevronDown, PanelLeftClose, PanelLeftOpen, Plus, Wrench, CalendarDays, BarChart3 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { TitaniumWave } from '../titanium-wave';
@@ -51,6 +51,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const [turns, setTurns] = useState<Turn[]>([]);
   const [question, setQuestion] = useState('');
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [historyDay, setHistoryDay] = useState<string | null>(null);
   const historyDays = Array.from(new Set(turns.map(turn => turn.createdAt.slice(0, 10)))).sort().reverse();
   const visibleTurns = turns.filter(turn => (!historyDay || turn.createdAt.slice(0, 10) === historyDay) && !/^Analiză locală\s*[·:]/i.test(turn.answer.trim()));
@@ -130,19 +131,21 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
     t('Ce ar trebui să verific înainte de un drum lung?', 'What should I check before a long trip?'),
   ];
   return (
-    <div className="ac-ai-layout">
+    <div className="ac-ai-layout ac-ai-chatgpt-layout">
+      <div className="ac-ai-main">
       <section className="card ac-ai-chat" aria-label={t('Conversație AutoCare AI', 'AutoCare AI conversation')}>
-        <div className="ac-ai-heading"><h3><Bot size={20} /> {t('Conversație', 'Conversation')}</h3><span className="ac-ai-online"><span /> Gemini AI</span><button className="ac-ai-history-toggle" type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)}><History size={15} /> {t('Istoric', 'History')} <ChevronDown size={13} /></button>
+        <div className="ac-ai-heading"><button className="ac-ai-history-toggle" type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)} title={t('Istoric conversații', 'Chat history')}>{historyOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />} <span>{t('Istoric', 'History')}</span></button><h3><Sparkles size={19} /> AutoCare AI</h3><span className="ac-ai-online"><span /> {t('Online', 'Online')}</span><button className="ac-ai-new-chat" type="button" onClick={() => { setHistoryDay(null); setHistoryOpen(false); setQuestion(''); autoScroll.current = true; }} title={t('Conversație nouă', 'New conversation')}><Plus size={16}/><span>{t('Nou', 'New')}</span></button>
           {turns.length > 0 && <button type="button" disabled={pending || loading} onClick={() => {
             if (window.confirm(t('Ștergi istoricul AI pentru această mașină?', 'Clear AI history for this vehicle?')))
               void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); setHistoryDay(null); setHistoryOpen(false); });
           }}><Trash2 size={16} />{t('Șterge istoricul', 'Clear history')}</button>}
         </div>
-        {historyOpen && <nav className="ac-ai-history" aria-label={t('Istoricul conversațiilor', 'Conversation history')}><button type="button" className={historyDay === null ? 'active' : ''} onClick={() => setHistoryDay(null)}>{t('Toate mesajele', 'All messages')} <span>{turns.length}</span></button>{historyDays.map(day => <button type="button" className={historyDay === day ? 'active' : ''} key={day} onClick={() => setHistoryDay(day)}>{new Date(day + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}<span>{turns.filter(turn => turn.createdAt.startsWith(day)).length}</span></button>)}{!historyDays.length && <p>{t('Nu există conversații salvate.', 'No saved conversations yet.')}</p>}</nav>}
+        {historyOpen && <div className="ac-ai-history-overlay"><button type="button" className="ac-ai-history-backdrop" aria-label={t('Închide istoricul', 'Close history')} onClick={() => setHistoryOpen(false)} /><nav className="ac-ai-history-panel" aria-label={t('Istoricul conversațiilor', 'Conversation history')}><div className="ac-ai-history-title"><strong>{t('Conversațiile tale', 'Your conversations')}</strong><button type="button" onClick={() => setHistoryOpen(false)} aria-label={t('Închide', 'Close')}><PanelLeftClose size={17}/></button></div><button type="button" className={historyDay === null ? 'active' : ''} onClick={() => { setHistoryDay(null); setHistoryOpen(false); }}>{t('Toate mesajele', 'All messages')} <span>{turns.length}</span></button>{historyDays.map(day => <button type="button" className={historyDay === day ? 'active' : ''} key={day} onClick={() => { setHistoryDay(day); setHistoryOpen(false); }}>{new Date(day + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}<span>{turns.filter(turn => turn.createdAt.startsWith(day)).length}</span></button>)}{!historyDays.length && <p>{t('Nu există conversații salvate.', 'No saved conversations yet.')}</p>}</nav></div>}
         {!available && <p className="ac-ai-state" role="status">{t('Conexiunea AI nu este configurată. Contactează administratorul.', 'AI is not configured. Contact support.')}</p>}
         {loading ? <p role="status">{t('Se încarcă istoricul…', 'Loading history…')}</p> :
           visibleTurns.length ? <ol ref={historyList} onScroll={event => { const el = event.currentTarget; autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 140; }} className="ac-ai-turns" aria-live="polite">{visibleTurns.map(turn => <li key={turn.id}><p className="ac-ai-question" data-user-content>{turn.question}</p><div className="ac-ai-answer"><strong><Sparkles size={16} /> {t('Asistent', 'Assistant')}</strong><AiMarkdown text={turn.answer} /><button type="button" className="ac-ai-copy" title={t('Copiază răspunsul', 'Copy answer')} onClick={() => void navigator.clipboard.writeText(turn.answer).then(() => setNotice(t('Răspuns copiat.', 'Answer copied.'))).catch(() => setError(t('Nu s-a putut copia răspunsul.', 'Could not copy answer.')))}><Copy size={14} /> {t('Copiază', 'Copy')}</button><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></li>)}<li className="ac-ai-scroll-anchor" ref={bottom} aria-hidden="true" /></ol>
             : <div className="ac-ai-welcome"><span className="ac-ai-welcome-icon"><Sparkles size={26} /></span><h3>{t('Salut! Cu ce te pot ajuta?', 'Hi! How can I help?')}</h3><p>{t('Sunt asistentul tău auto. Povestește-mi ce se întâmplă sau alege o întrebare pentru început.', 'I am your car assistant. Tell me what is happening or choose a question to get started.')}</p><div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={preview || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={16} />{value}<ArrowUpRight size={14} /></button>)}</div></div>}
+        <div className="ac-ai-quick-prompts"><button type="button" onClick={() => ask(t("Analizează costurile mele", "Analyze my costs"), "finance")} disabled={pending || loading || preview}><BarChart3 size={15}/>{t("Costuri", "Costs")}</button><button type="button" onClick={() => ask(t("Ce revizii urmează?", "What maintenance is due?"), "maintenance")} disabled={pending || loading || preview}><CalendarDays size={15}/>{t("Revizii", "Maintenance")}</button><button type="button" onClick={() => ask(t("Ce să verific la mașină?", "What should I check?"))} disabled={pending || loading || preview}><Wrench size={15}/>{t("Sfaturi", "Advice")}</button></div>
         <form className="ac-ai-composer" onSubmit={event => { event.preventDefault(); ask(question); }}>
           <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Scrie orice întrebare…', 'Ask me anything about your car…')} rows={2} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); ask(question); } }} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
           <button className="primary" type="submit" disabled={preview || pending || loading || question.trim().length < 1}><Send size={17} />{t('Trimite', 'Send')}</button>
@@ -152,7 +155,9 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
         <small className="ac-ai-privacy"><ShieldCheck size={14} /> {t('Asistent AI. Recomandările nu înlocuiesc un diagnostic în service.', 'AI assistant. Advice does not replace a professional inspection.')}</small>
         {available && <small>{t('Întrebarea, istoricul recent și datele relevante ale mașinii sunt trimise furnizorului AI. Evită datele personale.', 'The question, recent history and relevant vehicle data are sent to the AI provider. Avoid personal information.')}</small>}
       </section>
-      <aside className="ac-ai-tools">
+      </div>
+      <button type="button" className="ac-ai-tools-toggle" aria-expanded={toolsOpen} onClick={() => setToolsOpen(open => !open)}><FileScan size={16}/>{t("Instrumente avansate și documente", "Advanced tools and documents")} <ChevronDown size={16}/></button>
+      {toolsOpen && <aside className="ac-ai-tools">
         <section className="card"><h3><Sparkles size={18} /> {t('Analiză și rapoarte', 'Analysis and reports')}</h3>
           {([
             ['analysis', t('Analizează mașina', 'Analyze vehicle')],
@@ -179,7 +184,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
           </form>}
         </section>
         <div aria-live="polite" className="ac-ai-feedback">{pending && <p>{t('Se procesează…', 'Processing…')}</p>}{notice && <p>{notice}</p>}{error && <p role="alert">{error}</p>}</div>
-      </aside>
+      </aside>}
     </div>
   );
 }
