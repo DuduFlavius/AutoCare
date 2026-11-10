@@ -44,7 +44,10 @@ async function generateGemini(instructions: string, input: string | { role: 'use
   });
   if (!response.ok) {
     if (response.status === 429) throw new AppError(429, 'Limita gratuită Gemini a fost atinsă. Încearcă mai târziu.');
-    throw new AppError(502, 'Gemini nu a putut răspunde. Verifică modelul și cheia API.');
+    console.error('AutoCare Gemini request failed', { status: response.status, model });
+    if (response.status === 400 || response.status === 404) throw new AppError(502, 'Modelul Gemini configurat nu este disponibil. Verifică GEMINI_MODEL.');
+    if (response.status === 401 || response.status === 403) throw new AppError(502, 'Cheia Gemini nu are acces la model. Verifică GEMINI_API_KEY în Vercel.');
+    throw new AppError(502, 'Gemini nu a putut răspunde. Reîncearcă mai târziu.');
   }
   const result: unknown = await response.json();
   const parsed = z.object({
