@@ -261,3 +261,67 @@
  .ac-ai-tools>.card>p{font-size:12px;line-height:1.5}
  .ac-ai-tools>.card input[type=file]{display:block;width:100%;max-width:100%;min-width:0;font-size:12px}
 }
+
+/* Full-width conversational workspace: no permanent tools column */
+.ac-ai-chatgpt-layout{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;width:100%!important;max-width:100%!important;min-width:0!important}
+.ac-ai-main{width:100%;min-width:0;max-width:100%}
+.ac-ai-chatgpt-layout .ac-ai-chat{position:relative;width:100%;min-width:0;min-height:min(75dvh,780px);border:1px solid #243853!important;border-radius:20px!important;background:linear-gradient(155deg,#101a2c,#0b1423)!important;box-shadow:0 20px 45px #0002}
+.ac-ai-chatgpt-layout .ac-ai-heading{display:flex!important;flex-wrap:wrap;align-items:center;gap:12px;padding:13px 20px;min-height:66px}
+.ac-ai-chatgpt-layout .ac-ai-heading h3{font-size:16px;letter-spacing:-.02em;font-weight:650;flex:1;white-space:nowrap}
+.ac-ai-chatgpt-layout .ac-ai-heading>button.ac-ai-history-toggle{margin:0!important;flex:none;min-height:36px;padding:8px 10px!important}
+.ac-ai-chatgpt-layout .ac-ai-heading>button.ac-ai-new-chat{margin:0;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:8px 12px!important;border:1px solid #35577d;border-radius:10px;background:#152b4b;color:#dceaff;font-size:12px!important}
+.ac-ai-chatgpt-layout .ac-ai-heading>button:not(.ac-ai-history-toggle){margin-left:0}
+.ac-ai-chatgpt-layout .ac-ai-online{font-size:11px;white-space:nowrap}
+.ac-ai-chatgpt-layout .ac-ai-turns{width:100%;max-height:min(64dvh,700px);min-height:320px;padding:26px clamp(16px,4vw,50px) 24px;gap:22px;overflow-x:hidden}
+.ac-ai-chatgpt-layout .ac-ai-turns>li{width:100%;max-width:100%;gap:12px}
+.ac-ai-chatgpt-layout .ac-ai-question{max-width:min(80%,640px);width:fit-content;align-self:flex-end;font-size:14px;line-height:1.55;background:linear-gradient(135deg,#235ec4,#17469c);border:1px solid #3474dc;border-radius:18px 18px 5px 18px;padding:12px 17px}
+.ac-ai-chatgpt-layout .ac-ai-answer{align-self:flex-start;width:fit-content;max-width:min(100%,850px);padding:0 0 0 3px;border:0!important;background:transparent!important;box-shadow:none!important;font-size:14px}
+.ac-ai-chatgpt-layout .ac-ai-answer>strong{margin-bottom:10px;font-size:12px}
+.ac-ai-chatgpt-layout .ac-ai-markdown{font-size:14px;line-height:1.65;gap:11px}
+.ac-ai-chatgpt-layout .ac-ai-markdown p,.ac-ai-chatgpt-layout .ac-ai-markdown li{font-size:14px;line-height:1.65}
+.ac-ai-chatgpt-layout .ac-ai-quick-prompts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px clamp(12px,3vw,36px) 2px}
+.ac-ai-chatgpt-layout .ac-ai-quick-prompts button{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:7px 13px;border:1px solid #304869;border-radius:99px;background:#111e32;color:#c5d7f0;font-size:12px;white-space:nowrap}
+.ac-ai-chatgpt-layout .ac-ai-quick-prompts button:hover{background:#1b3151;border-color:#4d82cc}
+.ac-ai-chatgpt-layout .ac-ai-composer{margin:12px clamp(12px,3vw,36px) 11px;min-height:62px;padding:8px 9px 8px 17px;border-radius:17px;background:#101c30;border:1px solid #36547b}
+.ac-ai-chatgpt-layout .ac-ai-composer textarea{font-size:14px!important;min-height:42px;padding:10px 3px!important}
+.ac-ai-chatgpt-layout .ac-ai-composer button{min-height:40px!important;padding:10px 18px!important;border-radius:11px!important;background:#1267ee!important;color:#fff!important;font-size:13px!important}
+.ac-ai-chatgpt-layout .ac-ai-composer button:disabled{opacity:.55}
+.ac-ai-chatgpt-layout .ac-ai-privacy{margin:0 clamp(12px,3vw,36px) 6px}
+.ac-ai-chatgpt-layout .ac-ai-chat>small:not(.ac-ai-privacy){margin:0 clamp(12px,3vw,36px) 15px}
+.ac-ai-chatgpt-layout .ac-ai-tools-toggle{display:flex;align-items:center;justify-content:center;gap:9px;min-height:45px;width:100%;padding:10px 14px;border:1px solid #304866;border-radius:13px;background:#121f33;color:#c7d9f3;font-size:13px}
+.ac-ai-chatgpt-layout .ac-ai-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0;width:100%}
+.ac-ai-chatgpt-layout .ac-ai-tools>.card{min-width:0;width:100%;max-width:100%}
+.ac-ai-history-overlay{position:absolute;z-index:30;inset:0;display:flex;overflow:hidden;border-radius:20px}
+.ac-ai-history-backdrop{position:absolute;inset:0;border:0;background:#0208129c}
+.ac-ai-history-panel{position:relative;z-index:1;display:flex;flex-direction:column;align-items:stretch;gap:5px;width:min(320px,85%);height:100%;max-height:100%;padding:18px 12px;overflow-y:auto;background:#111d31;border-right:1px solid #354c6a;box-shadow:15px 0 45px #0007}
+.ac-ai-history-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px;padding:0 7px;color:#f0f6ff;font-size:14px}
+.ac-ai-history-title button{padding:7px;border:1px solid #314562;border-radius:8px;background:#1a2a42;color:#d5e6ff}
+.ac-ai-history-panel>button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:39px;padding:10px 12px;border:0;border-radius:9px;background:transparent;color:#b6c9e2;text-align:left;font-size:12px}
+.ac-ai-history-panel>button:hover,.ac-ai-history-panel>button.active{background:#20385a;color:#fff}
+.ac-ai-history-panel>button span{font-size:10px;color:#93b8e6}
+.ac-ai-history-panel>p{padding:12px;font-size:12px;color:#a6b8d0}
+@media(max-width:900px){.ac-ai-chatgpt-layout .ac-ai-tools{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){
+ .ac-ai-chatgpt-layout .ac-ai-chat{min-height:min(72dvh,650px);border-radius:14px!important}
+ .ac-ai-chatgpt-layout .ac-ai-heading{display:flex!important;flex-wrap:wrap;gap:7px;padding:10px;min-height:56px}
+ .ac-ai-chatgpt-layout .ac-ai-heading h3{flex:1;min-width:110px;font-size:14px;grid-column:auto;grid-row:auto}
+ .ac-ai-chatgpt-layout .ac-ai-heading>button.ac-ai-history-toggle{grid-column:auto;grid-row:auto;min-width:36px;min-height:36px;padding:8px!important}
+ .ac-ai-chatgpt-layout .ac-ai-heading>button.ac-ai-history-toggle span{display:none}
+ .ac-ai-chatgpt-layout .ac-ai-heading>button.ac-ai-new-chat{grid-column:auto;grid-row:auto;min-width:36px;min-height:36px;padding:8px!important}
+ .ac-ai-chatgpt-layout .ac-ai-heading>button.ac-ai-new-chat span{display:none}
+ .ac-ai-chatgpt-layout .ac-ai-heading .ac-ai-online{font-size:10px;grid-column:auto;grid-row:auto}
+ .ac-ai-chatgpt-layout .ac-ai-heading>button:not(.ac-ai-history-toggle){grid-column:auto;grid-row:auto}
+ .ac-ai-chatgpt-layout .ac-ai-heading>button:has(.lucide-trash-2){font-size:0!important;padding:8px!important;min-width:34px}
+ .ac-ai-chatgpt-layout .ac-ai-heading>button:has(.lucide-trash-2) svg{width:15px;height:15px}
+ .ac-ai-chatgpt-layout .ac-ai-turns{min-height:260px;max-height:55dvh;gap:16px;padding:18px 12px}
+ .ac-ai-chatgpt-layout .ac-ai-question{max-width:88%;font-size:13.5px;padding:10px 13px}
+ .ac-ai-chatgpt-layout .ac-ai-answer{max-width:100%;font-size:13.5px}
+ .ac-ai-chatgpt-layout .ac-ai-markdown,.ac-ai-chatgpt-layout .ac-ai-markdown p,.ac-ai-chatgpt-layout .ac-ai-markdown li{font-size:13.5px;line-height:1.55}
+ .ac-ai-chatgpt-layout .ac-ai-quick-prompts{flex-wrap:nowrap;gap:6px;padding:8px 10px 2px;overflow-x:auto;scrollbar-width:none}
+ .ac-ai-chatgpt-layout .ac-ai-quick-prompts button{flex:none;padding:8px 11px;font-size:11px}
+ .ac-ai-chatgpt-layout .ac-ai-composer{margin:9px 9px 10px;min-height:54px;padding:5px 6px 5px 11px}
+ .ac-ai-chatgpt-layout .ac-ai-composer textarea{min-height:42px;font-size:14px!important}
+ .ac-ai-chatgpt-layout .ac-ai-composer button{min-width:40px!important;width:40px!important;min-height:40px!important;padding:10px!important;font-size:0!important}
+ .ac-ai-chatgpt-layout .ac-ai-composer button svg{width:19px;height:19px}
+ .ac-ai-history-overlay{border-radius:14px}
+}
