@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, Bot, ShieldCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { TitaniumWave } from '../titanium-wave';
@@ -27,7 +27,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, avail
   const en = useApplicationLanguage() === 'en';
   return (
     <div className="ac-ai-page" data-workspace-ui>
-      <header className="ac-ai-hero"><TitaniumWave /><span className="ac-ai-icon"><Sparkles size={25} /></span><div><small>AUTOCARE PREMIUM</small><h2>{en ? 'Your vehicle assistant' : 'Asistentul tău auto'}</h2><p>{en ? 'Advice based on your recorded vehicle data.' : 'Recomandări bazate pe datele înregistrate ale mașinii.'}</p></div></header>
+      <header className="ac-ai-hero"><TitaniumWave /><span className="ac-ai-icon"><Sparkles size={25} /></span><div><small>AUTOCARE PREMIUM</small><h2>{en ? 'Your vehicle assistant' : 'Asistentul tău auto'}</h2><p>{en ? 'Your personal automotive AI. Ask anything, naturally.' : 'Discută natural despre orice problemă auto. AI-ul cunoaște și istoricul mașinii tale.'}</p></div></header>
       {!premium ? <section className="card"><p>{en ? 'AutoCare AI is included in Premium.' : 'AutoCare AI este inclus în Premium.'}</p><a className="button primary" href="/cont?tab=Premium">Premium <ArrowUpRight size={15} /></a></section>
         : !vehicles.length ? <section className="card"><p>{en ? 'Add a vehicle first.' : 'Adaugă întâi un vehicul.'}</p><a className="button" href="/cont?tab=Garaj">{en ? 'My garage' : 'Garajul meu'}</a></section>
         : <>
@@ -77,7 +77,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   }
 
   function ask(value: string, mode: Mode = 'chat') {
-    if (preview || loading || value.trim().length < 4) return;
+    if (preview || loading || value.trim().length < 1) return;
     void run(async signal => {
       const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode, localFallback: false }), signal });
       setTurns(previous => [...previous, data.turn].slice(-30));
@@ -113,28 +113,31 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   }
 
   const suggestions = [
-    t('Ce revizii urmează și când trebuie schimbat uleiul?', 'Which services are due and when should I change the oil?'),
+    t('Am o problemă cu mașina. Mă ajuți să înțeleg ce se întâmplă?', 'I have a car problem. Can you help me figure it out?'),
     t('Cât am cheltuit anul acesta și unde pot reduce costurile?', 'What have I spent this year and where could I save?'),
-    t('Ce documente îmi expiră?', 'Which documents are expiring?'),
+    t('Ce poate însemna un martor aprins în bord?', 'What does a dashboard warning light mean?'),
     t('Ce ar trebui să verific înainte de un drum lung?', 'What should I check before a long trip?'),
   ];
   return (
     <div className="ac-ai-layout">
       <section className="card ac-ai-chat" aria-label={t('Conversație AutoCare AI', 'AutoCare AI conversation')}>
-        <div className="ac-ai-heading"><h3>{t('Conversația ta', 'Your conversation')}</h3>
+        <div className="ac-ai-heading"><h3><Bot size={20} /> {t('Discută cu AutoCare AI', 'Chat with AutoCare AI')}</h3><span className="ac-ai-online"><span /> Gemini AI</span>
           {turns.length > 0 && <button type="button" disabled={pending || loading} onClick={() => {
             if (window.confirm(t('Ștergi istoricul AI pentru această mașină?', 'Clear AI history for this vehicle?')))
               void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); });
           }}><Trash2 size={16} />{t('Șterge istoricul', 'Clear history')}</button>}
         </div>
-        {!available && <p className="ac-ai-state" role="status">{t('Analiza locală răspunde din datele vehiculului. Scanarea și întrebările deschise necesită furnizorul AI.', 'Local analysis uses vehicle records. Scanning and open-ended questions require the AI provider.')}</p>}
+        {!available && <p className="ac-ai-state" role="status">{t('Conexiunea AI nu este configurată. Contactează administratorul.', 'AI is not configured. Contact support.')}</p>}
         {loading ? <p role="status">{t('Se încarcă istoricul…', 'Loading history…')}</p> :
           turns.length ? <ol className="ac-ai-turns" aria-live="polite">{turns.map(turn => <li key={turn.id}><p className="ac-ai-question" data-user-content>{turn.question}</p><div className="ac-ai-answer"><strong><Sparkles size={16} /> AutoCare AI</strong><p data-user-content>{turn.answer}</p><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></li>)}</ol>
-            : <div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={preview || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={16} />{value}<ArrowUpRight size={14} /></button>)}</div>}
+            : <div className="ac-ai-welcome"><span className="ac-ai-welcome-icon"><Sparkles size={26} /></span><h3>{t('Salut! Cu ce te pot ajuta?', 'Hi! How can I help?')}</h3><p>{t('Sunt asistentul tău auto. Povestește-mi ce se întâmplă sau alege o întrebare pentru început.', 'I am your car assistant. Tell me what is happening or choose a question to get started.')}</p><div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={preview || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={16} />{value}<ArrowUpRight size={14} /></button>)}</div></div>}
         <form className="ac-ai-composer" onSubmit={event => { event.preventDefault(); ask(question); }}>
-          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Întreabă despre mașina ta…', 'Ask about your vehicle…')} rows={2} minLength={4} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
-          <button className="primary" type="submit" disabled={preview || pending || loading || question.trim().length < 4}><Send size={17} />{t('Trimite', 'Send')}</button>
+          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Scrie orice întrebare…', 'Ask me anything about your car…')} rows={2} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
+          <button className="primary" type="submit" disabled={preview || pending || loading || question.trim().length < 1}><Send size={17} />{t('Trimite', 'Send')}</button>
         </form>
+        {pending && <p className="ac-ai-typing" role="status"><span className="ac-ai-typing-dots"><i/><i/><i/></span> {t('AutoCare AI pregătește răspunsul…', 'AutoCare AI is thinking…')}</p>}
+        {error && <p className="ac-ai-inline-error" role="alert">{error}</p>}
+        <small className="ac-ai-privacy"><ShieldCheck size={14} /> {t('Asistent AI. Recomandările nu înlocuiesc un diagnostic în service.', 'AI assistant. Advice does not replace a professional inspection.')}</small>
         {available && <small>{t('Întrebarea, istoricul recent și datele relevante ale mașinii sunt trimise furnizorului AI. Evită datele personale.', 'The question, recent history and relevant vehicle data are sent to the AI provider. Avoid personal information.')}</small>}
       </section>
       <aside className="ac-ai-tools">
@@ -142,7 +145,6 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
           {([
             ['analysis', t('Analizează mașina', 'Analyze vehicle')],
             ['finance', t('Compară cheltuielile lunare', 'Compare monthly expenses')],
-            ['maintenance', t('Verifică termenele de întreținere', 'Check maintenance deadlines')],
             ['monthly', t('Generează raportul lunii curente', 'Generate current month report')],
             ['annual', t('Generează raportul anului curent', 'Generate current year report')],
           ] as const).map(([mode, label]) => <button key={mode} type="button" disabled={preview || pending || loading} onClick={() => ask(label, mode)}>{label} <ArrowUpRight size={14} /></button>)}
