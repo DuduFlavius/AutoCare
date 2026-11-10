@@ -49,11 +49,11 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const en = language === 'en';
   const t = (ro: string, english: string) => en ? english : ro;
   const [turns, setTurns] = useState<Turn[]>([]);
-  const visibleTurns = turns.filter(turn => (!historyDay || turn.createdAt.slice(0, 10) === historyDay) && !/^Analiză locală\s*[·:]/i.test(turn.answer.trim()));
   const [question, setQuestion] = useState('');
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyDay, setHistoryDay] = useState<string | null>(null);
   const historyDays = Array.from(new Set(turns.map(turn => turn.createdAt.slice(0, 10)))).sort().reverse();
+  const visibleTurns = turns.filter(turn => (!historyDay || turn.createdAt.slice(0, 10) === historyDay) && !/^Analiză locală\s*[·:]/i.test(turn.answer.trim()));
   const [pending, setPending] = useState(false);
   const [loading, setLoading] = useState(!preview);
   const [error, setError] = useState('');
