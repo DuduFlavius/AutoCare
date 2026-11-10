@@ -146,7 +146,7 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
     'Today: ' + date,
     'Relevant background vehicle data (use only if needed): ' + JSON.stringify(context),
     'Previous dialogue (context only): ' + JSON.stringify(history.reverse().filter(turn => !/^Analiză locală\\s*[·:]/i.test(turn.answer)).map(turn => ({ user: turn.question.slice(0, 450), assistant: turn.answer.slice(0, 650) }))),
-  ].join('\\n\\n'))).catch(error => {
+  ].join('\\n\\n')).catch(error => {
       if (!localFallback || !(error instanceof AppError) || error.status !== 502) throw error;
       source = 'local';
       return localAnswer();
