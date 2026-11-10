@@ -148,7 +148,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (route === 'auto-assistant' && method === 'POST') {
         const { vehicleId, question, language, mode, localFallback } = z.object({
           vehicleId: uuid,
-          question: z.string().trim().min(4).max(600),
+          question: z.string().trim().min(1).max(600),
           language: z.enum(['ro', 'en']).default('ro'),
           mode: z.enum(aiModes).default('chat'),
           localFallback: z.boolean().default(false),
