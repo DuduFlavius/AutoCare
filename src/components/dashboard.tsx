@@ -26,6 +26,7 @@ import {
   Download,
   FolderOpen,
   MessageSquare,
+  Bot,
   SlidersHorizontal,
   Search,
   Menu,
@@ -639,7 +640,10 @@ export default function Dashboard({ name, previewData }: { name: string; preview
                   ))}
                 </div>
               ))}
-              {data?.profile.role === 'founder' && (
+              <a href="/ai" className="founder-nav-link" onClick={() => setMenuOpen(false)}>
+            <Bot size={18} /> AutoCare AI <ArrowUpRight size={13} />
+          </a>
+          {data?.profile.role === 'founder' && (
                 <div className="autocare-mobile-founder-card">
                   <div className="autocare-mobile-founder-identity">
                     <Shield size={20} />
