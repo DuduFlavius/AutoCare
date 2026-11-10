@@ -27,10 +27,36 @@ function geminiParts(input: string | { role: 'user'; content: InputPart[] }[]): 
   }));
 }
 
+async function resolveGeminiModel(key: string, preferred: string): Promise<string> {
+  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', {
+    headers: { 'x-goog-api-key': key },
+    cache: 'no-store',
+    signal: AbortSignal.timeout(12000),
+  });
+  if (!response.ok) {
+    console.error('AutoCare Gemini model discovery failed', { status: response.status });
+    throw new AppError(502, 'Nu pot verifica modelele Gemini disponibile pentru această cheie.');
+  }
+  const data: unknown = await response.json();
+  const parsed = z.object({ models: z.array(z.object({
+    name: z.string(),
+    supportedGenerationMethods: z.array(z.string()).optional(),
+  })).default([]) }).parse(data);
+  const available = parsed.models.filter(model => model.supportedGenerationMethods?.includes('generateContent'))
+    .map(model => model.name.replace(/^models\//, ''));
+  const priority = [preferred, 'gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash'];
+  const selected = priority.find(model => available.includes(model)) ||
+    available.find(model => /^gemini-[\d.]+-flash-lite(?:$|-)/.test(model)) ||
+    available.find(model => /^gemini-[\d.]+-flash(?:$|-)/.test(model));
+  if (!selected) throw new AppError(503, 'Nu există un model Gemini Flash compatibil cu cheia API. Verifică Google AI Studio.');
+  return selected;
+}
+
 async function generateGemini(instructions: string, input: string | { role: 'user'; content: InputPart[] }[], maxTokens: number) {
   const key = process.env.GEMINI_API_KEY?.trim();
   if (!key) throw new AppError(503, 'Gemini nu este configurat.');
-  const model = process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash-lite';
+  const preferredModel = process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash-lite';
+  const model = await resolveGeminiModel(key, preferredModel);
   const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent', {
     method: 'POST',
     cache: 'no-store',
