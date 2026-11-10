@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, Bot, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, Bot, ShieldCheck, Copy, Square } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { TitaniumWave } from '../titanium-wave';
+import { AiMarkdown } from './ai-markdown';
 import './auto-ai.css';
 
 type Vehicle = Awaited<ReturnType<typeof dashboard>>['vehicles'][number];
@@ -58,7 +59,9 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const action = useRef<AbortController | null>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const bottom = useRef<HTMLLIElement>(null);
-  useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [turns.length, pending]);
+  const historyList = useRef<HTMLOListElement>(null);
+  const autoScroll = useRef(true);
+  useEffect(() => { if (autoScroll.current) bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [turns.length, pending]);
 
   useEffect(() => {
     if (preview) return;
@@ -76,11 +79,12 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
     setPending(true); setError(''); setNotice('');
     try { await task(controller.signal); }
     catch (e) { if (!controller.signal.aborted) setError((e as Error).message); }
-    finally { action.current = null; if (!controller.signal.aborted) setPending(false); }
+    finally { if (action.current === controller) action.current = null; setPending(false); }
   }
 
   function ask(value: string, mode: Mode = 'chat') {
-    if (preview || loading || value.trim().length < 1) return;
+    if (preview || loading || action.current || value.trim().length < 1) return;
+    autoScroll.current = true;
     void run(async signal => {
       const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode, localFallback: false }), signal });
       setTurns(previous => [...previous, data.turn].slice(-30));
@@ -132,13 +136,13 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
         </div>
         {!available && <p className="ac-ai-state" role="status">{t('Conexiunea AI nu este configurată. Contactează administratorul.', 'AI is not configured. Contact support.')}</p>}
         {loading ? <p role="status">{t('Se încarcă istoricul…', 'Loading history…')}</p> :
-          visibleTurns.length ? <ol className="ac-ai-turns" aria-live="polite">{visibleTurns.map(turn => <li key={turn.id}><p className="ac-ai-question" data-user-content>{turn.question}</p><div className="ac-ai-answer"><strong><Sparkles size={16} /> {t('Asistent', 'Assistant')}</strong><div className="ac-ai-message-body" data-user-content>{turn.answer.split('\n').map((line, index) => /^#{1,4}\s/.test(line) ? <h4 key={index}>{line.replace(/^#{1,4}\s*/, '')}</h4> : <p key={index}>{line.split(/(\*\*[^*]+\*\*)/g).map((part, partIndex) => part.startsWith('**') && part.endsWith('**') ? <b key={partIndex}>{part.slice(2, -2)}</b> : part)}</p>)}</div><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></li>)}<li className="ac-ai-scroll-anchor" ref={bottom} aria-hidden="true" /></ol>
+          visibleTurns.length ? <ol ref={historyList} onScroll={event => { const el = event.currentTarget; autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 140; }} className="ac-ai-turns" aria-live="polite">{visibleTurns.map(turn => <li key={turn.id}><p className="ac-ai-question" data-user-content>{turn.question}</p><div className="ac-ai-answer"><strong><Sparkles size={16} /> {t('Asistent', 'Assistant')}</strong><AiMarkdown text={turn.answer} /><button type="button" className="ac-ai-copy" title={t('Copiază răspunsul', 'Copy answer')} onClick={() => void navigator.clipboard.writeText(turn.answer).then(() => setNotice(t('Răspuns copiat.', 'Answer copied.'))).catch(() => setError(t('Nu s-a putut copia răspunsul.', 'Could not copy answer.')))}><Copy size={14} /> {t('Copiază', 'Copy')}</button><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></li>)}<li className="ac-ai-scroll-anchor" ref={bottom} aria-hidden="true" /></ol>
             : <div className="ac-ai-welcome"><span className="ac-ai-welcome-icon"><Sparkles size={26} /></span><h3>{t('Salut! Cu ce te pot ajuta?', 'Hi! How can I help?')}</h3><p>{t('Sunt asistentul tău auto. Povestește-mi ce se întâmplă sau alege o întrebare pentru început.', 'I am your car assistant. Tell me what is happening or choose a question to get started.')}</p><div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={preview || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={16} />{value}<ArrowUpRight size={14} /></button>)}</div></div>}
         <form className="ac-ai-composer" onSubmit={event => { event.preventDefault(); ask(question); }}>
           <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Scrie orice întrebare…', 'Ask me anything about your car…')} rows={2} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); ask(question); } }} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
           <button className="primary" type="submit" disabled={preview || pending || loading || question.trim().length < 1}><Send size={17} />{t('Trimite', 'Send')}</button>
         </form>
-        {pending && <p className="ac-ai-typing" role="status"><span className="ac-ai-typing-dots"><i/><i/><i/></span> {t('Se pregătește răspunsul…', 'Thinking…')}</p>}
+        {pending && <div className="ac-ai-typing" role="status"><span className="ac-ai-typing-dots"><i/><i/><i/></span> {t('Se pregătește răspunsul…', 'Thinking…')} <button type="button" className="ac-ai-stop" onClick={() => { action.current?.abort(); action.current = null; setPending(false); setNotice(t('Afișarea a fost oprită. Este posibil ca serverul să finalizeze cererea deja trimisă.', 'Stopped waiting. The server may still finish the submitted request.')); }}><Square size={12} /> {t('Oprește', 'Stop')}</button></div>}
         {error && <p className="ac-ai-inline-error" role="alert">{error}</p>}
         <small className="ac-ai-privacy"><ShieldCheck size={14} /> {t('Asistent AI. Recomandările nu înlocuiesc un diagnostic în service.', 'AI assistant. Advice does not replace a professional inspection.')}</small>
         {available && <small>{t('Întrebarea, istoricul recent și datele relevante ale mașinii sunt trimise furnizorului AI. Evită datele personale.', 'The question, recent history and relevant vehicle data are sent to the AI provider. Avoid personal information.')}</small>}
