@@ -153,10 +153,12 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           mode: z.enum(aiModes).default('chat'),
           localFallback: z.boolean().default(false),
         }).parse(await body(req));
-        await rate(uid, 'auto-assistant-v2', 12);
-        await rate(uid, 'auto-assistant-day-v2', 120, 86400000);
-        await rate('all', 'ai-provider-day-v2', 3000, 86400000);
-        return json(await askAutoAssistant(uid, vehicleId, question, language, mode, localFallback));
+        // Keep a short-window abuse guard, but only count successful AI replies toward daily usage.
+        await rate(uid, 'auto-assistant-minute-v3', 12);
+        const answer = await askAutoAssistant(uid, vehicleId, question, language, mode, localFallback);
+        await rate(uid, 'auto-assistant-success-day-v3', 120, 86400000);
+        await rate('all', 'ai-provider-success-day-v3', 3000, 86400000);
+        return json(answer);
       }
       if (route === 'auto-assistant/scan' && method === 'POST') {
         await rate(uid, 'auto-assistant-scan-day', 6, 86400000);
