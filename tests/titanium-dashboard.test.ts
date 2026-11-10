@@ -6,7 +6,8 @@ import { auth } from '../src/lib/auth';
 import { closeLocalDb, db } from '../src/lib/db';
 import { gpsTrips, records, subscriptions, user, vehicles } from '../src/lib/schema';
 import { dashboard } from '../src/lib/service';
-import { POST } from '../src/app/api/v1/[...path]/route';
+import { garageOverview, garageVehicleSummary } from '../src/lib/garage-overview';
+import { DELETE, PATCH, POST, PUT } from '../src/app/api/v1/[...path]/route';
 
 delete process.env.DATABASE_URL;
 delete process.env.OPENAI_API_KEY;
@@ -93,4 +94,48 @@ test('assistant requires Premium, checks ownership, and limits context sent to t
   assert.equal(response.status, 200);
   assert.equal((await response.json()).answer, 'ITP expiră pe 31 ianuarie 2030.');
   assert.equal(provider.mock.callCount(), 1);
+});
+
+test('garage totals include history, and primary vehicle is persisted only for an active owned vehicle', async () => {
+  const create = (method: string, path: string, payload?: unknown, sessionCookie = cookie) => {
+    const request = new Request('http://localhost:3000/api/v1/' + path, {
+      method,
+      headers: { Origin: 'http://localhost:3000', 'Content-Type': 'application/json', Cookie: sessionCookie },
+      body: payload === undefined ? undefined : JSON.stringify(payload),
+    });
+    const context = { params: Promise.resolve({ path: path.split('/') }) };
+    return (method === 'DELETE' ? DELETE : method === 'POST' ? POST : method === 'PATCH' ? PATCH : PUT)(request, context);
+  };
+  const choose = (vehicleId: string, sessionCookie = cookie) => create('PUT', 'vehicles/primary', { vehicleId }, sessionCookie);
+  assert.equal((await choose(carId, '')).status, 401);
+  assert.equal((await choose(foreignCarId)).status, 404);
+  assert.equal((await choose(carId)).status, 200);
+  assert.equal((await dashboard(ownerId)).primaryVehicleId, carId);
+  assert.equal((await dashboard(foreignId)).primaryVehicleId, null);
+  const vehicleInput = { brand: 'Demo', model: 'Estate', plate: 'TEST 02', year: 2024, fuel: 'Diesel', odometer: 24000 };
+  const added = await create('POST', 'vehicles', vehicleInput);
+  assert.equal(added.status, 201);
+  const second = await added.json();
+  assert.equal((await choose(second.id)).status, 200);
+  assert.equal((await create('PATCH', 'vehicles/' + second.id, { ...vehicleInput, engine: '2.0' })).status, 200);
+  assert.equal((await create('POST', 'smartdrive/vehicles/' + second.id + '/readings', { odometer: 24100 })).status, 201);
+  await db().insert(records).values([
+    { id: crypto.randomUUID(), userId: ownerId, vehicleId: carId, kind: 'service', title: 'Revizie', category: 'Revizie', date: '2025-01-01', amountBani: 8500 },
+    { id: crypto.randomUUID(), userId: ownerId, vehicleId: carId, kind: 'service', title: 'Revizie viitoare', category: 'Revizie', date: '2099-12-01', expiresAt: '2099-12-01', amountBani: 0 },
+    { id: crypto.randomUUID(), userId: ownerId, vehicleId: second.id, kind: 'document', title: 'RCA', category: 'RCA', expiresAt: '2099-01-01', amountBani: 500 },
+    { id: crypto.randomUUID(), userId: ownerId, vehicleId: second.id, kind: 'document', title: 'ITP expirat', category: 'ITP', expiresAt: '2020-01-01' },
+    { id: crypto.randomUUID(), userId: ownerId, vehicleId: second.id, kind: 'expense', title: 'Cost anulat', category: 'Altele', cancelled: true, amountBani: 4000 },
+  ]);
+  let data = await dashboard(ownerId);
+  let overview = garageOverview(data, '2030-01-01');
+  assert.equal(data.primaryVehicleId, second.id);
+  assert.equal(data.vehicles.find(vehicle => vehicle.id === second.id)?.engine, '2.0');
+  assert.deepEqual(overview.totals, { vehicles: 2, active: 2, kilometers: 42100, costs: 9000, services: 1, documents: 2 });
+  assert.deepEqual(garageVehicleSummary(overview.records.get(second.id) ?? [], 24100, data.profile.timezone).deadline, { date: '2020-01-01', title: 'ITP', overdue: true });
+  assert.equal((await create('DELETE', 'vehicles/' + second.id)).status, 200);
+  assert.equal((await choose(second.id)).status, 400);
+  data = await dashboard(ownerId);
+  overview = garageOverview(data, '2030-01-01');
+  assert.equal(data.primaryVehicleId, null);
+  assert.deepEqual(overview.totals, { vehicles: 2, active: 1, kilometers: 42100, costs: 9000, services: 1, documents: 1 });
 });

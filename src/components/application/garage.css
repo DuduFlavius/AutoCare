@@ -1,0 +1,151 @@
+.ac-garage-page {
+  --garage-edge: #263e62;
+  --garage-blue: #6eb8ff;
+  --garage-panel: linear-gradient(150deg,#101d31,#0c1525 74%);
+  display: grid;
+  min-width: 0;
+  gap: clamp(18px, 2vw, 26px);
+}
+.ac-garage-inventory, .ac-garage-numbers { display: grid; gap: 12px; min-width: 0; }
+.ac-garage-bar, .ac-garage-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 15px;
+  min-width: 0;
+}
+.ac-garage-bar { justify-content: space-between; }
+.ac-garage-bar h2, .ac-garage-numbers h2 { font-size: 19px; margin: 0; }
+.ac-garage-bar p, .ac-garage-numbers p, .ac-garage-add p {
+  margin: 3px 0 0;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+.ac-garage-search { position: relative; display: flex; align-items: center; min-width: 0; }
+.ac-garage-search > svg { position: absolute; left: 11px; color: var(--garage-blue); pointer-events: none; }
+html body .ac-workspace.ac-studio .ac-garage-search input {
+  width: min(100%, 260px);
+  min-width: 0;
+  padding-inline-start: 34px !important;
+}
+.ac-garage-filters .check { margin: 0; max-width: 100%; }
+.ac-garage-vehicles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 335px), 1fr));
+  align-items: start;
+  gap: clamp(12px, 1.4vw, 19px);
+}
+.ac-garage-vehicle, .ac-garage-add, .ac-garage-numbers {
+  min-width: 0;
+  border: 1px solid var(--garage-edge);
+  border-radius: 15px;
+  background: var(--garage-panel);
+}
+.ac-garage-vehicle {
+  display: grid;
+  gap: 11px;
+  padding: clamp(12px, 1.3vw, 17px);
+  box-shadow: 0 10px 24px #04081436;
+}
+.ac-garage-vehicle[data-primary='true'] { border-color: #375c92; }
+.ac-garage-identity {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  border: 1px solid #284367;
+  border-radius: 11px;
+  padding: 12px;
+  background: radial-gradient(ellipse at 75% 5%,#183b72,transparent 66%), #0c172b;
+}
+.ac-garage-identity > .ac-titanium-wave { z-index: -1; opacity: .48; }
+.ac-garage-identity-main { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; }
+.ac-garage-identity h3 { font-size: clamp(20px, 2vw, 26px); letter-spacing: -.035em; margin: 0; overflow-wrap: anywhere; }
+.ac-garage-identity p { color: var(--color-muted); font-size: 12px; margin: 0; overflow-wrap: anywhere; }
+.ac-garage-plate, .ac-garage-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  max-width: 100%; overflow-wrap: anywhere; border-radius: 6px;
+  padding: 4px 7px; font-size: 11px; font-weight: 650;
+}
+.ac-garage-plate { background: #14243d; color: var(--color-text); border: 1px solid #30496b; letter-spacing: .07em; }
+.ac-garage-badge { color: #9dd9c6; background: #15332f; border: 1px solid #2b514b; }
+.ac-garage-badge[data-status='primary'] { color: #c3e1ff; background: #183e71; border-color: #3b659e; }
+.ac-garage-badge[data-status='archived'] { color: #c6ceda; background: #252e40; border-color: #455269; }
+.ac-garage-mileage { display: flex; align-items: center; gap: 10px; min-width: 0; padding-inline: 4px; }
+.ac-garage-mileage > svg { flex: none; color: var(--garage-blue); }
+.ac-garage-mileage span, .ac-garage-metrics dt, .ac-garage-numbers dt { color: var(--color-muted); font-size: 11px; }
+.ac-garage-mileage strong { display: block; font-size: clamp(20px, 2.1vw, 29px); font-variant-numeric: tabular-nums; line-height: 1.12; overflow-wrap: anywhere; }
+.ac-garage-mileage small { font-size: 13px; color: var(--color-muted); }
+.ac-garage-metrics, .ac-garage-numbers dl {
+  display: grid; gap: 7px; margin: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.ac-garage-metrics > div, .ac-garage-numbers dl > div {
+  min-width: 0; padding: 8px; border-radius: 8px;
+  border: 1px solid #233650; background: #0b1424;
+  overflow-wrap: anywhere;
+}
+.ac-garage-metrics dt { display: flex; align-items: center; gap: 4px; }
+.ac-garage-metrics dt svg { color: var(--garage-blue); flex: none; }
+.ac-garage-metrics dd, .ac-garage-numbers dd { margin: 4px 0 0; font-weight: 720; }
+.ac-garage-metrics dd { font-size: 13px; }
+.ac-garage-metrics small { display: block; color: var(--color-muted); font-size: 11px; }
+.ac-garage-metrics [data-status='valid'] { color: #9dd9c6; }
+.ac-garage-metrics :is([data-status='soon'],[data-status='due']) { color: #f5d393; }
+.ac-garage-metrics [data-status='overdue'] { color: #ffafaa; }
+.ac-garage-actions, .ac-garage-secondary, .ac-garage-confirm-actions {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+}
+.ac-garage-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.ac-garage-secondary { border-top: 1px solid #243550; padding-top: 8px; }
+html body .ac-workspace.ac-studio .ac-garage-page button {
+  min-width: 0; max-width: 100%; min-height: 42px;
+  padding: 6px 8px !important; gap: 5px;
+  white-space: normal !important; overflow-wrap: anywhere;
+}
+.ac-garage-page button > svg { flex-shrink: 0; }
+html body .ac-workspace.ac-studio .ac-garage-page .primary {
+  background: linear-gradient(135deg,#398bff,#66b9ff) !important;
+  border-color: #71b3f9 !important; color: #071425 !important;
+}
+html body .ac-workspace.ac-studio .ac-garage-page .ac-garage-archive { color: #ffbcb7 !important; }
+.ac-garage-secondary .ac-inline-mileage, .ac-garage-secondary form, .ac-garage-secondary input { min-width: 0; max-width: 100%; }
+.ac-garage-secondary form > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.ac-garage-secondary [aria-pressed='true'] { color: #b5d9ff; }
+.ac-garage-add {
+  display: grid; grid-template-columns: auto minmax(0,1fr);
+  align-items: center; gap: 8px 10px;
+  align-self: start; padding: 14px;
+}
+.ac-garage-add h3 { margin: 0; font-size: 16px; }
+.ac-garage-add > button { grid-column: 2; justify-self: start; }
+.ac-garage-icon {
+  display: inline-grid; place-items: center; width: 33px; height: 33px;
+  border: 1px solid #2d4d77; border-radius: 9px;
+  color: var(--garage-blue); background: #122a4b;
+}
+.ac-garage-add .ac-garage-icon { width: 43px; height: 43px; }
+.ac-garage-numbers { padding: clamp(12px, 1.3vw, 17px); }
+.ac-garage-numbers dl { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.ac-garage-numbers dl > div { display: grid; align-content: start; gap: 4px; padding: 9px; }
+.ac-garage-numbers dt { display: grid; gap: 5px; }
+.ac-garage-numbers dd { font-size: clamp(14px,1.5vw,21px); }
+.ac-garage-no-results { color: var(--color-muted); margin: 0; }
+.ac-garage-confirm-actions { justify-content: flex-end; margin-top: 12px; }
+@media (max-width: 840px) {
+  .ac-garage-numbers dl { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (max-width: 620px) {
+  .ac-garage-vehicles { grid-template-columns: minmax(0,1fr); }
+  .ac-garage-numbers dl { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 380px) {
+  .ac-garage-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .ac-garage-metrics > div:last-child { grid-column: 1/-1; }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ac-garage-vehicle, .ac-garage-add { transition: border-color 160ms ease; }
+  .ac-garage-vehicle:hover, .ac-garage-add:hover { border-color: #426795; }
+}

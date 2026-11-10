@@ -265,6 +265,10 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       const row = (await db().select().from(s.settings).where(eq(s.settings.key, key)))[0];
       return json(row?.value ?? { dailyKm: null });
     }
+    if (route === 'vehicles/primary' && method === 'PUT') {
+      const { vehicleId } = z.object({ vehicleId: uuid }).parse(await body(req));
+      return json(await svc.setPrimaryVehicle(uid, vehicleId));
+    }
     if (route === 'dashboard' && method === 'GET') return json(await svc.dashboard(uid));
     if (path.length === 2 && path[0] === 'notifications' && method === 'DELETE') {
       const id = uuid.parse(path[1]);

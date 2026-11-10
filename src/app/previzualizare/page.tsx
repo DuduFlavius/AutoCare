@@ -114,6 +114,7 @@ export default async function DesignPreview({
       cancelAtPeriodEnd: false,
       updatedAt: now,
     },
+    primaryVehicleId: null,
     recentTrips: [],
     monthlyTrips: [],
     annualTrips: [],

@@ -13,7 +13,8 @@ import ApplicationHome from './application/home';
 import ApplicationHeader from './application/header';
 import MobileNavigation from './application/mobile-navigation';
 import AccountHub from './application/account';
-import InlineMileageEditor from './inline-mileage-editor';
+import { ApplicationGarage } from './application/garage';
+import { selectActiveVehicle } from '@/lib/application-home';
 import CommunicationPreferences from './communication-preferences';
 import Membership from './membership';
 import PremiumDownloads from './premium-downloads';
@@ -329,6 +330,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     [recordView, setRecordView] = useState('timeline'),
     [calendarView, setCalendarView] = useState('list'),
     [showArchived, setShowArchived] = useState(false),
+    [archiveVehicleTarget, setArchiveVehicleTarget] = useState<Data['vehicles'][number] | null>(null),
     [deleteOpen, setDeleteOpen] = useState(false),
     [history, setHistory] = useState<Array<{
       id: string;
@@ -576,6 +578,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     setCurrency(next);try{localStorage.setItem('autocare-currency',next);}catch{ /* Storage may be unavailable. */ }
   }
   const activeCars = data?.vehicles.filter((v) => !v.archived) || [];
+  const primaryVehicleId = selectActiveVehicle(activeCars, data?.primaryVehicleId ?? activeVehicleId)?.id ?? '';
   const garageQuery = normalizeWorkspaceSearch(query);
   const garageCars = tab === 'Garaj' && !vehicleDetail
     ? data?.vehicles.filter(v => (!filter || v.id === filter) && (showArchived || !v.archived) &&
@@ -770,9 +773,13 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
       await api('profile', 'PUT', { ...profileValues(), pushEnabled: true });
     }, 'Notificările push au fost activate pentru acest browser.');
   }
-  function selectVehicle(id: string) {
+  async function selectVehicle(id: string) {
+    if (!data || id === data.primaryVehicleId || busy) return;
+    if (!previewData && !await act(() => api('vehicles/primary', 'PUT', { vehicleId: id }))) return;
     setActiveVehicleId(id);
-    if(data) { try { sessionStorage.setItem('autocare-active-vehicle:'+data.profile.userId,id); } catch { /* Storage may be blocked; keep the in-memory selection. */ } }
+    if (!previewData) setData(current => current?.vehicles.some(vehicle => vehicle.id === id && !vehicle.archived) ? { ...current, primaryVehicleId: id } : current);
+    try { sessionStorage.setItem('autocare-active-vehicle:' + data.profile.userId, id); }
+    catch { /* The server preference remains available if storage is blocked. */ }
   }
   async function signOut() {
     if (previewData || signingOut) return;
@@ -916,12 +923,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
         ) : (
           <>
             {!['Dashboard','Cont'].includes(tab) && <WorkspaceModuleHeader tab={tab} language={language}>
-              {tab === 'Garaj' ? (
-                <button className="primary" onClick={() => setModal({ kind: 'vehicle' })}>
-                  <Plus size={17} />
-                  Adaugă o mașină
-                </button>
-              ) : ['Documente', 'Întreținere', 'Cheltuieli'].includes(tab) ? (
+              {['Documente', 'Întreținere', 'Cheltuieli'].includes(tab) ? (
                 <button
                   className="primary"
                   disabled={!activeCars.length}
@@ -950,7 +952,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
               ) : null}
             </WorkspaceModuleHeader>}
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
-            {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={activeVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
+            {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
             {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
             {tab === 'Istoric auto' && <VehicleJournal data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
         {tab === 'Garaj' && vehicleDetail && (
@@ -984,143 +986,24 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
           </section>
         )}
             {tab === 'Garaj' && !vehicleDetail && (
-              <>
-                <div className="toolbar ac-garage-toolbar">
-                  {data.vehicles.length > 1 && <input
-                    aria-label="Caută o mașină"
-                    placeholder="Caută marcă, model sau număr…"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                  />}
-                  {data.vehicles.some((v) => v.archived) && <label className="check">
-                    <input
-                      type="checkbox"
-                      checked={showArchived}
-                      onChange={(e) => setShowArchived(e.target.checked)}
-                    />{' '}
-                    Arată și mașinile arhivate
-                  </label>}
-                </div>
-                {!data.vehicles.length ? (
-                  <Empty
-                    text="Bine ai venit în garaj! Adaugă o mașină ca să poți salva actele și reviziile ei."
-                    action={() => setModal({ kind: 'vehicle' })}
-                  />
-                ) : (
-                  <div className="grid3 ac-garage-grid">
-                    {garageCars.length === 0 && <p className="card" role="status">{language === 'en' ? 'No vehicles match the current filters.' : 'Nicio mașină nu corespunde filtrelor active.'}</p>}
-                    {garageCars                      .map((v) => (
-                        <article key={v.id} className="card car-card" data-selected={!v.archived && (activeVehicleId || activeCars[0]?.id) === v.id || undefined}>
-                          <div className="between">
-                            <span className="eyebrow">
-                              {v.year} · {v.fuel}
-                            </span>
-                            <span className={'pill ' + (v.archived ? 'archived' : 'valid')}>
-                              {v.archived ? 'Arhivată' : 'Activă'}
-                            </span>
-                          </div>
-                          <VehiclePhoto vehicleId={v.id} name={v.brand+' '+v.model} uploaded={data.photos.some(p=>p.vehicleId===v.id)} preview={!!previewData} illustration/>
-                          <h2 data-user-content>
-                            {v.brand} {v.model}
-                          </h2>
-                          <div className="between">
-                            <span data-user-content className="plate">{v.plate}</span>
-                            <span className="small muted">
-                              {v.odometer.toLocaleString(locale)} km
-                            </span>
-                          </div>
-                          <p className="small muted" style={{ marginTop: 15 }}>
-                            VIN: {v.vin || '—'}
-                            <br />
-                            {v.engine || 'Motorizare necompletată'}
-                            {v.capacity ? ` · ${v.capacity} cm³` : ''}
-                          </p>
-                          <div className="car-metrics">
-                            <div>
-                              <span>Documente</span>
-                              <strong>
-                                {
-                                  data.records.filter(
-                                    (r) =>
-                                      r.vehicleId === v.id && r.kind === 'document' && !r.cancelled,
-                                  ).length
-                                }{' '}
-                                active
-                              </strong>
-                            </div>
-                            <div>
-                              <span>Următorul termen</span>
-                              {(() => {
-                                const r = data.records
-                                  .filter(
-                                    (r) => r.vehicleId === v.id && !r.cancelled && r.expiresAt,
-                                  )
-                                  .sort((a, b) =>
-                                    (a.expiresAt || '').localeCompare(b.expiresAt || ''),
-                                  )[0];
-                                return r ? (
-                                  <strong
-                                    className={
-                                      r.status.days != null && r.status.days <= 30
-                                        ? 'deadline-warning'
-                                        : ''
-                                    }
-                                  >
-                                    {r.category} · {(r.expiresAt?displayDate(r.expiresAt):'')}
-                                  </strong>
-                                ) : (
-                                  <strong>De completat</strong>
-                                );
-                              })()}
-                            </div>
-                          </div>
-                          {v.notes && <p data-user-content className="small">{v.notes}</p>}
-                          {!v.archived && <><button className="app-select-vehicle" type="button" aria-pressed={(activeVehicleId || activeCars[0]?.id)===v.id} onClick={()=>selectVehicle(v.id)}>{(activeVehicleId || activeCars[0]?.id)===v.id ? (language==='en'?'Selected for Home':'Selectată pentru Acasă') : (language==='en'?'Select for Home':'Selectează pentru Acasă')}</button><InlineMileageEditor key={v.id} vehicleId={v.id} currentKm={v.odometer} preview={!!previewData} onSaved={refresh}/></>}
-                          <div className="row-actions">
-                            <button className="primary" onClick={() => navigate('Garaj', 'push', v.id)}>
-                              Vezi mașina <ArrowUpRight size={14} />
-                            </button>
-                            <button
-                              disabled={v.archived}
-                              onClick={() => setModal({ kind: 'vehicle', vehicle: v })}
-                            >
-                              Editează
-                            </button>
-                            <button
-                              onClick={() => {
-                                navigate('Documente');
-                                setFilter(v.id);
-                              }}
-                            >
-                              Documente
-                            </button>
-                            {!v.archived && (
-                              <button
-                                className="danger"
-                                disabled={busy}
-                                onClick={() => {
-                                  if (confirm(translateApplicationCopy('Arhivezi mașina? Alertele asociate se opresc.',locale==='ro-RO'?'ro':'en')))
-                                    act(() => api('vehicles/' + v.id, 'DELETE'));
-                                }}
-                              >
-                                Arhivează
-                              </button>
-                            )}
-                          </div>
-                        </article>
-                      ))}
-                    <button className="add-car-tile" onClick={() => setModal({ kind: 'vehicle' })}>
-                      <CarFront size={36} strokeWidth={1.3} />
-                      <Plus size={23} />
-                      <strong>Mai ai o mașină?</strong>
-                      <span>Completează datele și gestionează totul dintr-un singur loc.</span>
-                      <span className="button">
-                        Adaugă o mașină <Plus size={15} />
-                      </span>
-                    </button>
-                  </div>
-                )}
-              </>
+              <ApplicationGarage
+                data={data} vehicles={garageCars} primaryId={primaryVehicleId} today={nowDate}
+                query={query} showArchived={showArchived} busy={busy} preview={!!previewData}
+                money={moneyDisplay} onQuery={setQuery} onShowArchived={setShowArchived}
+                onAdd={() => setModal({ kind: 'vehicle' })}
+                onDetails={id => navigate('Garaj', 'push', id)}
+                onEdit={vehicle => setModal({ kind: 'vehicle', vehicle })}
+                onDocuments={id => {
+                  if (!navigate('Documente')) return;
+                  setFilter(id);
+                  setQuery('');
+                  setCategoryFilter('');
+                  setRecordState('');
+                  setPeriod('all');
+                  setShowArchived(false);
+                }}
+                onArchive={vehicle => { setError(''); setArchiveVehicleTarget(vehicle); }} onSelect={selectVehicle} onRefresh={refresh}
+              />
             )}
             {['Documente', 'Întreținere', 'Cheltuieli'].includes(tab) && (
               <>
@@ -1161,7 +1044,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                         </button>
                       ))}
                     </div>
-                    {activeCars.filter(vehicle => vehicle.id === (filter || activeVehicleId || activeCars[0].id)).map(vehicle => (
+                    {activeCars.filter(vehicle => vehicle.id === (filter || primaryVehicleId || activeCars[0].id)).map(vehicle => (
                       <div className="ac-service-vehicle" key={vehicle.id}>
                         <div>
                           <span className="eyebrow">{language === 'en' ? 'Vehicle in focus' : 'Mașină selectată'}</span>
@@ -2047,6 +1930,20 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 <p className="muted">Se verifică accesul…</p>
               ))}
           </>
+        )}
+        {archiveVehicleTarget && (
+          <Dialog title={language === 'en' ? 'Archive vehicle' : 'Arhivează vehiculul'} onClose={() => { if (!busy) setArchiveVehicleTarget(null); }}>
+            <p data-user-content><strong>{archiveVehicleTarget.brand} {archiveVehicleTarget.model}</strong> · {archiveVehicleTarget.plate}</p>
+            <p>{language === 'en' ? 'Its records stay in your account and its reminders stop.' : 'Datele și istoricul rămân în cont, iar alertele asociate se opresc.'}</p>
+            {error && <p role="alert">{error}</p>}
+            <div className="ac-garage-confirm-actions">
+              <button type="button" disabled={busy} onClick={() => setArchiveVehicleTarget(null)}>{language === 'en' ? 'Cancel' : 'Renunță'}</button>
+              <button type="button" disabled={busy} className="danger" onClick={async () => {
+                const archived = await act(() => api('vehicles/' + archiveVehicleTarget.id, 'DELETE'));
+                if (archived || previewData) setArchiveVehicleTarget(null);
+              }}>{language === 'en' ? 'Confirm archive' : 'Confirmă arhivarea'}</button>
+            </div>
+          </Dialog>
         )}
         {checkoutUrl && (
           <Dialog title={language === 'en' ? 'Secure payment' : 'Plată securizată'} onClose={() => setCheckoutUrl(null)}>

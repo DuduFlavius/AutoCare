@@ -1,3 +1,4 @@
+import { primaryVehicleKey } from './garage-overview';
 import { autoAssistantConfigured } from './auto-assistant-config';
 import {groupedNotifications} from './notification-groups';
 import {paidExtensions} from './paid-coverage';
@@ -117,6 +118,18 @@ export async function editVehicle(uid: string, id: string, input: unknown) {
       .where(and(eq(s.vehicles.id, id), eq(s.vehicles.userId, uid)))
       .returning()
   )[0];
+}
+export async function setPrimaryVehicle(uid: string, id: string) {
+  return db().transaction(async tx => {
+    const [vehicle] = await tx.select({ archived: s.vehicles.archived }).from(s.vehicles)
+      .where(and(eq(s.vehicles.id, id), eq(s.vehicles.userId, uid))).for('update');
+    if (!vehicle) throw new AppError(404, 'Mașina nu există.');
+    if (vehicle.archived) throw new AppError(400, 'Alege o mașină activă.');
+    const value = { vehicleId: id };
+    await tx.insert(s.settings).values({ key: primaryVehicleKey(uid), value })
+      .onConflictDoUpdate({ target: s.settings.key, set: { value } });
+    return value;
+  });
 }
 export async function archiveVehicle(uid: string, id: string) {
   await ownedVehicle(uid, id);
@@ -277,7 +290,7 @@ export async function dashboard(uid: string) {
   const now = new Date();
   const date = localDate(now, p.timezone);
   const tripMonth = sql<string>`to_char(${s.gpsTrips.startedAt} AT TIME ZONE ${p.timezone}, 'YYYY-MM')`;
-  const [cars, rows, sub, alerts, attachments, photos, recentTrips, annualTrips] = await Promise.all([
+  const [cars, rows, sub, alerts, attachments, photos, recentTrips, annualTrips, primaryPreference] = await Promise.all([
     db()
       .select()
       .from(s.vehicles)
@@ -320,7 +333,9 @@ export async function dashboard(uid: string) {
       sql`${s.gpsTrips.startedAt} >= (${date.slice(0, 4) + '-01-01'}::date::timestamp AT TIME ZONE ${p.timezone})`,
       sql`${s.gpsTrips.startedAt} <= ${now.toISOString()}::timestamptz`,
     )).groupBy(s.gpsTrips.vehicleId, sql`2`),
+    db().select({ value: s.settings.value }).from(s.settings).where(eq(s.settings.key, primaryVehicleKey(uid))),
   ]);
+  const preferredId = (primaryPreference[0]?.value as { vehicleId?: string } | undefined)?.vehicleId;
   const grants = await activeGrants(uid);
   const price = await pricing();
   const extensions=await paidExtensions(uid);
@@ -333,6 +348,7 @@ export async function dashboard(uid: string) {
   return {
     profile: p,
     vehicles: cars,
+    primaryVehicleId: cars.find(car => !car.archived && car.id === preferredId)?.id ?? null,
     recentTrips,
     monthlyTrips: annualTrips.filter(trip => trip.month === date.slice(0, 7)).map(({ vehicleId, meters, count }) => ({ vehicleId, meters, count })),
     annualTrips,
