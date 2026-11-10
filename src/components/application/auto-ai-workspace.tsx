@@ -79,7 +79,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   function ask(value: string, mode: Mode = 'chat') {
     if (preview || loading || value.trim().length < 4) return;
     void run(async signal => {
-      const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode, localFallback: true }), signal });
+      const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode, localFallback: false }), signal });
       setTurns(previous => [...previous, data.turn].slice(-30));
       setQuestion('');
     });
