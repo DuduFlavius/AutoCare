@@ -48,6 +48,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const en = language === 'en';
   const t = (ro: string, english: string) => en ? english : ro;
   const [turns, setTurns] = useState<Turn[]>([]);
+  const visibleTurns = turns.filter(turn => !/^Analiză locală\s*[·:]/i.test(turn.answer.trim()));
   const [question, setQuestion] = useState('');
   const [pending, setPending] = useState(false);
   const [loading, setLoading] = useState(!preview);
@@ -56,6 +57,8 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const [scan, setScan] = useState<Scan | null>(null);
   const action = useRef<AbortController | null>(null);
   const input = useRef<HTMLTextAreaElement>(null);
+  const bottom = useRef<HTMLDivElement>(null);
+  useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [turns.length, pending]);
 
   useEffect(() => {
     if (preview) return;
@@ -121,7 +124,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   return (
     <div className="ac-ai-layout">
       <section className="card ac-ai-chat" aria-label={t('Conversație AutoCare AI', 'AutoCare AI conversation')}>
-        <div className="ac-ai-heading"><h3><Bot size={20} /> {t('Discută cu AutoCare AI', 'Chat with AutoCare AI')}</h3><span className="ac-ai-online"><span /> Gemini AI</span>
+        <div className="ac-ai-heading"><h3><Bot size={20} /> {t('Conversație', 'Conversation')}</h3><span className="ac-ai-online"><span /> Gemini AI</span>
           {turns.length > 0 && <button type="button" disabled={pending || loading} onClick={() => {
             if (window.confirm(t('Ștergi istoricul AI pentru această mașină?', 'Clear AI history for this vehicle?')))
               void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); });
@@ -129,13 +132,13 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
         </div>
         {!available && <p className="ac-ai-state" role="status">{t('Conexiunea AI nu este configurată. Contactează administratorul.', 'AI is not configured. Contact support.')}</p>}
         {loading ? <p role="status">{t('Se încarcă istoricul…', 'Loading history…')}</p> :
-          turns.length ? <ol className="ac-ai-turns" aria-live="polite">{turns.map(turn => <li key={turn.id}><p className="ac-ai-question" data-user-content>{turn.question}</p><div className="ac-ai-answer"><strong><Sparkles size={16} /> AutoCare AI</strong><p data-user-content>{turn.answer}</p><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></li>)}</ol>
+          visibleTurns.length ? <ol className="ac-ai-turns" aria-live="polite">{visibleTurns.map(turn => <li key={turn.id}><p className="ac-ai-question" data-user-content>{turn.question}</p><div className="ac-ai-answer"><strong><Sparkles size={16} /> {t('Asistent', 'Assistant')}</strong><div className="ac-ai-message-body" data-user-content>{turn.answer.split('\n').map((line, index) => /^#{1,4}\\s/.test(line) ? <h4 key={index}>{line.replace(/^#{1,4}\\s*/, '')}</h4> : <p key={index}>{line.split(/(\\*\\*[^*]+\\*\\*)/g).map((part, partIndex) => part.startsWith('**') && part.endsWith('**') ? <b key={partIndex}>{part.slice(2, -2)}</b> : part)}</p>)}</div><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></li>)}<div ref={bottom} /></ol>
             : <div className="ac-ai-welcome"><span className="ac-ai-welcome-icon"><Sparkles size={26} /></span><h3>{t('Salut! Cu ce te pot ajuta?', 'Hi! How can I help?')}</h3><p>{t('Sunt asistentul tău auto. Povestește-mi ce se întâmplă sau alege o întrebare pentru început.', 'I am your car assistant. Tell me what is happening or choose a question to get started.')}</p><div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={preview || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={16} />{value}<ArrowUpRight size={14} /></button>)}</div></div>}
         <form className="ac-ai-composer" onSubmit={event => { event.preventDefault(); ask(question); }}>
-          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Scrie orice întrebare…', 'Ask me anything about your car…')} rows={2} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
+          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Scrie orice întrebare…', 'Ask me anything about your car…')} rows={2} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); ask(question); } }} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
           <button className="primary" type="submit" disabled={preview || pending || loading || question.trim().length < 1}><Send size={17} />{t('Trimite', 'Send')}</button>
         </form>
-        {pending && <p className="ac-ai-typing" role="status"><span className="ac-ai-typing-dots"><i/><i/><i/></span> {t('AutoCare AI pregătește răspunsul…', 'AutoCare AI is thinking…')}</p>}
+        {pending && <p className="ac-ai-typing" role="status"><span className="ac-ai-typing-dots"><i/><i/><i/></span> {t('Se pregătește răspunsul…', 'Thinking…')}</p>}
         {error && <p className="ac-ai-inline-error" role="alert">{error}</p>}
         <small className="ac-ai-privacy"><ShieldCheck size={14} /> {t('Asistent AI. Recomandările nu înlocuiesc un diagnostic în service.', 'AI assistant. Advice does not replace a professional inspection.')}</small>
         {available && <small>{t('Întrebarea, istoricul recent și datele relevante ale mașinii sunt trimise furnizorului AI. Evită datele personale.', 'The question, recent history and relevant vehicle data are sent to the AI provider. Avoid personal information.')}</small>}
