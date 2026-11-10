@@ -115,6 +115,7 @@ export default async function DesignPreview({
       updatedAt: now,
     },
     primaryVehicleId: null,
+    financeBudgets: {},
     recentTrips: [],
     monthlyTrips: [],
     annualTrips: [],

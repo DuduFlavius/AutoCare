@@ -1,3 +1,4 @@
+import { calendarRecordDate, isPlannedService } from './planned-service';
 import {reminderOffsets,alertOffsetAllowed} from './maintenance-alerts';
 import { and, eq, sql, lte, or } from 'drizzle-orm';
 import { db } from './db';
@@ -20,6 +21,7 @@ export async function scheduleReminders(now = new Date()) {
     .leftJoin(s.subscriptions, eq(s.records.userId, s.subscriptions.userId))
     .where(and(eq(s.records.cancelled, false), eq(s.vehicles.archived, false)));
   let queued = 0;
+  const entitlements = new Map<string, boolean>();
   for (const { r, v, p, u } of rows) {
     const hour = Number(
       new Intl.DateTimeFormat('en-GB', {
@@ -29,16 +31,20 @@ export async function scheduleReminders(now = new Date()) {
       }).format(now),
     );
     if (hour < p.hour) continue;
-    const paid = await premium(u.id, now);
-    const days = r.expiresAt ? daysRemaining(r.expiresAt, now, p.timezone) : null;
-    const due=reminderOffsets({parts:r.parts,paid,defaults:p.offsets,days,nextKm:r.kind==='service'?r.nextKm:null,odometer:v.odometer,afterExpiry:p.afterExpiry});
+    const paid = entitlements.get(u.id) ?? await premium(u.id, now);
+    entitlements.set(u.id, paid);
+    const today = localDate(now, p.timezone);
+    const planned = isPlannedService(r, today);
+    const deadline = calendarRecordDate(r, today);
+    const days = deadline ? daysRemaining(deadline, now, p.timezone) : null;
+    const due = planned ? (days !== null && [7, 3, 1, 0].includes(days) ? ['plan-' + days] : []) : reminderOffsets({parts:r.parts,paid,defaults:p.offsets,days,nextKm:r.kind==='service'?r.nextKm:null,odometer:v.odometer,afterExpiry:p.afterExpiry});
     for (const offset of due)
       for (const channel of ['email', 'push', 'app']) {
         if (channel === 'email' && !u.emailVerified) continue;
         if ((channel === 'email' && !p.emailEnabled) || (channel === 'push' && !p.pushEnabled))
           continue;
         const subject = `${r.category || r.title}: ${v.brand} ${v.model} (${v.plate})`;
-        const reminder = offset.startsWith('km-before-') ? `Mai sunt ${Math.max(0,(r.nextKm??v.odometer)-v.odometer)} km până la intervenția programată.` : offset === 'km'
+        const reminder = planned ? (days === 0 ? 'Lucrarea programată este astăzi.' : `Lucrarea programată se apropie. Mai sunt ${days} ${days === 1 ? 'zi' : 'zile'}.`) : offset.startsWith('km-before-') ? `Mai sunt ${Math.max(0,(r.nextKm??v.odometer)-v.odometer)} km până la intervenția programată.` : offset === 'km'
           ? `Ai atins ${r.nextKm} km. Verifică lucrarea programată.`
           : days === 0
             ? `Astăzi expiră ${r.category || r.title}.`
@@ -177,7 +183,10 @@ export async function deliverReminders(now = new Date(), transport: Transport = 
       context.r.revision === n.revision &&
       (n.channel !== 'email' || context.u.emailVerified) &&
       (n.channel === 'email' ? context.p.emailEnabled : context.p.pushEnabled) &&
-      alertOffsetAllowed(n.offset,context.r.parts,paid,context.p.offsets,context.p.afterExpiry) &&
+      (n.offset.startsWith('plan-')
+        ? isPlannedService(context.r, n.localDate) && calendarRecordDate(context.r, n.localDate) != null
+          && n.offset === 'plan-' + daysRemaining(calendarRecordDate(context.r, n.localDate)!, now, context.p.timezone)
+        : alertOffsetAllowed(n.offset,context.r.parts,paid,context.p.offsets,context.p.afterExpiry)) &&
       localDate(now, context.p.timezone) === n.localDate;
     if (!valid) {
       await db()

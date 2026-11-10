@@ -29,7 +29,7 @@ export function completedServiceSeed<T extends MaintenanceSource>(
   }
   for (const key of Object.keys(details))
     if (
-      /^(cost|completedBy|previousService)|^filtru\d+(Cost|Km|Data)$|^urmatoarea|^verificare|^expirare/.test(
+      /^(cost|completedBy|previousService|planned)|^filtru\d+(Cost|Km|Data)$|^urmatoarea|^verificare|^expirare/.test(
         key,
       )
     )

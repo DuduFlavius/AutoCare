@@ -1,3 +1,4 @@
+import { financeGroup } from './finance-overview';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 export async function vehicleReport({
   vehicles,
@@ -39,6 +40,8 @@ export async function vehicleReport({
     if (index > 0) page = doc.addPage([595.28, 841.89]);
     index++;
     page.drawRectangle({ x: 0, y: 759, width: 596, height: 83, color: rgb(0.07, 0.15, 0.26) });
+    page.drawRectangle({ x: 0, y: 759, width: 596, height: 3, color: rgb(0.22, 0.55, 1) });
+    page.drawText('MIDNIGHT TITANIUM', { x: 437, y: 810, size: 9, font: bold, color: rgb(0.62, 0.80, 1) });
     page.drawText('AutoCare', { x: 36, y: 803, size: 20, font: bold, color: rgb(1, 1, 1) });
     page.drawText('RAPORT AUTO | ' + clean(generatedAt), {
       x: 36,
@@ -86,12 +89,39 @@ export async function vehicleReport({
       y -= heading ? 22 : 15;
     }
   };
-  text('Garaj si istoric', true);
-  text(vehicles.length + ' vehicule | ' + records.length + ' inregistrari');
-  const total = records.reduce((sum, r) => sum + (r.amountKnown ? r.amountBani : 0), 0);
-  text('Cost total in selectie: ' + (total / 100).toFixed(2) + ' RON');
-  text('Costurile necunoscute nu sunt incluse. Documentul nu reprezinta o expertiza tehnica.');
-  y -= 10;
+  text('Sinteza garajului', true);
+  const known = records.filter(row => row.amountKnown);
+  const total = known.reduce((sum, row) => sum + row.amountBani, 0);
+  const tiles = [
+    ['Vehicule', String(vehicles.length)],
+    ['Inregistrari', String(records.length)],
+    ['Cost in selectie', known.length ? (total / 100).toFixed(2) + ' RON' : 'Necompletat'],
+  ];
+  tiles.forEach(([label, value], i) => {
+    const x = 36 + i * 176;
+    page.drawRectangle({ x, y: y - 49, width: 168, height: 55, color: rgb(0.94, 0.96, 0.99), borderWidth: 1, borderColor: rgb(0.84, 0.89, 0.96) });
+    page.drawText(label, { x: x + 10, y: y - 12, size: 9, font: regular, color: rgb(0.28, 0.35, 0.46) });
+    page.drawText(value, { x: x + 10, y: y - 34, size: 14, font: bold, color: rgb(0.11, 0.24, 0.42) });
+  });
+  y -= 67;
+  text('Costurile necunoscute sunt excluse. Raportul nu este o factura sau o expertiza tehnica.');
+  const costsByGroup = new Map<string, number>();
+  for (const row of known) {
+    const group = financeGroup(row);
+    costsByGroup.set(group, (costsByGroup.get(group) ?? 0) + row.amountBani);
+  }
+  if (total > 0) {
+    y -= 9;
+    text('Distributia costurilor', true);
+    for (const [group, amount] of [...costsByGroup].filter(([, value]) => value > 0).sort((a,b) => b[1] - a[1])) {
+      page.drawText(clean(group), { x: 38, y, size: 9, font: regular, color: rgb(0.12, 0.2, 0.31) });
+      page.drawRectangle({ x: 134, y: y - 1, width: 282, height: 7, color: rgb(0.9, 0.93, 0.97) });
+      page.drawRectangle({ x: 134, y: y - 1, width: 282 * amount / total, height: 7, color: rgb(0.22, 0.55, 1) });
+      page.drawText((amount / 100).toFixed(2) + ' RON', { x: 430, y, size: 9, font: bold, color: rgb(0.12, 0.2, 0.31) });
+      y -= 18;
+    }
+  }
+  y -= 12;
   for (const car of vehicles) {
     const rows = records
       .filter((r) => r.vehicleId === car.id)
@@ -103,6 +133,7 @@ export async function vehicleReport({
     y -= 6;
     for (const r of rows) {
       if (y < 125) fresh();
+      page.drawLine({ start: { x: 37, y: y + 9 }, end: { x: 557, y: y + 9 }, color: rgb(0.86, 0.91, 0.97), thickness: 0.7 });
       text((r.date || 'Data necompletata') + ' | ' + r.title, true);
       text(
         r.kind +

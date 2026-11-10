@@ -31,6 +31,12 @@ export async function billingMailValid(
   context: DeliveryContext = {},
   now = new Date(),
 ) {
+  if (template === 'payment_receipt') {
+    if (!context.invoiceId) return false;
+    const [invoice] = await db().select({ id: s.invoices.id }).from(s.invoices)
+      .where(and(eq(s.invoices.id, context.invoiceId), eq(s.invoices.userId, uid), eq(s.invoices.status, 'paid')));
+    return !!invoice;
+  }
   if (!['premium_expiry', 'renewal', 'payment_failed'].includes(template)) return true;
   const sub = (await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid)))[0];
   const grants = await db()

@@ -19,6 +19,7 @@ import { prepareRecordDraft, recordDraftSchedule, type RecordPayload } from '@/l
 export default function RecordEditor({
   kind,
   record,
+  planned = false,
   data,
   vehicleId,
   onSave,
@@ -27,6 +28,7 @@ export default function RecordEditor({
 }: {
   kind: 'document' | 'service' | 'expense';
   record?: RecordItem;
+  planned?: boolean;
   data: Data;
   vehicleId?: string;
   onSave: (payload: RecordPayload, file: File | null) => Promise<boolean>;
@@ -36,6 +38,7 @@ export default function RecordEditor({
   const locale = useApplicationLocale();
   const language = useApplicationLanguage();
   const en = language === 'en';
+  const plannedWork = kind === 'service' && (planned || parseServiceDetails(record?.parts ?? '').planned === '1');
   const formRef = useRef<HTMLFormElement>(null);
   const categoryDrafts = useRef<Record<string, string>>({});
   const [choosing, setChoosing] = useState(!record);
@@ -264,13 +267,15 @@ export default function RecordEditor({
             }
           />
         </label>
+        {plannedWork && <input type="hidden" name="ac_planned" value="1" />}
+        {plannedWork && <p className="small" data-workspace-ui>{en ? 'Saved in Calendar. It enters the service history after completion.' : 'Lucrarea se salvează în Calendar. Apare în istoric după ce o marchezi efectuată.'}</p>}
         <div className="form-grid">
           <label>
             {kind === 'document'
               ? 'Data emiterii · opțional'
               : kind === 'expense'
                 ? 'Data cheltuielii'
-                : 'Data intervenției'}
+                : plannedWork ? (en ? 'Scheduled work date' : 'Data planificată') : 'Data intervenției'}
             <input
               type="date"
               name="date"

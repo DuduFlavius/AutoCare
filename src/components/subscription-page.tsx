@@ -135,6 +135,7 @@ export default function SubscriptionPage({
               }).format(i.amountBani / 100)}{' '}
               · {i.createdAt?new Date(i.createdAt).toLocaleDateString(en?'en-GB':'ro-RO')+' · ':''}{i.status==='paid'?(en?'Confirmed':'Confirmată'):i.status==='refunded'?(en?'Refunded':'Rambursată'):i.status}
               {i.livemode === false ? ' · TEST' : ''}
+              {i.status === 'paid' && i.id.startsWith('in_') && <> · <a href={'/api/v1/billing/invoices/' + encodeURIComponent(i.id)} target="_blank" rel="noopener noreferrer">{en ? 'View invoice' : 'Deschide factura'}</a></>}
             </p>
           ))
         ) : (

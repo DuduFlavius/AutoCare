@@ -1,3 +1,5 @@
+import { isPlannedService } from './planned-service';
+import { localDate } from './config';
 import {isOilMaintenance} from './maintenance-kind';
 export {isOilMaintenance} from './maintenance-kind';
 import { parseServiceDetails } from './service-details';
@@ -17,7 +19,7 @@ export function currentHomeMaintenance<T extends MaintenanceSource & {kind: stri
   });
 }
 export function upcomingMaintenance(records: Array<MaintenanceSource & { kind: string; cancelled: boolean }>, currentKm: number, dailyKm: number | null, timezone: string, today = new Date()) {
-  return rankMaintenanceForecasts(currentHomeMaintenance(records).flatMap(maintenanceTargets), currentKm, dailyKm, timezone, today);
+  return rankMaintenanceForecasts(currentHomeMaintenance(records.filter(record => !isPlannedService(record, localDate(today, timezone)))).flatMap(maintenanceTargets), currentKm, dailyKm, timezone, today);
 }
 
 export function vehicleCareScore(

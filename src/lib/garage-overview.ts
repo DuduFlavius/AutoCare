@@ -1,3 +1,4 @@
+import { isPlannedService } from './planned-service';
 import { upcomingMaintenance } from './application-home';
 import type { dashboard } from './service';
 
@@ -19,8 +20,10 @@ export function garageOverview(data: Pick<Data, 'vehicles' | 'records'>, today: 
     const entries = records.get(record.vehicleId) ?? [];
     entries.push(record);
     records.set(record.vehicleId, entries);
-    if (record.amountKnown !== false) costs += record.amountBani;
-    if (record.kind === 'service' && record.date && record.date <= today) services++;
+    if (!isPlannedService(record, today)) {
+      if (record.amountKnown !== false) costs += record.amountBani;
+      if (record.kind === 'service' && record.date && record.date <= today) services++;
+    }
     if (activeVehicles.has(record.vehicleId) && isActiveGarageDocument(record)) documents++;
   }
   return {

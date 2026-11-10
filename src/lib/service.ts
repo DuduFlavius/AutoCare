@@ -1,3 +1,6 @@
+import { financeBudgetKey, summarize } from './finance-overview';
+import { isPlannedService } from './planned-service';
+export { summarize } from './finance-overview';
 import { primaryVehicleKey } from './garage-overview';
 import { autoAssistantConfigured } from './auto-assistant-config';
 import {groupedNotifications} from './notification-groups';
@@ -119,6 +122,21 @@ export async function editVehicle(uid: string, id: string, input: unknown) {
       .returning()
   )[0];
 }
+export async function saveFinanceBudget(uid: string, vehicleId: string, amountBani: number | null) {
+  return db().transaction(async tx => {
+    await tx.select({ id: s.user.id }).from(s.user).where(eq(s.user.id, uid)).for('update');
+    const [vehicle] = await tx.select({ archived: s.vehicles.archived }).from(s.vehicles)
+      .where(and(eq(s.vehicles.id, vehicleId), eq(s.vehicles.userId, uid))).for('update');
+    if (!vehicle || vehicle.archived) throw new AppError(404, 'Mașina nu este activă.');
+    const key = financeBudgetKey(uid);
+    const [previous] = await tx.select({ value: s.settings.value }).from(s.settings).where(eq(s.settings.key, key));
+    const budgets = { ...(previous?.value as Record<string, number> | undefined) };
+    if (amountBani === null) delete budgets[vehicleId];
+    else budgets[vehicleId] = amountBani;
+    await tx.insert(s.settings).values({ key, value: budgets }).onConflictDoUpdate({ target: s.settings.key, set: { value: budgets } });
+    return { budgets };
+  });
+}
 export async function setPrimaryVehicle(uid: string, id: string) {
   return db().transaction(async tx => {
     const [vehicle] = await tx.select({ archived: s.vehicles.archived }).from(s.vehicles)
@@ -143,6 +161,8 @@ export async function saveRecord(uid: string, input: unknown, id?: string, compl
   const data = { ...parsed, amountBani: parsed.amountKnown ? parsed.amountBani : 0 };
   const car = await ownedVehicle(uid, data.vehicleId);
   const technical=parseServiceDetails(data.parts||'');
+  if (data.kind === 'service' && technical.planned === '1' && !data.date)
+    throw new AppError(400, 'Alege data lucrării planificate.');
   if(technical.budgetEstimat!==undefined && (!Number.isFinite(Number(technical.budgetEstimat)) || Number(technical.budgetEstimat)<0 || Number(technical.budgetEstimat)>1000000)) throw new AppError(400,'Buget estimat invalid.');
   const advanced=['intervalLuni','intervalIntretinere','intervalDistributie','alertDays','alertKm','budgetEstimat'].some(key=>!!technical[key]);
   if(advanced&&!(await premium(uid))) {
@@ -240,57 +260,12 @@ export async function saveProfile(uid: string, input: unknown) {
   await profile(uid);
   await db().update(s.profiles).set(data).where(eq(s.profiles.userId, uid));
 }
-export function summarize(
-  rows: Array<{
-    amountBani: number;
-    category: string;
-    date: string | null;
-    odometer: number | null;
-    vehicleId: string;
-  }>,
-  year: number,
-  month: string,
-) {
-  const selected = rows.filter((r) => r.date?.startsWith(String(year)));
-  const monthly = Array.from({ length: 12 }, (_, i) => ({
-    month: `${year}-${String(i + 1).padStart(2, '0')}`,
-    bani: 0,
-  }));
-  const categories: Record<string, number> = {};
-  for (const r of selected) {
-    const m = Number(r.date!.slice(5, 7)) - 1;
-    monthly[m].bani += r.amountBani;
-    categories[r.category] = (categories[r.category] || 0) + r.amountBani;
-  }
-  const mileage = new Map<string, number[]>();
-  for (const r of [...selected].sort((a,b)=>(a.date||'').localeCompare(b.date||'')))
-    if (r.odometer != null) {
-      const a = mileage.get(r.vehicleId) || [];
-      a.push(r.odometer);
-      mileage.set(r.vehicleId, a);
-    }
-  let km = 0;
-  let mileageComplete=true;
-  for(const id of new Set(selected.filter(r=>r.amountBani>0).map(r=>r.vehicleId))){const values=mileage.get(id)||[];if(values.length<2||values.some((value,index)=>index>0&&value<values[index-1])||values[values.length-1]<=values[0])mileageComplete=false;}
-  for (const a of mileage.values()) if (a.length >= 2) km += Math.max(...a) - Math.min(...a);
-  const annualBani = selected.reduce((a, r) => a + r.amountBani, 0);
-  return {
-    annualBani,
-    monthBani: selected
-      .filter((r) => r.date?.startsWith(month))
-      .reduce((a, r) => a + r.amountBani, 0),
-    monthly,
-    categories,
-    costPerKm: mileageComplete && km > 0 ? annualBani / 100 / km : null,
-    km,
-  };
-}
 export async function dashboard(uid: string) {
   const p = await profile(uid);
   const now = new Date();
   const date = localDate(now, p.timezone);
   const tripMonth = sql<string>`to_char(${s.gpsTrips.startedAt} AT TIME ZONE ${p.timezone}, 'YYYY-MM')`;
-  const [cars, rows, sub, alerts, attachments, photos, recentTrips, annualTrips, primaryPreference] = await Promise.all([
+  const [cars, rows, sub, alerts, attachments, photos, recentTrips, annualTrips, primaryPreference, budgetPreference] = await Promise.all([
     db()
       .select()
       .from(s.vehicles)
@@ -334,6 +309,7 @@ export async function dashboard(uid: string) {
       sql`${s.gpsTrips.startedAt} <= ${now.toISOString()}::timestamptz`,
     )).groupBy(s.gpsTrips.vehicleId, sql`2`),
     db().select({ value: s.settings.value }).from(s.settings).where(eq(s.settings.key, primaryVehicleKey(uid))),
+    db().select({ value: s.settings.value }).from(s.settings).where(eq(s.settings.key, financeBudgetKey(uid))),
   ]);
   const preferredId = (primaryPreference[0]?.value as { vehicleId?: string } | undefined)?.vehicleId;
   const grants = await activeGrants(uid);
@@ -341,13 +317,14 @@ export async function dashboard(uid: string) {
   const extensions=await paidExtensions(uid);
   const paid = (!!sub[0]?.subscriptionId && isPremium(sub[0])) || grants.length > 0 || extensions.length>0;
   const summary = summarize(
-    rows.filter((r) => !r.cancelled),
+    rows.filter((r) => !r.cancelled && !isPlannedService(r, date)).map(r => ({ ...r, amountBani: r.amountKnown ? r.amountBani : 0 })),
     Number(date.slice(0, 4)),
     date.slice(0, 7),
   );
   return {
     profile: p,
     vehicles: cars,
+    financeBudgets: (budgetPreference[0]?.value ?? {}) as Record<string, number>,
     primaryVehicleId: cars.find(car => !car.archived && car.id === preferredId)?.id ?? null,
     recentTrips,
     monthlyTrips: annualTrips.filter(trip => trip.month === date.slice(0, 7)).map(({ vehicleId, meters, count }) => ({ vehicleId, meters, count })),

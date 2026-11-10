@@ -50,7 +50,7 @@ export const publicTopics = {
       ],
       [
         'Planifică pe baza informațiilor corecte',
-        'Înregistrează termenul sau pragul de kilometri al unei intervenții când îl cunoști. AutoCare afișează următoarea operațiune introdusă, fără să inventeze un diagnostic ori un interval de service. Pentru recomandările tehnice urmează documentația producătorului și indicațiile unui atelier calificat.',
+        'Planifică o lucrare în Calendar și înregistrează separat data și kilometrajul la care a fost efectuată. În ultima săptămână, programarea poate apărea și în rezumatul contului. Pentru reviziile recurente, introdu termenul sau pragul de kilometraj confirmat. Pentru recomandările tehnice urmează documentația producătorului și indicațiile unui atelier calificat.',
       ],
     ],
   },
@@ -67,7 +67,7 @@ export const publicTopics = {
       ],
       [
         'Compară perioadele în același mod',
-        'Graficele și rezumatele folosesc înregistrările contului. Urmărește costurile pe luni și categorii și consultă istoricul pentru explicații. Un cont fără cheltuieli afișează o stare goală, fără valori demonstrative.',
+        'Compară cheltuielile lunare și anuale pe vehicul și categorie. Graficul diferențiază o perioadă fără înregistrări de o perioadă cu un cost înregistrat de zero lei. În Premium poți stabili un buget lunar pe vehicul și urmări cât ai consumat din el.',
       ],
       [
         'Evită dublarea costurilor',

@@ -4,7 +4,9 @@ import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
 import './studio-workspace.css';
-import VehiclePhoto from './application/vehicle-photo';
+import { FinanceCenter } from './application/finance-center';
+import { TitaniumWave } from './titanium-wave';
+import { calendarRecordDate, isPlannedService } from '@/lib/planned-service';
 import WorkspaceViewport from './workspace-viewport';
 import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspacePreferences, WorkspaceModuleHeader } from './app-workspace';
 import { normalizeWorkspaceSearch, normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
@@ -77,6 +79,7 @@ type Modal = {
   vehicle?: Vehicle;
   record?: RecordItem;
   completionOf?: string;
+  planned?: boolean;
 } | null;
 const _money = (b: number) =>
   new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(b / 100);
@@ -606,6 +609,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     tab === 'Documente' ? 'document' : tab === 'Întreținere' ? 'service' : 'expense';
   const exportFilters = {
     kind: kindFilter,
+    journal: tab === 'Întreținere' ? '1' : undefined,
     vehicleId: filter,
     category: categoryFilter,
     status: recordState,
@@ -615,7 +619,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     to: period === 'all' ? undefined : nowDate,
   };
   const rows = filterRecords(
-    data?.records || [],
+    (data?.records || []).filter(row => tab !== 'Întreținere' || !isPlannedService(row, nowDate)),
     exportFilters,
     new Date(),
     data?.profile.timezone || 'Europe/Bucharest',
@@ -946,7 +950,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 <button
                   className="primary"
                   disabled={!activeCars.length}
-                  onClick={() => setModal({ kind: 'service' })}
+                  onClick={() => setModal({ kind: 'service', planned: true })}
                 >
                   <Plus size={16} /> Planifică o lucrare
                 </button>
@@ -972,7 +976,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
               preview={!!previewData}
               onCreate={(kind) => {
                 setFilter(vehicleDetail);
-                setModal({ kind });
+                setModal({ kind, planned: kind === 'service' });
               }}
               data={data}
               id={vehicleDetail}
@@ -1014,7 +1018,16 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 onArchive={vehicle => { setError(''); setArchiveVehicleTarget(vehicle); }} onSelect={selectVehicle} onRefresh={refresh}
               />
             )}
-            {['Documente', 'Întreținere', 'Cheltuieli'].includes(tab) && (
+            {tab === 'Cheltuieli' && <FinanceCenter
+              data={data} today={nowDate} primaryId={primaryVehicleId} preview={!!previewData} money={moneyDisplay}
+              onEdit={record => setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })}
+              onArchive={record => {
+                if (window.confirm(language === 'en' ? 'Archive this record and stop its reminders?' : 'Arhivezi înregistrarea și oprești alertele asociate?'))
+                  void act(() => api('records/' + record.id, 'DELETE'));
+              }}
+              onAi={id => navigate('AutoCare AI', 'push', id)} onRefresh={refresh}
+            />}
+            {['Documente', 'Întreținere'].includes(tab) && (
               <>
                 {tab === 'Documente' && (
                   <>
@@ -1060,8 +1073,12 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                           <h2 data-user-content>{vehicle.brand} {vehicle.model}</h2>
                           <p data-user-content>{[vehicle.year, vehicle.engine, vehicle.fuel].filter(Boolean).join(' · ')}</p>
                           <strong>{vehicle.odometer.toLocaleString(locale)} km</strong>
+                          <div className="ac-service-actions" data-workspace-ui>
+                            <button type="button" onClick={() => navigate('AutoCare AI', 'push', vehicle.id)}>AI Maintenance <ArrowUpRight size={15}/></button>
+                            <button type="button" onClick={() => { if (navigate('Calendar')) setFilter(vehicle.id); }}>{language === 'en' ? 'View calendar' : 'Vezi calendarul'}</button>
+                          </div>
                         </div>
-                        <VehiclePhoto vehicleId={vehicle.id} name={vehicle.brand + ' ' + vehicle.model} uploaded={data.photos.some(photo => photo.vehicleId === vehicle.id)} preview={!!previewData}/>
+                        <TitaniumWave />
                       </div>
                     ))}
                   </section>
@@ -1228,64 +1245,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                     </div>
                   </div>
                 )}
-                {tab === 'Întreținere' && <details open className="app-maintenance-plan" data-workspace-ui><summary><CalendarDays size={18}/>{language==='en'?'Maintenance plan · days & mileage':'Planul de întreținere · zile și kilometri'}<ChevronRight size={16}/></summary><MaintenanceForecast data={data} records={visible} preview={!!previewData} onUpdateMileage={()=>navigate('Kilometraj')} onUpgrade={()=>navigate('Abonament')}/></details>}
-                {tab === 'Cheltuieli' && (
-                  <div className="grid2 ac-expenses-board">
-                    <section className="card">
-                      <p className="eyebrow">REZUMAT FINANCIAR · TOATE MAȘINILE</p>
-                      <h3>Costuri înregistrate</h3>
-                      <div className="monthly-cost">
-                        <span className="small muted">Luna aceasta</span>
-                        <strong>{moneyDisplay(data.summary.monthBani)}</strong>
-                      </div>
-                      <span className="small muted">Total anual</span>
-                      <div className="price">{moneyDisplay(data.summary.annualBani)}</div>
-                      <p className="muted small">
-                        Include lucrările și documentele cu un cost, fără dublare.
-                      </p>
-                      <p className="small">
-                        {data.summary.costPerKm == null
-                          ? (language==='en'?'Cost per km unavailable: at least two distinct readings are required.':'Adaugă cel puțin două citiri distincte pentru a vedea costul pe kilometru.')
-                          : (language==='en'?`Estimated cost per km: ${moneyDisplay(data.summary.costPerKm*100)} (partial data coverage)`:`Cost/km estimativ: ${moneyDisplay(data.summary.costPerKm*100)} (acoperire parțială a datelor)`)}
-                      </p>
-                      {Object.entries(data.summary.categories).map(([category, value]) => (
-                        <button
-                          className="category-cost"
-                          key={category}
-                          onClick={() => setQuery(category)}
-                        >
-                          <span className="between">
-                            <span>{category}</span>
-                            <strong>{moneyDisplay(value)}</strong>
-                          </span>
-                          <span className="category-track">
-                            <span
-                              style={{
-                                width:
-                                  Math.min(
-                                    100,
-                                    data.summary.annualBani > 0
-                                      ? (value / data.summary.annualBani) * 100
-                                      : 0,
-                                  ) + '%',
-                              }}
-                            />
-                          </span>
-                        </button>
-                      ))}
-                    </section>
-                    {(data.summary.monthly.some(m=>m.bani>0) || !data.premium) && <section className="card">
-                      <h3>Evoluția cheltuielilor</h3>
-                      {data.premium ? (
-                        <ExpenseChart data={data} currency={currency} />
-                      ) : (
-                        <p className="muted small">
-                          Graficele și analiza detaliată sunt disponibile cu Premium.
-                        </p>
-                      )}
-                    </section>}
-                  </div>
-                )}
+                {tab === 'Întreținere' && <details open className="app-maintenance-plan" data-workspace-ui><summary><CalendarDays size={18}/>{language==='en'?'Maintenance plan · days & mileage':'Planul de întreținere · zile și kilometri'}<ChevronRight size={16}/></summary><MaintenanceForecast data={data} records={visible.filter(row => !isPlannedService(row, nowDate))} vehicleId={filter || primaryVehicleId} preview={!!previewData} onUpdateMileage={()=>navigate('Kilometraj')} onUpgrade={()=>navigate('Abonament')}/></details>}
                 {!rows.length &&
                   (query ||
                     filter ||
@@ -1580,6 +1540,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 {calendarView === 'month' ? (
                   <Calendar
                     month={calendarMonth}
+                    today={nowDate}
                     open={(record) =>
                       setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })
                     }
@@ -1590,10 +1551,10 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                     {visible
                       .filter(
                         (r) =>
-                          r.expiresAt?.startsWith(calendarMonth) &&
+                          calendarRecordDate(r, nowDate)?.startsWith(calendarMonth) &&
                           activeCars.some((v) => v.id === r.vehicleId),
                       )
-                      .sort((a, b) => a.expiresAt!.localeCompare(b.expiresAt!))
+                      .sort((a, b) => calendarRecordDate(a, nowDate)!.localeCompare(calendarRecordDate(b, nowDate)!))
                       .map((r) => (
                         <button
                           className="event-line"
@@ -1605,15 +1566,17 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                             })
                           }
                         >
-                          <span className="event-date">{r.expiresAt?.slice(-2)}</span>
+                          <span className="event-date">{calendarRecordDate(r, nowDate)?.slice(-2)}</span>
                           <span className="list-grow">
                             <strong data-user-content>{r.title}</strong>
                             <span className="muted small">{vehicleName(r.vehicleId)}</span>
                           </span>
-                          <Status record={r} />
+                          {isPlannedService(r, nowDate)
+                            ? <span className="badge">{language === 'en' ? 'Scheduled work' : 'Lucrare planificată'}</span>
+                            : <Status record={r} />}
                         </button>
                       ))}
-                    {!visible.some((r) => r.expiresAt?.startsWith(calendarMonth)) && (
+                    {!visible.some((r) => calendarRecordDate(r, nowDate)?.startsWith(calendarMonth) && activeCars.some(v => v.id === r.vehicleId)) && (
                       <Empty text="Nu ai termene înregistrate în luna selectată." />
                     )}
                   </div>
@@ -2043,11 +2006,20 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             }
             onClose={closeRecord}
           >
+            {modal.kind === 'service' && modal.record && !modal.completionOf && !modal.record.cancelled && data.premium && isPlannedService(modal.record, nowDate) && calendarRecordDate(modal.record, nowDate) && (
+              <button type="button" className="primary" onClick={() => {
+                const record = modal.record!;
+                if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?', language))) return;
+                setRecordDirty(false);
+                setModal({ kind: 'service', completionOf: record.id, record: completedServiceSeed(record, data.vehicles.find(v => v.id === record.vehicleId)?.odometer ?? record.odometer ?? 0, nowDate) });
+              }} data-workspace-ui>{language === 'en' ? 'Mark as completed' : 'Marchează ca efectuată'}</button>
+            )}
             {modal.kind !== 'vehicle' ? (
               <RecordEditor
-                key={modal.record?.id || modal.kind}
+                key={modal.completionOf ? 'completion:' + modal.completionOf : modal.record?.id || modal.kind}
                 kind={modal.kind}
                 record={modal.record}
+                planned={modal.planned || (!modal.completionOf && !!modal.record && isPlannedService(modal.record, nowDate))}
                 data={data}
                 vehicleId={filter || undefined}
                 onDirty={setRecordDirty}
@@ -2205,60 +2177,14 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     </div></ApplicationLanguageProvider>
   );
 }
-function ExpenseChart({ data, currency }: { data: Data; currency: 'RON' | 'EUR' }) {
-  const chartLanguage = useApplicationLanguage();
-
-  const locale=useApplicationLocale();
-const moneyDisplay = (bani: number): string => currency === 'EUR'
-    ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR'}).format(bani / 500)
-    : new Intl.NumberFormat(locale, {style:'currency',currency:'RON'}).format(bani / 100);
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const max = Math.max(1, ...data.summary.monthly.map((m) => m.bani));
-  return (
-    <>
-      <div
-        className="chart"
-        role="group"
-        aria-label={
-          (chartLanguage === 'en' ? 'Monthly expenses: ' : 'Cheltuieli lunare: ') +
-          data.summary.monthly.map((m) => `${m.month}: ${moneyDisplay(m.bani)}`).join(', ')
-        }
-      >
-        {data.summary.monthly.map((m) => (
-          <button
-            type="button"
-            className="bar"
-            key={m.month}
-            aria-label={`${m.month}: ${moneyDisplay(m.bani)}`}
-            aria-pressed={selectedMonth === m.month}
-            onClick={() => setSelectedMonth(m.month)}
-            title={`${m.month}: ${moneyDisplay(m.bani)}`}
-          >
-            <div className="bar-fill" style={{ height: Math.max(2, (m.bani / max) * 140) }} />
-            <span>{m.month.slice(-2)}</span>
-          </button>
-        ))}
-      </div>
-      {selectedMonth && (
-        <p role="status" className="small">
-          {selectedMonth}:{' '}
-          <strong>
-            {moneyDisplay(data.summary.monthly.find((m) => m.month === selectedMonth)?.bani || 0)}
-          </strong>
-        </p>
-      )}
-      <p className="micro">
-        Valori din înregistrările active. Lunile fără date nu indică lipsa cheltuielilor.
-      </p>
-    </>
-  );
-}
 function Calendar({
   month,
+  today,
   rows,
   open,
 }: {
   month: string;
+  today: string;
   rows: RecordItem[];
   open: (record: RecordItem) => void;
 }) {
@@ -2282,13 +2208,13 @@ function Calendar({
         return (
           <div
             className={
-              'calendar-day ' + (date === new Date().toLocaleDateString('en-CA') ? 'today' : '')
+              'calendar-day ' + (date === today ? 'today' : '')
             }
             key={date}
           >
             <strong>{i + 1}</strong>
             {rows
-              .filter((r) => r.expiresAt === date)
+              .filter((r) => calendarRecordDate(r, today) === date)
               .map((r) => (
                 <button className="calendar-event" key={r.id} onClick={() => open(r)}>
                   {r.title}

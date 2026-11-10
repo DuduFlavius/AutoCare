@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import {extensionCheckout,extensionEvent} from './subscription-extensions';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from './db';
 import * as s from './schema';
 import { AppError } from './service';
@@ -15,6 +15,18 @@ export function stripe() {
   if (!key.startsWith('sk_test_') && process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS !== 'true')
     throw new AppError(503, 'Plățile reale sunt dezactivate în această versiune.');
   return new Stripe(key, { timeout: 12000, maxNetworkRetries: 1 });
+}
+export async function billingInvoice(uid: string, id: string) {
+  if (!/^in_[A-Za-z0-9_]{1,150}$/.test(id)) throw new AppError(404, 'Factura nu există.');
+  const [stored] = await db().select({ id: s.invoices.id, livemode: s.invoices.livemode }).from(s.invoices)
+    .where(and(eq(s.invoices.id, id), eq(s.invoices.userId, uid), eq(s.invoices.status, 'paid')));
+  if (!stored) throw new AppError(404, 'Factura nu există.');
+  const invoice = await stripe().invoices.retrieve(id);
+  if (invoice.status !== 'paid' || invoice.livemode !== stored.livemode || !invoice.hosted_invoice_url)
+    throw new AppError(404, 'Factura nu este disponibilă.');
+  const url = new URL(invoice.hosted_invoice_url);
+  if (url.protocol !== 'https:') throw new AppError(502, 'Adresa facturii nu este disponibilă.');
+  return url;
 }
 export async function checkout(uid: string, interval: string, extend=false) {
   if (!['monthly', 'quarterly', 'annual'].includes(interval))
@@ -212,6 +224,8 @@ export async function processStripeEvent(event: Stripe.Event, client: Stripe) {
           target: s.invoices.id,
           set: { status: invoice.status || 'unknown', amountBani: invoice.amount_paid },
         });
+    if (invoice?.status === 'paid' && event.type === 'invoice.paid' && invoice.billing_reason === 'subscription_create' && invoice.amount_paid > 0)
+      await queueAutomatedMail(uid, 'payment_receipt', `payment-receipt:${invoice.id}`, { invoiceId: invoice.id }, tx);
     if (invoice && event.type === 'invoice.paid' && invoice.billing_reason === 'subscription_cycle' && status === 'active')
       await queueAutomatedMail(uid, 'renewal', `renewal:${invoice.id}`, { subscriptionId: sub.id, invoiceId: invoice.id, periodEnd: end ? new Date(end * 1000).toISOString() : undefined }, tx);
     if (invoice && event.type === 'invoice.payment_failed' && ['past_due','unpaid','incomplete','pending_payment'].includes(status))

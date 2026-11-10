@@ -35,7 +35,9 @@ const labels: Record<string, string> = {
 export default function MailCenter() {
 
   const locale=useApplicationLocale();
-const [libraryName, setLibraryName] = useState('');
+  const [releaseVersion, setReleaseVersion] = useState('');
+  const [releaseDate, setReleaseDate] = useState('');
+  const [libraryName, setLibraryName] = useState('');
   const [communicationType, setCommunicationType] = useState('Informare cont');
   const [section, setSection] = useState<'compose' | 'history' | 'automation'>('compose');
   const [gmailStatus, setGmailStatus] = useState<{connected: boolean; testedAt?: string | null; reconnectRequired?: boolean} | null>(null);
@@ -237,6 +239,11 @@ const [libraryName, setLibraryName] = useState('');
               ))}
             </select>
           </label>
+          {template === 'release_news' && <div className="form-grid">
+            <label>{locale === 'ro-RO' ? 'Versiunea lansării' : 'Release version'}<input value={releaseVersion} maxLength={40} onChange={e => setReleaseVersion(e.target.value)} placeholder="2.4.0" /></label>
+            <label>{locale === 'ro-RO' ? 'Data lansării' : 'Release date'}<input type="date" value={releaseDate} onChange={e => setReleaseDate(e.target.value)} /></label>
+            <p className="small muted">{locale === 'ro-RO' ? 'Anunțul intră în coadă pentru data aleasă. AutoCare verifică acordul pentru noutăți înainte de expediere.' : 'The release is queued for the selected date. AutoCare verifies news consent before sending.'}</p>
+          </div>}
           <label>Tip de comunicare — alege sau scrie tu
             <input list="mail-communication-options" disabled={saved || busy} maxLength={100} value={communicationType} onChange={e => setCommunicationType(e.target.value)} placeholder="Ex.: Informare service, răspuns suport…" />
             <datalist id="mail-communication-options">{['Informare cont', 'Revizie și întreținere', 'Documente și expirări', 'Asistență tehnică', 'GPS și Bluetooth', 'Actualizare aplicație', 'Stare abonament', 'Incident tehnic', 'Mentenanță platformă', 'Confirmare solicitare', 'Răspuns reclamație', 'Anunț de serviciu', 'Feedback', 'Noutăți', 'Ofertă specială'].map(x => <option key={x} value={x} />)}{data.library.filter(x => x.kind === 'communication').map(x => <option key={x.id} value={x.label} />)}</datalist>
@@ -426,6 +433,14 @@ const [libraryName, setLibraryName] = useState('');
                 await api(`/campaigns/${draftId}/request-approval`, 'POST');
                 setData(await api()); setNotice('Cererea apare în Mail Center-ul Fondatorului. Nu s-au trimis emailuri.'); setSection('history'); return;
               }
+              if (template === 'release_news') {
+                if (!data.permissions.canApprove) throw new Error('Doar Fondatorul poate publica o lansare.');
+                await api(`/campaigns/${draftId}/publish-release`, 'POST', { version: releaseVersion, releaseDate });
+                setData(await api());
+                setNotice('Lansarea a fost programată. Starea expedierii apare în istoric.');
+                setSection('history');
+                return;
+              }
               let total = 0;
               let remaining = true;
               for (let batch = 0; batch < 15 && remaining; batch++) {
@@ -447,7 +462,7 @@ const [libraryName, setLibraryName] = useState('');
               });
             }}
           >
-            <Send size={17} /> {busy ? 'Se procesează…' : !data.permissions.directSend && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved') ? 'Trimite Fondatorului pentru aprobare' : saved ? 'Continuă trimiterea emailurilor' : recipients.length ? `Trimite emailul către ${recipients.length} destinatari` : 'Bifează un destinatar pentru trimitere'}
+            <Send size={17} /> {busy ? 'Se procesează…' : !data.permissions.directSend && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved') ? 'Trimite Fondatorului pentru aprobare' : template === 'release_news' ? 'Programează AutoCare News' : saved ? 'Continuă trimiterea emailurilor' : recipients.length ? `Trimite emailul către ${recipients.length} destinatari` : 'Bifează un destinatar pentru trimitere'}
           </button>
           {!recipients.length && <p className="small muted">Bifează cel puțin un destinatar pentru a activa trimiterea.</p>}
           {data.permissions.directSend && gmailStatus && !gmailStatus.testedAt && (

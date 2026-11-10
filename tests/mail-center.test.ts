@@ -519,3 +519,22 @@ test('Retry queues only definite failures without a provider ID, preserving acce
   assert.equal(after.find(x=>x.id===rows[1].id)?.status,'pending');
   assert.equal((await center.retryFailedCampaign(founder,campaign.id)).requeued,0);
 });
+
+test('Release News cannot bypass the explicit publish gate or marketing consent', async () => {
+  const draft = await center.saveCampaign(founder, input({
+    template: 'release_news', category: 'promotional', message: 'Actualizare importantă pentru calendar.',
+  }));
+  await assert.rejects(() => center.sendCampaign(founder, draft.id), /publică lansarea/i);
+  await assert.rejects(() => center.publishReleaseNews(admin, draft.id, { version: '2.4.0', releaseDate: '2030-01-01' }));
+  await assert.rejects(() => center.publishReleaseNews(founder, draft.id, { version: '2.4.0', releaseDate: '2030-01-01' }), /Activează automatizările/);
+  assert.equal((await center.campaignDetail(founder, draft.id)).campaign.status, 'draft');
+});
+
+test('Payment receipt validation requires the recipient’s own paid invoice', async () => {
+  const invoiceId = 'in_finance_test';
+  await db().insert(s.invoices).values({ id: invoiceId, userId: client, amountBani: 15000, currency: 'ron', status: 'paid' });
+  assert.equal(await billingMailValid(client, 'payment_receipt', { invoiceId }), true);
+  assert.equal(await billingMailValid(other, 'payment_receipt', { invoiceId }), false);
+  await db().update(s.invoices).set({ status: 'refunded' }).where(eq(s.invoices.id, invoiceId));
+  assert.equal(await billingMailValid(client, 'payment_receipt', { invoiceId }), false);
+});

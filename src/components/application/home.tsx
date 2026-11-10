@@ -31,6 +31,8 @@ import {
 import { forecastDuration } from '@/lib/service-forecast';
 import { AppEmpty, AppStatus } from './ui';
 import { TitaniumWave } from '../titanium-wave';
+import { calendarRecordDate, isPlannedService } from '@/lib/planned-service';
+import { daysRemaining } from '@/lib/config';
 import { AutoAssistant } from './auto-assistant';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -70,7 +72,16 @@ export default function ApplicationHome({
   const usage = useMileageUsage(car?.id ?? '', car?.odometer ?? 0, preview);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null),
     [editingEstimate, setEditingEstimate] = useState(false);
-  const rows = data.records.filter((r) => !r.cancelled && r.vehicleId === car?.id);
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: data.profile.timezone });
+  const allRows = data.records.filter((r) => !r.cancelled && r.vehicleId === car?.id);
+  const rows = allRows.filter(row => !isPlannedService(row, today));
+  const imminent = allRows.filter(row => isPlannedService(row, today))
+    .flatMap(row => {
+      const scheduled = calendarRecordDate(row, today);
+      if (!scheduled) return [];
+      const days = daysRemaining(scheduled, new Date(), data.profile.timezone);
+      return days >= 0 && days <= 7 ? [{ row, days }] : [];
+    }).sort((a, b) => a.days - b.days)[0];
   const planningRows = data.premium ? rows : rows.filter(isOilMaintenance);
   const maintenance = car
     ? upcomingMaintenance(planningRows, car.odometer, usage.dailyKm, data.profile.timezone)
@@ -91,7 +102,6 @@ export default function ApplicationHome({
     .filter((r) => r.kind === 'service')
     .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
     .slice(0, 4);
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: data.profile.timezone });
   const costRows = rows.filter(
     (r) => ['expense', 'service', 'document'].includes(r.kind) && r.amountKnown !== false && r.date,
   );
@@ -239,6 +249,11 @@ export default function ApplicationHome({
                     <p><strong data-user-content>{attention[0].title}</strong> · {attention[0].status.label}</p>
                     <button type="button" className="studio-text-button" onClick={() => onRecord(attention[0])}>{t('Vezi documentul', 'View document')} <ArrowUpRight size={14}/></button>
                   </>
+                ) : imminent ? (
+                  <>
+                    <p><strong data-user-content>{imminent.row.title}</strong> · {imminent.days === 0 ? t('Astăzi', 'Today') : imminent.days + ' ' + t('zile', 'days')}</p>
+                    <button type="button" className="studio-text-button" onClick={() => navigate('Calendar')}>{t('Vezi calendarul', 'View calendar')} <ArrowUpRight size={14} /></button>
+                  </>
                 ) : next ? (
                   <>
                     <p><strong data-user-content>{next.service.title}</strong> · {labels[next.status.state]}</p>
@@ -252,7 +267,7 @@ export default function ApplicationHome({
                 )}
               </div>
             </section>
-            <AutoAssistant key={car.id} vehicleId={car.id} available={!preview && data.autoAssistantAvailable} premium={data.premium} en={en} onPremium={() => navigate('Premium')} onOpen={() => navigate('AutoCare AI')} />
+            <AutoAssistant key={car.id} vehicleId={car.id} preview={preview} available={!preview && data.autoAssistantAvailable} premium={data.premium} en={en} onPremium={() => navigate('Premium')} onOpen={() => navigate('AutoCare AI')} />
           </div>
           </div>
           <div className="ac-cockpit-data">

@@ -1,4 +1,8 @@
 'use client';
+import { isFinancialEntry } from '@/lib/finance-overview';
+import { isPlannedService } from '@/lib/planned-service';
+import { localDate } from '@/lib/config';
+import VehiclePhoto from './application/vehicle-photo';
 import { TitaniumWave } from './titanium-wave';
 import {useApplicationLocale} from './application-locale';
 import { fuelConsumption } from '@/lib/fuel-log';
@@ -757,6 +761,9 @@ export function VehicleSheet({
 }) {
 
   const locale=useApplicationLocale();
+  const [photoRevision, setPhotoRevision] = useState(0);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState('');
   const [section, setSection] = useState<'overview' | 'document' | 'service' | 'expense' | 'mileage'>('overview');
   const en = locale.startsWith('en');
   const date=(value:string|null)=>formatDate(value,locale);
@@ -765,7 +772,9 @@ export function VehicleSheet({
   const usage = useMileageUsage(id, v?.odometer ?? 0, preview);
   if (!v) return null;
   const entries = data.records.filter((r) => r.vehicleId === id);
-  const active = entries.filter((r) => !r.cancelled);
+  const today = localDate(new Date(), data.profile.timezone);
+  const active = entries.filter(r => !r.cancelled && !isPlannedService(r, today));
+  const hasPhoto = photoRevision > 0 || data.photos.some(photo => photo.vehicleId === id);
   const cost = active.filter(record => record.amountKnown !== false).reduce((sum, r) => sum + r.amountBani, 0);
   const consumption = fuelConsumption(active);
   const readings = active
@@ -777,6 +786,26 @@ export function VehicleSheet({
   const next = upcoming[0];
   const care = vehicleCareScore(docs, upcoming);
   const t = (ro: string, english: string) => en ? english : ro;
+  async function savePhoto(file: File) {
+    if (preview || uploadingPhoto) return;
+    setPhotoError('');
+    if (file.size > 2097152) {
+      setPhotoError(t('Fotografia poate avea maximum 2 MB.', 'The photo must be 2 MB or smaller.'));
+      return;
+    }
+    setUploadingPhoto(true);
+    try {
+      const form = new FormData();
+      form.set('file', file);
+      const response = await fetch('/api/v1/vehicles/' + encodeURIComponent(id) + '/photo', { method: 'POST', body: form });
+      if (!response.ok) throw new Error('Upload failed');
+      setPhotoRevision(previous => previous + 1);
+    } catch {
+      setPhotoError(t('Fotografia nu a putut fi salvată. Verifică formatul și încearcă din nou.', 'The photo could not be saved. Check the format and try again.'));
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
   const odometerByDay = new Map<string, { time: number; km: number }>();
   for (const reading of [...(usage.readings ?? [])].reverse()) {
     const time = Date.parse(reading.recordedAt);
@@ -885,6 +914,19 @@ export function VehicleSheet({
             )) : <p className="muted">{t('Adaugă primele documente pentru această mașină.', 'Add the first documents for this vehicle.')}</p>}
             <button type="button" className="studio-text-button" onClick={() => setSection('document')}>{t('Toate documentele', 'All documents')} <ArrowUpRight size={14} /></button>
           </section>
+          {!preview && (!v.archived || hasPhoto) && <section className="card ac-vehicle-notes ac-owned-vehicle-photo">
+            <h3>{t('Fotografia vehiculului', 'Vehicle photo')}</h3>
+            {hasPhoto ? <VehiclePhoto key={photoRevision} vehicleId={id} name={v.brand + ' ' + v.model} uploaded /> : <p>{t('Adaugă o fotografie a mașinii tale.', 'Add a photo of your vehicle.')}</p>}
+            {!v.archived && <label>{hasPhoto ? t('Înlocuiește fotografia', 'Replace photo') : t('Alege JPEG sau PNG', 'Select JPEG or PNG')}
+              <input type="file" accept="image/jpeg,image/png" disabled={uploadingPhoto} onChange={event => {
+                const file = event.currentTarget.files?.[0];
+                event.currentTarget.value = '';
+                if (file) void savePhoto(file);
+              }} />
+            </label>}
+            {uploadingPhoto && <p role="status">{t('Se salvează fotografia…', 'Saving photo…')}</p>}
+            {photoError && <p role="alert">{photoError}</p>}
+          </section>}
           {v.notes && <section className="card ac-vehicle-notes"><h3>{t('Notițe', 'Notes')}</h3><p data-user-content>{v.notes}</p></section>}
         </div>
       )}
@@ -924,8 +966,8 @@ export function VehicleSheet({
       </section>
       {(['document', 'service', 'expense'] as const).map((kind) => {
         const rows = kind === 'expense'
-          ? active.filter((r) => r.kind === 'expense' || (r.kind === 'service' && r.amountKnown !== false && r.amountBani > 0))
-          : entries.filter((r) => r.kind === kind);
+          ? active.filter(r => isFinancialEntry(r, today))
+          : entries.filter(r => r.kind === kind && !isPlannedService(r, today));
         return (
         <section className="card ac-vehicle-records" hidden={section !== kind && !(section === 'overview' && kind === 'service')} key={kind}>
           <h3>

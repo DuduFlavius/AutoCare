@@ -75,11 +75,28 @@ export const emailTemplates = {
     cta: 'Vezi abonamentul',
     path: '/cont?tab=Abonament',
   },
+  payment_receipt: {
+    label: 'Confirmare plată și factură',
+    title: 'Plata ta a fost confirmată',
+    subject: 'AutoCare — confirmare plată și factură',
+    body: 'Plata abonamentului a fost confirmată. Poți deschide factura și istoricul plăților din contul AutoCare.',
+    cta: 'Vezi factura',
+    path: '/cont?tab=Abonament',
+  },
+  release_news: {
+    label: 'AutoCare News · Lansare importantă',
+    title: 'Noutăți AutoCare',
+    subject: 'AutoCare News — lansare importantă',
+    body: 'Descrie funcțiile noi și schimbările importante din această versiune.',
+    cta: 'Explorează AutoCare',
+    path: '/functionalitati',
+    category: 'promotional',
+  },
   renewal: {
     label: 'Reînnoire Premium',
     title: 'Mai departe, cu AutoCare Premium.',
     subject: 'AutoCare — plata pentru reînnoire a fost confirmată',
-    body: 'Plata pentru reînnoirea abonamentului tău a fost confirmată. Poți verifica perioada curentă și detaliile abonamentului în cont.',
+    body: 'Plata pentru reînnoirea abonamentului tău a fost confirmată. Poți verifica perioada curentă și deschide factura din istoricul plăților.',
     cta: 'Vezi abonamentul',
     path: '/cont?tab=Abonament',
   },
@@ -159,19 +176,20 @@ export function renderEmail(template: EmailTemplate, input: TemplateInput = {}):
   const name = input.name?.trim() || 'prietene';
   const promotional = input.promotional || templateCategory(template) === 'promotional';
   const preferences = appLink('/cont?tab=Setări');
+  const isReminder = template === 'reminder';
   const footer = promotional
     ? 'Primești acest mesaj deoarece ai acceptat comunicările promoționale AutoCare. Îți poți retrage acordul din preferințele de comunicare.'
-    : 'Mesaj tranzacțional AutoCare. Gestionează preferințele de comunicare din cont. Emailurile de securitate necesare autentificării sunt trimise la cererea ta.';
-  const text = `AutoCare\n\nSalut, ${name}!\n\n${t.title}\n\n${message}\n\n${cta}: ${url}\n\n${footer}\nPreferințe: ${preferences}\nAutoCare · Garajul tău digital\n${appLink('/')}`;
+    : isReminder ? 'Memento AutoCare. Frecvența și canalele se gestionează din setările contului.' : 'Mesaj tranzacțional AutoCare. Gestionează preferințele de comunicare din cont. Emailurile de securitate necesare autentificării sunt trimise la cererea ta.';
+  const text = `AutoCare\n\nSalut, ${name}!\n\n${t.title}\n\n${message}\n\n${cta}: ${url}\n\n${footer}\nPreferințe: ${preferences}\nAutoCare · Garajul tău digital\n${appLink('/contact')}`;
   const e = escapeHtml;
-  const html = `<!doctype html><html lang="ro"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>${e(subject)}</title><style>@media only screen and (max-width:620px){.email-shell{width:100%!important}.email-pad{padding:28px 22px!important}.email-title{font-size:29px!important}.email-cta{display:block!important;text-align:center!important}.email-hero{height:auto!important}}</style></head><body style="margin:0;padding:0;background:#eef2f8;font-family:Arial,Helvetica,sans-serif;color:#17283f"><div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">${e(message.slice(0, 130))}</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#eef2f8"><tr><td align="center" style="padding:28px 8px"><table role="presentation" class="email-shell" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden"><tr><td style="padding:24px 32px;background:#14233b"><a href="${e(appLink('/'))}" style="font-size:27px;font-weight:800;color:#ffffff;text-decoration:none;letter-spacing:-1px">Auto<span style="color:#71a7ff">Care</span></a><span style="float:right;color:#bdcce0;font-size:11px;letter-spacing:2px;line-height:32px">GARAJUL TĂU DIGITAL</span></td></tr><tr><td class="email-hero" style="background:#172b4a;padding:48px 40px 52px;border-top:1px solid #31476a"><p style="margin:0 0 14px;color:#a8c7f5;font-size:11px;letter-spacing:3px;font-weight:bold">AUTOCARE · GARAJUL TĂU DIGITAL</p><p style="margin:0;color:#ffffff;font-size:32px;line-height:1.2;font-weight:800;letter-spacing:-1px">Totul despre mașina ta.<br><span style="color:#9bc1ff">Într-un singur loc.</span></p><p style="margin:20px 0 0;color:#d1def0;font-size:14px;line-height:1.6">Întreținere, documente și notificări importante.</p></td></tr><tr><td class="email-pad" style="padding:36px 40px 40px"><p style="margin:0 0 14px;font-size:12px;letter-spacing:2px;color:#2467bd;font-weight:bold">${promotional ? 'NOUTĂȚI AUTOCARE' : 'AUTOCARE · PENTRU TINE'}</p><p style="margin:0 0 16px;font-size:16px;color:#506784">Salut, ${e(name)}!</p><h1 class="email-title" style="margin:0 0 22px;font-size:34px;line-height:1.15;letter-spacing:-1px;color:#17283f">${e(t.title)}</h1>${message
+  const html = `<!doctype html><html lang="ro"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark light"><title>${e(subject)}</title><style>@media only screen and (max-width:620px){.email-shell{width:100%!important}.email-pad{padding:28px 22px!important}.email-title{font-size:29px!important}.email-cta{display:block!important;text-align:center!important}.email-hero{height:auto!important}}</style></head><body style="margin:0;padding:0;background:#090D14;font-family:Arial,Helvetica,sans-serif;color:#F3F6FA"><div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">${e(message.slice(0, 130))}</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#090D14"><tr><td align="center" style="padding:28px 8px"><table role="presentation" class="email-shell" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#111925;border-radius:16px;overflow:hidden"><tr><td style="padding:24px 32px;background:#14233b"><a href="${e(appLink('/'))}" style="font-size:27px;font-weight:800;color:#ffffff;text-decoration:none;letter-spacing:-1px">Auto<span style="color:#71a7ff">Care</span></a><span style="float:right;color:#bdcce0;font-size:11px;letter-spacing:2px;line-height:32px">GARAJUL TĂU DIGITAL</span></td></tr><tr><td class="email-hero" style="background:#172b4a;padding:48px 40px 52px;border-top:1px solid #31476a"><p style="margin:0 0 14px;color:#a8c7f5;font-size:11px;letter-spacing:3px;font-weight:bold">AUTOCARE · GARAJUL TĂU DIGITAL</p><p style="margin:0;color:#ffffff;font-size:32px;line-height:1.2;font-weight:800;letter-spacing:-1px">Totul despre mașina ta.<br><span style="color:#9bc1ff">Într-un singur loc.</span></p><p style="margin:20px 0 0;color:#d1def0;font-size:14px;line-height:1.6">Întreținere, documente și notificări importante.</p></td></tr><tr><td class="email-pad" style="padding:36px 40px 40px"><p style="margin:0 0 14px;font-size:12px;letter-spacing:2px;color:#82baff;font-weight:bold">${promotional ? 'AUTOCARE NEWS' : isReminder ? 'AUTOCARE · MEMENTO INTELIGENT' : 'AUTOCARE · CONT ȘI OPERAȚIUNI'}</p><p style="margin:0 0 16px;font-size:16px;color:#B8C4D2">Salut, ${e(name)}!</p><h1 class="email-title" style="margin:0 0 22px;font-size:34px;line-height:1.15;letter-spacing:-1px;color:#F3F6FA">${e(t.title)}</h1>${message
     .split(/\n\s*\n/)
     .map(
       (p) =>
-        `<p style="margin:0 0 18px;font-size:16px;line-height:1.75;color:#506078">${e(p).replace(/\n/g, '<br>')}</p>`,
+        `<p style="margin:0 0 18px;font-size:16px;line-height:1.75;color:#B8C4D2">${e(p).replace(/\n/g, '<br>')}</p>`,
     )
     .join(
       '',
-    )}<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px 0"><tr><td bgcolor="#2467bd" style="border-radius:8px"><a class="email-cta" href="${e(url)}" style="display:inline-block;padding:17px 25px;border:1px solid #2467bd;border-radius:8px;color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none;mso-padding-alt:17px 25px">${e(cta)} →</a></td></tr></table><p style="font-size:12px;line-height:1.7;color:#697b91;word-break:break-all">Butonul nu funcționează? Deschide acest link:<br><a href="${e(url)}" style="color:#2467bd">${e(url)}</a></p></td></tr><tr><td class="email-pad" style="padding:26px 40px;border-top:1px solid #e2e9f3;background:#f7f9fc"><p style="font-size:12px;line-height:1.7;color:#64748b;margin:0 0 16px">${e(footer)}</p><p style="font-size:12px;line-height:1.7;margin:0"><a href="${e(preferences)}" style="color:#2467bd">Preferințe de comunicare${promotional ? ' / dezabonare' : ''}</a> · <a href="${e(appLink('/confidentialitate'))}" style="color:#2467bd">Confidențialitate</a></p><p style="font-size:12px;color:#64748b;margin:16px 0 0">© ${new Date().getUTCFullYear()} AutoCare · Garajul tău digital</p></td></tr></table></td></tr></table></body></html>`;
+    )}<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px 0"><tr><td bgcolor="#2467bd" style="border-radius:8px"><a class="email-cta" href="${e(url)}" style="display:inline-block;padding:17px 25px;border:1px solid #2467bd;border-radius:8px;color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none;mso-padding-alt:17px 25px">${e(cta)} →</a></td></tr></table><p style="font-size:12px;line-height:1.7;color:#9eafc4;word-break:break-all">Butonul nu funcționează? Deschide acest link:<br><a href="${e(url)}" style="color:#82baff">${e(url)}</a></p></td></tr><tr><td class="email-pad" style="padding:26px 40px;border-top:1px solid #344253;background:#1B2633"><p style="font-size:12px;line-height:1.7;color:#B8C4D2;margin:0 0 16px">${e(footer)}</p><p style="font-size:12px;line-height:1.7;margin:0"><a href="${e(preferences)}" style="color:#82baff">Preferințe de comunicare${promotional ? ' / dezabonare' : ''}</a> · <a href="${e(appLink('/confidentialitate'))}" style="color:#82baff">Confidențialitate</a> · <a href="${e(appLink('/contact'))}" style="color:#82baff">Contact</a></p><p style="font-size:12px;color:#B8C4D2;margin:16px 0 0">© ${new Date().getUTCFullYear()} AutoCare · Garajul tău digital</p></td></tr></table></td></tr></table></body></html>`;
   return { subject, text, html };
 }

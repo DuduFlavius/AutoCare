@@ -9,6 +9,7 @@ import { sendMail } from './mail';
 import { renderEmail } from './email-templates';
 import { queueAutomatedMail } from './mail-automation';
 import { origin } from './config';
+import { financeBudgetKey } from './finance-overview';
 import { primaryVehicleKey } from './garage-overview';
 import { createHash } from 'node:crypto';
 let cached: ReturnType<typeof makeAuth> | undefined;
@@ -57,7 +58,7 @@ function makeAuth() {
       deleteUser: {
         enabled: true,
         afterDelete: async u => {
-          await db().delete(schema.settings).where(eq(schema.settings.key, primaryVehicleKey(u.id)));
+          await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(u.id), financeBudgetKey(u.id)]));
         },
         beforeDelete: async (u) => {
           const sub = (

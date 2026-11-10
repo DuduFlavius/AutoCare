@@ -1,3 +1,6 @@
+import { financeGroup, financeGroups, isFinancialEntry } from '@/lib/finance-overview';
+import { isPlannedService } from '@/lib/planned-service';
+import { localDate } from '@/lib/config';
 import { aiModes, askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, scanAutoDocument } from '@/lib/auto-assistant';
 import { findRoadDestinations } from '@/lib/road-geocoding';
 import { loadDrivingRoutes, roadCoordinate } from '@/lib/road-navigation-server';
@@ -23,7 +26,7 @@ import { sendMail } from '@/lib/mail';
 import * as googleMail from '@/lib/google-mail';
 import * as mailCenter from '@/lib/mail-center';
 import { renderEmail } from '@/lib/email-templates';
-import { stripe, checkout, billingPortal, processStripeEvent } from '@/lib/billing';
+import { stripe, checkout, billingPortal, billingInvoice, processStripeEvent } from '@/lib/billing';
 import {createMechanicShare,listMechanicShares,revokeMechanicShare} from '@/lib/mechanic-shares';
 import {syncPaidExtensions} from '@/lib/subscription-extensions';
 import {vehicleReport} from '@/lib/vehicle-report';
@@ -143,16 +146,17 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (route === 'auto-assistant/history' && method === 'GET')
         return json(await autoAssistantHistory(uid, uuid.parse(new URL(req.url).searchParams.get('vehicleId'))));
       if (route === 'auto-assistant' && method === 'POST') {
-        const { vehicleId, question, language, mode } = z.object({
+        const { vehicleId, question, language, mode, localFallback } = z.object({
           vehicleId: uuid,
           question: z.string().trim().min(4).max(600),
           language: z.enum(['ro', 'en']).default('ro'),
           mode: z.enum(aiModes).default('chat'),
+          localFallback: z.boolean().default(false),
         }).parse(await body(req));
         await rate(uid, 'auto-assistant', 4);
         await rate(uid, 'auto-assistant-day', 24, 86400000);
         await rate('all', 'ai-provider-day', 600, 86400000);
-        return json(await askAutoAssistant(uid, vehicleId, question, language, mode));
+        return json(await askAutoAssistant(uid, vehicleId, question, language, mode, localFallback));
       }
       if (route === 'auto-assistant/scan' && method === 'POST') {
         await rate(uid, 'auto-assistant-scan-day', 6, 86400000);
@@ -236,6 +240,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (path[1] === 'mail' && path[2] === 'campaigns' && path[3]) {
         if (path.length === 4 && method === 'GET') return json(await mailCenter.campaignDetail(uid, path[3]));
         if (path.length === 5 && path[4] === 'retry-failed' && method === 'POST') return json(await mailCenter.retryFailedCampaign(uid, path[3]));
+        if (path.length === 5 && path[4] === 'publish-release' && method === 'POST') return json(await mailCenter.publishReleaseNews(uid, path[3], await body(req)));
         if (path.length === 5 && path[4] === 'send' && method === 'POST') return json(await mailCenter.sendCampaign(uid, path[3]));
       }
 
@@ -284,6 +289,11 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       }
       const row = (await db().select().from(s.settings).where(eq(s.settings.key, key)))[0];
       return json(row?.value ?? { dailyKm: null });
+    }
+    if (route === 'finance/budget' && method === 'PUT') {
+      if (!await svc.premium(uid)) throw new svc.AppError(403, 'Bugetele pe vehicul sunt disponibile în Premium.');
+      const { vehicleId, amountBani } = z.object({ vehicleId: uuid, amountBani: z.number().int().min(1).max(100000000).nullable() }).parse(await body(req));
+      return json(await svc.saveFinanceBudget(uid, vehicleId, amountBani));
     }
     if (route === 'vehicles/primary' && method === 'PUT') {
       const { vehicleId } = z.object({ vehicleId: uuid }).parse(await body(req));
@@ -673,6 +683,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       const filters = z
         .object({
           kind: z.enum(['document', 'service', 'expense']).optional(),
+          finance: z.literal('1').optional(),
+          financeCategory: z.enum(financeGroups).optional(),
+          journal: z.literal('1').optional(),
           vehicleId: z.string().uuid().optional(),
           category: z.string().max(250).optional(),
           status: z.enum(['valid', 'soon', 'expired', 'incomplete', 'archived']).optional(),
@@ -690,7 +703,11 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         .parse(
           Object.fromEntries(Array.from(params.entries()).filter(([key]) => key !== 'format')),
         );
-      const selected = filterRecords(data.records, filters, new Date(), data.profile.timezone);
+      const today = localDate(new Date(), data.profile.timezone);
+      const selection = filters.finance
+        ? data.records.filter(row => isFinancialEntry(row, today) && (!filters.financeCategory || financeGroup(row) === filters.financeCategory))
+        : filters.journal ? data.records.filter(row => !isPlannedService(row, today)) : data.records;
+      const selected = filterRecords(selection, filters, new Date(), data.profile.timezone);
       const rows = selected.map(
         ({
           id,
@@ -757,6 +774,8 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     if(route==='billing/sync' && method==='POST')return json(await syncPaidExtensions(uid,stripe()));
     if(route==='billing/extend' && method==='POST')return json(await checkout(uid,z.object({interval:z.enum(['monthly','quarterly','annual'])}).parse(await body(req)).interval,true));
     if (route === 'billing/portal' && method === 'POST') return json(await billingPortal(uid));
+    if (path[0] === 'billing' && path[1] === 'invoices' && path.length === 3 && method === 'GET')
+      return new Response(null, { status: 303, headers: { Location: (await billingInvoice(uid, path[2])).toString(), 'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer' } });
     if (route === 'billing/invoices' && method === 'GET')
       return json(
         await db()

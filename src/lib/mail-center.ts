@@ -333,6 +333,7 @@ export async function deliverCampaign(
           s.mailDeliveries.status,
           campaign.source === 'automation' ? ['held', 'pending'] : ['pending'],
         ),
+        sql`(${s.mailDeliveries.error} is distinct from 'GMAIL_HTTP_429' or ${s.mailDeliveries.attemptedAt} <= ${new Date(now.getTime() - 15 * 60000).toISOString()}::timestamptz)`,
       ),
     )
     .limit(2);
@@ -381,11 +382,15 @@ export async function deliverCampaign(
           .where(eq(s.mailDeliveries.id, candidate.id));
         accepted++;
       } catch (e) {
+        const retryCount = candidate.context.retryCount ?? 0;
+        const retry = campaign.source === 'automation' && e instanceof GoogleDeliveryError
+          && e.code === 'GMAIL_HTTP_429' && retryCount < 3;
         await db()
           .update(s.mailDeliveries)
           .set({
-            status: e instanceof GoogleDeliveryError ? e.deliveryStatus : 'unknown',
+            status: retry ? 'pending' : e instanceof GoogleDeliveryError ? e.deliveryStatus : 'unknown',
             error: e instanceof GoogleDeliveryError ? e.code : 'DELIVERY_UNCONFIRMED',
+            ...(retry ? { context: { ...candidate.context, retryCount: retryCount + 1 } } : {}),
           })
           .where(eq(s.mailDeliveries.id, candidate.id));
       }
@@ -410,6 +415,7 @@ export async function deliverCampaign(
 export async function sendCampaign(uid: string, id: string) {
   await requireMailStaff(uid);
   const { campaign } = await campaignDetail(uid, id);
+  if (campaign.template === 'release_news') throw new AppError(400, 'Publică lansarea prin AutoCare News.');
   if (campaign.source !== 'manual')
     throw new AppError(403, 'Automatizările necesită aprobarea și activarea separată.');
   const actor = await requireMailStaff(uid);
@@ -452,9 +458,41 @@ export async function retryFailedCampaign(uid: string, id: string) {
   await db().insert(s.audit).values({id:crypto.randomUUID(),actorId:uid,action:'mail.failed.requeued',target:id});
   return { requeued: requeued.length };
 }
+export async function publishReleaseNews(uid: string, id: string, input: unknown) {
+  await requireFounder(uid);
+  const { version, releaseDate } = z.object({
+    version: z.string().trim().regex(/^[0-9][A-Za-z0-9.+-]{0,39}$/),
+    releaseDate: z.iso.date(),
+  }).strict().parse(input);
+  if (!(await automationState()).enabled || !(await gmailReady()))
+    throw new AppError(409, 'Activează automatizările și verifică expeditorul înainte de publicare.');
+  const key = 'mail-release:' + version.toLowerCase();
+  return db().transaction(async tx => {
+    const [campaign] = await tx.select().from(s.mailCampaigns).where(eq(s.mailCampaigns.id, id)).for('update');
+    if (!campaign || campaign.template !== 'release_news' || campaign.category !== 'promotional' || campaign.source !== 'manual')
+      throw new AppError(404, 'Alege o ciornă AutoCare News.');
+    const [existing] = await tx.select().from(s.settings).where(eq(s.settings.key, key));
+    if (existing) {
+      if ((existing.value as { campaignId?: string }).campaignId === id) return { scheduled: true };
+      throw new AppError(409, 'Versiunea are deja un anunț publicat.');
+    }
+    if (campaign.status !== 'draft') throw new AppError(409, 'Anunțul nu mai este o ciornă.');
+    if (campaign.message === emailTemplates.release_news.body)
+      throw new AppError(400, 'Completează funcțiile și schimbările reale ale versiunii.');
+    const reserved = await tx.insert(s.settings).values({ key, value: { version, releaseDate, campaignId: id } })
+      .onConflictDoNothing().returning({ key: s.settings.key });
+    if (!reserved.length) throw new AppError(409, 'Versiunea are deja un anunț publicat.');
+    await tx.update(s.mailCampaigns).set({
+      source: 'automation', actorId: uid, status: 'held',
+      message: `Versiunea ${version} · ${releaseDate}\n\n${campaign.message}`,
+    }).where(eq(s.mailCampaigns.id, id));
+    await tx.insert(s.audit).values({ id: crypto.randomUUID(), actorId: uid, action: 'mail.release.scheduled', target: id });
+    return { scheduled: true };
+  });
+}
 export async function deliverAutomatedMail() {
   if (!(await automationState()).enabled) return { enabled: false, accepted: 0 };
-  if (!(await gmailReady())) return { enabled: true, accepted: 0, blocked: 'GMAIL_TEST_REQUIRED' };
+  if (!(await gmailReady().catch(() => false))) return { enabled: true, accepted: 0, blocked: 'GMAIL_TEST_REQUIRED' };
   const campaigns = await db()
     .select({ id: s.mailCampaigns.id })
     .from(s.mailCampaigns)
@@ -462,6 +500,11 @@ export async function deliverAutomatedMail() {
       and(
         eq(s.mailCampaigns.source, 'automation'),
         inArray(s.mailCampaigns.status, ['held', 'sending']),
+        sql`(${s.mailCampaigns.template} <> 'release_news' or exists (
+          select 1 from ${s.settings} where ${s.settings.key} like 'mail-release:%'
+          and ${s.settings.value}->>'campaignId' = ${s.mailCampaigns.id}
+          and ${s.settings.value}->>'releaseDate' <= to_char(now() at time zone 'Europe/Bucharest', 'YYYY-MM-DD')
+        ))`,
       ),
     )
     .orderBy(s.mailCampaigns.createdAt)

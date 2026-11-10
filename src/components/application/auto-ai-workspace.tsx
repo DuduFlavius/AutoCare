@@ -9,7 +9,7 @@ import './auto-ai.css';
 
 type Vehicle = Awaited<ReturnType<typeof dashboard>>['vehicles'][number];
 type Turn = { id: string; question: string; answer: string; createdAt: string };
-type Mode = 'chat' | 'analysis' | 'monthly' | 'annual';
+type Mode = 'chat' | 'analysis' | 'monthly' | 'annual' | 'finance' | 'maintenance';
 const categories = ['RCA', 'ITP', 'Rovinietă', 'CASCO', 'Talon', 'Alt document'];
 type Scan = { category: string; number: string; date: string; expiresAt: string; amountRon: string };
 async function request(path: string, init?: RequestInit) {
@@ -77,9 +77,9 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   }
 
   function ask(value: string, mode: Mode = 'chat') {
-    if (!available || loading || value.trim().length < 4) return;
+    if (preview || loading || value.trim().length < 4) return;
     void run(async signal => {
-      const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode }), signal });
+      const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode, localFallback: true }), signal });
       setTurns(previous => [...previous, data.turn].slice(-30));
       setQuestion('');
     });
@@ -127,23 +127,25 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
               void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); });
           }}><Trash2 size={16} />{t('Șterge istoricul', 'Clear history')}</button>}
         </div>
-        {!available && <p className="ac-ai-state" role="status">{t('Furnizorul AI nu este configurat. Istoricul salvat rămâne disponibil.', 'The AI provider is not configured. Saved history remains available.')}</p>}
+        {!available && <p className="ac-ai-state" role="status">{t('Analiza locală răspunde din datele vehiculului. Scanarea și întrebările deschise necesită furnizorul AI.', 'Local analysis uses vehicle records. Scanning and open-ended questions require the AI provider.')}</p>}
         {loading ? <p role="status">{t('Se încarcă istoricul…', 'Loading history…')}</p> :
           turns.length ? <ol className="ac-ai-turns" aria-live="polite">{turns.map(turn => <li key={turn.id}><p className="ac-ai-question" data-user-content>{turn.question}</p><div className="ac-ai-answer"><strong><Sparkles size={16} /> AutoCare AI</strong><p data-user-content>{turn.answer}</p><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></li>)}</ol>
-            : <div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={!available || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={16} />{value}<ArrowUpRight size={14} /></button>)}</div>}
+            : <div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={preview || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={16} />{value}<ArrowUpRight size={14} /></button>)}</div>}
         <form className="ac-ai-composer" onSubmit={event => { event.preventDefault(); ask(question); }}>
-          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Întreabă despre mașina ta…', 'Ask about your vehicle…')} rows={2} minLength={4} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={!available || pending} />
-          <button className="primary" type="submit" disabled={!available || pending || loading || question.trim().length < 4}><Send size={17} />{t('Trimite', 'Send')}</button>
+          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Întreabă despre mașina ta…', 'Ask about your vehicle…')} rows={2} minLength={4} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
+          <button className="primary" type="submit" disabled={preview || pending || loading || question.trim().length < 4}><Send size={17} />{t('Trimite', 'Send')}</button>
         </form>
-        <small>{t('Întrebarea, istoricul recent și datele relevante ale mașinii sunt trimise furnizorului AI. Evită datele personale.', 'The question, recent history and relevant vehicle data are sent to the AI provider. Avoid personal information.')}</small>
+        {available && <small>{t('Întrebarea, istoricul recent și datele relevante ale mașinii sunt trimise furnizorului AI. Evită datele personale.', 'The question, recent history and relevant vehicle data are sent to the AI provider. Avoid personal information.')}</small>}
       </section>
       <aside className="ac-ai-tools">
         <section className="card"><h3><Sparkles size={18} /> {t('Analiză și rapoarte', 'Analysis and reports')}</h3>
           {([
             ['analysis', t('Analizează mașina', 'Analyze vehicle')],
+            ['finance', t('Compară cheltuielile lunare', 'Compare monthly expenses')],
+            ['maintenance', t('Verifică termenele de întreținere', 'Check maintenance deadlines')],
             ['monthly', t('Generează raportul lunii curente', 'Generate current month report')],
             ['annual', t('Generează raportul anului curent', 'Generate current year report')],
-          ] as const).map(([mode, label]) => <button key={mode} type="button" disabled={!available || pending || loading} onClick={() => ask(label, mode)}>{label} <ArrowUpRight size={14} /></button>)}
+          ] as const).map(([mode, label]) => <button key={mode} type="button" disabled={preview || pending || loading} onClick={() => ask(label, mode)}>{label} <ArrowUpRight size={14} /></button>)}
           <a href="/cont?tab=Plan+%C3%AEntre%C8%9Binere&drive=points#service-finder" className="button"><MapPin size={17} /> Service Finder</a>
         </section>
         <section className="card"><h3><FileScan size={18} /> {t('Scanează un document', 'Scan a document')}</h3>

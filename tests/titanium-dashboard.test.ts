@@ -4,7 +4,8 @@ import { eq } from 'drizzle-orm';
 import { migrate } from '../scripts/migrate';
 import { auth } from '../src/lib/auth';
 import { closeLocalDb, db } from '../src/lib/db';
-import { gpsTrips, records, subscriptions, user, vehicles } from '../src/lib/schema';
+import { gpsTrips, notifications, records, subscriptions, user, vehicles } from '../src/lib/schema';
+import { scheduleReminders } from '../src/lib/reminders';
 import { dashboard } from '../src/lib/service';
 import { garageOverview, garageVehicleSummary } from '../src/lib/garage-overview';
 import { DELETE, GET, PATCH, POST, PUT } from '../src/app/api/v1/[...path]/route';
@@ -175,4 +176,50 @@ test('garage totals include history, and primary vehicle is persisted only for a
   overview = garageOverview(data, '2030-01-01');
   assert.equal(data.primaryVehicleId, null);
   assert.deepEqual(overview.totals, { vehicles: 2, active: 1, kilometers: 42100, costs: 9000, services: 1, documents: 1 });
+});
+
+test('financial budget is owner-scoped and AI Finance accepts questions without provider configuration', async () => {
+  delete process.env.OPENAI_API_KEY;
+  delete process.env.AUTOCARE_AI_MODEL;
+  const site = 'http://localhost:3000';
+  const headers = { Origin: site, Cookie: cookie, 'Content-Type': 'application/json' };
+  const budget = (vehicleId: string, amountBani: number | null) => PUT(new Request(site + '/api/v1/finance/budget', {
+    method: 'PUT', headers, body: JSON.stringify({ vehicleId, amountBani }),
+  }), { params: Promise.resolve({ path: ['finance', 'budget'] }) });
+  assert.equal((await budget(foreignCarId, 20000)).status, 404);
+  assert.equal((await budget(carId, 20000)).status, 200);
+  assert.equal((await dashboard(ownerId)).financeBudgets[carId], 20000);
+  assert.equal((await budget(carId, null)).status, 200);
+  assert.equal((await dashboard(ownerId)).financeBudgets[carId], undefined);
+  const response = await POST(new Request(site + '/api/v1/auto-assistant', {
+    method: 'POST', headers,
+    body: JSON.stringify({ vehicleId: carId, question: 'Compară cheltuielile lunare', mode: 'finance', localFallback: true }),
+  }), { params: Promise.resolve({ path: ['auto-assistant'] }) });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.source, 'local');
+  assert.match(result.answer, /Analiză locală/);
+});
+
+test('planned service generates a last-week reminder once and stays out of financial exports', async () => {
+  const plannedId = crypto.randomUUID();
+  await db().insert(records).values({
+    id: plannedId, userId: ownerId, vehicleId: carId, kind: 'service',
+    title: 'Planned-only test operation', category: 'Service', date: '2031-05-08',
+    amountBani: 99000, amountKnown: true, parts: 'AutoCare · planned: 1',
+  });
+  const now = new Date('2031-05-01T12:00:00Z');
+  await scheduleReminders(now);
+  await scheduleReminders(now);
+  const reminders = await db().select().from(notifications).where(eq(notifications.recordId, plannedId));
+  assert.equal(reminders.filter(item => item.channel === 'app' && item.offset === 'plan-7').length, 1);
+  const exportRequest = (format: string) => GET(new Request('http://localhost:3000/api/v1/export?finance=1&format=' + format, {
+    headers: { Cookie: cookie },
+  }), { params: Promise.resolve({ path: ['export'] }) });
+  const csv = await exportRequest('csv');
+  assert.equal(csv.status, 200);
+  assert.doesNotMatch(await csv.text(), /Planned-only test operation/);
+  const pdf = await exportRequest('pdf');
+  assert.equal(pdf.status, 200);
+  assert.match(Buffer.from(await pdf.arrayBuffer()).subarray(0, 8).toString(), /^%PDF-/);
 });

@@ -475,7 +475,7 @@ export const mailDeliveries = pgTable('mail_deliveries', {
   status: text().notNull().default('draft'),
   error: text(),
   providerId: text(),
-  context: jsonb().$type<{ subscriptionId?: string; periodEnd?: string; invoiceId?: string; grantId?: string }>().notNull().default({}),
+  context: jsonb().$type<{ subscriptionId?: string; periodEnd?: string; invoiceId?: string; grantId?: string; retryCount?: number }>().notNull().default({}),
   attemptedAt: timestamp({ withTimezone: true }),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 }, t => [index('mail_delivery_campaign_status').on(t.campaignId,t.status), index('mail_delivery_provider').on(t.providerId)]);
