@@ -4,7 +4,7 @@ import { Fragment, type ReactNode } from 'react';
 
 /** Render a restricted Markdown subset as React nodes. Never inject HTML or execute model output. */
 function inline(source: string): ReactNode[] {
-  const tokens = source.split(/(\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|\*\*[^*]+\*\*|\*[^*\n]+\*|\`[^\`]+\`)/g);
+  const tokens = source.split(/(\[(?:[^\]]+)\]\((?:https?:\/\/[^\s)]+)\)|\*\*[^*]+\*\*|\*[^*\n]+\*|\`[^\`]+\`)/g);
   const nodes: ReactNode[] = [];
   for (let i = 0; i < tokens.length; i++) {
     const part = tokens[i];
@@ -22,7 +22,6 @@ function inline(source: string): ReactNode[] {
     if (part.startsWith('**') && part.endsWith('**')) nodes.push(<strong key={i}>{part.slice(2, -2)}</strong>);
     else if (part.startsWith('*') && part.endsWith('*')) nodes.push(<em key={i}>{part.slice(1, -1)}</em>);
     else if (part.startsWith('`') && part.endsWith('`')) nodes.push(<code key={i}>{part.slice(1, -1)}</code>);
-    else if (i > 0 && tokens[i - 1]?.startsWith('[') && i < tokens.length - 2) continue;
     else nodes.push(<Fragment key={i}>{part}</Fragment>);
   }
   return nodes;
