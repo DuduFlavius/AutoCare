@@ -116,6 +116,8 @@ export default async function DesignPreview({
     },
     recentTrips: [],
     monthlyTrips: [],
+    annualTrips: [],
+    autoAssistantAvailable: false,
     notifications: [],
     attachments: [],
     photos: [{ vehicleId: vehicles[0].id }],

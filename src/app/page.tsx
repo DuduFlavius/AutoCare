@@ -8,11 +8,19 @@ import {
   Wrench,
   Files,
   CarFront,
+  Bell,
+  ChartNoAxesCombined,
+  MapPin,
+  CircleCheck,
+  CirclePlay,
 } from 'lucide-react';
 import LuxuryExperience, { LuxuryMotion } from '@/components/luxury-experience';
 import { pricing, DEFAULT_PRICING } from '@/lib/pricing';
 import './luxury-public.css';
 import './studio-public.css';
+import './titanium-landing.css';
+import { LandingCockpit } from '@/components/landing-cockpit';
+import { TitaniumWave } from '@/components/titanium-wave';
 import { PublicShell } from '@/components/public-shell';
 import { appName, origin } from '@/lib/config';
 import { publicMetadata, siteDescription } from '@/lib/seo';
@@ -37,72 +45,68 @@ export default async function Home() {
     new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 }).format(bani / 100);
   return (
     <div className="ac-lux-public ac-studio-public">
-      <PublicShell>
+      <PublicShell landing>
         <LuxuryMotion />
         <main>
-          <section className="studio-landing-hero">
+          <section className="studio-landing-hero ac-titanium-hero">
+            <TitaniumWave />
             <div className="studio-landing-copy">
-              <p className="lux-eyebrow">AUTOCARE PREMIUM</p>
-              <h1>
-                Mașina ta. <span>Drumurile tale.</span>
-              </h1>
-              <p>
-                Înregistrează călătoriile prin GPS și urmărește kilometrajul, reviziile, documentele și costurile fiecărei mașini din același garaj digital.
-              </p>
+              <p className="lux-eyebrow"><ShieldCheck size={16} /> GARAJUL TĂU DIGITAL</p>
+              <h1>Mai mult control.<br /><span>La fiecare drum.</span></h1>
+              <p>Organizează întreținerea, documentele și costurile mașinii. Înregistrează călătoriile prin SmartDrive GPS și vezi ce urmează, dintr-un singur loc.</p>
+              <ul className="ac-landing-checks">
+                {['Garaj digital', 'Mentenanță automată', 'SmartDrive GPS', 'Documente la îndemână'].map(label => (
+                  <li key={label}><CircleCheck size={18} /> {label}</li>
+                ))}
+              </ul>
               <div className="studio-landing-actions">
-                <Link href="/inregistrare" className="lux-primary">
-                  Începe gratuit <ArrowUpRight size={20} />
-                </Link>
-                <Link href="#aplicatia" className="lux-secondary">
-                  Vezi aplicația
-                </Link>
+                <Link href="/inregistrare" className="lux-primary">Începe gratuit <ArrowUpRight size={18} /></Link>
+                <Link href="#aplicatia" className="lux-secondary"><CirclePlay size={18} /> Vezi cum funcționează</Link>
               </div>
               <div className="studio-landing-trust">
-                <span>
-                  <Check size={17} /> O mașină gratuită
-                </span>
-                <span>
-                  <ShieldCheck size={17} /> Date private
-                </span>
-                <span>
-                  <Check size={17} /> Fără card bancar
-                </span>
+                <span><Check size={16} /> O mașină în planul gratuit</span>
+                <span><ShieldCheck size={16} /> Fără card bancar la înscriere</span>
               </div>
             </div>
-            <figure className="studio-landing-photography product-hero-photo">
-              <picture>
-                <source
-                  media="(max-width: 680px)"
-                  srcSet="/images/aplicatie-intretinere-auto-640.webp"
-                />
-                <img
-                  src="/images/aplicatie-intretinere-auto.webp"
-                  width={1280}
-                  height={854}
-                  fetchPriority="high"
-                  alt="Automobil de prezentare AutoCare"
-                />
-              </picture>
-            </figure>
+            <LandingCockpit />
           </section>
-          <div className="lux-capabilities" aria-label="Funcționalități AutoCare">
-            <span>
-              <Wrench size={17} />
-              Întreținere
-            </span>
-            <span>
-              <Files size={17} />
-              Documente
-            </span>
-            <span>
-              <CarFront size={17} />
-              Garaj digital
-            </span>
-            <span>
-              <ShieldCheck size={17} />
-              Date private
-            </span>
-          </div>
+          <section className="ac-landing-features" aria-labelledby="ac-landing-features-title">
+            <header>
+              <h2 id="ac-landing-features-title">Funcționalități AutoCare</h2>
+              <p>De la primul drum până la următoarea revizie.</p>
+            </header>
+            <div className="ac-landing-feature-grid">
+              {[
+                { Icon: MapPin, title: 'SmartDrive GPS', description: 'Înregistrează traseul și distanța parcursă.', href: '/smart-gps' },
+                { Icon: Wrench, title: 'Mentenanță automată', description: 'Urmărește reviziile și intervalele de service.', href: '/smart-maintenance' },
+                { Icon: Files, title: 'Documente digitale', description: 'Păstrează actele și termenele la un loc.', href: '/documente-auto' },
+                { Icon: CarFront, title: 'Garaj digital', description: 'Vezi istoricul fiecărei mașini.', href: '/functionalitati' },
+                { Icon: ChartNoAxesCombined, title: 'Statistici auto', description: 'Urmărește costurile din evidența ta.', href: '/cheltuieli-auto' },
+                { Icon: Bell, title: 'Remindere', description: 'Primește alerte pentru termenele configurate.', href: '/cum-functioneaza' },
+              ].map(({ Icon, title, description, href }) => (
+                <Link key={title} href={href}>
+                  <Icon size={24} aria-hidden="true" /><h3>{title}</h3><p>{description}</p>
+                  <span>Explorează <ArrowUpRight size={14} /></span>
+                </Link>
+              ))}
+            </div>
+          </section>
+          <section className="ac-landing-discovery" aria-label="Hartă și abonamente">
+            <article className="ac-landing-map-card">
+              <div className="ac-landing-map-symbol" aria-hidden="true"><MapPin size={50} /></div>
+              <div><h2>AutoCare Maps</h2><p>Alege o destinație și explorează punctele auto din apropiere.</p>
+                <Link href="/autocare-maps" className="lux-text-link">Explorează harta <ArrowUpRight size={16} /></Link>
+              </div>
+            </article>
+            <section className="ac-landing-plans" aria-labelledby="ac-landing-plans-title">
+              <h2 id="ac-landing-plans-title">Planuri AutoCare</h2>
+              <div>
+                <Link href="/inregistrare"><b>Gratuit</b><strong>0 <small>RON</small></strong><span>Începe gratuit <ArrowUpRight size={14} /></span></Link>
+                <Link href="/preturi" className="ac-landing-plan-featured"><b>Premium lunar</b><strong>{money(prices.monthlyBani)} <small>RON / lună</small></strong><span>Vezi abonamentul <ArrowUpRight size={14} /></span></Link>
+                <Link href="/preturi"><b>Premium anual</b><strong>{money(prices.annualBani)} <small>RON / an</small></strong><span>Vezi abonamentul <ArrowUpRight size={14} /></span></Link>
+              </div>
+            </section>
+          </section>
           <section className="ac-product-systems" id="aplicatia">
             <header>
               <p className="lux-eyebrow">SISTEME AUTOCARE</p>

@@ -1,3 +1,4 @@
+import { autoAssistantConfigured } from './auto-assistant-config';
 import {groupedNotifications} from './notification-groups';
 import {paidExtensions} from './paid-coverage';
 import {parseServiceDetails} from './service-details';
@@ -275,7 +276,8 @@ export async function dashboard(uid: string) {
   const p = await profile(uid);
   const now = new Date();
   const date = localDate(now, p.timezone);
-  const [cars, rows, sub, alerts, attachments, photos, recentTrips, monthlyTrips] = await Promise.all([
+  const tripMonth = sql<string>`to_char(${s.gpsTrips.startedAt} AT TIME ZONE ${p.timezone}, 'YYYY-MM')`;
+  const [cars, rows, sub, alerts, attachments, photos, recentTrips, annualTrips] = await Promise.all([
     db()
       .select()
       .from(s.vehicles)
@@ -310,13 +312,14 @@ export async function dashboard(uid: string) {
     db().select({id:s.gpsTrips.id,vehicleId:s.gpsTrips.vehicleId,startedAt:s.gpsTrips.startedAt,durationSeconds:s.gpsTrips.durationSeconds,distanceMeters:s.gpsTrips.distanceMeters,source:s.gpsTrips.source}).from(s.gpsTrips).where(eq(s.gpsTrips.userId,uid)).orderBy(desc(s.gpsTrips.startedAt)).limit(12),
     db().select({
       vehicleId: s.gpsTrips.vehicleId,
+      month: tripMonth,
       meters: sql<number>`sum(${s.gpsTrips.distanceMeters})`.mapWith(Number),
       count: sql<number>`count(*)`.mapWith(Number),
     }).from(s.gpsTrips).where(and(
       eq(s.gpsTrips.userId, uid),
-      sql`${s.gpsTrips.startedAt} >= (${date.slice(0, 7) + '-01'}::date::timestamp AT TIME ZONE ${p.timezone})`,
+      sql`${s.gpsTrips.startedAt} >= (${date.slice(0, 4) + '-01-01'}::date::timestamp AT TIME ZONE ${p.timezone})`,
       sql`${s.gpsTrips.startedAt} <= ${now.toISOString()}::timestamptz`,
-    )).groupBy(s.gpsTrips.vehicleId),
+    )).groupBy(s.gpsTrips.vehicleId, sql`2`),
   ]);
   const grants = await activeGrants(uid);
   const price = await pricing();
@@ -331,7 +334,9 @@ export async function dashboard(uid: string) {
     profile: p,
     vehicles: cars,
     recentTrips,
-    monthlyTrips,
+    monthlyTrips: annualTrips.filter(trip => trip.month === date.slice(0, 7)).map(({ vehicleId, meters, count }) => ({ vehicleId, meters, count })),
+    annualTrips,
+    autoAssistantAvailable: paid && autoAssistantConfigured(),
     records: rows.map((r) => ({
       ...r,
       status: r.cancelled

@@ -8,27 +8,33 @@ export { Brand } from './brand';
 export function PublicShell({
   children,
   dark = false,
+  landing = false,
 }: {
   children: React.ReactNode;
   dark?: boolean;
+  landing?: boolean;
 }) {
   const content = (
     <>
       <div className="wrap">
         <header className="public-nav">
-          <Brand />
+          <Brand href={landing ? "/" : undefined} />
           <nav className="navlinks" aria-label="Navigare principală">
+            {landing && <Link href="/" aria-current="page">Acasă</Link>}
             <Link href="/functionalitati">Funcționalități</Link>
-            <Link href="/cum-functioneaza">Cum funcționează</Link>
+            {!landing && <Link href="/cum-functioneaza">Cum funcționează</Link>}
             <Link href="/preturi">Prețuri</Link>
             <Link href="/ghiduri">Ghiduri</Link>
+            {landing && <Link href="/despre-noi">Despre</Link>}
           </nav>
           <Link href="/autentificare" className="button ghost">
             Intră în cont <ArrowUpRight size={16} aria-hidden="true"/>
           </Link>
+          {landing && <Link className="button ac-landing-nav-cta" href="/inregistrare">Începe acum <ArrowUpRight size={15} aria-hidden="true" /></Link>}
           <details className="ac-public-mobile-nav">
             <summary><Menu size={18}/> Meniu</summary>
             <nav aria-label="Navigare mobilă">
+              {landing && <Link href="/inregistrare">Creează cont gratuit</Link>}
               <Link href="/functionalitati">Funcționalități</Link>
               <Link href="/smart-gps">SmartDrive GPS</Link>
               <Link href="/bluetooth">Bluetooth</Link>

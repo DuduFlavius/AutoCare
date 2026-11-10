@@ -271,3 +271,110 @@ html body .app-shell.ac-workspace.ac-studio .ws-navigation a[aria-current='page'
   html body .app-shell.ac-workspace.ac-studio .ac-cockpit-home .studio-detail-grid { grid-template-columns: minmax(0, 1fr); }
   html body .app-shell.ac-workspace.ac-studio .ac-cockpit-home .studio-status-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Titanium composition shared by the landing, dashboard and the vehicle profile. */
+.ac-titanium-wave {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ac-cockpit-home .studio-home-heading,
+.ac-cockpit-home .ac-vehicle-instrument,
+.ac-titanium-reminder,
+.ac-titanium-vehicle {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+.ac-cockpit-home .ac-titanium-wave,
+.ac-titanium-vehicle .ac-titanium-wave {
+  z-index: -1;
+  opacity: .58;
+}
+.ac-cockpit-home .studio-home-heading > .ac-titanium-wave { opacity: .36; }
+html body .ac-workspace.ac-studio .ac-cockpit-home .studio-home-heading h1 {
+  font-size: clamp(30px, 3.1vw, 51px) !important;
+}
+.ac-cockpit-home .ac-instrument-art { opacity: .64; }
+.ac-cockpit-home .ac-readiness-value { justify-content: flex-start; gap: 12px; }
+.ac-care-ring {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: clamp(82px, 9vw, 106px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0c182c 58%, transparent 61%), conic-gradient(from 220deg, #56d6e8 0, #398bff var(--ac-care-score), #243956 var(--ac-care-score));
+  box-shadow: 0 0 24px #398bff28;
+}
+.ac-cockpit-home .ac-care-ring strong { font-size: clamp(24px, 2.5vw, 33px); }
+.ac-titanium-action-deck { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.ac-titanium-action-deck > section {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #27416a;
+  border-radius: 14px;
+  background: linear-gradient(148deg,#101f38,#0a1324);
+}
+.ac-titanium-action-deck h2 { margin: 0 0 4px; font-size: 15px; }
+.ac-titanium-action-deck p, .ac-titanium-action-deck small { margin: 0; color: var(--color-muted); overflow-wrap: anywhere; }
+.ac-titanium-action-deck small { display: block; margin-top: 4px; }
+.ac-assistant-icon {
+  display: grid;
+  place-items: center;
+  color: #6dccff;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  border: 1px solid #2d5081;
+  background: radial-gradient(ellipse at 20% 10%, #24559d, #0e1c37 85%);
+}
+.ac-titanium-assistant form { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 6px; margin-top: 8px; }
+.ac-titanium-assistant input { min-width: 0; width: 100%; }
+.ac-titanium-assistant .ac-assistant-answer { white-space: pre-wrap; padding-top: 8px; color: var(--color-text); }
+html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-insights { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.ac-drive-bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0,1fr);
+  align-items: end;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  gap: clamp(2px,.4vw,7px);
+  text-align: center;
+}
+.ac-drive-bars small { font-size: 10px; color: var(--color-muted); }
+.ac-drive-track {
+  height: 74px;
+  display: flex;
+  align-items: end;
+  background: #091326;
+  border-radius: 5px;
+}
+.ac-drive-track i { width: 100%; border-radius: 5px; background: linear-gradient(#58c6ff,#175bc6); }
+html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titanium-vehicle {
+  grid-template-columns: minmax(0, 1fr);
+  background: radial-gradient(ellipse at 72% 58%,#183365,transparent 64%), linear-gradient(125deg,#101d32,#091121);
+}
+.ac-titanium-vehicle > div { min-width: 0; overflow-wrap: anywhere; }
+.ac-titanium-vehicle h2 { margin: 4px 0; font-size: clamp(28px,4vw,49px); }
+.ac-titanium-vehicle .vehicle-sheet-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ac-vehicle-profile .ac-vehicle-sheet-tabs { display: flex; flex-wrap: wrap; gap: 5px; }
+.ac-vehicle-profile .ac-vehicle-sheet-tabs button { min-width: 0; white-space: normal; }
+@media (max-width: 1180px) {
+  html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-insights { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .ac-cockpit-home .ac-activity-panel { grid-column: 1/-1; }
+}
+@media (max-width: 720px) {
+  .ac-titanium-action-deck,
+  html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-insights { grid-template-columns: minmax(0,1fr); }
+  .ac-vehicle-profile .ac-vehicle-sheet-tabs { position: static; }
+}

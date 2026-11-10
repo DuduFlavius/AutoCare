@@ -1,3 +1,4 @@
+import { askAutoAssistant } from '@/lib/auto-assistant';
 import { findRoadDestinations } from '@/lib/road-geocoding';
 import { loadDrivingRoutes, roadCoordinate } from '@/lib/road-navigation-server';
 import { autoPointCategories } from '@/lib/auto-points';
@@ -133,6 +134,16 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     const uid = sess.user.id;
     await svc.assertActiveAccount(uid);
     await rate(uid);
+    if (route === 'auto-assistant' && method === 'POST') {
+      await rate(uid, 'auto-assistant', 4);
+      if (!await svc.premium(uid)) throw new svc.AppError(403, 'Asistentul AI este disponibil în Premium.');
+      const { vehicleId, question, language } = z.object({
+        vehicleId: uuid,
+        question: z.string().trim().min(4).max(500),
+        language: z.enum(['ro', 'en']).default('ro'),
+      }).parse(await body(req));
+      return json(await askAutoAssistant(uid, vehicleId, question, language));
+    }
     if (route === 'smartdrive/destinations' && method === 'POST') {
       await rate(uid, 'smartdrive-destinations', 12);
       const { query, area } = z.object({ query: z.string().trim().min(3).max(160), area: roadCoordinate }).parse(await body(req));

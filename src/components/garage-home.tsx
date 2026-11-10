@@ -1,5 +1,5 @@
 'use client';
-import VehiclePhoto from './application/vehicle-photo';
+import { TitaniumWave } from './titanium-wave';
 import {useApplicationLocale} from './application-locale';
 import { fuelConsumption } from '@/lib/fuel-log';
 import {parseServiceDetails} from '@/lib/service-details';
@@ -739,7 +739,6 @@ export function VehicleSheet({
   edit,
   removeService,
   busy,
-  preview = false,
 }: {
   data: Data;
   id: string;
@@ -747,7 +746,6 @@ export function VehicleSheet({
   edit: () => void;
   removeService: (record: Entry) => void;
   busy: boolean;
-  preview?: boolean;
 }) {
 
   const locale=useApplicationLocale();
@@ -766,8 +764,8 @@ const v = data.vehicles.find((v) => v.id === id);
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   return (
     <div className="vehicle-sheet">
-      <header className="sheet-overview">
-        <VehiclePhoto vehicleId={v.id} name={v.brand + ' ' + v.model} uploaded={data.photos.some(photo => photo.vehicleId === v.id)} preview={preview} illustration priority/>
+      <header className="sheet-overview ac-titanium-vehicle">
+        <TitaniumWave />
         <div>
           <p className="eyebrow">AutoCare · {locale === 'ro-RO' ? 'Fișa vehiculului' : 'Vehicle report'}</p>
           <p className="small">

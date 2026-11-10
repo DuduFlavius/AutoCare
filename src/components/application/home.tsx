@@ -30,6 +30,8 @@ import {
 } from '@/lib/application-home';
 import { forecastDuration } from '@/lib/service-forecast';
 import { AppEmpty, AppStatus } from './ui';
+import { TitaniumWave } from '../titanium-wave';
+import { AutoAssistant } from './auto-assistant';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type Row = Data['records'][number];
@@ -111,6 +113,9 @@ export default function ApplicationHome({
     };
   });
   const monthlyTrip = data.monthlyTrips?.find(trip => trip.vehicleId === car?.id);
+  const tripMonths = (data.annualTrips ?? []).filter(trip => trip.vehicleId === car?.id);
+  const annualDistance = tripMonths.reduce((total, month) => total + month.meters, 0);
+  const maxTripMonth = Math.max(1, ...tripMonths.map(month => month.meters));
   const monthCost = months.at(-1)?.value ?? 0,
     yearCost = costRows
       .filter((r) => r.date?.startsWith(today.slice(0, 4)))
@@ -156,6 +161,7 @@ export default function ApplicationHome({
   return (
     <div className="studio-home ac-cockpit-home" data-workspace-ui>
       <header className="studio-home-heading">
+        <TitaniumWave />
         <div>
           <span className="studio-kicker">AUTOCARE · {t('PREZENTARE GENERALĂ', 'OVERVIEW')}</span>
           <h1 id="workspace-page-title" tabIndex={-1}>
@@ -194,6 +200,7 @@ export default function ApplicationHome({
         <>
           <div className="studio-overview">
             <section className="studio-vehicle-panel ac-vehicle-instrument" aria-labelledby="ac-instrument-title">
+              <TitaniumWave />
               <div className="ac-instrument-heading">
                 <div className="studio-vehicle-identity">
                   <span className="studio-kicker">{t('MAȘINA SELECTATĂ', 'SELECTED VEHICLE')}</span>
@@ -238,16 +245,45 @@ export default function ApplicationHome({
               <div className="ac-readiness-heading"><span className="studio-kicker">{t('CENTRU DE CONTROL', 'CONTROL CENTRE')}</span><Activity size={19}/></div>
               <h2 id="ac-readiness-title">{t('Starea întreținerii', 'Care status')}</h2>
               <div className="ac-readiness-value">
-                <strong>{careScore === null ? '—' : careScore + '%'}</strong>
-                <span>{careScore === null ? t('Date insuficiente', 'More data needed') : t('Termene în regulă', 'Deadlines in good standing')}</span>
+                <div className="ac-care-ring" style={{ '--ac-care-score': (careScore ?? 0) + '%' } as CSSProperties}>
+                  <strong>{careScore === null ? '—' : careScore + '%'}</strong>
+                </div>
+                <span>{careScore === null
+                  ? t('Adaugă termene pentru a vedea scorul.', 'Add deadlines to see your score.')
+                  : `${healthyChecks} / ${careStates.length} ${t('termene în regulă', 'deadlines in good standing')}`}</span>
               </div>
-              {careScore !== null && <meter min={0} max={100} value={careScore} aria-label={t('Termene în regulă', 'Deadlines in good standing')}/>}
               <p>{t('Scor din scadențele documentelor și intervalele de service înregistrate.', 'Score from recorded document deadlines and maintenance intervals.')}</p>
               <div className="ac-readiness-actions">
                 <button type="button" onClick={() => navigate('Întreținere')}><Wrench size={16}/>{t('Întreținere', 'Maintenance')}<ArrowUpRight size={14}/></button>
                 <button type="button" onClick={() => navigate('Notificări')}><Bell size={16}/>{t('Notificări', 'Notifications')}{reminders > 0 && <span>{reminders}</span>}<ArrowUpRight size={14}/></button>
               </div>
             </section>
+          </div>
+          <div className="ac-titanium-action-deck">
+            <section className="ac-titanium-reminder" aria-labelledby="ac-next-reminder">
+              <TitaniumWave />
+              <div className="ac-assistant-icon"><CalendarDays size={22} aria-hidden="true" /></div>
+              <div>
+                <h2 id="ac-next-reminder">{t('Următorul termen', 'Next deadline')}</h2>
+                {attention[0] ? (
+                  <>
+                    <p><strong data-user-content>{attention[0].title}</strong> · {attention[0].status.label}</p>
+                    <button type="button" className="studio-text-button" onClick={() => onRecord(attention[0])}>{t('Vezi documentul', 'View document')} <ArrowUpRight size={14}/></button>
+                  </>
+                ) : next ? (
+                  <>
+                    <p><strong data-user-content>{next.service.title}</strong> · {labels[next.status.state]}</p>
+                    <button type="button" className="studio-text-button" onClick={() => openForecast(next)}>{t('Vezi mentenanța', 'View maintenance')} <ArrowUpRight size={14}/></button>
+                  </>
+                ) : (
+                  <>
+                    <p>{t('Adaugă un document sau planifică o lucrare.', 'Add a document or schedule a service.')}</p>
+                    <button type="button" className="studio-text-button" onClick={() => onCreate('document', car.id)}>{t('Adaugă document', 'Add document')} <ArrowUpRight size={14}/></button>
+                  </>
+                )}
+              </div>
+            </section>
+            <AutoAssistant key={car.id} vehicleId={car.id} available={!preview && data.autoAssistantAvailable} premium={data.premium} en={en} onPremium={() => navigate('Premium')} />
           </div>
           <section className="studio-telemetry" aria-labelledby="studio-telemetry-title">
             <div className="studio-telemetry-heading">
@@ -444,6 +480,33 @@ export default function ApplicationHome({
                   )}
                 </p>
               )}
+            </section>
+            <section className="studio-panel ac-annual-drive">
+              <div className="studio-panel-head">
+                <h2>{t('Distanță GPS anuală', 'Annual GPS distance')}</h2>
+                <button type="button" className="studio-text-button" onClick={() => navigate('Plan întreținere')}>SmartDrive <ArrowUpRight size={15}/></button>
+              </div>
+              {tripMonths.length ? (
+                <>
+                  <div className="studio-cost-total">
+                    <strong>{(annualDistance / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} km</strong>
+                    <span>{today.slice(0, 4)} · {t('trasee salvate', 'saved trips')}</span>
+                  </div>
+                  <ul className="ac-drive-bars" aria-label={t('Distanță lunară GPS', 'Monthly GPS distance')}>
+                    {Array.from({ length: Number(today.slice(5, 7)) }, (_, month) => {
+                      const key = today.slice(0, 4) + '-' + String(month + 1).padStart(2, '0');
+                      const meters = tripMonths.find(trip => trip.month === key)?.meters ?? 0;
+                      const label = new Date(Date.UTC(2020, month, 1)).toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' });
+                      const distance = (meters / 1000).toLocaleString(locale, { maximumFractionDigits: 1 }) + ' km';
+                      return <li key={key} title={label + ' · ' + distance}>
+                        <span className="sr-only">{label} · {distance}</span>
+                        <span className="ac-drive-track" aria-hidden="true"><i style={{ height: (meters / maxTripMonth * 100) + '%' }} /></span>
+                        <small aria-hidden="true">{label.slice(0, 3)}</small>
+                      </li>;
+                    })}
+                  </ul>
+                </>
+              ) : <p className="studio-chart-empty">{t('Distanța apare după ce salvezi prima călătorie GPS.', 'Distance appears after your first saved GPS trip.')}</p>}
             </section>
             <section className="studio-panel ac-activity-panel">
               <div className="studio-panel-head"><h2>{t('Activitate recentă', 'Recent activity')}</h2><button type="button" className="studio-text-button" onClick={() => navigate('Istoric auto')}>{t('Istoric', 'History')}<ArrowUpRight size={16}/></button></div>
