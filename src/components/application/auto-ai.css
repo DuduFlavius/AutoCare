@@ -67,3 +67,32 @@
 .ac-ai-tools>.card{border-radius:19px!important}
 @media(max-width:900px){.ac-ai-layout{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:550px){.ac-ai-suggestions{grid-template-columns:1fr}.ac-ai-chat{min-height:500px}.ac-ai-question{max-width:94%}.ac-ai-answer{max-width:98%}}
+
+/* Premium chat refinement: spacious reading pane, consistent typography, clean messages */
+.ac-ai-chat{display:flex!important;flex-direction:column;gap:0!important;min-height:690px;overflow:hidden;padding:0!important;background:#0e1523!important;border:1px solid #26334b!important;border-radius:22px!important}
+.ac-ai-heading{flex:none;min-height:75px;padding:18px 24px;border-bottom:1px solid #27354d;gap:12px}
+.ac-ai-heading h3{font-size:16px;font-weight:650;letter-spacing:-.02em}
+.ac-ai-heading h3 svg{color:#7eb8ff}
+.ac-ai-heading>button{margin-left:auto}
+.ac-ai-online{background:#111e31;border-color:#31486a}
+.ac-ai-turns{flex:1;display:flex;flex-direction:column;gap:25px;max-height:min(70vh,760px);min-height:360px;padding:28px 28px 38px;scrollbar-width:thin;scrollbar-color:#344b6a transparent}
+.ac-ai-turns li{display:flex;flex-direction:column;gap:14px;flex:none}
+.ac-ai-question{margin:0;max-width:min(78%,620px);font-size:14px;background:#234d9b;border:1px solid #3866b7;border-radius:19px 19px 5px 19px;padding:13px 18px;color:#f5f9ff}
+.ac-ai-answer{max-width:min(94%,800px);border:0;background:transparent;padding:0 4px 0 0;border-radius:0;box-shadow:none;font-size:14px;color:#dbe5f4;line-height:1.75}
+.ac-ai-answer strong{font-size:12px;font-weight:650;color:#9cc8ff;margin-bottom:9px;letter-spacing:.01em}
+.ac-ai-message-body{display:grid;gap:8px;overflow-wrap:anywhere}
+.ac-ai-message-body p{margin:0;white-space:pre-wrap;line-height:1.8}
+.ac-ai-message-body p:empty{display:none}
+.ac-ai-message-body h4{font-size:15px;font-weight:700;color:#f3f7ff;margin:12px 0 1px}
+.ac-ai-message-body b{font-weight:700;color:#fff}
+.ac-ai-answer time{font-size:10px;color:#7e92b0;margin-top:10px}
+.ac-ai-composer{flex:none;margin:14px 20px 12px;padding:7px 8px 7px 14px;border-radius:17px;border:1px solid #364966;background:#151f31;box-shadow:0 8px 24px #0002}
+.ac-ai-composer textarea{min-height:50px;max-height:160px;resize:none;color:#f0f5ff;font-size:14px;line-height:1.6}
+.ac-ai-composer textarea::placeholder{color:#8092ad}
+.ac-ai-composer button{border-radius:12px!important;padding:11px 16px!important}
+.ac-ai-privacy{margin:0 24px 10px;font-size:11px!important}
+.ac-ai-chat>small:not(.ac-ai-privacy){margin:0 24px 18px;font-size:10px;line-height:1.5}
+.ac-ai-typing,.ac-ai-inline-error{margin:0 24px 12px}
+.ac-ai-welcome{flex:1;padding:40px 24px;min-height:370px}
+.ac-ai-suggestions{max-width:780px}
+@media(max-width:650px){.ac-ai-heading{padding:14px;gap:8px}.ac-ai-heading h3{font-size:14px}.ac-ai-online{font-size:10px;padding:5px 8px}.ac-ai-turns{padding:20px 15px;gap:18px}.ac-ai-question{max-width:88%}.ac-ai-answer{max-width:100%}.ac-ai-composer{margin:10px 12px}.ac-ai-privacy,.ac-ai-chat>small:not(.ac-ai-privacy){margin-left:14px;margin-right:14px}.ac-ai-composer button{font-size:0;padding:10px!important}.ac-ai-composer button svg{width:20px;height:20px}.ac-ai-chat{min-height:560px}}
