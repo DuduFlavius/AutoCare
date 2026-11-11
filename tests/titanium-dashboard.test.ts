@@ -87,7 +87,9 @@ test('assistant requires Premium, checks ownership, and limits context sent to t
     const payload = JSON.parse(String(request.body));
     assert.equal(payload.store, false);
     assert.equal(payload.model, 'test-model');
-    assert.equal(JSON.parse(payload.input).context.entries[0].expiresAt, '2030-01-31');
+    assert.match(payload.input, /CURRENT USER MESSAGE/);
+    assert.ok(payload.input.includes('Când expiră ITP?'));
+    assert.match(payload.input, /"expiresAt":"2030-01-31"/);
     assert.doesNotMatch(payload.input, /PRIVATE-/);
     return Response.json({ output: [{ type: 'message', content: [{ type: 'output_text', text: 'ITP expiră pe 31 ianuarie 2030.' }] }] });
   });

@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { PriceCards } from './membership';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -24,6 +25,11 @@ export default function SubscriptionPage({
     createdAt?: string;
   }>;
 }) {
+  const [selectedPlan, setSelectedPlan] = useState('');
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get('plan') ?? '';
+    if (['monthly', 'quarterly', 'annual'].includes(value)) setSelectedPlan(value);
+  }, []);
   const en = language === 'en',
     grants = data.premiumAccess.manual,
     lifetime = grants.some((g) => !g.expiresAt),
@@ -113,6 +119,7 @@ export default function SubscriptionPage({
             </p>
           </section>
           <PriceCards
+            selectedPlan={selectedPlan}
             monthlyBani={data.pricing.monthlyBani}
             annualBani={data.pricing.annualBani}
             language={language}

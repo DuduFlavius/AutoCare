@@ -11,6 +11,17 @@ export const pages: Record<
       { ...value, sections: value.sections.map(([a, b]) => [a, b] as [string, string]) },
     ]),
   ),
+  'autocare-ai': {
+    title: 'AutoCare AI, asistentul personal al mașinii tale',
+    intro: 'Conversează despre întreținere, cheltuieli și documente folosind datele vehiculului ales din garaj.',
+    sections: [
+      ['Întrebări legate de mașina ta', 'Asistentul folosește marca, modelul, motorizarea, kilometrajul și înregistrările disponibile. Poți continua conversația cu întrebări scurte. Când lipsesc informații, îți cere detalii.'],
+      ['Întreținere și documente', 'Verifică pragurile introduse pentru revizii, ulei și distribuție și consultă datele de expirare ale documentelor. Recomandările tehnice se verifică împreună cu un specialist.'],
+      ['Analiză financiară', 'Compară costurile înregistrate, categoriile de cheltuieli și perioadele disponibile. Calculul costului pe kilometru necesită citiri datate suficiente. Estimările sunt marcate ca estimări.'],
+      ['Inclus în AutoCare Premium', 'Toate perioadele de abonare Premium includ acces la asistent, cu până la 120 de întrebări și 6 scanări pe zi. Istoricul conversației se păstrează pentru vehiculul selectat. Verifici datele extrase înainte de salvare.'],
+      ['Date private și control', 'Accesul la fiecare vehicul este verificat pe server. Întrebările, istoricul recent și datele relevante sunt trimise furnizorului AI pentru răspuns. Poți șterge istoricul conversației pentru vehiculul selectat.'],
+    ],
+  },
   'despre-noi': {
     title: 'Despre AutoCare',
     intro: 'AutoCare este un garaj digital pentru administrarea mașinii personale și a istoricului ei.',

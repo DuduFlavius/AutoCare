@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, Bot, ShieldCheck, Copy, Square, History, ChevronDown, PanelLeftClose, PanelLeftOpen, Plus, Wrench, CalendarDays, BarChart3 } from 'lucide-react';
+import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, ShieldCheck, Copy, Square, ChevronDown, PanelLeftClose, PanelLeftOpen, Plus, Wrench, CalendarDays, BarChart3 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { TitaniumWave } from '../titanium-wave';

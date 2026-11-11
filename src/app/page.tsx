@@ -1,3 +1,4 @@
+import { PublicAiIntro } from '@/components/public-ai-intro';
 import { TechnologyNavigation } from '@/components/technology-navigation';
 import './product-intro.css';
 import Link from 'next/link';
@@ -92,6 +93,7 @@ export default async function Home() {
               ))}
             </div>
           </section>
+          <PublicAiIntro />
           <section className="ac-landing-discovery" aria-label="Hartă și abonamente">
             <article className="ac-landing-map-card">
               <div className="ac-landing-map-symbol" aria-hidden="true"><MapPin size={50} /></div>
@@ -109,9 +111,9 @@ export default async function Home() {
             </section>
             <article className="ac-landing-assistant">
               <Sparkles size={26} aria-hidden="true" />
-              <h2>AI Auto Assistant</h2>
-              <p>Întrebări despre documente, revizii și cheltuieli, cu răspunsuri bazate pe datele mașinii. Disponibil când este configurat furnizorul AI.</p>
-              <Link href="/cont" className="lux-text-link">Intră în cont <ArrowUpRight size={16} /></Link>
+              <h2>AutoCare AI</h2>
+              <p>Asistentul personal al mașinii tale. Discută despre revizii, documente și cheltuieli, cu răspunsuri adaptate istoricului vehiculului. Inclus în toate planurile Premium.</p>
+              <Link href="/autocare-ai" className="lux-text-link">Descoperă AutoCare AI <ArrowUpRight size={16} /></Link>
             </article>
           </section>
           <section className="ac-product-systems" id="aplicatia">

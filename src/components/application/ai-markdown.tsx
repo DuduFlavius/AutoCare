@@ -4,7 +4,7 @@ import { Fragment, type ReactNode } from 'react';
 
 /** Render a restricted Markdown subset as React nodes. Never inject HTML or execute model output. */
 function inline(source: string): ReactNode[] {
-  const tokens = source.split(/(\[(?:[^\]]+)\]\((?:https?:\/\/[^\s)]+)\)|\*\*[^*]+\*\*|\*[^*\n]+\*|\`[^\`]+\`)/g);
+  const tokens = source.split(/(\[(?:[^\]]+)\]\((?:https?:\/\/[^\s)]+)\)|\*\*[^*]+\*\*|\*[^*\n]+\*|`[^`]+`)/g);
   const nodes: ReactNode[] = [];
   for (let i = 0; i < tokens.length; i++) {
     const part = tokens[i];
@@ -39,10 +39,10 @@ export function AiMarkdown({ text }: { text: string }) {
       blocks.push(<h4 key={i} className="ac-ai-md-heading">{inline(heading[2])}</h4>);
       i++; continue;
     }
-    if (/^\`\`\`/.test(line)) {
+    if (/^```/.test(line)) {
       const start = i++;
       const code: string[] = [];
-      while (i < lines.length && !/^\`\`\`/.test(lines[i])) code.push(lines[i++]);
+      while (i < lines.length && !/^```/.test(lines[i])) code.push(lines[i++]);
       if (i < lines.length) i++;
       blocks.push(<pre key={start}><code>{code.join('\n')}</code></pre>);
       continue;
@@ -73,7 +73,7 @@ export function AiMarkdown({ text }: { text: string }) {
       continue;
     }
     const start = i; const paragraph: string[] = [];
-    while (i < lines.length && lines[i].trim() && !/^(#{1,4}\s|\`\`\`|>\s|\s*[-*+]\s|\s*\d+\.\s)/.test(lines[i])) paragraph.push(lines[i++]);
+    while (i < lines.length && lines[i].trim() && !/^(#{1,4}\s|```|>\s|\s*[-*+]\s|\s*\d+\.\s)/.test(lines[i])) paragraph.push(lines[i++]);
     if (!paragraph.length) { i++; continue; }
     blocks.push(<p key={start}>{inline(paragraph.join(' '))}</p>);
   }

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, type FormEvent } from 'react';
+import { PublicAiIntro } from './public-ai-intro';
 import Link from 'next/link';
 import SiteLanguage from './site-language';
 import './auth-premium.css';
@@ -159,6 +160,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
             ? 'Creează-ți contul pentru a adăuga prima mașină.'
             : 'Documentele și istoricul mașinii tale, la îndemână.'}
         </p>
+        {signup && <PublicAiIntro compact />}
         <form
           method="post"
           className="stack"
@@ -271,7 +273,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
           </p>
         )}
         <div className="stack small" style={{ marginTop: 20 }}>
-          <Link href={signup ? '/autentificare' : '/inregistrare'}>
+          <Link href={(signup ? '/autentificare?' : '/inregistrare?') + new URLSearchParams({ next })}>
             {signup ? 'Ai deja cont? Autentifică-te' : 'Nu ai cont? Înregistrează-te'}
           </Link>
           <Link href="/recuperare-parola">Recuperează parola</Link>

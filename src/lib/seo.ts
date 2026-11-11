@@ -101,6 +101,7 @@ export const indexableSlugs = [
   'contact',
   'preturi',
   'comparatie',
+  'autocare-ai',
   'intrebari-frecvente',
 ];
 export function publicMetadata(title: string, description: string, path: string): Metadata {

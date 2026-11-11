@@ -21,6 +21,7 @@ export function PriceCards({
   prepaid = false,
   language = 'ro',
   reportTimezone,
+  selectedPlan,
 }: {
   monthlyBani: number;
   annualBani: number;
@@ -29,6 +30,7 @@ export function PriceCards({
   prepaid?: boolean;
   language?: 'ro' | 'en';
   reportTimezone?: string;
+  selectedPlan?: string;
 }) {
   const locale = useApplicationLocale();
   const s = savings(monthlyBani, annualBani);
@@ -48,12 +50,12 @@ export function PriceCards({
   }
   return (
     <div className="subscription-options ac-plan-grid">
-      <article className="card subscription-option ac-plan-card">
+      <article className="card subscription-option ac-plan-card" data-selected={selectedPlan === "monthly" || undefined}>
         <div className="subscription-symbol">
           <CreditCard size={23} />
         </div>
         <p className="eyebrow">{en?'MONTHLY PREMIUM':'PREMIUM LUNAR'}</p>
-        <h2>{en?'Flexible, month to month.':'Flexibil, lună de lună.'}</h2>
+        <h2>{en?'Flexible, month to month.':'Control, lună de lună.'}</h2>
         <div className="subscription-price">
           {price(monthlyBani)} <span>{en ? '/month' : 'lei/lună'}</span>
         </div>
@@ -63,29 +65,31 @@ export function PriceCards({
             : `${amount(s.annualMonthlyBani)} lei pentru 12 luni de plată lunară.`}
         </p>
         <ul>
+          <li><Check size={15} />{en ? 'AutoCare AI for every vehicle' : 'AutoCare AI pentru fiecare vehicul'}</li>
+          <li><Check size={15} />{en ? '120 AI questions and 6 scans per day' : '120 întrebări AI și 6 scanări pe zi'}</li>
           <li>
             <Check size={15} />
             {en
               ? 'Maintenance planning and mileage estimates'
-              : 'Planificare întreținere și estimări după kilometraj'}
+              : 'Revizii planificate după timp și kilometraj'}
           </li>
           <li>
             <Check size={15} />
             {en
               ? 'Expense analysis and history exports'
-              : 'Analiza cheltuielilor și exporturi din istoric'}
+              : 'Cheltuieli, bugete și rapoarte PDF/CSV'}
           </li>
           <li>
             <Check size={15} />
             {en
               ? 'Configurable reminder preferences'
-              : 'Preferințe configurabile pentru mementouri'}
+              : 'Mementouri pentru documente și întreținere'}
           </li>
           <li>
             <Check size={15} />
             {en
               ? 'Priorities from saved deadlines and mileage'
-              : 'Priorități după termene și kilometraj'}
+              : 'Istoric separat pentru fiecare vehicul'}
           </li>
 
           <li>
@@ -104,17 +108,17 @@ export function PriceCards({
             {prepaid?(en?'Add 1 month':'Adaugă 1 lună'):(en?'Choose monthly':'Alege lunar')} <ArrowUpRight size={15} />
           </button>
         ) : (
-          <a className="button" href="/cont?tab=Abonament">
-            {en?'View in your account':'Vezi în cont'} <ArrowUpRight size={15} />
+          <a className="button" href="/inregistrare?next=%2Fcont%3Ftab%3DAbonament%26plan%3Dmonthly">
+            {en?'Create account and choose plan':'Creează cont și alege planul'} <ArrowUpRight size={15} />
           </a>
         )}
       </article>
-      <article className="card subscription-option ac-plan-card">
+      <article className="card subscription-option ac-plan-card" data-selected={selectedPlan === "quarterly" || undefined}>
         <div className="subscription-symbol">
           <CreditCard size={23} />
         </div>
         <p className="eyebrow">{en?'3-MONTH PREMIUM':'PREMIUM 3 LUNI'}</p>
-        <h2>{en?'Three months of peace of mind.':'Un trimestru fără griji.'}</h2>
+        <h2>{en?'Three months of peace of mind.':'Trei luni de organizare.'}</h2>
         <div className="subscription-price">
           {price(monthlyBani * 3)} <span>{en ? '/3 months' : 'lei / 3 luni'}</span>
         </div>
@@ -124,29 +128,31 @@ export function PriceCards({
             : `Echivalent cu ${amount(monthlyBani)} lei/lună, facturat la fiecare 3 luni.`}
         </p>
         <ul>
+          <li><Check size={15} />{en ? 'AutoCare AI for every vehicle' : 'AutoCare AI pentru fiecare vehicul'}</li>
+          <li><Check size={15} />{en ? '120 AI questions and 6 scans per day' : '120 întrebări AI și 6 scanări pe zi'}</li>
           <li>
             <Check size={15} />
             {en
               ? 'Maintenance planning and mileage estimates'
-              : 'Planificare întreținere și estimări după kilometraj'}
+              : 'Revizii planificate după timp și kilometraj'}
           </li>
           <li>
             <Check size={15} />
             {en
               ? 'Expense analysis and history exports'
-              : 'Analiza cheltuielilor și exporturi din istoric'}
+              : 'Cheltuieli, bugete și rapoarte PDF/CSV'}
           </li>
           <li>
             <Check size={15} />
             {en
               ? 'Configurable reminder preferences'
-              : 'Preferințe configurabile pentru mementouri'}
+              : 'Mementouri pentru documente și întreținere'}
           </li>
           <li>
             <Check size={15} />
             {en
               ? 'Priorities from saved deadlines and mileage'
-              : 'Priorități după termene și kilometraj'}
+              : 'Istoric separat pentru fiecare vehicul'}
           </li>
 
           <li>
@@ -165,18 +171,18 @@ export function PriceCards({
             {prepaid?(en?'Add 3 months':'Adaugă 3 luni'):(en?'Choose 3 months':'Alege 3 luni')} <ArrowUpRight size={15} />
           </button>
         ) : (
-          <a className="button" href="/cont?tab=Abonament">
-            {en?'View in your account':'Vezi în cont'} <ArrowUpRight size={15} />
+          <a className="button" href="/inregistrare?next=%2Fcont%3Ftab%3DAbonament%26plan%3Dquarterly">
+            {en?'Create account and choose plan':'Creează cont și alege planul'} <ArrowUpRight size={15} />
           </a>
         )}
       </article>
-      <article className="card subscription-option annual-option ac-plan-card">
+      <article className="card subscription-option annual-option ac-plan-card" data-selected={selectedPlan === "annual" || undefined}>
         <span className="best-plan">{en?'BEST VALUE':'CEL MAI BUN RAPORT PREȚ–BENEFICII'}</span>
         <div className="subscription-symbol">
           <ShieldCheck size={23} />
         </div>
         <p className="eyebrow">{en?'ANNUAL PREMIUM':'PREMIUM ANUAL'}</p>
-        <h2>{en?'More value.':'Mai multă valoare.'}</h2>
+        <h2>{en?'More value.':'Un an pentru garajul tău.'}</h2>
         <div className="subscription-price">
           {price(annualBani)} <span>{en ? '/year' : 'lei/an'}</span>
         </div>
@@ -195,29 +201,31 @@ export function PriceCards({
           )}
         </p>
         <ul>
+          <li><Check size={15} />{en ? 'AutoCare AI for every vehicle' : 'AutoCare AI pentru fiecare vehicul'}</li>
+          <li><Check size={15} />{en ? '120 AI questions and 6 scans per day' : '120 întrebări AI și 6 scanări pe zi'}</li>
           <li>
             <Check size={15} />
             {en
               ? 'Maintenance planning and mileage estimates'
-              : 'Planificare întreținere și estimări după kilometraj'}
+              : 'Revizii planificate după timp și kilometraj'}
           </li>
           <li>
             <Check size={15} />
             {en
               ? 'Expense analysis and history exports'
-              : 'Analiza cheltuielilor și exporturi din istoric'}
+              : 'Cheltuieli, bugete și rapoarte PDF/CSV'}
           </li>
           <li>
             <Check size={15} />
             {en
               ? 'Configurable reminder preferences'
-              : 'Preferințe configurabile pentru mementouri'}
+              : 'Mementouri pentru documente și întreținere'}
           </li>
           <li>
             <Check size={15} />
             {en
               ? 'Priorities from saved deadlines and mileage'
-              : 'Priorități după termene și kilometraj'}
+              : 'Istoric separat pentru fiecare vehicul'}
           </li>
 
           <li>
@@ -237,8 +245,8 @@ export function PriceCards({
             {prepaid?(en?'Add 12 months':'Adaugă 12 luni'):(en?'Choose annual':'Alege anual')} <ArrowUpRight size={15} />
           </button>
         ) : (
-          <a className="button primary" href="/cont?tab=Abonament">
-            {en?'View in your account':'Vezi în cont'} <ArrowUpRight size={15} />
+          <a className="button primary" href="/inregistrare?next=%2Fcont%3Ftab%3DAbonament%26plan%3Dannual">
+            {en?'Create account and choose plan':'Creează cont și alege planul'} <ArrowUpRight size={15} />
           </a>
         )}
       </article>

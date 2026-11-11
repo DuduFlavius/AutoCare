@@ -699,3 +699,63 @@
     }
   }
 }
+
+.ac-plan-card[data-selected] {outline:2px solid #398bff;outline-offset:3px}
+
+@layer autocare-membership {
+/* Compact plan typography, scoped to public pricing and subscription cards. */
+html body .subscription-options.ac-plan-grid {
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;align-items:stretch!important;gap:16px!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card {
+ display:flex!important;flex-direction:column!important;min-width:0!important;min-height:0!important;height:auto!important;
+ padding:22px!important;border-radius:16px!important;background:linear-gradient(150deg,#142033,#101925)!important;border:1px solid #304056!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card h2 {
+ margin:0 0 14px!important;font-size:19px!important;font-weight:650!important;line-height:1.35!important;letter-spacing:-.3px!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card .eyebrow {
+ margin:0 0 8px!important;color:#a8c2df!important;font-size:10px!important;letter-spacing:1px!important;line-height:1.5!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card .subscription-price {
+ display:flex!important;align-items:baseline!important;flex-wrap:wrap!important;gap:7px!important;
+ margin:0 0 7px!important;font-size:36px!important;font-weight:700!important;line-height:1.2!important;color:#f3f6fa!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card .subscription-price span {
+ font-size:12px!important;color:#b8c4d2!important;font-weight:400!important;line-height:1.5!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > p.small,
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > .savings {
+ min-height:35px!important;margin:0 0 12px!important;font-size:12px!important;line-height:1.5!important;color:#aebfd3!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > ul {
+ display:flex!important;flex-direction:column!important;justify-content:flex-start!important;flex:0 0 auto!important;
+ gap:11px!important;margin:10px 0 20px!important;padding:0!important;list-style:none!important;min-height:0!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > ul > li {
+ display:flex!important;align-items:flex-start!important;gap:8px!important;margin:0!important;padding:0!important;
+ font-size:13px!important;font-weight:400!important;line-height:1.55!important;letter-spacing:normal!important;color:#d0dbea!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > ul > li > span {
+ display:block!important;min-width:0!important;font:inherit!important;color:inherit!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > ul > li > svg {
+ width:15px!important;height:15px!important;flex:0 0 15px!important;margin-top:3px!important;color:#6ab6ff!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > ul > li:nth-child(-n+2) {color:#b0d8ff!important}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > .ac-plan-report {
+ margin-top:auto!important;margin-bottom:12px!important;padding:10px 12px!important;background:#18283d!important;border:1px solid #31465f!important;border-radius:10px!important;
+}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > .ac-plan-report :is(a,strong) {font-size:12px!important;line-height:1.5!important}
+html body .subscription-options.ac-plan-grid > article.ac-plan-card > :is(a,button) {
+ display:flex!important;justify-content:center!important;align-items:center!important;gap:7px!important;min-height:44px!important;
+ margin-top:0!important;padding:11px!important;border-radius:10px!important;font-size:13px!important;font-weight:600!important;line-height:1.4!important;white-space:normal!important;
+}
+html body .subscription-options.ac-plan-grid > article.annual-option {border-color:#398bff!important}
+html body .subscription-options.ac-plan-grid > article.annual-option > :is(a,button) {background:#398bff!important;color:#fff!important}
+@media(max-width:850px) {
+ html body .subscription-options.ac-plan-grid {grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
+ html body .subscription-options.ac-plan-grid > article.ac-plan-card {padding:19px!important}
+}
+
+}
