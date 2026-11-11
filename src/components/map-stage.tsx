@@ -1,7 +1,7 @@
 'use client';
 
 import { Maximize2, Minimize2 } from 'lucide-react';
-import { useRef, useState, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
 export default function MapStage({
   title,
@@ -16,38 +16,44 @@ export default function MapStage({
 }) {
   const panel = useRef<HTMLDialogElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
+  const wasExpanded = useRef(false);
   const [expanded, setExpanded] = useState(false);
 
-  function expand() {
+  // Own the native dialog state after React commits. Reopening in onClose alone
+  // races the browser's close algorithm and can leave the embedded map hidden.
+  useLayoutEffect(() => {
     const dialog = panel.current;
     if (!dialog) return;
     if (expanded) {
-      dialog.close();
-      return;
+      if (!dialog.matches(':modal')) {
+        dialog.removeAttribute('open');
+        dialog.showModal();
+      }
+    } else {
+      if (dialog.matches(':modal')) dialog.close();
+      dialog.setAttribute('open', '');
     }
-    dialog.removeAttribute('open');
-    dialog.showModal();
-    setExpanded(true);
-    toggle.current?.focus();
+    if (expanded || wasExpanded.current) toggle.current?.focus({ preventScroll: true });
+    wasExpanded.current = expanded;
+  }, [expanded]);
+
+  function expand() {
+    setExpanded(value => !value);
   }
 
   return (
     <dialog
       ref={panel}
-      open
       aria-label={title}
       className="ac-map-stage"
-      onClose={() => {
-        panel.current?.setAttribute('open', '');
-        setExpanded(false);
-        toggle.current?.focus();
-      }}
+      onClose={() => setExpanded(false)}
+      onCancel={event => { event.preventDefault(); setExpanded(false); }}
     >
       <div className="ac-map-stage-bar">
         <span>{title}</span>
         <div className="ac-map-stage-actions">
           {expanded && actions}
-          <button ref={toggle} type="button" onClick={expand}>
+          <button ref={toggle} type="button" aria-expanded={expanded} onClick={expand}>
             {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             {expanded
               ? english
