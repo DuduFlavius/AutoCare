@@ -1,3 +1,4 @@
+import { PublicAiIntro } from '@/components/public-ai-intro';
 import { TechnologyNavigation } from '@/components/technology-navigation';
 import './product-intro.css';
 import Link from 'next/link';
@@ -92,6 +93,7 @@ export default async function Home() {
               ))}
             </div>
           </section>
+          <PublicAiIntro />
           <section className="ac-landing-discovery" aria-label="Hartă și abonamente">
             <article className="ac-landing-map-card">
               <div className="ac-landing-map-symbol" aria-hidden="true"><MapPin size={50} /></div>

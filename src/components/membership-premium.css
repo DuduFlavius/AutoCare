@@ -699,3 +699,5 @@
     }
   }
 }
+
+.ac-plan-card[data-selected] {outline:2px solid #398bff;outline-offset:3px}

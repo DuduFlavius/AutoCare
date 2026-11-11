@@ -4,6 +4,7 @@ export function GET() {
   const base = origin();
   return new Response(`# AutoCare\n\n> Garaj digital în limba română pentru documente auto, întreținere, kilometraj și cheltuieli. Aplicație Android și web.\n\n## Surse publice\n${[
     ['Aplicația AutoCare', '/aplicatie-auto'],
+    ['AutoCare AI și limitele Premium', '/autocare-ai'],
     ['Funcționalități', '/functionalitati'],
     ['Documente RCA, ITP și rovinietă', '/documente-auto'],
     ['Istoric service și lucrări planificate', '/intretinere-auto'],

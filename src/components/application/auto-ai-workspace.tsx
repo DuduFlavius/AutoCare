@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Bot, CheckCheck, FileScan, History, MapPin, Send, ShieldCheck, Sparkles, Trash2, UserRound } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { TitaniumWave } from '../titanium-wave';
@@ -27,7 +27,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, avail
   const en = useApplicationLanguage() === 'en';
   return (
     <div className="ac-ai-page" data-workspace-ui>
-      <header className="ac-ai-hero"><TitaniumWave /><span className="ac-ai-icon"><Sparkles size={25} /></span><div><small>AUTOCARE PREMIUM</small><h2>{en ? 'Your vehicle assistant' : 'Asistentul tău auto'}</h2><p>{en ? 'Advice based on your recorded vehicle data.' : 'Recomandări bazate pe datele înregistrate ale mașinii.'}</p></div></header>
+      <header className="ac-ai-hero"><TitaniumWave /><span className="ac-ai-icon"><Sparkles size={25} /></span><div><small>AUTOCARE PREMIUM</small><h2>AutoCare AI</h2><p>{en ? 'Your personal vehicle assistant.' : 'Asistentul tău personal pentru mașină.'}</p></div></header>
       {!premium ? <section className="card"><p>{en ? 'AutoCare AI is included in Premium.' : 'AutoCare AI este inclus în Premium.'}</p><a className="button primary" href="/cont?tab=Premium">Premium <ArrowUpRight size={15} /></a></section>
         : !vehicles.length ? <section className="card"><p>{en ? 'Add a vehicle first.' : 'Adaugă întâi un vehicul.'}</p><a className="button" href="/cont?tab=Garaj">{en ? 'My garage' : 'Garajul meu'}</a></section>
         : <>
@@ -48,6 +48,9 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const en = language === 'en';
   const t = (ro: string, english: string) => en ? english : ro;
   const [turns, setTurns] = useState<Turn[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [submitted, setSubmitted] = useState('');
+  const messages = useRef<HTMLDivElement>(null);
   const [question, setQuestion] = useState('');
   const [pending, setPending] = useState(false);
   const [loading, setLoading] = useState(!preview);
@@ -66,6 +69,11 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
     return () => { controller.abort(); action.current?.abort(); };
   }, [vehicleId, preview]);
 
+  useEffect(() => {
+    const list = messages.current;
+    if (list) list.scrollTop = list.scrollHeight;
+  }, [turns.length, pending, showHistory]);
+
   async function run(task: (signal: AbortSignal) => Promise<void>) {
     if (preview || action.current) return;
     const controller = new AbortController();
@@ -73,12 +81,13 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
     setPending(true); setError(''); setNotice('');
     try { await task(controller.signal); }
     catch (e) { if (!controller.signal.aborted) setError((e as Error).message); }
-    finally { action.current = null; if (!controller.signal.aborted) setPending(false); }
+    finally { action.current = null; if (!controller.signal.aborted) { setPending(false); setSubmitted(''); } }
   }
 
   function ask(value: string, mode: Mode = 'chat') {
-    if (preview || loading || value.trim().length < 4) return;
+    if (preview || loading || value.trim().length < 1) return;
     void run(async signal => {
+      setSubmitted(value);
       const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode, localFallback: true }), signal });
       setTurns(previous => [...previous, data.turn].slice(-30));
       setQuestion('');
@@ -121,23 +130,45 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   return (
     <div className="ac-ai-layout">
       <section className="card ac-ai-chat" aria-label={t('Conversație AutoCare AI', 'AutoCare AI conversation')}>
-        <div className="ac-ai-heading"><h3>{t('Conversația ta', 'Your conversation')}</h3>
+        <div className="ac-ai-heading"><h3><Bot size={18} /> {t('Conversația ta', 'Your conversation')}</h3>
+          <span className="ac-ai-provider" data-online={available || undefined}><i />{available ? t('AI conectat', 'AI connected') : t('Analiză locală', 'Local analysis')}</span>
+          <button type="button" aria-pressed={showHistory} onClick={() => setShowHistory(value => !value)}><History size={15} />{t('Istoric chat', 'Chat history')}</button>
           {turns.length > 0 && <button type="button" disabled={pending || loading} onClick={() => {
             if (window.confirm(t('Ștergi istoricul AI pentru această mașină?', 'Clear AI history for this vehicle?')))
               void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); });
           }}><Trash2 size={16} />{t('Șterge istoricul', 'Clear history')}</button>}
         </div>
         {!available && <p className="ac-ai-state" role="status">{t('Analiza locală răspunde din datele vehiculului. Scanarea și întrebările deschise necesită furnizorul AI.', 'Local analysis uses vehicle records. Scanning and open-ended questions require the AI provider.')}</p>}
-        {loading ? <p role="status">{t('Se încarcă istoricul…', 'Loading history…')}</p> :
-          turns.length ? <ol className="ac-ai-turns" aria-live="polite">{turns.map(turn => <li key={turn.id}><p className="ac-ai-question" data-user-content>{turn.question}</p><div className="ac-ai-answer"><strong><Sparkles size={16} /> AutoCare AI</strong><p data-user-content>{turn.answer}</p><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></li>)}</ol>
-            : <div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={preview || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={16} />{value}<ArrowUpRight size={14} /></button>)}</div>}
+        <div className="ac-ai-message-scroll" ref={messages} role="log" aria-label={t('Mesaje', 'Messages')} aria-live="polite" aria-busy={pending}>
+          {loading ? <p className="ac-ai-loading" role="status">{t('Se încarcă istoricul…', 'Loading history…')}</p> :
+            turns.length ? <ol className="ac-ai-turns">{(showHistory ? turns : turns.slice(-6)).map(turn => <li key={turn.id}>
+              <div className="ac-ai-user-row"><div><p className="ac-ai-question" data-user-content>{turn.question}</p><small><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</time><CheckCheck size={13} /></small></div><span className="ac-ai-avatar"><UserRound size={18} /></span></div>
+              <div className="ac-ai-bot-row"><span className="ac-ai-avatar"><Sparkles size={19} /></span><article className="ac-ai-answer"><strong>AutoCare AI</strong><AnswerContent value={turn.answer} /><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time></article></div>
+            </li>)}</ol> : <div className="ac-ai-welcome">
+              <span className="ac-ai-icon"><Sparkles size={26} /></span><h3>{t('Salut! Cu ce te pot ajuta?', 'Hello! How can I help?')}</h3>
+              <p>{t('Povestește-mi ce se întâmplă cu mașina sau alege o întrebare.', 'Tell me about your vehicle or choose a question.')}</p>
+              <div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={preview || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={15} /><span>{value}</span><ArrowUpRight size={14} /></button>)}</div>
+            </div>}
+          {pending && <div className="ac-ai-pending" role="status"><p data-user-content>{submitted || t('Se pregătește analiza…', 'Preparing analysis…')}</p><span><Sparkles size={15} /> {t('AutoCare îți pregătește răspunsul…', 'AutoCare is preparing your answer…')}</span></div>}
+        </div>
+        <div className="ac-ai-shortcuts">{([
+          ['finance', t('Analizează costurile', 'Analyze costs')],
+          ['maintenance', t('Următoarea revizie', 'Next service')],
+          ['analysis', t('Analizează mașina', 'Analyze vehicle')],
+        ] as const).map(([mode, label]) => <button type="button" key={mode} disabled={preview || pending || loading} onClick={() => ask(label, mode)}><Sparkles size={13} />{label}</button>)}</div>
         <form className="ac-ai-composer" onSubmit={event => { event.preventDefault(); ask(question); }}>
-          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Întreabă despre mașina ta…', 'Ask about your vehicle…')} rows={2} minLength={4} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
-          <button className="primary" type="submit" disabled={preview || pending || loading || question.trim().length < 4}><Send size={17} />{t('Trimite', 'Send')}</button>
+          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Întreabă despre mașina ta…', 'Ask about your vehicle…')} rows={2} onKeyDown={event => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault();
+              ask(question);
+            }
+          }} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
+          <button className="primary" type="submit" disabled={preview || pending || loading || question.trim().length < 1}><Send size={17} />{t('Trimite', 'Send')}</button>
         </form>
+        <small className="ac-ai-trust"><ShieldCheck size={14} />{t('Asistent personalizat. Recomandările tehnice se verifică împreună cu un specialist.', 'Personalized assistant. Review technical recommendations with a specialist.')}</small>
         {available && <small>{t('Întrebarea, istoricul recent și datele relevante ale mașinii sunt trimise furnizorului AI. Evită datele personale.', 'The question, recent history and relevant vehicle data are sent to the AI provider. Avoid personal information.')}</small>}
       </section>
-      <aside className="ac-ai-tools">
+      <details className="ac-ai-tools"><summary><FileScan size={16} />{t('Documente și rapoarte', 'Documents and reports')}</summary>
         <section className="card"><h3><Sparkles size={18} /> {t('Analiză și rapoarte', 'Analysis and reports')}</h3>
           {([
             ['analysis', t('Analizează mașina', 'Analyze vehicle')],
@@ -146,6 +177,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
             ['monthly', t('Generează raportul lunii curente', 'Generate current month report')],
             ['annual', t('Generează raportul anului curent', 'Generate current year report')],
           ] as const).map(([mode, label]) => <button key={mode} type="button" disabled={preview || pending || loading} onClick={() => ask(label, mode)}>{label} <ArrowUpRight size={14} /></button>)}
+          <small>{t('Premium include până la 24 de întrebări și 6 scanări de documente pe zi.', 'Premium includes up to 24 questions and 6 document scans per day.')}</small>
           <a href="/cont?tab=Plan+%C3%AEntre%C8%9Binere&drive=points#service-finder" className="button"><MapPin size={17} /> Service Finder</a>
         </section>
         <section className="card"><h3><FileScan size={18} /> {t('Scanează un document', 'Scan a document')}</h3>
@@ -165,7 +197,22 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
           </form>}
         </section>
         <div aria-live="polite" className="ac-ai-feedback">{pending && <p>{t('Se procesează…', 'Processing…')}</p>}{notice && <p>{notice}</p>}{error && <p role="alert">{error}</p>}</div>
-      </aside>
+      </details>
     </div>
   );
+}
+
+
+function AnswerContent({ value }: { value: string }) {
+  const lines = value.split('\n');
+  return <div className="ac-ai-answer-content" data-user-content>{lines.filter(line => line.trim()).map((line, index) => {
+    const text = line.trim();
+    const heading = /^(#{1,3}\s|\*\*.+\*\*$)/.test(text);
+    const bullet = /^[-*•]\s/.test(text);
+    const parts = text.replace(/^#{1,3}\s/, '').replace(/^[-*•]\s/, '').split(/(\*\*[^*]+\*\*)/g);
+    return <p key={index} className={heading ? 'ac-ai-answer-title' : bullet ? 'ac-ai-answer-bullet' : undefined}>
+      {bullet && <CheckCheck size={14} aria-hidden="true" />}
+      <span>{parts.map((part, i) => part.startsWith('**') && part.endsWith('**') ? <strong key={i}>{part.slice(2, -2)}</strong> : part)}</span>
+    </p>;
+  })}</div>;
 }

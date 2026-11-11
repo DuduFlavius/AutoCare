@@ -223,3 +223,20 @@ test('planned service generates a last-week reminder once and stays out of finan
   assert.equal(pdf.status, 200);
   assert.match(Buffer.from(await pdf.arrayBuffer()).subarray(0, 8).toString(), /^%PDF-/);
 });
+
+test('local assistant handles a greeting and a short follow-up using only the selected vehicle history', async () => {
+  const { askAutoAssistant } = await import('../src/lib/auto-assistant');
+  delete process.env.OPENAI_API_KEY;
+  delete process.env.AUTOCARE_AI_MODEL;
+  delete process.env.GEMINI_API_KEY;
+  delete process.env.GEMINI_MODEL;
+  const greeting = await askAutoAssistant(ownerId, carId, 'Salut!', 'ro', 'chat', true);
+  assert.equal(greeting.source, 'local');
+  assert.match(greeting.answer, /Salut! Te ajut cu Example GT/);
+  const maintenance = await askAutoAssistant(ownerId, carId, 'Ce revizii urmează?', 'ro', 'chat', true);
+  assert.match(maintenance.answer, /lucrare/);
+  const followup = await askAutoAssistant(ownerId, carId, 'da', 'ro', 'chat', true);
+  assert.match(followup.answer, /lucrare/);
+  assert.doesNotMatch(followup.answer, /Întrebările deschise necesită/);
+  await assert.rejects(() => askAutoAssistant(ownerId, foreignCarId, 'Salut!', 'ro', 'chat', true));
+});

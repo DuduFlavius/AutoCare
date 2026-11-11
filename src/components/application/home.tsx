@@ -1,6 +1,7 @@
 'use client';
 import { useState, type CSSProperties } from 'react';
 import {
+  Sparkles,
   ArrowUpRight,
   Bell,
   ArrowRight,
@@ -576,7 +577,8 @@ export default function ApplicationHome({
                 { Icon: Wallet, label: t('Adaugă cheltuială', 'Add expense'), action: () => onCreate('expense', car.id) },
                 { Icon: Files, label: t('Adaugă document', 'Add document'), action: () => onCreate('document', car.id) },
                 { Icon: CalendarDays, label: t('Raport anual', 'Annual report'), action: () => navigate('Rapoarte') },
-              ].map(({ Icon, label, action }) => <button type="button" key={label} onClick={action}><Icon size={19} />{label}</button>)}
+                { Icon: Sparkles, label: 'AutoCare AI', action: () => navigate('AutoCare AI') },
+              ].map(({ Icon, label, action }) => <button type="button" key={label} onClick={action}><Icon size={19} /><span>{label}</span></button>)}
             </div>
           </section>
             <section className="studio-panel ac-activity-panel">

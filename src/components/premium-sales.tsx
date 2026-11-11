@@ -10,6 +10,8 @@ export default function PremiumSales({
 }) {
   const en = language === 'en';
   const comparison = [
+    ['AutoCare AI', '—', en ? 'Vehicle conversations and saved history' : 'Conversații pe vehicul și istoric salvat'],
+    [en ? 'AI usage allowance' : 'Limită de utilizare AI', '—', en ? '24 questions/day · 6 document scans/day when connected' : '24 întrebări/zi · 6 scanări/zi cu furnizor conectat'],
     [en ? 'Complete service and renew its interval' : 'Finalizează lucrarea și reînnoiește intervalul', '—', en ? 'Included' : 'Inclus'],
     [en ? 'Estimated budget vs actual cost' : 'Buget estimat vs cost real', '—', en ? 'Included' : 'Inclus'],
     [en ? 'Temporary mechanic folder' : 'Dosar temporar pentru mecanic', '—', en ? '1, 3 or 7 days · revocable' : '1, 3 sau 7 zile · revocabil'],

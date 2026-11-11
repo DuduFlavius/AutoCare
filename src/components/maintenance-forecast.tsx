@@ -1,6 +1,9 @@
 'use client';
 import { useState } from 'react';
 import ServiceForecastCards from './service-forecast-cards';
+import { currentHomeMaintenance } from '@/lib/application-home';
+import { isPlannedService } from '@/lib/planned-service';
+import { localDate } from '@/lib/config';
 import { maintenanceTargets } from '@/lib/maintenance-schedule';
 import { useApplicationLanguage } from './application-locale';
 import type { dashboard } from '@/lib/service';
@@ -43,8 +46,8 @@ export default function MaintenanceForecast({
       </section>
     );
   if (!car) return null;
-  const services = records
-    .filter((r) => r.kind === 'service' && !r.cancelled && r.vehicleId === car.id)
+  const today = localDate(new Date(), data.profile.timezone);
+  const services = currentHomeMaintenance(records.filter(r => r.vehicleId === car.id && !isPlannedService(r, today)))
     .flatMap(maintenanceTargets);
   return (
     <section className="card ac-all-maintenance-forecast" data-workspace-ui>

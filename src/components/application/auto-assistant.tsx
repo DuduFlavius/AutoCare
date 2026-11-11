@@ -23,7 +23,7 @@ export function AutoAssistant({
 
   async function ask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!premium || preview || request.current || question.trim().length < 4) return;
+    if (!premium || preview || request.current || question.trim().length < 1) return;
     const controller = new AbortController();
     request.current = controller;
     setPending(true);
@@ -56,7 +56,7 @@ export function AutoAssistant({
           <>
             <p>{en ? 'Ask about service, documents or recorded expenses.' : 'Întreabă despre revizii, documente sau costurile înregistrate.'}</p>
             <form onSubmit={ask} aria-busy={pending}>
-              <input aria-label={en ? 'Your question' : 'Întrebarea ta'} value={question} onChange={e => setQuestion(e.target.value)} minLength={4} maxLength={500} required placeholder={en ? 'When is my next service?' : 'Când urmează revizia?'} />
+              <input aria-label={en ? 'Your question' : 'Întrebarea ta'} value={question} onChange={e => setQuestion(e.target.value)} minLength={1} maxLength={500} required placeholder={en ? 'When is my next service?' : 'Când urmează revizia?'} />
               <button className="primary" type="submit" disabled={pending} aria-label={en ? 'Send question' : 'Trimite întrebarea'}><Send size={17} /></button>
             </form>
             <small>{available ? (en ? 'Your question and selected vehicle records are sent to the AI provider. Avoid including personal data.' : 'Întrebarea și datele relevante ale mașinii sunt trimise către furnizorul AI. Evită datele personale.') : (en ? 'Local analysis uses your recorded data.' : 'Analiza locală folosește datele înregistrate.')}</small>

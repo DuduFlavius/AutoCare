@@ -63,3 +63,14 @@ html body .ac-workspace.ac-studio .ac-service-garage .ac-service-vehicle {
 }
 .ac-service-vehicle > .ac-titanium-wave {z-index:-1;opacity:.55}
 .ac-service-actions {display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+
+html body .ac-workspace.ac-studio .ac-all-maintenance-forecast {padding:13px}
+.ac-all-maintenance-forecast .ac-forecast-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ac-all-maintenance-forecast .ac-forecast-list > :not(article) {grid-column:1/-1}
+html body .ac-workspace.ac-studio .ac-all-maintenance-forecast .forecast-service-card {
+ min-width:0;min-height:0;padding:13px;gap:7px;border-radius:12px;background:#111e32;border:1px solid #2a4160;
+}
+.ac-all-maintenance-forecast .forecast-result > span {font-size:22px!important}
+.ac-all-maintenance-forecast .forecast-service-card p {font-size:12px;line-height:1.5;margin:3px 0}
+.ac-all-maintenance-forecast .forecast-thresholds {display:grid;gap:5px}
+@media(max-width:650px){.ac-all-maintenance-forecast .ac-forecast-list{grid-template-columns:minmax(0,1fr)}}

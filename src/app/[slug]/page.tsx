@@ -1,3 +1,4 @@
+import { PublicAiIntro } from '@/components/public-ai-intro';
 import { technologyPages } from '@/lib/public-technology';
 import { TechnologyNavigation } from '@/components/technology-navigation';
 import { ArrowUpRight } from 'lucide-react';
@@ -71,6 +72,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
             și opțiuni avansate.
           </p>
           </header>
+          <PublicAiIntro />
           <PriceCards monthlyBani={prices.monthlyBani} annualBani={prices.annualBani} />
           <p className="small muted">
             Tarife în RON. Abonamente recurente, administrate în portalul de facturare. Checkout-ul
@@ -88,6 +90,8 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   const legal = ['confidentialitate', 'termeni', 'cookie-uri'].includes(slug);
   const cta = technology
     ? { href: technology.workspace, label: technology.action }
+    : slug === 'autocare-ai'
+      ? { href: '/inregistrare?next=%2Fcont%3Ftab%3DAutoCare%2BAI', label: 'Descoperă AI în Premium' }
     : slug === 'contact'
       ? { href: '/cont?tab=Centru%20de%20suport', label: 'Deschide Centrul de suport' }
       : { href: '/inregistrare', label: 'Creează cont gratuit' };
@@ -102,6 +106,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           {!legal && <Link href={cta.href} className="button primary">{cta.label} <ArrowUpRight size={17}/></Link>}
         </header>
         {topic && <img className="seo-topic-image" src={topic.image} alt={topic.alt} width={960} height={420} loading="lazy" />}
+        {['functionalitati', 'autocare-ai'].includes(slug) && <PublicAiIntro />}
         {(slug === 'functionalitati' || technology) && <TechnologyNavigation current={slug}/>}
         {faq ? (
           <div className="public-faq">
