@@ -90,7 +90,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const [scan, setScan] = useState<Scan | null>(null);
   const action = useRef<AbortController | null>(null);
   const input = useRef<HTMLTextAreaElement>(null);
-  useLayoutEffect(()=>{const field=input.current;if(!field)return;field.style.height='auto';field.style.height=Math.min(120,field.scrollHeight)+'px';field.style.overflowY=field.scrollHeight>120?'auto':'hidden';},[question]);
+  useLayoutEffect(()=>{const field=input.current;if(!field)return;field.style.setProperty('height','auto','important');field.style.setProperty('height',Math.min(120,field.scrollHeight)+'px','important');field.style.setProperty('overflow-y',field.scrollHeight>120?'auto':'hidden','important');},[question]);
   const bottom = useRef<HTMLLIElement>(null);
   const messageScroll = useRef<HTMLDivElement>(null);
   const historyList = useRef<HTMLOListElement>(null);
