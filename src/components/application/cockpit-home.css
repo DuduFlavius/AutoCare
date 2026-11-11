@@ -89,3 +89,13 @@ html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] 
 
 @layer autocare-workspace { html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] .app-topbar-title {display:none!important} @media(max-width:900px){html body .app-shell.ac-workspace.ac-studio main#workspace-main:has(.ac-cockpit) {width:100%!important}} }
 @layer autocare-workspace {@media(max-width:600px){html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] .app-topbar-brand {flex:none!important;gap:8px!important;white-space:nowrap!important}html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] .app-topbar-brand strong {white-space:nowrap!important;font-size:16px!important}html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] .app-topbar-actions {gap:5px!important}}}
+
+@layer autocare-workspace {
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-finance>header select {width:auto!important;flex:none!important;max-width:175px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-recommendation {display:flex!important;align-items:start!important;gap:12px!important;border:1px solid #37597f!important;background:radial-gradient(ellipse at bottom right,#24589b33,transparent 70%),#152943!important;border-radius:13px!important;padding:17px 13px!important;min-height:150px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-recommendation>.ac-cockpit-car-icon {width:43px!important;height:43px!important;border-radius:12px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-recommendation>div {min-width:0!important;flex:1!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-recommendation strong {font-size:13px!important;line-height:1.5!important;display:block!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-recommendation p {font-size:11px!important;line-height:1.5!important;color:#a5bdd9!important;margin:7px 0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-recommendation button {display:inline-flex!important;align-items:center!important;gap:7px!important;min-height:35px!important;border:1px solid #4b7bb5!important;border-radius:8px!important;background:#275084!important;padding:6px 10px!important;color:#eff6ff!important;font-size:11px!important}
+}

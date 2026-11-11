@@ -2,7 +2,7 @@
 
 ## Delivered first: cockpit
 
-Published separately before the remaining changes. Structure follows the supplied reference with the original Midnight Titanium palette: six real-data summaries, spending chart, selected garage vehicle, appointments, recent activity, important documents, compact AI access. No income series, fabricated growth percentages, vehicle photographs, or mechanical health claims. Existing financial helpers and recorded data remain authoritative.
+Published separately before the remaining changes. Structure follows the supplied reference with the original Midnight Titanium palette: six real-data summaries, spending chart, selected garage vehicle, recent activity, important documents, actionable recommendations with appointments, and compact AI access. No income series, fabricated growth percentages, vehicle photographs, or mechanical health claims. Existing financial helpers and recorded data remain authoritative.
 
 ## Shared product system
 
@@ -38,7 +38,7 @@ The Founder Pricing page has a read-only six-price catalog audit. It exposes ide
 
 ### Activation and real Stripe Test Mode verification
 
-No separate Stripe Test Mode key is available in the supplied environment. The isolated test suite is not a substitute for a real Stripe Test Mode run. EUR live activation is gated by `AUTOCARE_ENABLE_EUR_PAYMENTS=true`; the default is off, leaving existing RON billing available. Do not enable this flag before the following verification succeeds.
+The Stripe plugin connection is confirmed. The session currently exposes no Stripe API operations or provider skills, despite a refreshed tool/skill discovery. No separate Stripe Test Mode key is available in the supplied environment. The isolated test suite is not a substitute for a real Stripe Test Mode run. EUR live activation is gated by `AUTOCARE_ENABLE_EUR_PAYMENTS=true`; the default is off, leaving existing RON billing available. Do not enable this flag before the following verification succeeds.
 
 Run:
 
@@ -62,4 +62,6 @@ Google Play digital-subscription billing rules must be satisfied through Play Bi
 - Responsive browser review: desktop, 320px and tablet/phone widths; sidebar viewport calculation and mobile header corrected after visual inspection.
 - Payment tests cover all six exact price/currency mappings, explicit currency and locale, distinct idempotency keys, multi-currency prices, ambiguous/wrong prices, EUR invoice renewal, webhook idempotence, existing-subscription guard, EUR extension amounts, and unauthenticated access.
 - Real provider test runner exits with a clear missing `STRIPE_TEST_SECRET_KEY` error; no successful real delivery/payment is claimed.
-- Final full-suite and browser results are recorded in the delivery message; any external blockers remain explicit.
+- Final suite: 243 tests passed. TypeScript, lint and production build passed.
+- Browser responsive audit: all 16 user-facing modules loaded at desktop, tablet (768px shell), and phone (390px shell) widths — 48 checks with document scroll width equal to viewport width. Additional 320px dashboard check passed. RO/EN switching was exercised from both sidebar and mobile header; EUR prices and signup currency links were checked in both languages.
+- Founder private data and real-device/real-provider tests remain outside the available authenticated preview; no unsupported success is claimed.
