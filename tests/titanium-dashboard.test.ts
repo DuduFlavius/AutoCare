@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { migrate } from '../scripts/migrate';
 import { auth } from '../src/lib/auth';
 import { closeLocalDb, db } from '../src/lib/db';
-import { gpsTrips, notifications, records, subscriptions, user, vehicles } from '../src/lib/schema';
+import { autoAiTurns, gpsTrips, notifications, records, subscriptions, user, vehicles } from '../src/lib/schema';
 import { scheduleReminders } from '../src/lib/reminders';
 import { dashboard } from '../src/lib/service';
 import { garageOverview, garageVehicleSummary } from '../src/lib/garage-overview';
@@ -224,4 +224,34 @@ test('planned service generates a last-week reminder once and stays out of finan
   const pdf = await exportRequest('pdf');
   assert.equal(pdf.status, 200);
   assert.match(Buffer.from(await pdf.arrayBuffer()).subarray(0, 8).toString(), /^%PDF-/);
+});
+
+
+test('new chat omits previous dialogue, preserves history, and refuses expired Premium across AI endpoints', async t => {
+ const oldId = crypto.randomUUID();
+ await db().insert(autoAiTurns).values({id:oldId,userId:ownerId,vehicleId:carId,question:'OLD-CHAT-CONTEXT-MUST-NOT-BE-SENT',answer:'Previous conversation'});
+ process.env.OPENAI_API_KEY = 'test-provider-key';
+ process.env.AUTOCARE_AI_MODEL = 'test-model';
+ const provider = t.mock.method(globalThis,'fetch',async (_url:string,init:RequestInit) => {
+  const payload = JSON.parse(String(init.body));
+  assert.doesNotMatch(payload.input,/OLD-CHAT-CONTEXT-MUST-NOT-BE-SENT/);
+  assert.match(payload.input,/Previous dialogue \(context only\): \[\]/);
+  return Response.json({output:[{type:'message',content:[{type:'output_text',text:'A fresh conversation.'}]}]});
+ });
+ const headers = {Origin:'http://localhost:3000',Cookie:cookie,'Content-Type':'application/json'};
+ const ask = (contextTurns:number) => POST(new Request('http://localhost:3000/api/v1/auto-assistant',{method:'POST',headers,body:JSON.stringify({vehicleId:carId,question:'Start a new conversation',language:'en',contextTurns})}),{params:Promise.resolve({path:['auto-assistant']})});
+ assert.equal((await ask(0)).status,200);
+ assert.equal((await db().select().from(autoAiTurns).where(eq(autoAiTurns.id,oldId))).length,1);
+ assert.equal((await ask(5)).status,400);
+ assert.equal(provider.mock.callCount(),1);
+ await db().update(subscriptions).set({status:'canceled',periodEnd:new Date(0)}).where(eq(subscriptions.userId,ownerId));
+ assert.equal((await ask(0)).status,403);
+ for (const [method,path] of [['GET','auto-assistant/history?vehicleId='+carId],['DELETE','auto-assistant/history'],['POST','auto-assistant/scan']] as const) {
+  const handler = method === 'GET' ? GET : method === 'DELETE' ? DELETE : POST;
+  const response = await handler(new Request('http://localhost:3000/api/v1/'+path,{method,headers,...(method==='GET'?{}:{body:JSON.stringify({vehicleId:carId})})}),{params:Promise.resolve({path:path.split('?')[0].split('/')})});
+  assert.equal(response.status,403);
+ }
+ assert.equal(provider.mock.callCount(),1);
+ delete process.env.OPENAI_API_KEY;
+ delete process.env.AUTOCARE_AI_MODEL;
 });

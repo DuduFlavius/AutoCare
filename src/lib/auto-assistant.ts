@@ -36,7 +36,7 @@ export async function clearAutoAssistantHistory(uid: string, vehicleId: string) 
 
 const knownCategories = new Set(['RCA', 'ITP', 'Rovinietă', 'CASCO', 'Revizie', 'Distribuție', 'Schimb ulei', 'Alimentare', 'Filtre', 'Frâne', 'Anvelope', 'Reparații', 'Service']);
 
-export async function askAutoAssistant(uid: string, vehicleId: string, question: string, language: 'ro' | 'en', mode: Mode = 'chat', localFallback = false) {
+export async function askAutoAssistant(uid: string, vehicleId: string, question: string, language: 'ro' | 'en', mode: Mode = 'chat', localFallback = false, contextTurns = 4) {
   const vehicle = await activeVehicle(uid, vehicleId);
   const configured = autoAssistantConfigured();
   if (!configured && !localFallback) throw new AppError(503, 'Asistentul AI nu este configurat.');
@@ -55,7 +55,7 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
     db().select().from(records).where(and(scope, eq(records.kind, 'service'))).orderBy(sql`${records.date} DESC NULLS LAST`).limit(100),
     db().select().from(records).where(and(scope, gte(records.date, (Number(date.slice(0, 4)) - 1) + '-01-01'))),
     db().select({ question: autoAiTurns.question, answer: autoAiTurns.answer }).from(autoAiTurns)
-      .where(turnsFor(uid, vehicleId)).orderBy(desc(autoAiTurns.createdAt)).limit(4),
+      .where(turnsFor(uid, vehicleId)).orderBy(desc(autoAiTurns.createdAt)).limit(Math.max(0, Math.min(4, contextTurns))),
     db().select({ date: mileageReadings.recordedAt, km: mileageReadings.odometer }).from(mileageReadings)
       .where(and(eq(mileageReadings.userId, uid), eq(mileageReadings.vehicleId, vehicleId)))
       .orderBy(desc(mileageReadings.recordedAt)).limit(8),

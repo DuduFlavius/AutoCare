@@ -454,6 +454,7 @@ Object.assign(dictionary, {
   "Începe cu prima mașină": "Start with your first vehicle",
   "Citește ghidurile practice": "Read the practical guides"
 });
+Object.assign(dictionary, {"Exclusiv pentru abonații Premium. Conturile gratuite nu au acces la conversații sau scanare AI.":"Exclusively for Premium subscribers. Free accounts cannot access AI conversations or document scanning."});
 const normalizedDictionary=Object.fromEntries(Object.entries(dictionary).map(([ro,en])=>[normalizeCopy(ro),en]));
  const templates: [RegExp,(...parts:string[])=>string][]=[
  [/^Bună,(.*)$/,(_,name)=>'Hello,'+name],

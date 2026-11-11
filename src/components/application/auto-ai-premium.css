@@ -95,4 +95,40 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-question {font-size:16px!important;padding:10px 12px!important}
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-chat > small {font-size:12px!important}
 }
+/* The document stays still; only messages, history and the tools drawer scroll. */
+html:has(.ac-ai-page[data-chat]), body:has(.ac-ai-page[data-chat]) {height:100%!important;overflow:hidden!important;overscroll-behavior:none}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-ai-page[data-chat]) {min-height:0!important;overflow:hidden!important;padding-bottom:0!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] {height:var(--ai-page-height,calc(100dvh - 140px))!important;min-height:0!important;grid-template-rows:auto auto minmax(0,1fr)!important;gap:8px!important;overflow:hidden!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-layout {position:relative!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr) auto!important;gap:8px!important;height:100%!important;min-height:0!important;overflow:hidden!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-main {display:flex!important;flex-direction:column!important;min-height:0!important;height:100%!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-chat {flex:1!important;height:100%!important;min-height:0!important;overflow:hidden!important;box-sizing:border-box!important;padding:16px!important;gap:8px!important;background:linear-gradient(135deg,#101e33,#0d1727)!important;border-radius:18px!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-chat > :not(.ac-ai-message-scroll) {flex-shrink:0!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-message-scroll {flex:1 1 0!important;height:0!important;min-height:0!important;overflow:auto!important;padding-right:4px!important;scroll-padding-block:12px!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-tools {position:absolute!important;inset:0 0 46px!important;z-index:35!important;overflow:auto!important;padding:16px!important;box-sizing:border-box!important;border:1px solid #345275!important;border-radius:16px!important;background:#101e33!important;box-shadow:0 12px 40px #0006!important;max-height:100%!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-heading .ac-ai-new-chat {display:inline-flex!important;align-items:center!important;gap:7px!important;background:#183b65!important;border:1px solid #376799!important;border-radius:10px!important;color:#e8f3ff!important;padding:9px 13px!important;min-height:42px!important;white-space:nowrap!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-heading .ac-ai-new-chat span {display:inline!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-heading .ac-ai-online {font-size:12px!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-hero {padding:12px 16px!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-hero p {font-size:13px!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-composer {flex-shrink:0!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-markdown {white-space:normal!important;max-height:none!important;overflow:visible!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-markdown :is(p,li,h4) {text-overflow:clip!important;white-space:normal!important;overflow:visible!important;display:block!important;-webkit-line-clamp:unset!important}
+@media(max-width:600px) {
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-chat {padding:10px!important;gap:7px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-hero p,
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-hero small {display:none!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-hero {padding:9px 11px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-hero .ac-ai-icon {width:32px!important;height:32px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-heading {gap:6px!important;padding-bottom:7px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-heading h3 {font-size:16px!important;min-width:90px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-heading .ac-ai-online {display:none!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-heading .ac-ai-new-chat {padding:7px 9px!important;font-size:13px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-tools-toggle {min-height:36px!important;padding:6px!important;font-size:12px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-chat > small {font-size:11px!important;line-height:1.4!important}
+}
+
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-compact-chat] {grid-template-rows:minmax(0,1fr)!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-compact-chat] > :is(.ac-ai-hero,.ac-ai-vehicle),
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-compact-chat] .ac-ai-chat > :is(small,.ac-ai-quick-prompts) {display:none!important}
+
 }

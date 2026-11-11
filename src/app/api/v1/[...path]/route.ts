@@ -146,16 +146,17 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (route === 'auto-assistant/history' && method === 'GET')
         return json(await autoAssistantHistory(uid, uuid.parse(new URL(req.url).searchParams.get('vehicleId'))));
       if (route === 'auto-assistant' && method === 'POST') {
-        const { vehicleId, question, language, mode, localFallback } = z.object({
+        const { vehicleId, question, language, mode, localFallback, contextTurns } = z.object({
           vehicleId: uuid,
           question: z.string().trim().min(1).max(600),
           language: z.enum(['ro', 'en']).default('ro'),
           mode: z.enum(aiModes).default('chat'),
           localFallback: z.boolean().default(false),
+          contextTurns: z.number().int().min(0).max(4).optional(),
         }).parse(await body(req));
         // Keep a short-window abuse guard, but only count successful AI replies toward daily usage.
         await rate(uid, 'auto-assistant-minute-v3', 12);
-        const answer = await askAutoAssistant(uid, vehicleId, question, language, mode, localFallback);
+        const answer = await askAutoAssistant(uid, vehicleId, question, language, mode, localFallback, contextTurns);
         await rate(uid, 'auto-assistant-success-day-v3', 120, 86400000);
         await rate('all', 'ai-provider-success-day-v3', 3000, 86400000);
         return json(answer);

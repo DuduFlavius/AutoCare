@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, ShieldCheck, Copy, Square, ChevronDown, PanelLeftClose, PanelLeftOpen, Plus, Wrench, CalendarDays, BarChart3, UserRound, CheckCheck } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
+import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, ShieldCheck, Copy, Square, ChevronDown, PanelLeftClose, PanelLeftOpen, MessageSquareText, Wrench, CalendarDays, BarChart3, UserRound, CheckCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { TitaniumWave } from '../titanium-wave';
@@ -27,10 +27,35 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, avail
   available: boolean; preview: boolean; onSaved: () => Promise<void>;
 }) {
   const en = useApplicationLanguage() === 'en';
+  const page = useRef<HTMLDivElement>(null);
+  const hasChat = premium && vehicles.length > 0;
+  useLayoutEffect(() => {
+    const element = page.current;
+    if (!element || !hasChat) return;
+    const update = () => {
+      const viewport = window.visualViewport;
+      const bottom = (viewport?.height ?? window.innerHeight) + (viewport?.offsetTop ?? 0);
+      const navigation = document.querySelector<HTMLElement>('.autocare-mobile-dock');
+      const navRect = navigation?.getBoundingClientRect();
+      const reserved = navRect && navRect.height && navRect.top < bottom && getComputedStyle(navigation!).position === 'fixed' ? bottom - navRect.top : 0;
+      const height = Math.max(180, bottom - element.getBoundingClientRect().top - reserved - 12);
+      element.style.setProperty('--ai-page-height', height + 'px');
+      element.toggleAttribute('data-compact-chat', height < 420);
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(document.querySelector('header') ?? element);
+    const dock = document.querySelector('.autocare-mobile-dock');
+    if (dock) observer.observe(dock);
+    window.addEventListener('resize', update);
+    window.visualViewport?.addEventListener('resize', update);
+    window.visualViewport?.addEventListener('scroll', update);
+    return () => { observer.disconnect(); window.removeEventListener('resize', update); window.visualViewport?.removeEventListener('resize', update); window.visualViewport?.removeEventListener('scroll', update); };
+  }, [hasChat]);
   return (
-    <div className="ac-ai-page" data-workspace-ui>
+    <div ref={page} className="ac-ai-page" data-chat={hasChat || undefined} data-workspace-ui>
       <header className="ac-ai-hero"><TitaniumWave /><span className="ac-ai-icon"><Sparkles size={25} /></span><div><small>AUTOCARE PREMIUM</small><h2>AutoCare AI</h2><p>{en ? 'Your personal automotive AI. Ask anything, naturally.' : 'Discută natural despre orice problemă auto. AI-ul cunoaște și istoricul mașinii tale.'}</p></div></header>
-      {!premium ? <section className="card"><p>{en ? 'AutoCare AI is included in Premium.' : 'AutoCare AI este inclus în Premium.'}</p><a className="button primary" href="/cont?tab=Premium">Premium <ArrowUpRight size={15} /></a></section>
+      {!premium ? <section className="card"><p>{en ? 'AutoCare AI is exclusively available with an active Premium subscription. Upgrade to start a conversation.' : 'AutoCare AI este disponibil exclusiv cu un abonament Premium activ. Activează Premium pentru a începe conversația.'}</p><a className="button primary" href="/cont?tab=Premium">Premium <ArrowUpRight size={15} /></a></section>
         : !vehicles.length ? <section className="card"><p>{en ? 'Add a vehicle first.' : 'Adaugă întâi un vehicul.'}</p><a className="button" href="/cont?tab=Garaj">{en ? 'My garage' : 'Garajul meu'}</a></section>
         : <>
           <label className="ac-ai-vehicle">{en ? 'Vehicle' : 'Vehicul'}
@@ -55,7 +80,9 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const [toolsOpen, setToolsOpen] = useState(false);
   const [historyDay, setHistoryDay] = useState<string | null>(null);
   const historyDays = Array.from(new Set(turns.map(turn => turn.createdAt.slice(0, 10)))).sort().reverse();
-  const visibleTurns = turns.filter(turn => (!historyDay || turn.createdAt.slice(0, 10) === historyDay) && !/^Analiză locală\s*[·:]/i.test(turn.answer.trim()));
+  const [chatStartId, setChatStartId] = useState<string | undefined>();
+  const sessionTurns = chatStartId === undefined ? turns : turns.slice(Math.max(0, turns.findIndex(turn => turn.id === chatStartId) + 1));
+  const visibleTurns = (historyDay ? turns : sessionTurns).filter(turn => (!historyDay || turn.createdAt.slice(0, 10) === historyDay) && !/^Analiză locală\s*[·:]/i.test(turn.answer.trim()));
   const [pending, setPending] = useState(false);
   const [loading, setLoading] = useState(!preview);
   const [error, setError] = useState('');
@@ -64,9 +91,10 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const action = useRef<AbortController | null>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const bottom = useRef<HTMLLIElement>(null);
+  const messageScroll = useRef<HTMLDivElement>(null);
   const historyList = useRef<HTMLOListElement>(null);
   const autoScroll = useRef(true);
-  useEffect(() => { if (autoScroll.current) bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [turns.length, pending]);
+  useEffect(() => { if (autoScroll.current && messageScroll.current) messageScroll.current.scrollTo({ top: messageScroll.current.scrollHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }, [turns.length, pending]);
 
   useEffect(() => {
     if (preview) return;
@@ -91,7 +119,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
     if (preview || loading || action.current || value.trim().length < 1) return;
     autoScroll.current = true;
     void run(async signal => {
-      const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode, localFallback: false }), signal });
+      const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value, language, mode, localFallback: false, ...(chatStartId !== undefined ? { contextTurns: Math.min(4, sessionTurns.length) } : {}) }), signal });
       setHistoryDay(null);
       setTurns(previous => [...previous, data.turn].slice(-150));
       setQuestion('');
@@ -135,15 +163,15 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
     <div className="ac-ai-layout ac-ai-chatgpt-layout">
       <div className="ac-ai-main">
       <section className="card ac-ai-chat" aria-label={t('Conversație AutoCare AI', 'AutoCare AI conversation')}>
-        <div className="ac-ai-heading"><button className="ac-ai-history-toggle" type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)} title={t('Istoric conversații', 'Chat history')}>{historyOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />} <span>{t('Istoric', 'History')}</span></button><h3><Sparkles size={19} /> AutoCare AI</h3><span className="ac-ai-online"><span /> {available ? t('AI disponibil', 'AI available') : t('Indisponibil', 'Unavailable')}</span><button className="ac-ai-new-chat" type="button" onClick={() => { setHistoryDay(null); setHistoryOpen(false); setQuestion(''); autoScroll.current = true; }} title={t('Conversație nouă', 'New conversation')}><Plus size={16}/><span>{t('Nou', 'New')}</span></button>
+        <div className="ac-ai-heading"><button className="ac-ai-history-toggle" type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)} title={t('Istoric conversații', 'Chat history')}>{historyOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />} <span>{t('Istoric', 'History')}</span></button><h3><Sparkles size={19} /> AutoCare AI</h3><span className="ac-ai-online"><span /> {available ? t('AI disponibil', 'AI available') : t('Indisponibil', 'Unavailable')}</span><button className="ac-ai-new-chat" type="button" disabled={pending || loading} onClick={() => { setChatStartId(turns.at(-1)?.id ?? ''); setHistoryDay(null); setHistoryOpen(false); setQuestion(''); setError(''); setNotice(''); autoScroll.current = true; input.current?.focus(); }} title={t('Conversație nouă', 'New conversation')}><MessageSquareText size={16}/><span>{t('Chat nou', 'New chat')}</span></button>
           {turns.length > 0 && <button type="button" disabled={pending || loading} onClick={() => {
             if (window.confirm(t('Ștergi istoricul AI pentru această mașină?', 'Clear AI history for this vehicle?')))
-              void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); setHistoryDay(null); setHistoryOpen(false); });
+              void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); setChatStartId(undefined); setHistoryDay(null); setHistoryOpen(false); });
           }}><Trash2 size={16} />{t('Șterge istoricul', 'Clear history')}</button>}
         </div>
-        {historyOpen && <div className="ac-ai-history-overlay"><button type="button" className="ac-ai-history-backdrop" aria-label={t('Închide istoricul', 'Close history')} onClick={() => setHistoryOpen(false)} /><nav className="ac-ai-history-panel" aria-label={t('Istoricul conversațiilor', 'Conversation history')}><div className="ac-ai-history-title"><strong>{t('Conversațiile tale', 'Your conversations')}</strong><button type="button" onClick={() => setHistoryOpen(false)} aria-label={t('Închide', 'Close')}><PanelLeftClose size={17}/></button></div><button type="button" className={historyDay === null ? 'active' : ''} onClick={() => { setHistoryDay(null); setHistoryOpen(false); }}>{t('Toate mesajele', 'All messages')} <span>{turns.length}</span></button>{historyDays.map(day => <button type="button" className={historyDay === day ? 'active' : ''} key={day} onClick={() => { setHistoryDay(day); setHistoryOpen(false); }}>{new Date(day + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}<span>{turns.filter(turn => turn.createdAt.startsWith(day)).length}</span></button>)}{!historyDays.length && <p>{t('Nu există conversații salvate.', 'No saved conversations yet.')}</p>}</nav></div>}
+        {historyOpen && <div className="ac-ai-history-overlay"><button type="button" className="ac-ai-history-backdrop" aria-label={t('Închide istoricul', 'Close history')} onClick={() => setHistoryOpen(false)} /><nav className="ac-ai-history-panel" aria-label={t('Istoricul conversațiilor', 'Conversation history')}><div className="ac-ai-history-title"><strong>{t('Conversațiile tale', 'Your conversations')}</strong><button type="button" onClick={() => setHistoryOpen(false)} aria-label={t('Închide', 'Close')}><PanelLeftClose size={17}/></button></div><button type="button" className={historyDay === null ? 'active' : ''} onClick={() => { setChatStartId(undefined); setHistoryDay(null); setHistoryOpen(false); }}>{t('Toate mesajele', 'All messages')} <span>{turns.length}</span></button>{historyDays.map(day => <button type="button" className={historyDay === day ? 'active' : ''} key={day} onClick={() => { setHistoryDay(day); setHistoryOpen(false); }}>{new Date(day + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}<span>{turns.filter(turn => turn.createdAt.startsWith(day)).length}</span></button>)}{!historyDays.length && <p>{t('Nu există conversații salvate.', 'No saved conversations yet.')}</p>}</nav></div>}
         {!available && <p className="ac-ai-state" role="status">{t('Conexiunea AI nu este configurată. Contactează administratorul.', 'AI is not configured. Contact support.')}</p>}
-        <div className="ac-ai-message-scroll" role="log" aria-label={t('Mesaje', 'Messages')} onScroll={event => { const el = event.currentTarget; autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 140; }}>
+        <div ref={messageScroll} className="ac-ai-message-scroll" role="log" aria-label={t('Mesaje', 'Messages')} onScroll={event => { const el = event.currentTarget; autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 140; }}>
         {loading ? <p role="status">{t('Se încarcă istoricul…', 'Loading history…')}</p> :
           visibleTurns.length ? <ol ref={historyList} onScroll={event => { const el = event.currentTarget; autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 140; }} className="ac-ai-turns" aria-live="polite">{visibleTurns.map(turn => <li key={turn.id}><div className="ac-ai-user-row"><div><p className="ac-ai-question" data-user-content>{turn.question}</p><small><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</time><CheckCheck size={13}/></small></div><span className="ac-ai-avatar"><UserRound size={18}/></span></div><div className="ac-ai-bot-row"><span className="ac-ai-avatar"><Sparkles size={18}/></span><div className="ac-ai-answer"><strong><Sparkles size={16} /> {t('Asistent', 'Assistant')}</strong><AiMarkdown text={turn.answer} /><button type="button" className="ac-ai-copy" title={t('Copiază răspunsul', 'Copy answer')} onClick={() => void navigator.clipboard.writeText(turn.answer).then(() => setNotice(t('Răspuns copiat.', 'Answer copied.'))).catch(() => setError(t('Nu s-a putut copia răspunsul.', 'Could not copy answer.')))}><Copy size={14} /> {t('Copiază', 'Copy')}</button><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleString(locale)}</time></div></div></li>)}<li className="ac-ai-scroll-anchor" ref={bottom} aria-hidden="true" /></ol>
             : <div className="ac-ai-welcome"><span className="ac-ai-welcome-icon"><Sparkles size={26} /></span><h3>{t('Salut! Cu ce te pot ajuta?', 'Hi! How can I help?')}</h3><p>{t('Sunt asistentul tău auto. Povestește-mi ce se întâmplă sau alege o întrebare pentru început.', 'I am your car assistant. Tell me what is happening or choose a question to get started.')}</p><div className="ac-ai-suggestions">{suggestions.map(value => <button key={value} type="button" disabled={preview || pending} onClick={() => { setQuestion(value); input.current?.focus(); }}><Sparkles size={16} />{value}<ArrowUpRight size={14} /></button>)}</div></div>}

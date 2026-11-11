@@ -19,3 +19,5 @@ html body .ac-public-ai[data-compact] h2 {font-size:20px!important}
 html body .ac-public-ai[data-compact] p {font-size:14px!important}
 .ac-public-language {display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 10px;border:1px solid #33455f;border-radius:10px;background:#122036;color:#e6f1ff;font-size:13px;cursor:pointer}
 @media(max-width:700px){html body .ac-public-ai .ac-public-ai-grid{grid-template-columns:minmax(0,1fr)}html body .ac-public-ai .ac-public-ai-heading{align-items:start}html body .ac-public-ai{gap:18px;margin:24px auto}html body .ac-public-ai .ac-public-ai-grid article{padding:18px!important}.ac-public-language{padding:7px;gap:4px}}
+
+html body .ac-public-ai .ac-public-ai-access {font-size:14px!important;color:#9bcaff!important;padding:11px 14px;border:1px solid #2e5077;border-radius:11px;background:#142a43;max-width:none}

@@ -5,6 +5,7 @@ import './public-ai-intro.css';
 export function PublicAiIntro({ compact = false }: { compact?: boolean }) {
   return <section className="ac-public-ai" data-compact={compact || undefined} aria-labelledby={compact ? 'ac-ai-register-title' : 'ac-public-ai-title'}>
     <div className="ac-public-ai-heading"><span><Sparkles size={23} /></span><div><p>AUTOCARE AI · PREMIUM</p><h2 id={compact ? 'ac-ai-register-title' : 'ac-public-ai-title'}>Mașina ta are istoric. Acum are și un asistent.</h2></div></div>
+    <p className="ac-public-ai-access">Exclusiv pentru abonații Premium. Conturile gratuite nu au acces la conversații sau scanare AI.</p>
     <p>Întreabă despre revizii, cheltuieli și documente. Primești explicații care folosesc datele vehiculului ales.</p>
     {!compact && <div className="ac-public-ai-grid">{[
       [Wallet, 'Înțelege costurile', 'Compară perioadele și vezi categoriile în care ai cheltuit cel mai mult.'],
