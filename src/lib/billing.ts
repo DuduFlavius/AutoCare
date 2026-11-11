@@ -67,7 +67,7 @@ export async function checkout(uid: string, interval: string, extend=false, curr
       success_url: origin() + '/cont?tab=Abonament&currency='+currency.toUpperCase(),
       cancel_url: origin() + '/cont?tab=Abonament&currency='+currency.toUpperCase(),
     },
-    { idempotencyKey: `checkout-${uid}-${interval}-${currency}-${Math.floor(Date.now() / 600000)}` },
+    { idempotencyKey: `checkout-${uid}-${interval}-${currency}-${language}-${Math.floor(Date.now() / 600000)}` },
   );
   return { url: session.url };
 }

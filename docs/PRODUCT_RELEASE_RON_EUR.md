@@ -30,7 +30,7 @@ EUR supports explicit existing identifiers:
 - `STRIPE_QUARTERLY_EUR_PRICE_ID`
 - `STRIPE_ANNUAL_EUR_PRICE_ID`
 
-If an explicit EUR ID is absent, the resolver first checks the existing RON price's `currency_options.eur`. It then searches existing active recurring prices under that same Stripe product. It requires exactly one match of amount, currency and recurrence; no prices/products are created or deleted. Ambiguous matches fail closed. The request explicitly sets Checkout currency and locale and disables Adaptive Pricing to preserve the selected fixed amount. Currency is part of the Checkout idempotency key.
+If an explicit EUR ID is absent, the resolver first checks the existing RON price's `currency_options.eur`. It then searches existing active recurring prices under that same Stripe product. It requires exactly one match of amount, currency and recurrence; no prices/products are created or deleted. Ambiguous matches fail closed. The request explicitly sets Checkout currency and locale and disables Adaptive Pricing to preserve the selected fixed amount. Currency and locale are part of the Checkout idempotency key.
 
 The existing legacy `billing_prices` table accepts only RON monthly/annual mappings. Additional verified price mappings are therefore retained in the existing JSON settings table (`billing-additional-catalog`), with an atomic JSONB merge; no destructive or ad hoc schema migration is required. Signed webhook checks recognize those historical mappings. Invoices retain actual currency and actual minor-unit amounts. Extensions preserve the canonical RON entitlement amount while verifying the exact EUR amount and writing the actual invoice currency.
 
@@ -38,7 +38,7 @@ The Founder Pricing page has a read-only six-price catalog audit. It exposes ide
 
 ### Activation and real Stripe Test Mode verification
 
-The Stripe plugin connection is confirmed. The session currently exposes no Stripe API operations or provider skills, despite a refreshed tool/skill discovery. No separate Stripe Test Mode key is available in the supplied environment. The isolated test suite is not a substitute for a real Stripe Test Mode run. EUR live activation is gated by `AUTOCARE_ENABLE_EUR_PAYMENTS=true`; the default is off, leaving existing RON billing available. Do not enable this flag before the following verification succeeds.
+The Stripe plugin connection is confirmed. The session currently exposes no Stripe API operations or provider skills, despite a refreshed tool/skill discovery. The direct Stripe Dashboard route also requires sign-in in the available browser. No separate Stripe Test Mode key is available in the supplied environment. The isolated test suite is not a substitute for a real Stripe Test Mode run. EUR live activation is gated by `AUTOCARE_ENABLE_EUR_PAYMENTS=true`; the default is off, leaving existing RON billing available. Do not enable this flag before the following verification succeeds.
 
 Run:
 
@@ -62,6 +62,6 @@ Google Play digital-subscription billing rules must be satisfied through Play Bi
 - Responsive browser review: desktop, 320px and tablet/phone widths; sidebar viewport calculation and mobile header corrected after visual inspection.
 - Payment tests cover all six exact price/currency mappings, explicit currency and locale, distinct idempotency keys, multi-currency prices, ambiguous/wrong prices, EUR invoice renewal, webhook idempotence, existing-subscription guard, EUR extension amounts, and unauthenticated access.
 - Real provider test runner exits with a clear missing `STRIPE_TEST_SECRET_KEY` error; no successful real delivery/payment is claimed.
-- Final suite: 243 tests passed. TypeScript, lint and production build passed.
+- Full suite: 243 tests passed before the final additional locale-idempotency regression test; the focused billing suite was rerun after that change. TypeScript, lint and production build passed.
 - Browser responsive audit: all 16 user-facing modules loaded at desktop, tablet (768px shell), and phone (390px shell) widths — 48 checks with document scroll width equal to viewport width. Additional 320px dashboard check passed. RO/EN switching was exercised from both sidebar and mobile header; EUR prices and signup currency links were checked in both languages.
 - Founder private data and real-device/real-provider tests remain outside the available authenticated preview; no unsupported success is claimed.
