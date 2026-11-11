@@ -54,7 +54,9 @@ html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .
 html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-activity summary {cursor:pointer!important;display:flex!important;gap:8px!important;align-items:center!important;min-height:36px!important;color:#abc2dd!important}
 html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-activity ul {margin:8px 0!important}
 @media(max-width:700px){
-html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-section-title h2 {flex:1 1 calc(100% - 46px)!important;min-width:0!important;overflow-wrap:normal!important;word-break:normal!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-card .ac-clear-section-title {display:grid!important;grid-template-columns:36px minmax(0,1fr)!important;align-items:center!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-card .ac-clear-section-title h2 {min-width:0!important;width:auto!important;overflow-wrap:normal!important;word-break:normal!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-card .ac-clear-section-title .ac-clear-tag {grid-column:1/-1!important;justify-self:start!important}
 html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home {grid-template-columns:minmax(0,1fr)!important;gap:16px!important}
 html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-card {padding:18px!important;border-radius:15px!important}
 html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-health-body {grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
