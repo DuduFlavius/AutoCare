@@ -71,7 +71,7 @@ html body .ac-workspace.ac-studio .ac-ai-shortcuts button{display:grid;justify-i
 }
 
 /* The chat owns its header. Preserve the page heading for assistive technology. */
-html body .ac-workspace.ac-studio .main:has(.ac-ai-page) .ac-module-heading {
+html body .ac-workspace.ac-studio .main:has(.ac-ai-page) .ac-module-header {
  position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
  overflow:hidden!important;clip-path:inset(50%);white-space:nowrap;
 }
