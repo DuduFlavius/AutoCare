@@ -90,6 +90,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
   const [scan, setScan] = useState<Scan | null>(null);
   const action = useRef<AbortController | null>(null);
   const input = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(()=>{const field=input.current;if(!field)return;field.style.height='auto';field.style.height=Math.min(120,field.scrollHeight)+'px';field.style.overflowY=field.scrollHeight>120?'auto':'hidden';},[question]);
   const bottom = useRef<HTMLLIElement>(null);
   const messageScroll = useRef<HTMLDivElement>(null);
   const historyList = useRef<HTMLOListElement>(null);
@@ -179,8 +180,8 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
         </div>
         <div className="ac-ai-quick-prompts"><button type="button" onClick={() => ask(t("Analizează costurile mele", "Analyze my costs"), "finance")} disabled={pending || loading || preview}><BarChart3 size={15}/>{t("Costuri", "Costs")}</button><button type="button" onClick={() => ask(t("Ce revizii urmează?", "What maintenance is due?"), "maintenance")} disabled={pending || loading || preview}><CalendarDays size={15}/>{t("Revizii", "Maintenance")}</button><button type="button" onClick={() => ask(t("Ce să verific la mașină?", "What should I check?"))} disabled={pending || loading || preview}><Wrench size={15}/>{t("Sfaturi", "Advice")}</button></div>
         <form className="ac-ai-composer" onSubmit={event => { event.preventDefault(); ask(question); }}>
-          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Scrie orice întrebare…', 'Ask me anything about your car…')} rows={2} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); ask(question); } }} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
-          <button className="primary" type="submit" disabled={preview || pending || loading || question.trim().length < 1}><Send size={17} />{t('Trimite', 'Send')}</button>
+          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Scrie orice întrebare…', 'Ask me anything about your car…')} rows={1} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); ask(question); } }} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending} />
+          <button className="primary" type="submit" aria-label={t('Trimite', 'Send')} disabled={preview || pending || loading || question.trim().length < 1}><Send size={17} /><span>{t('Trimite', 'Send')}</span></button>
         </form>
         {pending && <div className="ac-ai-typing" role="status"><span className="ac-ai-typing-dots"><i/><i/><i/></span> {t('Se pregătește răspunsul…', 'Thinking…')} <button type="button" className="ac-ai-stop" onClick={() => { action.current?.abort(); action.current = null; setPending(false); setNotice(t('Afișarea a fost oprită. Este posibil ca serverul să finalizeze cererea deja trimisă.', 'Stopped waiting. The server may still finish the submitted request.')); }}><Square size={12} /> {t('Oprește', 'Stop')}</button></div>}
         {error && <p className="ac-ai-inline-error" role="alert">{error}</p>}

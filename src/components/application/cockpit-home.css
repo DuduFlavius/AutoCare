@@ -99,3 +99,9 @@ html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-reco
 html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-recommendation p {font-size:11px!important;line-height:1.5!important;color:#a5bdd9!important;margin:7px 0!important}
 html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-cockpit-recommendation button {display:inline-flex!important;align-items:center!important;gap:7px!important;min-height:35px!important;border:1px solid #4b7bb5!important;border-radius:8px!important;background:#275084!important;padding:6px 10px!important;color:#eff6ff!important;font-size:11px!important}
 }
+/* Account pages have no preview notice spacer: reserve the fixed application chrome explicitly. */
+@layer autocare-workspace {
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-cockpit) {padding-top:104px!important;padding-bottom:44px!important}
+@media(max-width:900px){html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-cockpit) {padding-top:90px!important;padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}}
+@media(max-width:600px){html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-cockpit>.ac-cockpit-ai {grid-row:2!important}html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-cockpit h1 {font-size:28px!important;line-height:1.25!important}}
+}
