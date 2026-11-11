@@ -45,6 +45,9 @@
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-road-map-center {min-height:44px!important;max-width:calc(100% - 24px)!important;background:#142640!important;color:#e4efff!important;border:1px solid #47658a!important;border-radius:12px!important;font-size:13px!important}
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip .service-reminder-box {margin-top:16px!important;padding:14px!important;font-size:13px!important;background:#112035!important;border:1px solid #273d57!important;border-radius:12px!important}
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-live-content > p {font-size:13px!important;line-height:1.6!important;color:#a9bdd5!important;overflow-wrap:anywhere!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-smartdrive-trip) > nav.ws-context-nav {display:none!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .mileage-planner:has(.ac-smartdrive-trip) > .mileage-planner-heading {display:none!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit .ac-map-stage:modal .ac-road-map-canvas {height:calc(100dvh - 135px)!important;min-height:260px!important}
  @media(max-width:1050px) {
   html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit {grid-template-columns:minmax(0,1fr)!important}
   html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console {grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:start!important}
@@ -52,7 +55,10 @@
  }
  @media(max-width:600px) {
   html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console {grid-template-columns:minmax(0,1fr)!important}
-  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console .drive-session {grid-row:auto!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console .drive-session {grid-row:auto!important;order:2!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console .ac-drive-vehicle {order:0!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console .ac-smartdrive-trip-controls {order:1!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console .ac-smartdrive-sync {order:3!important}
   html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit .ac-map-stage:not(:modal) .ac-road-map-canvas {height:350px!important}
   html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip {padding:12px!important}
   html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-map-stage-bar button {min-height:42px!important;font-size:12px!important;white-space:normal!important}
