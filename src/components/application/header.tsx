@@ -46,7 +46,7 @@ export default function ApplicationHeader({
           onClick={onSearch}
           aria-label={en ? 'Search application' : 'Caută în aplicație'}
         >
-          <Search size={20} /><span className="studio-search-label">{en ? 'Search' : 'Căutare'}</span>
+          <Search size={20} /><span className="studio-search-label">{en ? 'Search vehicles, documents, services…' : 'Caută mașini, documente, servicii…'}</span>
         </button>
         <button
           className="app-icon-button app-notification-button"
