@@ -521,6 +521,8 @@ html body .ac-workspace.ac-studio .ac-vehicle-profile .ac-owned-vehicle-photo im
 .ac-owned-vehicle-photo label {display:grid; gap:5px; min-width:0}
 .ac-owned-vehicle-photo input {max-width:100%; min-width:0}
 
+@layer autocare-workspace {
+
 html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-cockpit-quick > div {display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
 html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-cockpit-quick button {
  display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;
@@ -530,4 +532,6 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-cockpit
 .ac-cockpit-quick button span {min-width:0}
 @media(max-width:700px) {
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-cockpit-quick > div {grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
 }
