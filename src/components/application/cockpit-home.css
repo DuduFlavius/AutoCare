@@ -88,3 +88,4 @@ html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] 
 }
 
 @layer autocare-workspace { html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] .app-topbar-title {display:none!important} @media(max-width:900px){html body .app-shell.ac-workspace.ac-studio main#workspace-main:has(.ac-cockpit) {width:100%!important}} }
+@layer autocare-workspace {@media(max-width:600px){html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] .app-topbar-brand {flex:none!important;gap:8px!important;white-space:nowrap!important}html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] .app-topbar-brand strong {white-space:nowrap!important;font-size:16px!important}html body .app-shell.ac-workspace.ac-studio[data-workspace-section="Dashboard"] .app-topbar-actions {gap:5px!important}}}
