@@ -265,3 +265,5 @@ Object.assign(reviewedPublicCopy,{
 });
 
 Object.assign(reviewedPublicCopy, {'Benzină':'Petrol','Motorină':'Diesel','Electrică':'Electric','Hibrid':'Hybrid','Hibrid plug-in':'Plug-in hybrid','Export date personale JSON':'Personal data export (JSON)'});
+
+Object.assign(reviewedPublicCopy, {"Abonamente AutoCare":"AutoCare subscriptions", "Fir de navigare":"Breadcrumbs"});
