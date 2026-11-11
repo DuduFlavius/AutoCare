@@ -1,0 +1,74 @@
+@layer autocare-workspace {
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:22px!important;max-width:1180px!important;width:100%!important;margin:auto!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home * {box-sizing:border-box}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-welcome {grid-column:1/-1!important;display:flex!important;align-items:center!important;justify-content:space-between!important;flex-wrap:wrap!important;gap:16px!important;padding:4px 0 18px!important;margin:0!important;background:none!important;border:0!important;border-bottom:1px solid #26384d!important;border-radius:0!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home h1 {font-size:27px!important;line-height:1.3!important;letter-spacing:-.03em!important;margin:7px 0 10px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home h2 {font-size:18px!important;line-height:1.4!important;margin:0!important;letter-spacing:-.015em!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home h3 {font-size:18px!important;line-height:1.4!important;margin:7px 0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home button {min-height:42px!important;display:inline-flex!important;align-items:center!important;gap:8px!important;font-size:13px!important;line-height:1.5!important;white-space:normal!important;padding:9px 12px!important;border-radius:10px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home select {min-width:0!important;max-width:100%!important;min-height:42px!important;font-size:13px!important;padding:8px 10px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-eyebrow {font-size:10px!important;letter-spacing:.13em!important;color:#829cb9!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-vehicle {display:grid!important;gap:5px!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-vehicle button {padding:0!important;border:0!important;background:none!important;min-height:28px!important;text-align:left!important;font-size:16px!important;color:#e2edfa!important;flex-wrap:wrap!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-vehicle button span {font-size:12px!important;color:#9db9d9!important;letter-spacing:.06em!important;border-left:1px solid #38516e!important;padding-left:10px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-vehicle small {font-size:12px!important;color:#90a6bf!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-header-actions {display:flex!important;flex-wrap:wrap!important;gap:8px!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-shortcuts {display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;width:100%!important;gap:9px!important;padding-top:8px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-shortcuts button {justify-content:center!important;background:#122033!important;border:1px solid #283c55!important;color:#bed3ed!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-card {display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:14px!important;padding:24px!important;margin:0!important;min-width:0!important;max-width:100%!important;min-height:0!important;height:auto!important;background:#101c2d!important;border:1px solid #263a53!important;border-radius:18px!important;box-shadow:none!important;overflow:hidden!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-health {grid-column:1/-1!important;background:linear-gradient(115deg,#12243b,#101b2b)!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-section-title {display:flex!important;gap:10px!important;align-items:center!important;flex-wrap:wrap!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-section-title h2 {flex:1!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-icon {display:grid!important;place-items:center!important;width:36px!important;height:36px!important;border-radius:10px!important;background:#1b3655!important;color:#83bdff!important;flex:none!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-tag {font-size:11px!important;color:#abc9ee!important;padding:5px 8px!important;background:#1a304a!important;border-radius:7px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-health-body {display:grid!important;grid-template-columns:minmax(190px,.7fr) minmax(0,1.3fr)!important;gap:24px!important;align-items:center!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-score {display:grid!important;gap:6px!important;padding:12px 0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-score strong {font-size:44px!important;line-height:1.2!important;color:#e8f4ff!important;font-variant-numeric:tabular-nums!important;letter-spacing:-.05em!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-score span {font-size:13px!important;color:#9fb9d7!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-next {border-left:1px solid #2c425e!important;padding-left:24px!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-next small {font-size:12px!important;color:#93b1d2!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home p {font-size:14px!important;line-height:1.65!important;margin:0!important;color:#b6c9df!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-caption {font-size:12px!important;line-height:1.65!important;color:#8fa7c2!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-link {align-self:flex-start!important;margin-top:auto!important;border:0!important;background:none!important;color:#78b9ff!important;padding:5px 0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-document-types {display:flex!important;flex-wrap:wrap!important;gap:12px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-document-types>span {display:grid!important;gap:4px!important;font-size:13px!important;color:#dce9fa!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-document-types small {font-size:11px!important;color:#91a9c4!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-doc-summary {display:flex!important;align-items:start!important;gap:9px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-doc-summary svg {flex:none!important;color:#63b4c2!important;margin-top:3px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home ul {list-style:none!important;margin:0!important;padding:0!important;display:grid!important;gap:6px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home li button {display:flex!important;width:100%!important;justify-content:space-between!important;text-align:left!important;background:#132338!important;border:1px solid #2a3f59!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home li button span {display:grid!important;gap:4px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home li small {font-size:12px!important;color:#99b1ce!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-money {font-size:32px!important;line-height:1.25!important;letter-spacing:-.035em!important;font-variant-numeric:tabular-nums!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-bars {display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:10px!important;height:95px!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-bars>div {display:flex!important;flex-direction:column!important;gap:7px!important;text-align:center!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-bars>div>span {display:flex!important;align-items:end!important;justify-content:center!important;height:65px!important;border-bottom:1px solid #2f435e!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-bars i {display:block!important;width:min(24px,70%)!important;min-height:0!important;background:#388ef1!important;border-radius:5px 5px 0 0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-bars .is-missing {border-bottom-style:dashed!important;opacity:.45!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-bars small {font-size:11px!important;color:#9ab2cd!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-ai {grid-column:1/-1!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(200px,1fr)!important;align-items:center!important;gap:10px 24px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-ai form {grid-column:2!important;grid-row:1/span 2!important;display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;gap:8px!important;min-width:0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-ai input {min-width:0!important;width:100%!important;height:46px!important;font-size:15px!important;padding:10px 12px!important;border-radius:10px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-ai form button {background:#1978e8!important;border:1px solid #478fe5!important;justify-content:center!important;padding:0!important;color:#fff!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-activity {border-top:1px solid #2a3e57!important;padding-top:12px!important;margin-top:2px!important;font-size:13px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-activity summary {cursor:pointer!important;display:flex!important;gap:8px!important;align-items:center!important;min-height:36px!important;color:#abc2dd!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-activity ul {margin:8px 0!important}
+@media(max-width:700px){
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home {grid-template-columns:minmax(0,1fr)!important;gap:16px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-card {padding:18px!important;border-radius:15px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-health-body {grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-next {padding:14px 0 0!important;border-left:0!important;border-top:1px solid #2c425e!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-score {padding:4px 0!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-score strong {font-size:38px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-shortcuts {grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-shortcuts button {justify-content:start!important;min-height:46px!important;padding:9px!important;font-size:12px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-ai {grid-template-columns:minmax(0,1fr)!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-ai form {grid-column:auto!important;grid-row:auto!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home h1 {font-size:24px!important}
+html body .app-shell.ac-workspace.ac-studio main#workspace-main .ac-clear-home .ac-clear-header-actions {width:100%!important}
+html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock.app-bottom-nav {display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;flex-wrap:nowrap!important;height:auto!important;min-height:68px!important;padding:7px max(6px,env(safe-area-inset-right)) max(7px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left))!important;gap:3px!important}
+html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock.app-bottom-nav a {min-width:0!important;width:auto!important;min-height:48px!important;gap:5px!important;padding:5px 2px!important;font-size:10px!important;white-space:nowrap!important}
+}
+@media(max-width:900px){html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock.app-bottom-nav {grid-template-columns:repeat(5,minmax(0,1fr))!important}}
+
+}

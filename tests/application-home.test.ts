@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { selectActiveVehicle, upcomingMaintenance, isOilMaintenance, vehicleCareScore } from '../src/lib/application-home';
+import { selectActiveVehicle, upcomingMaintenance, isOilMaintenance, vehicleCareScore, homeCareAssessment } from '../src/lib/application-home';
 import { mobileWorkspaceSections, workspaceSections } from '../src/lib/workspace';
 const today = new Date('2030-01-01T12:00:00Z');
 const service = { id:'oil',title:'Oil',category:'Schimb ulei',kind:'service',cancelled:false,date:'2029-12-01',odometer:100000,nextKm:115000,expiresAt:null,parts:null };
@@ -26,7 +26,7 @@ test('home prioritizes overdue work and does not invent deadlines',()=>{
   assert.equal(upcomingMaintenance([{...service,cancelled:true}],108000,70,'UTC',today).length,0);
 });
 test('mobile navigation gives GPS a direct entry and retains the existing destinations',()=>{
-  assert.equal(mobileWorkspaceSections.length,6);
+  assert.equal(mobileWorkspaceSections.length,5);
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Plan întreținere'));
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cont'));
   for(const section of mobileWorkspaceSections)assert.ok(workspaceSections.some(s=>s.id===section.id));
@@ -65,4 +65,16 @@ test('vehicle care score uses only dated documents and scheduled maintenance', (
     [null, -1, 30, 31].map(days => ({ status: { days } })),
     ['unscheduled', 'overdue', 'valid'].map(state => ({ status: { state } })),
   ), { total: 5, valid: 2, percent: 40 });
+});
+
+
+test('home never presents a complete health percentage when core evidence is missing',()=>{
+ const documents=[{category:'RCA',status:{days:120}},{category:'ITP',status:{days:200}}];
+ const oil=[{service:{title:'Schimb ulei motor'},status:{state:'valid'}}];
+ assert.equal(homeCareAssessment(documents,oil,84000).percent,100);
+ assert.equal(homeCareAssessment(documents.slice(0,1),oil,84000).percent,null);
+ assert.equal(homeCareAssessment(documents,[],84000).complete,false);
+ assert.equal(homeCareAssessment(documents,oil,0).percent,null);
+ assert.equal(homeCareAssessment(documents,[{...oil[0],status:{state:'overdue'}}],84000).percent,67);
+ assert.equal(homeCareAssessment([{category:'ITP',status:{days:null}},documents[0]],oil,84000).percent,null);
 });

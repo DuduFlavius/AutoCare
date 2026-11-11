@@ -1,5 +1,5 @@
 'use client';
-import { Star, CreditCard, Bell, Settings, HelpCircle, LogOut, ChevronRight, Gauge, Wallet, CalendarDays, History, Route, Shield } from 'lucide-react';
+import { Star, CreditCard, Bell, Settings, HelpCircle, LogOut, ChevronRight, Gauge, Wallet, CalendarDays, History, Route, Shield, Files, Wrench } from 'lucide-react';
 import { useApplicationLanguage } from '../application-locale';
 import MobileInstall from '../mobile-install';
 import { AppSection, AppStatus } from './ui';
@@ -9,7 +9,7 @@ export default function AccountHub({ data, name, navigate, onSettings, onSignOut
   const language = useApplicationLanguage(), en = language === 'en';
   const links = [
     {title: en ? 'My garage tools' : 'Instrumentele garajului', rows: [
-      ['Kilometraj','Kilometraj și istoric','Mileage & readings',Gauge],['Cheltuieli','Cheltuieli','Expenses',Wallet],['Calendar','Calendar','Calendar',CalendarDays],['Istoric auto','Istoric complet','Vehicle history',History],['Plan întreținere','SmartDrive GPS','SmartDrive GPS',Route],
+      ['Documente','Documente','Documents',Files],['Întreținere','Întreținere','Maintenance',Wrench],['Rapoarte','Rapoarte','Reports',Files],['Kilometraj','Kilometraj și istoric','Mileage & readings',Gauge],['Cheltuieli','Cheltuieli','Expenses',Wallet],['Calendar','Calendar','Calendar',CalendarDays],['Istoric auto','Istoric complet','Vehicle history',History],['Plan întreținere','SmartDrive GPS','SmartDrive GPS',Route],
     ]},
     {title: en ? 'Membership' : 'Abonament și beneficii', rows: [['Premium','Instrumente Premium','Premium tools',Star],['Abonament','Gestionează abonamentul','Manage subscription',CreditCard]]},
     {title: en ? 'Preferences & help' : 'Preferințe și ajutor', rows: [['Notificări','Centrul de notificări','Notifications',Bell],['Setări','Profil, limbă și setări','Profile, language & settings',Settings],['Centru de suport','Ajutor și suport','Help & support',HelpCircle]]},

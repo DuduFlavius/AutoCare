@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { PublicAiIntro } from './public-ai-intro';
 import Link from 'next/link';
 import SiteLanguage from './site-language';
+import {translateApplicationCopy} from '@/lib/application-language';
 import './auth-premium.css';
 import { ShieldCheck, Files, Wrench, Eye, EyeOff } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
@@ -16,6 +17,8 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
       /* Preferences still work without storage. */
     }
   }, []);
+  const en=language==='en';
+  const t=(ro:string,english:string)=>en?english:ro;
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -96,26 +99,25 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
         <div className="auth-editorial-content">
           <span className="section-kicker">AUTOCARE · GARAGE ACCESS</span>
           <h2>
-            Grijă pentru mașină.
+            {t("Grijă pentru mașină.", "Care for your vehicle.")}
             <br />
-            <em>Liniște pentru tine.</em>
+            <em>{t("Liniște pentru tine.", "Peace of mind for you.")}</em>
           </h2>
           <p>
-            Un spațiu personal pentru documente, revizii și toate detaliile pe care merită să le
-            păstrezi.
+            {t("Un spațiu personal pentru documente, revizii și toate detaliile pe care merită să le păstrezi.", "A personal space for documents, maintenance and all the details worth keeping.")}
           </p>
           <div>
             <span>
               <Files size={16} />
-              Documente organizate
+              {t("Documente organizate", "Organized documents")}
             </span>
             <span>
               <Wrench size={16} />
-              Istoric la îndemână
+              {t("Istoric la îndemână", "History at hand")}
             </span>
             <span>
               <ShieldCheck size={16} />
-              Date private
+              {t("Date private", "Private data")}
             </span>
           </div>
         </div>
@@ -140,12 +142,12 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
                 }
               }}
             >
-              <option value="ro">Română</option>
+              <option value="ro">{en?'Romanian':'Română'}</option>
               <option value="en">English</option>
             </select>
           </label>
         </div>
-        <p className="eyebrow">GARAJUL TĂU DIGITAL</p>
+        <p className="eyebrow">{t("GARAJUL TĂU DIGITAL", "YOUR DIGITAL GARAGE")}</p>
         <h1>
           {signup
             ? 'Creează cont'
@@ -180,7 +182,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
         >
           {signup && (
             <label>
-              Nume
+              {t("Nume", "Name")}
               <input name="name" autoComplete="name" required maxLength={100} />
             </label>
           )}
@@ -199,7 +201,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
           )}
           {!forgot && (
             <label>
-              Parolă
+              {t("Parolă", "Password")}
               <div className="auth-password-row">
                 <input
                   name="password"
@@ -237,7 +239,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
                 </button>
               </div>
               {(signup || reset) && (
-                <span className="micro">Cel puțin 12 caractere.</span>
+                <span className="micro">{t("Cel puțin 12 caractere.", "At least 12 characters.")}</span>
               )}
             </label>
           )}
@@ -245,8 +247,8 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
             <label className="check">
               <input name="acceptTerms" type="checkbox" required />
               <span>
-                Accept <Link href="/termeni">termenii</Link> și am citit{' '}
-                <Link href="/confidentialitate">politica de confidențialitate</Link>.
+                {t("Accept", "I accept")} <Link href="/termeni">{t("termenii", "the terms")}</Link> {t("și am citit", "and have read")}{' '}
+                <Link href="/confidentialitate">{t("politica de confidențialitate", "the privacy policy")}</Link>.
               </span>
             </label>
           )}
@@ -264,12 +266,12 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
         </form>
         {error && (
           <p role="alert" className="error">
-            {error}
+            {translateApplicationCopy(error,language)}
           </p>
         )}
         {message && (
           <p role="status" className="notice">
-            {message}
+            {translateApplicationCopy(message,language)}
           </p>
         )}
         <div className="stack small" style={{ marginTop: 20 }}>

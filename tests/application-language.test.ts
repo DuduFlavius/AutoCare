@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
 import ts from 'typescript';
 import {translateApplicationCopy as t,normalizeCopy} from '../src/lib/application-language';
 import {translationSource} from '../src/lib/workspace';
@@ -43,12 +43,27 @@ test('maintenance form labels and options have reviewed English copy without cha
  assert.match(source,/<option key=\{x\} value=\{x\}>/);
 });
 test('all Romanian static application UI text has an English translation',()=>{
- const files=['dashboard','garage-home','record-editor','service-detail-fields','smartdrive-history','service-forecast-cards','smartdrive-trip','membership','mobile-install','push-settings','communication-preferences','support-chat','founder-panel','mail-center','google-mail-settings'];
+ const files:string[]=[];function collect(dir:string){for(const entry of readdirSync(dir,{withFileTypes:true})){const path=dir+'/'+entry.name;if(entry.isDirectory())collect(path);else if(path.endsWith('.tsx'))files.push(path);}}collect('src');
  const missing=new Set<string>();
- for(const name of files){const ast=ts.createSourceFile(name+'.tsx',readFileSync('src/components/'+name+'.tsx','utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+ for(const name of files){const ast=ts.createSourceFile(name,readFileSync(name,'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
  function visit(node:ts.Node){
   if(ts.isJsxText(node)){const value=normalizeCopy(node.text);if(/[ăâîșțĂÂÎȘȚ]/.test(value)&&value!=='ȘTERGE'&&t(value,'en')===value)missing.add(name+': '+value);}
   ts.forEachChild(node,visit);
  }visit(ast);}
  assert.deepEqual([...missing],[]);
+});
+
+
+test('every public page and practical guide has reviewed English copy', async()=>{
+ const {pages}=await import('../src/lib/pages');
+ const {guides}=await import('../src/lib/guides');
+ for(const page of [...Object.values(pages),...Object.values(guides)]) {
+  for(const value of [page.title,'intro' in page?page.intro:page.description,...page.sections.flat()]) {
+   if(/[ăâîșțĂÂÎȘȚ]/.test(value)) assert.notEqual(t(value,'en'),value,'Missing public copy: '+value);
+  }
+ }
+});
+test('registration fragments and Premium explanations translate without changing commercial amounts',()=>{
+ for(const source of ['Cel puțin 12 caractere.','Creează-ți contul pentru a adăuga prima mașină.','termenii','și am citit','politica de confidențialitate','120 întrebări AI și 6 scanări pe zi'])assert.notEqual(t(source,'en'),source);
+ assert.equal(t('150 RON','en'),'150 RON');assert.equal(t('450 RON','en'),'450 RON');assert.equal(t('1.700 RON','en'),'1.700 RON');
 });

@@ -1944,15 +1944,15 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 await act(async () => {
                   await api('account', 'DELETE', {
                     password: String(f.get('password')),
-                    confirm: String(f.get('confirm')),
+                    confirm: language === 'en' && String(f.get('confirm')) === 'DELETE' ? 'ȘTERGE' : String(f.get('confirm')),
                   });
                   window.location.assign('/');
                 });
               }}
             >
               <label>
-                Scrie ȘTERGE
-                <input name="confirm" required pattern="ȘTERGE" autoComplete="off" />
+                {language === 'en' ? 'Type DELETE' : 'Scrie ȘTERGE'}
+                <input name="confirm" required pattern={language === 'en' ? 'DELETE' : 'ȘTERGE'} autoComplete="off" />
               </label>
               <label>
                 Confirmă parola

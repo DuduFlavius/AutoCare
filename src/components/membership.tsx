@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import PremiumSales from './premium-sales';
 import PremiumCareTools from './premium-care-tools';
 import PremiumDownloads from './premium-downloads';
@@ -19,7 +20,7 @@ export function PriceCards({
   checkout,
   busy = false,
   prepaid = false,
-  language = 'ro',
+  language,
   reportTimezone,
   selectedPlan,
 }: {
@@ -34,13 +35,19 @@ export function PriceCards({
 }) {
   const locale = useApplicationLocale();
   const s = savings(monthlyBani, annualBani);
-  const en = language === 'en';
+  const [publicLanguage,setPublicLanguage]=useState<'ro'|'en'>('ro');
+  useEffect(()=>{
+    const update=()=>{try { const saved=localStorage.getItem('autocare-language'); setPublicLanguage(saved==='en'||saved!=='ro'&&!navigator.language.toLowerCase().startsWith('ro')?'en':'ro'); }catch{/* Use the current language without storage. */}};
+    update();window.addEventListener('autocare-language-change',update);window.addEventListener('storage',update);
+    return()=>{window.removeEventListener('autocare-language-change',update);window.removeEventListener('storage',update);};
+  },[]);
+  const en = (language ?? publicLanguage) === 'en';
   const euro = (b: number) =>
     new Intl.NumberFormat('en-IE', {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'RON',
       maximumFractionDigits: 2,
-    }).format(b / 500);
+    }).format(b / 100);
   const price = (b: number) => (en ? euro(b) : amount(b));
   const to = reportTimezone ? localDate(new Date(), reportTimezone) : '';
   function reportLink(months: number, kind: 'service' | 'expense' | '', format: 'pdf' | 'csv') {

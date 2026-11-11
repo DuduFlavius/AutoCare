@@ -1,4 +1,5 @@
 'use client';
+import { translateApplicationCopy } from '@/lib/application-language';
 
 import {
   Archive, ArrowUpRight, CalendarDays, CarFront, Check, FileText, Gauge, Layers3,
@@ -92,7 +93,7 @@ export function ApplicationGarage({
                     </span>
                   </div>
                   <h3 id={'ac-garage-vehicle-' + vehicle.id} data-user-content>{vehicle.brand} {vehicle.model}</h3>
-                  <p>{vehicle.year} · <span data-user-content>{vehicle.fuel}{vehicle.engine ? ' · ' + vehicle.engine : ''}{vehicle.capacity ? ' · ' + number.format(vehicle.capacity) + ' cm³' : ''}</span></p>
+                  <p>{vehicle.year} · <span data-user-content>{translateApplicationCopy(vehicle.fuel,english?'en':'ro')}{vehicle.engine ? ' · ' + vehicle.engine : ''}{vehicle.capacity ? ' · ' + number.format(vehicle.capacity) + ' cm³' : ''}</span></p>
                 </div>
                 <div className="ac-garage-mileage">
                   <Gauge size={21} aria-hidden="true" />

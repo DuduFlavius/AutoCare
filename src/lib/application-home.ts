@@ -33,3 +33,14 @@ export function vehicleCareScore(
     + scheduled.filter(item => item.status.state === 'valid').length;
   return { total, valid, percent: total ? Math.round(valid / total * 100) : null };
 }
+
+/** A deadline score is incomplete without the core document and oil-service evidence. */
+export function homeCareAssessment(
+ documents: ReadonlyArray<{category:string;status:{days:number|null}}>,
+ maintenance: ReadonlyArray<{service:{category?:string;title:string};status:{state:string}}>,
+ currentKm:number,
+) {
+ const score=vehicleCareScore(documents,maintenance);
+ const complete=Number.isFinite(currentKm)&&currentKm>0&&['RCA','ITP'].every(kind=>documents.some(doc=>doc.category===kind&&doc.status.days!=null))&&maintenance.some(item=>isOilMaintenance({category:item.service.category??'',title:item.service.title})&&item.status.state!=='unscheduled');
+ return {...score,complete,percent:complete?score.percent:null};
+}
