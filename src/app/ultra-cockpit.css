@@ -526,7 +526,7 @@ html body .ac-workspace.ac-studio .ac-cockpit-quick > div {
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;
 }
 html body .ac-workspace.ac-studio .ac-cockpit-quick button {
-  display:flex;align-items:center;justify-content:flex-start;gap:8px;min-height:53px;
+  display:flex;align-items:center;justify-content:flex-start;gap:8px;min-height:54px!important;
   padding:10px!important;text-align:start;line-height:1.45;overflow-wrap:normal;word-break:normal;
 }
 .ac-cockpit-quick button span {min-width:0}
