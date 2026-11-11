@@ -12,6 +12,7 @@ import './product-finish.css';
 import './product-identity.css';
 import './automotive-workspace.css';
 import './ultra-cockpit.css';
+import './product-system.css';
 import { siteDescription } from '@/lib/seo';
 import { appName, origin } from '@/lib/config';
 export const metadata: Metadata = {

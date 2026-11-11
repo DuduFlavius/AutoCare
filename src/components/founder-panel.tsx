@@ -20,6 +20,7 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import SupportChat from './support-chat';
+import BillingCatalogAudit from './billing-catalog-audit';
 import SearchConsoleSettings from './search-console-settings';
 import GoogleMailSettings from './google-mail-settings';
 import MailCenter from './mail-center';
@@ -823,6 +824,7 @@ const [tab, setTab] = useState('Roluri și permisiuni'),
         )}
         {tab === 'Prețuri' && (
           <section className="card founder-pricing">
+            <BillingCatalogAudit/>
             <p className="eyebrow">TARIFE ÎN RON</p>
             <h2>Prețuri clare. Sume verificate.</h2>
             <form

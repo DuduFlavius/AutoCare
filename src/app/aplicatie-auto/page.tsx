@@ -1,3 +1,4 @@
+import VehicleSymbol from '@/components/vehicle-symbol';
 import Link from 'next/link';
 import { TechnologyNavigation } from '@/components/technology-navigation';
 import { PublicShell } from '@/components/public-shell';
@@ -17,7 +18,7 @@ export default function AppOverview() {
     <p>AutoCare este un garaj digital pentru documente, întreținere, kilometraj și cheltuieli auto. Ai aceeași evidență în contul tău, pe telefon și pe calculator.</p>
     </header>
     <TechnologyNavigation/>
-    <img loading="lazy" src="/images/autocare-app-premium.webp" width={1672} height={940} alt="Prezentare vizuală AutoCare: documente auto și termene organizate" style={{width:'100%',height:'auto',borderRadius:24}} />
+    <VehicleSymbol/>
     <h2>Ce poți gestiona în AutoCare?</h2>
     <p><Link href="/documente-auto">RCA, ITP și rovinieta</Link>, cu date de expirare și mementouri configurabile. Păstrezi fotografii sau PDF-uri în cont, în limitele planului ales.</p>
     <p><Link href="/intretinere-auto">Revizii și intervenții</Link>, cu data, kilometrajul și costul lucrării. Urmărești schimbul de ulei și distribuția pe baza intervalelor completate pentru mașina ta.</p>

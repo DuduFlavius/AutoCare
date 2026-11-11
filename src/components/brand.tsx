@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { CarFront } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
 export function Brand({
   href = '/start',
@@ -12,7 +12,7 @@ export function Brand({
   return (
     <Link className="brand" href={href} onClick={onClick} aria-label="AutoCare · pagina principală">
       <span className="brandmark">
-        <CarFront size={26} />
+        <Settings size={26} strokeWidth={2.1} />
       </span>
       <span className="brand-word">
         Auto<span className="accent">Care</span>

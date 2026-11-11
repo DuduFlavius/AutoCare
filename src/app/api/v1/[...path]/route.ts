@@ -26,6 +26,7 @@ import { sendMail } from '@/lib/mail';
 import * as googleMail from '@/lib/google-mail';
 import * as mailCenter from '@/lib/mail-center';
 import { renderEmail } from '@/lib/email-templates';
+import {resolveBillingPrice} from '@/lib/stripe-catalog';
 import { stripe, checkout, billingPortal, billingInvoice, processStripeEvent } from '@/lib/billing';
 import {createMechanicShare,listMechanicShares,revokeMechanicShare} from '@/lib/mechanic-shares';
 import {syncPaidExtensions} from '@/lib/subscription-extensions';
@@ -256,6 +257,11 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       }
       if (route === 'founder/team' && method === 'POST')
         return json(await founder.addTeamMember(uid, await body(req)));
+      if(route==='founder/billing-catalog' && method==='GET') {
+        const configured=await pricing(),client=stripe();
+        const rows=await Promise.all((['ron','eur'] as const).flatMap(currency=>(['monthly','quarterly','annual'] as const).map(async interval=>{try {const result=await resolveBillingPrice(client,configured,interval,currency);return {interval,currency,priceId:result.price.id,amount:result.amount,livemode:result.price.livemode,ready:true};}catch(error){return {interval,currency,ready:false,error:(error as Error).message};}})));
+        return json({rows});
+      }
       if (route === 'founder/overview' && method === 'GET')
         return json(await founder.founderOverview(uid));
       if (route === 'founder/users' && method === 'GET')
@@ -767,15 +773,11 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       await auth().api.deleteUser({ headers: req.headers, body: { password: data.password } });
       return json({ ok: true });
     }
-    if (route === 'billing/checkout' && method === 'POST')
-      return json(
-        await checkout(
-          uid,
-          z.object({ interval: z.enum(['monthly', 'quarterly', 'annual']) }).parse(await body(req)).interval,
-        ),
-      );
+    if (['billing/checkout','billing/extend'].includes(route) && method === 'POST') {
+      const input=z.object({interval:z.enum(['monthly','quarterly','annual']),currency:z.enum(['RON','EUR','ron','eur']).default('RON'),language:z.enum(['ro','en']).default('ro')}).parse(await body(req));
+      return json(await checkout(uid,input.interval,route==='billing/extend',input.currency.toLowerCase() as 'ron'|'eur',input.language));
+    }
     if(route==='billing/sync' && method==='POST')return json(await syncPaidExtensions(uid,stripe()));
-    if(route==='billing/extend' && method==='POST')return json(await checkout(uid,z.object({interval:z.enum(['monthly','quarterly','annual'])}).parse(await body(req)).interval,true));
     if (route === 'billing/portal' && method === 'POST') return json(await billingPortal(uid));
     if (path[0] === 'billing' && path[1] === 'invoices' && path.length === 3 && method === 'GET')
       return new Response(null, { status: 303, headers: { Location: (await billingInvoice(uid, path[2])).toString(), 'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer' } });

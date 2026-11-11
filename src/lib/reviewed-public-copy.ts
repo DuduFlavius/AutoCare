@@ -267,3 +267,7 @@ Object.assign(reviewedPublicCopy,{
 Object.assign(reviewedPublicCopy, {'Benzină':'Petrol','Motorină':'Diesel','Electrică':'Electric','Hibrid':'Hybrid','Hibrid plug-in':'Plug-in hybrid','Export date personale JSON':'Personal data export (JSON)'});
 
 Object.assign(reviewedPublicCopy, {"Abonamente AutoCare":"AutoCare subscriptions", "Fir de navigare":"Breadcrumbs"});
+
+Object.assign(reviewedPublicCopy, {"Tarife în RON sau EUR. Abonamente recurente, administrate în portalul de facturare. Checkout-ul este disponibil numai după configurarea și verificarea procesatorului.":"Prices in RON or EUR. Recurring subscriptions are managed in the billing portal. Checkout requires a configured and verified payment processor.","Prețul Stripe nu corespunde monedei, sumei sau perioadei selectate.":"The Stripe price does not match the selected currency, amount or billing period.","Prețul Stripe nu este configurat pentru acest abonament.":"No Stripe price is configured for this plan.","Există mai multe prețuri EUR potrivite. Configurează identificatorul Stripe exact.":"Multiple EUR prices match. Configure the exact Stripe Price ID.","Prețul EUR nu este disponibil pentru acest abonament.":"The EUR price is not available for this plan.","Descarcă fișierul original":"Download original file"});
+
+Object.assign(reviewedPublicCopy, {"Plățile EUR sunt în curs de validare. Alege RON sau revino după activare.":"EUR payments are awaiting verification. Choose RON or return once EUR is enabled."});

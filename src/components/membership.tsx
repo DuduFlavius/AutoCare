@@ -11,9 +11,8 @@ import { Check, ArrowUpRight, CreditCard, ShieldCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { localDate } from '@/lib/config';
 import { savings } from '@/lib/pricing-display';
+import type {BillingCurrency} from '@/lib/billing-currency';
 type Data = Awaited<ReturnType<typeof dashboard>>;
-const amount = (b: number) =>
-  new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 }).format(b / 100);
 export function PriceCards({
   monthlyBani,
   annualBani,
@@ -26,14 +25,13 @@ export function PriceCards({
 }: {
   monthlyBani: number;
   annualBani: number;
-  checkout?: (interval: string) => void;
+  checkout?: (interval: string, currency:BillingCurrency) => void;
   busy?: boolean;
   prepaid?: boolean;
   language?: 'ro' | 'en';
   reportTimezone?: string;
   selectedPlan?: string;
 }) {
-  const locale = useApplicationLocale();
   const s = savings(monthlyBani, annualBani);
   const [publicLanguage,setPublicLanguage]=useState<'ro'|'en'>('ro');
   useEffect(()=>{
@@ -42,13 +40,14 @@ export function PriceCards({
     return()=>{window.removeEventListener('autocare-language-change',update);window.removeEventListener('storage',update);};
   },[]);
   const en = (language ?? publicLanguage) === 'en';
-  const euro = (b: number) =>
-    new Intl.NumberFormat('en-IE', {
-      style: 'currency',
-      currency: 'RON',
-      maximumFractionDigits: 2,
-    }).format(b / 100);
-  const price = (b: number) => (en ? euro(b) : amount(b));
+  const [currency,setBillingCurrency]=useState<BillingCurrency>('ron');
+  useEffect(()=>{try {const query=new URLSearchParams(window.location.search).get('currency')?.toLowerCase();const saved=localStorage.getItem('autocare-billing-currency');setBillingCurrency(query==='eur'||query==='ron'?query:saved==='eur'?'eur':'ron');}catch{/* RON remains the safe default. */}},[]);
+  function changeBillingCurrency(next:BillingCurrency) {setBillingCurrency(next);try {localStorage.setItem('autocare-billing-currency',next);const url=new URL(window.location.href);url.searchParams.set('currency',next.toUpperCase());window.history.replaceState(window.history.state,'',url);}catch{/* Checkout also receives the selected currency explicitly. */}}
+  const minor=(b:number)=>currency==='eur'?b/5:b;
+  const price=(b:number)=>new Intl.NumberFormat(en?'en-GB':'ro-RO',{maximumFractionDigits:2}).format(minor(b)/100)+' '+currency.toUpperCase();
+  const euro=price;
+  const localizedAmount=price;
+  const signup=(plan:string)=>'/inregistrare?next='+encodeURIComponent('/cont?tab=Abonament&plan='+plan+'&currency='+currency.toUpperCase());
   const to = reportTimezone ? localDate(new Date(), reportTimezone) : '';
   function reportLink(months: number, kind: 'service' | 'expense' | '', format: 'pdf' | 'csv') {
     const [year, month] = to.split('-').map(Number);
@@ -56,6 +55,8 @@ export function PriceCards({
     return '/api/v1/export?' + new URLSearchParams({ format, archived: 'active', from, to, ...(kind && { kind }) });
   }
   return (
+    <div className="ac-billing-plans" data-workspace-ui>
+      <div className="ac-billing-currency"><div><strong>{en?'Choose your currency':'Alege moneda'}</strong><p>{en?'The selected currency is used at Checkout.':'Moneda aleasă se păstrează la plată.'}</p></div><div className="ac-currency-toggle" role="group" aria-label={en?'Billing currency':'Moneda plății'}>{(['ron','eur'] as const).map(code=><button type="button" key={code} aria-pressed={currency===code} onClick={()=>changeBillingCurrency(code)}>{code.toUpperCase()}</button>)}</div></div>
     <div className="subscription-options ac-plan-grid">
       <article className="card subscription-option ac-plan-card" data-selected={selectedPlan === "monthly" || undefined}>
         <div className="subscription-symbol">
@@ -64,12 +65,12 @@ export function PriceCards({
         <p className="eyebrow">{en?'MONTHLY PREMIUM':'PREMIUM LUNAR'}</p>
         <h2>{en?'Flexible, month to month.':'Control, lună de lună.'}</h2>
         <div className="subscription-price">
-          {price(monthlyBani)} <span>{en ? '/month' : 'lei/lună'}</span>
+          {price(monthlyBani)} <span>{en ? '/month' : '/lună'}</span>
         </div>
         <p className="small muted">
           {en
             ? `${euro(s.annualMonthlyBani)} for 12 monthly payments.`
-            : `${amount(s.annualMonthlyBani)} lei pentru 12 luni de plată lunară.`}
+            : `${localizedAmount(s.annualMonthlyBani)} pentru 12 luni de plată lunară.`}
         </p>
         <ul>
           <li><Check size={15} />{en ? 'AutoCare AI for every vehicle' : 'AutoCare AI pentru fiecare vehicul'}</li>
@@ -111,11 +112,11 @@ export function PriceCards({
           {reportTimezone ? <a href={reportLink(1, 'service', 'pdf')}>{en ? 'Monthly service PDF' : 'Fișa de revizii a lunii'} <ArrowUpRight size={14}/></a> : <strong>{en ? 'Monthly service PDF' : 'Fișa de revizii a lunii'}</strong>}
         </div>
         {checkout ? (
-          <button className="button" disabled={busy} onClick={() => checkout('monthly')}>
+          <button className="button" disabled={busy} onClick={() => checkout('monthly',currency)}>
             {prepaid?(en?'Add 1 month':'Adaugă 1 lună'):(en?'Choose monthly':'Alege lunar')} <ArrowUpRight size={15} />
           </button>
         ) : (
-          <a className="button" href="/inregistrare?next=%2Fcont%3Ftab%3DAbonament%26plan%3Dmonthly">
+          <a className="button" href={signup('monthly')}>
             {en?'Create account and choose plan':'Creează cont și alege planul'} <ArrowUpRight size={15} />
           </a>
         )}
@@ -127,12 +128,12 @@ export function PriceCards({
         <p className="eyebrow">{en?'3-MONTH PREMIUM':'PREMIUM 3 LUNI'}</p>
         <h2>{en?'Three months of peace of mind.':'Trei luni de organizare.'}</h2>
         <div className="subscription-price">
-          {price(monthlyBani * 3)} <span>{en ? '/3 months' : 'lei / 3 luni'}</span>
+          {price(monthlyBani * 3)} <span>{en ? '/3 months' : '/3 luni'}</span>
         </div>
         <p className="small muted">
           {prepaid ? (en?'One payment for 3 additional months.':'O singură plată pentru încă 3 luni.') : en
             ? `Equivalent to ${euro(monthlyBani)}/month, billed every 3 months.`
-            : `Echivalent cu ${amount(monthlyBani)} lei/lună, facturat la fiecare 3 luni.`}
+            : `Echivalent cu ${localizedAmount(monthlyBani)}/lună, facturat la fiecare 3 luni.`}
         </p>
         <ul>
           <li><Check size={15} />{en ? 'AutoCare AI for every vehicle' : 'AutoCare AI pentru fiecare vehicul'}</li>
@@ -174,11 +175,11 @@ export function PriceCards({
           {reportTimezone ? <a href={reportLink(3, 'expense', 'csv')}>{en ? 'Three-month expense CSV' : 'Cheltuieli pe 3 luni'} <ArrowUpRight size={14}/></a> : <strong>{en ? 'Three-month expense CSV' : 'Cheltuieli pe 3 luni'}</strong>}
         </div>
         {checkout ? (
-          <button className="button" disabled={busy} onClick={() => checkout('quarterly')}>
+          <button className="button" disabled={busy} onClick={() => checkout('quarterly',currency)}>
             {prepaid?(en?'Add 3 months':'Adaugă 3 luni'):(en?'Choose 3 months':'Alege 3 luni')} <ArrowUpRight size={15} />
           </button>
         ) : (
-          <a className="button" href="/inregistrare?next=%2Fcont%3Ftab%3DAbonament%26plan%3Dquarterly">
+          <a className="button" href={signup('quarterly')}>
             {en?'Create account and choose plan':'Creează cont și alege planul'} <ArrowUpRight size={15} />
           </a>
         )}
@@ -191,15 +192,15 @@ export function PriceCards({
         <p className="eyebrow">{en?'ANNUAL PREMIUM':'PREMIUM ANUAL'}</p>
         <h2>{en?'More value.':'Un an pentru garajul tău.'}</h2>
         <div className="subscription-price">
-          {price(annualBani)} <span>{en ? '/year' : 'lei/an'}</span>
+          {price(annualBani)} <span>{en ? '/year' : '/an'}</span>
         </div>
         <p className="subscription-saving">
           {s.savingBani > 0 ? (
             <>
               {en
                 ? `Save ${euro(s.savingBani)}/year`
-                : `Economisești ${amount(s.savingBani)} lei/an`}{' '}
-              · {s.savingPercent.toLocaleString(locale, { maximumFractionDigits: 1 })}%
+                : `Economisești ${localizedAmount(s.savingBani)}/an`}{' '}
+              · {s.savingPercent.toLocaleString(en?'en-GB':'ro-RO', { maximumFractionDigits: 1 })}%
             </>
           ) : en ? (
             'One annual payment.'
@@ -248,15 +249,16 @@ export function PriceCards({
           {reportTimezone ? <a href={reportLink(12, '', 'pdf')}>{en ? '12-month garage PDF' : 'Dosarul garajului pe 12 luni'} <ArrowUpRight size={14}/></a> : <strong>{en ? '12-month garage PDF' : 'Dosarul garajului pe 12 luni'}</strong>}
         </div>
         {checkout ? (
-          <button className="primary" disabled={busy} onClick={() => checkout('annual')}>
+          <button className="primary" disabled={busy} onClick={() => checkout('annual',currency)}>
             {prepaid?(en?'Add 12 months':'Adaugă 12 luni'):(en?'Choose annual':'Alege anual')} <ArrowUpRight size={15} />
           </button>
         ) : (
-          <a className="button primary" href="/inregistrare?next=%2Fcont%3Ftab%3DAbonament%26plan%3Dannual">
+          <a className="button primary" href={signup('annual')}>
             {en?'Create account and choose plan':'Creează cont și alege planul'} <ArrowUpRight size={15} />
           </a>
         )}
       </article>
+    </div>
     </div>
   );
 }

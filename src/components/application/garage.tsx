@@ -1,4 +1,5 @@
 'use client';
+import VehicleSymbol from '../vehicle-symbol';
 import { translateApplicationCopy } from '@/lib/application-language';
 
 import {
@@ -85,6 +86,7 @@ export function ApplicationGarage({
               <article key={vehicle.id} className="ac-garage-vehicle" data-primary={primary || undefined} aria-labelledby={'ac-garage-vehicle-' + vehicle.id}>
                 <div className="ac-garage-identity">
                   <TitaniumWave />
+                  <VehicleSymbol compact/>
                   <div className="ac-garage-identity-main">
                     <span className="ac-garage-plate" data-user-content>{vehicle.plate}</span>
                     <span className="ac-garage-badge" data-status={vehicle.archived ? 'archived' : primary ? 'primary' : 'active'}>
@@ -104,6 +106,7 @@ export function ApplicationGarage({
                   <div><dt><CalendarDays size={14} />{deadline?.overdue ? t('Scadență depășită', 'Overdue deadline') : t('Următoarea scadență', 'Next deadline')}</dt><dd data-status={deadline?.overdue ? 'overdue' : undefined}>{deadlineText}</dd>{(deadline || maintenance?.service.nextKm != null) && <small data-user-content>{deadline?.title ?? maintenance?.service.title}</small>}</div>
                   <div><dt><Wrench size={14} />{t('Mentenanță', 'Maintenance')}</dt><dd data-status={maintenance?.status.state}>{maintenanceLabels[maintenance?.status.state ?? 'unscheduled'] ?? maintenanceLabels.unscheduled}</dd></div>
                 </dl>
+                <div className="ac-garage-document-strip">{['ITP','RCA','Rovinietă'].map(kind=>{const doc=(records.get(vehicle.id)??[]).find(r=>r.kind==='document'&&r.category===kind);return <button type="button" key={kind} onClick={()=>onDocuments(vehicle.id)}><FileText size={13}/><span>{kind==='Rovinietă'?t('Rovinietă','Vignette'):kind}</span><small>{!doc?t('Lipsește','Missing'):doc.status.days==null?'—':doc.status.days<0?t('Expirat','Expired'):doc.status.days+' '+t('zile','days')}</small></button>})}</div>
                 <div className="ac-garage-actions">
                   <button type="button" className="primary" onClick={() => onDetails(vehicle.id)}>{t('Vezi detalii', 'View details')} <ArrowUpRight size={15} /></button>
                   <button type="button" disabled={busy || vehicle.archived} onClick={() => onEdit(vehicle)}><Pencil size={15} />{t('Editează', 'Edit')}</button>

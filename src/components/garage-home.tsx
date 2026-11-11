@@ -3,6 +3,7 @@ import { isFinancialEntry } from '@/lib/finance-overview';
 import { isPlannedService } from '@/lib/planned-service';
 import { localDate } from '@/lib/config';
 import VehiclePhoto from './application/vehicle-photo';
+import VehicleSymbol from './vehicle-symbol';
 import { TitaniumWave } from './titanium-wave';
 import {useApplicationLocale} from './application-locale';
 import { fuelConsumption } from '@/lib/fuel-log';
@@ -130,7 +131,7 @@ const home = dashboardHome(data);
       )}
       <div className="ac-premium-overview">
         <section className="ac-premium-vehicle ac-premium-panel">
-          <img className="ac-premium-hero-photo" src="/images/autocare-app-premium.webp" srcSet="/images/autocare-app-premium-mobile.webp 768w, /images/autocare-app-premium.webp 1400w" sizes="(max-width: 600px) 100vw, 60vw" alt="" aria-hidden="true" loading="eager" decoding="async" />
+          <VehicleSymbol/>
           <div className="ac-premium-hero-shade" aria-hidden="true" />
           <div className="ac-premium-vehicle-top">
             <span className="ac-premium-kicker"><CarFront size={17}/> {language === 'en' ? 'YOUR VEHICLE' : 'MAȘINA TA'}</span>
@@ -916,7 +917,7 @@ export function VehicleSheet({
           </section>
           {!preview && (!v.archived || hasPhoto) && <section className="card ac-vehicle-notes ac-owned-vehicle-photo">
             <h3>{t('Fotografia vehiculului', 'Vehicle photo')}</h3>
-            {hasPhoto ? <VehiclePhoto key={photoRevision} vehicleId={id} name={v.brand + ' ' + v.model} uploaded /> : <p>{t('Adaugă o fotografie a mașinii tale.', 'Add a photo of your vehicle.')}</p>}
+            {hasPhoto ? <><VehiclePhoto key={photoRevision} vehicleId={id} name={v.brand + ' ' + v.model} uploaded /><a className="button" href={'/api/v1/vehicles/'+encodeURIComponent(id)+'/photo'} download>{t('Descarcă fișierul original','Download original file')}</a></> : <p>{t('Adaugă o fotografie a mașinii tale.', 'Add a photo of your vehicle.')}</p>}
             {!v.archived && <label>{hasPhoto ? t('Înlocuiește fotografia', 'Replace photo') : t('Alege JPEG sau PNG', 'Select JPEG or PNG')}
               <input type="file" accept="image/jpeg,image/png" disabled={uploadingPhoto} onChange={event => {
                 const file = event.currentTarget.files?.[0];

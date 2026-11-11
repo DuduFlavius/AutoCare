@@ -1,5 +1,6 @@
 'use client';
 import { Bell, Search, UserRound, LogOut, Star, CarFront } from 'lucide-react';
+import LanguageMenu from '../language-menu';
 import { useApplicationLanguage } from '../application-locale';
 export default function ApplicationHeader({
   title,
@@ -13,6 +14,7 @@ export default function ApplicationHeader({
   onSignOut,
   signingOut,
   preview,
+  onLanguage,
 }: {
   title: string;
   name: string;
@@ -25,6 +27,7 @@ export default function ApplicationHeader({
   onSignOut: () => void;
   signingOut: boolean;
   preview: boolean;
+  onLanguage: (language: 'ro' | 'en') => void;
 }) {
   const en = useApplicationLanguage() === 'en';
   return (
@@ -60,6 +63,7 @@ export default function ApplicationHeader({
           <Star size={16} />
           <span>{premium ? (en ? 'Premium active' : 'Premium activ') : 'Premium'}</span>
         </button>
+        <LanguageMenu language={en?'en':'ro'} onChange={onLanguage} compact/>
         <button
           className="app-avatar-button"
           onClick={onAccount}

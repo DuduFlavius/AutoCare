@@ -342,7 +342,7 @@
   html body .app-shell.ac-workspace .app-topbar-brand strong { color: var(--color-text) !important; -webkit-text-fill-color: currentColor !important; }
   html body .app-shell.ac-workspace .main .ac-premium-overview-dashboard > header { background: var(--color-surface) !important; }
   html body .app-shell.ac-workspace .main .ac-premium-overview-dashboard > header :is(h2,p,span) { color: var(--color-text) !important; }
-  html body .app-shell.ac-workspace .main .ac-premium-sales { background: linear-gradient(90deg,#172a3bf8 35%,#172a3bc9 70%,#172a3b80),url('/images/autocare-app-premium.webp') center right/cover !important; }
+  html body .app-shell.ac-workspace .main .ac-premium-sales { background: linear-gradient(90deg,#172a3bf8 35%,#172a3bc9 70%,#172a3b80) !important; }
   html body .app-shell.ac-workspace .main .ac-premium-sales h2 { font-size: clamp(25px,3vw,38px) !important; line-height: 1.2 !important; letter-spacing: -1px !important; max-width: 650px !important; }
   html body .app-shell.ac-workspace .main .ac-premium-sales :is(p,small) { color: var(--color-muted) !important; max-width: 650px !important; margin: 0 !important; }
   html body .app-shell.ac-workspace .main .ac-premium-sales > p:first-child { color: var(--color-primary-ink) !important; font-size: 10px !important; letter-spacing: 2px !important; }

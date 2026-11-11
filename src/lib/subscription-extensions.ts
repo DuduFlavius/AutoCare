@@ -4,12 +4,15 @@ import { db } from './db';
 import * as s from './schema';
 import { AppError, activeGrants } from './service';
 import { isPremium, origin } from './config';
+import type {BillingCurrency} from './billing-currency';
 import { addPaidMonths } from './paid-coverage';
 export async function extensionCheckout(
   uid: string,
   months: number,
   amountBani: number,
   client: Stripe,
+  currency:BillingCurrency='ron',
+  language:'ro'|'en'='ro',
 ) {
   const old = (await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid)))[0];
   if (old && ['past_due', 'unpaid', 'pending_payment', 'incomplete'].includes(old.status))
@@ -22,7 +25,7 @@ export async function extensionCheckout(
     const session=await client.checkout.sessions.retrieve(pending.sessionId);
     if(session.payment_status==='paid')await confirmExtension(session.id,'reconcile:'+session.id,session.livemode,client);
     else if(session.status==='expired')await db().update(s.subscriptionExtensions).set({status:'expired'}).where(eq(s.subscriptionExtensions.id,pending.id));
-    else if(session.status==='open'){if(pending.months===months&&pending.amountBani===amountBani)return{url:session.url};await client.checkout.sessions.expire(session.id);await db().update(s.subscriptionExtensions).set({status:'expired'}).where(eq(s.subscriptionExtensions.id,pending.id));}
+    else if(session.status==='open'){if(pending.months===months&&pending.amountBani===amountBani&&session.currency===currency)return{url:session.url};await client.checkout.sessions.expire(session.id);await db().update(s.subscriptionExtensions).set({status:'expired'}).where(eq(s.subscriptionExtensions.id,pending.id));}
     else throw new AppError(409,'Există o plată în curs. Finalizeaz-o sau așteaptă expirarea ei înainte de a alege alt plan.');
   }
   const grants = await activeGrants(uid);
@@ -53,22 +56,23 @@ export async function extensionCheckout(
   const session = await client.checkout.sessions.create(
     {
       mode: 'payment',
+      currency, locale:language, adaptive_pricing:{enabled:false},
       customer: old?.customerId || undefined,
       customer_creation: old?.customerId ? undefined : 'always',
       client_reference_id: uid,
-      metadata: { userId: uid, purpose: 'premium_extension', extensionId: id },
+      metadata: { userId: uid, purpose: 'premium_extension', extensionId: id, billingCurrency:currency },
       line_items: [
         {
           quantity: 1,
           price_data: {
-            currency: 'ron',
-            unit_amount: amountBani,
-            product_data: { name: `AutoCare Premium · prelungire ${months} luni` },
+            currency,
+            unit_amount: currency==='eur'?amountBani/5:amountBani,
+            product_data: { name: language==='en'?`AutoCare Premium · ${months}-month extension`:`AutoCare Premium · prelungire ${months} luni` },
           },
         },
       ],
-      success_url: origin() + '/cont?tab=Abonament&payment=processing',
-      cancel_url: origin() + '/cont?tab=Abonament',
+      success_url: origin() + '/cont?tab=Abonament&payment=processing&currency='+currency.toUpperCase(),
+      cancel_url: origin() + '/cont?tab=Abonament&currency='+currency.toUpperCase(),
     },
     { idempotencyKey: 'extension-checkout-' + id },
   );
@@ -129,8 +133,9 @@ export async function confirmExtension(
   if (session.payment_status !== 'paid') return { pending: true };
   if (
     session.mode !== 'payment' ||
-    session.currency !== 'ron' ||
-    session.amount_total !== known.amountBani ||
+    !['ron','eur'].includes(session.currency??'') ||
+    (session.metadata?.billingCurrency??'ron')!==session.currency ||
+    session.amount_total !== (session.currency==='eur'?known.amountBani/5:known.amountBani) ||
     session.client_reference_id !== known.userId ||
     session.metadata?.extensionId !== known.id ||
     session.livemode !== livemode
@@ -229,8 +234,8 @@ export async function confirmExtension(
         id: row.sessionId,
         userId: row.userId,
         livemode: livemode,
-        amountBani: row.amountBani,
-        currency: 'ron',
+        amountBani: session.amount_total!,
+        currency: session.currency!,
         status: 'paid',
       })
       .onConflictDoNothing();

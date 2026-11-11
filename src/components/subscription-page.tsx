@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import type {BillingCurrency} from '@/lib/billing-currency';
 import { PriceCards } from './membership';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -14,7 +15,7 @@ export default function SubscriptionPage({
   data: Data;
   language: 'ro' | 'en';
   busy: boolean;
-  checkout: (interval: string, extend: boolean) => void;
+  checkout: (interval: string, extend: boolean, currency?:BillingCurrency) => void;
   portal: () => void;
   invoices: Array<{
     id: string;
@@ -126,11 +127,11 @@ export default function SubscriptionPage({
             busy={busy||lifetime}
             prepaid={data.premium}
             reportTimezone={data.premium ? data.profile.timezone : undefined}
-            checkout={(interval) => checkout(interval, data.premium)}
+            checkout={(interval,currency) => checkout(interval, data.premium,currency)}
           />
         </>
       )}
-      <p className="micro">{en?'EUR prices are indicative at EUR 1 ≈ RON 5. Payment is charged in RON at the confirmed Stripe price.':'Prețurile sunt facturate în RON, la valoarea confirmată în pagina de plată Stripe.'}</p>
+      <p className="micro">{en?'Pay in RON or EUR at the displayed catalog price. Your existing subscription keeps its billing currency.':'Plătești în RON sau EUR, la tariful afișat. Abonamentul existent își păstrează moneda de facturare.'}</p>
       <section className="card">
         <h3>{en ? 'Payment history' : 'Istoricul plăților'}</h3>
         {invoices.length ? (

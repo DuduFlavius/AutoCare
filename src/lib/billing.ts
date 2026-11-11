@@ -1,10 +1,12 @@
 import Stripe from 'stripe';
 import {extensionCheckout,extensionEvent} from './subscription-extensions';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from './db';
 import * as s from './schema';
 import { AppError } from './service';
 import { pricing } from './pricing';
+import {resolveBillingPrice} from './stripe-catalog';
+import type {BillingCurrency, BillingInterval} from './billing-currency';
 import { origin } from './config';
 import { queueAutomatedMail } from './mail-automation';
 export function stripe() {
@@ -28,56 +30,44 @@ export async function billingInvoice(uid: string, id: string) {
   if (url.protocol !== 'https:') throw new AppError(502, 'Adresa facturii nu este disponibilă.');
   return url;
 }
-export async function checkout(uid: string, interval: string, extend=false) {
+export async function checkout(uid: string, interval: string, extend=false, currency:BillingCurrency='ron', language:'ro'|'en'='ro', clientOverride?:Stripe) {
   if (!['monthly', 'quarterly', 'annual'].includes(interval))
     throw new AppError(400, 'Interval invalid.');
+  if(currency==='eur'&&process.env.AUTOCARE_ENABLE_EUR_PAYMENTS!=='true')throw new AppError(503,'Plățile EUR sunt în curs de validare. Alege RON sau revino după activare.');
   const configured = await pricing();
   if (extend) {
     const months = interval === 'annual' ? 12 : interval === 'quarterly' ? 3 : 1;
     const amount = months >= 12 ? configured.annualBani * (months / 12) : configured.monthlyBani * months;
-    return extensionCheckout(uid, months, amount, stripe());
+    return extensionCheckout(uid, months, amount, clientOverride??stripe(),currency,language);
   }
-  const price = interval === 'annual'
-    ? process.env.STRIPE_ANNUAL_PRICE_ID || configured.annualPriceId
-    : interval === 'quarterly'
-      ? process.env.STRIPE_QUARTERLY_PRICE_ID
-      : process.env.STRIPE_MONTHLY_PRICE_ID || configured.monthlyPriceId;
-  if (!price)
-    throw new AppError(
-      503,
-      'Prețurile procesatorului nu sunt configurate. Fondatorul trebuie să sincronizeze catalogul.',
-    );
-  const client = stripe();
-  const remote = await client.prices.retrieve(price);
-  const expectedAmount = interval === 'annual' ? configured.annualBani : interval === 'quarterly' ? configured.monthlyBani * 3 : configured.monthlyBani;
-  const expectedInterval = interval === 'annual' ? 'year' : 'month';
-  const expectedCount = interval === 'quarterly' ? 3 : 1;
-  if (
-    !remote.active ||
-    remote.currency !== 'ron' ||
-    remote.unit_amount !== expectedAmount ||
-    remote.recurring?.interval !== expectedInterval ||
-    remote.recurring.interval_count !== expectedCount
-  )
-    throw new AppError(
-      503,
-      'Prețul procesatorului nu corespunde tarifului RON afișat. Plata a fost oprită.',
-    );
+  const client = clientOverride??stripe();
+  const selected=await resolveBillingPrice(client,configured,interval as BillingInterval,currency);
+  const price=selected.price.id;
   const old = (await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid)))[0];
   if (old?.subscriptionId && ['active', 'trialing', 'past_due', 'unpaid'].includes(old.status))
     throw new AppError(409, 'Gestionează abonamentul existent din portal.');
+  // Retain every previously configured price for renewal webhooks, including discovered EUR prices.
+  if(currency==='ron'&&interval!=='quarterly')await db().insert(s.billingPrices).values({id:price,interval,amountBani:selected.amount,currency}).onConflictDoNothing();
+  else {
+    // Legacy billing_prices permits RON monthly/annual only. Retain additional mappings in the existing JSON catalog without altering historical tables.
+    const extra={[price]:{interval,amount:selected.amount,currency}};
+    await db().insert(s.settings).values({key:'billing-additional-catalog',value:extra}).onConflictDoUpdate({target:s.settings.key,set:{value:sql`${s.settings.value} || ${JSON.stringify(extra)}::jsonb`}});
+  }
   const session = await client.checkout.sessions.create(
     {
       mode: 'subscription',
+      currency,
+      locale:language,
+      adaptive_pricing:{enabled:false},
       line_items: [{ price, quantity: 1 }],
       client_reference_id: uid,
-      metadata: { userId: uid },
-      subscription_data: { metadata: { userId: uid } },
+      metadata: { userId: uid, billingCurrency:currency, billingInterval:interval },
+      subscription_data: { metadata: { userId: uid, billingCurrency:currency, billingInterval:interval } },
       customer: old?.customerId || undefined,
-      success_url: origin() + '/cont?tab=Abonament',
-      cancel_url: origin() + '/cont?tab=Abonament',
+      success_url: origin() + '/cont?tab=Abonament&currency='+currency.toUpperCase(),
+      cancel_url: origin() + '/cont?tab=Abonament&currency='+currency.toUpperCase(),
     },
-    { idempotencyKey: `checkout-${uid}-${interval}-${Math.floor(Date.now() / 600000)}` },
+    { idempotencyKey: `checkout-${uid}-${interval}-${currency}-${Math.floor(Date.now() / 600000)}` },
   );
   return { url: session.url };
 }
@@ -158,7 +148,12 @@ export async function processStripeEvent(event: Stripe.Event, client: Stripe) {
     throw new AppError(400, 'Proprietar abonament invalid.');
   const configured = await pricing();
   const historical = await db().select({ id: s.billingPrices.id }).from(s.billingPrices);
+  const extraCatalog=(await db().select().from(s.settings).where(eq(s.settings.key,'billing-additional-catalog')))[0]?.value;
   const prices = [
+    ...Object.keys(extraCatalog&&typeof extraCatalog==='object'?extraCatalog:{}),
+    process.env.STRIPE_MONTHLY_EUR_PRICE_ID,
+    process.env.STRIPE_QUARTERLY_EUR_PRICE_ID,
+    process.env.STRIPE_ANNUAL_EUR_PRICE_ID,
     process.env.STRIPE_MONTHLY_PRICE_ID,
     process.env.STRIPE_QUARTERLY_PRICE_ID,
     process.env.STRIPE_ANNUAL_PRICE_ID,

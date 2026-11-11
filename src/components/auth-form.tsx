@@ -1,4 +1,5 @@
 'use client';
+import VehicleSymbol from './vehicle-symbol';
 import { useEffect, useState, type FormEvent } from 'react';
 import { PublicAiIntro } from './public-ai-intro';
 import Link from 'next/link';
@@ -88,14 +89,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
     <main className="auth-layout ac-auth-premium">
       <SiteLanguage language={language} />
       <aside className="auth-editorial">
-        <img
-          src="/images/autocare-app-premium.webp"
-          srcSet="/images/autocare-app-premium-mobile.webp 768w, /images/autocare-app-premium.webp 1400w"
-          sizes="(max-width:760px) 100vw, 50vw"
-          alt=""
-          aria-hidden="true"
-          fetchPriority="high"
-        />
+        <VehicleSymbol/>
         <div className="auth-editorial-content">
           <span className="section-kicker">AUTOCARE · GARAGE ACCESS</span>
           <h2>

@@ -1,3 +1,4 @@
+import VehicleSymbol from '@/components/vehicle-symbol';
 import { PublicAiIntro } from '@/components/public-ai-intro';
 import { technologyPages } from '@/lib/public-technology';
 import { TechnologyNavigation } from '@/components/technology-navigation';
@@ -75,7 +76,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           <PublicAiIntro />
           <PriceCards monthlyBani={prices.monthlyBani} annualBani={prices.annualBani} />
           <p className="small muted">
-            Tarife în RON. Abonamente recurente, administrate în portalul de facturare. Checkout-ul
+            Tarife în RON sau EUR. Abonamente recurente, administrate în portalul de facturare. Checkout-ul
             este disponibil numai după configurarea și verificarea procesatorului.
           </p>
         </main>
@@ -105,7 +106,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           <p>{p.intro}</p>
           {!legal && <Link href={cta.href} className="button primary">{cta.label} <ArrowUpRight size={17}/></Link>}
         </header>
-        {topic && <img className="seo-topic-image" src={topic.image} alt={topic.alt} width={960} height={420} loading="lazy" />}
+        {topic && <VehicleSymbol/>}
         {['functionalitati', 'autocare-ai'].includes(slug) && <PublicAiIntro />}
         {(slug === 'functionalitati' || technology) && <TechnologyNavigation current={slug}/>}
         {faq ? (

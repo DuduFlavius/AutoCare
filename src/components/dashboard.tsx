@@ -14,6 +14,7 @@ import SiteLanguage from './site-language';
 import ApplicationHome from './application/home';
 import { AutoAiWorkspace } from './application/auto-ai-workspace';
 import ApplicationHeader from './application/header';
+import LanguageMenu from './language-menu';
 import MobileNavigation from './application/mobile-navigation';
 import AccountHub from './application/account';
 import { ApplicationGarage } from './application/garage';
@@ -470,9 +471,9 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
   }
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
-  function startCheckout(interval: string, extend = false) {
+  function startCheckout(interval: string, extend = false, billingCurrency:'ron'|'eur'='ron') {
     void act(async () => {
-      const out = await api(extend ? 'billing/extend' : 'billing/checkout', 'POST', { interval });
+      const out = await api(extend ? 'billing/extend' : 'billing/checkout', 'POST', { interval,currency:billingCurrency.toUpperCase(),language });
       if (typeof out?.url !== 'string' || !out.url.startsWith('https://checkout.stripe.com/')) {
         throw new Error(language === 'en' ? 'Invalid Stripe checkout link.' : 'Linkul de plată Stripe este invalid.');
       }
@@ -575,8 +576,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     window.addEventListener('keydown',shortcut);return()=>window.removeEventListener('keydown',shortcut);
   },[modal,recordDirty,recordSaving]);
   function changeLanguage(next:'ro'|'en'){
-    setLanguage(next);setCurrency(next==='en'?'EUR':'RON');
-    try{localStorage.setItem('autocare-language',next);localStorage.setItem('autocare-currency',next==='en'?'EUR':'RON');}catch{ /* Storage may be unavailable. */ }
+    setLanguage(next);
+    try{localStorage.setItem('autocare-language',next);window.dispatchEvent(new Event('autocare-language-change'));}catch{ /* Storage may be unavailable. */ }
   }
   function changeCurrency(next:'EUR'|'RON'){
     setCurrency(next);try{localStorage.setItem('autocare-currency',next);}catch{ /* Storage may be unavailable. */ }
@@ -844,6 +845,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             </button>
           </div>
         )}
+        <LanguageMenu language={language} onChange={changeLanguage}/>
         <details className="sidebar-account">
           {' '}
           <summary className="sidebar-profile">
@@ -877,7 +879,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
       </aside>
       {data&&!previewData&&<NativeTripSync ownerId={data.profile.userId} vehicles={data.vehicles.filter(v=>!v.archived)} onUpdated={refresh} onReview={()=>navigate('Plan întreținere')} english={language==='en'}/>}
       <SiteLanguage language={language} />
-      <ApplicationHeader title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (workspaceSections.find(s=>s.id===tab)?.[language] ?? tab)} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
+      <ApplicationHeader onLanguage={changeLanguage} title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (workspaceSections.find(s=>s.id===tab)?.[language] ?? tab)} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
       <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'}/>
       <main id="workspace-main" tabIndex={-1} aria-busy={busy||!data}
         className={

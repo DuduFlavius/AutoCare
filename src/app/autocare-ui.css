@@ -3119,8 +3119,7 @@ a:hover {
 }
 .sidebar .membership-promo {
   background:
-    linear-gradient(180deg, #111c35cc, #111c35f5),
-    url('/design-car.jpg') center/cover;
+    linear-gradient(180deg, #111c35cc, #111c35f5);
   border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
 }
 .sidebar-bottom p {
