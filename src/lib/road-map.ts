@@ -27,6 +27,20 @@ export function streetOnlyStyle(style: StyleSpecification): StyleSpecification {
     ...style,
     layers: style.layers
       .filter(layer => layer.type !== 'raster' && layer.type !== 'hillshade' && !/^railway.*_dashline$/.test(layer.id))
+      .map(layer => {
+        // Retain the provider's road geometry and zoom expressions; only tune its palette.
+        if (layer.type === 'background') return { ...layer, paint: { ...layer.paint, 'background-color': '#101d2b' } };
+        if (layer.type === 'fill') {
+          const color = /water/.test(layer.id) ? '#0b263b' : /building/.test(layer.id) ? '#1a2b3d' : /park|wood|grass/.test(layer.id) ? '#173331' : null;
+          if (color) return { ...layer, paint: { ...layer.paint, 'fill-color': color } };
+        }
+        if (layer.type === 'line' && /road|highway/.test(layer.id) && !/rail|tunnel|bridge|casing/.test(layer.id)) {
+          const color = /motorway|trunk|primary/.test(layer.id) ? '#7b93ae' : /secondary|tertiary/.test(layer.id) ? '#526d89' : '#344e68';
+          return { ...layer, paint: { ...layer.paint, 'line-color': color } };
+        }
+        if (layer.type === 'symbol' && layer.layout?.['text-field']) return { ...layer, paint: { ...layer.paint, 'text-color': /place|country/.test(layer.id) ? '#e1edf9' : '#bdcee0', 'text-halo-color': '#102033', 'text-halo-width': 1.3 } };
+        return layer;
+      })
       .flatMap(layer => {
         if (layer.type !== 'symbol' || !layer.layout?.['icon-image']) return [layer];
         if (!layer.layout['text-field']) return [];

@@ -22,3 +22,16 @@ test('street style removes square base markers and railway ties while keeping st
   assert.deepEqual(style.layers.map(layer => layer.id), ['railway_service', 'place_town']);
   assert.deepEqual(style.layers[1].layout, {'text-field': '{name}'});
 });
+
+test('the street palette gives roads, water and labels distinct dark-map contrast', () => {
+ const style = streetOnlyStyle({version:8,sources:{},layers:[
+  {id:'background',type:'background'},
+  {id:'water',type:'fill',source:'streets'},
+  {id:'highway_primary',type:'line',source:'streets'},
+  {id:'highway_minor',type:'line',source:'streets'},
+  {id:'road_label',type:'symbol',source:'streets',layout:{'text-field':'{name}'}},
+ ]});
+ assert.equal(style.layers[0].paint?.['background-color' as keyof typeof style.layers[0]['paint']], '#101d2b');
+ assert.notDeepEqual(style.layers[2].paint,style.layers[3].paint);
+ assert.ok(JSON.stringify(style.layers[4].paint).includes('#bdcee0'));
+});

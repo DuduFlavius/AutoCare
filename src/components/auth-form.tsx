@@ -11,7 +11,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
   const [language, setLanguage] = useState<'ro' | 'en'>('ro');
   useEffect(() => {
     try {
-      if (localStorage.getItem('autocare-language') === 'en') setLanguage('en');
+      if ((localStorage.getItem('autocare-language') === 'en' || localStorage.getItem('autocare-language') !== 'ro' && !navigator.language.toLowerCase().startsWith('ro'))) setLanguage('en');
     } catch {
       /* Preferences still work without storage. */
     }

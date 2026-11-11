@@ -8,7 +8,7 @@ import MapStage from './map-stage';
 import { Gauge, History, Bell, Route, Clock3 } from 'lucide-react';
 import { mileageMetrics } from '@/lib/smartdrive-metrics';
 const RoadMapView = dynamic(() => import('./road-map'), { ssr: false });
-type Vehicle = { id: string; brand: string; model: string; odometer: number };
+type Vehicle = { id: string; brand: string; model: string; plate?: string; odometer: number };
 type Reading = { id: string; odometer: number; recordedAt: string; source: string };
 type Trip = { id: string; distanceMeters: number; durationSeconds: number; startedAt: string };
 type TripStats = { count: number; meters: number; seconds: number };
@@ -79,6 +79,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
   const totals = stats?.path === statsPath ? stats.value : null;
   const filteredTrips = tripResult?.key === tripPath ? tripResult.trips : [];
   const selectedTrip = filteredTrips.find(trip => trip.id === selectedTripId) ?? filteredTrips[0];
+  const currentVehicle = vehicles.find(vehicle => vehicle.id === vehicleId);
   const tripId = selectedTrip?.id;
   useEffect(() => {
     if (preview || !tripId) return;
@@ -105,8 +106,8 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
     finally { setBusy(false); }
   };
   return <section className="ac-smartdrive-history">
-    <div className="ac-smartdrive-history-head"><div><span className="ac-premium-kicker"><History size={17}/> SMARTDRIVE · ISTORIC</span><h3>Citiri confirmate și călătorii</h3></div>
-      {vehicles.length > 1 && <label>Mașina <select value={vehicleId} onChange={e => { setSelected(e.target.value); setPage(0); }}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}</option>)}</select></label>}</div>
+    <div className="ac-smartdrive-history-head"><div><span className="ac-premium-kicker"><History size={17}/> SMARTDRIVE · ISTORIC</span><h3>{t('Citiri confirmate și călătorii', 'Trips and confirmed mileage')}</h3></div>
+      {vehicles.length > 1 && <label>{t('Mașina', 'Vehicle')} <select value={vehicleId} onChange={e => { setSelected(e.target.value); setPage(0); }}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}{v.plate ? ' · ' + v.plate : ''}</option>)}</select></label>}</div>
     <section aria-label={t('Statistici GPS', 'GPS statistics')}>
       <p className="small muted">{tripDate ? t('Total pentru data selectată', 'Selected date totals') : t('Total pentru toate călătoriile mașinii', 'All trips for this vehicle')}</p>
       <div className="ac-smartdrive-history-metrics ac-trip-totals">
@@ -122,7 +123,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
         {tripDate && <button type="button" onClick={() => { setTripDate(''); setPage(0); }}>{t('Toate datele', 'All dates')}</button>}
         {filteredTrips.map(trip => (
           <button type="button" key={trip.id} aria-pressed={selectedTrip?.id === trip.id} onClick={() => setSelectedTripId(trip.id)}>
-            <span>{new Date(trip.startedAt).toLocaleString(locale, { timeZone: timezone, dateStyle: 'medium', timeStyle: 'short' })}</span>
+            <small data-user-content>{currentVehicle?.brand} {currentVehicle?.model}{currentVehicle?.plate ? ' · ' + currentVehicle.plate : ''}</small><span>{new Date(trip.startedAt).toLocaleString(locale, { timeZone: timezone, dateStyle: 'medium', timeStyle: 'short' })}</span>
             <strong>{(trip.distanceMeters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 })} km · {driveDuration(trip.durationSeconds)}</strong>
           </button>
         ))}
@@ -154,30 +155,30 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
     </div>
     <div className="ac-mileage-history-callout">
       <div>
-        <strong>Următoarea citire de kilometraj</strong>
+        <strong>{t('Următoarea citire de kilometraj', 'Next mileage reading')}</strong>
         <p className="small muted">{visibleReadings.length && Number.isFinite(Date.parse(visibleReadings[0].recordedAt)) ? (() => {
           const date = new Date(visibleReadings[0].recordedAt);
           date.setDate(date.getDate() + Math.max(1, prefs.frequencyDays));
           return date.getTime() <= Date.now()
-            ? 'E timpul să introduci kilometrajul actual.'
-            : 'Reintrodu kilometrii în jurul datei de ' + date.toLocaleDateString(locale);
-        })() : 'Introdu o primă citire pentru a calcula data următoarei actualizări.'}</p>
+            ? t('E timpul să introduci kilometrajul actual.', 'It is time to update your mileage.')
+            : t('Actualizează kilometrajul în jurul datei de ', 'Update mileage around ') + date.toLocaleDateString(locale);
+        })() : t('Introdu o primă citire pentru a calcula data următoarei actualizări.', 'Add your first reading to calculate the next update date.')}</p>
       </div>
-      <button className="primary" type="button" disabled={!vehicleId} onClick={() => onUpdateMileage(vehicleId)}>Introdu km acum</button>
+      <button className="primary" type="button" disabled={!vehicleId} onClick={() => onUpdateMileage(vehicleId)}>{t('Introdu km acum', 'Enter mileage now')}</button>
     </div>
     <div className="ac-smartdrive-history-metrics">
-      <div><Gauge size={19}/><span>Diferență între citiri</span><strong>{deltaKm !== null ? deltaKm.toLocaleString(locale) + ' km' : '—'}</strong></div>
-      <div><span>Medie zilnică</span><strong>{dailyKm === null ? 'Date insuficiente' : dailyKm.toLocaleString(locale,{maximumFractionDigits:1}) + ' km/zi'}</strong></div>
-      <div><span>Medie lunară estimată (30 zile)</span><strong>{monthlyKm === null ? 'Date insuficiente' : monthlyKm.toLocaleString(locale,{maximumFractionDigits:0}) + ' km'}</strong></div>
+      <div><Gauge size={19}/><span>{t('Diferență între citiri', 'Mileage between readings')}</span><strong>{deltaKm !== null ? deltaKm.toLocaleString(locale) + ' km' : '—'}</strong></div>
+      <div><span>{t('Medie zilnică', 'Daily average')}</span><strong>{dailyKm === null ? t('Date insuficiente', 'Not enough data') : dailyKm.toLocaleString(locale,{maximumFractionDigits:1}) + t(' km/zi', ' km/day')}</strong></div>
+      <div><span>{t('Medie lunară estimată (30 zile)', 'Estimated monthly average (30 days)')}</span><strong>{monthlyKm === null ? t('Date insuficiente', 'Not enough data') : monthlyKm.toLocaleString(locale,{maximumFractionDigits:0}) + ' km'}</strong></div>
     </div>
-    <p className="ac-smartdrive-history-note">Mediile folosesc numai citirile confirmate, nu distanțele GPS. Pentru calcul sunt necesare două citiri la cel puțin o zi distanță.</p>
+    <p className="ac-smartdrive-history-note">{t('Mediile folosesc numai citirile confirmate, nu distanțele GPS. Sunt necesare două citiri la cel puțin o zi distanță.', 'Averages use confirmed mileage readings, not GPS distances. At least two readings one day apart are required.')}</p>
     <div className="ac-smartdrive-history-columns">
-      <div><h4>Citiri kilometraj</h4>{visibleReadings.length ? visibleReadings.slice(0,8).map((r,i) => <div className="ac-smartdrive-history-row" key={r.id}><span>{new Date(r.recordedAt).toLocaleDateString(locale)} · {r.source === 'manual' ? 'Manual' : r.source}</span><strong>{r.odometer.toLocaleString(locale)} km</strong>{visibleReadings[i+1] && <small>+{Math.max(0,r.odometer-visibleReadings[i+1].odometer).toLocaleString(locale)} km</small>}</div>) : <p>Nu există citiri salvate în istoricul nou.</p>}</div>
+      <div><h4>{t('Citiri kilometraj', 'Mileage readings')}</h4>{visibleReadings.length ? visibleReadings.slice(0,8).map((r,i) => <div className="ac-smartdrive-history-row" key={r.id}><span>{new Date(r.recordedAt).toLocaleDateString(locale)} · {r.source === 'manual' ? 'Manual' : r.source}</span><strong>{r.odometer.toLocaleString(locale)} km</strong>{visibleReadings[i+1] && <small>+{Math.max(0,r.odometer-visibleReadings[i+1].odometer).toLocaleString(locale)} km</small>}</div>) : <p>{t('Nu există citiri salvate în istoricul nou.', 'No mileage readings saved yet.')}</p>}</div>
     </div>
-    <div className="ac-smartdrive-reminder"><div><span className="ac-premium-kicker"><Bell size={17}/> REMINDER KILOMETRAJ</span><p>Preferința este salvată în cont. Livrarea periodică necesită activarea jobului pe baza de date configurată.</p></div>
-      <label><input type="checkbox" checked={prefs.enabled} onChange={e => setPrefs(p => ({...p,enabled:e.target.checked}))}/> Activ</label>
-      <label>La fiecare <select value={prefs.frequencyDays} onChange={e => setPrefs(p => ({...p,frequencyDays:Number(e.target.value)}))}>{[1,2,3,5,7,14,30].map(n => <option key={n} value={n}>{n===1?'1 zi':n+' zile'}</option>)}</select></label>
-      <button type="button" disabled={busy || preview} onClick={save}>{busy ? 'Se salvează…' : 'Salvează preferința'}</button>
+    <div className="ac-smartdrive-reminder"><div><span className="ac-premium-kicker"><Bell size={17}/> REMINDER KILOMETRAJ</span><p>{t('Preferința este salvată în cont. Livrarea periodică necesită configurarea notificărilor automate.', 'Preferences are saved to your account. Scheduled delivery requires automatic notifications to be configured.')}</p></div>
+      <label><input type="checkbox" checked={prefs.enabled} onChange={e => setPrefs(p => ({...p,enabled:e.target.checked}))}/> {t('Activ', 'Enabled')}</label>
+      <label>{t('La fiecare', 'Every')} <select value={prefs.frequencyDays} onChange={e => setPrefs(p => ({...p,frequencyDays:Number(e.target.value)}))}>{[1,2,3,5,7,14,30].map(n => <option key={n} value={n}>{n + ' ' + (english ? n === 1 ? 'day' : 'days' : n === 1 ? 'zi' : 'zile')}</option>)}</select></label>
+      <button type="button" disabled={busy || preview} onClick={save}>{busy ? t('Se salvează…', 'Saving…') : t('Salvează preferința', 'Save preference')}</button>
     </div>
     {error && <p role="alert" className="ac-smartdrive-history-error">{error}</p>}
   </section>;

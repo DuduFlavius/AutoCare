@@ -3,6 +3,7 @@ import { ArrowUpRight, Menu } from 'lucide-react';
 import { appName } from '@/lib/config';
 import { Brand } from './brand';
 import MobileInstall from './mobile-install';
+import PublicLanguage from './public-language';
 import './public-surfaces.css';
 export { Brand } from './brand';
 export function PublicShell({
@@ -31,7 +32,7 @@ export function PublicShell({
             Intră în cont <ArrowUpRight size={16} aria-hidden="true"/>
           </Link>
           {landing && <Link className="button ac-landing-nav-cta" href="/inregistrare">Începe acum <ArrowUpRight size={15} aria-hidden="true" /></Link>}
-          <details className="ac-public-mobile-nav">
+          <PublicLanguage/><details className="ac-public-mobile-nav">
             <summary><Menu size={18}/> Meniu</summary>
             <nav aria-label="Navigare mobilă">
               {landing && <Link href="/inregistrare">Creează cont gratuit</Link>}

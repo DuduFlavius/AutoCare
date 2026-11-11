@@ -1,0 +1,61 @@
+/* A bounded cockpit grid: both columns are allowed to shrink inside the workspace. */
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip {
+   min-width:0!important;max-width:100%!important;width:100%!important;box-sizing:border-box!important;padding:clamp(14px,2vw,24px)!important;margin:12px 0!important;gap:18px!important;
+   background:#0d1726!important;border:1px solid #263a53!important;border-radius:20px!important;
+ }
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-live-content {min-width:0!important;max-width:100%!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip-heading {margin-bottom:20px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip-heading h3 {font-size:clamp(22px,2vw,28px)!important;line-height:1.25!important;margin:10px 0 6px!important;letter-spacing:-.025em!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip-heading p {font-size:14px!important;color:#aebed1!important;margin:0!important;line-height:1.6!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit {display:grid!important;grid-template-columns:minmax(0,7fr) minmax(0,3fr)!important;align-items:start!important;gap:18px!important;min-width:0!important;max-width:100%!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit > * {min-width:0!important;max-width:100%!important;box-sizing:border-box!important;margin:0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console {display:grid!important;gap:14px!important;min-width:0!important;padding:0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit .drive-session {padding:20px!important;border:1px solid #2a405b!important;border-radius:16px!important;background:#122034!important;box-shadow:0 8px 24px #00000014!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-status {font-size:13px!important;color:#c5d7ed!important;line-height:1.5!important;flex-wrap:wrap!important;gap:8px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-distance {margin-top:20px!important;gap:9px!important;display:flex!important;align-items:baseline!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-distance > span {font-size:46px!important;line-height:1.15!important;letter-spacing:-.04em!important;color:#f0f6ff!important;font-variant-numeric:tabular-nums!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-distance > small {font-size:18px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-caption {font-size:13px!important;line-height:1.6!important;color:#a6b9d0!important;margin:8px 0 18px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-details {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px 12px!important;padding-top:18px!important;border-color:#2a405b!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-details > div {display:grid!important;gap:6px!important;min-width:0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-details span {font-size:12px!important;color:#adbed3!important;line-height:1.4!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-details strong {font-size:16px!important;line-height:1.4!important;color:#edf5ff!important;overflow-wrap:anywhere!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-details svg {color:#69afff!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-details .drive-signal {grid-column:1/-1!important;padding-top:12px!important;border-top:1px solid #2a405b!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-privacy {font-size:12px!important;color:#a6b9d0!important;display:flex!important;align-items:start!important;gap:6px!important;line-height:1.6!important;margin:18px 0 0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session-dot {background:#6e859d!important;box-shadow:none!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .drive-session--driving .drive-session-dot {background:#38d4b0!important;box-shadow:0 0 0 4px #38d4b014!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-vehicle {display:grid!important;gap:8px!important;font-size:13px!important;color:#adbed3!important;min-width:0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-vehicle select {width:100%!important;max-width:100%!important;min-width:0!important;min-height:46px!important;font-size:14px!important;background:#122034!important;border:1px solid #304863!important;border-radius:11px!important;padding:10px!important;color:#edf5ff!important;text-overflow:ellipsis!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip-controls {display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:9px!important;min-width:0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip-controls button {width:100%!important;white-space:normal!important;min-height:48px!important;font-size:14px!important;justify-content:center!important;padding:12px!important;border-radius:12px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip-controls .primary {background:#1478ec!important;color:#fff!important;border:1px solid #398ef6!important;box-shadow:0 5px 16px #1478ec26!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip-controls .ac-drive-stop {background:#33202b!important;border:1px solid #754355!important;color:#ffd9e1!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-sync {display:flex!important;align-items:start!important;gap:8px!important;min-width:0!important;font-size:12px!important;line-height:1.6!important;color:#9fb3cc!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-sync input {flex:none!important;width:16px!important;height:16px!important;margin-top:3px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit .ac-map-stage:not(:modal) .ac-road-map-canvas {height:clamp(390px,54dvh,650px)!important;min-height:0!important;width:100%!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit .ac-road-map {height:auto!important;min-width:0!important;max-width:100%!important;filter:none!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit .ac-smartdrive-map {min-width:0!important;max-width:100%!important;filter:none!important;border:0!important;border-radius:0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit .ac-map-stage {min-width:0!important;max-width:100%!important;padding:0!important;border:1px solid #2a405b!important;border-radius:16px!important;background:#0d1726!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit .ac-map-stage:modal {max-width:none!important;border-radius:0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-map-stage-bar {display:flex!important;flex-wrap:wrap!important;justify-content:space-between!important;gap:8px!important;padding:12px!important;background:#122034!important;font-size:13px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-road-map :is(.maplibregl-ctrl-group,.leaflet-control-zoom) {background:#13243b!important;border:1px solid #365473!important;border-radius:12px!important;overflow:hidden!important;box-shadow:0 4px 14px #0003!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-road-map :is(.maplibregl-ctrl-group button,.leaflet-control-zoom a) {width:42px!important;height:42px!important;background:#13243b!important;color:#f2f7ff!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-road-map-center {min-height:44px!important;max-width:calc(100% - 24px)!important;background:#142640!important;color:#e4efff!important;border:1px solid #47658a!important;border-radius:12px!important;font-size:13px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip .service-reminder-box {margin-top:16px!important;padding:14px!important;font-size:13px!important;background:#112035!important;border:1px solid #273d57!important;border-radius:12px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-live-content > p {font-size:13px!important;line-height:1.6!important;color:#a9bdd5!important;overflow-wrap:anywhere!important}
+ @media(max-width:1050px) {
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit {grid-template-columns:minmax(0,1fr)!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console {grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:start!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console .drive-session {grid-row:span 3!important}
+ }
+ @media(max-width:600px) {
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console {grid-template-columns:minmax(0,1fr)!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-console .drive-session {grid-row:auto!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-drive-cockpit .ac-map-stage:not(:modal) .ac-road-map-canvas {height:350px!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-smartdrive-trip {padding:12px!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-map-stage-bar button {min-height:42px!important;font-size:12px!important;white-space:normal!important}
+ }
+ @media(prefers-reduced-motion:reduce) { .drive-session * {animation:none!important;transition:none!important} }
+}
