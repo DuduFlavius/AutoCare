@@ -1,3 +1,4 @@
+import {userLanguage} from './user-language';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
@@ -369,6 +370,7 @@ export async function deliverCampaign(
           .where(eq(s.mailDeliveries.id, candidate.id));
         const content = renderEmail(campaign.template as EmailTemplate, {
           name: user.name,
+          language:await userLanguage(candidate.userId),
           subject: campaign.subject,
           message: campaign.message,
           ctaLabel: campaign.ctaLabel,
