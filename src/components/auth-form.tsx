@@ -1,4 +1,5 @@
 'use client';
+import {saveBrowserLanguage} from '@/lib/language-preference';
 import VehicleSymbol from './vehicle-symbol';
 import { useEffect, useState, type FormEvent } from 'react';
 import { PublicAiIntro } from './public-ai-intro';
@@ -18,6 +19,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
       /* Preferences still work without storage. */
     }
   }, []);
+  useEffect(()=>{saveBrowserLanguage(language);},[language]);
   const en=language==='en';
   const t=(ro:string,english:string)=>en?english:ro;
   const [showPassword, setShowPassword] = useState(false);
@@ -130,7 +132,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
                 const next = event.target.value === 'en' ? 'en' : 'ro';
                 setLanguage(next);
                 try {
-                  localStorage.setItem('autocare-language', next);
+                  saveBrowserLanguage(next);
                 } catch {
                   /* Optional preference persistence. */
                 }
