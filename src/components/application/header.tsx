@@ -39,7 +39,7 @@ export default function ApplicationHeader({
         <strong>AutoCare</strong>
       </span>
       <span className="app-topbar-title">
-        <span>{en ? 'Your workspace' : 'Spațiul tău auto'}</span>
+        <span>AutoCare</span>
         <span aria-hidden="true">/</span>
         <strong>{title}</strong>
       </span>
