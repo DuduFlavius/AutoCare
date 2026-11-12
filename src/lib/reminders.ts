@@ -1,3 +1,4 @@
+import {userLanguage} from './user-language';
 import { calendarRecordDate, isPlannedService } from './planned-service';
 import {reminderOffsets,alertOffsetAllowed} from './maintenance-alerts';
 import { and, eq, sql, lte, or } from 'drizzle-orm';
@@ -33,6 +34,7 @@ export async function scheduleReminders(now = new Date()) {
     if (hour < p.hour) continue;
     const paid = entitlements.get(u.id) ?? await premium(u.id, now);
     entitlements.set(u.id, paid);
+    const en=(await userLanguage(u.id))==='en';
     const today = localDate(now, p.timezone);
     const planned = isPlannedService(r, today);
     const deadline = calendarRecordDate(r, today);
@@ -51,7 +53,8 @@ export async function scheduleReminders(now = new Date()) {
             : days! < 0
               ? `${r.category || r.title} a expirat de ${Math.abs(days!)} ${Math.abs(days!) === 1 ? 'zi' : 'zile'}.`
               : `În ${days} ${days === 1 ? 'zi' : 'zile'} expiră ${r.category || r.title}.`;
-        const message = `${subject} — ${reminder}`;
+        const englishReminder=planned ? (days===0?'Your scheduled service is today.':`Your scheduled service is in ${days} ${days===1?'day':'days'}.`) : offset.startsWith('km-before-') ? `${Math.max(0,(r.nextKm??v.odometer)-v.odometer)} km until your scheduled service.` : offset==='km' ? `You have reached ${r.nextKm} km. Check your scheduled service.` : days===0 ? 'Expires today.' : days!<0 ? `Expired ${Math.abs(days!)} ${Math.abs(days!)===1?'day':'days'} ago.` : `Expires in ${days} ${days===1?'day':'days'}.`;
+        const message = `${subject} — ${en?englishReminder:reminder}`;
         const out = await db()
           .insert(s.notifications)
           .values({
@@ -80,7 +83,7 @@ export type Transport = (
 ) => Promise<string>;
 export const realTransport: Transport = async (n, email) => {
   if (n.channel === 'email')
-    return sendMail(email, 'AutoCare — memento pentru mașina ta', n.message, `reminder/${n.id}`, renderEmail('reminder', { message: n.message, name: await userEmailName(n.userId) }));
+    return sendMail(email, 'AutoCare — memento pentru mașina ta', n.message, `reminder/${n.id}`, renderEmail('reminder', { language:await userLanguage(n.userId), message: n.message, name: await userEmailName(n.userId) }));
   return sendPushNotification(n.userId, { id: n.id, title: 'AutoCare', body: n.message });
 };
 
