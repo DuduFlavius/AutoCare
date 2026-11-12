@@ -4,7 +4,7 @@ import { migrate } from '../scripts/migrate';
 import { auth } from '../src/lib/auth';
 import { db, closeLocalDb } from '../src/lib/db';
 import * as schema from '../src/lib/schema';
-import { GET, POST, PATCH, DELETE } from '../src/app/api/v1/[...path]/route';
+import { GET, POST, PATCH, DELETE, PUT } from '../src/app/api/v1/[...path]/route';
 import { prepareRecordDraft } from '../src/lib/record-draft';
 import {
   serviceCategories,
@@ -318,4 +318,19 @@ test('confirmed mileage update persists and recalculates timing distance and day
   const forecast = forecastService({ currentKm: actual.odometer, nextKm: 150000, averageKmPerDay: usage.dailyKm });
   assert.equal(forecast?.remainingKm, 60000);
   assert.equal(forecast?.days, 858);
+});
+
+test('language preference persists per authenticated account and rejects unsafe writes',async()=>{
+ const signUp=await auth().handler(new Request('http://localhost:3000/api/auth/sign-up/email',{method:'POST',headers:{Origin:'http://localhost:3000','Content-Type':'application/json',Cookie:'autocare-language=en'},body:JSON.stringify({name:'Locale owner',email:'locale-owner@example.invalid',password:'locale-owner-password-123'})}));
+ assert.equal(signUp.status,200);
+ const localeCookie=signUp.headers.getSetCookie().map(v=>v.split(';')[0]).join('; ');
+ const call=(method:string,body?:unknown,headers:Record<string,string>={})=>(method==='GET'?GET:PUT)(new Request('http://localhost:3000/api/v1/preferences/language',{method,headers:{Origin:'http://localhost:3000',Cookie:localeCookie,'Content-Type':'application/json',...headers},body:body?JSON.stringify(body):undefined}),{params:Promise.resolve({path:['preferences','language']})});
+ assert.deepEqual(await (await call('GET')).json(),{language:'en'});
+ assert.equal((await call('PUT',{language:'en'})).status,200);
+ assert.deepEqual(await (await call('GET')).json(),{language:'en'});
+ assert.equal((await call('PUT',{language:'de'})).status,400);
+ assert.equal((await call('PUT',{language:'en',userId:crypto.randomUUID()})).status,400);
+ assert.equal((await call('PUT',{language:'ro'},{Origin:'https://foreign.invalid'})).status,403);
+ assert.equal((await call('GET',undefined,{Cookie:''})).status,401);
+ assert.equal((await call('PUT',{language:'ro'})).status,200);
 });
