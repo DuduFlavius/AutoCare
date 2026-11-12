@@ -1,7 +1,7 @@
 'use client';
 import { useState, useDeferredValue, type ReactNode } from 'react';
 import {
-  LayoutDashboard,
+  House,
   CarFront,
   Files,
   History,
@@ -13,7 +13,7 @@ import {
   BellRing,
   Star,
   CreditCard,
-  MessageSquare,
+  Headset,
   Settings,
   ArrowUpRight,
   Search,
@@ -29,7 +29,7 @@ import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type Language = 'ro' | 'en';
 const icons = {
-  home: LayoutDashboard,
+  home: House,
   car: CarFront,
   files: Files,
   history: History,
@@ -41,7 +41,7 @@ const icons = {
   bell: BellRing,
   premium: Star,
   credit: CreditCard,
-  support: MessageSquare,
+  support: Headset,
   settings: Settings,
 };
 export function WorkspaceNavigation({
@@ -67,14 +67,14 @@ export function WorkspaceNavigation({
       aria-label={language === 'en' ? 'Application sections' : 'Secțiunile aplicației'}
       data-workspace-ui
     >
-      {([
+      {(tab==='Dashboard'?[{ro:'',en:'',ids:['Dashboard','Garaj','Întreținere','Calendar','Cheltuieli','Rapoarte','Istoric auto','Documente','Plan întreținere','Notificări','Setări','Centru de suport','Cont','AutoCare AI']}]:[
         { ro:'GARAJUL TĂU',en:'YOUR GARAGE', ids:['Dashboard','Garaj','AutoCare AI','Întreținere','Documente'] },
         { ro:'EVIDENȚĂ ȘI PLANIFICARE',en:'TRACKING & PLANNING', ids:['Kilometraj','Calendar','Cheltuieli','Rapoarte','Istoric auto','Plan întreținere'] },
         { ro:'CONTUL TĂU',en:'YOUR ACCOUNT', ids:['Premium','Abonament','Notificări','Setări','Centru de suport','Cont'] },
       ]).map(group => <div className="ws-nav-group" key={group.en}><p>{group[language]}</p>{group.ids.map(id => {
         const section=workspaceSections.find(section=>section.id===id)!;
         const Icon=icons[section.icon];
-        const count=id==='Cont'?notifications+support:0;
+        const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
         const label = id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj' ? (language==='en'?'My garage':'Garajul meu') : section[language];
         return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}><Icon size={18}/><span>{label}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
       })}</div>)}
