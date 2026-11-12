@@ -3,7 +3,7 @@
   "appName": "AutoCare",
   "webDir": "www",
   "server": {
-    "url": "https://autocare-premium.vercel.app/cont",
+    "url": "https://autocare-jglt.onrender.com/cont",
     "cleartext": false
   },
   "android": {
