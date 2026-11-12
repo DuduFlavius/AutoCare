@@ -165,7 +165,7 @@ export default function MailCenter() {
           </div>
         )}
         <p className="notice">
-          Automatizări: {data.automation.enabled ? 'activate' : 'dezactivate'}. Administrare din secțiunea Automatizări.
+          Automatizări: {data.automation.enabled && gmailStatus?.connected && gmailStatus.testedAt && !gmailStatus.reconnectRequired ? 'activate' : 'dezactivate'}. Administrare din secțiunea Automatizări.
         </p>
       </section>
       {data.permissions.canApprove && gmailStatus?.reconnectRequired && <GoogleMailSettings />}
