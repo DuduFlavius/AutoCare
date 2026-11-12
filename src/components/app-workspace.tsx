@@ -1,5 +1,6 @@
 'use client';
 import { useState, useDeferredValue, type ReactNode } from 'react';
+import ReferenceArtwork,{type ReferenceArtworkName} from './reference-artwork';
 import {
   House,
   CarFront,
@@ -28,6 +29,7 @@ import {
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type Language = 'ro' | 'en';
+const referenceIcons:Record<string,ReferenceArtworkName>={Dashboard:'nav-home',Garaj:'nav-car','Întreținere':'nav-service',Calendar:'nav-calendar',Cheltuieli:'nav-expenses',Rapoarte:'nav-reports','Istoric auto':'nav-history',Documente:'nav-documents','Plan întreținere':'nav-gps','Notificări':'nav-bell','Setări':'nav-settings','Centru de suport':'nav-support',Cont:'nav-account'};
 const icons = {
   home: House,
   car: CarFront,
@@ -75,8 +77,8 @@ export function WorkspaceNavigation({
         const section=workspaceSections.find(section=>section.id===id)!;
         const Icon=icons[section.icon];
         const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
-        const label = id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj' ? (language==='en'?'My garage':'Garajul meu') : section[language];
-        return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}><Icon size={18}/><span>{label}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
+        const label = id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj' ? (tab==='Dashboard'?(language==='en'?'Vehicles':'Mașini'):(language==='en'?'My garage':'Garajul meu')) : section[language];
+        return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}>{tab==='Dashboard'&&referenceIcons[id]?<ReferenceArtwork name={referenceIcons[id]} width={32} height={32}/>:<Icon size={18}/>}<span>{label}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
       })}</div>)}
     </nav>
   );
