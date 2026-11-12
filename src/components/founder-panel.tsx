@@ -101,7 +101,7 @@ export default function FounderPanel({ initial, name }: { initial: Overview; nam
 
   const locale=useApplicationLocale();
   const money=(b:number)=>formatMoney(b,locale);
-const [tab, setTab] = useState('Roluri și permisiuni'),
+const [tab, setTab] = useState('Utilizatori'),
     [overview, setOverview] = useState(initial),
     [users, setUsers] = useState<UsersData | null>(null),
     [audit, setAudit] = useState<Audit | null>(null),
@@ -120,6 +120,7 @@ const [tab, setTab] = useState('Roluri și permisiuni'),
     if (new URLSearchParams(window.location.search).has('gmail')) setTab('Setări administrative');
   }, []);
   const detailsRef = useRef<HTMLElement>(null);
+  const selectionRequest=useRef(0);
   const userPane = ['Utilizatori', 'Roluri și permisiuni', 'Abonamente'].includes(tab);
   async function loadUsers() {
     const result: UsersData = await api(
@@ -170,11 +171,15 @@ const [tab, setTab] = useState('Roluri și permisiuni'),
     setNotice('');
   }
   async function choose(user: User) {
+    const request=++selectionRequest.current;
+    setDuration('1');
     setSelected(user);
     setDetail(null);
     setError('');
     try {
-      setDetail(await api('users/' + user.id));
+      const detail=await api('users/' + user.id);
+      if(request!==selectionRequest.current)return;
+      setDetail(detail);
       detailsRef.current?.scrollIntoView({
         block: 'start',
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
@@ -721,7 +726,7 @@ const [tab, setTab] = useState('Roluri și permisiuni'),
                       Duratele se adaugă după expirarea accesului manual curent, dacă există.
                       Accesul manual și cel plătit rămân separate.
                     </p>
-                    <button className="primary" disabled={busy}>
+                    <button className="primary" disabled={busy || !detail}>
                       {detail?.access.manual ? 'Prelungește Premium' : 'Acordă Premium'}
                     </button>
                   </form>
