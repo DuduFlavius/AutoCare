@@ -1,18 +1,23 @@
-.ac-admin-frame{min-height:100dvh;background:#080e1c;color:#e7efff;font-family:Inter,'Segoe UI',sans-serif;overflow-x:clip}
+.ac-admin-frame{min-height:100dvh;background:#080d1b;color:#e7efff;font-family:Inter,'Segoe UI',sans-serif;overflow-x:clip}
 .ac-admin-language{position:sticky;top:0;z-index:95;display:flex;align-items:center;justify-content:flex-end;gap:20px;padding:10px 25px;background:#10182beb;border-bottom:1px solid #2c3b5a;backdrop-filter:blur(12px)}
 .ac-admin-language>span{font-size:12px;color:#a9bce0;letter-spacing:.03em}
-html body .ac-admin-frame .founder-shell{background:#080e1c!important;max-width:100%!important;min-width:0!important}
-html body .ac-admin-frame .founder-sidebar{background:linear-gradient(160deg,#131c35,#0c1425)!important;border-right:1px solid #2d3c5a!important;padding-top:80px!important}
+html body .ac-admin-frame .founder-shell{background:#080d1b!important;max-width:100%!important;min-width:0!important}
+html body .ac-admin-frame .founder-sidebar{background:linear-gradient(160deg,#171e39,#0d1225)!important;border-right:1px solid #2d3c5a!important;padding-top:80px!important}
 html body .ac-admin-frame .founder-sidebar nav button{border-radius:11px!important;padding:11px 14px!important;font-size:13px!important;min-height:43px!important}
-html body .ac-admin-frame .founder-sidebar nav button.active{background:linear-gradient(115deg,#354f9b,#29235d)!important;border:1px solid #5474bc!important;color:white!important}
+html body .ac-admin-frame .founder-sidebar nav button.active{background:linear-gradient(115deg,#5232e8,#302079)!important;border:1px solid #5474bc!important;color:white!important}
 html body .ac-admin-frame .founder-main{padding:30px!important;min-width:0!important;max-width:100%!important}
-html body .ac-admin-frame .founder-main :is(.card,.founder-user-detail){background:linear-gradient(145deg,#162239,#10192c)!important;border:1px solid #334561!important;border-radius:18px!important;box-shadow:0 14px 32px #00000012!important}
+html body .ac-admin-frame .founder-main :is(.card,.founder-user-detail){background:linear-gradient(145deg,#171e39,#0e152b)!important;border:1px solid #334561!important;border-radius:18px!important;box-shadow:0 14px 32px #00000012!important}
 html body .ac-admin-frame .founder-main .founder-page-header h1{font-size:28px!important;font-weight:700!important;color:#f0f4ff!important}
 html body .ac-admin-frame .founder-action-form{padding:20px!important;border:1px solid #3c527a!important;background:#142039!important;border-radius:14px!important;gap:12px!important}
-html body .ac-admin-frame .founder-action-form button.primary{min-height:44px!important;background:linear-gradient(110deg,#355fc4,#493a9d)!important;border:1px solid #6c80d2!important;color:white!important;border-radius:10px!important}
+html body .ac-admin-frame .founder-action-form button.primary{min-height:44px!important;background:linear-gradient(110deg,#5232e8,#302079)!important;border:1px solid #6c80d2!important;color:white!important;border-radius:10px!important}
 html body .ac-admin-frame .founder-table-wrap{overflow:auto!important;max-width:100%!important}
 html body .ac-admin-frame :is(input,select,textarea){max-width:100%!important;box-sizing:border-box!important;min-height:42px!important;border-radius:10px!important;background:#0f192c!important;color:#e1ebff!important;border-color:#425579!important}
 html body .ac-admin-frame .google-console-settings{border-color:#52658b!important}
 .ac-email-missing{border:1px solid #465c84;border-radius:12px;padding:15px;background:#101c33;overflow-wrap:anywhere;font-size:12px;line-height:1.7}
 .ac-email-missing code{color:#bbd5ff;font-size:11px;overflow-wrap:anywhere}
 @media(max-width:900px){.ac-admin-language{padding:8px 14px;gap:10px}.ac-admin-language>span{font-size:10px}html body .ac-admin-frame .founder-sidebar{padding-top:18px!important}html body .ac-admin-frame .founder-main{padding:18px 14px!important}html body .ac-admin-frame .founder-user-grid{grid-template-columns:minmax(0,1fr)!important}html body .ac-admin-frame .founder-main .founder-page-header h1{font-size:23px!important}}
+
+html body .ac-admin-frame .ac-email-setup{display:grid;gap:12px;padding:16px;margin-top:14px;border:1px solid #354269;border-radius:12px;background:#11192f}
+html body .ac-admin-frame .ac-email-setup ol{padding-left:20px;margin:0;display:grid;gap:10px}
+html body .ac-admin-frame .ac-email-setup a{color:#aab7ff;text-decoration:underline;text-underline-offset:3px}
+html body .ac-admin-frame .google-console-settings .inline{display:flex;flex-wrap:wrap;gap:10px}
