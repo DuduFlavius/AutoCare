@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { Mail } from 'lucide-react';
 type Status = {
   configured: boolean;
+  missing?:string[];
+  callback?:string;
   connected: boolean;
   from?: string;
   testedAt?: string | null;
@@ -98,7 +100,7 @@ const [status, setStatus] = useState<Status | null>(null);
             </strong>
             {status.from ? ` · ${status.from}` : ''}
           </p>
-          {!status.configured && <p>Configurarea Gmail pe server este incompletă.</p>}
+          {!status.configured && <div className="ac-email-missing"><p>Configurarea Gmail pe server este incompletă.</p><ul>{status.missing?.map(key=><li key={key}><code>{key}</code></li>)}</ul>{status.callback&&<p>OAuth redirect URI: <code>{status.callback}</code></p>}</div>}
           {status.testedAt && (
             <p>Ultimul test trimis: {new Date(status.testedAt).toLocaleString(locale)}</p>
           )}
