@@ -1,3 +1,4 @@
+import PublicPlanPrice from '@/components/public-plan-price';
 import { PublicAiIntro } from '@/components/public-ai-intro';
 import { TechnologyNavigation } from '@/components/technology-navigation';
 import './product-intro.css';
@@ -43,8 +44,6 @@ export async function generateMetadata() {
 export default async function Home() {
   const prices =
     process.env.DATABASE_URL || process.env.LOCAL_DATABASE_PATH ? await pricing() : DEFAULT_PRICING;
-  const money = (bani: number) =>
-    new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 }).format(bani / 100);
   return (
     <div className="ac-lux-public ac-studio-public">
       <PublicShell landing>
@@ -104,9 +103,9 @@ export default async function Home() {
             <section className="ac-landing-plans" aria-labelledby="ac-landing-plans-title">
               <h2 id="ac-landing-plans-title">Planuri AutoCare</h2>
               <div>
-                <Link href="/inregistrare"><b>Gratuit</b><strong>0 <small>RON</small></strong><span>Începe gratuit <ArrowUpRight size={14} /></span></Link>
-                <Link href="/preturi" className="ac-landing-plan-featured"><b>Premium lunar</b><strong>{money(prices.monthlyBani)} <small>RON / lună</small></strong><span>Vezi abonamentul <ArrowUpRight size={14} /></span></Link>
-                <Link href="/preturi"><b>Premium anual</b><strong>{money(prices.annualBani)} <small>RON / an</small></strong><span>Vezi abonamentul <ArrowUpRight size={14} /></span></Link>
+                <Link href="/inregistrare"><b>Gratuit</b><strong><PublicPlanPrice bani={0}/></strong><span>Începe gratuit <ArrowUpRight size={14} /></span></Link>
+                <Link href="/preturi" className="ac-landing-plan-featured"><b>Premium lunar</b><strong><PublicPlanPrice bani={prices.monthlyBani} interval="month"/></strong><span>Vezi abonamentul <ArrowUpRight size={14} /></span></Link>
+                <Link href="/preturi"><b>Premium anual</b><strong><PublicPlanPrice bani={prices.annualBani} interval="year"/></strong><span>Vezi abonamentul <ArrowUpRight size={14} /></span></Link>
               </div>
             </section>
             <article className="ac-landing-assistant">
@@ -151,10 +150,9 @@ export default async function Home() {
             <div className="lux-pricing-card">
               <span>PREMIUM LUNAR</span>
               <div>
-                <strong>{money(prices.monthlyBani)}</strong>
-                <span>lei / lună</span>
+                <strong><PublicPlanPrice bani={prices.monthlyBani} interval="month"/></strong>
               </div>
-              <p>sau {money(prices.annualBani)} lei / an</p>
+              <p><PublicPlanPrice bani={prices.annualBani} interval="year"/></p>
               <Link href="/preturi" className="lux-primary">
                 Alege planul potrivit <ArrowUpRight size={18} />
               </Link>

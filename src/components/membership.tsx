@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+import {useBillingCurrency} from './use-billing-currency';
+import PublicPlanPrice from './public-plan-price';
 import PremiumSales from './premium-sales';
 import PremiumCareTools from './premium-care-tools';
 import PremiumDownloads from './premium-downloads';
@@ -33,16 +34,7 @@ export function PriceCards({
   selectedPlan?: string;
 }) {
   const s = savings(monthlyBani, annualBani);
-  const [publicLanguage,setPublicLanguage]=useState<'ro'|'en'>('ro');
-  useEffect(()=>{
-    const update=()=>{try { const saved=localStorage.getItem('autocare-language'); setPublicLanguage(saved==='en'||saved!=='ro'&&!navigator.language.toLowerCase().startsWith('ro')?'en':'ro'); }catch{/* Use the current language without storage. */}};
-    update();window.addEventListener('autocare-language-change',update);window.addEventListener('storage',update);
-    return()=>{window.removeEventListener('autocare-language-change',update);window.removeEventListener('storage',update);};
-  },[]);
-  const en = (language ?? publicLanguage) === 'en';
-  const [currency,setBillingCurrency]=useState<BillingCurrency>('ron');
-  useEffect(()=>{try {const query=new URLSearchParams(window.location.search).get('currency')?.toLowerCase();const saved=localStorage.getItem('autocare-billing-currency');setBillingCurrency(query==='eur'||query==='ron'?query:saved==='eur'?'eur':'ron');}catch{/* RON remains the safe default. */}},[]);
-  function changeBillingCurrency(next:BillingCurrency) {setBillingCurrency(next);try {localStorage.setItem('autocare-billing-currency',next);const url=new URL(window.location.href);url.searchParams.set('currency',next.toUpperCase());window.history.replaceState(window.history.state,'',url);}catch{/* Checkout also receives the selected currency explicitly. */}}
+  const {currency,changeCurrency:changeBillingCurrency,en}=useBillingCurrency(language);
   const minor=(b:number)=>currency==='eur'?b/5:b;
   const price=(b:number)=>new Intl.NumberFormat(en?'en-GB':'ro-RO',{maximumFractionDigits:2}).format(minor(b)/100)+' '+currency.toUpperCase();
   const euro=price;
@@ -294,7 +286,7 @@ export default function Membership({
   const accessUntil=Math.max(new Date(data.premiumAccess.paidUntil||0).getTime(),...data.premiumAccess.manual.map(g=>g.expiresAt?new Date(g.expiresAt).getTime():0));
   return (
     <div className="membership-workspace studio-membership">
-      <section className="studio-premium-offer" data-workspace-ui><div><span className="studio-kicker">AUTOCARE PREMIUM</span><h2>{language==='en'?'Your garage. The complete picture.':'Garajul tău. Imaginea completă.'}</h2><p>{language==='en'?'More vehicles, advanced maintenance and reports. All in one place.':'Mai multe mașini, întreținere avansată și rapoarte. Totul într-un singur loc.'}</p><div className="studio-benefit-chips"><span><Check size={17}/>{language==='en'?'Multiple vehicles':'Mai multe mașini'}</span><span><Check size={17}/>PDF / CSV</span><span><Check size={17}/>{language==='en'?'Maintenance forecasts':'Estimări de întreținere'}</span></div></div><div className="studio-offer-price"><span>{language==='en'?'MONTHLY PLAN':'PLAN LUNAR'}</span><strong>{new Intl.NumberFormat(locale,{style:'currency',currency:'RON',maximumFractionDigits:0}).format(data.pricing.monthlyBani/100)}<small>{language==='en'?'/ month':'/ lună'}</small></strong><button className="primary" type="button" onClick={()=>navigate('Abonament')}>{data.premium?(language==='en'?'Manage subscription':'Gestionează abonamentul'):(language==='en'?'Choose Premium':'Alege Premium')}<ArrowUpRight size={18}/></button><small>{language==='en'?'Final conditions shown before payment.':'Condițiile finale sunt afișate înainte de plată.'}</small></div></section>
+      <section className="studio-premium-offer" data-workspace-ui><div><span className="studio-kicker">AUTOCARE PREMIUM</span><h2>{language==='en'?'Your garage. The complete picture.':'Garajul tău. Imaginea completă.'}</h2><p>{language==='en'?'More vehicles, advanced maintenance and reports. All in one place.':'Mai multe mașini, întreținere avansată și rapoarte. Totul într-un singur loc.'}</p><div className="studio-benefit-chips"><span><Check size={17}/>{language==='en'?'Multiple vehicles':'Mai multe mașini'}</span><span><Check size={17}/>PDF / CSV</span><span><Check size={17}/>{language==='en'?'Maintenance forecasts':'Estimări de întreținere'}</span></div></div><div className="studio-offer-price"><span>{language==='en'?'MONTHLY PLAN':'PLAN LUNAR'}</span><strong><PublicPlanPrice bani={data.pricing.monthlyBani} interval="month"/></strong><button className="primary" type="button" onClick={()=>navigate('Abonament')}>{data.premium?(language==='en'?'Manage subscription':'Gestionează abonamentul'):(language==='en'?'Choose Premium':'Alege Premium')}<ArrowUpRight size={18}/></button><small>{language==='en'?'Final conditions shown before payment.':'Condițiile finale sunt afișate înainte de plată.'}</small></div></section>
       <section className="card membership-current">
         <div className="settings-section-title">
           <span className="list-icon">

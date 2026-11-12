@@ -80,3 +80,23 @@ html body .founder-shell .founder-page-header h1 {font-size:28px!important;lette
 
 @layer autocare-workspace {@media(max-width:400px){html body .app-shell.ac-workspace.ac-studio .app-topbar-actions .app-avatar-button {display:none!important}html body .app-shell.ac-workspace.ac-studio .app-topbar-actions>.app-icon-button {width:32px!important;min-width:32px!important;padding:6px!important}html body .app-shell.ac-workspace.ac-studio .ac-language-menu.is-compact {padding:4px 7px!important}html body .app-shell.ac-workspace.ac-studio .ac-language-menu.is-compact select {width:35px!important;min-width:35px!important}}}
 @layer autocare-workspace {html body .app-shell.ac-workspace.ac-studio .ac-language-menu,html body .app-shell.ac-workspace.ac-studio .ac-language-menu.is-compact {flex-direction:row!important;flex-wrap:nowrap!important;justify-content:flex-start!important}html body .app-shell.ac-workspace.ac-studio .ac-language-menu>select {flex:1!important}html body .app-shell.ac-workspace.ac-studio .ac-language-menu.is-compact>select {flex:none!important}html body .app-shell.ac-workspace.ac-studio .sidebar>.ac-language-menu {flex-shrink:0!important}}
+
+/* Preserve the complete workspace between the fixed top bar and the mobile dock. */
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main {box-sizing:border-box!important;min-width:0!important;max-width:calc(100% - var(--app-sidebar))!important;padding-top:104px!important;padding-bottom:44px!important;scroll-margin-top:100px}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main>:is(section,article,div,header,nav) {min-width:0;max-width:100%}
+ html body .app-shell.ac-workspace.ac-studio main#workspace-main :is(.page-head,.ws-module-header,.ws-module-heading,.ac-module-header) {min-width:0;flex-wrap:wrap;gap:14px}
+ html body .app-shell.ac-workspace.ac-studio main#workspace-main :is(.page-head,.ws-module-header,.ws-module-heading,.ac-module-header)>* {min-width:0;max-width:100%}
+ html body .app-shell.ac-workspace.ac-studio main#workspace-main :is(.toolbar,.filter-row,.form-grid,.row-actions)>* {min-width:0;max-width:100%}
+ html body .app-shell.ac-workspace.ac-studio main#workspace-main :is(.table-wrap,.finance-table-wrap,.ac-ai-table-scroll) {min-width:0;max-width:100%;overflow-x:auto}
+ html body .app-shell.ac-workspace.ac-studio main#workspace-main :is(p,h1,h2,h3,button,a) {overflow-wrap:break-word}
+ @media(max-width:900px){
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main {width:100%!important;max-width:100%!important;margin-left:0!important;padding-top:90px!important;padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+  html body .app-shell.ac-workspace.ac-studio main#workspace-main :is(.page-head,.ws-module-header,.ws-module-heading,.ac-module-header) {align-items:flex-start}
+ }
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-ai-page[data-chat]) {padding-bottom:0!important}
+}
+@layer autocare-workspace {
+ html body .ac-plan-inline-price {font:inherit;color:inherit}
+ html body .ac-plan-inline-price>small {font-size:13px;font-weight:500;letter-spacing:0;white-space:normal}
+}

@@ -8,3 +8,11 @@ export const BILLING_AMOUNTS = {
 export function billingAmount(interval: BillingInterval, currency: BillingCurrency) { return BILLING_AMOUNTS[currency][interval]; }
 export function billingRecurrence(interval: BillingInterval) {return {interval:interval==='annual'?'year' as const:'month' as const,interval_count:interval==='quarterly'?3:1};}
 export function billingCurrency(value:unknown):BillingCurrency {if(value==='eur'||value==='EUR')return 'eur';return 'ron';}
+
+/** An explicit currency choice wins; otherwise English offers default to EUR. */
+export function displayBillingCurrency(language:'ro'|'en',query:unknown,saved:unknown):BillingCurrency {
+ const requested=typeof query==='string'?query.toLowerCase():null;
+ if(requested==='ron'||requested==='eur')return requested;
+ if(saved==='ron'||saved==='eur')return saved;
+ return language==='en'?'eur':'ron';
+}

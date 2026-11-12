@@ -1,0 +1,27 @@
+'use client';
+import {useEffect,useState} from 'react';
+import {displayBillingCurrency,type BillingCurrency} from '@/lib/billing-currency';
+export function useBillingCurrency(language?:'ro'|'en') {
+ const [publicLanguage,setPublicLanguage]=useState<'ro'|'en'>('ro');
+ const [currency,setCurrency]=useState<BillingCurrency>('ron');
+ useEffect(()=>{
+  const update=()=>{
+   try {
+    const savedLanguage=localStorage.getItem('autocare-language');
+    const resolved=language??(savedLanguage==='en'||savedLanguage!=='ro'&&!navigator.language.toLowerCase().startsWith('ro')?'en':'ro');
+    setPublicLanguage(resolved);
+    const query=new URLSearchParams(window.location.search).get('currency')?.toLowerCase();
+    const saved=localStorage.getItem('autocare-billing-currency');
+    setCurrency(displayBillingCurrency(resolved,query,saved));
+   }catch{setPublicLanguage(language??'ro');setCurrency(language==='en'?'eur':'ron');}
+  };
+  update();
+  for(const event of ['autocare-language-change','autocare-billing-currency-change','storage'])window.addEventListener(event,update);
+  return()=>{for(const event of ['autocare-language-change','autocare-billing-currency-change','storage'])window.removeEventListener(event,update);};
+ },[language]);
+ const changeCurrency=(next:BillingCurrency)=>{
+  setCurrency(next);
+  try{localStorage.setItem('autocare-billing-currency',next);const url=new URL(window.location.href);url.searchParams.set('currency',next.toUpperCase());window.history.replaceState(window.history.state,'',url);window.dispatchEvent(new Event('autocare-billing-currency-change'));}catch{/* Checkout receives the selected currency even without storage. */}
+ };
+ return {currency,changeCurrency,en:(language??publicLanguage)==='en'};
+}

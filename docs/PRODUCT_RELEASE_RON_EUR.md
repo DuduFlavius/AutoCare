@@ -65,3 +65,34 @@ Google Play digital-subscription billing rules must be satisfied through Play Bi
 - Full suite: 243 tests passed before the final additional locale-idempotency regression test; the focused billing suite was rerun after that change. TypeScript, lint and production build passed.
 - Browser responsive audit: all 16 user-facing modules loaded at desktop, tablet (768px shell), and phone (390px shell) widths — 48 checks with document scroll width equal to viewport width. Additional 320px dashboard check passed. RO/EN switching was exercised from both sidebar and mobile header; EUR prices and signup currency links were checked in both languages.
 - Founder private data and real-device/real-provider tests remain outside the available authenticated preview; no unsupported success is claimed.
+
+## Follow-up — 12 November 2026
+
+### Implemented in source
+
+- Shared billing display preference across the landing page, public plan cards, Premium offer and subscription selector. English first visits default to EUR; Romanian first visits default to RON. Explicit URL or saved currency selections win over language defaults and remain intact through Checkout.
+- Removed independent hardcoded RON offers from the landing page and Premium banner. Prices remain exactly 150/450/1700 RON and 30/90/340 EUR.
+- Shared workspace sizing now reserves 104px above desktop content, 90px above mobile content, and mobile navigation plus safe-area space below all modules. Main width respects the responsive sidebar variable. Headers/actions can wrap, and tables keep overflow inside their own container. The existing AI message-only scroll remains intact.
+- This source includes the previous unpromoted greeting and AI composer fixes from upstream f6825c4. None of these newer changes is claimed live.
+
+### Real Stripe catalog verified read-only
+
+Connected account: AutoCare (`acct_1UOFuVD0ZFBnbhyw`), live mode only. All six prices are active, per-unit recurring licensed prices; matching RON/EUR plans share their corresponding product.
+
+| Interval | RON Price ID | EUR Price ID |
+| --- | --- | --- |
+| Monthly | price_1UVTrlD0ZFBnbhywZjS0qSe2 | price_1Uaaf2D0ZFBnbhywkjAhzhmr |
+| Three months | price_1UVTs4D0ZFBnbhywrNvfMenQ | price_1UaaeOD0ZFBnbhywDLAVFXze |
+| Annual | price_1UVTscD0ZFBnbhywXHCfqhqG | price_1UaaduD0ZFBnbhywCuOWKeET |
+
+No prices, subscriptions, customers or payments were changed in Stripe. Test Mode access is not included in the connected account: a read request with livemode=false was rejected. Therefore no actual Stripe Test Mode Checkout or provider webhook test is claimed. The test-only verification script remains ready for the account's test credentials and six Test Mode IDs.
+
+### External blockers — publication NOT completed
+
+Vercel reports HTTP 402 `resource_creation_blocked`: the roomlyy team has an overdue balance and needs a valid payment method/reactivation. Both the public domain and preview render `Deployment Paused`. The attempted EUR environment-variable configuration was rejected; those variables have NOT been activated. No Vercel CLI with independent credentials is available in this environment.
+
+After Vercel reactivation and successful real Test Mode validation, configure the three `STRIPE_*_EUR_PRICE_ID` variables using the verified IDs above, set `AUTOCARE_ENABLE_EUR_PAYMENTS=true`, deploy this branch, and promote the verified production deployment to the existing public alias. The explicit EUR safety gate is preserved until validation. Existing RON subscriptions are unchanged.
+
+The managed local browser preview launcher also failed before startup because it passes Vite-only --host/--strictPort options to Next.js. The working application dev command was not rewritten to compensate for preview infrastructure. New browser screenshots/device tests remain unverified.
+
+Validation for this follow-up: 246 automated tests passed, including two new currency preference regressions; TypeScript and lint passed. The final production build passed (Next.js compilation, TypeScript and page generation). Browser checks and actual Android device checks are not claimed.
