@@ -6,6 +6,7 @@ import {translateApplicationCopy as t,normalizeCopy} from '../src/lib/applicatio
 import {translationSource} from '../src/lib/workspace';
 
 test('multiline JSX copy and accessible labels receive the same translations',()=>{
+ assert.equal(t('Adaugă întâi o mașină','en'),'Add a vehicle first');
  assert.equal(t('Programează următoarea lucrare după dată sau kilometraj, conform\n   planului mașinii tale.','en'),"Schedule the next maintenance by date or mileage, following your vehicle's maintenance plan.");
  assert.equal(t('Kilometri pe zi pentru estimare','en'),'Daily kilometers for estimate');
  assert.equal(t('Următoarea citire de kilometraj','en'),'Next mileage reading');
