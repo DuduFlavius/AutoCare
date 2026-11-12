@@ -1,3 +1,4 @@
+import {queueAutomatedMail} from './mail-automation';
 import { and, eq, desc, sql, ilike, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from './db';
@@ -320,6 +321,7 @@ export async function grantPremium(uid: string, id: string, input: unknown) {
       action: 'premium.manual.granted',
       target: id + ':' + granted.id,
     });
+    await queueAutomatedMail(id,'premium_grant','premium-grant:'+granted.id,{},tx);
     return granted;
   });
 }
