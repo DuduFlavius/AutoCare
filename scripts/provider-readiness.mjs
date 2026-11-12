@@ -35,5 +35,8 @@ export async function providerReadiness(env,request=fetch) {
   return {status:compatible.length?'models_available':'no_compatible_models',preferredModelAvailable:compatible.includes(preferred),compatibleModels:compatible.length};
  };
  const [billing,assistant]=await Promise.all([stripe(),ai()]);
- return {event:'autocare_provider_readiness',stripe:billing,ai:assistant};
+ const gmailKeys=['GOOGLE_MAIL_CLIENT_ID','GOOGLE_MAIL_CLIENT_SECRET','GOOGLE_MAIL_FROM','GOOGLE_MAIL_REDIRECT_URI'];
+ const missing=gmailKeys.filter(key=>!env[key]);
+ const mail={gmail:missing.length?{status:'missing_configuration',missing}:{status:'configured_oauth_and_delivery_test_required'},resend:env.RESEND_API_KEY&&env.EMAIL_FROM?'configured_not_delivery_verified':'not_configured',automationsEnabled:env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED==='true'};
+ return {event:'autocare_provider_readiness',stripe:billing,ai:assistant,mail,founderConfigured:!!env.AUTOCARE_FOUNDER_USER_ID?.trim()};
 }
