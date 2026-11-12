@@ -7,6 +7,8 @@ import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
 import './studio-workspace.css';
+import './application/reference-dashboard.css';
+import './premium-workspace-theme.css';
 import { FinanceCenter } from './application/finance-center';
 import { TitaniumWave } from './titanium-wave';
 import { calendarRecordDate, isPlannedService } from '@/lib/planned-service';
@@ -810,12 +812,12 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (
-    <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace ac-studio" data-language={language} data-settings-panel={settingsPanel} data-workspace-section={tab}>
+    <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace ac-studio ac-reference-theme" data-language={language} data-settings-panel={settingsPanel} data-workspace-section={tab}>
       <WorkspaceViewport service={tab==='Întreținere'}/>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
       {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>navigate('Garaj', 'push', id)} /></Dialog>}
       <aside className="sidebar">
-        <Brand reference={tab==='Dashboard'}
+        <Brand reference
           href={previewData ? '/previzualizare' : '/cont'}
           onClick={(e) => {
             if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -848,7 +850,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
               'sidebar-bottom ' + (data?.premium ? 'membership-active' : 'membership-promo')
             }
           >
-            {tab==='Dashboard'&&<ReferenceArtwork name="crown" width={44} height={44} className="ac-ref-crown"/>}
+            <ReferenceArtwork name="crown" width={44} height={44} className="ac-ref-crown"/>
             <p className="eyebrow">{data?.premium ? (language === 'en' ? 'PREMIUM ACTIVE' : 'PREMIUM ACTIV') : 'AUTOCARE PREMIUM'}</p>
             <p>
               {data?.premium
@@ -895,7 +897,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
       </aside>
       {data&&!previewData&&<NativeTripSync ownerId={data.profile.userId} vehicles={data.vehicles.filter(v=>!v.archived)} onUpdated={refresh} onReview={()=>navigate('Plan întreținere')} english={language==='en'}/>}
       <SiteLanguage language={language} />
-      <ApplicationHeader reference={tab==='Dashboard'} onLanguage={changeLanguage} title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (workspaceSections.find(s=>s.id===tab)?.[language] ?? tab)} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
+      <ApplicationHeader reference onLanguage={changeLanguage} title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (workspaceSections.find(s=>s.id===tab)?.[language] ?? tab)} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
       <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'}/>
       <main id="workspace-main" tabIndex={-1} aria-busy={busy||!data}
         className={
