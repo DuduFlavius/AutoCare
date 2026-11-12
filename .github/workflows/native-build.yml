@@ -1,7 +1,7 @@
 name: Native GPS builds
 on:
   push:
-    branches: [feature/autocare-native-gps-20261104]
+    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated]
     paths: ["mobile/**", ".github/workflows/native-build.yml"]
   pull_request:
     branches: [feature/autocare-desktop-premium-20261102, feature/autocare-native-gps-20261104]
@@ -42,7 +42,7 @@ jobs:
   android-release:
     permissions:
       contents: write
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.signed_android_release)
+    if: github.event_name == 'workflow_dispatch' && inputs.signed_android_release
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: android-release
