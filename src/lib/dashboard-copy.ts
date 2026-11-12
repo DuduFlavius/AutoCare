@@ -80,3 +80,16 @@ Object.assign(dashboardCopy, {
 });
 
 Object.assign(dashboardCopy,{'≤ 30 zile':'≤ 30 days','Activă':'Active','Descarcă documentul':'Download document'});
+
+Object.assign(dashboardCopy, {
+ 'Adresa OAuth a fost copiată.':'OAuth redirect URI copied.',
+ 'Copiază manual adresa OAuth afișată mai jos.':'Copy the OAuth redirect URI shown below manually.',
+ 'Configurare inițială':'Initial setup',
+ 'Activează Gmail API în proiectul Google Cloud și creează un client OAuth de tip Web application.':'Enable the Gmail API in your Google Cloud project and create a Web application OAuth client.',
+ 'Adaugă adresa OAuth de mai sus la Authorized redirect URIs.':'Add the OAuth URI above to Authorized redirect URIs.',
+ 'În Render → Environment, completează Client ID, Client secret și adresa Gmail oficială în variabilele afișate. Salvează și publică modificările.':'In Render → Environment, enter the Client ID, Client secret and official Gmail address in the listed variables. Save and deploy the changes.',
+ 'Revino aici, conectează contul Google și trimite emailul de test.':'Return here, connect the Google account and send the test email.',
+ 'Deschide Google Cloud':'Open Google Cloud',
+ 'Activează Gmail API':'Enable Gmail API',
+ 'Copiază adresa OAuth':'Copy OAuth redirect URI',
+});
