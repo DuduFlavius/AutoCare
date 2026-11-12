@@ -25,6 +25,7 @@ import { origin } from '@/lib/config';
 import { runJob, sendPushNotification } from '@/lib/reminders';
 import { sendMail } from '@/lib/mail';
 import * as googleMail from '@/lib/google-mail';
+import {isGoogleMailProductionRequest} from '@/lib/google-mail-origin';
 import * as mailCenter from '@/lib/mail-center';
 import { renderEmail } from '@/lib/email-templates';
 import {resolveBillingPrice} from '@/lib/stripe-catalog';
@@ -211,7 +212,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         return json(await googleMail.googleMailStatus(uid));
       if (route === 'mail/google/disconnect' && method === 'POST')
         return json(await googleMail.disconnectGoogleMail(uid));
-      if (new URL(req.url).origin !== new URL(googleMail.googleMailCallback()).origin)
+      if (!isGoogleMailProductionRequest(req,googleMail.googleMailCallback(),process.env.RENDER==='true'))
         return json({ error: 'Conectarea și testarea Gmail sunt disponibile pe domeniul de producție configurat.' }, 403);
       if (route === 'mail/google/connect' && method === 'POST') {
         const result = await googleMail.beginGoogleMail(uid, sess.session.id);
