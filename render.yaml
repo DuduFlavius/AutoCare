@@ -1,0 +1,25 @@
+# Existing database and credentials are supplied privately in Render, never in Git.
+# No paid services, disks, cron services or replacement databases are created.
+services:
+  - type: web
+    name: autocare
+    runtime: node
+    plan: free
+    branch: feature/autocare-ai-integrated
+    autoDeployTrigger: 'off'
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start:render
+    healthCheckPath: /api/app-version
+    envVars:
+      - key: NODE_VERSION
+        value: 24.22.1
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: '1'
+      - key: DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: CRON_SECRET
+        sync: false

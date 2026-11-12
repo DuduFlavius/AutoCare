@@ -16,7 +16,8 @@
     "founder:identify": "node --import tsx scripts/identify-founder.ts",
     "db:mail-center": "node --import tsx scripts/migrate-mail-center.ts",
     "prebuild": "node scripts/prepare-road-map.mjs",
-    "predev": "node scripts/prepare-road-map.mjs"
+    "predev": "node scripts/prepare-road-map.mjs",
+    "start:render": "node scripts/start-render.mjs"
   },
   "dependencies": {
     "@capacitor/core": "8.6.0",

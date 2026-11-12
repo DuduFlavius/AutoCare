@@ -12,7 +12,7 @@ export default async function DesignPreview({
   searchParams: Promise<{ echipa?: string; device?:string; tab?:string; plan?:string; garage?:string; view?:string; drive?:string; vehicle?:string }>;
 }) {
   const previewOptions = await searchParams;
-  if (process.env.VERCEL_ENV === 'production') notFound();
+  if (process.env.VERCEL_ENV === 'production' || process.env.RENDER === 'true') notFound();
 
   const now = new Date(),
     today = now.toISOString().slice(0, 10);
