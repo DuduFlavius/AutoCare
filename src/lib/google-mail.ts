@@ -134,7 +134,7 @@ export async function googleMailStatus(uid: string) {
   try {
     c = config();
   } catch {
-    return { configured: false, connected: false, automaticEnabled: false };
+    return { configured: false, connected: false, automaticEnabled: false, missing:['GOOGLE_MAIL_CLIENT_ID','GOOGLE_MAIL_CLIENT_SECRET','GOOGLE_MAIL_FROM','GOOGLE_MAIL_REDIRECT_URI'].filter(key=>!process.env[key] || key==='GOOGLE_MAIL_REDIRECT_URI'&&process.env[key]!==googleMailCallback() || key==='GOOGLE_MAIL_FROM'&&!/@gmail\.com$/i.test(process.env[key]??'')), callback:googleMailCallback() };
   }
   const row = await read(CONNECTION);
   if (!row) return { configured: true, connected: false, from: c.from, automaticEnabled: false };
