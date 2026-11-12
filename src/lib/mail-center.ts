@@ -201,6 +201,7 @@ export async function previewMail(uid: string, input: unknown) {
   await requireMailStaff(uid);
   const data = z
     .object({
+      language:z.enum(['ro','en']).optional(),
       template: z.enum(templateIds),
       name: z.string().max(100).optional(),
       subject: z.string().max(180).optional(),
@@ -212,7 +213,7 @@ export async function previewMail(uid: string, input: unknown) {
     .strict()
     .parse(input);
   try {
-    return renderEmail(data.template, data);
+    return renderEmail(data.template, {...data,language:data.language??await userLanguage(uid)});
   } catch {
     throw new AppError(400, 'Linkul CTA trebuie să fie o adresă din AutoCare.');
   }
