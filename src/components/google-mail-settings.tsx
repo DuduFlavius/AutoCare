@@ -47,6 +47,16 @@ const [status, setStatus] = useState<Status | null>(null);
       cancelled = true;
     };
   }, []);
+  async function copyCallback() {
+    if (!status?.callback) return;
+    try {
+      await navigator.clipboard.writeText(status.callback);
+      setNotice('Adresa OAuth a fost copiată.');
+      setError('');
+    } catch {
+      setError('Copiază manual adresa OAuth afișată mai jos.');
+    }
+  }
   async function act(action: 'connect' | 'test' | 'disconnect') {
     if (busy) return;
     setBusy(true);
@@ -101,6 +111,20 @@ const [status, setStatus] = useState<Status | null>(null);
             {status.from ? ` · ${status.from}` : ''}
           </p>
           {!status.configured && <div className="ac-email-missing"><p>Configurarea Gmail pe server este incompletă.</p><ul>{status.missing?.map(key=><li key={key}><code>{key}</code></li>)}</ul>{status.callback&&<p>OAuth redirect URI: <code>{status.callback}</code></p>}</div>}
+          {!status.configured && <div className="ac-email-setup">
+            <strong>Configurare inițială</strong>
+            <ol>
+              <li>Activează Gmail API în proiectul Google Cloud și creează un client OAuth de tip Web application.</li>
+              <li>Adaugă adresa OAuth de mai sus la Authorized redirect URIs.</li>
+              <li>În Render → Environment, completează Client ID, Client secret și adresa Gmail oficială în variabilele afișate. Salvează și publică modificările.</li>
+              <li>Revino aici, conectează contul Google și trimite emailul de test.</li>
+            </ol>
+            <div className="inline">
+              <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener noreferrer">Deschide Google Cloud</a>
+              <a href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank" rel="noopener noreferrer">Activează Gmail API</a>
+              {status.callback&&<button type="button" onClick={()=>void copyCallback()}>Copiază adresa OAuth</button>}
+            </div>
+          </div>}
           {status.testedAt && (
             <p>Ultimul test trimis: {new Date(status.testedAt).toLocaleString(locale)}</p>
           )}
