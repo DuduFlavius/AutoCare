@@ -1,9 +1,11 @@
 'use client';
 import { Bell, Search, UserRound, LogOut, Star, CarFront } from 'lucide-react';
 import LanguageMenu from '../language-menu';
+import ReferenceArtwork from '../reference-artwork';
 import { useApplicationLanguage } from '../application-locale';
 export default function ApplicationHeader({
   title,
+  reference=false,
   name,
   unread,
   premium,
@@ -17,6 +19,7 @@ export default function ApplicationHeader({
   onLanguage,
 }: {
   title: string;
+  reference?:boolean;
   name: string;
   unread: number;
   premium: boolean;
@@ -34,7 +37,7 @@ export default function ApplicationHeader({
     <header className="app-header app-topbar" data-workspace-ui>
       <span className="app-topbar-brand">
         <span className="app-topbar-mark">
-          <CarFront size={19} />
+          {reference?<ReferenceArtwork name="gear" width={29} height={29}/>:<CarFront size={19} />}
         </span>
         <strong>AutoCare</strong>
       </span>
@@ -49,14 +52,14 @@ export default function ApplicationHeader({
           onClick={onSearch}
           aria-label={en ? 'Search application' : 'Caută în aplicație'}
         >
-          <Search size={20} /><span className="studio-search-label">{en ? 'Search vehicles, documents, services…' : 'Caută mașini, documente, servicii…'}</span>
+          {reference?<ReferenceArtwork name="search" width={27} height={27}/>:<Search size={20} />}<span className="studio-search-label">{en ? 'Search vehicles, documents, services…' : 'Caută mașini, documente, servicii… (Ctrl + K)'}</span>
         </button>
         <button
           className="app-icon-button app-notification-button"
           onClick={onNotifications}
           aria-label={en ? `Notifications, ${unread} unread` : `Notificări, ${unread} necitite`}
         >
-          <Bell size={20} />
+          {reference?<ReferenceArtwork name="nav-bell" width={32} height={32}/>:<Bell size={20} />}
           {unread > 0 && <span aria-hidden="true">{unread>99?'99+':unread}</span>}
         </button>
         <button className="app-header-premium" onClick={onPremium}>
@@ -71,7 +74,7 @@ export default function ApplicationHeader({
           title={name}
         >
           {name.trim() ? (
-            name
+            (reference?name.trim().slice(0,1):name)
               .trim()
               .split(' ')
               .map((s) => s[0])
