@@ -21,3 +21,11 @@ test('readiness reports missing and unauthorized providers without echoing provi
  const failure=await providerReadiness(env,async()=>new Response('private_gemini_test_value',{status:403}));
  assert.equal(failure.ai.httpStatus,403);assert.equal(failure.stripe.httpStatus,403);assert.ok(!JSON.stringify(failure).includes('private_'));
 });
+
+test('mail readiness identifies missing server configuration without claiming delivery or printing credentials',async()=>{
+ const result=await providerReadiness({GOOGLE_MAIL_CLIENT_SECRET:'private_mail_secret'});
+ assert.equal(result.mail.gmail.status,'missing_configuration');
+ assert.ok(result.mail.gmail.missing?.includes('GOOGLE_MAIL_CLIENT_ID'));
+ assert.ok(!JSON.stringify(result).includes('private_mail_secret'));
+ assert.equal(result.mail.automationsEnabled,false);
+});
