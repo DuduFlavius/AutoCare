@@ -1,3 +1,4 @@
+import AdminLocale from '@/components/admin-locale';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
@@ -16,7 +17,7 @@ export default async function FounderPage() {
     redirect('/autentificare');
   try {
     const actor = await requireMailStaff(session.user.id);
-    if (actor.role !== 'founder') return <main className="founder-shell mail-staff-shell"><a className="button" href="/cont">Înapoi în garaj</a><MailCenter /></main>;
+    if (actor.role !== 'founder') return <AdminLocale><main className="founder-shell mail-staff-shell"><a className="button" href="/cont">Înapoi în garaj</a><MailCenter /></main></AdminLocale>;
     await requireFounder(session.user.id);
   } catch {
     return (
@@ -29,5 +30,5 @@ export default async function FounderPage() {
       </main>
     );
   }
-  return <FounderPanel initial={await founderOverview(session.user.id)} name={session.user.name} />;
+  return <AdminLocale><FounderPanel initial={await founderOverview(session.user.id)} name={session.user.name} /></AdminLocale>;
 }
