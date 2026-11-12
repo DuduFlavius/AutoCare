@@ -1,3 +1,4 @@
+import {dashboardCopy} from './dashboard-copy';
 import {reviewedPublicCopy} from './reviewed-public-copy';
 import {applicationCopy} from './application-copy';
 export const dictionary:Record<string,string>={
@@ -457,6 +458,7 @@ Object.assign(dictionary, {
 });
 Object.assign(dictionary, {"Exclusiv pentru abonații Premium. Conturile gratuite nu au acces la conversații sau scanare AI.":"Exclusively for Premium subscribers. Free accounts cannot access AI conversations or document scanning."});
 Object.assign(dictionary,reviewedPublicCopy);
+Object.assign(dictionary, dashboardCopy);
 const normalizedDictionary=Object.fromEntries(Object.entries(dictionary).map(([ro,en])=>[normalizeCopy(ro),en]));
  const templates: [RegExp,(...parts:string[])=>string][]=[
  [/^Bună,(.*)$/,(_,name)=>'Hello,'+name],
