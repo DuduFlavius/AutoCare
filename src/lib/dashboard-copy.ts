@@ -93,3 +93,4 @@ Object.assign(dashboardCopy, {
  'Activează Gmail API':'Enable Gmail API',
  'Copiază adresa OAuth':'Copy OAuth redirect URI',
 });
+Object.assign(dashboardCopy, {'Adaugă întâi o mașină':'Add a vehicle first'});
