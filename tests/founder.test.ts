@@ -95,6 +95,8 @@ test('Founder adds team members by exact email and revokes admin and assistant i
 });
 test('Manual Premium extends, revokes, supports explicit lifetime and never creates payments', async () => {
   const a = await f.grantPremium(founder, client, { months: 1, note: 'Cadou' });
+  const queued=(await db().select().from(s.mailDeliveries).where(eq(s.mailDeliveries.dedupeKey,'premium-grant:'+a.id)));
+  assert.equal(queued.length,1);assert.equal(queued[0].userId,client);assert.equal(queued[0].status,'held');
   assert.equal(await svc.premium(client), true);
   const b = await f.grantPremium(founder, client, { months: 3 });
   assert.ok(b.expiresAt! > a.expiresAt!);
