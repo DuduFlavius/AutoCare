@@ -1,0 +1,50 @@
+/* One persistent account palette, shared by every workspace module. */
+@layer autocare-workspace {
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme {
+ --color-bg:#080d1b;--color-nav:#0d1225;--color-surface:#11182f;--color-surface-muted:#171f39;
+ --color-text:#eef0ff;--color-muted:#aebcde;--color-border:#2b365d;--color-primary:#7962ff;
+ --color-primary-soft:#24204e;--color-primary-deep:#261b70;
+ --app-bg:#080d1b;--app-surface:#11182f;--app-ink:#eef0ff;--app-muted:#aebcde;--app-line:#2b365d;--app-blue:#7962ff;--app-blue-soft:#24204e;
+ font-family:Inter,'Segoe UI',sans-serif!important;
+}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme :is(button,input,select,textarea,table){font-family:inherit!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main#workspace-main :is(.card,.panel,.app-card,.ac-finance-card,.ac-finance-hero,.ac-garage-vehicle,.ac-service-vehicle,.ac-ai-history-panel){
+ background:linear-gradient(145deg,#171e39,#0e152b)!important;border-color:#2b365d!important;box-shadow:inset 0 1px #a5bdff0b,0 10px 25px #00000018!important;color:#eef0ff!important;border-radius:17px!important;
+}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main#workspace-main :is(.page-header,.ws-module-header,.ac-ai-hero){background:linear-gradient(125deg,#141c36,#0c1327)!important;border-color:#2b365d!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme :is(main#workspace-main,.dialog) :is(input,select,textarea){background:#10172b!important;border-color:#354269!important;color:#e7edff!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme :is(main#workspace-main,.dialog) :is(input,textarea)::placeholder{color:#9aa9cf!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme :is(main#workspace-main,.dialog,.sidebar-bottom) button.primary{background:linear-gradient(110deg,#5232e8,#302079)!important;border-color:#6552e6!important;color:#fff!important;box-shadow:0 4px 18px #4026a52e!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main#workspace-main :is(button,a):focus-visible{outline:2px solid #9aabff!important;outline-offset:3px!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main#workspace-main :is(.ac-finance-table,table) th{background:#18213c!important;color:#aebde4!important;border-color:#303c60!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main#workspace-main :is(.ac-finance-table,table) td{border-color:#293451!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .dialog{background:linear-gradient(145deg,#171e39,#0e152b)!important;border-color:#354269!important;color:#eef0ff!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .google-console-settings .inline{display:flex!important;flex-wrap:wrap!important;gap:10px!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .google-console-settings code{overflow-wrap:anywhere!important;white-space:normal!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .ac-email-setup{display:grid!important;gap:12px!important;padding:16px!important;margin-top:14px!important;border:1px solid #354269!important;border-radius:12px!important;background:#11192f!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .ac-email-setup ol{padding-left:20px!important;margin:0!important;display:grid!important;gap:10px!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .ac-email-setup a{color:#aab7ff!important;text-decoration:underline!important;text-underline-offset:3px!important}
+/* Stronger than the shared button flex rule: amounts never become narrow columns. */
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories button.ac-finance-card{
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto 7px auto!important;align-content:start!important;align-items:start!important;justify-items:stretch!important;gap:10px!important;width:100%!important;min-width:0!important;padding:18px!important;text-align:left!important;
+}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories button.ac-finance-card[aria-pressed=true]{border-color:#8975ff!important;box-shadow:0 0 0 1px #8975ff!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories button.ac-finance-card>span{display:block!important;width:100%!important;max-width:none!important;font-size:14px!important;line-height:1.4!important;color:#c1ccef!important;word-break:normal!important;overflow-wrap:normal!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories button.ac-finance-card>strong{display:block!important;width:100%!important;min-width:0!important;font-size:clamp(18px,1.6vw,24px)!important;line-height:1.4!important;letter-spacing:-.02em!important;font-variant-numeric:tabular-nums!important;white-space:normal!important;word-break:normal!important;overflow-wrap:normal!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories button.ac-finance-card>progress{display:block!important;min-width:0!important;width:100%!important;height:7px!important;accent-color:#8068ff!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories button.ac-finance-card>small{display:block!important;width:100%!important;min-width:0!important;font-size:12px!important;line-height:1.5!important;overflow-wrap:normal!important;word-break:normal!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-history .ac-finance-filters{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-history .ac-finance-filters>label{flex:0 1 auto!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .app-header.app-topbar .app-header-signout{display:inline-flex!important;order:3!important;align-items:center!important;justify-content:center!important;min-width:36px!important;padding:8px!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .app-header.app-topbar .app-header-signout>span{display:none!important}
+@media(max-width:1200px){html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:600px){
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories{gap:10px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories button.ac-finance-card{padding:14px!important;gap:8px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .app-header.app-topbar .app-header-signout{display:none!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .sidebar-account{display:block!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .google-console-settings .inline>button{flex:1 1 170px!important;min-height:44px!important}
+}
+@media(max-width:360px){html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories{grid-template-columns:minmax(0,1fr)!important}}
+}
