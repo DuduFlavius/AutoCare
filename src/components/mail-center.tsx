@@ -387,6 +387,7 @@ export default function MailCenter() {
               void run(async () =>
                 setPreview(
                   await api('/preview', 'POST', {
+                    language:locale==='en-GB'?'en':'ro',
                     template,
                     subject,
                     message,
