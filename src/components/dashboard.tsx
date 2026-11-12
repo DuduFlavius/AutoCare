@@ -964,7 +964,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                   }
                 >
                   <Plus size={17} />
-                  {!activeCars.length ? 'Adaugă întâi o mașină' : tab === 'Documente' ? 'Adaugă document' : tab === 'Întreținere' ? 'Adaugă intervenție' : 'Adaugă cheltuială'}
+                  {translateApplicationCopy(!activeCars.length ? 'Adaugă întâi o mașină' : tab === 'Documente' ? 'Adaugă document' : tab === 'Întreținere' ? 'Adaugă intervenție' : 'Adaugă cheltuială',language)}
                 </button>
               ) : tab === 'Calendar' ? (
                 <button
@@ -972,7 +972,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                   disabled={!activeCars.length}
                   onClick={() => setModal({ kind: 'service', planned: true })}
                 >
-                  <Plus size={16} /> Planifică o lucrare
+                  <Plus size={16} /> {translateApplicationCopy('Planifică o lucrare',language)}
                 </button>
               ) : null}
             </WorkspaceModuleHeader>}
