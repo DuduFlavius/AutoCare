@@ -123,7 +123,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
     </div>
     {data.premium && <section className="ac-finance-categories" aria-label={t('Categorii financiare', 'Expense categories')}>
       {report.categories(view).map(item => <button key={item.group} type="button" className="ac-finance-card" aria-pressed={group === item.group} onClick={() => { setGroup(group === item.group ? '' : item.group); setRange(group === item.group ? 'all' : view); setPage(0); }}>
-        <span>{groups[item.group]}</span><strong>{money(item.bani)}</strong>
+        <span>{groups[item.group]}</span><strong>{money(item.bani).replace(/\u00a0/g,' ')}</strong>
         <progress max={100} value={item.share} aria-label={t('Pondere în total', 'Share of total')} />
         <small>{item.share.toLocaleString(locale, { maximumFractionDigits: 1 })}% · {changeText(item.change)}</small>
       </button>)}
