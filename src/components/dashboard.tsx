@@ -839,7 +839,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             </button>
           )}
         </div>
-        {data?.profile.role !== 'founder' && (
+        {(
           <div
             className={
               'sidebar-bottom ' + (data?.premium ? 'membership-active' : 'membership-promo')
