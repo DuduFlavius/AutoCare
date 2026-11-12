@@ -78,7 +78,7 @@ export function WorkspaceNavigation({
         const Icon=icons[section.icon];
         const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
         const label = id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj' ? (tab==='Dashboard'?(language==='en'?'Vehicles':'Mașini'):(language==='en'?'My garage':'Garajul meu')) : section[language];
-        return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}>{tab==='Dashboard'&&referenceIcons[id]?<ReferenceArtwork name={referenceIcons[id]} width={32} height={32}/>:<Icon size={18}/>}<span>{label}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
+        return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}>{referenceIcons[id]?<ReferenceArtwork name={referenceIcons[id]} width={32} height={32}/>:<Icon size={18}/>}<span>{label}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
       })}</div>)}
     </nav>
   );
