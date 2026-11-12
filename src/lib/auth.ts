@@ -1,3 +1,5 @@
+import {languageCookie} from './language-preference';
+import {languagePreferenceKey,userLanguage} from './user-language';
 import { eq, inArray } from 'drizzle-orm';
 import { betterAuth } from 'better-auth';
 import { APIError } from 'better-auth/api';
@@ -28,13 +30,13 @@ function makeAuth() {
       autoSignIn: process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION !== 'true',
       minPasswordLength: 12,
       revokeSessionsOnPasswordReset: true,
-      sendResetPassword: async ({ user, url }) => {
+      sendResetPassword: async ({ user, url },request) => {
         await sendMail(
           user.email,
           'Resetează parola AutoCare',
           url,
           createHash('sha256').update(url).digest('hex'),
-          renderEmail('password_reset', { name: user.name, actionUrl: url }),
+          renderEmail('password_reset', { name: user.name, actionUrl: url, language:languageCookie(request?.headers.get('cookie'))??await userLanguage(user.id) }),
           { userId: user.id, template: 'password_reset' },
         );
       },
@@ -42,13 +44,13 @@ function makeAuth() {
     emailVerification: {
       sendOnSignUp: process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION === 'true',
       autoSignInAfterVerification: false,
-      sendVerificationEmail: async ({ user, url }) => {
+      sendVerificationEmail: async ({ user, url },request) => {
         await sendMail(
           user.email,
           'Confirmă adresa de email AutoCare',
           url,
           createHash('sha256').update(url).digest('hex'),
-          renderEmail('verification', { name: user.name, actionUrl: url }),
+          renderEmail('verification', { name: user.name, actionUrl: url, language:languageCookie(request?.headers.get('cookie'))??await userLanguage(user.id) }),
           { userId: user.id, template: 'verification' },
         );
       },
@@ -58,7 +60,7 @@ function makeAuth() {
       deleteUser: {
         enabled: true,
         afterDelete: async u => {
-          await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(u.id), financeBudgetKey(u.id)]));
+          await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(u.id), financeBudgetKey(u.id), languagePreferenceKey(u.id)]));
         },
         beforeDelete: async (u) => {
           const sub = (
@@ -97,7 +99,9 @@ function makeAuth() {
       },
       user: {
         create: {
-          after: async (u) => {
+          after: async (u,ctx) => {
+            const language=languageCookie(ctx?.headers?.get('cookie'));
+            if(language) await db().insert(schema.settings).values({key:languagePreferenceKey(u.id),value:{language}}).onConflictDoUpdate({target:schema.settings.key,set:{value:{language}}});
             try {
               await queueAutomatedMail(u.id, 'welcome', `welcome:${u.id}`);
             } catch {
