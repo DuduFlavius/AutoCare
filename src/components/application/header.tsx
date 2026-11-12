@@ -57,7 +57,7 @@ export default function ApplicationHeader({
           aria-label={en ? `Notifications, ${unread} unread` : `Notificări, ${unread} necitite`}
         >
           <Bell size={20} />
-          {unread > 0 && <span aria-hidden="true" />}
+          {unread > 0 && <span aria-hidden="true">{unread>99?'99+':unread}</span>}
         </button>
         <button className="app-header-premium" onClick={onPremium}>
           <Star size={16} />
