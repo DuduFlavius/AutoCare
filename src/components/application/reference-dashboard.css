@@ -173,3 +173,13 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-referen
 @media(max-width:900px){html body .app-shell.ac-workspace.ac-studio:has(.ac-reference)>main.main#workspace-main{padding:94px 18px calc(110px + env(safe-area-inset-bottom))!important}}
 @media(max-width:600px){html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-panel h2{font-size:15px!important}html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-stat-copy>span{font-size:12px!important}html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-garage{min-height:0!important}html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-stat-copy small{font-size:10px!important}}
 }
+@layer autocare-workspace {
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference :is(button,input,select,h1,h2,strong,small,p,span){font-family:Inter,'Segoe UI',sans-serif!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-row-copy strong{font-size:14px!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-row-copy small{font-size:12px!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-stat-copy small{font-size:12px!important;line-height:1.45!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-chart-meta>div{font-size:12px!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-panel footer>span{font-size:11px!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-stat{box-shadow:inset 0 1px #a5bdff0d,0 10px 25px #00000022!important}
+@media(max-width:600px){html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-stat-copy small{font-size:11px!important}html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference .ac-ref-panel footer{flex-wrap:wrap!important}}
+}
