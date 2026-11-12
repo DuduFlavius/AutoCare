@@ -78,3 +78,5 @@ export const dashboardCopy: Record<string, string> = {
 Object.assign(dashboardCopy, {
 "Total mașini":"Total vehicles","În garajul tău":"In your garage","Lucrări planificate":"Scheduled services","În calendar":"In your calendar","Intervale înregistrate":"Recorded intervals","Documente care expiră":"Expiring documents","În următoarele 30 de zile":"Within the next 30 days","Bine ai venit,":"Welcome back,","Garajul tău. Mereu sub control.":"Your garage. Always in control.","Statistici financiare":"Financial statistics","Ultimele 6 luni":"Last 6 months","Cheltuieli înregistrate, comparate cu anul precedent":"Recorded expenses compared with the previous year","Următoarele programări":"Upcoming appointments","Nicio lucrare planificată":"No scheduled services"
 });
+
+Object.assign(dashboardCopy,{'≤ 30 zile':'≤ 30 days','Activă':'Active','Descarcă documentul':'Download document'});
