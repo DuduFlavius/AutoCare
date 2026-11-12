@@ -1,3 +1,4 @@
+import {languagePreferenceKey, userLanguage} from '@/lib/user-language';
 import { financeGroup, financeGroups, isFinancialEntry } from '@/lib/finance-overview';
 import { isPlannedService } from '@/lib/planned-service';
 import { localDate } from '@/lib/config';
@@ -138,6 +139,15 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     const uid = sess.user.id;
     await svc.assertActiveAccount(uid);
     await rate(uid);
+    if (route === 'preferences/language') {
+      if (method === 'GET') return json({language:await userLanguage(uid)});
+      if (method === 'PUT') {
+        const value=z.object({language:z.enum(['ro','en'])}).strict().parse(await body(req));
+        await db().insert(s.settings).values({key:languagePreferenceKey(uid),value}).onConflictDoUpdate({target:s.settings.key,set:{value}});
+        return json(value);
+      }
+    }
+
     if (path[0] === 'auto-assistant') {
       if (!await svc.premium(uid)) throw new svc.AppError(403, 'Asistentul AI este disponibil în Premium.');
       if (route === 'auto-assistant/history' && method === 'DELETE') {
