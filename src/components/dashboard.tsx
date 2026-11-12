@@ -1,6 +1,7 @@
 'use client';
 import {saveBrowserLanguage} from '@/lib/language-preference';
 import dynamic from 'next/dynamic';
+import {accountDisplayCurrency} from '@/lib/display-currency';
 import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
@@ -356,14 +357,13 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
       const saved=localStorage.getItem('autocare-language');
       if(saved==='ro'||saved==='en') {void api('preferences/language','PUT',{language:saved}).catch(()=>{});return;}
     } catch { /* Account preference still works without browser storage. */ }
-    void api('preferences/language').then(value=>{if(!stopped){setLanguage(value.language);try{localStorage.setItem('autocare-language',value.language);}catch{/* Optional storage. */}}}).catch(()=>{});
+    void api('preferences/language').then(value=>{if(!stopped){setLanguage(value.language);setCurrency(accountDisplayCurrency(value.language));try{saveBrowserLanguage(value.language);}catch{/* Optional storage. */}}}).catch(()=>{});
     return()=>{stopped=true};
   },[data?.profile.userId,previewData]);
   const displayDate=(value:string)=>new Date(value+'T12:00:00').toLocaleDateString(locale);
   useEffect(() => {
-    try { if (window.localStorage.getItem('autocare-language') === 'en') {setLanguage('en');setCurrency('EUR');}
-      const savedCurrency = window.localStorage.getItem('autocare-currency');
-      if (savedCurrency === 'EUR' || savedCurrency === 'RON') setCurrency(savedCurrency); } catch { /* Storage may be unavailable. */ }
+    try { const language=window.localStorage.getItem('autocare-language')==='en'?'en':'ro';setLanguage(language);
+      setCurrency(accountDisplayCurrency(language,localStorage.getItem('autocare-currency'),localStorage.getItem('autocare-currency-language'))); } catch { /* Storage may be unavailable. */ }
     const t = new URLSearchParams(window.location.search).get('tab');
     if (t) setTab(normalizeWorkspaceTab(t));
     refresh();
@@ -588,11 +588,13 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
   },[modal,recordDirty,recordSaving]);
   function changeLanguage(next:'ro'|'en'){
     setLanguage(next);
+    const displayCurrency=accountDisplayCurrency(next);setCurrency(displayCurrency);
+    try{localStorage.setItem('autocare-currency',displayCurrency);localStorage.setItem('autocare-currency-language',next);}catch{/* Optional persistence. */}
     if(!previewData) void api('preferences/language','PUT',{language:next}).catch(()=>setError(next==='en'?'Language changed on this device. Account preference could not be saved; try again when connected.':'Limba s-a schimbat pe acest dispozitiv. Preferința contului nu s-a putut salva; reîncearcă după conectare.'));
     try{saveBrowserLanguage(next);window.dispatchEvent(new Event('autocare-language-change'));}catch{ /* Storage may be unavailable. */ }
   }
   function changeCurrency(next:'EUR'|'RON'){
-    setCurrency(next);try{localStorage.setItem('autocare-currency',next);}catch{ /* Storage may be unavailable. */ }
+    setCurrency(next);try{localStorage.setItem('autocare-currency',next);localStorage.setItem('autocare-currency-language',language);}catch{ /* Storage may be unavailable. */ }
   }
   const activeCars = data?.vehicles.filter((v) => !v.archived) || [];
   const primaryVehicleId = selectActiveVehicle(activeCars, data?.primaryVehicleId ?? activeVehicleId)?.id ?? '';
