@@ -258,3 +258,10 @@ html body .app-shell.ac-workspace.ac-studio:has(.ac-reference)>.sidebar .sidebar
 html body .app-shell.ac-workspace.ac-studio:has(.ac-reference)>.sidebar .sidebar-bottom>button{min-height:42px!important}
 }
 }
+@layer autocare-workspace {
+@media(min-width:901px){
+html body .app-shell.ac-workspace.ac-studio:has(.ac-reference)>.sidebar .ws-navigation{gap:2px!important}
+html body .app-shell.ac-workspace.ac-studio:has(.ac-reference)>.sidebar .ws-navigation a{min-height:42px!important;height:42px!important}
+html body .app-shell.ac-workspace.ac-studio:has(.ac-reference)>.sidebar .ws-navigation a>span:not(.ws-nav-count){font-size:15px!important}
+}
+}
