@@ -1,4 +1,5 @@
 'use client';
+import {saveBrowserLanguage} from '@/lib/language-preference';
 import dynamic from 'next/dynamic';
 import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
@@ -348,6 +349,16 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
   const dashboardRequest = useRef(0);
   const locale=language==='en'?'en-GB':'ro-RO';
   useEffect(()=>{if(previewData||tab!=='Abonament')return;const timer=setInterval(()=>{if(document.visibilityState==='visible'){void api('billing/sync','POST').then(()=>refresh(true)).catch(()=>{});void refresh(true);void api('billing/invoices').then(setInvoices).catch(e=>setError(e.message));}},15000);return()=>clearInterval(timer);},[tab,previewData]);
+  useEffect(()=>{
+    if(previewData||!data?.profile.userId)return;
+    let stopped=false;
+    try {
+      const saved=localStorage.getItem('autocare-language');
+      if(saved==='ro'||saved==='en') {void api('preferences/language','PUT',{language:saved}).catch(()=>{});return;}
+    } catch { /* Account preference still works without browser storage. */ }
+    void api('preferences/language').then(value=>{if(!stopped){setLanguage(value.language);try{localStorage.setItem('autocare-language',value.language);}catch{/* Optional storage. */}}}).catch(()=>{});
+    return()=>{stopped=true};
+  },[data?.profile.userId,previewData]);
   const displayDate=(value:string)=>new Date(value+'T12:00:00').toLocaleDateString(locale);
   useEffect(() => {
     try { if (window.localStorage.getItem('autocare-language') === 'en') {setLanguage('en');setCurrency('EUR');}
@@ -577,7 +588,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
   },[modal,recordDirty,recordSaving]);
   function changeLanguage(next:'ro'|'en'){
     setLanguage(next);
-    try{localStorage.setItem('autocare-language',next);window.dispatchEvent(new Event('autocare-language-change'));}catch{ /* Storage may be unavailable. */ }
+    if(!previewData) void api('preferences/language','PUT',{language:next}).catch(()=>setError(next==='en'?'Language changed on this device. Account preference could not be saved; try again when connected.':'Limba s-a schimbat pe acest dispozitiv. Preferința contului nu s-a putut salva; reîncearcă după conectare.'));
+    try{saveBrowserLanguage(next);window.dispatchEvent(new Event('autocare-language-change'));}catch{ /* Storage may be unavailable. */ }
   }
   function changeCurrency(next:'EUR'|'RON'){
     setCurrency(next);try{localStorage.setItem('autocare-currency',next);}catch{ /* Storage may be unavailable. */ }
