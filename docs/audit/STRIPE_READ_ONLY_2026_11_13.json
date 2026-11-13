@@ -1,0 +1,87 @@
+{
+  "checkedAt": "2026-11-13T12:03:22.854Z",
+  "mode": "live read-only",
+  "prices": [
+    {
+      "id": "price_1Uaaf2D0ZFBnbhywkjAhzhmr",
+      "currency": "eur",
+      "amount": 3000,
+      "product": "prod_VWWv2bN4S3Plu1",
+      "interval": "month",
+      "intervalCount": 1
+    },
+    {
+      "id": "price_1UaaeOD0ZFBnbhywDLAVFXze",
+      "currency": "eur",
+      "amount": 9000,
+      "product": "prod_VWWv8DZopOTbUP",
+      "interval": "month",
+      "intervalCount": 3
+    },
+    {
+      "id": "price_1UaaduD0ZFBnbhywCuOWKeET",
+      "currency": "eur",
+      "amount": 34000,
+      "product": "prod_VWWwHAYXX2Kvsi",
+      "interval": "year",
+      "intervalCount": 1
+    },
+    {
+      "id": "price_1UVTscD0ZFBnbhywXHCfqhqG",
+      "currency": "ron",
+      "amount": 170000,
+      "product": "prod_VWWwHAYXX2Kvsi",
+      "interval": "year",
+      "intervalCount": 1
+    },
+    {
+      "id": "price_1UVTs4D0ZFBnbhywrNvfMenQ",
+      "currency": "ron",
+      "amount": 45000,
+      "product": "prod_VWWv8DZopOTbUP",
+      "interval": "month",
+      "intervalCount": 3
+    },
+    {
+      "id": "price_1UVTrlD0ZFBnbhywZjS0qSe2",
+      "currency": "ron",
+      "amount": 15000,
+      "product": "prod_VWWv2bN4S3Plu1",
+      "interval": "month",
+      "intervalCount": 1
+    }
+  ],
+  "webhooks": [
+    {
+      "url": "https://autocare-jglt.onrender.com/api/v1/billing/webhook",
+      "status": "enabled",
+      "events": [
+        "checkout.session.completed",
+        "checkout.session.async_payment_succeeded",
+        "checkout.session.async_payment_failed",
+        "customer.subscription.created",
+        "customer.subscription.updated",
+        "customer.subscription.deleted",
+        "invoice.paid",
+        "invoice.payment_failed",
+        "charge.refunded"
+      ]
+    },
+    {
+      "url": "https://autocare-premium.vercel.app/api/v1/billing/webhook",
+      "status": "enabled",
+      "events": [
+        "checkout.session.completed",
+        "invoice.paid",
+        "invoice.payment_failed",
+        "customer.subscription.created",
+        "customer.subscription.updated",
+        "customer.subscription.deleted",
+        "checkout.session.async_payment_succeeded",
+        "checkout.session.async_payment_failed"
+      ]
+    }
+  ],
+  "paymentExecuted": false,
+  "serverEnvironmentMappingsVerified": false
+}
