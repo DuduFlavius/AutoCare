@@ -1,14 +1,17 @@
 'use client';
 import {useEffect,useState} from 'react';
+import {publicRoutePairs,romanianPublicPath} from '@/lib/public-routes';
 import {displayBillingCurrency,type BillingCurrency} from '@/lib/billing-currency';
 export function useBillingCurrency(language?:'ro'|'en') {
- const [publicLanguage,setPublicLanguage]=useState<'ro'|'en'>('ro');
- const [currency,setCurrency]=useState<BillingCurrency>('ron');
+ const [publicLanguage,setPublicLanguage]=useState<'ro'|'en'>(language??'ro');
+ const [currency,setCurrency]=useState<BillingCurrency>(language==='en'?'eur':'ron');
  useEffect(()=>{
   const update=()=>{
    try {
     const savedLanguage=localStorage.getItem('autocare-language');
-    const resolved=language??(savedLanguage==='en'||savedLanguage!=='ro'&&!navigator.language.toLowerCase().startsWith('ro')?'en':'ro');
+    const publicPath=romanianPublicPath(window.location.pathname);
+    const routeLanguage=publicPath&&publicRoutePairs[publicPath]?(window.location.pathname.startsWith('/en')?'en':'ro'):null;
+    const resolved=language??routeLanguage??(savedLanguage==='en'||savedLanguage!=='ro'&&!navigator.language.toLowerCase().startsWith('ro')?'en':'ro');
     setPublicLanguage(resolved);
     const query=new URLSearchParams(window.location.search).get('currency')?.toLowerCase();
     const saved=localStorage.getItem('autocare-billing-currency-language')===resolved?localStorage.getItem('autocare-billing-currency'):null;
