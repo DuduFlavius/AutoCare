@@ -93,3 +93,14 @@ test('Robots keeps account URLs private without accidentally blocking the public
  assert.ok(values.includes('/cont$'));assert.ok(values.includes('/cont?'));assert.ok(!values.includes('/cont'));
  assert.ok(indexableSlugs.includes('contact'));
 });
+
+test('Robots allows every canonical public sitemap URL and still blocks private routes and queries',()=>{
+ const rule=robots().rules;assert.ok(!Array.isArray(rule));const patterns=Array.isArray(rule.disallow)?rule.disallow:[rule.disallow];
+ const blocked=(path:string)=>patterns.some(pattern=>{
+  if(!pattern)return false;const end=pattern.endsWith('$');const body=end?pattern.slice(0,-1):pattern;
+  const escaped=body.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('^'+escaped+(end?'$':'')).test(path);
+ });
+ for(const entry of sitemap())assert.equal(blocked(new URL(entry.url).pathname),false,entry.url);
+ for(const path of ['/cont','/cont?tab=Documente','/admin','/admin?tab=users','/dosar/private-token','/api/v1/files/private','/en/sign-in?next=private'])assert.equal(blocked(path),true,path);
+ assert.equal(blocked('/administrarea-masinii'),false);assert.equal(blocked('/contact'),false);
+});
