@@ -1,3 +1,4 @@
+import {languageCookie} from '@/lib/language-preference';
 import {after} from 'next/server';
 import {dispatchMailSafely} from '@/lib/mail-dispatch';
 import {languagePreferenceKey, userLanguage} from '@/lib/user-language';
@@ -1069,13 +1070,8 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         event: 'stripe_api_error', trace, type: stripeError.name,
         code: stripeError.code || null, statusCode: stripeError.statusCode || null,
       }));
-      const message = stripeError.code === 'resource_missing'
-        ? 'Prețul Stripe configurat nu există în contul LIVE. Verifică ID-urile price_ din Vercel.'
-        : stripeError.code === 'api_key_expired' || stripeError.code === 'invalid_api_key'
-          ? 'Cheia Stripe LIVE este invalidă sau expirată.'
-          : stripeError.statusCode === 403
-            ? 'Cheia Stripe nu are permisiunile necesare pentru Checkout.'
-            : 'Stripe nu a putut iniția plata. Verifică înregistrarea erorii în Vercel.';
+      const english=languageCookie(req.headers.get('cookie'))==='en';
+      const message=english?'Payment could not be started. Please try again later or contact support with the reference below.':'Plata nu a putut fi inițiată. Încearcă mai târziu sau contactează suportul cu referința de mai jos.';
       return json({ error: message, trace }, stripeError.statusCode === 401 || stripeError.statusCode === 403 ? 503 : 502);
     }
     if (e instanceof SyntaxError) return json({ error: 'Cerere invalidă.' }, 400);
