@@ -33,3 +33,20 @@ test('language cookie accepts only exact supported preference values',async()=>{
  assert.equal(languageCookie('other-autocare-language=en'),null);
  assert.equal(languageCookie(null),null);
 });
+
+test('registration language uses weighted browser preferences without inferring language from IP',async()=>{
+ const {registrationLanguage}=await import('../src/lib/mail-language');
+ assert.equal(registrationLanguage('en-GB,en;q=0.9,ro;q=0.4'),'en');
+ assert.equal(registrationLanguage('en;q=0.2,ro-RO;q=0.9'),'ro');
+ assert.equal(registrationLanguage('fr-FR,fr;q=0.8'),'en');
+ assert.equal(registrationLanguage('en;q=0,ro;q=.8'),'ro');
+ assert.equal(registrationLanguage(null),'ro');
+});
+test('email canvas is light, compact and escapes custom subjects and messages',()=>{
+ const mail=renderEmail('administrative',{subject:'Service <update>',message:'Own <script>message</script>\n\nSecond paragraph'});
+ assert.ok(mail.html.includes('background:#edf1f7'));
+ assert.ok(mail.html.includes('Service &lt;update&gt;</h1>'));
+ assert.ok(!mail.html.includes('background:#090D14'));
+ assert.ok(!mail.html.includes('<script>message'));
+ assert.ok(mail.text.includes('Second paragraph'));
+});
