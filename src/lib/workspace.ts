@@ -1,8 +1,8 @@
 export const mobileWorkspaceSections = [
   { id: 'Dashboard', ro: 'Acasă', en: 'Home' },
-  { id: 'Garaj', ro: 'Garajul meu', en: 'My garage' },
   { id: 'Documente', ro: 'Documente', en: 'Documents' },
   { id: 'Cheltuieli', ro: 'Istoric', en: 'History' },
+  { id: 'Cont', ro: 'Setări', en: 'Settings' },
 ] as const;
 export const workspaceSections = [
   { id: 'Cont', ro: 'Cont', en: 'Account', group: 'account', icon: 'settings' },
