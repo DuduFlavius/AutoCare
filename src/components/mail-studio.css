@@ -1,0 +1,35 @@
+/* Mail Studio: consistent dark controls, a light email canvas, and one readable editor. */
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio{font-family:Inter,'Segoe UI',sans-serif;color:#eaf0ff;display:grid;gap:20px;min-width:0;width:100%}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .card{background:linear-gradient(145deg,#151e36,#10182d)!important;border:1px solid #2b3b5d!important;border-radius:18px!important;padding:24px!important;min-width:0;box-shadow:0 12px 30px #00000015!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio :is(h2,h3){font-family:inherit!important;letter-spacing:-.025em;color:#f0f4ff!important;margin:0 0 8px;font-size:22px!important;line-height:1.35!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio p{font-size:14px!important;line-height:1.7!important;max-width:80ch;color:#b5c3df!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio label:not(.check){display:grid!important;gap:8px!important;font-size:13px!important;line-height:1.5!important;font-weight:550;color:#c9d6ef!important;min-width:0}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio :is(input:not([type=checkbox]),select,textarea){font-family:inherit!important;font-size:15px!important;line-height:1.6!important;border:1px solid #39496c!important;background:#0c1427!important;color:#edf2ff!important;min-height:46px!important;border-radius:10px!important;padding:11px 13px!important;max-width:100%;width:100%;box-sizing:border-box}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio textarea{min-height:190px!important;resize:vertical}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio :is(button,a,input,textarea,select):focus-visible{outline:2px solid #91aaff;outline-offset:3px}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button{font-family:inherit!important;font-size:13px!important;min-height:42px!important;padding:10px 14px!important;border:1px solid #344769!important;border-radius:10px!important;background:#1a2742!important;color:#dfebff!important;white-space:normal!important;line-height:1.5!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button:disabled{opacity:.5!important;cursor:not-allowed!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .inline{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-center-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start;min-width:0}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio [hidden]{display:none!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-tabs{margin:0;padding:6px;background:#0d162a;border:1px solid #2b3b5d;border-radius:13px;display:flex;gap:6px}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-tabs button[aria-pressed=true]{background:#2a3f79!important;border-color:#6388e5!important;color:white!important;box-shadow:none}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-quick-templates{display:flex;gap:8px;flex-wrap:wrap;padding:10px 0}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-quick-templates button:first-child{background:#314f9b!important;border-color:#6e92f1!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel{background:#edf1f7!important;border-color:#d7dfec!important;padding:16px!important;overflow:hidden}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel>.inline{background:#14203b;border-radius:11px;padding:12px;gap:8px}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel>.inline h2{font-size:17px!important;margin:0 auto 0 0!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel>p{color:#52617a!important;font-size:13px!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel iframe{border-radius:12px;background:#edf1f7;min-height:650px;height:850px!important;width:100%;max-width:100%}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#42516d;font-size:12px}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-recipients{max-height:310px;overflow-y:auto;border:1px solid #2e4162;border-radius:12px;padding:12px;display:grid;gap:8px;background:#0e172a}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-recipients .check{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:8px;min-height:46px}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-recipients .check:has(input:checked){background:#243a65}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button.mail-send-action{background:linear-gradient(110deg,#416dde,#314b9a)!important;border:1px solid #779bf2!important;color:white!important;min-height:52px!important;font-size:15px!important;font-weight:650!important;box-shadow:0 6px 20px #243c812a}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button.mail-send-action[aria-disabled=true]{opacity:.55!important;cursor:not-allowed!important}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-automation-flows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-automation-flows article{padding:18px;border:1px solid #33486b;border-radius:12px;background:#101b31}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-automation-flows strong{font-size:15px;color:#e2edff}
+@media(min-width:1250px){html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel{position:sticky;top:80px}}
+@media(max-width:1100px){html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-center-grid{grid-template-columns:minmax(0,1fr)}html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-automation-flows{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .card{padding:16px!important}html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-tabs button{font-size:12px!important;padding:9px 6px!important}html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio input,html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio textarea{font-size:16px!important}}
