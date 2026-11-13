@@ -259,7 +259,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
                   ? 'Trimite instrucțiunile'
                   : reset
                     ? 'Salvează parola'
-                    : t('Bine ai revenit!', 'Welcome back!')}
+                    : t('Conectare', 'Sign in')}
           </button>
         </form>
         {error && (
