@@ -77,7 +77,8 @@ export function financeOverview<T extends FinanceEntry>(rows: T[], today: string
   const year = Number(today.slice(0, 4));
   const [y, m] = month.split('-').map(Number);
   const previousMonth = new Date(Date.UTC(y, m - 2, 1)).toISOString().slice(0, 7);
-  const entries = rows.filter(row => (!vehicleId || row.vehicleId === vehicleId) && isFinancialEntry(row, today));
+  const uniqueRows = [...new Map(rows.map(row => [row.id, row])).values()];
+  const entries = uniqueRows.filter(row => (!vehicleId || row.vehicleId === vehicleId) && isFinancialEntry(row, today));
   const dated = entries.filter(row => !row.cancelled && row.date && row.date <= today);
   const known = dated.filter(row => row.amountKnown !== false);
   const sum = (values: FinanceEntry[]) => values.reduce((total, row) => total + row.amountBani, 0);
@@ -86,7 +87,7 @@ export function financeOverview<T extends FinanceEntry>(rows: T[], today: string
   const annual = known.filter(row => row.date!.startsWith(String(year)));
   const previousYear = known.filter(row => row.date!.startsWith(String(year - 1)));
   // Preserve the existing cost/km formula and include genuine mileage evidence from zero-cost service records.
-  const mileageInputs = rows.filter(row => !row.cancelled && row.date && row.date <= today &&
+  const mileageInputs = uniqueRows.filter(row => !row.cancelled && row.date && row.date <= today &&
     !isPlannedService(row, today) && (!vehicleId || row.vehicleId === vehicleId));
   const mileage = summarize(mileageInputs.map(row => ({ ...row, amountBani: isFinancialEntry(row, today) && row.amountKnown !== false ? row.amountBani : 0 })), year, month);
   const series = Array.from({ length: 12 }, (_, index) => {
@@ -124,3 +125,18 @@ export function budgetState(limitBani: number, usedBani: number) {
 }
 
 export const financeBudgetKey = (userId: string) => 'finance-budgets:' + userId;
+
+/** Conservative signals from completed months with recorded costs; missing months are not assumed free. */
+export function financeSignals(rows: FinanceEntry[], today: string, vehicleId = '') {
+  const entries = financeOverview(rows,today,vehicleId).entries.filter(row=>!row.cancelled&&row.amountKnown!==false&&row.date&&row.date<=today);
+  const months = new Map<string,number>();
+  for(const row of entries) if(row.date!.slice(0,7)<today.slice(0,7)) {
+    const key=row.date!.slice(0,7); months.set(key,(months.get(key)||0)+row.amountBani);
+  }
+  const recent=[...months.entries()].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,6);
+  const forecastBani=recent.length>=3 ? Math.round(recent.reduce((sum,[,bani])=>sum+bani,0)/recent.length) : null;
+  const amounts=entries.filter(row=>row.date!.startsWith(today.slice(0,4))&&row.amountBani>0).map(row=>row.amountBani).sort((a,b)=>a-b);
+  const median=amounts.length ? (amounts[Math.floor((amounts.length-1)/2)]+amounts[Math.floor(amounts.length/2)])/2 : 0;
+  const unusual=amounts.length>=5&&median>0 ? entries.filter(row=>row.date!.startsWith(today.slice(0,4))&&row.amountBani>=3*median) : [];
+  return {forecastBani, measuredMonths:recent.length, unusual};
+}
