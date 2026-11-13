@@ -1,0 +1,79 @@
+{
+  "robotsStatus": 200,
+  "sitemapURLs": 52,
+  "blockedPublicURLs": [],
+  "privatePathsBlocked": {
+    "/cont": true,
+    "/cont?x=1": true,
+    "/admin": true,
+    "/admin/users": true,
+    "/dosar/secret": true,
+    "/api/v1/dashboard": true
+  },
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "finalURL": "https://autocare-jglt.onrender.com/",
+      "cache": "s-maxage=300, stale-while-revalidate=31535700",
+      "nextCache": "STALE",
+      "type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/administrarea-masinii",
+      "status": 200,
+      "finalURL": "https://autocare-jglt.onrender.com/administrarea-masinii",
+      "cache": "s-maxage=300, stale-while-revalidate=31535700",
+      "nextCache": "STALE",
+      "type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/contact",
+      "status": 200,
+      "finalURL": "https://autocare-jglt.onrender.com/contact",
+      "cache": "s-maxage=300, stale-while-revalidate=31535700",
+      "nextCache": "STALE",
+      "type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/en/vehicle-documents",
+      "status": 200,
+      "finalURL": "https://autocare-jglt.onrender.com/en/vehicle-documents",
+      "cache": "s-maxage=300, stale-while-revalidate=31535700",
+      "nextCache": "STALE",
+      "type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/en/sign-in",
+      "status": 200,
+      "finalURL": "https://autocare-jglt.onrender.com/en/sign-in",
+      "cache": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "nextCache": null,
+      "type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/cont?tab=Abonament&plan=annual&currency=EUR",
+      "status": 200,
+      "finalURL": "https://autocare-jglt.onrender.com/autentificare?next=%2Fcont%3Ftab%3DAbonament%26plan%3Dannual%26currency%3DEUR",
+      "cache": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "nextCache": null,
+      "type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/admin",
+      "status": 200,
+      "finalURL": "https://autocare-jglt.onrender.com/autentificare",
+      "cache": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "nextCache": null,
+      "type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/opengraph-image",
+      "status": 200,
+      "finalURL": "https://autocare-jglt.onrender.com/opengraph-image",
+      "cache": "public, max-age=0, must-revalidate",
+      "nextCache": "HIT",
+      "type": "image/png"
+    }
+  ]
+}
