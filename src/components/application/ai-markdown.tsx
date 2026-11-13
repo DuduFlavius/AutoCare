@@ -34,7 +34,8 @@ export function AiMarkdown({ text }: { text: string }) {
   while (i < lines.length) {
     const line = lines[i];
     if (!line.trim()) { i++; continue; }
-    const heading = /^(#{1,4})\s+(.+)$/.exec(line);
+    if (/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/.test(line)) { blocks.push(<hr key={i}/>); i++; continue; }
+    const heading = /^(#{1,6})\s+(.+)$/.exec(line);
     if (heading) {
       blocks.push(<h4 key={i} className="ac-ai-md-heading">{inline(heading[2])}</h4>);
       i++; continue;
@@ -73,7 +74,7 @@ export function AiMarkdown({ text }: { text: string }) {
       continue;
     }
     const start = i; const paragraph: string[] = [];
-    while (i < lines.length && lines[i].trim() && !/^(#{1,4}\s|```|>\s|\s*[-*+]\s|\s*\d+\.\s)/.test(lines[i])) paragraph.push(lines[i++]);
+    while (i < lines.length && lines[i].trim() && !/^(#{1,6}\s|```|>\s|\s*[-*+]\s|\s*\d+\.\s)/.test(lines[i])) paragraph.push(lines[i++]);
     if (!paragraph.length) { i++; continue; }
     blocks.push(<p key={start}>{inline(paragraph.join(' '))}</p>);
   }
