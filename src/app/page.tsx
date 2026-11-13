@@ -18,7 +18,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import LuxuryExperience, { LuxuryMotion } from '@/components/luxury-experience';
-import { pricing, DEFAULT_PRICING } from '@/lib/pricing';
+import { publicPricing, DEFAULT_PRICING } from '@/lib/pricing';
 import './luxury-public.css';
 import './studio-public.css';
 import './titanium-landing.css';
@@ -43,7 +43,7 @@ export async function generateMetadata() {
 }
 export default async function Home() {
   const prices =
-    process.env.DATABASE_URL || process.env.LOCAL_DATABASE_PATH ? await pricing() : DEFAULT_PRICING;
+    process.env.DATABASE_URL || process.env.LOCAL_DATABASE_PATH ? await publicPricing() : DEFAULT_PRICING;
   return (
     <div className="ac-lux-public ac-studio-public">
       <PublicShell landing>
