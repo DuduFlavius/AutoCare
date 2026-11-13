@@ -16,10 +16,10 @@ test('SEO sitemap contains canonical public pages and image URLs without private
     assert.ok(url.startsWith(process.env.APP_URL + '/'));
     assert.doesNotMatch(
       url,
-      /cont$|admin|api\/|autentificare|inregistrare|previzualizare|confidentialitate|termeni/,
+      /\/(?:cont|admin|api|autentificare|inregistrare|previzualizare|confidentialitate|termeni)(?:\/|$)/,
     );
   }
-  assert.ok(entries[0].images?.[0].endsWith('.webp'));
+  assert.ok(entries[0].images?.[0].endsWith('.png'));
   const rules = robots().rules;
   assert.ok(!Array.isArray(rules) && rules.allow === '/');
 });
@@ -60,4 +60,36 @@ test('Application discovery follows the canonical domain and exposes only public
   assert.ok(content.includes(process.env.APP_URL + '/aplicatie-auto'));
   assert.doesNotMatch(content, /\/cont|\/api\/|project-sxage/);
   assert.ok(sitemap().some(entry => entry.url.endsWith('/aplicatie-auto')));
+});
+
+test('Every indexable page has reciprocal RO/EN URLs, including guides, with private auth pages excluded', async()=>{
+ const {publicRoutePairs,publicLanguageAlternates,romanianPublicPath}=await import('../src/lib/public-routes');
+ const paths=['/',...indexableSlugs.map(slug=>'/'+slug),'/ghiduri',...Object.keys(guides).map(slug=>'/ghiduri/'+slug)];
+ for(const path of paths){
+  assert.ok(publicRoutePairs[path],path);
+  const ro=publicLanguageAlternates(path,process.env.APP_URL!);const en=publicLanguageAlternates(publicRoutePairs[path],process.env.APP_URL!);
+  assert.deepEqual(ro,en,path);assert.equal(romanianPublicPath(publicRoutePairs[path]),path);
+  assert.equal(ro?.ro,process.env.APP_URL+path);assert.equal(ro?.en,process.env.APP_URL+publicRoutePairs[path]);
+ }
+ for(const entry of sitemap()){assert.ok(entry.alternates?.languages);assert.doesNotMatch(entry.url,/sign-in|sign-up|forgot-password|reset-password|compare-plans|comparatie/);}
+});
+test('English public editorial content and guides are translated at the server data boundary',async()=>{
+ const {pages}=await import('../src/lib/pages');const {englishPage,englishGuide}=await import('../src/lib/public-content');
+ for(const slug of Object.keys(pages)){
+  const page=englishPage(slug)!;assert.ok(page?.title&&page.intro,slug);
+  for(const text of [page.title,page.intro,...page.sections.flat()])assert.doesNotMatch(text,/[ăâîșțĂÂÎȘȚ]/,slug+': '+text);
+ }
+ for(const slug of Object.keys(guides)){const guide=englishGuide(slug)!;for(const text of [guide.title,guide.description,...guide.sections.flat()])assert.doesNotMatch(text,/[ăâîșțĂÂÎȘȚ]/,slug);}
+});
+test('Analytics rejects placeholder IDs and unknown events without exposing user data',async()=>{
+ const {analyticsMeasurementId,analyticsEventAllowed}=await import('../src/lib/analytics');
+ assert.equal(analyticsMeasurementId(undefined),null);assert.equal(analyticsMeasurementId('G-XXXX'),null);assert.equal(analyticsMeasurementId('<script>'),null);
+ assert.equal(analyticsEventAllowed('sign_up'),true);assert.equal(analyticsEventAllowed('document_uploaded'),false);
+});
+
+test('Robots keeps account URLs private without accidentally blocking the public contact page',()=>{
+ const rule=robots().rules;assert.ok(!Array.isArray(rule));
+ const values=Array.isArray(rule.disallow)?rule.disallow:[rule.disallow];
+ assert.ok(values.includes('/cont$'));assert.ok(values.includes('/cont?'));assert.ok(!values.includes('/cont'));
+ assert.ok(indexableSlugs.includes('contact'));
 });
