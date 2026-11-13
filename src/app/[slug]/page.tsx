@@ -4,7 +4,7 @@ import { technologyPages } from '@/lib/public-technology';
 import { TechnologyNavigation } from '@/components/technology-navigation';
 import { ArrowUpRight } from 'lucide-react';
 import { PriceCards } from '@/components/membership';
-import { pricing, DEFAULT_PRICING } from '@/lib/pricing';
+import { publicPricing, DEFAULT_PRICING } from '@/lib/pricing';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PublicShell } from '@/components/public-shell';
@@ -55,7 +55,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   if (['preturi', 'comparatie'].includes(slug)) {
     const prices =
       process.env.DATABASE_URL || process.env.LOCAL_DATABASE_PATH
-        ? await pricing()
+        ? await publicPricing()
         : DEFAULT_PRICING;
     return (
       <PublicShell dark>
