@@ -51,3 +51,14 @@ test('finance estimates need three completed recorded months and identify only s
  assert.equal(signals.forecastBani,10000);assert.equal(signals.measuredMonths,3);assert.deepEqual(signals.unusual.map(row=>row.id),['e']);
  assert.equal(financeSignals(input,'2026-04-10','other').forecastBani,null);
 });
+
+test('mobile timeline periods reconcile and never fill missing months with invented records',async()=>{
+ const {financeTimeline}=await import('../src/lib/finance-overview');
+ const rows=[row('jan',{date:'2026-01-05',amountBani:100}),row('jan',{date:'2026-01-05',amountBani:100}),row('march',{date:'2026-03-02',amountBani:400}),row('unknown',{date:'2026-02-02',amountKnown:false,amountBani:5000}),row('future',{date:'2026-11-01',amountBani:7000}),row('archive',{date:'2026-03-01',cancelled:true,amountBani:8000})];
+ const timeline=financeTimeline(rows,'2026-03-10',3);
+ assert.equal(timeline.from,'2026-01-01');assert.equal(timeline.totalBani,500);assert.equal(timeline.count,2);
+ assert.deepEqual(timeline.buckets.map(row=>row.count),[1,0,1]);
+ assert.equal(timeline.buckets.reduce((sum,row)=>sum+row.bani,0),timeline.totalBani);
+ assert.equal(financeTimeline(rows,'2026-03-10',1).totalBani,400);
+ assert.equal(financeTimeline(rows,'2026-03-10',null).totalBani,500);
+});
