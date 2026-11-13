@@ -39,7 +39,7 @@ export function PriceCards({
   const price=(b:number)=>new Intl.NumberFormat(en?'en-GB':'ro-RO',{maximumFractionDigits:2}).format(minor(b)/100)+' '+currency.toUpperCase();
   const euro=price;
   const localizedAmount=price;
-  const signup=(plan:string)=>'/inregistrare?next='+encodeURIComponent('/cont?tab=Abonament&plan='+plan+'&currency='+currency.toUpperCase());
+  const signup=(plan:string)=>(en?'/en/sign-up?next=':'/inregistrare?next=')+encodeURIComponent('/cont?tab=Abonament&plan='+plan+'&currency='+currency.toUpperCase());
   const to = reportTimezone ? localDate(new Date(), reportTimezone) : '';
   function reportLink(months: number, kind: 'service' | 'expense' | '', format: 'pdf' | 'csv') {
     const [year, month] = to.split('-').map(Number);
