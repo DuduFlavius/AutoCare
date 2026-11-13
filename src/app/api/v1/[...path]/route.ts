@@ -516,6 +516,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       }
     }
     if (path[0] === 'records') {
+      if (method === 'POST' && path.length === 3 && path[2] === 'restore') { await svc.restoreRecord(uid, uuid.parse(path[1])); return json({ok:true}); }
       if (method === 'POST' && path.length === 1)
         return json(await svc.saveRecord(uid, await body(req)), 201);
       if (method === 'PATCH' && path.length === 2)
