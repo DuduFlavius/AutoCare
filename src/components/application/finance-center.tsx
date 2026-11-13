@@ -1,5 +1,6 @@
 'use client';
 
+import { MobileFinanceOverview } from './mobile-finance-overview';
 import { useMemo, useState, type FormEvent } from 'react';
 import { ArrowUpRight, BarChart3, CalendarDays, Download, Gauge, MoreHorizontal, Fuel, Wrench, ShieldCheck, CircleDot, Settings2, Files, Paperclip, Sparkles, Wallet } from 'lucide-react';
 import { budgetState, financeSignals, financeGroup, financeOverview, financialChange, type FinanceGroup } from '@/lib/finance-overview';
@@ -26,6 +27,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
     Combustibil: t('Combustibil', 'Fuel'), Service: 'Service', Frâne: t('Frâne', 'Brakes'), RCA: 'RCA', ITP: 'ITP',
     Anvelope: t('Anvelope', 'Tyres'), Distribuție: t('Distribuție', 'Timing system'), 'Alte cheltuieli': t('Alte cheltuieli', 'Other expenses'),
   };
+  const [mobileDetails,setMobileDetails]=useState(false),[mobileFilters,setMobileFilters]=useState(false);
   const [vehicle, setVehicle] = useState('');
   const [view, setView] = useState<'month' | 'year'>('year');
   const [group, setGroup] = useState('');
@@ -60,7 +62,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
   const shown = point != null && chart[point] ? chart[point] : chart[view === 'year' ? m - 1 : Number(today.slice(-2)) - 1];
   const details = (row: Sample) => row.known ? money(row.bani) : row.count ? t('Cost necunoscut', 'Cost unknown') : t('Fără înregistrări', 'No entries');
   const changeText = (value: number | null) => value == null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(value) + '%';
-  const from = range === 'month' ? month + '-01' : range === 'year' ? year + '-01-01' : undefined;
+  const from = range === '6' || range === '12' || range === '24' ? new Date(Date.UTC(y,m-Number(range),1)).toISOString().slice(0,10) : range === 'month' ? month + '-01' : range === 'year' ? year + '-01-01' : undefined;
   const filters = { q: query.trim(), archived: archived ? 'all' : 'active', from, to: from ? today : undefined } as const;
   const rows = filterRecords(report.entries.filter(row => !group || financeGroup(row) === group), filters)
     .sort((a, b) => sort === 'amount' ? Number(a.amountKnown === false) - Number(b.amountKnown === false) || b.amountBani - a.amountBani :
@@ -84,7 +86,9 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
   const categoryIcons = { Combustibil: Fuel, Service: Wrench, Frâne: CircleDot, RCA: ShieldCheck, ITP: Files, Anvelope: CircleDot, Distribuție: Settings2, 'Alte cheltuieli': Wallet };
   const date = (value: string | null) => value ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value + 'T12:00:00Z')) : '—';
 
-  return <div className="ac-finance" data-workspace-ui>
+  return <div className="ac-finance" data-workspace-ui data-mobile-details={mobileDetails||undefined} data-mobile-filters={mobileFilters||undefined}>
+    <MobileFinanceOverview rows={report.entries} today={today} money={money} period={range} onPeriod={value=>{setRange(value);setPage(0);}} onFilters={()=>setMobileFilters(value=>!value)} filtersOpen={mobileFilters}/>
+    <button className="ac-m-finance-more" aria-expanded={mobileDetails} onClick={()=>setMobileDetails(value=>!value)}>{t('Bugete, categorii și analiză','Budgets, categories & analysis')} <Sparkles size={16}/></button>
     <section className="ac-finance-hero"><TitaniumWave />
       <div><span className="studio-kicker">AUTOCARE · FINANCE</span><h2>{t('Centrul financiar auto', 'Vehicle finance center')}</h2><p>{t('Costuri reale din cheltuieli, intervenții și documente, o singură dată per înregistrare.', 'Actual costs from expenses, service and documents, counted once per record.')}</p></div>
       <label>{t('Vehicul', 'Vehicle')}<select value={vehicle} onChange={e => { setVehicle(e.target.value); setPage(0); setPoint(null); }}>
@@ -153,10 +157,10 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
         [t('Medie / cheltuială','Average / expense'), historyKnown.length ? money(historyTotal/historyKnown.length) : '—'],
         [t('Cea mai mare cheltuială','Largest expense'), historyKnown.length ? money(Math.max(...historyKnown.map(row=>row.amountBani))) : '—'],
       ].map(([label,value])=><div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
-      <div className="ac-finance-filters">
+      <div className="ac-finance-filters" id="ac-finance-ledger-filters">
         <input type="search" maxLength={250} placeholder={t('Caută în cheltuieli…', 'Search expenses…')} aria-label={t('Caută cheltuieli', 'Search expenses')} value={query} onChange={e => { setQuery(e.target.value); setPage(0); }} />
         <select aria-label={t('Categorie', 'Category')} value={group} onChange={e => { setGroup(e.target.value); setPage(0); }}><option value="">{t('Toate categoriile', 'All categories')}</option>{Object.entries(groups).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
-        <select aria-label={t('Perioadă', 'Period')} value={range} onChange={e => { setRange(e.target.value); if(e.target.value==='month'||e.target.value==='year'){setView(e.target.value);setPoint(null);} setPage(0); }}><option value="all">{t('Tot istoricul', 'All history')}</option><option value="month">{t('Luna curentă', 'Current month')}</option><option value="year">{t('Anul curent', 'Current year')}</option></select>
+        <select aria-label={t('Perioadă', 'Period')} value={range} onChange={e => { setRange(e.target.value); if(e.target.value==='month'||e.target.value==='year'){setView(e.target.value);setPoint(null);} setPage(0); }}><option value="6">{t('Ultimele 6 luni','Last 6 months')}</option><option value="12">{t('Ultimele 12 luni','Last 12 months')}</option><option value="24">{t('Ultimele 2 ani','Last 2 years')}</option><option value="all">{t('Tot istoricul', 'All history')}</option><option value="month">{t('Luna curentă', 'Current month')}</option><option value="year">{t('Anul curent', 'Current year')}</option></select>
         <select aria-label={t('Sortare', 'Sort order')} value={sort} onChange={e => { setSort(e.target.value); setPage(0); }}><option value="recent">{t('Cele mai recente', 'Newest first')}</option><option value="old">{t('Cele mai vechi', 'Oldest first')}</option><option value="category">{t('Categorie A–Z', 'Category A–Z')}</option><option value="amount">{t('Valoare descrescătoare', 'Highest value')}</option></select>
         <label className="check"><input type="checkbox" checked={archived} onChange={e => { setArchived(e.target.checked); setPage(0); }} /> {t('Include arhivate', 'Include archived')}</label>
       </div>
