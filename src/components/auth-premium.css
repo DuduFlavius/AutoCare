@@ -327,3 +327,4 @@ html body .auth-layout.ac-auth-premium .ac-auth-ai-details .ac-public-ai{margin:
 }
 }
 @layer autocare-auth-refinement{@media(max-width:760px){html body:has(.ac-auth-premium) .ac-public-shell>.wrap>.public-nav,html body:has(.ac-auth-premium) .ac-public-shell>.wrap>.footer,html body:has(.ac-auth-premium) .ac-public-shell>.wrap>.ac-install-banner{display:none!important}html body:has(.ac-auth-premium) .ac-public-shell>.wrap{width:100%!important;max-width:100%!important;padding:0!important;margin:0!important}}}
+@layer autocare-auth-refinement{@media(max-width:760px){html body .auth-layout.ac-auth-premium .auth-box>div.stack{align-items:center!important;text-align:center!important;gap:12px!important;font-size:13px!important}}}
