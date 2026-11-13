@@ -1,4 +1,5 @@
 'use client';
+import {publicConversion} from '@/lib/analytics';
 import {saveBrowserLanguage} from '@/lib/language-preference';
 import VehicleSymbol from './vehicle-symbol';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -10,15 +11,15 @@ import './auth-premium.css';
 import { ShieldCheck, Files, Wrench, Eye, EyeOff } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { authErrorMessage } from '@/lib/auth-messages';
-export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string }) {
-  const [language, setLanguage] = useState<'ro' | 'en'>('ro');
+export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: string; next?: string; initialLanguage?:'ro'|'en' }) {
+  const [language, setLanguage] = useState<'ro' | 'en'>(initialLanguage??'ro');
   useEffect(() => {
     try {
-      if ((localStorage.getItem('autocare-language') === 'en' || localStorage.getItem('autocare-language') !== 'ro' && !navigator.language.toLowerCase().startsWith('ro'))) setLanguage('en');
+      if (!initialLanguage && (localStorage.getItem('autocare-language') === 'en' || localStorage.getItem('autocare-language') !== 'ro' && !navigator.language.toLowerCase().startsWith('ro'))) setLanguage('en');
     } catch {
       /* Preferences still work without storage. */
     }
-  }, []);
+  }, [initialLanguage]);
   useEffect(()=>{saveBrowserLanguage(language);},[language]);
   const en=language==='en';
   const t=(ro:string,english:string)=>en?english:ro;
@@ -77,6 +78,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
               })
             : await authClient.signIn.email({ email, password, callbackURL: next });
       if (result.error) throw new Error(authErrorMessage(result.error.code, result.error.message));
+      if(signup||!forgot&&!reset)publicConversion(signup?'sign_up':'login');
       if (signup) window.location.assign(next);
       else if (forgot) setMessage('Dacă există un cont, vei primi instrucțiunile prin email.');
       else if (reset) setMessage('Parola a fost schimbată. Te poți autentifica.');
@@ -245,8 +247,8 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
             <label className="check">
               <input name="acceptTerms" type="checkbox" required />
               <span>
-                {t("Accept", "I accept")} <Link href="/termeni">{t("termenii", "the terms")}</Link> {t("și am citit", "and have read")}{' '}
-                <Link href="/confidentialitate">{t("politica de confidențialitate", "the privacy policy")}</Link>.
+                {t("Accept", "I accept")} <Link href={en?'/en/terms':'/termeni'}>{t("termenii", "the terms")}</Link> {t("și am citit", "and have read")}{' '}
+                <Link href={en?'/en/privacy':'/confidentialitate'}>{t("politica de confidențialitate", "the privacy policy")}</Link>.
               </span>
             </label>
           )}
@@ -273,10 +275,10 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
           </p>
         )}
         <div className="stack small" style={{ marginTop: 20 }}>
-          <Link href={(signup ? '/autentificare?' : '/inregistrare?') + new URLSearchParams({ next })}>
+          <Link href={(signup ? (en?'/en/sign-in?':'/autentificare?') : (en?'/en/sign-up?':'/inregistrare?')) + new URLSearchParams({ next })}>
             {signup ? 'Ai deja cont? Autentifică-te' : 'Nu ai cont? Înregistrează-te'}
           </Link>
-          <Link href="/recuperare-parola">Recuperează parola</Link>
+          <Link href={en?'/en/forgot-password':'/recuperare-parola'}>Recuperează parola</Link>
         </div>
       </div>
     </main>
