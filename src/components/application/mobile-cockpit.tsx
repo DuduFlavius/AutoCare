@@ -1,5 +1,5 @@
 'use client';
-import { Bell, CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Wallet, Wrench } from 'lucide-react';
+import { Bell, CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Wallet, Wrench, ShieldCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { selectActiveVehicle, upcomingMaintenance } from '@/lib/application-home';
@@ -29,7 +29,7 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onV
  return <div className="ac-mobile-home" data-workspace-ui>
   {!car?<section className="ac-m-empty"><CarFront size={52}/><h2>{t('Garajul tău începe aici','Your garage starts here')}</h2><p>{t('Adaugă mașina pentru a organiza documentele și întreținerea.','Add your vehicle to organize documents and maintenance.')}</p><button className="ac-m-primary" onClick={()=>onCreate('vehicle')}><Plus size={18}/>{t('Adaugă vehicul','Add vehicle')}</button></section>:<>
    <section className="ac-m-vehicle">
-    <button className="ac-m-vehicle-open" onClick={()=>onVehicle(car.id)} aria-label={t('Deschide fișa mașinii','Open vehicle profile')}><span className="ac-m-vehicle-art"><CarFront size={66} strokeWidth={1.2}/><span>AutoCare</span></span><span className="ac-m-vehicle-identity"><strong data-user-content>{car.brand} {car.model}</strong><small data-user-content>{car.plate}</small></span><ChevronRight size={19}/></button>
+    <button className="ac-m-vehicle-open" onClick={()=>onVehicle(car.id)} aria-label={t('Deschide fișa mașinii','Open vehicle profile')}><span className="ac-m-vehicle-art ac-m-vehicle-emblem" aria-hidden="true"><span className="ac-m-emblem-orbit"/><ShieldCheck size={35} strokeWidth={1.25}/><span className="ac-m-emblem-caption">AUTOCARE</span></span><span className="ac-m-vehicle-identity"><strong data-user-content>{car.brand} {car.model}</strong><small data-user-content>{car.plate}</small></span><ChevronRight size={19}/></button>
     <div className="ac-m-vehicle-bottom"><span><Gauge size={14}/>{car.odometer.toLocaleString(locale)} km</span><button onClick={()=>navigate('Garaj')}>{t('Garajul meu','My garage')}<ChevronRight size={14}/></button></div>
     {active.length>1&&<label className="ac-m-car-switch"><span>{t('Mașina selectată','Selected vehicle')}</span><select value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{active.map(vehicle=><option key={vehicle.id} value={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}</select></label>}
    </section>
