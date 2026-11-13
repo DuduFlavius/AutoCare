@@ -140,3 +140,19 @@ export function financeSignals(rows: FinanceEntry[], today: string, vehicleId = 
   const unusual=amounts.length>=5&&median>0 ? entries.filter(row=>row.date!.startsWith(today.slice(0,4))&&row.amountBani>=3*median) : [];
   return {forecastBani, measuredMonths:recent.length, unusual};
 }
+
+/** A sparse timeline preserves missing months as gaps, rather than inventing recorded zero costs. */
+export function financeTimeline(rows: FinanceEntry[], today: string, months: number | null) {
+  const unique=[...new Map(rows.map(row=>[row.id,row])).values()];
+  const known=unique.filter(row=>!row.cancelled&&row.amountKnown!==false&&row.date&&row.date<=today&&isFinancialEntry(row,today));
+  const current=today.slice(0,7);
+  const [year,month]=current.split('-').map(Number);
+  const first=months?new Date(Date.UTC(year,month-months,1)).toISOString().slice(0,7):known.map(row=>row.date!.slice(0,7)).sort()[0]??current;
+  const selected=known.filter(row=>row.date!.slice(0,7)>=first);
+  const annual=year-Number(first.slice(0,4))>3;
+  const values=new Map<string,{key:string;bani:number;count:number}>();
+  if(annual){for(let y=Number(first.slice(0,4));y<=year;y++)values.set(String(y),{key:String(y),bani:0,count:0});}
+  else {const start=new Date(first+'-01T12:00:00Z');for(let i=0;i<60;i++){const key=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth()+i,1)).toISOString().slice(0,7);if(key>current)break;values.set(key,{key,bani:0,count:0});}}
+  for(const row of selected){const bucket=values.get(row.date!.slice(0,annual?4:7));if(bucket){bucket.bani+=row.amountBani;bucket.count++;}}
+  return {totalBani:selected.reduce((sum,row)=>sum+row.amountBani,0),count:selected.length,buckets:[...values.values()],from:first+'-01'};
+}
