@@ -10,7 +10,7 @@ import {englishPage,englishGuide} from '@/lib/public-content';
 import {publicMetadata,indexableSlugs} from '@/lib/seo';
 import {origin} from '@/lib/config';
 import {guides} from '@/lib/guides';
-import {pricing,DEFAULT_PRICING} from '@/lib/pricing';
+import {publicPricing,DEFAULT_PRICING} from '@/lib/pricing';
 import {discoveryPagesEn} from '@/lib/discovery-pages';
 import {technologyPages} from '@/lib/public-technology';
 type Props={params:Promise<{segments?:string[]}>;searchParams:Promise<{next?:string;token?:string}>};
@@ -38,7 +38,7 @@ export default async function EnglishPublicPage({params,searchParams}:Props){
  const description='intro' in page?page.intro:page.description;
  if(auth[ro]){const {next}=await searchParams;return <PublicShell language="en"><AuthForm mode={ro.slice(1)} initialLanguage="en" next={next?.startsWith('/cont?')?next:'/cont'}/></PublicShell>;}
  const isPrice=ro==='/preturi'||ro==='/comparatie';
- const prices=isPrice&&(process.env.DATABASE_URL||process.env.LOCAL_DATABASE_PATH)?await pricing():DEFAULT_PRICING;
+ const prices=isPrice&&(process.env.DATABASE_URL||process.env.LOCAL_DATABASE_PATH)?await publicPricing():DEFAULT_PRICING;
  return <PublicShell language="en" dark landing={ro==='/'}><main className="content-page seo-content ac-public-editorial">
   <nav className="breadcrumbs" aria-label="Breadcrumb"><Link href="/en">Home</Link>{ro!=='/'&&<> / <span aria-current="page">{page.title}</span></>}</nav>
   <header className="ac-editorial-hero"><p className="eyebrow">AUTOCARE PREMIUM</p><h1>{page.title}</h1><p>{description}</p></header>
