@@ -10,6 +10,8 @@ import './studio-workspace.css';
 import './application/reference-dashboard.css';
 import './premium-workspace-theme.css';
 import './application/product-refinement.css';
+import { DocumentVault } from './application/document-vault';
+import './application/mobile-reference.css';
 import { FinanceCenter } from './application/finance-center';
 import { TitaniumWave } from './titanium-wave';
 import { calendarRecordDate, isPlannedService } from '@/lib/planned-service';
@@ -985,7 +987,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
               onVehicle={id => navigate('AutoCare AI', 'push', id)}
               premium={data.premium} available={data.autoAssistantAvailable} preview={!!previewData} onSaved={refresh}
             />}
-            {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
+            {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onLanguage={changeLanguage} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
             {tab === 'Istoric auto' && <VehicleJournal data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
         {tab === 'Garaj' && vehicleDetail && (
           <section className="ac-vehicle-profile" aria-label={language === 'en' ? 'Vehicle profile' : 'Profilul vehiculului'}>
@@ -1049,7 +1051,15 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
               onRestore={record => { void act(() => api('records/' + record.id + '/restore', 'POST')); }}
               onAi={id => navigate('AutoCare AI', 'push', id)} onRefresh={refresh}
             />}
-            {['Documente', 'Întreținere'].includes(tab) && (
+            {tab === 'Documente' && <DocumentVault data={data} vehicleId={filter} onVehicle={setFilter} preview={!!previewData} busy={busy}
+              onEdit={record=>setModal({kind:'document',record})} onCreate={()=>setModal(activeCars.length?{kind:'document'}:{kind:'vehicle'})}
+              onArchive={record=>{if(window.confirm(language==='en'?'Archive this document?':'Arhivezi acest document?'))void act(()=>api('records/'+record.id,'DELETE'));}}
+              onRestore={record=>{void act(()=>api('records/'+record.id+'/restore','POST'));}}
+              onHistory={record=>{void act(async()=>{setHistory(await api('records/'+record.id+'/history'));},'');}}
+              onDeleteFile={file=>{if(window.confirm(language==='en'?'Permanently delete this attachment?':'Ștergi definitiv acest atașament?'))void act(()=>api('files/'+file.id,'DELETE'));}}
+              onUpload={async(record,file)=>{if(file.size>2097152){setError(language==='en'?'Choose a PDF, JPG or PNG up to 2 MB.':'Alege un PDF, JPG sau PNG de maximum 2 MB.');return;}if(!['application/pdf','image/jpeg','image/png'].includes(file.type)){setError(language==='en'?'Choose a PDF, JPG or PNG.':'Alege un PDF, JPG sau PNG.');return;}const form=new FormData();form.set('file',file);form.set('recordId',record.id);await act(async()=>{const res=await fetch('/api/v1/files',{method:'POST',body:form});const out=await res.json().catch(()=>({}));if(!res.ok)throw new Error(out.error||(language==='en'?'Upload failed.':'Încărcarea a eșuat.'));});}}
+            />}
+            {['Întreținere'].includes(tab) && (
               <>
                 {tab === 'Documente' && (
                   <>
@@ -1611,7 +1621,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             {openedSmartDrive && <div hidden={tab !== 'Plan întreținere'}><MileagePlanner data={data} initialDrive={initialDrive} driveVisible={tab === 'Plan întreținere'} preview={!!previewData} onUpdated={refresh} onError={setError} /></div>}
             {tab === 'Notificări' && (
               <div className="overview-stack">
-                <PushSettings
+                <section className="ac-m-notification-intro" data-workspace-ui><span><BellRing size={76} strokeWidth={1.2}/><b>{data.notifications.filter(row=>!row.readAt).length}</b></span><h2>{data.notifications.some(row=>!row.readAt)?(language==='en'?'Your new notifications':'Notificările tale noi'):(language==='en'?'You are up to date':'Ești la zi')}</h2><p>{language==='en'?'Your vehicle deadlines and important alerts, in one place.':'Termenele mașinii și alertele importante, într-un singur loc.'}</p><button className="ac-m-primary" onClick={()=>document.querySelector('.autocare-notifications')?.scrollIntoView({behavior:'smooth',block:'start'})}>{language==='en'?'View notifications':'Vezi notificările'}<ChevronRight size={18}/></button></section>
+                <details className="ac-notification-setup"><summary>{language==='en'?'Notification delivery settings':'Setări de livrare a notificărilor'}</summary><PushSettings
                   configured={data.notificationSetup.pushConfigured}
                   emailConfigured={data.notificationSetup.emailConfigured}
                   preview={!!previewData}
@@ -1623,7 +1634,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                     ).then(() => {})
                   }
                 />
-                <ReminderInbox
+                </details><ReminderInbox
                   data={data}
                   open={(record) =>
                     setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })
