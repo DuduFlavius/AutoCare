@@ -8,7 +8,10 @@ export function proxy(request: NextRequest) {
     origin(),
     process.env.VERCEL_ENV,
   );
-  return destination ? NextResponse.redirect(destination, 307) : NextResponse.next();
+  if(destination)return NextResponse.redirect(destination,307);
+  const headers=new Headers(request.headers);
+  headers.set('x-autocare-public-language',request.nextUrl.pathname==='/en'||request.nextUrl.pathname.startsWith('/en/')?'en':'ro');
+  return NextResponse.next({request:{headers}});
 }
 export const config = {
   matcher: ['/((?!_next/static|_next/image|icon-192.png|icon-512.png|icon.svg).*)'],
