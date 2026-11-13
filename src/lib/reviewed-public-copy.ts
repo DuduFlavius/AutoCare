@@ -1,3 +1,4 @@
+import {discoveryPages,discoveryPagesEn} from './discovery-pages';
 // Reviewed English copy for public pages. Source data and legal draft qualifications are preserved.
 export const reviewedPublicCopy: Record<string,string> = {
   "Înregistrează drumurile cu Smart GPS": "Record your drives with Smart GPS",
@@ -271,3 +272,22 @@ Object.assign(reviewedPublicCopy, {"Abonamente AutoCare":"AutoCare subscriptions
 Object.assign(reviewedPublicCopy, {"Tarife în RON sau EUR. Abonamente recurente, administrate în portalul de facturare. Checkout-ul este disponibil numai după configurarea și verificarea procesatorului.":"Prices in RON or EUR. Recurring subscriptions are managed in the billing portal. Checkout requires a configured and verified payment processor.","Prețul Stripe nu corespunde monedei, sumei sau perioadei selectate.":"The Stripe price does not match the selected currency, amount or billing period.","Prețul Stripe nu este configurat pentru acest abonament.":"No Stripe price is configured for this plan.","Există mai multe prețuri EUR potrivite. Configurează identificatorul Stripe exact.":"Multiple EUR prices match. Configure the exact Stripe Price ID.","Prețul EUR nu este disponibil pentru acest abonament.":"The EUR price is not available for this plan.","Descarcă fișierul original":"Download original file"});
 
 Object.assign(reviewedPublicCopy, {"Plățile EUR sunt în curs de validare. Alege RON sau revino după activare.":"EUR payments are awaiting verification. Choose RON or return once EUR is enabled."});
+
+Object.assign(reviewedPublicCopy, {
+'Prețurile disponibile sunt afișate în pagina de abonamente, în RON și EUR. Reînnoirea și anularea se gestionează în portalul de facturare. Operatorul trebuie să completeze condițiile privind TVA, facturarea, rambursarea, retragerea și reclamațiile înainte de aprobarea acestor termeni.':'Available prices are shown on the subscription page in RON and EUR. Renewals and cancellations are managed in the billing portal. The operator must complete VAT, invoicing, refund, withdrawal and complaint terms before these conditions are approved.'
+});
+
+Object.assign(reviewedPublicCopy, {
+ 'Cookie-urile necesare păstrează autentificarea și preferințele. Analiza opțională, dacă este configurată, se activează numai după acordul tău.':'Necessary cookies preserve authentication and preferences. Optional analytics, when configured, starts only after your consent.',
+ 'Nu folosim module de publicitate. Google Analytics 4 poate fi activat numai dacă operatorul configurează un identificator valid și accepți analiza din pagina publică. Refuzul nu afectează accesul. Preferințele pot fi schimbate din controlul de analiză din subsol; la retragere, trimiterile se opresc după reîncărcarea paginii.':'We do not use advertising modules. Google Analytics 4 can start only when the operator configures a valid measurement ID and you accept analytics on a public page. Refusal does not affect access. Change your choice using the analytics control in the footer; withdrawing consent stops transmission after the page reloads.',
+ 'Fără analiză sau marketing':'Optional analytics and no advertising',
+});
+
+for(const key of Object.keys(discoveryPages) as Array<keyof typeof discoveryPages>){
+ const ro=discoveryPages[key],en=discoveryPagesEn[key];
+ reviewedPublicCopy[ro.title]=en.title;reviewedPublicCopy[ro.intro]=en.intro;
+ ro.sections.forEach((section,index)=>section.forEach((text,column)=>{reviewedPublicCopy[text]=en.sections[index][column];}));
+}
+
+reviewedPublicCopy['Analiză opțională, fără publicitate']='Optional analytics, no advertising';
+reviewedPublicCopy['Abonamente']='Subscriptions';
