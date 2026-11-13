@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { MobileCockpit } from './mobile-cockpit';
 import ReferenceArtwork,{type ReferenceArtworkName} from '../reference-artwork';
 import { dashboardCopy } from '@/lib/dashboard-copy';
 import { ArrowUpRight, Files, CarFront, History, Sparkles, Send, CalendarDays, ChevronRight, Clock3, Plus } from 'lucide-react';
@@ -55,7 +56,7 @@ export default function ApplicationHome({data,name,selectedVehicle,onSelectVehic
   {art:'document' as ReferenceArtworkName,label:t('Documente care expiră'),value:String(attention.length),detail:t('≤ 30 zile'),go:'Documente'},
   {art:'gauge' as ReferenceArtworkName,label:t('Kilometraj confirmat'),value:car?car.odometer.toLocaleString(locale):'—',detail:car?'km':'',go:'Kilometraj'},
  ];
- return <div className="ac-reference" data-workspace-ui>
+ return <><MobileCockpit data={data} selectedVehicle={selectedVehicle} onSelectVehicle={onSelectVehicle} navigate={navigate} onVehicle={onVehicle} onCreate={onCreate} onRecord={onRecord} currency={currency}/><div className="ac-reference ac-home-desktop" data-workspace-ui>
   <header className="ac-ref-welcome"><div><p>{t('Bine ai venit,')}</p><h1 id="workspace-page-title" tabIndex={-1}><span data-user-content>{name.trim().split(/\s+/)[0]}!</span> <span className="ac-ref-wave" aria-hidden="true"><ReferenceArtwork name="wave" width={48} height={49}/></span></h1><span>{t('Garajul tău. Mereu sub control.')}</span></div><div className="ac-ref-hero-actions"><button onClick={()=>navigate('Garaj')}><ReferenceArtwork name="garage-button" width={28} height={26}/>{t('Garajul meu')}</button><button className="ac-ref-primary" onClick={()=>navigate('Plan întreținere')}><ReferenceArtwork name="plane" width={29} height={29}/>SmartDrive</button></div></header>
   {!car?<AppEmpty Icon={CarFront} title={t('Adaugă prima mașină')} description={t('Documente, revizii și costuri. Totul începe cu mașina ta.')} action={t('Adaugă vehicul')} onAction={()=>onCreate('vehicle')}/>:<>
   {cars.length>3&&<div className="ac-ref-scope"><span><span className="ac-ref-live"/>{t('Prezentarea garajului')}</span><label><CarFront size={14}/><select aria-label={t('Vehicul selectat')} value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{cars.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>)}</select></label></div>}
@@ -71,5 +72,5 @@ export default function ApplicationHome({data,name,selectedVehicle,onSelectVehic
   </div>
   <section className="ac-ref-ai"><span className="ac-ref-ai-icon"><Sparkles size={22}/></span><div><strong>AutoCare AI <small>Premium</small></strong><p>{t('Claritate pentru următorul drum.')}</p></div><form onSubmit={e=>{e.preventDefault();openAI();}}><input aria-label={t('Întrebarea pentru AI')} placeholder={data.premium?t('Întreabă despre mașina ta…'):t('Disponibil cu Premium')} maxLength={600} value={question} onChange={e=>setQuestion(e.target.value)} disabled={!data.premium}/><button type="submit" aria-label={t('Deschide chatul')}><Send size={18}/></button></form></section>
   </>}
- </div>;
+ </div></>;
 }
