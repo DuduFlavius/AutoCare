@@ -1,0 +1,12 @@
+# Mail Studio delivery
+
+- Gmail must be connected and tested. The existing Founder approval and deployment flag still gate automation; this change does not bypass them.
+- Signup queues one welcome per user. The auth Route Handler dispatches after returning a successful registration response. The initial welcome may reach the address just supplied at signup, even before verification, only for the server-generated `welcome:<userId>` event, within the existing 24-hour window. Other automated messages retain the verification and preference rules.
+- Published AutoCare News releases enter the persistent queue on their selected release date. Technical Git commits do not automatically become marketing announcements. The Founder writes the actual release description and selects opted-in recipients; each version is reserved once.
+- A supervised local worker checks the authenticated mail job every 30 seconds while Render is running. It can resume approved automatic mail and manual campaigns explicitly started within the previous 24 hours. Drafts and unknown delivery outcomes are never automatically sent or replayed. Recipient preferences, account restrictions and provider authorization are checked again.
+- Render Free sleeping pauses the worker. Startup and new registration/publication requests resume processing. Guaranteed delivery while the site sleeps still needs the configured external scheduled job; the optional GitHub cron configuration is documented in MAIL_RENDER_SETUP.md.
+- Default templates use the recipient's saved RO/EN preference. Registration falls back to Accept-Language when no explicit language cookie exists; no IP lookup or location storage is used.
+- Custom campaigns and reusable templates can have a separate English subject/message/button. The English copy is stored in settings and selected at delivery; custom text is never presented as automatically translated when no English copy was supplied.
+- Campaign content, recipients and English copy are covered by the same immutable fingerprint and save transaction. All custom HTML is escaped. CTA destinations remain restricted to the AutoCare origin.
+
+Verification: automated provider mocks test permission checks, preference enforcement, deduplication, language selection and safe HTML. The worker integration test uses only a local fake HTTP server and checks bearer authentication and shutdown. These checks do not prove real Inbox delivery. Use Founder → Gmail test to confirm the provider before authorizing automation.
