@@ -250,6 +250,18 @@ export async function archiveRecord(uid: string, id: string) {
       );
   });
 }
+export async function restoreRecord(uid: string, id: string) {
+  await db().transaction(async tx => {
+    const previous = (await tx.select().from(s.records).where(and(eq(s.records.id,id),eq(s.records.userId,uid))).for('update'))[0];
+    if (!previous) throw new AppError(404, 'Înregistrare inexistentă.');
+    if (!previous.cancelled) return;
+    const car = (await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id,previous.vehicleId),eq(s.vehicles.userId,uid))))[0];
+    if (!car) throw new AppError(404, 'Mașină inexistentă.');
+    if (car.archived) throw new AppError(400, 'Mașina este arhivată.');
+    await tx.insert(s.recordHistory).values({id:crypto.randomUUID(),userId:uid,recordId:id,snapshot:previous});
+    await tx.update(s.records).set({cancelled:false,revision:previous.revision+1}).where(and(eq(s.records.id,id),eq(s.records.userId,uid)));
+  });
+}
 export async function saveProfile(uid: string, input: unknown) {
   const data = profileInput.parse(input);
   if (
