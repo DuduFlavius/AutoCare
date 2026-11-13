@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, ShieldCheck, Copy, Square, ChevronDown, PanelLeftClose, PanelLeftOpen, MessageSquareText, Wrench, CalendarDays, BarChart3, UserRound, CheckCheck } from 'lucide-react';
+import { ArrowUpRight, FileScan, MapPin, Send, Sparkles, Trash2, ShieldCheck, Copy, Square, ChevronDown, PanelLeftClose, PanelLeftOpen, MessageSquareText, Wrench, CalendarDays, BarChart3, UserRound, CheckCheck, MoreHorizontal } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { TitaniumWave } from '../titanium-wave';
@@ -32,25 +32,31 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, avail
   useLayoutEffect(() => {
     const element = page.current;
     if (!element || !hasChat) return;
+    let frame = 0;
+    let previousHeight = -1;
     const update = () => {
+      frame = 0;
       const viewport = window.visualViewport;
       const bottom = (viewport?.height ?? window.innerHeight) + (viewport?.offsetTop ?? 0);
       const navigation = document.querySelector<HTMLElement>('.autocare-mobile-dock');
       const navRect = navigation?.getBoundingClientRect();
       const reserved = navRect && navRect.height && navRect.top < bottom && getComputedStyle(navigation!).position === 'fixed' ? bottom - navRect.top : 0;
       const height = Math.max(180, bottom - element.getBoundingClientRect().top - reserved - 12);
+      if (Math.abs(height - previousHeight) < 1) return;
+      previousHeight = height;
       element.style.setProperty('--ai-page-height', height + 'px');
       element.toggleAttribute('data-compact-chat', height < 420);
     };
     update();
-    const observer = new ResizeObserver(update);
+    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
+    const observer = new ResizeObserver(schedule);
     observer.observe(document.querySelector('header') ?? element);
     const dock = document.querySelector('.autocare-mobile-dock');
     if (dock) observer.observe(dock);
-    window.addEventListener('resize', update);
-    window.visualViewport?.addEventListener('resize', update);
-    window.visualViewport?.addEventListener('scroll', update);
-    return () => { observer.disconnect(); window.removeEventListener('resize', update); window.visualViewport?.removeEventListener('resize', update); window.visualViewport?.removeEventListener('scroll', update); };
+    window.addEventListener('resize', schedule);
+    window.visualViewport?.addEventListener('resize', schedule);
+    window.visualViewport?.addEventListener('scroll', schedule);
+    return () => { observer.disconnect(); window.cancelAnimationFrame(frame); window.removeEventListener('resize', schedule); window.visualViewport?.removeEventListener('resize', schedule); window.visualViewport?.removeEventListener('scroll', schedule); };
   }, [hasChat]);
   return (
     <div ref={page} className="ac-ai-page" data-chat={hasChat || undefined} data-workspace-ui>
@@ -165,12 +171,7 @@ function AiConversation({ vehicleId, available, preview, onSaved }: { vehicleId:
     <div className="ac-ai-layout ac-ai-chatgpt-layout">
       <div className="ac-ai-main">
       <section className="card ac-ai-chat" aria-label={t('Conversație AutoCare AI', 'AutoCare AI conversation')}>
-        <div className="ac-ai-heading"><button className="ac-ai-history-toggle" type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)} title={t('Istoric conversații', 'Chat history')}>{historyOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />} <span>{t('Istoric', 'History')}</span></button><h3><Sparkles size={19} /> AutoCare AI</h3><span className="ac-ai-online"><span /> {available ? t('AI disponibil', 'AI available') : t('Indisponibil', 'Unavailable')}</span><button className="ac-ai-new-chat" type="button" disabled={pending || loading} onClick={() => { setChatStartId(turns.at(-1)?.id ?? ''); setHistoryDay(null); setHistoryOpen(false); setQuestion(''); setError(''); setNotice(''); autoScroll.current = true; input.current?.focus(); }} title={t('Conversație nouă', 'New conversation')}><MessageSquareText size={16}/><span>{t('Chat nou', 'New chat')}</span></button>
-          {turns.length > 0 && <button type="button" disabled={pending || loading} onClick={() => {
-            if (window.confirm(t('Ștergi istoricul AI pentru această mașină?', 'Clear AI history for this vehicle?')))
-              void run(async signal => { await request('auto-assistant/history', { ...json('DELETE', { vehicleId }), signal }); setTurns([]); setChatStartId(undefined); setHistoryDay(null); setHistoryOpen(false); });
-          }}><Trash2 size={16} />{t('Șterge istoricul', 'Clear history')}</button>}
-        </div>
+        <div className="ac-ai-heading"><h3><Sparkles size={18}/> AutoCare AI</h3><span className="ac-ai-online"><span/>{available?t('AI disponibil','AI available'):t('Indisponibil','Unavailable')}</span><button className="ac-ai-new-chat" type="button" disabled={pending||loading} onClick={()=>{setChatStartId(turns.at(-1)?.id??'');setHistoryDay(null);setHistoryOpen(false);setQuestion('');setError('');setNotice('');autoScroll.current=true;input.current?.focus();}}><MessageSquareText size={16}/><span>{t('Chat nou','New chat')}</span></button><details className="ac-ai-actions-menu"><summary aria-label={t('Opțiuni conversație','Conversation options')}><MoreHorizontal size={21}/></summary><div><button type="button" onClick={event=>{event.currentTarget.closest('details')?.removeAttribute('open');setHistoryOpen(value=>!value);}}><PanelLeftOpen size={17}/>{t('Istoric conversații','Chat history')}</button>{turns.length>0&&<button type="button" disabled={pending||loading} onClick={event=>{event.currentTarget.closest('details')?.removeAttribute('open');if(window.confirm(t('Ștergi istoricul AI pentru această mașină?','Clear AI history for this vehicle?')))void run(async signal=>{await request('auto-assistant/history',{...json('DELETE',{vehicleId}),signal});setTurns([]);setChatStartId(undefined);setHistoryDay(null);setHistoryOpen(false);});}}><Trash2 size={17}/>{t('Șterge istoricul','Clear history')}</button>}</div></details></div>
         {historyOpen && <div className="ac-ai-history-overlay"><button type="button" className="ac-ai-history-backdrop" aria-label={t('Închide istoricul', 'Close history')} onClick={() => setHistoryOpen(false)} /><nav className="ac-ai-history-panel" aria-label={t('Istoricul conversațiilor', 'Conversation history')}><div className="ac-ai-history-title"><strong>{t('Conversațiile tale', 'Your conversations')}</strong><button type="button" onClick={() => setHistoryOpen(false)} aria-label={t('Închide', 'Close')}><PanelLeftClose size={17}/></button></div><button type="button" className={historyDay === null ? 'active' : ''} onClick={() => { setChatStartId(undefined); setHistoryDay(null); setHistoryOpen(false); }}>{t('Toate mesajele', 'All messages')} <span>{turns.length}</span></button>{historyDays.map(day => <button type="button" className={historyDay === day ? 'active' : ''} key={day} onClick={() => { setHistoryDay(day); setHistoryOpen(false); }}>{new Date(day + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}<span>{turns.filter(turn => turn.createdAt.startsWith(day)).length}</span></button>)}{!historyDays.length && <p>{t('Nu există conversații salvate.', 'No saved conversations yet.')}</p>}</nav></div>}
         {!available && <p className="ac-ai-state" role="status">{t('Conexiunea AI nu este configurată. Contactează administratorul.', 'AI is not configured. Contact support.')}</p>}
         <div ref={messageScroll} className="ac-ai-message-scroll" role="log" aria-label={t('Mesaje', 'Messages')} onScroll={event => { const el = event.currentTarget; autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 140; }}>
