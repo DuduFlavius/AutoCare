@@ -268,6 +268,17 @@ test('05 Records enforce owner, track changes, and keep expiry incomplete if omi
   });
   assert.equal(foreign.status, 404);
 });
+test('archived records restore only for their owner, preserve data, and create one audit revision',async()=>{
+ const record=await svc.saveRecord(uid,{kind:'expense',category:'Alte cheltuieli',title:'Restorable receipt',vehicleId:car.id,date:'2030-03-01',amountBani:12345,amountKnown:true});
+ await svc.archiveRecord(uid,record.id);
+ await assert.rejects(()=>svc.restoreRecord(other,record.id));
+ await svc.restoreRecord(uid,record.id);
+ await svc.restoreRecord(uid,record.id);
+ const restored=await svc.ownedRecord(uid,record.id);
+ assert.equal(restored.cancelled,false);assert.equal(restored.amountBani,12345);assert.equal(restored.title,record.title);assert.equal(restored.revision,record.revision+2);
+ assert.equal((await db().select().from(s.recordHistory).where(eq(s.recordHistory.recordId,record.id))).length,1);
+ await svc.archiveRecord(uid,record.id);
+});
 test('06 Scheduler offsets, date boundary, deduplication and acceptance', async () => {
   await db()
     .insert(s.subscriptions)
