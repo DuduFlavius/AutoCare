@@ -1,3 +1,4 @@
+import {registrationLanguage} from './mail-language';
 import {languageCookie} from './language-preference';
 import {languagePreferenceKey,userLanguage} from './user-language';
 import { eq, inArray } from 'drizzle-orm';
@@ -100,7 +101,7 @@ function makeAuth() {
       user: {
         create: {
           after: async (u,ctx) => {
-            const language=languageCookie(ctx?.headers?.get('cookie'));
+            const language=languageCookie(ctx?.headers?.get('cookie'))??registrationLanguage(ctx?.headers?.get('accept-language'));
             if(language) await db().insert(schema.settings).values({key:languagePreferenceKey(u.id),value:{language}}).onConflictDoUpdate({target:schema.settings.key,set:{value:{language}}});
             try {
               await queueAutomatedMail(u.id, 'welcome', `welcome:${u.id}`);
