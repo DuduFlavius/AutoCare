@@ -1,3 +1,5 @@
+import { discoveryPages } from './discovery-pages';
+import { publicLanguageAlternates } from './public-routes';
 import { technologyPages } from './public-technology';
 import type { Metadata } from 'next';
 import { origin, appName } from './config';
@@ -91,6 +93,7 @@ export const seoTitles: Record<string, string> = {
   'intrebari-frecvente': 'Întrebări frecvente despre AutoCare',
 };
 export const indexableSlugs = [
+  ...Object.keys(discoveryPages),
   'despre-noi',
   'aplicatie-auto',
   'instaleaza',
@@ -100,7 +103,6 @@ export const indexableSlugs = [
   ...Object.keys(technologyPages),
   'contact',
   'preturi',
-  'comparatie',
   'autocare-ai',
   'intrebari-frecvente',
 ];
@@ -109,7 +111,7 @@ export function publicMetadata(title: string, description: string, path: string)
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: url, languages: publicLanguageAlternates(path, origin()) },
     openGraph: {
       title,
       description,
