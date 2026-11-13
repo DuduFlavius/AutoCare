@@ -7,13 +7,15 @@ export function Brand({
   href = '/start',
   onClick,
   reference=false,
+  label="AutoCare · pagina principală",
 }: {
   href?: string;
   reference?:boolean;
+  label?:string;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }) {
   return (
-    <Link className="brand" href={href} onClick={onClick} aria-label="AutoCare · pagina principală">
+    <Link className="brand" href={href} onClick={onClick} aria-label={label}>
       {reference?<ReferenceArtwork name="wordmark" width={174} height={46} alt="AutoCare"/>:<><span className="brandmark">
         <Settings size={26} strokeWidth={2.1} />
       </span>
