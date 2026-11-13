@@ -35,6 +35,7 @@ export default function ApplicationHeader({
   const en = useApplicationLanguage() === 'en';
   return (
     <header className="app-header app-topbar" data-workspace-ui>
+      <div className="ac-m-header"><div>{title===(en?'Home':'Acasă')?<><span>{en?'Welcome,':'Bun venit,'}</span><strong data-user-content>{name.trim().split(/\s+/)[0]} <span aria-hidden="true">👋</span></strong></>:<h1>{title===(en?'Account':'Cont')?(en?'Settings':'Setări'):title===(en?'Expenses':'Cheltuieli')?(en?'Expense history':'Istoric cheltuieli'):title}</h1>}</div><div><select aria-label={en?'Language':'Limbă'} value={en?'en':'ro'} onChange={e=>onLanguage(e.target.value==='en'?'en':'ro')}><option value="ro">RO</option><option value="en">EN</option></select><button onClick={onNotifications} aria-label={en?'Notifications':'Notificări'}><Bell size={23}/>{unread>0&&<small>{unread>99?'99+':unread}</small>}</button><button className="ac-m-avatar" onClick={onAccount} aria-label={en?'Account and settings':'Cont și setări'}>{name.trim().split(/\s+/).map(value=>value[0]).slice(0,2).join('')}</button></div></div>
       <span className="app-topbar-brand">
         <span className="app-topbar-mark">
           {reference?<ReferenceArtwork name="gear" width={29} height={29}/>:<CarFront size={19} />}
