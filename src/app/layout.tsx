@@ -1,3 +1,4 @@
+import {headers} from 'next/headers';
 import AutoUpdate from '@/components/auto-update';
 import type { Metadata, Viewport } from 'next';
 import './design-system.css';
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
   ...(process.env.GOOGLE_SITE_VERIFICATION
     ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
     : {}),
+  ...(process.env.BING_SITE_VERIFICATION && /^[A-Fa-f0-9]{32}$/.test(process.env.BING_SITE_VERIFICATION) ? {other:{'msvalidate.01':process.env.BING_SITE_VERIFICATION}} : {}),
   applicationName: appName,
   appleWebApp: { capable: true, title: appName, statusBarStyle: 'default' },
   icons: {
@@ -53,9 +55,10 @@ export const metadata: Metadata = {
   },
 };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#090d14' };
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({ children }: { children: React.ReactNode }) {
+  const language=(await headers()).get('x-autocare-public-language')==='en'?'en':'ro';
   return (
-    <html lang="ro">
+    <html lang={language}>
       <body>{children}<AutoUpdate /></body>
     </html>
   );
