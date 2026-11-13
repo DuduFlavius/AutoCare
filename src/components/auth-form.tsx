@@ -118,7 +118,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
           </div>
         </div>
       </aside>
-      <div className="auth-box">
+      <div className="auth-box"><Link href="/start" className="ac-auth-brand"><ShieldCheck size={25}/><strong>AutoCare <span>Premium</span></strong></Link>
         <div
           className="ac-auth-language"
           data-workspace-ui
