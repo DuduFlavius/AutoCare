@@ -109,3 +109,13 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .ac-m-round{displ
 }
 @layer autocare-workspace{@media(max-width:760px){html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main>.ws-context-nav{display:none!important}}}
 @layer autocare-workspace{@media(max-width:760px){.ac-m-header>div:first-child>h1{font-size:21px!important;line-height:1.2!important;letter-spacing:-.025em!important;margin:0!important;color:#eef0ff!important;overflow-wrap:normal!important}}}
+@layer autocare-workspace {
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-car{display:flex!important;flex-direction:row!important;align-items:center!important;gap:12px!important;padding:16px!important;min-height:68px!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-car>select{display:block!important;flex:1!important;min-width:0!important;min-height:36px!important;width:100%!important;border:0!important;background:transparent!important;box-shadow:none!important;padding:3px!important}
+@media(max-width:760px){
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .ac-m-settings-list>button{width:100%!important;max-width:none!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .ac-m-settings-list>button>span{flex:1!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .ac-m-settings-list>button>svg:last-child:not(:first-child){margin-left:auto!important}
+.ac-m-finance-empty{min-height:75px;display:grid;align-content:center;color:#aab4d4;font-size:13px;line-height:1.6;max-width:28ch}
+}
+}
