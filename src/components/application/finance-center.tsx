@@ -63,6 +63,15 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
   const details = (row: Sample) => row.known ? money(row.bani) : row.count ? t('Cost necunoscut', 'Cost unknown') : t('Fără înregistrări', 'No entries');
   const changeText = (value: number | null) => value == null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(value) + '%';
   const from = range === '6' || range === '12' || range === '24' ? new Date(Date.UTC(y,m-Number(range),1)).toISOString().slice(0,10) : range === 'month' ? month + '-01' : range === 'year' ? year + '-01-01' : undefined;
+  const customCategoryPeriod=['6','12','24','all'].includes(range);
+  const categoryRows=report.entries.filter(row=>!row.cancelled&&row.amountKnown!==false&&row.date&&row.date<=today&&(!from||row.date>=from));
+  const categoryTotal=categoryRows.reduce((sum,row)=>sum+row.amountBani,0);
+  const priorFrom=customCategoryPeriod&&from&&range!=='all'?new Date(Date.UTC(y,m-Number(range)*2,1)).toISOString().slice(0,10):null;
+  const categoryItems=customCategoryPeriod?(Object.keys(groups) as FinanceGroup[]).map(group=>{
+    const bani=categoryRows.filter(row=>financeGroup(row)===group).reduce((sum,row)=>sum+row.amountBani,0);
+    const previousBani=priorFrom?report.entries.filter(row=>!row.cancelled&&row.amountKnown!==false&&row.date&&row.date>=priorFrom&&row.date<from!&&financeGroup(row)===group).reduce((sum,row)=>sum+row.amountBani,0):0;
+    return {group,bani,previousBani,share:categoryTotal?bani/categoryTotal*100:0,change:financialChange(bani,previousBani)};
+  }):report.categories(view);
   const filters = { q: query.trim(), archived: archived ? 'all' : 'active', from, to: from ? today : undefined } as const;
   const rows = filterRecords(report.entries.filter(row => !group || financeGroup(row) === group), filters)
     .sort((a, b) => sort === 'amount' ? Number(a.amountKnown === false) - Number(b.amountKnown === false) || b.amountBani - a.amountBani :
@@ -140,8 +149,8 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
       </div>
     </div>
     {data.premium && <section className="ac-finance-categories" aria-label={t('Categorii financiare', 'Expense categories')}>
-      <h3 className="ac-category-heading">{t('Cheltuieli pe categorii','Expenses by category')} <small>{view==='year'?year:month}</small></h3>
-      {report.categories(view).map(item => <button key={item.group} type="button" className="ac-finance-card" aria-pressed={group === item.group} onClick={() => { setGroup(group === item.group ? '' : item.group); setRange(view); setPage(0); }}>
+      <h3 className="ac-category-heading">{t('Cheltuieli pe categorii','Expenses by category')} <small>{customCategoryPeriod?(range==='all'?t('Tot istoricul','All history'):from+' – '+today):view==='year'?year:month}</small></h3>
+      {categoryItems.map(item => <button key={item.group} type="button" className="ac-finance-card" aria-pressed={group === item.group} onClick={() => { setGroup(group === item.group ? '' : item.group); setPage(0); }}>
         <span className="ac-category-label">{(() => { const Icon = categoryIcons[item.group]; return <Icon size={20}/>; })()}{groups[item.group]}</span><strong>{money(item.bani).replace(/\u00a0/g,' ')}</strong>
         <progress max={100} value={item.share} aria-label={t('Pondere în total', 'Share of total')} />
         <small>{item.share.toLocaleString(locale, { maximumFractionDigits: 1 })}% · {changeText(item.change)}</small>
