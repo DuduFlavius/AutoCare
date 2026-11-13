@@ -25,10 +25,10 @@ test('home prioritizes overdue work and does not invent deadlines',()=>{
   assert.equal(result.length,2);
   assert.equal(upcomingMaintenance([{...service,cancelled:true}],108000,70,'UTC',today).length,0);
 });
-test('mobile navigation gives GPS a direct entry and retains the existing destinations',()=>{
-  assert.equal(mobileWorkspaceSections.length,5);
-  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Plan întreținere'));
-  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cont'));
+test('mobile navigation has four clear destinations and retains secondary modules',()=>{
+  assert.equal(mobileWorkspaceSections.length,4);
+  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Documente'));
+  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cheltuieli'));
   for(const section of mobileWorkspaceSections)assert.ok(workspaceSections.some(s=>s.id===section.id));
   for(const id of ['Notificări','Setări','Plan întreținere','Premium','Abonament','Centru de suport','Istoric auto','Cheltuieli','Calendar','Kilometraj'])assert.ok(workspaceSections.some(s=>s.id===id));
 });
