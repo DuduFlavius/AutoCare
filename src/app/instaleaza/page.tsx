@@ -1,3 +1,4 @@
+import {PublicShell} from '@/components/public-shell';
 import InstallGuide from '@/components/install-guide';
 import { publicMetadata } from '@/lib/seo';
 
@@ -8,5 +9,5 @@ export const metadata = publicMetadata(
 );
 
 export default function InstallPage() {
-  return <InstallGuide />;
+  return <PublicShell dark><InstallGuide /></PublicShell>;
 }
