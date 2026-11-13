@@ -118,7 +118,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
           </div>
         </div>
       </aside>
-      <div className="auth-box"><Link href="/start" className="ac-auth-brand"><ShieldCheck size={25}/><strong>AutoCare <span>Premium</span></strong></Link>
+      <div className="auth-box"><div className="ac-auth-toolbar"><Link href="/start" className="ac-auth-brand"><ShieldCheck size={25}/><strong>AutoCare <span>Premium</span></strong></Link>
         <div
           className="ac-auth-language"
           data-workspace-ui
@@ -143,7 +143,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
             </select>
           </label>
         </div>
-        <p className="eyebrow">{t("GARAJUL TĂU DIGITAL", "YOUR DIGITAL GARAGE")}</p>
+        </div><p className="eyebrow">{t("GARAJUL TĂU DIGITAL", "YOUR DIGITAL GARAGE")}</p>
         <h1>
           {signup
             ? 'Creează cont'
@@ -158,7 +158,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
             ? 'Creează-ți contul pentru a adăuga prima mașină.'
             : 'Documentele și istoricul mașinii tale, la îndemână.'}
         </p>
-        {signup && <PublicAiIntro compact />}
+        {signup && <details className="ac-auth-ai-details"><summary><ShieldCheck size={17}/><span>AutoCare AI · Premium<small>{t('Asistentul AI este disponibil exclusiv cu Premium.','The AI assistant is available exclusively with Premium.')}</small></span></summary><PublicAiIntro compact /></details>}
         <form
           method="post"
           className="stack"
