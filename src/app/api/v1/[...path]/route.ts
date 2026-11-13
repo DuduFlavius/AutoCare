@@ -1,3 +1,5 @@
+import {after} from 'next/server';
+import {dispatchMailSafely} from '@/lib/mail-dispatch';
 import {languagePreferenceKey, userLanguage} from '@/lib/user-language';
 import { financeGroup, financeGroups, isFinancialEntry } from '@/lib/finance-overview';
 import { isPlannedService } from '@/lib/planned-service';
@@ -97,6 +99,10 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     const path = (await ctx.params).path;
     const route = path.join('/');
     const method = req.method;
+    if(route==='jobs/mail'&&method==='GET'){
+      if(!secret(req))return json({error:'Neautorizat'},401);
+      return json(await dispatchMailSafely());
+    }
     if (route === 'jobs/reminders' && method === 'GET') {
       if (!secret(req)) return json({ error: 'Neautorizat' }, 401);
       return json(await runJob());
@@ -255,7 +261,11 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (path[1] === 'mail' && path[2] === 'campaigns' && path[3]) {
         if (path.length === 4 && method === 'GET') return json(await mailCenter.campaignDetail(uid, path[3]));
         if (path.length === 5 && path[4] === 'retry-failed' && method === 'POST') return json(await mailCenter.retryFailedCampaign(uid, path[3]));
-        if (path.length === 5 && path[4] === 'publish-release' && method === 'POST') return json(await mailCenter.publishReleaseNews(uid, path[3], await body(req)));
+        if (path.length === 5 && path[4] === 'publish-release' && method === 'POST') {
+          const result=await mailCenter.publishReleaseNews(uid,path[3],await body(req));
+          after(async()=>{await dispatchMailSafely();});
+          return json(result);
+        }
         if (path.length === 5 && path[4] === 'send' && method === 'POST') return json(await mailCenter.sendCampaign(uid, path[3]));
       }
 
