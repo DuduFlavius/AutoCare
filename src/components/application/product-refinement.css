@@ -89,3 +89,14 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspa
 }
 
 @layer autocare-workspace{@media(max-width:600px){.ac-finance-plot text{font-size:24px!important}.ac-finance-plot .ac-finance-month-alternate{display:none}}}
+@layer autocare-workspace{.ac-finance-categories>.ac-category-heading{grid-column:1/-1;font-size:18px;display:flex;justify-content:space-between;gap:12px;align-items:center;margin:0!important}.ac-category-heading small{font-size:13px;font-weight:400;color:#a8b7d4}}
+@layer autocare-workspace {
+@media(max-width:900px){html body .app-shell.ac-workspace.ac-studio.ac-reference-theme>.app-header.app-topbar :is(.app-header-premium,.app-header-signout){display:none!important}}
+@media(max-width:600px){
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme>.app-header.app-topbar{padding-inline:10px!important;gap:6px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme>.app-header.app-topbar .app-topbar-brand strong{display:none!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme>.app-header.app-topbar .app-avatar-button{display:grid!important;width:42px!important;min-width:42px!important;height:42px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme>.app-header.app-topbar .app-icon-button{width:40px!important;min-width:40px!important;min-height:44px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme>.app-header.app-topbar .app-topbar-actions{gap:4px!important}
+}
+}
