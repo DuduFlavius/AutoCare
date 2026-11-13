@@ -24,3 +24,9 @@ export async function pricing() {
   };
 }
 export { savings } from './pricing-display';
+
+/** Public display needs only the fixed LIVE tariff, never Price IDs or account data. */
+export async function publicPricing() {
+  if (process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS === 'true' || !process.env.DATABASE_URL && !process.env.LOCAL_DATABASE_PATH) return { ...DEFAULT_PRICING };
+  return pricing();
+}
