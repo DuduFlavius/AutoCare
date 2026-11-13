@@ -119,3 +119,21 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .ac-m-settings-li
 .ac-m-finance-empty{min-height:75px;display:grid;align-content:center;color:#aab4d4;font-size:13px;line-height:1.6;max-width:28ch}
 }
 }
+@layer autocare-workspace {
+/* Static, abstract vehicle identity: no car image and no continuous animation. */
+.ac-m-vehicle-art.ac-m-vehicle-emblem{position:relative;isolation:isolate;display:grid;place-items:center;width:76px;min-width:76px;height:86px;background:transparent;color:#c7c3f4;gap:0}
+.ac-m-emblem-orbit{position:absolute;inset:7px 2px 12px;border:1px solid #a696e942;border-radius:22px;transform:rotate(-10deg);background:linear-gradient(145deg,#8472db18,#8472db03)}
+.ac-m-vehicle-emblem>svg{filter:none!important;z-index:1}.ac-m-vehicle-emblem>.ac-m-emblem-caption{position:relative;font-size:8px;letter-spacing:.19em;margin-top:-2px;color:#a8a4c7;z-index:1}
+@media(max-width:760px){
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main{background:linear-gradient(#080b1ce8,#080b1cc9),url('/mobile-reference/aurora.svg') center bottom/100% auto no-repeat scroll,#080b1c!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme>.app-header.app-topbar,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .autocare-mobile-dock.app-bottom-nav{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#0b0e22!important;box-shadow:none!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .autocare-mobile-dock.app-bottom-nav>a.active>svg{filter:none!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-filters{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:10px!important;align-items:stretch!important;width:100%!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-filters>.ac-m-search{display:flex!important;flex-direction:row!important;align-items:center!important;grid-column:1/-1!important;min-width:0!important;width:100%!important;min-height:48px!important;padding:0 13px!important;border:1px solid #8274bd42!important;background:#12162d!important;border-radius:13px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-filters>.ac-m-search>svg{flex:none!important;color:#b4bddd!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-filters>.ac-m-search>input{width:100%!important;min-width:0!important;min-height:46px!important;font-size:16px!important;padding:10px 0!important;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;color:#edf0ff!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-filters>select{display:block!important;width:100%!important;min-width:0!important;min-height:46px!important;padding:10px 24px 10px 10px!important;font-size:13px!important;line-height:1.5!important;background:#12162d!important;border:1px solid #8274bd42!important;border-radius:12px!important;color:#d9dff4!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-archive-filter{grid-column:1/-1!important;display:flex!important;align-items:center!important;gap:9px!important;min-height:36px!important;font-size:12px!important;color:#acb8d8!important}
+}
+@media(max-width:360px){html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-filters{grid-template-columns:minmax(0,1fr)!important}}
+}
