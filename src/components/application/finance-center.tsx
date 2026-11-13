@@ -136,7 +136,8 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
       </div>
     </div>
     {data.premium && <section className="ac-finance-categories" aria-label={t('Categorii financiare', 'Expense categories')}>
-      {report.categories(view).map(item => <button key={item.group} type="button" className="ac-finance-card" aria-pressed={group === item.group} onClick={() => { setGroup(group === item.group ? '' : item.group); setRange(group === item.group ? 'all' : view); setPage(0); }}>
+      <h3 className="ac-category-heading">{t('Cheltuieli pe categorii','Expenses by category')} <small>{view==='year'?year:month}</small></h3>
+      {report.categories(view).map(item => <button key={item.group} type="button" className="ac-finance-card" aria-pressed={group === item.group} onClick={() => { setGroup(group === item.group ? '' : item.group); setRange(view); setPage(0); }}>
         <span className="ac-category-label">{(() => { const Icon = categoryIcons[item.group]; return <Icon size={20}/>; })()}{groups[item.group]}</span><strong>{money(item.bani).replace(/\u00a0/g,' ')}</strong>
         <progress max={100} value={item.share} aria-label={t('Pondere în total', 'Share of total')} />
         <small>{item.share.toLocaleString(locale, { maximumFractionDigits: 1 })}% · {changeText(item.change)}</small>
@@ -155,7 +156,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
       <div className="ac-finance-filters">
         <input type="search" maxLength={250} placeholder={t('Caută în cheltuieli…', 'Search expenses…')} aria-label={t('Caută cheltuieli', 'Search expenses')} value={query} onChange={e => { setQuery(e.target.value); setPage(0); }} />
         <select aria-label={t('Categorie', 'Category')} value={group} onChange={e => { setGroup(e.target.value); setPage(0); }}><option value="">{t('Toate categoriile', 'All categories')}</option>{Object.entries(groups).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
-        <select aria-label={t('Perioadă', 'Period')} value={range} onChange={e => { setRange(e.target.value); setPage(0); }}><option value="all">{t('Tot istoricul', 'All history')}</option><option value="month">{t('Luna curentă', 'Current month')}</option><option value="year">{t('Anul curent', 'Current year')}</option></select>
+        <select aria-label={t('Perioadă', 'Period')} value={range} onChange={e => { setRange(e.target.value); if(e.target.value==='month'||e.target.value==='year'){setView(e.target.value);setPoint(null);} setPage(0); }}><option value="all">{t('Tot istoricul', 'All history')}</option><option value="month">{t('Luna curentă', 'Current month')}</option><option value="year">{t('Anul curent', 'Current year')}</option></select>
         <select aria-label={t('Sortare', 'Sort order')} value={sort} onChange={e => { setSort(e.target.value); setPage(0); }}><option value="recent">{t('Cele mai recente', 'Newest first')}</option><option value="old">{t('Cele mai vechi', 'Oldest first')}</option><option value="category">{t('Categorie A–Z', 'Category A–Z')}</option><option value="amount">{t('Valoare descrescătoare', 'Highest value')}</option></select>
         <label className="check"><input type="checkbox" checked={archived} onChange={e => { setArchived(e.target.checked); setPage(0); }} /> {t('Include arhivate', 'Include archived')}</label>
       </div>
