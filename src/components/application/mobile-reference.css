@@ -137,3 +137,12 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .ac-m-settings-li
 }
 @media(max-width:360px){html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-document-screen .ac-vault-filters{grid-template-columns:minmax(0,1fr)!important}}
 }
+@layer autocare-workspace {
+@media(min-width:761px){
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .app-account>.ac-account-hub-grid{grid-column:1/-1!important;width:100%!important;min-width:0!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .app-account-links .app-record-row{width:100%!important;min-width:0!important;gap:10px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .app-account-links .app-record-row>span:nth-child(2){flex:1!important;min-width:0!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .app-account-links .app-record-row strong{word-break:normal!important;overflow-wrap:break-word!important}
+}
+@media(min-width:761px) and (max-width:1100px){html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .app-account>.ac-account-hub-grid{grid-template-columns:minmax(0,1fr)!important}}
+}
