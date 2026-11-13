@@ -14,7 +14,7 @@ import {automaticTripBatch} from '@/lib/automatic-trips';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { filterRecords } from '@/lib/record-filters';
 import * as founder from '@/lib/founder';
-import { pricing, savings } from '@/lib/pricing';
+import { pricing, publicPricing, savings } from '@/lib/pricing';
 import * as supportChat from '@/lib/support-chat';
 import { emailWebhook } from '@/lib/email-events';
 import { and, eq, desc, sql, isNull, inArray } from 'drizzle-orm';
@@ -128,7 +128,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       return json(await processStripeEvent(event, stripe()));
     }
     if (route === 'pricing' && method === 'GET') {
-      const p = await pricing();
+      const p = await publicPricing();
       return json({
         monthlyBani: p.monthlyBani,
         annualBani: p.annualBani,
