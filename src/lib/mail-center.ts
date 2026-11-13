@@ -1,3 +1,4 @@
+import {campaignEnglish,englishMailSchema} from './mail-localization';
 import {userLanguage} from './user-language';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { createHash } from 'node:crypto';
@@ -66,6 +67,7 @@ const inputSchema = z
   .object({
     id: z.uuid(),
     communicationType: z.string().trim().min(2).max(100).default('Informare cont'),
+    englishContent:englishMailSchema.optional(),
     template: z.enum(templateIds),
     category: z.enum(['transactional', 'promotional']),
     subject: z
@@ -115,6 +117,7 @@ export async function getCommunicationPreference(uid: string) {
 }
 const libraryEntrySchema = z.object({
   id: z.uuid(), kind: z.enum(['template', 'communication']),
+  englishContent:englishMailSchema.optional(),
   label: z.string().trim().min(2).max(100),
   category: z.enum(['transactional', 'promotional']),
   template: z.enum(templateIds).default('administrative'),
@@ -261,6 +264,7 @@ export async function saveCampaign(uid: string, input: unknown) {
       fingerprint,
       status: 'draft',
     });
+    if(data.englishContent)await tx.insert(s.settings).values({key:'mail-english:'+data.id,value:data.englishContent});
     await tx.insert(s.settings).values({ key: 'mail-kind:' + data.id, value: { label: data.communicationType } });
     await tx.insert(s.mailDeliveries).values(
       data.recipients.map((userId) => ({
@@ -354,7 +358,7 @@ export async function deliverCampaign(
         (campaign.source === 'automation' &&
           campaign.template === 'welcome' &&
           now.getTime() - campaign.createdAt.getTime() > 86400000) ||
-        !(await recipientAllowed(candidate.userId, campaign.category, campaign.source === 'manual')) ||
+        !(await recipientAllowed(candidate.userId, campaign.category, campaign.source === 'manual'||(campaign.source==='automation'&&campaign.template==='welcome'&&candidate.dedupeKey==='welcome:'+candidate.userId))) ||
         !(await billingMailValid(candidate.userId, campaign.template, candidate.context, now))
       ) {
         await db()
@@ -369,14 +373,17 @@ export async function deliverCampaign(
           .update(s.mailDeliveries)
           .set({ recipientEmail: user.email })
           .where(eq(s.mailDeliveries.id, candidate.id));
+        const language=await userLanguage(candidate.userId);
+        const english=language==='en'?await campaignEnglish(campaign.id):null;
         const content = renderEmail(campaign.template as EmailTemplate, {
           name: user.name,
-          language:await userLanguage(candidate.userId),
+          language,
           subject: campaign.subject,
           message: campaign.message,
           ctaLabel: campaign.ctaLabel,
           ctaPath: campaign.ctaPath,
           promotional: campaign.category === 'promotional',
+          ...(english??{}),
         });
         const providerId = await transport(user.email, content, candidate.id);
         await db()
@@ -489,6 +496,9 @@ export async function publishReleaseNews(uid: string, id: string, input: unknown
       source: 'automation', actorId: uid, status: 'held',
       message: `Versiunea ${version} · ${releaseDate}\n\n${campaign.message}`,
     }).where(eq(s.mailCampaigns.id, id));
+    const englishRow=(await tx.select().from(s.settings).where(eq(s.settings.key,'mail-english:'+id)))[0];
+    const english=englishMailSchema.safeParse(englishRow?.value);
+    if(english.success)await tx.update(s.settings).set({value:{...english.data,message:`Version ${version} · ${releaseDate}\n\n${english.data.message}`}}).where(eq(s.settings.key,'mail-english:'+id));
     await tx.insert(s.audit).values({ id: crypto.randomUUID(), actorId: uid, action: 'mail.release.scheduled', target: id });
     return { scheduled: true };
   });
@@ -512,7 +522,9 @@ export async function deliverAutomatedMail() {
     )
     .orderBy(s.mailCampaigns.createdAt)
     .limit(1);
-  return campaigns.length ? deliverCampaign(campaigns[0].id) : { enabled: true, accepted: 0 };
+  if(!campaigns.length)return {enabled:true,accepted:0};
+  await verifyGoogleMailAuthorization();
+  return deliverCampaign(campaigns[0].id);
 }
 
 export async function approveMailAutomation(uid: string, input: unknown) {
