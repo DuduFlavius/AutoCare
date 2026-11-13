@@ -27,7 +27,7 @@ export function PublicShell({
     <>
       <div className="wrap">
         <header className="public-nav">
-          <Brand href={href('/')} />
+          <Brand href={href('/')} label={language==='en'?'AutoCare · Home':'AutoCare · pagina principală'} />
           <nav className="navlinks" aria-label={language==='en'?'Main navigation':'Navigare principală'}>
             {landing && <Link href={href('/')} aria-current="page">{t('Acasă')}</Link>}
             <Link href={href('/functionalitati')}>{t('Funcționalități')}</Link>
