@@ -7,7 +7,7 @@ import { AppError, detectMime, ownedVehicle, profile } from './service';
 import { localDate } from './config';
 import { upcomingMaintenance } from './application-home';
 import { generateAi } from './ai-provider';
-import { financeOverview, isFinancialEntry } from './finance-overview';
+import { financeOverview, financeSignals, isFinancialEntry } from './finance-overview';
 import { autoAssistantConfigured } from './auto-assistant-config';
 
 export const aiModes = ['chat', 'analysis', 'monthly', 'annual', 'finance', 'maintenance'] as const;
@@ -61,6 +61,7 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
       .orderBy(desc(mileageReadings.recordedAt)).limit(8),
   ]);
   const finance = financeOverview(financialRows, date);
+  const signals = financeSignals(financialRows,date);
   const datedCosts = financialRows.filter(row => row.date && row.date <= date && row.amountKnown && row.amountBani > 0 && isFinancialEntry(row, date));
   const yearCosts = datedCosts.filter(row => row.date! >= yearStart).map(row => row.amountBani).sort((a,b) => a - b);
   const median = yearCosts.length ? (yearCosts[Math.floor((yearCosts.length - 1) / 2)] + yearCosts[Math.floor(yearCosts.length / 2)]) / 2 : null;
@@ -76,6 +77,7 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
     fuel: vehicle.fuel.slice(0, 32), year: vehicle.year, odometerKm: vehicle.odometer,
     period: { monthStart, yearStart, through: date, currency: 'RON', monthBani: finance.monthBani, yearBani: finance.yearBani, previousMonthBani: finance.previousMonthBani, previousYearBani: finance.previousYearBani, costPerKm: finance.costPerKm, yearKnown: finance.yearKnown },
     costBreakdown: { monthly: finance.categories('month'), annual: finance.categories('year') },
+    forecast: {monthlyEstimateBani:signals.forecastBani, recordedCompletedMonths:signals.measuredMonths, method:"Mean of up to six recorded completed months; not guaranteed; missing months excluded"},
     lastThreeMonths: months, unusuallyLargeExpenseBani: unusualCostBani,
     readings: readings.map(reading => ({ date: localDate(reading.date, timezone), km: reading.km })),
     documents: documents.map(row => ({ expiresAt: row.expiresAt, category: knownCategories.has(row.category) ? row.category : null })),
@@ -107,6 +109,7 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
       if (/3 lun|trei lun|3 month|three month/.test(words)) {
         for (const item of months) lines.push(item.month + ' · ' + (item.count ? money(item.bani) : en ? 'No recorded amounts' : 'Nicio sumă înregistrată'));
       }
+      if(signals.forecastBani!==null) lines.push((en?'Monthly estimate from recorded completed months, not a guaranteed cost':'Estimare lunară din lunile încheiate înregistrate, nu cost garantat')+' · '+money(signals.forecastBani));
       if (unusualCostBani !== null) lines.push((en ? 'Review this recorded cost. It is at least three times the median this year' : 'Verifică această cheltuială înregistrată. Este de cel puțin trei ori mai mare decât mediana anului') + ' · ' + money(unusualCostBani));
       if (highest.bani > 0) lines.push((en ? 'Largest category' : 'Categoria cu cel mai mare cost') + ' · ' + highest.group + ' · ' + money(highest.bani));
       if (highest.bani > 0 && /econom|reduc|sav|lower/.test(words)) lines.push(en ? 'Start by reviewing receipts in the largest category and comparing like-for-like quotes.' : 'Verifică bonurile din categoria cu cel mai mare cost și compară oferte pentru aceleași servicii sau produse.');
