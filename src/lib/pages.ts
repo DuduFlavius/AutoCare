@@ -1,9 +1,11 @@
+import { discoveryPages } from './discovery-pages';
 import { technologyPages } from './public-technology';
 import { publicTopics } from './seo';
 export const pages: Record<
   string,
   { title: string; intro: string; sections: Array<[string, string]> }
 > = {
+  ...Object.fromEntries(Object.entries(discoveryPages).map(([key,page])=>[key,{...page,sections:page.sections.map(([a,b])=>[a,b] as [string,string])}])),
   ...Object.fromEntries(Object.entries(technologyPages).map(([key, page]) => [key, { ...page, sections: page.sections.map(([a, b]) => [a, b] as [string, string]) }])),
   ...Object.fromEntries(
     Object.entries(publicTopics).map(([key, value]) => [
@@ -170,7 +172,7 @@ export const pages: Record<
       ],
       [
         'Abonamente și retragere',
-        'Prețurile sunt ipoteze de test. Checkout-ul real este blocat. Înainte de vânzare trebuie precizate TVA, facturarea, reînnoirea, anularea, rambursarea, dreptul de retragere și procedura de reclamații pentru consumatori.',
+        'Prețurile disponibile sunt afișate în pagina de abonamente, în RON și EUR. Reînnoirea și anularea se gestionează în portalul de facturare. Operatorul trebuie să completeze condițiile privind TVA, facturarea, rambursarea, retragerea și reclamațiile înainte de aprobarea acestor termeni.',
       ],
       [
         'Contul tău',
@@ -181,15 +183,15 @@ export const pages: Record<
   'cookie-uri': {
     title: 'Cookie-uri și stocare locală',
     intro:
-      'Versiunea curentă folosește numai funcțiile necesare autentificării și instalării aplicației.',
+      'Cookie-urile necesare păstrează autentificarea și preferințele. Analiza opțională, dacă este configurată, se activează numai după acordul tău.',
     sections: [
       [
         'Cookie-uri necesare',
         'Sesiunea de autentificare utilizează cookie-uri protejate, cu o durată controlată de sistemul de autentificare. Acestea sunt necesare accesului privat și securității.',
       ],
       [
-        'Fără analiză sau marketing',
-        'Nu sunt instalate module de publicitate sau analiză. Dacă sunt adăugate ulterior, evaluarea și mecanismul de consimțământ trebuie actualizate înainte de activare.',
+        'Analiză opțională, fără publicitate',
+        'Nu folosim module de publicitate. Google Analytics 4 poate fi activat numai dacă operatorul configurează un identificator valid și accepți analiza din pagina publică. Refuzul nu afectează accesul. Preferințele pot fi schimbate din controlul de analiză din subsol; la retragere, trimiterile se opresc după reîncărcarea paginii.',
       ],
       [
         'Preferințele browserului',
