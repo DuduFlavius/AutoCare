@@ -9,6 +9,7 @@ import './app-workspace.css';
 import './studio-workspace.css';
 import './application/reference-dashboard.css';
 import './premium-workspace-theme.css';
+import './application/product-refinement.css';
 import { FinanceCenter } from './application/finance-center';
 import { TitaniumWave } from './titanium-wave';
 import { calendarRecordDate, isPlannedService } from '@/lib/planned-service';
@@ -1024,7 +1025,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 money={moneyDisplay} onQuery={setQuery} onShowArchived={setShowArchived}
                 onAdd={() => setModal({ kind: 'vehicle' })}
                 onDetails={id => navigate('Garaj', 'push', id)}
-                onAi={id => navigate('AutoCare AI', 'push', id)}
+              onAi={id => navigate('AutoCare AI', 'push', id)}
                 onEdit={vehicle => setModal({ kind: 'vehicle', vehicle })}
                 onDocuments={id => {
                   if (!navigate('Documente')) return;
@@ -1045,12 +1046,14 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 if (window.confirm(language === 'en' ? 'Archive this record and stop its reminders?' : 'Arhivezi înregistrarea și oprești alertele asociate?'))
                   void act(() => api('records/' + record.id, 'DELETE'));
               }}
+              onRestore={record => { void act(() => api('records/' + record.id + '/restore', 'POST')); }}
               onAi={id => navigate('AutoCare AI', 'push', id)} onRefresh={refresh}
             />}
             {['Documente', 'Întreținere'].includes(tab) && (
               <>
                 {tab === 'Documente' && (
                   <>
+                    <section className="ac-vault-folder" data-workspace-ui><div><FolderOpen size={24}/><div><h3>{language==='en'?'Your digital document vault':'Dosarul tău digital'}</h3><p>{language==='en'?'Choose a vehicle to open its documents.':'Alege o mașină pentru a deschide documentele ei.'}</p></div></div><label>{language==='en'?'Vehicle folder':'Dosar vehicul'}<select value={filter} onChange={e=>setFilter(e.target.value)}><option value="">{language==='en'?'All vehicles':'Toate mașinile'}</option>{data.vehicles.map(car=><option key={car.id} value={car.id}>{car.brand} {car.model} · {car.plate}</option>)}</select></label></section>
                     <div className="stats document-statistics">
                       {([
                         ['', language === 'en' ? 'All documents' : 'Total documente', docStats.total],
@@ -1068,8 +1071,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                     </div>
                     {docStats.incomplete > 0 && (
                       <p className="data-quality-note">
-                        {docStats.incomplete} documente nu au o dată de expirare; acestea nu sunt
-                        clasificate ca valabile sau expirate.
+                        {docStats.incomplete} {language==='en'?'documents have no expiry date and cannot be classified as valid or expired.':'documente nu au o dată de expirare; acestea nu sunt clasificate ca valabile sau expirate.'}
                       </p>
                     )}
                   </>
@@ -1328,7 +1330,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                   <div
                     className={
                       tab === 'Documente'
-                        ? 'record-full document-gallery'
+                        ? 'record-full document-gallery ac-document-vault'
                         : 'record-full ' +
                           (tab === 'Întreținere' && recordView === 'timeline'
                             ? 'maintenance-timeline'
@@ -1351,7 +1353,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                               <td data-label="Înregistrare">
                                 {tab === 'Documente' && (
                                   <span className="record-kind-mark" aria-hidden="true">
-                                    <Files size={20} strokeWidth={1.6} />
+                                    {r.category==='RCA'||r.category==='CASCO'?<Shield size={24} strokeWidth={1.6}/>:r.category==='ITP'?<CarFront size={24} strokeWidth={1.6}/>:<Files size={24} strokeWidth={1.6}/>}
                                   </span>
                                 )}
                                 <strong data-user-content>{r.title}</strong>
@@ -1379,6 +1381,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                                         )}
                                         <span>{f.name} · Vezi</span>
                                       </a>
+                                      <a className="button document-download" href={'/api/v1/files/'+f.id} download aria-label={(language==='en'?'Download ':'Descarcă ')+f.name}><Download size={16}/></a>
                                       <button
                                         className="close danger"
                                         aria-label={'Șterge ' + f.name}
@@ -1393,6 +1396,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                                   ))}
                               </td>
                               <td data-label="Dată și termen">
+                                {tab==='Documente'&&<span className="micro">{language==='en'?'Issued · ':'Emis · '}</span>}
                                 {r.date
                                   ? displayDate(r.date)
                                   : 'Dată necompletată'}
