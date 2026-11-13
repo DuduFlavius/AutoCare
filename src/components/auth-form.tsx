@@ -151,7 +151,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
               ? 'Ai uitat parola?'
               : reset
                 ? 'Alege o parolă nouă.'
-                : 'Intră în cont'}
+                : t('Bine ai revenit!', 'Welcome back!')}
         </h1>
         <p className="muted small">
           {signup
@@ -187,6 +187,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
               Email
               <input
                 name="email"
+                placeholder="Email"
                 type="email"
                 autoComplete="email"
                 autoCapitalize="none"
@@ -201,6 +202,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
               <div className="auth-password-row">
                 <input
                   name="password"
+                  placeholder={t('Parolă','Password')}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete={signup || reset ? 'new-password' : 'current-password'}
                   minLength={signup || reset ? 12 : undefined}
@@ -257,7 +259,7 @@ export function AuthForm({ mode, next = '/cont' }: { mode: string; next?: string
                   ? 'Trimite instrucțiunile'
                   : reset
                     ? 'Salvează parola'
-                    : 'Intră în cont'}
+                    : t('Bine ai revenit!', 'Welcome back!')}
           </button>
         </form>
         {error && (
