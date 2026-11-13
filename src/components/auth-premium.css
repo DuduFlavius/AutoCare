@@ -290,3 +290,14 @@ html body .auth-layout.ac-auth-premium>.auth-editorial>.ac-vehicle-symbol{positi
 
 }
 @layer autocare-auth-refinement{html body .auth-layout.ac-auth-premium .ac-auth-brand{display:flex!important;gap:10px!important;align-items:center!important;margin-bottom:22px!important;color:#e7edff!important;text-decoration:none!important;font-size:20px!important}html body .auth-layout.ac-auth-premium .ac-auth-brand span{color:var(--color-primary-ink)!important}html body .auth-layout.ac-auth-premium .ac-auth-brand svg{color:var(--color-primary-ink)!important}}
+@layer autocare-auth-refinement {
+html body .auth-layout.ac-auth-premium{--color-primary:#7962ff;--color-primary-ink:#b2b3ff;--color-on-primary:#fff}
+html body .auth-layout.ac-auth-premium .ac-auth-toolbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;flex-wrap:wrap!important;margin-bottom:28px!important}
+html body .auth-layout.ac-auth-premium .ac-auth-toolbar .ac-auth-brand{margin:0!important;font-size:19px!important}
+html body .auth-layout.ac-auth-premium .ac-auth-toolbar label{font-size:11px!important;display:grid!important;gap:5px!important;color:#afbdd8!important}
+html body .auth-layout.ac-auth-premium .ac-auth-ai-details{margin:0 0 22px!important;border:1px solid #ffffff18!important;border-radius:12px!important;background:#ffffff03!important;padding:12px!important}
+html body .auth-layout.ac-auth-premium .ac-auth-ai-details>summary{display:flex!important;align-items:start!important;gap:9px!important;cursor:pointer!important;list-style:none!important;color:#c6ccff!important;font-size:13px!important;line-height:1.5!important}
+html body .auth-layout.ac-auth-premium .ac-auth-ai-details small{display:block!important;font-size:12px!important;color:#adb9d4!important;font-weight:400!important;margin-top:3px!important}
+html body .auth-layout.ac-auth-premium .ac-auth-ai-details .ac-public-ai{margin:12px 0 0!important;padding:14px!important;background:transparent!important;border:0!important;box-shadow:none!important}
+@media(max-width:480px){html body .auth-layout.ac-auth-premium .ac-auth-toolbar .ac-auth-brand{font-size:17px!important}html body .auth-layout.ac-auth-premium .ac-auth-toolbar .ac-auth-brand svg{width:20px!important}}
+}
