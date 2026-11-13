@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       ? 'Compară planurile AutoCare. Vezi funcțiile incluse în planul gratuit și prețurile actuale pentru abonamentele Premium.'
       : 'Alege planul potrivit pentru garajul tău digital.');
   return {
-    ...publicMetadata(title, description, '/' + slug),
+    ...publicMetadata(title, description, '/' + (slug === 'comparatie' ? 'preturi' : slug)),
     ...(!indexableSlugs.includes(slug)
       ? { robots: { index: false, follow: !authPages.includes(slug) } }
       : {}),
