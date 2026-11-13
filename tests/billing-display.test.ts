@@ -17,3 +17,11 @@ test('explicit URL and saved preferences survive language switches and Checkout 
  }
  assert.equal(displayBillingCurrency('en','usd','invalid'),'eur');
 });
+
+
+test('Public LIVE tariffs remain available without a database connection and preserve the billing contract', async()=>{
+ const {publicPricing}=await import('../src/lib/pricing');
+ const previous=process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS;
+ try{process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS='true';const p=await publicPricing();assert.equal(p.monthlyBani,15000);assert.equal(p.annualBani,170000);assert.equal(p.currency,'ron');assert.equal(p.monthlyPriceId,null);}
+ finally{if(previous===undefined)delete process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS;else process.env.AUTOCARE_ENABLE_LIVE_PAYMENTS=previous;}
+});
