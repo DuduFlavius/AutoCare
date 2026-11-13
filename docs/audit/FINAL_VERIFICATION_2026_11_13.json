@@ -1,0 +1,31 @@
+{
+  "checked": 72,
+  "htmlPages": 68,
+  "httpErrors": [],
+  "metadataErrors": [],
+  "wrongEnglishLang": [],
+  "commonPages": 29,
+  "beforeMedianMs": 449,
+  "afterMedianMs": 587,
+  "beforeHomeMs": 5620,
+  "afterHomeMs": 5656,
+  "release": "2d544e5a0f0b657ccb80a03f121e7149298109a2",
+  "deploy": "dep-dbrg0g8u01pc73b4ua60",
+  "status": "live",
+  "tests": {
+    "passed": 277,
+    "failed": 0
+  },
+  "visual": {
+    "desktopFreeAccountScreens": 17,
+    "mobileCSSWidth": 340,
+    "mobileMainSections": 4,
+    "realAndroidDevice": false,
+    "realIOSDevice": false,
+    "accountGridWidth": 1040,
+    "accountTextWidth": 173
+  },
+  "realPaymentsExecuted": false,
+  "productionDatabaseModified": false,
+  "auditClosed": false
+}
