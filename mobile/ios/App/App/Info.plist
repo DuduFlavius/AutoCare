@@ -66,6 +66,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>AutoCare uses the camera only when you choose to photograph a vehicle document.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>AutoCare înregistrează distanța traseului pornit de tine.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
