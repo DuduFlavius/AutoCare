@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
       disallow: [
-        '/cont',
+        '/cont$', '/cont?', '/cont/',
         '/admin',
         '/dosar',
         '/start',
@@ -16,6 +16,7 @@ export default function robots(): MetadataRoute.Robots {
         '/inregistrare',
         '/recuperare-parola',
         '/resetare-parola',
+        '/en/sign-in', '/en/sign-up', '/en/forgot-password', '/en/reset-password',
       ],
     },
     sitemap: origin() + '/sitemap.xml',
