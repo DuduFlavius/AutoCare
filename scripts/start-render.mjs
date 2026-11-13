@@ -20,5 +20,9 @@ try {
  const migrated=await run(['--import','tsx','scripts/migrate-mail-center.ts']);
  if(migrated!==0)process.exit(migrated);
  await run(['scripts/check-providers.mjs']);
- process.exit(await run(['node_modules/next/dist/bin/next','start','--hostname','0.0.0.0','--port',String(runtime.port)]));
+ const mailWorker=spawn(process.execPath,['scripts/mail-worker.mjs'],{stdio:'inherit',env:process.env});
+ let exitCode;
+ try{exitCode=await run(['node_modules/next/dist/bin/next','start','--hostname','0.0.0.0','--port',String(runtime.port)]);}
+ finally{mailWorker.kill('SIGTERM');}
+ process.exit(exitCode);
 }catch{console.error('Render startup failed. No credentials are logged.');process.exit(1);}
