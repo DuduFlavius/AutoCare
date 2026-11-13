@@ -538,3 +538,44 @@ test('Payment receipt validation requires the recipient’s own paid invoice', a
   await db().update(s.invoices).set({ status: 'refunded' }).where(eq(s.invoices.id, invoiceId));
   assert.equal(await billingMailValid(client, 'payment_receipt', { invoiceId }), false);
 });
+
+test('saved English custom content follows recipient language and survives campaign persistence',async()=>{
+ const {languagePreferenceKey}=await import('../src/lib/user-language');
+ const key=languagePreferenceKey(client);
+ const old=(await db().select().from(s.settings).where(eq(s.settings.key,key)))[0];
+ await db().insert(s.settings).values({key,value:{language:'en'}}).onConflictDoUpdate({target:s.settings.key,set:{value:{language:'en'}}});
+ try{
+  const row=input({englishContent:{subject:'Your custom workshop update',message:'This is the English content written by the founder.',ctaLabel:'View your garage'}});
+  await center.saveCampaign(founder,row);
+  let subject='',message='';
+  await center.deliverCampaign(row.id,async(_to,content)=>{subject=content.subject;message=content.text;return 'localized-provider';});
+  assert.equal(subject,'Your custom workshop update');
+  assert.match(message,/English content written by the founder/);
+ }finally{if(old)await db().update(s.settings).set({value:old.value}).where(eq(s.settings.key,key));else await db().delete(s.settings).where(eq(s.settings.key,key));}
+});
+test('a recent registration welcome reaches its unverified signup address once, without allowing unrelated automatic mail',async()=>{
+ const uid=crypto.randomUUID();
+ await db().insert(s.user).values({id:uid,name:'New signup',email:uid+'@example.invalid',emailVerified:false});
+ await db().insert(s.profiles).values({userId:uid,role:'user'});
+ const old=(await db().select().from(s.settings).where(eq(s.settings.key,'mail-automation-approval')))[0];
+ const gate=process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED;
+ process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED='true';
+ await db().insert(s.settings).values({key:'mail-automation-approval',value:{approvedBy:founder,approvedAt:new Date().toISOString(),testedAt:new Date().toISOString()}}).onConflictDoUpdate({target:s.settings.key,set:{value:{approvedBy:founder,approvedAt:new Date().toISOString(),testedAt:new Date().toISOString()}}});
+ try{
+  await queueAutomatedMail(uid,'welcome','welcome:'+uid);
+  await queueAutomatedMail(uid,'welcome','welcome:'+uid);
+  const [delivery]=await db().select().from(s.mailDeliveries).where(eq(s.mailDeliveries.dedupeKey,'welcome:'+uid));
+  let count=0;
+  const transport=async()=>{count++;return 'welcome-provider';};
+  await center.deliverCampaign(delivery.campaignId,transport);
+  await center.deliverCampaign(delivery.campaignId,transport);
+  assert.equal(count,1);
+  await queueAutomatedMail(uid,'welcome','unrelated:'+uid);
+  const [unrelated]=await db().select().from(s.mailDeliveries).where(eq(s.mailDeliveries.dedupeKey,'unrelated:'+uid));
+  await center.deliverCampaign(unrelated.campaignId,transport);
+  assert.equal(count,1);
+ }finally{
+  if(gate===undefined)delete process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED;else process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED=gate;
+  if(old)await db().update(s.settings).set({value:old.value}).where(eq(s.settings.key,'mail-automation-approval'));else await db().delete(s.settings).where(eq(s.settings.key,'mail-automation-approval'));
+ }
+});
