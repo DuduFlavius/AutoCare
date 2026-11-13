@@ -272,3 +272,21 @@
     }
   }
 }
+@layer autocare-auth-refinement {
+/* The same navy surfaces and compact controls as the application. */
+html body .auth-layout.ac-auth-premium{background:#10152a!important;border:1px solid #ffffff18!important;box-shadow:0 24px 90px #0003!important}
+html body .auth-layout.ac-auth-premium>.auth-editorial{background:radial-gradient(ellipse at 20% 15%,#293b6a70,transparent 60%),linear-gradient(145deg,#11182f,#090e20)!important;min-height:640px!important}
+html body .auth-layout.ac-auth-premium>.auth-editorial>svg{position:absolute;top:60px;left:12%;width:76%;height:220px;color:#86aaff;opacity:.9}
+html body .auth-layout.ac-auth-premium>.auth-box{background:linear-gradient(145deg,#171c34,#101528)!important;padding:44px!important}
+html body .auth-layout.ac-auth-premium .auth-box form input:not([type=checkbox]){background:#0e1429!important;border:1px solid #ffffff20!important;border-radius:12px!important;min-height:50px!important;color:#edf2ff!important;font-size:16px!important}
+html body .auth-layout.ac-auth-premium .auth-box form input:focus-visible{border-color:#809eff!important;outline:3px solid #6386ff20!important}
+html body .auth-layout.ac-auth-premium .auth-box form>button[type=submit]{border-radius:12px!important;min-height:50px!important;background:var(--color-primary)!important;color:var(--color-on-primary)!important}
+html body .auth-layout.ac-auth-premium .auth-editorial-content>p{font-size:15px!important;line-height:1.7!important}
+html body .auth-layout.ac-auth-premium .auth-editorial-content>div>span{font-size:12px!important}
+html body .auth-layout.ac-auth-premium .auth-box form label{font-size:14px!important;color:#bcc9e2!important}
+@media(max-width:900px){html body .auth-layout.ac-auth-premium{margin:18px auto 30px!important;width:100%!important;max-width:520px!important;border-radius:22px!important}html body .auth-layout.ac-auth-premium>.auth-editorial{min-height:164px!important;height:164px!important}html body .auth-layout.ac-auth-premium>.auth-editorial>svg{top:20px;left:auto;right:14px;width:130px;height:120px;opacity:.25}html body .auth-layout.ac-auth-premium .auth-editorial-content{inset:auto 24px 24px!important;max-width:85%!important}html body .auth-layout.ac-auth-premium>.auth-box{padding:26px 22px!important}}
+html body .auth-layout.ac-auth-premium>.auth-editorial>.ac-vehicle-symbol{position:absolute;top:40px;left:10%;width:80%;height:260px;max-width:100%;margin:0}
+@media(max-width:900px){html body .auth-layout.ac-auth-premium>.auth-editorial>.ac-vehicle-symbol{top:0;left:auto;right:-36px;width:190px;height:160px;opacity:.15}}
+
+}
+@layer autocare-auth-refinement{html body .auth-layout.ac-auth-premium .ac-auth-brand{display:flex!important;gap:10px!important;align-items:center!important;margin-bottom:22px!important;color:#e7edff!important;text-decoration:none!important;font-size:20px!important}html body .auth-layout.ac-auth-premium .ac-auth-brand span{color:var(--color-primary-ink)!important}html body .auth-layout.ac-auth-premium .ac-auth-brand svg{color:var(--color-primary-ink)!important}}
