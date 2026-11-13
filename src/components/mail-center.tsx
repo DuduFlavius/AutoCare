@@ -1,4 +1,6 @@
 'use client';
+import './mail-studio.css';
+import {englishEmailCopy} from '@/lib/email-copy-en';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
 import GoogleMailSettings from './google-mail-settings';
@@ -35,6 +37,10 @@ const labels: Record<string, string> = {
 export default function MailCenter() {
 
   const locale=useApplicationLocale();
+  const en=locale==='en-GB', t=(ro:string,english:string)=>en?english:ro;
+  const [englishSubject,setEnglishSubject]=useState(''),[englishMessage,setEnglishMessage]=useState(''),[englishCta,setEnglishCta]=useState('');
+  const [previewLanguage,setPreviewLanguage]=useState<'ro'|'en'>(en?'en':'ro');
+  const englishContent=englishSubject.trim()||englishMessage.trim()?{subject:englishSubject,message:englishMessage,ctaLabel:englishCta||'Open AutoCare'}:undefined;
   const [releaseVersion, setReleaseVersion] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
   const [libraryName, setLibraryName] = useState('');
@@ -90,6 +96,7 @@ export default function MailCenter() {
     if (!data) return;
     const t = data.templates[id];
     setTemplate(id);
+    setEnglishSubject('');setEnglishMessage('');setEnglishCta('');
     setSubject(t.subject);
     setMessage(t.body);
     setCtaLabel(t.cta);
@@ -121,22 +128,22 @@ export default function MailCenter() {
   if (!data)
     return (
       <section className="card">
-        <h2>Mail Center Premium</h2>
+        <h2>AutoCare Mail Studio</h2>
         <p role="status">{error || 'Se încarcă…'}</p>
       </section>
     );
   return (
-    <div className="mail-center">
+    <div className="mail-center mail-studio">
       <section className="card">
         <div className="inline">
           <Mail size={28} />
           <div>
             <p className="eyebrow">COMUNICARE AUTOCARE</p>
-            <h2>Mail Center Premium</h2>
+            <h2>AutoCare Mail Studio</h2>
           </div>
         </div>
         <p>
-          Alege un model, personalizează mesajul și selectează destinatarii.
+          {t('Mesaje clare. Un design îngrijit. Comunicări în limba fiecărui utilizator.','Clear messages. Thoughtful design. Communications in each user’s language.')}
         </p>
         {data.permissions.directSend && gmailStatus && (!gmailStatus.connected || !gmailStatus.testedAt) && (
           <p className="error" role="alert">
@@ -200,6 +207,10 @@ export default function MailCenter() {
               Ciornă nouă
             </button>
           </div>
+          <div className="mail-quick-templates" aria-label={t('Pornire rapidă','Quick start')}>
+            <button type="button" disabled={busy} onClick={()=>{choose('administrative');setSubject('');setMessage('');setPreview(null);}}>{t('Mesaj liber','Write your own')}</button>
+            {(['welcome','release_news','premium_grant','support_reply'] as EmailTemplate[]).map(id=><button key={id} type="button" disabled={busy} onClick={()=>choose(id)}>{en?englishEmailCopy[id].title:data.templates[id].label}</button>)}
+          </div>
           <p className="small muted">Șabloanele proprii se salvează în contul echipei și pot fi refolosite oricând.</p>
           <details className="mail-library"><summary>Șabloanele și tipurile mele</summary>
           <label>Biblioteca ta
@@ -209,6 +220,7 @@ export default function MailCenter() {
               if (entry.kind === 'template') {
                 choose(entry.template); setSubject(entry.subject); setMessage(entry.message);
                 setCtaLabel(entry.ctaLabel); setCtaPath(entry.ctaPath);
+                setEnglishSubject(entry.englishContent?.subject??'');setEnglishMessage(entry.englishContent?.message??'');setEnglishCta(entry.englishContent?.ctaLabel??'');
               }
               setCategory(entry.category); setCommunicationType(entry.kind === 'communication' ? entry.label : 'Informare cont'); setPreview(null);
             }}>
@@ -219,7 +231,7 @@ export default function MailCenter() {
           <label>Nume șablon / tip nou<input maxLength={100} value={libraryName} onChange={e => setLibraryName(e.target.value)} /></label>
           <div className="inline">
             {(['template', 'communication'] as const).map(kind => <button key={kind} type="button" disabled={busy || security || libraryName.trim().length < 2} onClick={() => void run(async () => {
-              await api('/library', 'POST', {id: crypto.randomUUID(), kind, label: libraryName, category, template, subject, message, ctaLabel, ctaPath});
+              await api('/library', 'POST', {id: crypto.randomUUID(), kind, label: libraryName, category, template, subject, message, ctaLabel, ctaPath, englishContent});
               setData(await api()); setLibraryName(''); setNotice('Salvat în biblioteca ta.');
             })}>{kind === 'template' ? 'Salvează ca șablon propriu' : 'Adaugă tip de comunicare'}</button>)}
           </div>
@@ -293,6 +305,12 @@ export default function MailCenter() {
               }}
             />
           </label>
+          <details className="mail-english-editor"><summary>{t('Versiune în engleză pentru destinatarii EN','English version for EN recipients')}</summary>
+            <p>{t('Șabloanele standard se traduc automat. Pentru textul propriu, completează aici versiunea în engleză. Fără această versiune, mesajul propriu rămâne în limba în care l-ai scris.','Standard templates are localized automatically. For your own text, write the English version here. Without it, custom text is sent in the language you wrote.')}</p>
+            <label>Subject · EN<input value={englishSubject} maxLength={180} disabled={saved||busy} onChange={e=>{setEnglishSubject(e.target.value);setPreview(null);}}/></label>
+            <label>Message · EN<textarea value={englishMessage} rows={7} maxLength={8000} disabled={saved||busy} onChange={e=>{setEnglishMessage(e.target.value);setPreview(null);}}/></label>
+            <label>Button · EN<input value={englishCta} placeholder="Open AutoCare" maxLength={60} disabled={saved||busy} onChange={e=>setEnglishCta(e.target.value)}/></label>
+          </details>
           <details><summary>Personalizează butonul și linkul</summary>
           <label>
             Text buton CTA
@@ -387,13 +405,14 @@ export default function MailCenter() {
               void run(async () =>
                 setPreview(
                   await api('/preview', 'POST', {
-                    language:locale==='en-GB'?'en':'ro',
+                    language:previewLanguage,
                     template,
                     subject,
                     message,
                     ctaLabel,
                     ctaPath,
                     name: selectedName,
+                    ...(previewLanguage==='en'&&englishContent?englishContent:{}),
                     promotional: category === 'promotional',
                   }),
                 ),
@@ -426,7 +445,7 @@ export default function MailCenter() {
               }
               if (!saved) {
                 await api('/campaigns', 'POST', {
-                  id: draftId, template, category, communicationType, subject, message, ctaLabel, ctaPath, recipients,
+                  id: draftId, template, category, communicationType, subject, message, ctaLabel, ctaPath, recipients, englishContent,
                 });
                 setSaved(true);
               }
@@ -473,6 +492,7 @@ export default function MailCenter() {
         <section className="card mail-preview">
           <div className="inline">
             <h2>Previzualizare</h2>
+            <select aria-label={t('Limba previzualizării','Preview language')} value={previewLanguage} onChange={e=>{setPreviewLanguage(e.target.value as 'ro'|'en');setPreview(null);}}><option value="ro">RO</option><option value="en">EN</option></select>
             <button aria-pressed={width === 'desktop'} onClick={() => setWidth('desktop')}>
               Desktop
             </button>
@@ -511,8 +531,13 @@ export default function MailCenter() {
         </section>
       </div>
       <section className="card stack mail-automation-card" hidden={section !== 'automation'}>
-        <p className="eyebrow">CONTROL COMUNICĂRI</p><h2>Automatizări</h2>
-        <p className="mail-status">{data.automation.enabled ? 'Automatizările sunt active.' : 'Automatizările sunt oprite.'}</p>
+        <p className="eyebrow">AUTOCARE · AUTOMATIONS</p><h2>Automatizări</h2>
+        <div className="mail-automation-flows">
+          <article><strong>{t('Bun venit','Welcome')}</strong><p>{t('La crearea contului · un singur mesaj · limba aleasă de utilizator','On signup · one message · the user’s selected language')}</p></article>
+          <article><strong>AutoCare News</strong><p>{t('La publicarea unei versiuni din Mail Studio · destinatari cu acord pentru noutăți','On release publication in Mail Studio · opted-in news recipients')}</p></article>
+          <article><strong>{t('Procesare automată','Automatic delivery')}</strong><p>{t('Coada este verificată periodic cât serverul rulează și după înregistrări. Render Free suspendă procesarea când serviciul doarme.','The queue is checked while the server runs and after signup. Render Free pauses processing while the service sleeps.')}</p></article>
+        </div>
+        <p className="mail-status">{data.automation.enabled&&gmailStatus?.connected&&gmailStatus.testedAt&&!gmailStatus.reconnectRequired ? 'Automatizările sunt active.' : 'Automatizările sunt oprite.'}</p>
         <p>{data.permissions.directSend ? 'Poți autoriza automatizările direct. Preferințele utilizatorilor și regulile de livrare rămân active.' : 'Solicitarea ta ajunge în Mail Center-ul Fondatorului pentru aprobare.'}</p>
         <button className="primary" disabled={busy} onClick={() => void run(async () => {
           if (data.permissions.directSend) {
