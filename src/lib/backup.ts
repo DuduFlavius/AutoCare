@@ -12,6 +12,11 @@ const tables = {
   profiles: s.profiles,
   vehicles: s.vehicles,
   vehiclePhotos: s.vehiclePhotos,
+  mileageReadings:s.mileageReadings,
+  gpsTrips:s.gpsTrips,
+  mileageReminderPreferences:s.mileageReminderPreferences,
+  mechanicShares:s.mechanicShares,
+  subscriptionExtensions:s.subscriptionExtensions,
   records: s.records,
   files: s.files,
   subscriptions: s.subscriptions,
@@ -32,6 +37,7 @@ const tables = {
   autoAiTurns: s.autoAiTurns,
   supportOperations: s.supportOperations,
   supportInternalNotes: s.supportInternalNotes,
+  supportTyping:s.supportTyping,
   settings: s.settings,
   invoices: s.invoices,
   recordHistory: s.recordHistory,
@@ -62,7 +68,7 @@ export async function encryptedBackup(key: Buffer) {
     cipher = createCipheriv('aes-256-gcm', key, iv);
   const bytes = Buffer.concat([
     cipher.update(
-      JSON.stringify({ version: 1, createdAt: new Date().toISOString(), tables: data }),
+      JSON.stringify({ version: 2, createdAt: new Date().toISOString(), tables: data }),
       'utf8',
     ),
     cipher.final(),
@@ -101,9 +107,10 @@ export async function restoreEncrypted(bytes: Buffer, key: Buffer) {
       'communicationPreferences',
       'mailCampaigns',
       'mailDeliveries',
+      'mileageReadings','gpsTrips','mileageReminderPreferences','mechanicShares','subscriptionExtensions','supportTyping',
     ])
       if (!(key in backup.tables)) backup.tables[key] = [];
-  if (backup.version !== 1 || Object.keys(tables).some((k) => !Array.isArray(backup.tables[k])))
+  if (![1,2].includes(backup.version) || Object.keys(tables).some((k) => !Array.isArray(backup.tables[k])))
     throw new Error('Invalid backup');
   await db().transaction(async (tx) => {
     for (const table of Object.values(tables)) {
