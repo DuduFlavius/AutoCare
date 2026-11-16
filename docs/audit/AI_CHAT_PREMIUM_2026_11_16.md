@@ -29,3 +29,13 @@ Migrarea `0014_ai_conversations.sql` adaugă doar `conversationId`, `feedback` �
 Scriptul `scripts/audit/ai-chat-browser.mjs` pregătește verificarea componentei reale la 1440×960 RO, 390×844 RO și 360×740 EN, cu API simulat într-un server local izolat. Lansarea Chromium a fost blocată de restricțiile de socket ale mediului; browserul conectat nu are context disponibil, iar browserul alternativ nu poate accesa serverul local. Aceste teste vizuale și de tastatură NU sunt raportate ca trecute. Nu există încă verificare a noii interfețe pe Android/iOS reale sau dovadă de trimitere a unei întrebări AI dintr-un cont Premium autentificat pe producție.
 
 Verificarea publicării, a migrației și a endpointurilor fără autentificare se adaugă după confirmarea Render.
+
+## Rezultat publicare
+
+- Suita finală: **282/282 teste trecute**, 0 eșecuri; lint și build trecute.
+- Render LIVE: `dep-dbta14rm8hqs73aa8gh0`, commit aplicație `e68eb6f7b84b0e4e814387415e189297701fb2be`.
+- `/api/app-version` confirmă acest commit, HTTP 200.
+- Logul pornirii confirmă `Additive migrations completed.` și pornirea Next. Verificarea existentă a furnizorului raportează modele AI disponibile; aceasta nu echivalează cu o conversație completă de producție.
+- Istoricul AI, trimiterea mesajului și feedbackul refuză accesul fără autentificare (HTTP 401). URL-ul secțiunii AI redirecționează vizitatorii neautentificați către autentificare.
+- Există avertismentul pg privind aliasurile SSL înaintea unei viitoare versiuni majore. Nu s-a slăbit verificarea TLS și nu s-au schimbat credențialele sau variabilele serverului.
+- Planul de găzduire rămâne Free, fără activarea unui cost nou. Limitarea de repaus Render discutată anterior nu este rezolvată prin acest redesign.
