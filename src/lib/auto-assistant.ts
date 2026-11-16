@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { PDFDocument } from 'pdf-lib';
 import { z } from 'zod';
 import { db } from './db';
@@ -8,6 +8,7 @@ import { localDate } from './config';
 import { upcomingMaintenance } from './application-home';
 import { generateAi } from './ai-provider';
 import { financeOverview, financeSignals, isFinancialEntry } from './finance-overview';
+import { assistantLanguageInstruction } from './ai-conversations';
 import { autoAssistantConfigured } from './auto-assistant-config';
 
 export const aiModes = ['chat', 'analysis', 'monthly', 'annual', 'finance', 'maintenance'] as const;
@@ -23,20 +24,27 @@ const turnsFor = (uid: string, vehicleId: string) => and(eq(autoAiTurns.userId, 
 
 export async function autoAssistantHistory(uid: string, vehicleId: string) {
   await activeVehicle(uid, vehicleId);
-  const turns = await db().select({ id: autoAiTurns.id, question: autoAiTurns.question, answer: autoAiTurns.answer, createdAt: autoAiTurns.createdAt })
+  const turns = await db().select({ id: autoAiTurns.id, question: autoAiTurns.question, answer: autoAiTurns.answer, createdAt: autoAiTurns.createdAt, conversationId: autoAiTurns.conversationId, feedback: autoAiTurns.feedback })
     .from(autoAiTurns).where(turnsFor(uid, vehicleId)).orderBy(desc(autoAiTurns.createdAt), desc(autoAiTurns.id)).limit(150);
   return { turns: turns.reverse() };
 }
 
-export async function clearAutoAssistantHistory(uid: string, vehicleId: string) {
+export async function clearAutoAssistantHistory(uid: string, vehicleId: string, turnIds?: string[]) {
   await ownedVehicle(uid, vehicleId);
-  await db().delete(autoAiTurns).where(turnsFor(uid, vehicleId));
+  await db().delete(autoAiTurns).where(and(turnsFor(uid, vehicleId), turnIds ? inArray(autoAiTurns.id, turnIds) : undefined));
+  return { ok: true };
+}
+
+export async function feedbackAutoAssistant(uid: string, vehicleId: string, turnId: string, feedback: number | null) {
+  await activeVehicle(uid, vehicleId);
+  const saved = await db().update(autoAiTurns).set({ feedback }).where(and(turnsFor(uid, vehicleId), eq(autoAiTurns.id, turnId))).returning({ id: autoAiTurns.id });
+  if (!saved.length) throw new AppError(404, 'Mesajul nu a fost găsit.');
   return { ok: true };
 }
 
 const knownCategories = new Set(['RCA', 'ITP', 'Rovinietă', 'CASCO', 'Revizie', 'Distribuție', 'Schimb ulei', 'Alimentare', 'Filtre', 'Frâne', 'Anvelope', 'Reparații', 'Service']);
 
-export async function askAutoAssistant(uid: string, vehicleId: string, question: string, language: 'ro' | 'en', mode: Mode = 'chat', localFallback = false, contextTurns = 4) {
+export async function askAutoAssistant(uid: string, vehicleId: string, question: string, language: 'ro' | 'en', mode: Mode = 'chat', localFallback = false, contextTurns = 4, conversationId?: string, excludeTurnId?: string, contextIds?: string[]) {
   const vehicle = await activeVehicle(uid, vehicleId);
   const configured = autoAssistantConfigured();
   if (!configured && !localFallback) throw new AppError(503, 'Asistentul AI nu este configurat.');
@@ -55,7 +63,7 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
     db().select().from(records).where(and(scope, eq(records.kind, 'service'))).orderBy(sql`${records.date} DESC NULLS LAST`).limit(100),
     db().select().from(records).where(and(scope, gte(records.date, (Number(date.slice(0, 4)) - 1) + '-01-01'))),
     db().select({ question: autoAiTurns.question, answer: autoAiTurns.answer }).from(autoAiTurns)
-      .where(turnsFor(uid, vehicleId)).orderBy(desc(autoAiTurns.createdAt)).limit(Math.max(0, Math.min(4, contextTurns))),
+      .where(and(turnsFor(uid, vehicleId), conversationId ? eq(autoAiTurns.conversationId, conversationId) : undefined, contextIds ? inArray(autoAiTurns.id, contextIds) : undefined, excludeTurnId ? sql`${autoAiTurns.id} <> ${excludeTurnId}` : undefined)).orderBy(desc(autoAiTurns.createdAt)).limit(Math.max(0, Math.min(4, contextTurns))),
     db().select({ date: mileageReadings.recordedAt, km: mileageReadings.odometer }).from(mileageReadings)
       .where(and(eq(mileageReadings.userId, uid), eq(mileageReadings.vehicleId, vehicleId)))
       .orderBy(desc(mileageReadings.recordedAt)).limit(8),
@@ -135,6 +143,7 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
   let source: 'provider' | 'local' = configured ? 'provider' : 'local';
   const answer = configured ? await generateAi([
     'You are a friendly, natural, helpful conversational automotive assistant. Respond in ' + (language === 'en' ? 'English' : 'Romanian') + '.',
+    assistantLanguageInstruction(language),
     'CRITICAL: The CURRENT USER MESSAGE is the primary instruction. Answer that message directly, naturally and relevantly. Do not automatically generate a vehicle report, status summary or maintenance analysis.',
     'For greetings (e.g. salut, buna, hello), greet back briefly and ask how you can help. For questions like "ma poti ajuta?", say yes, ask what they need help with, and optionally give two short examples. Never respond to such messages with "iata analiza", car summaries or financial statistics.',
     'Be conversational like a helpful chat assistant. Use short paragraphs; only use headings or lists when the question actually calls for a structured explanation. Do not start every reply with the vehicle name.',
@@ -149,17 +158,18 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
     'Today: ' + date,
     'Relevant background vehicle data (use only if needed): ' + JSON.stringify(context),
     'Previous dialogue (context only): ' + JSON.stringify(history.reverse().filter(turn => !/^Analiză locală\\s*[·:]/i.test(turn.answer)).map(turn => ({ user: turn.question.slice(0, 450), assistant: turn.answer.slice(0, 650) }))),
-  ].join('\\n\\n')).catch(error => {
+    assistantLanguageInstruction(language),
+  ].join('\n\n')).catch(error => {
       if (!localFallback || !(error instanceof AppError) || error.status !== 502) throw error;
       source = 'local';
       return localAnswer();
     }) : localAnswer();
   const turn = await db().transaction(async tx => {
     await tx.select({ id: user.id }).from(user).where(eq(user.id, uid)).for('update');
-    const [saved] = await tx.insert(autoAiTurns).values({ id: crypto.randomUUID(), userId: uid, vehicleId, question, answer }).returning();
+    const [saved] = await tx.insert(autoAiTurns).values({ id: crypto.randomUUID(), userId: uid, vehicleId, question, answer, conversationId: conversationId ?? null }).returning();
     await tx.delete(autoAiTurns).where(sql`${turnsFor(uid, vehicleId)} and ${autoAiTurns.id} in
       (select id from autocare_ai_turns where "userId"=${uid} and "vehicleId"=${vehicleId} order by "createdAt" desc, id desc offset 200)`);
-    return { id: saved.id, question: saved.question, answer: saved.answer, createdAt: saved.createdAt };
+    return { id: saved.id, question: saved.question, answer: saved.answer, createdAt: saved.createdAt, conversationId: saved.conversationId, feedback: saved.feedback };
   });
   return { answer, turn, source };
 }
