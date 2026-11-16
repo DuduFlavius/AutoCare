@@ -246,7 +246,7 @@ test('new chat omits previous dialogue, preserves history, and refuses expired P
  assert.equal(provider.mock.callCount(),1);
  await db().update(subscriptions).set({status:'canceled',periodEnd:new Date(0)}).where(eq(subscriptions.userId,ownerId));
  assert.equal((await ask(0)).status,403);
- for (const [method,path] of [['GET','auto-assistant/history?vehicleId='+carId],['DELETE','auto-assistant/history'],['POST','auto-assistant/scan']] as const) {
+ for (const [method,path] of [['GET','auto-assistant/history?vehicleId='+carId],['DELETE','auto-assistant/history'],['POST','auto-assistant/scan'],['POST','auto-assistant/feedback']] as const) {
   const handler = method === 'GET' ? GET : method === 'DELETE' ? DELETE : POST;
   const response = await handler(new Request('http://localhost:3000/api/v1/'+path,{method,headers,...(method==='GET'?{}:{body:JSON.stringify({vehicleId:carId})})}),{params:Promise.resolve({path:path.split('?')[0].split('/')})});
   assert.equal(response.status,403);
