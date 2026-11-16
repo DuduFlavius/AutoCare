@@ -5,14 +5,14 @@ import { browserGPSFix, type GPSFix } from '@/lib/gps-tracking';
 
 export const mapGPSOptions: PositionOptions = {
   enableHighAccuracy: true,
-  maximumAge: 5000,
-  timeout: 15000,
+  maximumAge: 0,
+  timeout: 30000,
 };
 
 export function mapLocationError(code: number, english: boolean) {
   if (code === 1) return english
     ? 'Allow location for AutoCare in your device or browser settings, then tap My location.'
-    : 'Permite localizarea pentru AutoCare din setările telefonului sau ale browserului, apoi apasă Poziția mea.';
+    : 'Permite localizarea precisă pentru AutoCare din setările telefonului și ale browserului, apoi apasă Poziția mea.';
   return english
     ? 'GPS position unavailable. Check that location is on and try again.'
     : 'Poziția GPS nu este disponibilă. Verifică dacă localizarea este pornită și încearcă din nou.';
@@ -54,7 +54,7 @@ export function useMapLocation(enabled: boolean, english: boolean) {
       if (!live) return;
       const fix = browserGPSFix(value);
       if (!fix) return;
-      setPosition(previous => !previous || fix.timestamp >= previous.timestamp ? fix : previous);
+      setPosition(previous => !previous || Date.now()-previous.timestamp>10000 || (fix.timestamp>=previous.timestamp && fix.accuracy<=previous.accuracy*1.3) ? fix : previous);
       setWaiting(false);
       setError('');
     }, failure => {
@@ -81,7 +81,7 @@ export function useMapLocation(enabled: boolean, english: boolean) {
     }
     setError('');
     setRequested(true);
-    if (shouldWatch && !waiting && (!position || Date.now() - position.timestamp > 15000 || error)) {
+    if (shouldWatch) {
       setAttempt(value => value + 1);
     }
   }
