@@ -151,3 +151,21 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspa
 html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] > .ac-ai-vehicle,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] .ac-ai-quick-prompts,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] .ac-ai-composer-hint,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] .ac-ai-disclosure {display:none!important}
 @media(prefers-reduced-motion:reduce) {html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page * {animation:none!important;scroll-behavior:auto!important;transition:none!important}}
 }
+
+@layer autocare-workspace {
+.ac-ai-close{display:grid;place-items:center;width:38px;height:40px;border:1px solid #7776b23b;border-radius:11px;background:#191d36;color:#cbd3ec}
+@media(max-width:760px){
+ html:has(.ac-ai-page[data-chat]) .autocare-mobile-dock,html:has(.ac-ai-page[data-chat]) .app-topbar{display:none!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-chat]{position:fixed!important;top:var(--ai-viewport-top,0px)!important;left:0!important;right:0!important;z-index:100!important;width:100%!important;max-width:none!important;height:var(--ai-page-height,100dvh)!important;box-sizing:border-box!important;margin:0!important;padding:calc(8px + env(safe-area-inset-top,0px)) 6px calc(4px + env(safe-area-inset-bottom,0px))!important;background:#0d1225!important;gap:5px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-chat{border-radius:12px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-heading{padding:8px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-brand-icon{display:none!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-header-actions>.ac-ai-new-chat{width:auto!important;padding:7px!important;font-size:10px!important;gap:4px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-new-chat span{display:inline!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-header-actions{gap:4px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-brand h3{font-size:14px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-vehicle{font-size:10px!important;padding:0 5px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-vehicle select{min-height:34px!important;height:34px!important;padding:6px 9px!important;font-size:12px!important}
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-composer textarea::placeholder{font-size:14px!important}
+}
+}
