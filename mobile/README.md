@@ -88,3 +88,10 @@ Server secrets/settings required:
 - `AUTOCARE_PLAY_BILLING_ENABLED=true`: enable only after Console products, RTDN, license tests, current price display and refund tests pass.
 
 Apply migrations 0016 and 0017 before deploying the web code. Existing Stripe website billing is preserved. Native purchases do not use Stripe checkout. Subscription upgrades/downgrades and prepaid extensions are not implemented in this release; validate the existing-account flow before enabling Play purchases. Native product availability and final localized payment terms are confirmed by Google Play. Signed production builds require the existing upload key and Firebase config; debug APKs remain preview-only and are not Play submissions.
+
+
+## 1.5.1: direct installation uses Stripe
+
+The default Android distribution is `direct`: package `ro.autocare.garage`, versionCode 16, versionName 1.5.1 for release builds. It does not register the native Play Billing bridge, so the hosted website uses its existing Stripe checkout. `-PautocareDistribution=play` explicitly registers Play Billing for the future store distribution. This flag is independent of debug/release signing.
+
+The production branch automatically attempts the existing signed-release job through the protected `android-release` environment. It publishes an installer only after Firebase configuration, the existing owner key, APK verification and AAB verification succeed. Missing secrets fail the job; an unsigned or debug APK is never used as the public update. Manual workflow dispatch remains available with `distribution=direct` and `signed_android_release=true`.

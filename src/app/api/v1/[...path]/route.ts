@@ -738,6 +738,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               photos,
               sessions,
               communicationPreferences,
+              accountSettings:await accountPreferences(uid),
               aiHistory,
               emailHistory,
               pushSubscriptions,

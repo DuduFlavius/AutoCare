@@ -59,7 +59,7 @@ jobs:
   android-release:
     permissions:
       contents: write
-    if: github.event_name == 'workflow_dispatch' && inputs.signed_android_release
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/feature/autocare-ai-integrated') || (github.event_name == 'workflow_dispatch' && inputs.signed_android_release)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: android-release
@@ -100,17 +100,29 @@ jobs:
           path: mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 7
       - name: Publish signed Android installer for in-app updates
+        if: inputs.distribution != 'play'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           python3 - <<'PYTHON'
-          import json, pathlib, re, shutil
+          import json, pathlib, re, shutil, os, subprocess
           gradle=pathlib.Path('mobile/android/app/build.gradle').read_text()
           version=re.search(r'versionName "([0-9.]+)"',gradle).group(1)
           code=int(re.search(r'versionCode (\d+)',gradle).group(1))
           folder=pathlib.Path('public/downloads');folder.mkdir(parents=True,exist_ok=True)
           name=f'AutoCare-{version}.apk'
+          previous=json.loads((folder/'android-release.json').read_text())
+          old_name=pathlib.PurePosixPath(previous['url']).name
+          if not re.fullmatch(r'AutoCare-[0-9.]+\.apk',old_name): raise SystemExit('Invalid previous Android installer path')
+          verifier=str(pathlib.Path(os.environ['ANDROID_HOME'])/'build-tools/36.0.0/apksigner')
+          def certificate(file):
+              output=subprocess.check_output([verifier,'verify','--print-certs',str(file)],text=True)
+              match=re.search(r'Signer #1 certificate SHA-256 digest: ([a-f0-9]+)',output)
+              if not match: raise SystemExit('Cannot verify Android signing identity')
+              return match.group(1)
+          built=pathlib.Path('mobile/android/app/build/outputs/apk/release/app-release.apk')
+          if certificate(folder/old_name)!=certificate(built): raise SystemExit('Android signing key differs from the existing public installer; update publication blocked')
           shutil.copyfile('mobile/android/app/build/outputs/apk/release/app-release.apk',folder/name)
           (folder/'android-release.json').write_text(json.dumps({'version':version,'versionCode':code,'url':f'/downloads/{name}'}))
           PYTHON

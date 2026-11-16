@@ -21,3 +21,8 @@ DNS direct resolver was unavailable in this execution environment. Public Google
 NETESTAT — full responsive visual review. Local Chromium launch was blocked and the alternate browser binary download failed. CSS and component behavior checks are not substitutes for full visual/real-device QA.
 
 Google Play publication remains NOT READY until owner signing/Firebase/Play configuration, license tests, disclosures and physical-device checks are completed. SEO improves relevant discovery, but cannot guarantee rankings, indexing or appearance for every vehicle-related search.
+
+## Production checkpoint
+Published commit dae969fd795bc0939f78448129b00f7ac540da17 to www.autocareapp.ro. Vercel production deployment READY; additive database migrations completed. Post-deploy crawl: 74/74 public URLs HTTP 200. /api/app-version reports the expected commit. Anonymous /api/v1/account/settings returns 401. Public account-deletion page inspected in the live desktop browser. Authenticated mobile visual and physical-device flows remain NETESTAT.
+
+Direct Android 1.5.1 release compilation and release lint passed; BuildConfig.PLAY_DISTRIBUTION=false, applicationId ro.autocare.garage, code 16. The generated local APK is unsigned and was not distributed. The signed CI path now attempts the existing owner credentials on production-branch pushes, checks continuity with the current public installer's certificate, and publishes only direct-distribution APKs. Missing credentials/configuration fail without replacing the old installer.
