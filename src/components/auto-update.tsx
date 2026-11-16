@@ -15,6 +15,11 @@ export default function AutoUpdate() {
   const dirty = useRef(false);
   const interaction = useRef(Date.now());
   useEffect(() => {
+    if ('serviceWorker' in navigator && !Capacitor.isNativePlatform()) {
+      void navigator.serviceWorker.register('/sw.js', {updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{});
+    }
+  }, []);
+  useEffect(() => {
     const native = Capacitor.isNativePlatform(); setNative(native);
     let disposed = false, busy = false;
     const checkAndroid = async () => {
