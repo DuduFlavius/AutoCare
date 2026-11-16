@@ -1,0 +1,21 @@
+{
+  "passed": [
+    "Human support separated from AI; latest real preview",
+    "Search and priority filters",
+    "Mobile list-to-chat navigation and back state",
+    "Take ownership and send with Enter",
+    "Shift+Enter does not submit",
+    "Customer profile and internal note saved",
+    "Priority update",
+    "Attachment upload invokes existing endpoint",
+    "Reopen and finalize again",
+    "Complete, deletion confirmation, trash and restore",
+    "Incoming message in-app and browser alert",
+    "Separate statistics view with 14 real buckets",
+    "Transfer removes reply access from previous operator",
+    "Customer messaging; no false alert for own sent message",
+    "Customer receives team-reply notification"
+  ],
+  "requests": 95,
+  "scope": "Isolated DOM, simulated API. No visual-layout or real-device assertion."
+}
