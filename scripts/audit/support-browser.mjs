@@ -1,0 +1,32 @@
+/** Real support component, synthetic accounts, isolated API. No production messages. */
+import {mkdtemp,readFile,writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import http from 'node:http';
+import {createRequire} from 'node:module';
+import {build} from 'esbuild';
+const require=createRequire(import.meta.url),{chromium}=require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright');
+const root=process.cwd(),dir=await mkdtemp(path.join(tmpdir(),'autocare-support-premium-'));
+const site=await readFile('src/components/site-document.tsx','utf8'),dashboard=await readFile('src/components/dashboard.tsx','utf8');
+const css=[...(site.match(/import '@\/app\/[^']+\.css';/g)||[]).map(line=>line.replace('@/',root+'/src/')),...(dashboard.match(/import '\.\/[^']+\.css';/g)||[]).map(line=>line.replace('./',root+'/src/components/'))].join('\n');
+await writeFile(path.join(dir,'entry.tsx'),`import React from '${root}/node_modules/react/index.js';import{createRoot}from'${root}/node_modules/react-dom/client.js';import SupportChat from '${root}/src/components/support-chat.tsx';import{ApplicationLanguageProvider}from'${root}/src/components/application-locale.tsx';${css}
+const q=new URLSearchParams(location.search);createRoot(document.getElementById('root')).render(<ApplicationLanguageProvider language={q.get('lang')==='en'?'en':'ro'}><div className="app-shell ac-workspace ac-studio ac-reference-theme"><main className="main" id="workspace-main"><SupportChat role={q.get('role')||'user'} /></main></div></ApplicationLanguageProvider>);`);
+await build({entryPoints:[path.join(dir,'entry.tsx')],bundle:true,outfile:path.join(dir,'app.js'),absWorkingDir:root,tsconfig:path.join(root,'tsconfig.json'),jsx:'automatic',nodePaths:[path.join(root,'node_modules')],external:['/images/*','/mobile-reference/*','/dashboard-reference/*'],loader:{'.woff2':'dataurl','.woff':'dataurl','.png':'dataurl','.svg':'dataurl'},logLevel:'error'});
+const html='<!doctype html><html><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/app.css"><style>html,body{margin:0;background:#090f20}.app-shell{display:block!important}.app-shell main.main#workspace-main{position:static!important;margin:0!important;padding:24px!important;width:100%!important;max-width:100%!important;min-height:100vh!important;box-sizing:border-box!important}@media(max-width:620px){.app-shell main.main#workspace-main{padding:10px!important}}</style><div id="root"></div><script src="/app.js"></script></html>';
+const server=http.createServer(async(req,res)=>{const file=req.url.split('?')[0];res.setHeader('Content-Type',file==='/app.js'?'application/javascript':file==='/app.css'?'text/css':'text/html');res.end(['/app.js','/app.css'].includes(file)?await readFile(path.join(dir,file.slice(1))):html);});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({executablePath:process.env.AUTOCARE_BROWSER_EXECUTABLE,headless:true,args:['--no-sandbox']}),results=[];
+try{for(const [width,height,role,lang] of [[1440,900,'admin','ro'],[1440,900,'user','ro'],[390,844,'user','ro'],[360,740,'admin','en']]){
+ const page=await browser.newPage({viewport:{width,height}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const thread={id:'thread',userId:'customer',name:'Alexandru Popescu',email:'customer@example.invalid',title:'Documente auto',status:'open',assignedTo:role==='admin'?'staff':null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),unreadCount:1,lastMessage:{id:'m1',body:'Bună ziua! Am nevoie de ajutor cu un document.',authorId:'customer',createdAt:new Date().toISOString()}};
+ await page.route('**/api/**',route=>{const p=new URL(route.request().url()).pathname;let json={ok:true};if(p.endsWith('/team'))json={selfId:'staff',team:[{id:'staff',name:'Operator AutoCare',role:'admin'}]};else if(p.endsWith('/chat'))json={selfId:role==='admin'?'staff':'customer',threads:[thread],counts:{open:1,completed:0,trashed:0}};else if(p.endsWith('/thread'))json={thread,messages:[{...thread.lastMessage,authorName:thread.name,authorRole:'user'}],hasMore:false,receipts:[],attachments:[]};return route.fulfill({json});});
+ await page.goto('http://127.0.0.1:'+server.address().port+'/?role='+role+'&lang='+lang);
+ if(role==='admin'){await page.locator('.support-thread-select').click();await page.locator('.support-conversation-menu>summary').click();await page.getByRole('button',{name:/Intră în conversație|Enter conversation/}).click();await page.locator('.support-conversation-menu>summary').click();}
+ await page.locator('.support-composer textarea').waitFor();await page.getByText('Bună ziua! Am nevoie de ajutor cu un document.',{exact:true}).last().waitFor();
+ await page.screenshot({path:path.join(dir,`support-${width}-${role}.png`),fullPage:true});
+  const controls=await page.locator('.support-composer textarea,.support-composer button[type=submit],.support-chat-header h3,.support-conversation-menu>summary').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x,right:r.right,y:r.y,bottom:r.bottom,width:r.width,height:r.height};}));
+ for(const r of controls)if(r.x<0||r.right>width+1||r.bottom>height+1||r.width<20||r.height<10)throw Error('Clipped chat control '+JSON.stringify({width,role,r}));
+ const layout=await page.evaluate(()=>{const box=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,height:r.height};};return {overflow:document.documentElement.scrollWidth>innerWidth,header:box('.support-chat-header'),messages:box('.support-messages'),composer:box('.support-composer')};});
+ if(layout.overflow||layout.messages.height<120||layout.composer.bottom>height+1||layout.header.bottom>layout.messages.y+1||layout.messages.bottom>layout.composer.y+1)throw Error('Invalid chat layout '+JSON.stringify({width,role,layout}));
+ await page.locator('.support-conversation-menu>summary').click();await page.getByRole('button',{name:/Șterge|Delete/,exact:true}).waitFor();await page.screenshot({path:path.join(dir,`menu-${width}-${role}.png`),fullPage:true});
+ if(errors.length)throw Error(errors.join(';'));results.push({width,height,role,lang,pass:true,messageHeight:layout.messages.height});await page.close();
+}console.log(JSON.stringify({results,artifacts:dir,scope:'Real component; synthetic data; no real-device assertion.'},null,2));}finally{await browser.close();server.close();}

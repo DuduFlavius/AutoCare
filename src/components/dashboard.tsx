@@ -756,8 +756,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       setModal(null);
     }
   }
-  async function push() {
-    await act(async () => {
+  async function registerPush() {
       if(hasNativePush()) {await activateNativePush(); await refresh(true); return;}
       if (!window.isSecureContext)
         throw new Error('Deschide AutoCare prin HTTPS pentru notificări.');
@@ -814,8 +813,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       );
       await api('push', 'POST', sub.toJSON());
       await api('profile', 'PUT', { ...profileValues(), pushEnabled: true });
-    }, 'Notificările au fost activate pe acest dispozitiv.');
   }
+  async function push() {await act(registerPush, 'Notificările au fost activate pe acest dispozitiv.');}
   async function selectVehicle(id: string) {
     if (!data || id === data.primaryVehicleId || busy) return;
     if (!previewData && !await act(() => api('vehicles/primary', 'PUT', { vehicleId: id }))) return;
@@ -1638,7 +1637,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             {openedSmartDrive && <div hidden={tab !== 'Plan întreținere'}><MileagePlanner data={data} initialDrive={initialDrive} driveVisible={tab === 'Plan întreținere'} preview={!!previewData} onUpdated={refresh} onError={setError} /></div>}
             {tab === 'Notificări' && (
               <div className="overview-stack">
-                <section className="ac-m-notification-intro" data-workspace-ui><span><BellRing size={76} strokeWidth={1.2}/><b>{data.notifications.filter(row=>!row.readAt).length}</b></span><h2>{data.notifications.some(row=>!row.readAt)?(language==='en'?'Your new notifications':'Notificările tale noi'):(language==='en'?'You are up to date':'Ești la zi')}</h2><p>{language==='en'?'Your vehicle deadlines and important alerts, in one place.':'Termenele mașinii și alertele importante, într-un singur loc.'}</p><button className="ac-m-primary" onClick={()=>document.querySelector('.autocare-notifications')?.scrollIntoView({behavior:'smooth',block:'start'})}>{language==='en'?'View notifications':'Vezi notificările'}<ChevronRight size={18}/></button></section>
+                <section className="ac-notification-toolbar" data-workspace-ui><span><BellRing size={24} strokeWidth={1.6}/><b>{data.notifications.filter(row=>!row.readAt).length}</b></span><h2>{data.notifications.some(row=>!row.readAt)?(language==='en'?'Your new notifications':'Notificările tale noi'):(language==='en'?'You are up to date':'Ești la zi')}</h2><p>{language==='en'?'Your vehicle deadlines and important alerts, in one place.':'Termenele mașinii și alertele importante, într-un singur loc.'}</p><button className="ac-m-primary" type="button" disabled={busy||!!previewData} onClick={()=>void act(async()=>{await registerPush();await api('push/test','POST');},language==='en'?'Test sent. Check your device notifications.':'Test trimis. Verifică notificările dispozitivului.') }><BellRing size={18}/>{language==='en'?'Test notifications':'Testează notificările'}</button></section>
                 <details className="ac-notification-setup"><summary>{language==='en'?'Notification delivery settings':'Setări de livrare a notificărilor'}</summary><PushSettings
                   configured={data.notificationSetup.pushConfigured}
                   emailConfigured={data.notificationSetup.emailConfigured}

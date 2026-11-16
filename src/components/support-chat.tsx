@@ -119,11 +119,10 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     [loading, setLoading] = useState(!preview),
     [mobileThread, setMobileThread] = useState(false),
     [entered, setEntered] = useState(false),
-    [clock, setClock] = useState(() => Date.now()),
     [olderBusy, setOlderBusy] = useState(false);
+  useEffect(()=>{if(!notice)return;const timer=setTimeout(()=>setNotice(''),5000);return()=>clearTimeout(timer);},[notice]);
   const [team, setTeam] = useState<{ id: string; name: string; role: string }[]>([]);
   const [selfId, setSelfId] = useState('');
-  const [selfName, setSelfName] = useState('');
   const [serverQuery, setServerQuery] = useState('');
   const queryRef = useRef('');
   const jumpTo = useRef<string | null>(null);
@@ -153,7 +152,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   useLayoutEffect(()=>{const input=composerInput.current;if(!input)return;input.style.height='auto';input.style.height=Math.min(110,input.scrollHeight)+'px';},[text,selected]);
   statusRef.current = status;
   queryRef.current = serverQuery;
-  useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10000); return () => clearInterval(timer); }, []);
   function merge(id: string, messages: Message[]) {
     const rows = Array.from(
       new Map([...(cache.current[id] || []), ...messages].map((m) => [m.id, m])).values(),
@@ -198,7 +196,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       if (currentStatus !== statusRef.current || currentQuery !== queryRef.current) return;
       setThreads(out.threads);
       if (out.selfId) setSelfId(out.selfId);
-      if (out.self?.name) setSelfName(out.self.name);
       setCounts(out.counts);
       if (currentStatus === 'open' && !currentQuery) {
         const next = new Map<string, string>();
@@ -208,7 +205,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           next.set(thread.id, thread.lastMessage.id);
           const previous = notifiedMessages.current.get(thread.id);
           if (notificationBaseline.current && previous !== thread.lastMessage.id && thread.lastMessage.authorId !== selfId && Number(thread.unreadCount || 0) > 0) {
-            setNotice(t('Mesaj nou în centrul de suport.', 'New message in the support center.'));
+
             if (notificationEnabled.current && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
               try {
                 const title=t('Mesaj nou · AutoCare Suport', 'New message · AutoCare Support');
@@ -453,9 +450,9 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     } catch (error) { setError((error as Error).message); }
     finally { setBusy(false); }
   }
-  if (view==='statistics' && staff) return <section ref={workspace} className="support-workspace ac-support-center support-statistics-mode"><SupportStatistics preview={preview} onClose={()=>setView('inbox')}/></section>;
+  if (view==='statistics' && staff) return <section id="autocare-support" ref={workspace} className="support-workspace ac-support-center support-statistics-mode"><SupportStatistics preview={preview} onClose={()=>setView('inbox')}/></section>;
   return (
-    <section ref={workspace}
+    <section id="autocare-support" ref={workspace}
       className={
         'support-workspace ac-support-center ' +
         (staff ? 'support-team' : 'support-client') +
@@ -562,21 +559,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         </aside>
       )}
       <div className="support-chat-panel">
-        <div className="support-personal-welcome">
-          <span className="support-avatar">{selfName ? initials(selfName) : <Headset size={19}/>}</span>
-          <div><strong>{selfName ? t(`Bine ai venit, ${selfName}!`, `Welcome, ${selfName}!`) : t('Bine ai venit!', 'Welcome!')}</strong><p>{staff ? t('Echipa AutoCare · Ajutor la fiecare pas.', 'AutoCare team · Here to help at every step.') : t('Suntem aici să te ajutăm cu mașina și contul tău.', 'We are here to help with your vehicle and account.')}</p></div>
-          <span className={'support-rank rank-'+role}>{en ? ({user:'Customer',assistant:'Assistant',admin:'Administrator',superadmin:'Super Administrator',founder:'Founder'}[role] || 'Customer') : roles[role] || 'Client'}</span>
-        </div>
-        {!staff && (
-          <nav className="support-client-folders" aria-label="Arhiva conversațiilor">
-            <button type="button" aria-pressed={status !== 'trashed'} onClick={() => { setStatus('open'); setSelected(null); selectedRef.current = null; setDetail(null); }}>
-              <MessageSquare size={16}/> Conversație
-            </button>
-            <button type="button" aria-pressed={status === 'trashed'} onClick={() => { setStatus('trashed'); setSelected(null); selectedRef.current = null; setDetail(null); }}>
-              <Trash2 size={16}/> Coș de gunoi
-            </button>
-          </nav>
-        )}
         {!staff && threads.length > 1 && (
           <label className="support-own-history">Istoric conversații
             <select value={selected ?? ''} onChange={event => {
@@ -586,16 +568,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               {threads.map(thread => <option key={thread.id} value={thread.id}>{new Date(thread.createdAt).toLocaleDateString(locale)} · {thread.title}</option>)}
             </select>
           </label>
-        )}
-        {!staff && status !== 'trashed' && (
-          <div className="support-client-intro" role="status">
-            <span className="support-intro-dot" />
-            <span>{detail?.operatorOnline ? 'Operator activ în conversație.' : current?.assignedTo
-              ? 'Un operator este atribuit conversației.'
-              : current && clock - new Date(current.createdAt).getTime() >= 60000
-                ? 'Mesajul tău este în așteptare. Revenim cât mai curând.'
-                : 'Bine ai venit! Suntem aici să te ajutăm.'}</span>
-          </div>
         )}
         <header className="support-chat-header">
           {staff && (
@@ -611,11 +583,11 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             {staff ? <UserRound size={22} /> : <Headset size={24} />}
           </span>
           <div className="support-header-title">
-            <h3>{staff ? current?.name || 'Conversație client' : 'Asistență AutoCare'}</h3>
+            <h3>{staff ? current?.name || 'Conversație client' : t('Asistență AutoCare','AutoCare Support')}</h3>
             <p>
               {staff
                 ? current?.email || 'Mesaje private · echipa AutoCare'
-                : 'Scrie-ne și echipa noastră te va ajuta.'}
+                : detail?.operatorOnline ? t('Echipa este online', 'The team is online') : t('Mesaje private cu echipa noastră', 'Private messages with our team')}
             </p>
           </div>
           {staff && current ? (
@@ -629,7 +601,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                     ? 'Finalizată'
                     : 'În coș'}
               </span>
-              <button type="button" aria-expanded={profileOpen} aria-controls="support-customer-panel" disabled={preview} onClick={() => setProfileOpen(open => !open)}><PanelRight size={17} /> Profil</button>
+              <button type="button" aria-expanded={profileOpen} aria-controls="support-customer-panel" disabled={preview} onClick={() => setProfileOpen(open => !open)}><PanelRight size={17} /> {t('Profil','Profile')}</button>
             </div>
           ) : (
             <div className="support-header-actions">
@@ -637,7 +609,16 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               <span className="support-header-role">Conversație privată</span>
             </div>
           )}
-        </header>
+          <details className="support-conversation-menu"><summary aria-label={t('Opțiuni conversație','Conversation options')}><MoreHorizontal size={21}/></summary><div className="support-conversation-menu-content">        {!staff && (
+          <nav className="support-client-folders" aria-label="Arhiva conversațiilor">
+            <button type="button" aria-pressed={status !== 'trashed'} onClick={() => { setStatus('open'); setSelected(null); selectedRef.current = null; setDetail(null); }}>
+              <MessageSquare size={16}/> Conversație
+            </button>
+            <button type="button" aria-pressed={status === 'trashed'} onClick={() => { setStatus('trashed'); setSelected(null); selectedRef.current = null; setDetail(null); }}>
+              <Trash2 size={16}/> Coș de gunoi
+            </button>
+          </nav>
+        )}
         {staff && current && (
           <div className="support-session-bar">
             <div className="support-session-status">
@@ -652,7 +633,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                     await request('/' + current.id + '/join', 'POST');
                     joined.current.add(current.id);
                     setEntered(true);
-                    setNotice('Ai preluat conversația. Clientul este anunțat automat.');
+
                     await refresh();
                   } catch (e) { setError((e as Error).message); }
                   finally { setBusy(false); }
@@ -688,9 +669,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             </div>
           </div>
         )}
-        {staff && current?.assignedTo && current.assignedTo !== selfId && (
-          <div className="support-notice" role="status">Conversația este preluată de {team.find((person) => person.id === current.assignedTo)?.name || 'alt membru al echipei'}. O poți consulta, dar nu poți răspunde.</div>
-        )}
         {
           <div className="support-notification-optin">
             <button type="button" onClick={async () => {
@@ -702,6 +680,11 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             }}><Bell size={14}/>{t('Notificări pentru mesaje noi','New message notifications')}</button>
           </div>
         }
+</div></details>
+        </header>
+        {staff && current?.assignedTo && current.assignedTo !== selfId && (
+          <div className="support-notice" role="status">Conversația este preluată de {team.find((person) => person.id === current.assignedTo)?.name || 'alt membru al echipei'}. O poți consulta, dar nu poți răspunde.</div>
+        )}
         {error && (
           <div role="alert" className="support-error">
             {error}
@@ -829,7 +812,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             )}
             {selected && detail?.thread.status === 'open' && (
               <label className="support-upload">
-                <span className="support-upload-trigger"><Paperclip size={16} /> Atașează fișier <small>PDF sau imagine · max. 2 MB</small></span>
+                <span className="support-upload-trigger" title={t('Atașează PDF sau imagine · max. 2 MB','Attach PDF or image · max. 2 MB')}><Paperclip size={18} /><span>{t('Atașează','Attach')}</span></span>
                 <input
                   ref={attachmentInput} type="file"
                   accept="application/pdf,image/png,image/jpeg"
@@ -842,19 +825,19 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                 />
               </label>
             )}
-            {staff && <label className="support-quick-reply">Răspuns rapid
+            {staff && <details className="support-quick-reply-menu"><summary>{t('Răspuns rapid','Quick reply')}</summary><label className="support-quick-reply"><span className="sr-only">Răspuns rapid</span>
               <select value="" onChange={event => { if (event.target.value) setText(previous => previous ? previous + '\n' + event.target.value : event.target.value); }}>
                 <option value="">Alege un răspuns</option>
                 <option value="Bună ziua! Îți mulțumim pentru mesaj. Cum te putem ajuta?">Salut și preluare</option>
                 <option value="Ne poți spune în ce secțiune apare problema și ce mesaj vezi pe ecran?">Cere detalii</option>
                 <option value="Dacă mai ai nevoie de ajutor, scrie-ne aici. Îți mulțumim!">Încheiere</option>
               </select>
-            </label>}
+            </label></details>}
             <div>
               <textarea ref={composerInput}
                 disabled={busy || preview}
                 aria-label="Mesaj către suport"
-                placeholder={staff ? 'Scrie un răspuns clientului…' : 'Scrie mesajul tău…'}
+                placeholder={staff ? t('Scrie un răspuns clientului…','Write a reply…') : t('Scrie mesajul tău…','Write your message…')}
                 value={text}
                 onChange={e => updateText(e.target.value)}
                 onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }}
@@ -869,7 +852,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                 disabled={busy || preview || !text.trim()}
               >
                 {busy ? <LoaderCircle className="support-spin" size={19} /> : <Send size={19} />}
-                <span>Trimite</span>
+                <span>{t('Trimite','Send')}</span>
               </button>
             </div>
             <p>
