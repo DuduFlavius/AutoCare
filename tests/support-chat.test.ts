@@ -38,7 +38,11 @@ test('Support: messages persist, owner isolation, server rejects role injection'
     message: 'Bună ziua, am nevoie de ajutor.',
   });
   threadId = out.threadId;
-  assert.equal((await chat.readSupportThread(customer, threadId)).messages[0].authorRole, 'user');
+  const history = await chat.readSupportThread(customer, threadId);
+  assert.ok(history.messages.some((m) => m.authorRole === 'user' && m.authorName === 'Client Unu'));
+  assert.equal(history.messages.filter((m) => m.authorRole === 'system' && m.body.includes('Bine ai venit, Client Unu,')).length, 1);
+  const listing = await chat.listSupportThreads(customer);
+  assert.deepEqual(listing.self, { id: customer, name: 'Client Unu', role: 'user' });
   await assert.rejects(() => chat.readSupportThread(other, threadId), status(404));
   await assert.rejects(
     () =>
@@ -82,27 +86,18 @@ test('Support: founder join announcement uses real name and is concurrent/idempo
   );
 });
 test('Support: assistant and administrator announce their actual rank', async () => {
-  await chat.joinSupportThread(assistant, threadId);
-  await chat.joinSupportThread(admin, threadId);
-  const messages = (await chat.readSupportThread(customer, threadId)).messages;
-  assert.ok(
-    messages.some((m) => m.body === 'Bună ziua! Asistentul Mihai Suport a intrat în chat.'),
-  );
-  assert.ok(
-    messages.some((m) => m.body === 'Bună ziua! Administratorul Ana Admin a intrat în chat.'),
-  );
-  await chat.sendSupportMessage(assistant, {
-    conversationId: threadId,
-    message: 'Verificăm solicitarea.',
-  });
-  assert.ok(
-    (await chat.readSupportThread(customer, threadId)).messages.some(
-      (m) => m.authorRole === 'assistant',
-    ),
-  );
+  for (const [staffId, title, name] of [[assistant, 'Asistentul', 'Mihai Suport'], [admin, 'Administratorul', 'Ana Admin']]) {
+    const { threadId: id } = await chat.sendSupportMessage(other, { message: 'Ajutor pentru rol' });
+    await chat.joinSupportThread(staffId, id);
+    const messages = (await chat.readSupportThread(other, id)).messages;
+    assert.ok(messages.some((m) => m.body === `Bună ziua! ${title} ${name} a intrat în chat.`));
+    await chat.sendSupportMessage(staffId, { conversationId: id, message: 'Verificăm solicitarea.' });
+    assert.ok((await chat.readSupportThread(other, id)).messages.some((m) => m.authorName === name && m.authorRole !== 'system'));
+    await chat.changeSupportThread(staffId, id, { action: 'complete' });
+  }
 });
-test('Support: clients cannot finalize/trash/restore; trash requires completion and is reversible', async () => {
-  for (const action of ['complete', 'trash', 'restore', 'reopen'])
+test('Support: clients can trash and restore; staff completion is reversible', async () => {
+  for (const action of ['complete', 'reopen'])
     await assert.rejects(
       () => chat.changeSupportThread(customer, threadId, { action }),
       status(403),
@@ -111,7 +106,7 @@ test('Support: clients cannot finalize/trash/restore; trash requires completion 
     () => chat.changeSupportThread(admin, threadId, { action: 'trash' }),
     status(409),
   );
-  await chat.changeSupportThread(admin, threadId, { action: 'complete' });
+  await chat.changeSupportThread(founder, threadId, { action: 'complete' });
   await assert.rejects(
     () =>
       chat.sendSupportMessage(customer, {
@@ -121,7 +116,7 @@ test('Support: clients cannot finalize/trash/restore; trash requires completion 
     status(409),
   );
   await chat.changeSupportThread(admin, threadId, { action: 'trash' });
-  await assert.rejects(() => chat.readSupportThread(customer, threadId), status(404));
+  assert.equal((await chat.readSupportThread(customer, threadId)).thread.status, 'trashed');
   assert.equal((await chat.listSupportThreads(admin, 'trashed')).threads[0].id, threadId);
   const rowsBefore = (await chat.readSupportThread(admin, threadId)).messages.length;
   await chat.changeSupportThread(founder, threadId, { action: 'restore' });
@@ -132,7 +127,7 @@ test('Support: clients cannot finalize/trash/restore; trash requires completion 
   assert.ok((await db().select().from(s.audit)).some((a) => a.action === 'support.trash'));
 });
 test('Support: a new customer message after completion starts a new thread, concurrent sends reuse it', async () => {
-  await chat.changeSupportThread(admin, threadId, { action: 'complete' });
+  await chat.changeSupportThread(founder, threadId, { action: 'complete' });
   const replies = await Promise.all([
     chat.sendSupportMessage(customer, { message: 'O solicitare nouă' }),
     chat.sendSupportMessage(customer, { message: 'Un detaliu suplimentar' }),
@@ -140,7 +135,7 @@ test('Support: a new customer message after completion starts a new thread, conc
   assert.equal(replies[0].threadId, replies[1].threadId);
   assert.notEqual(replies[0].threadId, threadId);
   assert.equal((await chat.readSupportThread(customer, threadId)).thread.status, 'completed');
-  assert.equal((await chat.readSupportThread(customer, replies[0].threadId)).messages.length, 2);
+  assert.equal((await chat.readSupportThread(customer, replies[0].threadId)).messages.length, 3);
 });
 test('Support: history pagination preserves tied timestamps without duplicates', async () => {
   const out = await chat.sendSupportMessage(other, { message: 'Conversație pentru paginare' });
@@ -162,9 +157,9 @@ test('Support: history pagination preserves tied timestamps without duplicates',
   assert.equal(first.messages.length, 100);
   assert.equal(first.hasMore, true);
   const second = await chat.readSupportThread(other, out.threadId, first.messages[0].id);
-  assert.equal(second.messages.length, 11);
+  assert.equal(second.messages.length, 12);
   assert.equal(second.hasMore, false);
-  assert.equal(new Set([...first.messages, ...second.messages].map((m) => m.id)).size, 111);
+  assert.equal(new Set([...first.messages, ...second.messages].map((m) => m.id)).size, 112);
   await assert.rejects(
     () => chat.readSupportThread(customer, threadId, first.messages[0].id),
     status(400),
@@ -221,7 +216,7 @@ test('Support: assignment, read markers and private attachments enforce permissi
     () => chat.assignSupportThread(assistant, id, { assigneeId: admin }),
     status(403),
   );
-  const unread = await chat.supportUnread(admin);
+  const unread = await chat.supportUnread(assistant);
   assert.ok(unread.unread > 0);
   const messages = (await chat.readSupportThread(admin, id)).messages;
   await chat.markSupportRead(admin, id, { messageId: messages.at(-1)!.id });

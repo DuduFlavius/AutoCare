@@ -73,6 +73,7 @@ export async function listSupportThreads(uid: string, status = 'open') {
     threads,
     counts: Object.fromEntries(counts.map((x) => [x.status, x.n])),
     role: who.role,
+    self: { id: uid, name: who.name, role: who.role },
   };
 }
 export async function readSupportThread(uid: string, id: string, cursor?: string) {
@@ -218,7 +219,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
           authorId: null,
           authorName: 'AutoCare',
           authorRole: 'system',
-          body: 'Bine ai venit la Centrul de suport AutoCare! Am primit mesajul tău. Un membru al echipei îți va răspunde aici cât mai curând posibil. Îți mulțumim pentru răbdare!',
+          body: `Bine ai venit, ${who.name}, la Centrul de suport AutoCare! Am primit mesajul tău. Un membru al echipei îți va răspunde aici cât mai curând posibil. Îți mulțumim pentru răbdare!`,
         });
       }
     }

@@ -865,3 +865,15 @@ summary + p {
     }
   }
 }
+
+/* Support welcome and role identity */
+.support-personal-welcome { display:flex; align-items:center; gap:12px; padding:18px 22px; border-bottom:1px solid #353452; background:linear-gradient(115deg,rgba(111,79,210,.18),rgba(25,29,53,.65)); }
+.support-personal-welcome > div { flex:1; min-width:0; }
+.support-personal-welcome strong { color:#f5f2ff; font-size:15px; }
+.support-personal-welcome p { margin:5px 0 0; color:#b1b6d6; font-size:12px; line-height:1.5; }
+.support-personal-welcome .support-rank { padding:6px 10px; border:1px solid currentColor; border-radius:20px; white-space:nowrap; }
+.support-rank.rank-founder { color:#e4c68a; background:rgba(228,198,138,.1); }
+.support-rank.rank-admin { color:#c9b4ff; background:rgba(164,125,255,.12); }
+.support-rank.rank-assistant { color:#9acff1; background:rgba(107,184,232,.1); }
+.support-rank.rank-user { color:#b7bedf; background:rgba(164,175,220,.1); }
+@media(max-width:760px) { .support-personal-welcome { padding:12px; gap:9px; flex-wrap:wrap; } .support-personal-welcome strong { font-size:14px; } .support-personal-welcome p { font-size:11px; } }
