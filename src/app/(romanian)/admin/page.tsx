@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { requireFounder, founderOverview } from '@/lib/founder';
 import MailCenter from '@/components/mail-center';
+import SupportChat from '@/components/support-chat';
 import { requireMailStaff } from '@/lib/mail-center';
 import FounderPanel from '@/components/founder-panel';
 export const dynamic = 'force-dynamic';
@@ -17,6 +18,7 @@ export default async function FounderPage() {
     redirect('/autentificare');
   try {
     const actor = await requireMailStaff(session.user.id);
+    if (actor.role === 'assistant') return <AdminLocale><main className="founder-shell mail-staff-shell"><a className="button" href="/cont">Înapoi în garaj</a><SupportChat role="assistant" /></main></AdminLocale>;
     if (actor.role !== 'founder') return <AdminLocale><main className="founder-shell mail-staff-shell"><a className="button" href="/cont">Înapoi în garaj</a><MailCenter /></main></AdminLocale>;
     await requireFounder(session.user.id);
   } catch {
