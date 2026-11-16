@@ -496,6 +496,8 @@ export const autoAiTurns = pgTable('autocare_ai_turns', {
   vehicleId: text().notNull().references(() => vehicles.id, { onDelete: 'cascade' }),
   question: text().notNull(),
   answer: text().notNull(),
+  conversationId: text(),
+  feedback: integer(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 }, t => [index('autocare_ai_owner_vehicle').on(t.userId, t.vehicleId, t.createdAt)]);
 
