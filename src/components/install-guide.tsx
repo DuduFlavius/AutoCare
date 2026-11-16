@@ -45,9 +45,9 @@ export default function InstallPage() {
       </section>
       <section>
         <h2>iPhone</h2>
-        <p>Deschide AutoCare în Safari. Apasă <strong>Partajare</strong>, apoi <strong>Adaugă la ecranul principal</strong> și <strong>Adaugă</strong>.</p>
+        <p>Deschide AutoCare în Safari. Apasă <strong>Partajare</strong>, apoi <strong>Adaugă la ecranul principal</strong> și <strong>Adaugă</strong>. Dacă apare opțiunea „Deschide ca aplicație web”, activeaz-o.</p>
       </section>
     </div>
-    <p className="muted small">GPS-ul în fundal și automatizarea Bluetooth necesită aplicația nativă și permisiunile dispozitivului.</p>
+    <p className="muted small">Notificările push pe iPhone necesită iOS 16.4 sau ulterior, instalare pe ecranul principal și activare din Setări, printr-o apăsare a utilizatorului. GPS-ul în fundal și automatizarea Bluetooth necesită aplicația nativă și permisiunile dispozitivului.</p>
   </main>;
 }
