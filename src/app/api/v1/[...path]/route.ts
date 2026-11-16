@@ -1,3 +1,4 @@
+import {dailyMileageProjection} from '@/lib/daily-mileage-projection';
 import {languageCookie} from '@/lib/language-preference';
 import {after} from 'next/server';
 import {dispatchMailSafely} from '@/lib/mail-dispatch';
@@ -318,16 +319,22 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     }
     if (path.length === 3 && path[0] === 'vehicles' && path[2] === 'daily-usage' && (method === 'GET' || method === 'POST')) {
       const vehicleId = uuid.parse(path[1]);
-      const car = (await db().select({ id: s.vehicles.id }).from(s.vehicles).where(and(eq(s.vehicles.id, vehicleId), eq(s.vehicles.userId, uid))))[0];
+      const car = (await db().select({ id: s.vehicles.id, odometer:s.vehicles.odometer }).from(s.vehicles).where(and(eq(s.vehicles.id, vehicleId), eq(s.vehicles.userId, uid))))[0];
       if (!car) throw new svc.AppError(404, 'Mașină inexistentă.');
       const key = `daily-usage:${uid}:${vehicleId}`;
       if (method === 'POST') {
-        const value = z.object({ dailyKm: z.number().min(1).max(2000).nullable() }).parse(await body(req));
+        const input = z.object({ dailyKm: z.number().min(1).max(2000).nullable() }).parse(await body(req));
+        const previous=(await db().select().from(s.settings).where(eq(s.settings.key,key)))[0]?.value as {dailyKm?:number|null;anchorDay?:string}|undefined;
+        const value={...input,anchorDay:previous?.dailyKm===input.dailyKm&&previous.anchorDay?previous.anchorDay:localDate(new Date(),(await svc.profile(uid)).timezone)};
         await db().insert(s.settings).values({ key, value }).onConflictDoUpdate({ target: s.settings.key, set: { value } });
         return json(value);
       }
       const row = (await db().select().from(s.settings).where(eq(s.settings.key, key)))[0];
-      return json(row?.value ?? { dailyKm: null });
+      const value=(row?.value ?? { dailyKm:null }) as {dailyKm:number|null;anchorDay?:string};
+      const timezone=(await svc.profile(uid)).timezone,today=localDate(new Date(),timezone);
+      const latest=(await db().select().from(s.mileageReadings).where(and(eq(s.mileageReadings.userId,uid),eq(s.mileageReadings.vehicleId,vehicleId))).orderBy(desc(s.mileageReadings.recordedAt)).limit(1))[0];
+      const anchor=[value.anchorDay||today,latest?localDate(latest.recordedAt,timezone):''].sort().at(-1)!;
+      return json({...value,projection:dailyMileageProjection(car.odometer,value.dailyKm,anchor,today)});
     }
     if (route === 'finance/budget' && method === 'PUT') {
       if (!await svc.premium(uid)) throw new svc.AppError(403, 'Bugetele pe vehicul sunt disponibile în Premium.');
@@ -394,13 +401,19 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           .where(and(eq(s.mileageReadings.userId, uid), eq(s.mileageReadings.vehicleId, vehicleId)))
           .orderBy(desc(s.mileageReadings.recordedAt)).limit(200));
         if (method === 'POST') {
-          const value = z.object({ odometer: z.number().int().min(0).max(99999999) }).parse(await body(req));
+          const value = z.object({ odometer: z.number().int().min(0).max(99999999), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), notes:z.string().trim().max(500).optional() }).parse(await body(req));
+          const timezone=(await svc.profile(uid)).timezone;
+          const today=localDate(new Date(),timezone);
+          if(value.date && (!Number.isFinite(Date.parse(value.date+'T12:00:00Z')) || new Date(value.date+'T12:00:00Z').toISOString().slice(0,10)!==value.date || value.date>today))throw new svc.AppError(400,'Alege o dată validă, cel mult ziua de azi.');
           const result = await db().transaction(async tx => {
             const current = (await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id, vehicleId), eq(s.vehicles.userId, uid))).for('update'))[0];
             if (!current) throw new svc.AppError(404, 'Mașina nu există.');
             if (value.odometer < current.odometer) throw new svc.AppError(400, 'Kilometrajul nu poate fi mai mic decât citirea confirmată.');
+            const previous=(await tx.select().from(s.mileageReadings).where(and(eq(s.mileageReadings.userId,uid),eq(s.mileageReadings.vehicleId,vehicleId))).orderBy(desc(s.mileageReadings.recordedAt)).limit(1))[0];
+            if(value.date && previous && value.date<localDate(previous.recordedAt,timezone))throw new svc.AppError(400,'Data nu poate preceda ultima citire validată.');
+            if(previous && previous.odometer===value.odometer && localDate(previous.recordedAt,timezone)===(value.date||today))return {vehicle:current,reading:previous};
             const updated = (await tx.update(s.vehicles).set({ odometer: value.odometer }).where(and(eq(s.vehicles.id, vehicleId), eq(s.vehicles.userId, uid))).returning())[0];
-            const reading = (await tx.insert(s.mileageReadings).values({ id: crypto.randomUUID(), userId: uid, vehicleId, odometer: value.odometer, source: 'manual' }).returning())[0];
+            const reading = (await tx.insert(s.mileageReadings).values({ id: crypto.randomUUID(), userId: uid, vehicleId, odometer: value.odometer, source: 'manual',notes:value.notes||null,...(value.date?{recordedAt:new Date(value.date+'T12:00:00Z')}:{}) }).returning())[0];
             return { vehicle: updated, reading };
           });
           return json(result, 201);
@@ -423,6 +436,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             odometer+=Math.floor((Number(previous.meters)%1000+fresh.reduce((sum,t)=>sum+t.distanceMeters,0))/1000);
             if(odometer>99999999)throw new svc.AppError(400,'Kilometraj invalid.');
             await tx.update(s.vehicles).set({odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
+            await tx.insert(s.mileageReadings).values({id:crypto.randomUUID(),userId:uid,vehicleId,odometer,source:'gps'});
           }
           await tx.insert(s.gpsTrips).values(fresh.map(t=>({...t,userId:uid,vehicleId,startedAt:new Date(t.startedAt),endedAt:new Date(t.endedAt),source:input.syncMileage?'browser-gps-synced':'browser-gps'})));
           return {ids,odometer};
@@ -476,6 +490,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               const odometer=vehicle.odometer+Math.floor((carry+value.distanceMeters)/1000);
               if(odometer>99999999)throw new svc.AppError(400,'Kilometraj invalid.');
               await tx.update(s.vehicles).set({odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
+            await tx.insert(s.mileageReadings).values({id:crypto.randomUUID(),userId:uid,vehicleId,odometer,source:'gps'});
             }
             return (await tx.insert(s.gpsTrips).values({id:value.id??crypto.randomUUID(),userId:uid,vehicleId,distanceMeters:value.distanceMeters,durationSeconds:value.durationSeconds,startedAt,endedAt,source:value.syncMileage?'browser-gps-synced':'browser-gps'}).returning())[0];
           });
@@ -606,7 +621,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
                 [
                   'fcm.googleapis.com',
                   'updates.push.services.mozilla.com',
-                  'web.push.apple.com',
+                  'push.apple.com',
                 ].some((h) => u.hostname === h || u.hostname.endsWith('.' + h))
               );
             }),
@@ -741,7 +756,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             .optional(),
         })
         .parse(
-          Object.fromEntries(Array.from(params.entries()).filter(([key]) => key !== 'format')),
+          Object.fromEntries(Array.from(params.entries()).filter(([key]) => key !== 'format' && key !== 'view')),
         );
       const today = localDate(new Date(), data.profile.timezone);
       const selection = filters.finance
@@ -775,11 +790,12 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       );
       if (format === 'pdf') {
         const vehicleIds=new Set(selected.map(r=>r.vehicleId));
-        const report=await vehicleReport({vehicles:data.vehicles.filter(v=>vehicleIds.has(v.id)),records:selected,generatedAt:new Date().toLocaleDateString('ro-RO',{timeZone:data.profile.timezone})});
+        if(filters.vehicleId)vehicleIds.add(filters.vehicleId);
+        const report=await vehicleReport({vehicles:data.vehicles.filter(v=>vehicleIds.has(v.id)),records:selected,generatedAt:new Date().toLocaleDateString(languageCookie(req.headers.get('cookie'))==='en'?'en-GB':'ro-RO',{timeZone:data.profile.timezone}),language:languageCookie(req.headers.get('cookie'))==='en'?'en':'ro',asOf:today,title:languageCookie(req.headers.get('cookie'))==='en'?(filters.kind==='service'?'Service sheet':filters.kind==='document'?'Vehicle documents':filters.kind==='expense'||filters.finance?'Expense report':'Vehicle history'):(filters.kind==='service'?'Fișă de service':filters.kind==='document'?'Situația documentelor':filters.kind==='expense'||filters.finance?'Raport de cheltuieli':'Istoric auto'),period:[filters.from,filters.to].filter(Boolean).join(' - ')||undefined});
         return new Response(report, {
           headers: {
             'Content-Type': 'application/pdf',
-            'Content-Disposition': 'attachment; filename="autocare-raport.pdf"',
+            'Content-Disposition': (params.get('view')==='1'?'inline':'attachment')+'; filename="autocare-raport.pdf"',
             'Cache-Control': 'no-store',
           },
         });
