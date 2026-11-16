@@ -1,11 +1,14 @@
 'use client';
-import { SupportAiDraft, SupportCustomerPanel, SupportStatistics } from './support-operations';
+import { SupportCustomerPanel, SupportStatistics } from './support-operations';
 import './support-center.css';
 import {translateApplicationCopy} from '@/lib/application-language';
 import {useApplicationLocale} from './application-locale';
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import {
   Headset,
+  Bell,
+  BarChart3,
+  MoreHorizontal,
   Paperclip,
   PanelRight,
   Search,
@@ -37,6 +40,7 @@ type Thread = {
   unreadCount?: number;
   priority?: string | null;
   workflow?: string | null;
+  lastMessage?: {id:string;body:string;authorId:string|null;createdAt:string}|null;
 };
 type Message = {
   id: string;
@@ -70,7 +74,7 @@ async function request(path: string, method = 'GET', data?: unknown) {
     body: data ? JSON.stringify(data) : undefined,
     cache: 'no-store',
   });
-  const out = await r.json();
+  const out = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(out.error || 'Conexiunea cu suportul nu a reușit.');
   return out;
 }
@@ -91,6 +95,11 @@ export default function SupportChat({
 }) {
 
   const locale=useApplicationLocale();
+  const en=locale==='en-GB',t=(ro:string,english:string)=>en?english:ro;
+  const [view,setView]=useState<'inbox'|'statistics'>('inbox');
+  const workspace=useRef<HTMLElement>(null);
+  const composerInput=useRef<HTMLTextAreaElement>(null);
+  const attachmentInput=useRef<HTMLInputElement>(null);
 const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   const [status, setStatus] = useState('open'),
     [threads, setThreads] = useState<Thread[]>([]),
@@ -106,7 +115,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [busy, setBusy] = useState(false),
-    [aiAvailable, setAiAvailable] = useState(false),
     [loading, setLoading] = useState(!preview),
     [mobileThread, setMobileThread] = useState(false),
     [entered, setEntered] = useState(false),
@@ -134,6 +142,13 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     notificationBaseline = useRef(false),
     notifiedMessages = useRef(new Map<string, string>()),
     notificationEnabled = useRef(false);
+  useLayoutEffect(()=>{
+    const element=workspace.current;if(!element)return;let frame=0,lastHeight=-1;
+    const update=()=>{frame=0;const viewport=window.visualViewport,bottom=(viewport?.height??window.innerHeight)+(viewport?.offsetTop??0);const dock=document.querySelector<HTMLElement>('.autocare-mobile-dock');const rect=dock?.getBoundingClientRect();const reserved=rect&&rect.height&&rect.top<bottom&&getComputedStyle(dock!).position==='fixed'?bottom-rect.top:0;const height=Math.max(220,bottom-Math.max(0,element.getBoundingClientRect().top)-reserved-12);if(Math.abs(lastHeight-height)<1)return;lastHeight=height;element.style.setProperty('--support-height',height+'px');element.toggleAttribute('data-compact',height<440);};
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};update();window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);window.visualViewport?.addEventListener('scroll',schedule);
+    return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('scroll',schedule);};
+  },[view,staff]);
+  useLayoutEffect(()=>{const input=composerInput.current;if(!input)return;input.style.height='auto';input.style.height=Math.min(110,input.scrollHeight)+'px';},[text,selected]);
   statusRef.current = status;
   queryRef.current = serverQuery;
   useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10000); return () => clearInterval(timer); }, []);
@@ -148,6 +163,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     const turn = ++epoch.current;
     if (selectedRef.current !== thread.id) setText('');
     setDetail(null);
+    setProfileOpen(false);
     selectedRef.current = thread.id;
     setSelected(thread.id);
     setMobileThread(true);
@@ -179,27 +195,26 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       const out = await request('?' + new URLSearchParams({ status: currentStatus, ...(staff && currentQuery ? { q: currentQuery } : {}) }));
       if (currentStatus !== statusRef.current || currentQuery !== queryRef.current) return;
       setThreads(out.threads);
+      if (out.selfId) setSelfId(out.selfId);
       setCounts(out.counts);
-      setAiAvailable(!!out.aiAvailable);
-      if (staff && currentStatus === 'open' && !currentQuery) {
+      if (currentStatus === 'open' && !currentQuery) {
         const next = new Map<string, string>();
         for (const thread of out.threads as Thread[]) {
-          if (thread.status !== 'open' || (thread.assignedTo && thread.assignedTo !== selfId)) continue;
-          next.set(thread.id, thread.updatedAt);
+          if (thread.status !== 'open' || (staff && thread.assignedTo && thread.assignedTo !== selfId)) continue;
+          if (!thread.lastMessage) continue;
+          next.set(thread.id, thread.lastMessage.id);
           const previous = notifiedMessages.current.get(thread.id);
-          if (notificationBaseline.current && (!previous || previous !== thread.updatedAt) && Number(thread.unreadCount || 0) > 0 && notificationEnabled.current && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-            try {
-              const alert = new Notification(previous ? 'Mesaj nou · AutoCare' : 'Solicitare nouă · AutoCare', {
-                body: thread.name + ' · ' + (thread.title || 'Conversație de suport'),
-                tag: 'autocare-support-' + thread.id,
-                icon: '/favicon.ico',
-              });
-              alert.onclick = () => { window.focus(); alert.close(); };
-            } catch { /* Browserul poate refuza notificarea în fundal. */ }
+          if (notificationBaseline.current && previous !== thread.lastMessage.id && thread.lastMessage.authorId !== selfId && Number(thread.unreadCount || 0) > 0) {
+            setNotice(t('Mesaj nou în centrul de suport.', 'New message in the support center.'));
+            if (notificationEnabled.current && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+              try {
+                const alert = new Notification(t('Mesaj nou · AutoCare Suport', 'New message · AutoCare Support'), {body:t('Deschide centrul de suport pentru a citi mesajul.', 'Open the support center to read the message.'),tag:'autocare-support-'+thread.id,icon:'/favicon.ico'});
+                alert.onclick=()=>{window.focus();alert.close();};
+              } catch { /* In-app alerts remain available when desktop notifications fail. */ }
+            }
           }
         }
-        notifiedMessages.current = next;
-        notificationBaseline.current = true;
+        notifiedMessages.current=next;notificationBaseline.current=true;
       }
       const current =
         out.threads.find((t: Thread) => t.id === (jumpTo.current || selectedRef.current)) || out.threads[0];
@@ -254,7 +269,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     };
   }, [status, preview, serverQuery, selfId]);
   useEffect(() => {
-    if (staff && typeof Notification !== 'undefined') notificationEnabled.current = Notification.permission === 'granted';
+    if (typeof Notification !== 'undefined') notificationEnabled.current = Notification.permission === 'granted';
   }, [staff]);
   useEffect(() => {
     if (!staff || preview) return;
@@ -270,12 +285,13 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       preview ||
       !selected ||
       !lastId ||
+      view === 'statistics' ||
       document.hidden ||
       (staff && window.innerWidth <= 760 && !mobileThread)
     )
       return;
     void request('/' + selected + '/read', 'POST', { messageId: lastId }).catch(() => {});
-  }, [selected, lastId, preview, staff, mobileThread]);
+  }, [selected, lastId, preview, staff, mobileThread, view]);
   async function assign(assigneeId: string) {
     if (!selected || preview) return;
     setBusy(true);
@@ -292,6 +308,8 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   }
   async function upload(file: File) {
     if (!selected || preview) return;
+    if (busy) return;
+    if (!['application/pdf','image/png','image/jpeg'].includes(file.type)) { setError(t('Alege un PDF, JPEG sau PNG.', 'Choose a PDF, JPEG or PNG.')); return; }
     if (file.size > 2097152) {
       setError('Fișierul poate avea maximum 2 MB.');
       return;
@@ -319,7 +337,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   }, [lastId, selected]);
   async function send(e: FormEvent) {
     e.preventDefault();
-    if (!text.trim() || busy || (!staff && status === 'trashed')) return;
+    if (!text.trim() || busy || (staff && !canWrite) || (!staff && status === 'trashed')) return;
     if (preview) {
       setNotice('Previzualizare de design: mesajele nu sunt trimise.');
       return;
@@ -428,8 +446,9 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     } catch (error) { setError((error as Error).message); }
     finally { setBusy(false); }
   }
+  if (view==='statistics' && staff) return <section ref={workspace} className="support-workspace ac-support-center support-statistics-mode"><SupportStatistics preview={preview} onClose={()=>setView('inbox')}/></section>;
   return (
-    <section
+    <section ref={workspace}
       className={
         'support-workspace ac-support-center ' +
         (staff ? 'support-team' : 'support-client') +
@@ -445,7 +464,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             </span>
             <span>AUTOCARE · ECHIPA</span>
           </div>
-          <h2>Centru de suport</h2>
+          <h2>{t('Centru de suport','Support center')}</h2>
           <p className="support-sync">
             <span />
             {loading ? 'Se conectează…' : 'Mesaje private'}
@@ -482,7 +501,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           </label>
           <div className="support-inbox-tools">
             <label><input type="checkbox" checked={unreadOnly} onChange={event => setUnreadOnly(event.target.checked)} /> Doar necitite</label>
-            <details><summary>Filtre inbox</summary>
+            <details><summary><MoreHorizontal size={16}/>{t('Filtre','Filters')}</summary>
               <label>Prioritate<select value={priorityFilter} onChange={event => setPriorityFilter(event.target.value)}>
                 <option value="">Toate</option><option value="normal">Normală</option><option value="high">Ridicată</option><option value="urgent">Urgentă</option>
               </select></label>
@@ -490,7 +509,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                 <option value="">Toți</option><option value="mine">Atribuite mie</option><option value="unassigned">Neatribuite</option>
               </select></label>
             </details>
-            <SupportStatistics preview={preview} />
+            <button type="button" className="support-stats-trigger" onClick={()=>setView('statistics')}><BarChart3 size={15}/>{t('Statistici','Statistics')}</button>
           </div>
           <div className="support-thread-list">
             {loading ? (
@@ -513,17 +532,17 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                         )}
                       </strong>
                       <small>{thread.email}</small>
-                      <span data-user-content className="support-preview-text">{thread.title}</span>
+                      <span data-user-content className="support-preview-text">{thread.lastMessage?.body || thread.title}</span>
                     </span>
                   </button>
                   <div className="support-thread-foot">
-                    <time>
-                      {new Date(thread.updatedAt).toLocaleDateString(locale, {
+                    <time dateTime={thread.lastMessage?.createdAt || thread.updatedAt}>
+                      {new Date(thread.lastMessage?.createdAt || thread.updatedAt).toLocaleString(locale, {
                         day: 'numeric',
-                        month: 'short',
+                        month: 'short', hour:'2-digit', minute:'2-digit',
                       })}
                     </time>
-                    <span className="support-thread-status">{thread.priority === 'urgent' ? 'Urgentă · ' : thread.priority === 'high' ? 'Prioritară · ' : ''}{thread.status !== 'open' ? (thread.status === 'completed' ? 'Finalizată' : 'În coș') : thread.workflow === 'waiting' ? 'În așteptare' : thread.assignedTo ? 'În lucru' : 'Neatribuită'}</span>
+                    <span className="support-thread-status">{thread.priority === 'urgent' ? 'Urgentă · ' : thread.priority === 'high' ? 'Prioritară · ' : ''}{thread.status !== 'open' ? (thread.status === 'completed' ? 'Finalizată' : 'În coș') : thread.workflow === 'waiting' ? 'În așteptare' : thread.assignedTo ? 'În lucru' : 'Nouă'}</span>
                   </div>
                 </article>
               ))
@@ -646,16 +665,16 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         {staff && current?.assignedTo && current.assignedTo !== selfId && (
           <div className="support-notice" role="status">Conversația este preluată de {team.find((person) => person.id === current.assignedTo)?.name || 'alt membru al echipei'}. O poți consulta, dar nu poți răspunde.</div>
         )}
-        {staff && (
+        {
           <div className="support-notification-optin">
             <button type="button" onClick={async () => {
               if (typeof Notification === 'undefined') { setNotice('Browserul nu permite notificări desktop.'); return; }
               const permission = await Notification.requestPermission();
               notificationEnabled.current = permission === 'granted';
               setNotice(permission === 'granted' ? 'Notificările pentru mesaje noi sunt activate în acest browser.' : 'Permite notificările din setările browserului pentru a primi alerte.');
-            }}>Activează notificări pentru mesaje noi</button>
+            }}><Bell size={14}/>{t('Notificări pentru mesaje noi','New message notifications')}</button>
           </div>
-        )}
+        }
         {error && (
           <div role="alert" className="support-error">
             {error}
@@ -730,8 +749,8 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                         r.userId !== message.authorId &&
                         (message.authorRole === 'user' ? r.userId === current?.assignedTo : r.userId === current?.userId) &&
                         new Date(r.lastReadAt) >= new Date(message.createdAt),
-                    ) && <small className="support-read-receipt">Citit</small>}
-                  <time>
+                    ) && <small className="support-read-receipt"><CheckCheck size={12}/>{t('Citit','Read')}</small>}
+                  <time dateTime={message.createdAt}>
                     {new Date(message.createdAt).toLocaleString(locale, {
                       day: 'numeric',
                       month: 'short',
@@ -764,8 +783,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           </section>
         )}
         {!staff && current?.status === 'trashed' && <button type="button" disabled={busy || preview} onClick={() => void change(current, 'restore')}><RotateCcw size={15} /> Restaurează conversația</button>}
-        {canWrite && staff && selected && !preview && <SupportAiDraft available={aiAvailable} key={selected} onDraft={value => setText(value)} />}
-        {!staff && !preview && status !== 'trashed' && <SupportAiDraft available={aiAvailable} />}
         {(staff && !canWrite) || (!staff && status === 'trashed') ? (
           <footer className="support-readonly">
             <ShieldCheck size={16} />
@@ -803,7 +820,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               <label className="support-upload">
                 <span className="support-upload-trigger"><Paperclip size={16} /> Atașează fișier <small>PDF sau imagine · max. 2 MB</small></span>
                 <input
-                  type="file"
+                  ref={attachmentInput} type="file"
                   accept="application/pdf,image/png,image/jpeg"
                   disabled={busy || preview}
                   onChange={(e) => {
@@ -823,12 +840,13 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               </select>
             </label>}
             <div>
-              <textarea
+              <textarea ref={composerInput}
+                disabled={busy || preview}
                 aria-label="Mesaj către suport"
                 placeholder={staff ? 'Scrie un răspuns clientului…' : 'Scrie mesajul tău…'}
                 value={text}
                 onChange={e => updateText(e.target.value)}
-                onKeyDown={event => { if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }}
+                onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }}
                 maxLength={4000}
                 rows={2}
                 required
@@ -837,7 +855,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                 className="primary"
                 aria-label="Trimite mesajul"
                 type="submit"
-                disabled={busy || !text.trim()}
+                disabled={busy || preview || !text.trim()}
               >
                 {busy ? <LoaderCircle className="support-spin" size={19} /> : <Send size={19} />}
                 <span>Trimite</span>
@@ -846,18 +864,19 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             <p>
               <ShieldCheck size={12} />
               <span>Conversație privată cu echipa AutoCare</span>
-              <small>{text.length}/4000</small>
+              <small>{text.length}/4000 · {t('Enter trimite', 'Enter to send')}</small>
             </p>
           </form>
         )}
       </div>
+      {staff && profileOpen && current && !preview && <button type="button" className="support-profile-backdrop" aria-label={t('Închide profilul','Close profile')} onClick={()=>setProfileOpen(false)}/> }
       {staff && profileOpen && current && !preview && <SupportCustomerPanel
         key={current.id} id={current.id} locale={locale} editable={!!selfId && current.assignedTo === selfId && current.status === 'open'}
         assignedName={team.find(person => person.id === current.assignedTo)?.name ?? (current.assignedTo ? 'Membru al echipei' : 'Neatribuit')}
         transfer={role !== 'assistant' && selfId && current.status === 'open' && (!current.assignedTo || current.assignedTo === selfId) ? { value: current.assignedTo ?? '', team, onAssign: assign } : undefined}
         onChange={refresh} onClose={() => setProfileOpen(false)} openHistory={(id, nextStatus) => {
           jumpTo.current = id;
-          setQuery(''); setUnreadOnly(false);
+          setQuery(''); setUnreadOnly(false); setAssigneeFilter(''); setPriorityFilter('');
           if (nextStatus !== status) setStatus(nextStatus);
           else void refresh();
         }}
