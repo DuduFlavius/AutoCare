@@ -62,6 +62,7 @@ export async function listSupportThreads(uid: string, status = 'open', query = '
       workingAt: s.supportThreads.workingAt,
       priority: s.supportOperations.priority,
       workflow: s.supportOperations.workflow,
+      lastMessage: sql<{id:string;body:string;authorId:string|null;createdAt:string}|null>`(SELECT jsonb_build_object('id',m.id,'body',left(m.body,180),'authorId',m."authorId",'createdAt',m."createdAt") FROM support_chat_messages m WHERE m."threadId"=${s.supportThreads.id} AND m."authorRole"<>'system' ORDER BY m."createdAt" DESC,m.id DESC LIMIT 1)`,
       unreadCount: sql<number>`(SELECT count(*)::int FROM support_chat_messages m WHERE m."threadId"=${s.supportThreads.id} AND m."authorId" IS DISTINCT FROM ${uid} AND m."createdAt">coalesce((SELECT r."lastReadAt" FROM support_reads r WHERE r."threadId"=${s.supportThreads.id} AND r."userId"=${uid}),'epoch'::timestamptz))`,
       name: s.user.name,
       email: s.user.email,
@@ -84,6 +85,7 @@ export async function listSupportThreads(uid: string, status = 'open', query = '
     : [];
   return {
     threads,
+    selfId: who.uid,
     counts: Object.fromEntries(counts.map((x) => [x.status, x.n])),
     aiAvailable: autoAssistantConfigured(),
     role: who.role,
@@ -514,17 +516,18 @@ export async function setSupportTyping(uid: string, id: string, input: unknown) 
 export async function supportCustomerContext(uid: string, id: string) {
   const { who, thread } = await threadFor(uid, id);
   if (!who.staff) throw new AppError(403, 'Acces rezervat echipei.');
-  const [users, activePremium, vehicles, threads, notes, events, restrictions, operations] = await Promise.all([
+  const [users, activePremium, vehicles, threads, notes, events, restrictions, operations, sessions] = await Promise.all([
     db().select({ name: s.user.name, email: s.user.email, createdAt: s.user.createdAt, verified: s.user.emailVerified }).from(s.user).where(eq(s.user.id, thread.userId)),
     premium(thread.userId),
-    db().select({ count: sql<number>`count(*)::int` }).from(s.vehicles).where(and(eq(s.vehicles.userId, thread.userId), eq(s.vehicles.archived, false))),
+    db().select({ id:s.vehicles.id,brand:s.vehicles.brand,model:s.vehicles.model,plate:s.vehicles.plate,year:s.vehicles.year,odometer:s.vehicles.odometer }).from(s.vehicles).where(and(eq(s.vehicles.userId, thread.userId), eq(s.vehicles.archived, false))),
     db().select({ id: s.supportThreads.id, status: s.supportThreads.status, createdAt: s.supportThreads.createdAt }).from(s.supportThreads).where(eq(s.supportThreads.userId, thread.userId)).orderBy(desc(s.supportThreads.createdAt)).limit(12),
     db().select({ id: s.supportInternalNotes.id, body: s.supportInternalNotes.body, createdAt: s.supportInternalNotes.createdAt, author: s.user.name }).from(s.supportInternalNotes).leftJoin(s.user, eq(s.user.id, s.supportInternalNotes.authorId)).where(eq(s.supportInternalNotes.threadId, id)).orderBy(desc(s.supportInternalNotes.createdAt)).limit(40),
     db().select({ id: s.audit.id, action: s.audit.action, createdAt: s.audit.createdAt, author: s.user.name }).from(s.audit).leftJoin(s.user, eq(s.user.id, s.audit.actorId)).where(sql`${s.audit.action} like 'support.%' and split_part(${s.audit.target}, ':', 1)=${id}`).orderBy(desc(s.audit.createdAt)).limit(20),
     db().select({ suspendedAt: s.accountRestrictions.suspendedAt }).from(s.accountRestrictions).where(eq(s.accountRestrictions.userId, thread.userId)),
     db().select().from(s.supportOperations).where(eq(s.supportOperations.threadId, id)),
+    db().select({lastActivityAt:sql<Date|null>`max(${s.session.updatedAt})`}).from(s.session).where(eq(s.session.userId,thread.userId)),
   ]);
-  return { customer: users[0], premium: activePremium, vehicleCount: vehicles[0].count, suspended: !!restrictions[0]?.suspendedAt, threads, notes, events, operations: operations[0] ?? null };
+  return { customer: users[0], premium: activePremium, vehicleCount: vehicles.length, vehicles, lastActivityAt: sessions[0]?.lastActivityAt ?? null, suspended: !!restrictions[0]?.suspendedAt, threads, notes, events, operations: operations[0] ?? null };
 }
 
 export async function updateSupportOperations(uid: string, id: string, input: unknown) {
@@ -562,14 +565,15 @@ export async function rateSupportThread(uid: string, id: string, input: unknown)
 
 export async function supportStatistics(uid: string) {
   if (!(await actor(uid)).staff) throw new AppError(403, 'Acces rezervat echipei.');
-  const [result, unread, activity] = await Promise.all([
+  const [result, unread, activity, trend] = await Promise.all([
     db().execute(sql`
       with first_replies as (
         select "threadId", min("createdAt") as replied from support_chat_messages
         where "authorRole" in ('assistant','admin','superadmin','founder') group by "threadId"
       )
       select count(*) filter (where t.status='open')::int as active,
-        count(*) filter (where t."completedAt" is not null)::int as resolved,
+        count(*) filter (where t.status='completed')::int as resolved,
+        count(*) filter (where t.status='open' and t."assignedTo" is null)::int as fresh,
         round(avg(extract(epoch from r.replied-t."createdAt")) filter(where r.replied >= t."createdAt"))::int as "responseSeconds",
         round(avg(extract(epoch from t."completedAt"-t."createdAt")) filter(where t."completedAt" >= t."createdAt"))::int as "resolutionSeconds",
         count(o.rating)::int as ratings, round(avg(o.rating),1)::float as satisfaction
@@ -582,10 +586,14 @@ export async function supportStatistics(uid: string) {
       .where(and(sql`${s.supportChatMessages.authorRole} in ('assistant','admin','superadmin','founder')`,
         gte(s.supportChatMessages.createdAt, new Date(Date.now() - 7 * 86400000))))
       .groupBy(s.user.id, s.user.name).orderBy(sql`count(*) desc`).limit(10),
+    db().execute(sql`SELECT to_char(day,'YYYY-MM-DD') as day, count(t.id)::int as count
+      FROM generate_series((now() AT TIME ZONE 'UTC')::date - 13, (now() AT TIME ZONE 'UTC')::date, interval '1 day') day
+      LEFT JOIN support_threads t ON (t."createdAt" AT TIME ZONE 'UTC')::date=day::date
+      GROUP BY day ORDER BY day`),
   ]);
   const row = result.rows[0];
   return {
-    active: Number(row.active), resolved: Number(row.resolved), ratings: Number(row.ratings),
+    fresh: Number(row.fresh), trend: trend.rows.map(row=>({day:String(row.day),count:Number(row.count)})), active: Number(row.active), resolved: Number(row.resolved), ratings: Number(row.ratings),
     responseSeconds: row.responseSeconds == null ? null : Number(row.responseSeconds),
     resolutionSeconds: row.resolutionSeconds == null ? null : Number(row.resolutionSeconds),
     satisfaction: row.satisfaction == null ? null : Number(row.satisfaction),
