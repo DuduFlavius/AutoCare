@@ -74,8 +74,8 @@ export default function MobileInstall() {
 
   if (installed) return null;
 
-  const instructions = en ? (platform === 'ios' ? 'On iPhone or iPad, open AutoCare in Safari. Tap Share, then Add to Home Screen and Add. Installation must be started from the browser menu.' : platform === 'android' ? 'On Android, open AutoCare in Chrome or Samsung Internet. Open the browser menu and choose Install app or Add to Home screen, then confirm.' : 'On a computer, use Chrome or Edge and choose Install app in the address bar or browser menu. Availability depends on your browser.') : platform === 'ios'
-    ? 'Pe iPhone: deschide AutoCare în Safari, apasă Partajează (pătratul cu săgeată) și alege „Adaugă pe ecranul principal”, apoi „Adaugă”. iOS nu permite site-ului să declanșeze direct instalarea.'
+  const instructions = en ? (platform === 'ios' ? 'On iPhone or iPad, open AutoCare in Safari. Tap Share, then Add to Home Screen and Add. Enable Open as Web App if that option is shown. Installation must be started from the browser menu.' : platform === 'android' ? 'On Android, open AutoCare in Chrome or Samsung Internet. Open the browser menu and choose Install app or Add to Home screen, then confirm.' : 'On a computer, use Chrome or Edge and choose Install app in the address bar or browser menu. Availability depends on your browser.') : platform === 'ios'
+    ? 'Pe iPhone: deschide AutoCare în Safari, apasă Partajează (pătratul cu săgeată) și alege „Adaugă pe ecranul principal”, apoi „Adaugă”. Dacă apare „Deschide ca aplicație web”, activează opțiunea. iOS nu permite site-ului să declanșeze direct instalarea.'
     : platform === 'android'
       ? 'Pe Samsung: deschide AutoCare în Chrome sau Samsung Internet, apasă meniul browserului (⋮ sau ☰), apoi „Instalează aplicația” / „Adaugă pe ecranul principal”. Confirmă instalarea.'
       : 'Pe calculator: în Chrome sau Edge, caută „Instalează aplicația” în bara de adrese sau în meniul browserului. Dacă opțiunea lipsește, browserul nu oferă momentan instalarea automată.';
@@ -84,7 +84,7 @@ export default function MobileInstall() {
     <div className="ac-mobile-install" aria-label={en ? 'Install AutoCare' : 'Instalare aplicație AutoCare'} data-workspace-ui={en || undefined}>
       <button type="button" className="ac-mobile-install-trigger" onClick={() => void install()}
         aria-expanded={expanded} aria-controls="ac-install-instructions">
-        {en ? 'Install app' : 'Instalează aplicația'}
+        {en ? 'Install AutoCare' : 'Instalează AutoCare'}
       </button>
       {expanded && (
         <div className="ac-mobile-install-help" id="ac-install-instructions" role="status">
