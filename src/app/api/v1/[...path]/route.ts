@@ -1,3 +1,5 @@
+import {playBillingConfigured,playProducts,playAccountId,verifyPlayPurchase} from '@/lib/play-billing';
+import {nativePushConfigured} from '@/lib/native-push';
 import {dailyMileageProjection} from '@/lib/daily-mileage-projection';
 import {languageCookie} from '@/lib/language-preference';
 import {after} from 'next/server';
@@ -597,6 +599,28 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           .where(and(eq(s.files.userId, uid), eq(s.files.id, file.id)));
         return json({ ok: true });
       }
+    }
+    if(route==='billing/play' && method==='GET') {
+      const current=(await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId,uid)))[0];
+      const existing=(await db().select().from(s.playSubscriptions).where(and(eq(s.playSubscriptions.userId,uid),eq(s.playSubscriptions.active,true),sql`${s.playSubscriptions.expiresAt}>now()`))).length>0;
+      return json({configured:playBillingConfigured(),products:playProducts(),accountId:playAccountId(uid),hasActiveSubscription:existing||!!(current?.subscriptionId&&['active','trialing','past_due','unpaid'].includes(current.status))});
+    }
+    if(route==='billing/play' && method==='POST') {
+      await rate(uid,'play-verify',20);
+      const {token}=z.object({token:z.string().min(10).max(4096)}).parse(await body(req));
+      try{return json(await verifyPlayPurchase(uid,token));}catch{throw new svc.AppError(400,'Achiziția Google Play nu a putut fi verificată. Reîncearcă restaurarea achizițiilor.');}
+    }
+    if (route === 'push/native' && method === 'GET') return json({configured:nativePushConfigured()});
+    if (route === 'push/native' && (method === 'POST' || method === 'DELETE')) {
+      const {token} = z.object({token:z.string().min(20).max(4096).regex(/^[A-Za-z0-9_:.-]+$/)}).parse(await body(req));
+      if (method === 'DELETE') {
+        await db().delete(s.nativePushTokens).where(and(eq(s.nativePushTokens.token,token),eq(s.nativePushTokens.userId,uid)));
+      } else {
+        if (!nativePushConfigured()) throw new svc.AppError(503,'Notificările Android nu sunt încă configurate.');
+        await db().insert(s.nativePushTokens).values({token,userId:uid}).onConflictDoUpdate({target:s.nativePushTokens.token,set:{userId:uid,updatedAt:new Date()}});
+        await db().update(s.profiles).set({pushEnabled:true}).where(eq(s.profiles.userId,uid));
+      }
+      return json({ok:true});
     }
     if (route === 'push/test' && method === 'POST') {
       await sendPushNotification(uid, {

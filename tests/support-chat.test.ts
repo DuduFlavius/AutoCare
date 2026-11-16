@@ -40,7 +40,8 @@ test('Support: messages persist, owner isolation, server rejects role injection'
   threadId = out.threadId;
   const opening = (await chat.readSupportThread(customer, threadId)).messages;
   assert.equal(opening[0].authorRole, 'system');
-  assert.match(opening[0].body, /Centrul de suport AutoCare/);
+  assert.match(opening[0].body, /Bine ai venit, Client Unu,/);
+  assert.deepEqual((await chat.listSupportThreads(customer)).self, {id:customer,name:'Client Unu',role:'user'});
   assert.equal(opening[1].authorRole, 'user');
   await assert.rejects(() => chat.readSupportThread(other, threadId), status(404));
   await assert.rejects(

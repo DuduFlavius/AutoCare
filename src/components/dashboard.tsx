@@ -1,4 +1,7 @@
 'use client';
+import {hasPlayBilling,purchasePlayPlan,restorePlayPurchases} from '@/lib/play-billing-client';
+import PlayBillingPanel from './play-billing-panel';
+import {activateNativePush,disconnectNativePush,hasNativePush} from '@/lib/native-push-client';
 import {saveBrowserLanguage} from '@/lib/language-preference';
 import dynamic from 'next/dynamic';
 import ReferenceArtwork from './reference-artwork';
@@ -392,6 +395,14 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
         .then(setAdmin)
         .catch((e) => setError(e.message));
   }, [tab]);
+  useEffect(() => {
+    if(previewData || !data?.profile.userId || !hasNativePush() || !data.profile.pushEnabled)return;
+    void activateNativePush(false).catch(()=>{});
+  },[previewData,data?.profile.userId,data?.profile.pushEnabled]);
+  useEffect(()=>{
+    if(previewData || !data?.profile.userId || !hasPlayBilling())return;
+    void restorePlayPurchases().then(()=>refresh(true)).catch(()=>{});
+  },[previewData,data?.profile.userId]);
   // Reconnect an already-authorized desktop/mobile device to Web Push after login.
   useEffect(() => {
     if (previewData || !data?.pushPublicKey || !data.notificationSetup.pushConfigured) return;
@@ -490,6 +501,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
 
   function startCheckout(interval: string, extend = false, billingCurrency:'ron'|'eur'='ron') {
     void act(async () => {
+      if(hasPlayBilling()){if(extend)throw new Error('Prelungirea se gestionează prin abonamentul Google Play.');await purchasePlayPlan(interval);await refresh(true);return;}
       const out = await api(extend ? 'billing/extend' : 'billing/checkout', 'POST', { interval,currency:billingCurrency.toUpperCase(),language });
       if (typeof out?.url !== 'string' || !out.url.startsWith('https://checkout.stripe.com/')) {
         throw new Error(language === 'en' ? 'Invalid Stripe checkout link.' : 'Linkul de plată Stripe este invalid.');
@@ -742,6 +754,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
   }
   async function push() {
     await act(async () => {
+      if(hasNativePush()) {await activateNativePush(); await refresh(true); return;}
       if (!window.isSecureContext)
         throw new Error('Deschide AutoCare prin HTTPS pentru notificări.');
       if (
@@ -797,7 +810,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
       );
       await api('push', 'POST', sub.toJSON());
       await api('profile', 'PUT', { ...profileValues(), pushEnabled: true });
-    }, 'Notificările push au fost activate pentru acest browser.');
+    }, 'Notificările au fost activate pe acest dispozitiv.');
   }
   async function selectVehicle(id: string) {
     if (!data || id === data.primaryVehicleId || busy) return;
@@ -811,7 +824,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     if (previewData || signingOut) return;
     if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
     setSigningOut(true); setError('');
-    try { if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
+    try { await disconnectNativePush(); if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (
@@ -1678,7 +1691,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             {tab === 'Centru de suport' && (
               <SupportChat role={data.profile.role} preview={!!previewData} />
             )}
-            {tab==='Abonament'&&<SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/>}
+            {tab==='Abonament'&&<><PlayBillingPanel onUpdated={()=>refresh(true)}/><SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(hasPlayBilling())throw new Error('Gestionează abonamentul din Google Play.');if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/></>}
             {tab==='Rapoarte'&&(data.premium?<PremiumDownloads data={data} language={language} preview={!!previewData}/>:<section className="card studio-report-intro"><Download size={32}/><h2>{language==='en'?'Reports, ready when you need them.':'Rapoartele tale, gata când ai nevoie.'}</h2><p>{language==='en'?'PDF and CSV reports are included with Premium. Your personal data export remains free in account settings.':'Rapoartele PDF și CSV sunt incluse cu Premium. Exportul datelor personale rămâne gratuit în setările contului.'}</p><button className="primary" onClick={()=>navigate('Premium')}>{language==='en'?'Compare plans':'Compară planurile'}</button></section>)}
             {tab === 'Premium' && (
               <Membership

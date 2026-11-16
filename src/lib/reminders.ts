@@ -1,3 +1,4 @@
+import {sendNativePush} from './native-push';
 import {userLanguage} from './user-language';
 import { calendarRecordDate, isPlannedService } from './planned-service';
 import {reminderOffsets,alertOffsetAllowed} from './maintenance-alerts';
@@ -91,16 +92,19 @@ export async function sendPushNotification(
   uid: string,
   payload: { id: string; title: string; body: string },
 ) {
-  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT)
+  const nativeSent = await sendNativePush(uid, payload);
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT) {
+    if (nativeSent) return 'push-accepted';
     throw new Error('PUSH_NOT_CONFIGURED');
+  }
   webpush.setVapidDetails(
     process.env.VAPID_SUBJECT,
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY,
   );
   const list = await db().select().from(s.pushes).where(eq(s.pushes.userId, uid));
-  if (!list.length) throw new Error('PUSH_NO_SUBSCRIPTION');
-  let sent = 0;
+  if (!list.length && !nativeSent) throw new Error('PUSH_NO_SUBSCRIPTION');
+  let sent = nativeSent;
   for (const p of list) {
     try {
       await webpush.sendNotification(

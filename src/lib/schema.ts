@@ -523,3 +523,18 @@ export const supportTyping = pgTable('support_typing', {
   typingAt: timestamp({ withTimezone: true }),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
+
+export const nativePushTokens = pgTable('native_push_tokens', {
+  token: text().primaryKey(),
+  userId: text('user_id').notNull().references(() => user.id, {onDelete:'cascade'}),
+  updatedAt: timestamp('updated_at',{withTimezone:true}).notNull().defaultNow(),
+}, t => [index('native_push_user').on(t.userId)]);
+
+export const playSubscriptions = pgTable('play_subscriptions', {
+  tokenHash:text().primaryKey(),
+  userId:text().notNull().references(()=>user.id,{onDelete:'cascade'}),
+  productId:text().notNull(),
+  expiresAt:timestamp({withTimezone:true}).notNull(),
+  active:boolean().notNull().default(false),
+  updatedAt:timestamp({withTimezone:true}).notNull().defaultNow(),
+},t=>[index('play_subscription_owner').on(t.userId)]);
