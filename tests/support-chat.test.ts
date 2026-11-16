@@ -324,3 +324,33 @@ test('Support AI requires staff for drafts and sends only the explicitly submitt
     delete process.env.AUTOCARE_AI_MODEL;
   }
 });
+
+
+test('Support premium: latest-message previews, customer vehicles and daily statistics use real scoped data', async () => {
+ const client=crypto.randomUUID(),outsider=crypto.randomUUID();
+ await db().insert(s.user).values([{id:client,name:'Premium Support Customer',email:client+'@example.invalid'},{id:outsider,name:'Private other customer',email:outsider+'@example.invalid'}]);
+ await db().insert(s.vehicles).values([{id:crypto.randomUUID(),userId:client,brand:'Owned',model:'Vehicle',plate:'OWN-PLATE',year:2022,fuel:'Diesel',odometer:12345},{id:crypto.randomUUID(),userId:outsider,brand:'Private',model:'Other',plate:'FOREIGN-PLATE',year:2021,fuel:'Diesel'}]);
+ const first=await chat.sendSupportMessage(client,{message:'Original subject'});
+ await chat.sendSupportMessage(client,{conversationId:first.threadId,message:'Actual latest message preview'});
+ const list=await chat.listSupportThreads(admin,'open','Premium Support Customer');
+ assert.equal(list.selfId,admin);assert.equal(list.threads.length,1);
+ assert.equal(list.threads[0].lastMessage?.body,'Actual latest message preview');
+ assert.equal(list.threads[0].lastMessage?.authorId,client);
+ await chat.joinSupportThread(admin,first.threadId);
+ const afterSystem=await chat.listSupportThreads(admin,'open','Premium Support Customer');
+ assert.equal(afterSystem.threads[0].lastMessage?.id,list.threads[0].lastMessage?.id);
+ const context=await chat.supportCustomerContext(admin,first.threadId);
+ assert.equal(context.vehicleCount,1);assert.equal(context.vehicles[0].plate,'OWN-PLATE');
+ assert.doesNotMatch(JSON.stringify(context),/FOREIGN-PLATE/);
+ await assert.rejects(()=>chat.supportCustomerContext(outsider,first.threadId),status(404));
+ const stats=await chat.supportStatistics(admin);
+ assert.equal(stats.trend.length,14);assert.ok(stats.trend.every((row,i,rows)=>/^\d{4}-\d{2}-\d{2}$/.test(row.day)&&row.count>=0&&(!i||row.day>rows[i-1].day)));
+ const [expected]=await db().select({count:sql<number>`count(*)::int`}).from(s.supportThreads).where(sql`(${s.supportThreads.createdAt} AT TIME ZONE 'UTC')::date >= (now() AT TIME ZONE 'UTC')::date - 13`);
+ assert.equal(stats.trend.reduce((sum,row)=>sum+row.count,0),expected.count);
+ const [fresh]=await db().select({count:sql<number>`count(*)::int`}).from(s.supportThreads).where(sql`${s.supportThreads.status}='open' and ${s.supportThreads.assignedTo} is null`);
+ assert.equal(stats.fresh,fresh.count);
+ await chat.changeSupportThread(admin,first.threadId,{action:'complete'});
+ const completed=await chat.supportStatistics(admin);
+ await chat.changeSupportThread(admin,first.threadId,{action:'reopen'});
+ assert.equal((await chat.supportStatistics(admin)).resolved,completed.resolved-1);
+});
