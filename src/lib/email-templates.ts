@@ -47,9 +47,9 @@ export const emailTemplates = {
   },
   welcome: {
     label: 'Bun venit',
-    title: 'Bine ai venit în garajul tău digital.',
+    title: 'Bine ai venit în AutoCare Premium.',
     subject: 'Bun venit în AutoCare',
-    body: 'Mașinile, documentele și istoricul de întreținere au acum un loc al lor. Adaugă prima mașină și organizează următorul drum cu mai multă claritate.',
+    body: 'Ne bucurăm că ești alături de noi. Mașinile, documentele și istoricul de întreținere au acum un loc al lor, pe telefon și pe calculator. Începe prin a adăuga prima mașină, apoi completează documentele și termenele importante. Dacă ai nevoie de ajutor, echipa noastră te așteaptă în centrul de suport din aplicație.',
     cta: 'Intră în garaj',
     path: '/cont',
   },

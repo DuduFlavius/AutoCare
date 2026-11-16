@@ -3,7 +3,7 @@
   "appName": "AutoCare",
   "webDir": "www",
   "server": {
-    "url": "https://autocare-jglt.onrender.com/cont",
+    "url": "https://www.autocareapp.ro/cont",
     "cleartext": false
   },
   "android": {

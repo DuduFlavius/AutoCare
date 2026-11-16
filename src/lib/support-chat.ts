@@ -86,6 +86,7 @@ export async function listSupportThreads(uid: string, status = 'open', query = '
   return {
     threads,
     selfId: who.uid,
+    self: { id: who.uid, name: who.name, role: who.role },
     counts: Object.fromEntries(counts.map((x) => [x.status, x.n])),
     aiAvailable: autoAssistantConfigured(),
     role: who.role,
@@ -245,7 +246,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
           authorName: 'AutoCare',
           createdAt: new Date(sentAt.getTime() - 1),
           authorRole: 'system',
-          body: 'Bine ai venit la Centrul de suport AutoCare! Am primit mesajul tău. Un membru al echipei îți va răspunde aici cât mai curând posibil. Îți mulțumim pentru răbdare!',
+          body: `Bine ai venit, ${who.name}, la Centrul de suport AutoCare! Am primit mesajul tău. Un membru al echipei îți va răspunde aici cât mai curând posibil. Îți mulțumim pentru răbdare!`,
         });
       }
     }

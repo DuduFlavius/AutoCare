@@ -20,6 +20,10 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Verify Java compiler
+        run: |
+          "$JAVA_HOME_21_X64/bin/java" -version
+          "$JAVA_HOME_21_X64/bin/javac" -version
       - run: npm ci --prefix mobile
       - run: cd mobile && npx cap sync android
       - name: Compile Android debug app
@@ -27,7 +31,7 @@ jobs:
           export JAVA_HOME="$JAVA_HOME_21_X64"
           export PATH="$JAVA_HOME/bin:$PATH"
           cd mobile/android
-          ./gradlew :app:assembleDebug :app:bundleRelease
+          ./gradlew :app:assembleDebug :app:bundleRelease :app:lintRelease :app:testDebugUnitTest
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: AutoCare-Android-debug
@@ -38,6 +42,14 @@ jobs:
         with:
           name: AutoCare-Android-unsigned-AAB-not-for-upload
           path: mobile/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 7
+      - name: Archive Android quality reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-Android-quality-reports
+          path: mobile/android/app/build/reports/
+          if-no-files-found: warn
           retention-days: 7
   android-release:
     permissions:
@@ -70,6 +82,7 @@ jobs:
           cd mobile/android
           ./gradlew :app:bundleRelease :app:assembleRelease
           jarsigner -verify app/build/outputs/bundle/release/app-release.aab
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose app/build/outputs/apk/release/app-release.apk
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: AutoCare-Google-Play-signed-AAB

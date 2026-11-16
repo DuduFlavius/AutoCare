@@ -260,3 +260,20 @@ html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspa
 html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace.ac-support-center :is(.support-client-folders,.support-chat-panel){max-width:100%!important;min-width:0!important}
 }
 }
+
+@layer autocare-workspace {
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace.ac-support-center .support-personal-welcome {display:flex!important;align-items:center!important;gap:10px!important;padding:12px 16px!important;flex-shrink:0!important;min-width:0!important;border-bottom:1px solid #7776b236!important;background:linear-gradient(115deg,#211d3d,#11182c)!important}
+.support-personal-welcome>div {flex:1;min-width:0;overflow-wrap:anywhere}
+.support-personal-welcome strong {font-size:14px!important;color:#f1edff!important}
+.support-personal-welcome p {font-size:11px!important;line-height:1.4!important;margin:4px 0 0!important;color:#b8bad6!important}
+.support-personal-welcome .support-rank {flex-shrink:0;white-space:nowrap}
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace.ac-support-center .rank-founder {color:#e6c88d!important;border-color:#e6c88d55!important}
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace.ac-support-center .rank-admin {color:#c3a8ff!important}
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace.ac-support-center .rank-assistant {color:#9cd5f7!important}
+@media(max-width:760px){
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace.ac-support-center {height:var(--support-height,calc(100dvh - 180px))!important;min-height:0!important}
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace.ac-support-center[data-compact] .support-personal-welcome {display:none!important}
+.support-personal-welcome p {display:none}
+.support-personal-welcome .support-avatar {display:none!important}
+}
+}

@@ -15,12 +15,19 @@ export default function MobileInstall() {
   const [installed, setInstalled] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [message, setMessage] = useState('');
+  const [androidRelease, setAndroidRelease] = useState<{version:string;url:string}|null>(null);
 
   useEffect(() => {
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const android = /Android/i.test(navigator.userAgent);
     setPlatform(ios ? 'ios' : android ? 'android' : 'desktop');
+    const controller=new AbortController();
+    if(android) void fetch('/api/android-update',{cache:'no-store',signal:controller.signal}).then(async response=>{
+      if(!response.ok)return;
+      const release=await response.json();
+      if(release.available && /^\d+\.\d+\.\d+$/.test(release.version) && /^\/downloads\/AutoCare-[0-9.]+\.apk$/.test(release.url))setAndroidRelease({version:release.version,url:release.url});
+    }).catch(()=>{});
     const displayMode = window.matchMedia('(display-mode: standalone)');
     const updateInstalled = () => setInstalled(displayMode.matches ||
       Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
@@ -43,6 +50,7 @@ export default function MobileInstall() {
     window.addEventListener('beforeinstallprompt', onPrompt);
     window.addEventListener('appinstalled', onInstalled);
     return () => {
+      controller.abort();
       displayMode.removeEventListener?.('change', updateInstalled);
       window.removeEventListener('beforeinstallprompt', onPrompt);
       window.removeEventListener('appinstalled', onInstalled);
@@ -91,6 +99,7 @@ export default function MobileInstall() {
           <button type="button" aria-label={en ? 'Close instructions' : 'Închide instrucțiunile'} onClick={() => setExpanded(false)}>×</button>
           <strong>{en ? 'Install AutoCare' : 'Instalează AutoCare'}</strong>
           {message && <p>{message}</p>}
+          {androidRelease && <p><a className="button" href={androidRelease.url} download>{en ? 'Download Android APK' : 'Descarcă APK Android'} · {androidRelease.version}</a></p>}
           <p>{instructions}</p>
           <small>{en ? 'Open AutoCare from your home screen after installation. Enable notifications separately in Settings.' : 'După instalare, deschide AutoCare din pictograma de pe telefon. Notificările se activează separat din Setări.'}</small>
         </div>

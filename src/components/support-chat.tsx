@@ -65,6 +65,7 @@ const roles: Record<string, string> = {
   assistant: 'Asistent',
   admin: 'Administrator',
   founder: 'Fondator',
+  superadmin: 'Super Administrator',
   system: 'Sistem',
 };
 async function request(path: string, method = 'GET', data?: unknown) {
@@ -122,6 +123,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     [olderBusy, setOlderBusy] = useState(false);
   const [team, setTeam] = useState<{ id: string; name: string; role: string }[]>([]);
   const [selfId, setSelfId] = useState('');
+  const [selfName, setSelfName] = useState('');
   const [serverQuery, setServerQuery] = useState('');
   const queryRef = useRef('');
   const jumpTo = useRef<string | null>(null);
@@ -196,6 +198,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       if (currentStatus !== statusRef.current || currentQuery !== queryRef.current) return;
       setThreads(out.threads);
       if (out.selfId) setSelfId(out.selfId);
+      if (out.self?.name) setSelfName(out.self.name);
       setCounts(out.counts);
       if (currentStatus === 'open' && !currentQuery) {
         const next = new Map<string, string>();
@@ -208,8 +211,12 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             setNotice(t('Mesaj nou în centrul de suport.', 'New message in the support center.'));
             if (notificationEnabled.current && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
               try {
-                const alert = new Notification(t('Mesaj nou · AutoCare Suport', 'New message · AutoCare Support'), {body:t('Deschide centrul de suport pentru a citi mesajul.', 'Open the support center to read the message.'),tag:'autocare-support-'+thread.id,icon:'/favicon.ico'});
-                alert.onclick=()=>{window.focus();alert.close();};
+                const title=t('Mesaj nou · AutoCare Suport', 'New message · AutoCare Support');
+                const options={body:t('Deschide centrul de suport pentru a citi mesajul.', 'Open the support center to read the message.'),tag:'autocare-support-'+thread.id,icon:'/icon-192.png',data:{url:'/cont?tab=Centru%20de%20suport'}};
+                const registration='serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : undefined;
+                if(registration) await registration.showNotification(title,options);
+                else { const alert=new Notification(title,options); alert.onclick=()=>{window.focus();void openThread(thread,false);alert.close();}; }
+
               } catch { /* In-app alerts remain available when desktop notifications fail. */ }
             }
           }
@@ -287,11 +294,11 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       !lastId ||
       view === 'statistics' ||
       document.hidden ||
-      (staff && window.innerWidth <= 760 && !mobileThread)
+      (staff && (!entered || (window.innerWidth <= 760 && !mobileThread)))
     )
       return;
     void request('/' + selected + '/read', 'POST', { messageId: lastId }).catch(() => {});
-  }, [selected, lastId, preview, staff, mobileThread, view]);
+  }, [selected, lastId, preview, staff, mobileThread, view, entered]);
   async function assign(assigneeId: string) {
     if (!selected || preview) return;
     setBusy(true);
@@ -555,6 +562,11 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         </aside>
       )}
       <div className="support-chat-panel">
+        <div className="support-personal-welcome">
+          <span className="support-avatar">{selfName ? initials(selfName) : <Headset size={19}/>}</span>
+          <div><strong>{selfName ? t(`Bine ai venit, ${selfName}!`, `Welcome, ${selfName}!`) : t('Bine ai venit!', 'Welcome!')}</strong><p>{staff ? t('Echipa AutoCare · Ajutor la fiecare pas.', 'AutoCare team · Here to help at every step.') : t('Suntem aici să te ajutăm cu mașina și contul tău.', 'We are here to help with your vehicle and account.')}</p></div>
+          <span className={'support-rank rank-'+role}>{en ? ({user:'Customer',assistant:'Assistant',admin:'Administrator',superadmin:'Super Administrator',founder:'Founder'}[role] || 'Customer') : roles[role] || 'Client'}</span>
+        </div>
         {!staff && (
           <nav className="support-client-folders" aria-label="Arhiva conversațiilor">
             <button type="button" aria-pressed={status !== 'trashed'} onClick={() => { setStatus('open'); setSelected(null); selectedRef.current = null; setDetail(null); }}>
@@ -683,7 +695,8 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           <div className="support-notification-optin">
             <button type="button" onClick={async () => {
               if (typeof Notification === 'undefined') { setNotice('Browserul nu permite notificări desktop.'); return; }
-              const permission = await Notification.requestPermission();
+              let permission: NotificationPermission;
+              try { permission = await Notification.requestPermission(); } catch { setNotice(t('Verifică permisiunile pentru notificări ale dispozitivului.', 'Check your device notification permissions.')); return; }
               notificationEnabled.current = permission === 'granted';
               setNotice(permission === 'granted' ? 'Notificările pentru mesaje noi sunt activate în acest browser.' : 'Permite notificările din setările browserului pentru a primi alerte.');
             }}><Bell size={14}/>{t('Notificări pentru mesaje noi','New message notifications')}</button>
