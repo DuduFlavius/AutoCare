@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import type {BillingCurrency} from '@/lib/billing-currency';
 import { PriceCards } from './membership';
+import './subscription-premium-layout.css';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 export default function SubscriptionPage({
@@ -42,60 +43,28 @@ export default function SubscriptionPage({
     Number.isFinite(until) && until > Date.now()
       ? new Date(until).toLocaleString(en ? 'en-GB' : 'ro-RO', { timeZone: data.profile.timezone })
       : null;
+  const remainingDays = date ? Math.max(0, Math.ceil((until - Date.now()) / 86400000)) : 0;
+  const expiryDate = date ? new Date(until).toLocaleDateString(en ? 'en-GB' : 'ro-RO', { timeZone: data.profile.timezone, day: '2-digit', month: 'long', year: 'numeric' }) : null;
+  const expiryTime = date ? new Date(until).toLocaleTimeString(en ? 'en-GB' : 'ro-RO', { timeZone: data.profile.timezone, hour: '2-digit', minute: '2-digit' }) : null;
   const recurring =
       !!data.subscription?.subscriptionId &&
       ['active', 'trialing'].includes(data.subscription.status),
     cancelled = data.subscription?.cancelAtPeriodEnd;
   return (
     <div className="stack ac-subscription-workspace" data-workspace-ui>
-      <section className="card">
-        <p className="eyebrow">AUTOCARE · {en ? 'SUBSCRIPTION' : 'ABONAMENT'}</p>
-        <h2>
-          {en ? 'Your subscription, clearly organized.' : 'Abonamentul tău, clar și organizat.'}
-        </h2>
-        <p>
-          {data.premium
-            ? en
-              ? 'Premium active'
-              : 'Premium activ'
-            : en
-              ? 'Free plan'
-              : 'Plan Gratuit'}
-        </p>
-        <h3>
-          {lifetime
-            ? en
-              ? 'Premium permanent · no expiry'
-              : 'Premium permanent · fără expirare'
-            : date
-              ? (en ? 'Access until: ' : 'Acces până la: ') + date
-              : en
-                ? 'No active paid period'
-                : 'Nu ai o perioadă activă'}
-        </h3>
-        {lifetime && recurring && (
-          <p>{en
-            ? 'Any date in the billing portal refers to your separate Stripe subscription.'
-            : 'Data din portalul de facturare se referă la abonamentul Stripe separat.'}</p>
-        )}
-        <p>
-          {recurring
-            ? cancelled
-              ? en
-                ? 'Automatic renewal is cancelled. Paid access remains until its deadline.'
-                : 'Reînnoirea automată este anulată. Accesul achitat rămâne până la termen.'
-              : en
-                ? 'Automatic renewal is active. Prepayment moves the next charge to the end of the paid period.'
-                : 'Reînnoirea automată este activă. O prelungire achitată mută următoarea facturare la finalul perioadei plătite.'
-            : en
-              ? 'Gifted or prepaid access does not create automatic charges.'
-              : 'Accesul oferit sau preplătit nu generează debitări automate.'}
-        </p>
-        {data.subscription?.customerId && (
-          <button disabled={busy} onClick={portal}>
-            {en ? 'Manage billing and cancellation' : 'Gestionează facturarea și anularea'}
-          </button>
-        )}
+      <section className="card ac-subscription-hero" aria-label={en ? 'Premium membership status' : 'Starea abonamentului Premium'}>
+        <div className="ac-subscription-hero-head">
+          <div><p className="eyebrow">AUTOCARE · {en ? 'YOUR MEMBERSHIP' : 'ABONAMENTUL TĂU'}</p>
+            <h2>{en ? 'Premium, with every detail in one place.' : 'Premium, cu toate detaliile la vedere.'}</h2></div>
+          <span className="ac-subscription-status" data-active={data.premium}>{data.premium ? (en ? 'Premium active' : 'Premium activ') : (en ? 'Free plan' : 'Plan gratuit')}</span>
+        </div>
+        <div className="ac-subscription-metrics">
+          <div className="ac-subscription-metric"><span>{en ? 'Access valid until' : 'Acces valabil până la'}</span><strong>{lifetime ? (en ? 'No expiration' : 'Fără expirare') : expiryDate || (en ? 'No active subscription' : 'Fără abonament activ')}</strong><small>{lifetime ? (en ? 'Lifetime Premium access' : 'Acces Premium permanent') : expiryTime ? (en ? 'At ' : 'Ora ') + expiryTime + ' · ' + data.profile.timezone : (en ? 'Activate Premium to see your expiration date.' : 'Activează Premium pentru a vedea data expirării.')}</small></div>
+          <div className="ac-subscription-metric"><span>{en ? 'Time remaining' : 'Timp rămas'}</span><strong>{lifetime ? '∞' : date ? remainingDays.toLocaleString(en ? 'en-GB' : 'ro-RO') : '—'}</strong><small>{lifetime ? (en ? 'Unlimited' : 'Nelimitat') : date ? (en ? remainingDays === 1 ? 'day remaining' : 'days remaining' : remainingDays === 1 ? 'zi rămasă' : 'zile rămase') : (en ? 'No paid access' : 'Fără acces plătit')}</small></div>
+          <div className="ac-subscription-metric"><span>{en ? 'Renewal' : 'Reînnoire'}</span><strong>{recurring ? cancelled ? (en ? 'Cancelled' : 'Anulată') : (en ? 'Automatic' : 'Automată') : (en ? 'Not automatic' : 'Nu este automată')}</strong><small>{recurring ? cancelled ? (en ? 'Access remains until expiry' : 'Accesul rămâne până la expirare') : (en ? 'Manage in billing portal' : 'Gestionează din portalul de plăți') : (en ? 'No recurring charge' : 'Fără debitare recurentă')}</small></div>
+        </div>
+        <p className="ac-subscription-explainer">{lifetime && recurring ? (en ? 'Your permanent access is separate from the Stripe subscription.' : 'Accesul permanent este separat de abonamentul Stripe.') : recurring ? cancelled ? (en ? 'Automatic renewal is cancelled; your paid access stays active until the displayed deadline.' : 'Reînnoirea automată este anulată; accesul plătit rămâne activ până la data afișată.') : (en ? 'Your subscription renews automatically unless cancelled. Paid extensions preserve the remaining period.' : 'Abonamentul se reînnoiește automat dacă nu îl anulezi. Prelungirile păstrează perioada rămasă.') : (en ? 'Gifted and prepaid access never creates an automatic charge.' : 'Accesul oferit sau preplătit nu generează debitări automate.')}</p>
+        {data.subscription?.customerId && <button className="ac-subscription-manage" disabled={busy} onClick={portal}>{en ? 'Manage payments and cancellation' : 'Gestionează plățile și anularea'}</button>}
       </section>
       {(
         <>
