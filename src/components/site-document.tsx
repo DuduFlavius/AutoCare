@@ -1,3 +1,4 @@
+import { startupImages } from '@/lib/pwa-launch';
 import AutoUpdate from '@/components/auto-update';
 import type { Metadata, Viewport } from 'next';
 import '@/app/design-system.css';
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     : {}),
   ...(process.env.BING_SITE_VERIFICATION && /^[A-Fa-f0-9]{32}$/.test(process.env.BING_SITE_VERIFICATION) ? {other:{'msvalidate.01':process.env.BING_SITE_VERIFICATION}} : {}),
   applicationName: appName,
-  appleWebApp: { capable: true, title: appName, statusBarStyle: 'default' },
+  appleWebApp: { capable: true, title: appName, statusBarStyle: 'black-translucent', startupImage: startupImages },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
