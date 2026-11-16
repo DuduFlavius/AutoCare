@@ -21,6 +21,7 @@ export default function PremiumDownloads({
     [error, setError] = useState('');
   if (!data.premium) return null;
   const invalidRange = !!from && !!to && from > to;
+  const previewQuery=new URLSearchParams({format:'pdf',view:'1',archived:'active',...(vehicle?{vehicleId:vehicle}:{}),...(kind?{kind}:{}),...(from?{from}:{}),...(to?{to}:{})});
   async function download(format: 'pdf' | 'csv') {
     if (preview) {
       setError(
@@ -84,7 +85,7 @@ export default function PremiumDownloads({
         <select value={kind} onChange={event => setKind(event.target.value)}>
           <option value="">{en ? 'All records' : 'Toate înregistrările'}</option>
           <option value="document">{en ? 'Documents' : 'Documente'}</option>
-          <option value="service">{en ? 'Service' : 'Intervenții'}</option>
+          <option value="service">{en ? 'Service sheet' : 'Fișă de service'}</option>
           <option value="expense">{en ? 'Expenses' : 'Cheltuieli'}</option>
         </select>
       </label>
@@ -93,6 +94,7 @@ export default function PremiumDownloads({
       </div>
       {invalidRange && <p role="alert">{en ? 'The end date must follow the start date.' : 'Data finală trebuie să fie egală cu sau după data de început.'}</p>}
       <div className="ac-premium-download-actions">
+        {!preview&&!invalidRange&&<a className="button" href={'/api/v1/export?'+previewQuery} target="_blank" rel="noopener noreferrer">{en?'Preview / Print PDF':'Previzualizează / Imprimă PDF'}</a>}
         <button type="button" disabled={!!busy || invalidRange} onClick={() => void download('pdf')}>
           <FileText size={18} />
           {busy === 'pdf'
