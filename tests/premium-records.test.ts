@@ -284,9 +284,12 @@ test('every catalog category round-trips through the existing API without a new 
 
 test('daily usage is stored per owned vehicle and reused after reload', async () => {
   const path = `vehicles/${vehicleId}/daily-usage`;
-  assert.deepEqual(await api(path), { dailyKm: null });
-  assert.deepEqual(await api(path, 'POST', { dailyKm: 70 }), { dailyKm: 70 });
-  assert.deepEqual(await api(path), { dailyKm: 70 });
+  assert.equal((await api(path)).dailyKm, null);
+  assert.equal((await api(path, 'POST', { dailyKm: 70 })).dailyKm, 70);
+  const usage=await api(path);
+  assert.equal(usage.dailyKm,70);
+  assert.equal(usage.projection.source,'declared-estimate');
+  assert.deepEqual(await api(path),usage,'refresh does not advance the estimate twice');
   const today = new Date('2030-01-01T12:00:00Z');
   const estimate = forecastService({ currentKm: 83000, nextKm: 150000, averageKmPerDay: (await api(path)).dailyKm, today });
   assert.equal(estimate?.days, 958);
@@ -300,8 +303,8 @@ test('daily usage is stored per owned vehicle and reused after reload', async ()
   const missing = `vehicles/${crypto.randomUUID()}/daily-usage`;
   const denied = await POST(new Request('http://localhost:3000/api/v1/' + missing, { method: 'POST', headers: { Origin: 'http://localhost:3000', Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ dailyKm: 70 }) }), { params: Promise.resolve({ path: missing.split('/') }) });
   assert.equal(denied.status, 404);
-  assert.deepEqual(await api(path), { dailyKm: 70 });
-  assert.deepEqual(await api(path, 'POST', { dailyKm: null }), { dailyKm: null });
+  assert.equal((await api(path)).dailyKm,70);
+  assert.equal((await api(path, 'POST', { dailyKm: null })).dailyKm,null);
 });
 
 test('confirmed mileage update persists and recalculates timing distance and days', async () => {
