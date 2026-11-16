@@ -1,0 +1,82 @@
+{
+  "deploy": "dep-dbtb0nmk1f9s73bckc0g",
+  "source": "d867cb97e8c4c3b0d7378a991b5557ef3ec0f14a",
+  "automatedTests": {
+    "passed": 288,
+    "failed": 0
+  },
+  "supportDOMScenarios": 15,
+  "liveHTTP": [
+    {
+      "path": "/api/app-version",
+      "status": 200,
+      "contentType": "application/json",
+      "cacheControl": "no-store, max-age=0",
+      "version": "d867cb97e8c4c3b0d7378a991b5557ef3ec0f14a"
+    },
+    {
+      "path": "/manifest.webmanifest",
+      "status": 200,
+      "contentType": "application/manifest+json",
+      "cacheControl": "public, max-age=0, must-revalidate",
+      "standalone": true
+    },
+    {
+      "path": "/sw.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=UTF-8",
+      "cacheControl": "no-store, max-age=0"
+    },
+    {
+      "path": "/apple-splash?w=750&h=1334",
+      "status": 200,
+      "contentType": "image/png",
+      "cacheControl": "public, max-age=86400",
+      "validPNG": true
+    },
+    {
+      "path": "/apple-splash?w=1&h=1",
+      "status": 400,
+      "contentType": "text/plain;charset=UTF-8",
+      "cacheControl": null
+    },
+    {
+      "path": "/instaleaza",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "s-maxage=300, stale-while-revalidate=31535700"
+    },
+    {
+      "path": "/en/install",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "s-maxage=300, stale-while-revalidate=31535700"
+    },
+    {
+      "path": "/api/v1/dashboard",
+      "status": 401,
+      "contentType": "application/json",
+      "cacheControl": "private, no-store"
+    },
+    {
+      "path": "/api/v1/export?format=pdf",
+      "status": 401,
+      "contentType": "application/json",
+      "cacheControl": "private, no-store"
+    },
+    {
+      "path": "/api/v1/smartdrive/vehicles/00000000-0000-4000-8000-000000000001/readings",
+      "status": 401,
+      "contentType": "application/json",
+      "cacheControl": "private, no-store"
+    },
+    {
+      "path": "/api/v1/account",
+      "status": 401,
+      "contentType": "application/json",
+      "cacheControl": "private, no-store"
+    }
+  ],
+  "realDeviceTestsCompleted": false,
+  "releaseAABGenerated": false
+}
