@@ -29,6 +29,10 @@ test('Public metadata has matching canonical, Open Graph URL and real absolute s
   assert.equal(meta.openGraph?.url, meta.alternates?.canonical);
   assert.ok(meta.twitter && 'card' in meta.twitter);
   assert.equal(meta.twitter.card, 'summary_large_image');
+  const english=publicMetadata('Vehicle documents','Your vehicle documents','/en/vehicle-documents');
+  assert.equal(english.openGraph?.locale,'en_GB');
+  assert.equal((english.openGraph?.images as {url:string}[])[0].url,process.env.APP_URL+'/en/opengraph-image');
+  assert.ok(sitemap()[0].images?.some(url=>url.endsWith('/images/autocare-app-premium.webp')));
   assert.equal(Object.keys(publicTopics).length, 3);
   assert.equal(Object.keys(guides).length, 3);
 });

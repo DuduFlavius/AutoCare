@@ -146,7 +146,9 @@ function Dialog({
   title,
   children,
   onClose,
+  className = '',
 }: {
+  className?: string;
   title: string;
   children: React.ReactNode;
   onClose: () => void;
@@ -187,7 +189,7 @@ function Dialog({
   return (
     <div className="dialog-backdrop">
       <div
-        className="dialog"
+        className={'dialog ' + className}
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
@@ -1714,7 +1716,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               />
             )}
             {tab === 'Setări' && (
-              <div className="ws-settings-layout">
+              <div className="ws-settings-layout ac-settings-premium">
               <nav className="ws-settings-nav" aria-label={language==='en'?'Settings categories':'Categorii setări'} data-workspace-ui>{([['account','Setări cont','Account Settings'],['alerts','Notificări și email','Notifications & email'],['device','Aplicație și afișare','App & display'],['help','Ajutor','Help']] as const).map(([id,ro,en])=><button type="button" key={id} aria-current={settingsPanel===id?'page':undefined} onClick={()=>setSettingsPanel(id)}>{language==='en'?en:ro}<ArrowUpRight size={15}/></button>)}</nav>
               <div className="grid2 settings-workspace">
                 <section hidden={settingsPanel!=='device'} className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /><AppUpdateSettings /><WorkspacePreferences language={language} currency={currency} onLanguage={changeLanguage} onCurrency={changeCurrency}/></section>
@@ -1905,7 +1907,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
           </Dialog>
         )}
         {deleteOpen && (
-          <Dialog title="Șterge contul" onClose={() => setDeleteOpen(false)}>
+          <Dialog className="ac-delete-account-dialog" title={language==='en'?'Delete your account':'Ștergerea contului'} onClose={() => setDeleteOpen(false)}>
             <p>
               {language==='en'?'Account and associated data deletion is permanent. Confirm deletion by email. An active Stripe subscription will be canceled first. Google Play subscriptions must be managed separately in Google Play and are not automatically canceled. In-app data is removed; payment providers retain legally required records under their own policies.':'Ștergerea contului și a datelor asociate este definitivă. Confirmarea finală se face prin email. Un abonament Stripe activ va fi anulat înainte de ștergere. Abonamentele Google Play se gestionează separat în Google Play și nu sunt anulate automat prin ștergerea contului. Datele din aplicație sunt eliminate; documentele păstrate legal de furnizorii de plăți urmează politicile acestora.'}
             </p>

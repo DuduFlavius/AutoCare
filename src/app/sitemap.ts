@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: new URL('/' + path, origin()).toString(),
     alternates: { languages: publicLanguageAlternates('/' + path, origin()) ?? {} },
     ...(path.startsWith('ghiduri/') ? { lastModified: '2026-10-20T07:26:00.000Z' } : {}),
-    ...(path === '' ? { images: [origin() + '/icon-512.png'] } : {}),
+    ...(path === '' ? { images: [origin() + '/icon-512.png',origin() + '/images/autocare-app-premium.webp',origin() + '/opengraph-image'] } : {}),
     ...(['documente-auto', 'intretinere-auto', 'cheltuieli-auto'].includes(path)
       ? {
           images: [

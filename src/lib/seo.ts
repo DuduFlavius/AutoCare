@@ -108,6 +108,8 @@ export const indexableSlugs = [
 ];
 export function publicMetadata(title: string, description: string, path: string): Metadata {
   const url = new URL(path, origin()).toString();
+  const english=path==='/en'||path.startsWith('/en/');
+  const imagePath=english?'/en/opengraph-image':'/opengraph-image';
   return {
     title,
     description,
@@ -117,14 +119,14 @@ export function publicMetadata(title: string, description: string, path: string)
       description,
       url,
       siteName: appName,
-      locale: 'ro_RO',
+      locale: english?'en_GB':'ro_RO',
       type: 'website',
       images: [
         {
-          url: new URL('/opengraph-image', origin()).toString(),
+          url: new URL(imagePath, origin()).toString(),
           width: 1200,
           height: 630,
-          alt: 'AutoCare — Mașina ta. Totul sub control.',
+          alt: english?'AutoCare Premium — your digital garage, documents and maintenance.':'AutoCare Premium — garajul tău digital, documente și întreținere.',
         },
       ],
     },
@@ -132,7 +134,7 @@ export function publicMetadata(title: string, description: string, path: string)
       card: 'summary_large_image',
       title,
       description,
-      images: [new URL('/opengraph-image', origin()).toString()],
+      images: [new URL(imagePath, origin()).toString()],
     },
   };
 }

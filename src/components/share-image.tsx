@@ -1,106 +1,22 @@
-import { ImageResponse } from 'next/og';
-export const alt =
-  'AutoCare — Mașina ta. Totul sub control. Documente, întreținere și cheltuieli auto, într-un singur loc.';
-export const size = { width: 1200, height: 630 };
-export const contentType = 'image/png';
-export const dynamic = 'force-static';
-export default async function Image() {
-  return new ImageResponse(
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        background: '#090D14',
-        color: '#F3F6FA',
-        position: 'relative',
-      }}
-    >
-      <svg width="620" height="630" viewBox="0 0 620 630" style={{position:'absolute',right:0,top:0}}>
-        <defs><linearGradient id="carPaint" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stopColor="#7db6ff"/><stop offset="1" stopColor="#1756c5"/></linearGradient></defs>
-        <circle cx="400" cy="300" r="240" fill="#203f78" opacity=".7"/>
-        <path d="M45 390 L115 350 L175 260 Q190 238 235 232 L410 225 Q450 225 474 260 L534 345 L579 372 Q592 385 590 421 L590 469 L40 469 L40 422 Q40 403 45 390Z" fill="url(#carPaint)" stroke="#a5ccff" strokeWidth="6"/>
-        <path d="M190 271 L405 264 Q431 264 444 284 L489 348 L137 348Z" fill="#0c2247" stroke="#93bfff" strokeWidth="5"/>
-        <path d="M320 268 L320 347" stroke="#7db6ff" strokeWidth="5"/>
-        <path d="M48 399 L120 386 L131 417 L49 421Z M498 385 L582 403 L579 423 L490 419Z" fill="#e9f5ff"/>
-        <circle cx="151" cy="465" r="61" fill="#101d31"/><circle cx="151" cy="465" r="31" fill="#a8bfd9"/>
-        <circle cx="478" cy="465" r="61" fill="#101d31"/><circle cx="478" cy="465" r="31" fill="#a8bfd9"/>
-        <path d="M32 527 L606 527" stroke="#6a9bde" strokeWidth="4" opacity=".6"/>
-      </svg>
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: 1200,
-          height: 630,
-          background:
-            'linear-gradient(90deg, #090D14 0%, #090D14 34%, rgba(9,13,20,0.88) 52%, rgba(9,13,20,0.05) 100%)',
-          display: 'flex',
-        }}
-      />
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '56px 64px',
-          width: '790px',
-          position: 'relative',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', fontSize: 37, fontWeight: 700 }}>
-          <svg width="48" height="48" viewBox="0 0 48 48" style={{ marginRight: 14 }}>
-            <rect width="48" height="48" rx="14" fill="#398BFF" />
-            <path
-              d="M12 31a14 14 0 1 1 24 0M24 24l8-8"
-              stroke="white"
-              strokeWidth="3"
-              fill="none"
-              strokeLinecap="round"
-            />
-            <circle cx="24" cy="24" r="3" fill="white" />
-          </svg>
-          AutoCare<span style={{ color: '#398BFF' }}>.</span>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            marginTop: 66,
-            flexDirection: 'column',
-            fontSize: 60,
-            lineHeight: 1.08,
-            fontWeight: 700,
-            letterSpacing: '-2px',
-          }}
-        >
-          <span>Mașina ta.</span>
-          <span>Totul sub control.</span>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            marginTop: 26,
-            color: '#B8C4D2',
-            fontSize: 26,
-            lineHeight: 1.45,
-            maxWidth: 560,
-          }}
-        >
-          Documente, întreținere și cheltuieli auto, într-un singur loc.
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            marginTop: 45,
-            fontSize: 19,
-            color: '#56D6E8',
-            letterSpacing: '2px',
-          }}
-        >
-          GARAJUL TĂU DIGITAL
-        </div>
-      </div>
-    </div>,
-    size,
-  );
+import {ImageResponse} from 'next/og';
+import {readFile} from 'node:fs/promises';
+import path from 'node:path';
+import sharp from 'sharp';
+export const alt='AutoCare Premium — garaj digital, documente, întreținere și kilometraj.';
+export const size={width:1200,height:630};
+export const contentType='image/png';
+export const dynamic='force-static';
+export default async function Image(language:'ro'|'en'='ro'){
+ const en=language==='en';
+ const [art,logo]=await Promise.all([readFile(path.join(process.cwd(),'public/images/autocare-app-premium.webp')).then(data=>sharp(data).resize(1200,675).png().toBuffer()),readFile(path.join(process.cwd(),'public/icon-192.png'))]);
+ return new ImageResponse(<div style={{display:'flex',width:'100%',height:'100%',position:'relative',background:'#071329',color:'#edf4ff',fontFamily:'sans-serif'}}>
+  <img src={'data:image/png;base64,'+art.toString('base64')} width={1200} height={675} alt="" style={{position:'absolute',left:0,top:-22,objectFit:'cover'}}/>
+  <div style={{position:'absolute',left:0,top:0,width:1200,height:630,display:'flex',background:'linear-gradient(90deg,rgba(5,15,34,0.97) 0%,rgba(5,15,34,0.94) 36%,rgba(5,15,34,0.52) 62%,rgba(5,15,34,0.08) 100%)'}}/>
+  <div style={{position:'relative',display:'flex',flexDirection:'column',padding:'48px 58px',width:760}}>
+   <div style={{display:'flex',alignItems:'center',gap:15}}><img src={'data:image/png;base64,'+logo.toString('base64')} width={52} height={52} alt="" style={{borderRadius:14}}/><span style={{fontSize:34,fontWeight:700,letterSpacing:-1}}>AutoCare</span><span style={{fontSize:11,letterSpacing:3,color:'#8bb8ff',marginLeft:3,marginTop:6}}>PREMIUM</span></div>
+   <div style={{display:'flex',flexDirection:'column',fontSize:66,fontWeight:700,lineHeight:1.06,letterSpacing:-2,marginTop:65}}><span>{en?'Your car.':'Mașina ta.'}</span><span style={{color:'#6aaaff',marginTop:9}}>{en?'All in one place.':'Totul sub control.'}</span></div>
+   <p style={{fontSize:22,color:'#b6c8e4',lineHeight:1.5,maxWidth:560,margin:'28px 0 0'}}>{en?'Documents, maintenance and mileage. Your digital garage, wherever you are.':'Documente, întreținere și kilometraj. Garajul tău digital, oriunde te-ai afla.'}</p>
+   <div style={{display:'flex',alignItems:'center',marginTop:'auto',gap:18,fontSize:15,color:'#8ea8d0'}}><span>www.autocareapp.ro</span><span style={{color:'#4e6b96'}}>·</span><span>Android & Web</span></div>
+  </div>
+ </div>,{...size,headers:{'Cache-Control':'public, max-age=3600, stale-while-revalidate=86400'}});
 }

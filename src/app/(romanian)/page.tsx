@@ -250,7 +250,6 @@ export default async function Home() {
                 ],
                 inLanguage: 'ro-RO',
                 image: origin() + '/images/autocare-app-premium.webp',
-                screenshot: origin() + '/images/autocare-app-premium.webp',
                 installUrl: origin() + '/aplicatie-auto',
                 offers: {
                   '@type': 'Offer',
