@@ -1,0 +1,18 @@
+/* Founder workspace: full viewport, responsive, no overlapping controls. */
+html body .founder-shell{width:100%;max-width:none;min-width:0;min-height:100dvh;box-sizing:border-box;overflow-x:clip}
+html body .founder-shell,html body .founder-shell *{box-sizing:border-box}
+html body .founder-shell .founder-main{min-width:0;max-width:100%;width:100%;overflow-x:clip;padding:clamp(16px,2.4vw,38px)}
+html body .founder-shell .founder-sidebar{min-width:0}
+html body .founder-shell .founder-page-header{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;min-width:0}
+html body .founder-shell .founder-page-header>div{min-width:0;flex:1 1 260px}
+html body .founder-shell .founder-page-header h1{overflow-wrap:anywhere}
+html body .founder-shell .card,html body .founder-shell .founder-table-wrap,html body .founder-shell .grid2,html body .founder-shell .founder-stats{min-width:0;max-width:100%}
+html body .founder-shell .founder-table-wrap{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+html body .founder-shell .founder-table-wrap table{width:100%;min-width:640px}
+html body .founder-shell :is(input,select,textarea,button){max-width:100%}
+html body .founder-shell .founder-profile>div{min-width:0;overflow-wrap:anywhere}
+html body .founder-shell .founder-sidebar nav button{min-width:0;overflow-wrap:anywhere}
+html body .founder-shell .founder-search,html body .founder-shell .founder-team-form{flex-wrap:wrap;max-width:100%}
+html body .founder-shell .founder-search>*{min-width:0}
+@media(max-width:900px){html body .founder-shell{display:flex;flex-direction:column;min-height:100dvh;height:auto}html body .founder-shell .founder-sidebar{width:100%;max-width:none;position:relative;top:auto;height:auto;min-height:0;max-height:none;padding:16px;overflow:visible}html body .founder-shell .founder-sidebar nav{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;max-width:100%;padding:6px 0 10px;scrollbar-width:thin}html body .founder-shell .founder-sidebar nav button{flex:0 0 auto;white-space:nowrap;min-height:42px}html body .founder-shell .founder-profile{display:none}html body .founder-shell .founder-main{flex:1;padding:18px 14px 32px}html body .founder-shell .founder-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){html body .founder-shell .founder-main{padding:14px 12px 28px}html body .founder-shell .founder-page-header{gap:10px}html body .founder-shell .founder-stats,html body .founder-shell .grid2{display:grid;grid-template-columns:minmax(0,1fr)}html body .founder-shell .founder-role-badge{align-self:flex-start}html body .founder-shell .founder-pagination{flex-wrap:wrap;gap:10px}}
