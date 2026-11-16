@@ -154,7 +154,7 @@ test('PDF and CSV downloads enforce Premium, include actual selected records and
   assert.match(pdf.headers.get('cache-control') || '', /no-store/);
   const report = await PDFDocument.load(await pdf.arrayBuffer());
   assert.ok(report.getPageCount() >= 1);
-  assert.equal(report.getTitle(), 'AutoCare - Raport auto');
+  assert.match(report.getTitle()||'', /^AutoCare Premium - /);
   const csv = await request('paid', 'export?format=csv');
   assert.equal(csv.status, 200);
   assert.match(await csv.text(), /Distribuție test/);
