@@ -97,6 +97,8 @@ export default function SupportChat({
     [olderBusy, setOlderBusy] = useState(false);
   const [team, setTeam] = useState<{ id: string; name: string; role: string }[]>([]);
   const [selfId, setSelfId] = useState('');
+  const [selfName, setSelfName] = useState('');
+  const [notificationPermission, setNotificationPermission] = useState('default');
   const selectedRef = useRef<string | null>(null),
     statusRef = useRef(status),
     epoch = useRef(0),
@@ -152,21 +154,29 @@ export default function SupportChat({
       const out = await request('?status=' + currentStatus);
       if (currentStatus !== statusRef.current) return;
       setThreads(out.threads);
+      if (out.self) { setSelfId(out.self.id); setSelfName(out.self.name); }
       setCounts(out.counts);
-      if (staff && currentStatus === 'open') {
+      if (currentStatus === 'open') {
         const next = new Map<string, string>();
         for (const thread of out.threads as Thread[]) {
-          if (thread.status !== 'open' || (thread.assignedTo && thread.assignedTo !== selfId)) continue;
+          if (thread.status !== 'open' || (staff && thread.assignedTo && thread.assignedTo !== selfId)) continue;
           next.set(thread.id, thread.updatedAt);
           const previous = notifiedMessages.current.get(thread.id);
           if (notificationBaseline.current && (!previous || previous !== thread.updatedAt) && Number(thread.unreadCount || 0) > 0 && notificationEnabled.current && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
             try {
-              const alert = new Notification(previous ? 'Mesaj nou · AutoCare' : 'Solicitare nouă · AutoCare', {
-                body: thread.name + ' · ' + (thread.title || 'Conversație de suport'),
+              const title = 'Mesaj nou · AutoCare';
+              const options = {
+                body: staff ? thread.name + ' · ' + (thread.title || 'Conversație de suport') : 'Echipa AutoCare ți-a răspuns în Centrul de suport.',
                 tag: 'autocare-support-' + thread.id,
-                icon: '/favicon.ico',
-              });
-              alert.onclick = () => { window.focus(); alert.close(); };
+                icon: '/icon-192.png',
+                data: { url: '/cont?tab=Centru%20de%20suport' },
+              };
+              const registration = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : undefined;
+              if (registration) await registration.showNotification(title, options);
+              else {
+                const alert = new Notification(title, options);
+                alert.onclick = () => { window.focus(); void openThread(thread, false); alert.close(); };
+              }
             } catch { /* Browserul poate refuza notificarea în fundal. */ }
           }
         }
@@ -225,7 +235,10 @@ export default function SupportChat({
     };
   }, [status, preview]);
   useEffect(() => {
-    if (staff && typeof Notification !== 'undefined') notificationEnabled.current = Notification.permission === 'granted';
+    if (typeof Notification !== 'undefined') {
+      notificationEnabled.current = Notification.permission === 'granted';
+      setNotificationPermission(Notification.permission);
+    }
   }, [staff]);
   useEffect(() => {
     if (!staff || preview) return;
@@ -242,11 +255,11 @@ export default function SupportChat({
       !selected ||
       !lastId ||
       document.hidden ||
-      (staff && window.innerWidth <= 760 && !mobileThread)
+      (staff && (!entered || (window.innerWidth <= 760 && !mobileThread)))
     )
       return;
     void request('/' + selected + '/read', 'POST', { messageId: lastId }).catch(() => {});
-  }, [selected, lastId, preview, staff, mobileThread]);
+  }, [selected, lastId, preview, staff, mobileThread, entered]);
   async function assign(assigneeId: string) {
     if (!selected || preview) return;
     setBusy(true);
@@ -515,6 +528,11 @@ export default function SupportChat({
         </aside>
       )}
       <div className="support-chat-panel">
+        <div className="support-personal-welcome">
+          <span className="support-avatar">{selfName ? initials(selfName) : <Headset size={20} />}</span>
+          <div><strong>{selfName ? `Bine ai venit, ${selfName}!` : 'Bine ai venit în Centrul de suport!'}</strong><p>{staff ? 'Gestionează solicitările și oferă ajutor clienților AutoCare.' : 'Spune-ne cu ce te putem ajuta. Echipa AutoCare îți răspunde aici.'}</p></div>
+          <span className={'support-rank rank-' + role}>{roles[role] || 'Client'}</span>
+        </div>
         {!staff && (
           <nav className="support-client-folders" aria-label="Arhiva conversațiilor">
             <button type="button" aria-pressed={status !== 'trashed'} onClick={() => { setStatus('open'); setSelected(null); selectedRef.current = null; setDetail(null); }}>
@@ -529,7 +547,7 @@ export default function SupportChat({
           <div className="support-client-intro" role="status">
             <span className="support-intro-dot" />
             <span>{current?.assignedTo
-              ? 'Un asistent este disponibil în conversație.'
+              ? 'Un membru al echipei a preluat conversația.'
               : current && clock - new Date(current.createdAt).getTime() >= 60000
                 ? 'Mesajul tău este în așteptare. Revenim cât mai curând.'
                 : 'Bine ai venit! Suntem aici să te ajutăm.'}</span>
@@ -615,14 +633,17 @@ export default function SupportChat({
         {staff && current?.assignedTo && current.assignedTo !== selfId && (
           <div className="support-notice" role="status">Conversația este preluată de {team.find((person) => person.id === current.assignedTo)?.name || 'alt membru al echipei'}. O poți consulta, dar nu poți răspunde.</div>
         )}
-        {staff && (
+        {(staff || !preview) && (
           <div className="support-notification-optin">
             <button type="button" onClick={async () => {
               if (typeof Notification === 'undefined') { setNotice('Browserul nu permite notificări desktop.'); return; }
-              const permission = await Notification.requestPermission();
+              let permission: NotificationPermission;
+              try { permission = await Notification.requestPermission(); }
+              catch { setNotice('Nu am putut activa notificările. Verifică permisiunile browserului.'); return; }
+              setNotificationPermission(permission);
               notificationEnabled.current = permission === 'granted';
               setNotice(permission === 'granted' ? 'Notificările pentru mesaje noi sunt activate în acest browser.' : 'Permite notificările din setările browserului pentru a primi alerte.');
-            }}>Activează notificări pentru mesaje noi</button>
+            }}>{notificationPermission === 'granted' ? 'Notificări activate · Mesaje noi' : 'Activează notificări pentru mesaje noi'}</button>
           </div>
         )}
         {error && (
@@ -731,7 +752,9 @@ export default function SupportChat({
                 ? 'Selectează o conversație activă pentru a răspunde.'
                 : current.status === 'trashed'
                   ? 'Conversația este în coș. Restaureaz-o pentru a o administra.'
-                  : 'Conversație finalizată. O poți redeschide din acțiuni.'}
+                  : current.status === 'open'
+                    ? 'Preia conversația sau intră în ea pentru a răspunde.'
+                    : 'Conversație finalizată. O poți redeschide din acțiuni.'}
             </span>
           </footer>
         ) : (
