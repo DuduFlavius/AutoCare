@@ -1,4 +1,5 @@
 'use client';
+import {hasNativePush} from '@/lib/native-push-client';
 import { useEffect, useState } from 'react';
 import { BellRing, Send, ShieldCheck } from 'lucide-react';
 export default function PushSettings({
@@ -14,11 +15,13 @@ export default function PushSettings({
   onActivate: () => Promise<void>;
   onTest: () => Promise<void>;
 }) {
+  const [native,setNative]=useState(false);
   const [feedback, setFeedback] = useState(''),
     [permission, setPermission] = useState('loading'),
     [busy, setBusy] = useState(false),
     [needsInstall, setNeedsInstall] = useState(false);
   useEffect(() => {
+    if(hasNativePush()){setNative(true);setPermission('default');return;}
     const ios =
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -52,7 +55,7 @@ export default function PushSettings({
   async function activate() {
     setBusy(true);
     try {
-      if (!configured) { await localTest(); return; }
+      if (!configured && !native) { await localTest(); return; }
       await onActivate();
       if ('Notification' in window) setPermission(Notification.permission);
     } catch (error) {
@@ -78,7 +81,7 @@ export default function PushSettings({
       </p>
       <div className="push-state" role="status">
         <ShieldCheck size={16} />
-        {needsInstall
+        {native ? 'Notificări Android: activează-le pentru mesaje și termene importante.' : needsInstall
           ? 'Pe iPhone/iPad: deschide în Safari → Partajează → Adaugă pe ecranul principal. Deschide apoi AutoCare din pictogramă și activează notificările. Necesită iOS/iPadOS 16.4 sau mai nou.'
           : permission === 'granted'
             ? 'Permisiune acordată pe acest dispozitiv'
@@ -109,7 +112,7 @@ export default function PushSettings({
           onClick={async () => {
             setBusy(true);
             try {
-              if (configured) await onTest();
+              if (configured || native) await onTest();
               else await localTest();
             } catch (error) {
               setFeedback(error instanceof Error ? error.message : 'Notificarea de test nu a putut fi trimisă.');
@@ -128,7 +131,7 @@ export default function PushSettings({
         setările de notificări ale sistemului, inclusiv modul Nu deranjați. Dacă permisiunea este
         blocată, schimb-o din setările site-ului și reîncarcă pagina.
       </p>
-      {!configured && <p className="small muted">Web Push în fundal nu este încă configurat pe server. Poți testa notificările locale pe dispozitiv, dar nu se vor trimite automat când aplicația este închisă.</p>}
+      {!configured && !native && <p className="small muted">Web Push în fundal nu este încă configurat pe server. Poți testa notificările locale pe dispozitiv, dar nu se vor trimite automat când aplicația este închisă.</p>}
       {!emailConfigured && (
         <p className="micro">
           Notificările pe dispozitiv sunt separate de e-mail. Trimiterea e-mailurilor necesită

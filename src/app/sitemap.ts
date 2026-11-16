@@ -6,6 +6,7 @@ import { guides } from '@/lib/guides';
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries = [
     '',
+    'stergere-cont',
     ...indexableSlugs,
     'ghiduri',
     ...Object.keys(guides).map((slug) => 'ghiduri/' + slug),

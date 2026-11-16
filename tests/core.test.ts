@@ -860,7 +860,7 @@ test('20 Logout revokes session on server', async () => {
     '/',
   );
 });
-test('21 Direct auth deletion cannot bypass billing guard; authenticated deletion removes the account', async () => {
+test('21 Account deletion requires email identity confirmation and invalidates the account only after the final link', async () => {
   await db().delete(s.rateLimit);
   let r = await authReq('sign-up/email', {
     email: 'remove@example.invalid',
@@ -904,7 +904,9 @@ test('21 Direct auth deletion cannot bypass billing guard; authenticated deletio
       body: JSON.stringify({ password: 'remove-test-password-123' }),
     }),
   );
-  assert.equal(r.status, 409);
+  assert.equal(r.status, 200);
+  assert.equal((await db().select().from(s.user).where(eq(s.user.id,u.id))).length,1);
+  assert.equal((await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId,u.id)))[0].status,'active');
   await db()
     .update(s.subscriptions)
     .set({ status: 'canceled' })
@@ -916,7 +918,15 @@ test('21 Direct auth deletion cannot bypass billing guard; authenticated deletio
     cookies,
   );
   assert.equal(r.status, 200);
+  assert.equal((await db().select().from(s.user).where(eq(s.user.id,u.id))).length,1);
+  const deletionURL=mail.at(-1)!.text.match(/http:\/\/localhost:3000\/api\/auth\/delete-user\/callback[^\s]+/)![0];
+  const missingSession=await auth().handler(new Request(deletionURL));
+  assert.ok(missingSession.status>=300);
+  const confirmed=await auth().handler(new Request(deletionURL,{headers:{Cookie:cookies}}));
+  assert.ok([200,302].includes(confirmed.status));
   assert.equal((await db().select().from(s.user).where(eq(s.user.id, u.id))).length, 0);
+  const replay=await auth().handler(new Request(deletionURL,{headers:{Cookie:cookies}}));
+  assert.ok(replay.status>=300);
 });
 
 test('SmartDrive: refresh session after password/session lifecycle tests', async () => {

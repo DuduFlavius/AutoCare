@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 // Production keys are supplied by the owner/CI, never checked into Git.
+def playDistribution = (project.findProperty('autocareDistribution') ?: 'direct') == 'play'
 def uploadKeyPath = System.getenv('AUTOCARE_UPLOAD_KEYSTORE')
 def signedRelease = uploadKeyPath != null && !uploadKeyPath.isBlank()
 if (signedRelease && ['AUTOCARE_UPLOAD_STORE_PASSWORD', 'AUTOCARE_UPLOAD_KEY_ALIAS', 'AUTOCARE_UPLOAD_KEY_PASSWORD'].any { !System.getenv(it) }) {
@@ -8,15 +9,21 @@ if (signedRelease && ['AUTOCARE_UPLOAD_STORE_PASSWORD', 'AUTOCARE_UPLOAD_KEY_ALI
 }
 
 
+if (signedRelease && !file('google-services.json').exists()) {
+    throw new GradleException('Firebase Android configuration is required for signed notification-enabled releases.')
+}
+
 android {
     namespace = "ro.autocare.garage"
     compileSdk = rootProject.ext.compileSdkVersion
+    buildFeatures { buildConfig true }
     defaultConfig {
+        buildConfigField "boolean", "PLAY_DISTRIBUTION", playDistribution.toString()
         applicationId "ro.autocare.garage"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 14
-        versionName "1.4.2"
+        versionCode 16
+        versionName "1.5.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -52,6 +59,7 @@ repositories {
 }
 
 dependencies {
+    implementation "com.android.billingclient:billing:8.0.0"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"

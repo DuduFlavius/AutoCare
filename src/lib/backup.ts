@@ -22,6 +22,8 @@ const tables = {
   subscriptions: s.subscriptions,
   notifications: s.notifications,
   pushes: s.pushes,
+  nativePushTokens: s.nativePushTokens,
+  playSubscriptions:s.playSubscriptions,
   webhookEvents: s.webhookEvents,
   jobRuns: s.jobRuns,
   support: s.support,
@@ -93,6 +95,7 @@ export async function restoreEncrypted(bytes: Buffer, key: Buffer) {
   );
   if (backup.version === 1 && backup.tables)
     for (const key of [
+      'nativePushTokens','playSubscriptions',
       'supportThreads',
       'supportChatMessages',
       'supportParticipants',
@@ -110,6 +113,7 @@ export async function restoreEncrypted(bytes: Buffer, key: Buffer) {
       'mileageReadings','gpsTrips','mileageReminderPreferences','mechanicShares','subscriptionExtensions','supportTyping',
     ])
       if (!(key in backup.tables)) backup.tables[key] = [];
+  if (backup.version === 2 && backup.tables) for(const key of ['nativePushTokens','playSubscriptions']) if(!(key in backup.tables))backup.tables[key]=[];
   if (![1,2].includes(backup.version) || Object.keys(tables).some((k) => !Array.isArray(backup.tables[k])))
     throw new Error('Invalid backup');
   await db().transaction(async (tx) => {

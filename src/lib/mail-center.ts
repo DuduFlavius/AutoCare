@@ -1,3 +1,4 @@
+import {accountPreferences} from './account-preferences';
 import {campaignEnglish,englishMailSchema} from './mail-localization';
 import {userLanguage} from './user-language';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
@@ -67,6 +68,8 @@ const inputSchema = z
   .object({
     id: z.uuid(),
     communicationType: z.string().trim().min(2).max(100).default('Informare cont'),
+    templateLabel:z.string().trim().max(100).optional(),
+    categoryLabel:z.string().trim().max(100).optional(),
     englishContent:englishMailSchema.optional(),
     template: z.enum(templateIds),
     category: z.enum(['transactional', 'promotional']),
@@ -265,7 +268,7 @@ export async function saveCampaign(uid: string, input: unknown) {
       status: 'draft',
     });
     if(data.englishContent)await tx.insert(s.settings).values({key:'mail-english:'+data.id,value:data.englishContent});
-    await tx.insert(s.settings).values({ key: 'mail-kind:' + data.id, value: { label: data.communicationType } });
+    await tx.insert(s.settings).values({ key: 'mail-kind:' + data.id, value: { label: data.communicationType,templateLabel:data.templateLabel,categoryLabel:data.categoryLabel } });
     await tx.insert(s.mailDeliveries).values(
       data.recipients.map((userId) => ({
         id: crypto.randomUUID(),
@@ -302,8 +305,8 @@ export async function campaignDetail(uid: string, id: string) {
     .innerJoin(s.user, eq(s.user.id, s.mailDeliveries.userId))
     .where(eq(s.mailDeliveries.campaignId, id))
     .limit(100);
-  const kind = (await db().select().from(s.settings).where(eq(s.settings.key, 'mail-kind:' + id)))[0]?.value as { label?: string } | undefined;
-  return { campaign, deliveries, communicationType: kind?.label || 'Informare cont' };
+  const kind = (await db().select().from(s.settings).where(eq(s.settings.key, 'mail-kind:' + id)))[0]?.value as { label?: string;templateLabel?:string;categoryLabel?:string } | undefined;
+  return { campaign, deliveries, communicationType: kind?.label || 'Informare cont',templateLabel:kind?.templateLabel||'',categoryLabel:kind?.categoryLabel||'' };
 }
 export type MailTransport = (to: string, content: EmailContent, id: string) => Promise<string>;
 export async function deliverCampaign(
@@ -354,7 +357,10 @@ export async function deliverCampaign(
         )
         .returning();
       if (!claimed.length) return;
+      const accountPrefs=await accountPreferences(candidate.userId);
+      const categoryEnabled=(!['release_news','feature_news'].includes(campaign.template)||accountPrefs.alerts.updates) && (campaign.template!=='administrative'||accountPrefs.alerts.account);
       if (
+        !categoryEnabled ||
         (campaign.source === 'automation' &&
           campaign.template === 'welcome' &&
           now.getTime() - campaign.createdAt.getTime() > 86400000) ||

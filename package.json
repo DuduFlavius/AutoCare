@@ -27,6 +27,8 @@
     "@types/leaflet": "1.9.22",
     "better-auth": "1.7.11",
     "drizzle-orm": "0.45.4",
+    "firebase-admin": "14.5.1",
+    "google-auth-library": "11.3.4",
     "leaflet": "1.9.4",
     "lucide-react": "latest",
     "maplibre-gl": "6.16.0",

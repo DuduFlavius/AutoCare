@@ -73,3 +73,18 @@ Android maps use `@capacitor/geolocation` 8.2.4 with high accuracy, a 1-second d
 Customers can end their own support conversations. Customers and administrators can move active or completed conversations to recoverable trash, which stops new messages in that thread. Customer access stays restricted to their own conversations. No schema migration is needed.
 
 The CI debug installer uses the `.preview` app ID and is for physical-device testing. The release AAB stays unsigned unless the owner's existing signing credentials are provided to the signed-release workflow. An unsigned AAB cannot be submitted to Play. Target SDK remains 36. Physical GPS, background behavior, signing, Play billing eligibility and Console declarations still require verification before store submission.
+
+## 1.5.0: Android notifications and Google Play Billing
+
+Native Android remote alerts use the Capacitor Firebase Messaging plugin. Server token registration is authenticated, user-scoped and removed on logout/account deletion. The server sends notification payloads so Android can display them while the WebView sleeps; delivery still depends on Android permissions, Google Play services and force-stop/battery rules. Configure the matching Firebase Android apps for `ro.autocare.garage` and the preview ID `ro.autocare.garage.preview`. Supply `google-services.json` locally or `AUTOCARE_GOOGLE_SERVICES_JSON_BASE64` in the signed-build GitHub environment. Set `AUTOCARE_FIREBASE_SERVICE_ACCOUNT` to the matching service-account JSON in the server's secret settings. Never put the private service account in the APK or Git. A build without Firebase configuration can compile but cannot register for remote notifications.
+
+Play Billing Library 8 purchases subscriptions through Google Play and restores purchases from the signed-in Play account. The server checks package, allowed product, hashed AutoCare account identity, Google-reported state and expiry before granting access; pending purchases never unlock Premium. Tokens are verified on the server and only their hashes are stored. Verified purchases are acknowledged by the server. Renewals/refunds/holds/revocations require authenticated Google Pub/Sub RTDN at `/api/play-notifications`; test notifications and a real license-test purchase/refund must be verified before launch.
+
+Server secrets/settings required:
+- `AUTOCARE_PLAY_SERVICE_ACCOUNT`: service-account JSON with Android Publisher access to this app.
+- `AUTOCARE_PLAY_MONTHLY_PRODUCT`, `AUTOCARE_PLAY_QUARTERLY_PRODUCT`, `AUTOCARE_PLAY_ANNUAL_PRODUCT`: three subscription product IDs with standard base plans; retain the existing catalog amounts when configuring Console.
+- `AUTOCARE_PLAY_RTDN_AUDIENCE`: exact HTTPS webhook URL.
+- `AUTOCARE_PLAY_RTDN_EMAIL`: email of the Pub/Sub push authentication service account.
+- `AUTOCARE_PLAY_BILLING_ENABLED=true`: enable only after Console products, RTDN, license tests, current price display and refund tests pass.
+
+Apply migrations 0016 and 0017 before deploying the web code. Existing Stripe website billing is preserved. Native purchases do not use Stripe checkout. Subscription upgrades/downgrades and prepaid extensions are not implemented in this release; validate the existing-account flow before enabling Play purchases. Native product availability and final localized payment terms are confirmed by Google Play. Signed production builds require the existing upload key and Firebase config; debug APKs remain preview-only and are not Play submissions.

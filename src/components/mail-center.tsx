@@ -44,6 +44,7 @@ export default function MailCenter() {
   const [releaseVersion, setReleaseVersion] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
   const [libraryName, setLibraryName] = useState('');
+  const [templateLabel,setTemplateLabel]=useState(''),[categoryLabel,setCategoryLabel]=useState('');
   const [communicationType, setCommunicationType] = useState('Informare cont');
   const [section, setSection] = useState<'compose' | 'history' | 'automation'>('compose');
   const [gmailStatus, setGmailStatus] = useState<{connected: boolean; testedAt?: string | null; reconnectRequired?: boolean} | null>(null);
@@ -278,6 +279,9 @@ export default function MailCenter() {
             Ofertele și comunicările de marketing trebuie marcate promoționale. Oamenii fără acord
             sunt excluși. Preferințele se verifică din nou înaintea trimiterii.
           </p>
+          <label>{t('Nume șablon propriu','Custom template name')}<input value={templateLabel} maxLength={100} disabled={saved||busy} onChange={e=>setTemplateLabel(e.target.value)}/></label>
+          <label>{t('Denumirea categoriei — text propriu','Category label — custom text')}<input value={categoryLabel} maxLength={100} disabled={saved||busy} onChange={e=>setCategoryLabel(e.target.value)}/></label>
+          <p className="micro">{t('Poți scrie propriile denumiri, subiectul și mesajul. Clasificarea administrativă sau promoțională stabilește acordul necesar destinatarilor.','Enter your own labels, subject and message. Administrative or promotional classification determines the recipient consent required.')}</p>
           <label>
             Subiect — alege o sugestie sau scrie tu
             <input
@@ -445,7 +449,7 @@ export default function MailCenter() {
               }
               if (!saved) {
                 await api('/campaigns', 'POST', {
-                  id: draftId, template, category, communicationType, subject, message, ctaLabel, ctaPath, recipients, englishContent,
+                  id: draftId, template, category, communicationType, templateLabel, categoryLabel, subject, message, ctaLabel, ctaPath, recipients, englishContent,
                 });
                 setSaved(true);
               }
@@ -614,7 +618,7 @@ export default function MailCenter() {
                             setCtaLabel(c.ctaLabel);
                             setCtaPath(c.ctaPath);
                             setCategory(c.category as typeof category);
-                            setCommunicationType(result.communicationType);
+                            setCommunicationType(result.communicationType);setTemplateLabel(result.templateLabel);setCategoryLabel(result.categoryLabel);
                             setSaved(true);
                             setConfirmed(false);
                             setPreview(null);

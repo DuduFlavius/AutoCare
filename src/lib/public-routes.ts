@@ -1,5 +1,6 @@
 /** Stable, language-specific public URLs; private routes are deliberately excluded. */
 export const publicRoutePairs: Record<string, string> = {
+ '/stergere-cont':'/en/delete-account',
  '/':'/en', '/despre-noi':'/en/about', '/aplicatie-auto':'/en/car-management-app',
  '/instaleaza':'/en/install', '/functionalitati':'/en/features', '/cum-functioneaza':'/en/how-it-works',
  '/documente-auto':'/en/vehicle-documents', '/intretinere-auto':'/en/service-history',

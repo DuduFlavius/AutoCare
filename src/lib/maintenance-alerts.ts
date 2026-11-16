@@ -27,7 +27,7 @@ export function reminderOffsets(input: {
   const configured = operationAlerts(parts);
   const selected = paid
     ? (configured.days ?? defaults)
-    : defaults.filter((n) => [30, 7, 1, 0].includes(n));
+    : defaults.filter((n) => [30, 15, 7, 1, 0].includes(n));
   const due: string[] = [];
   if (days !== null && selected.includes(days)) due.push(String(days));
   if (days !== null && days < 0 && paid && afterExpiry) due.push('overdue');
@@ -56,6 +56,6 @@ export function alertOffsetAllowed(
   if (/^km-before-\d+$/.test(offset))
     return paid && !!configured.kilometers?.includes(Number(offset.slice(10)));
   return (
-    paid ? (configured.days ?? defaults) : defaults.filter((n) => [30, 7, 1, 0].includes(n))
+    paid ? (configured.days ?? defaults) : defaults.filter((n) => [30, 15, 7, 1, 0].includes(n))
   ).includes(Number(offset));
 }

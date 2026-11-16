@@ -4,10 +4,15 @@ on:
     branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated]
     paths: ["mobile/**", ".github/workflows/native-build.yml"]
   pull_request:
-    branches: [feature/autocare-desktop-premium-20261102, feature/autocare-native-gps-20261104]
+    branches: [feature/autocare-ai-integrated, feature/autocare-desktop-premium-20261102, feature/autocare-native-gps-20261104]
     paths: ["mobile/**", ".github/workflows/native-build.yml"]
   workflow_dispatch:
     inputs:
+      distribution:
+        description: Android distribution (direct uses Stripe, play uses Google Play Billing)
+        type: choice
+        options: [direct, play]
+        default: direct
       signed_android_release:
         description: 'Build a signed Google Play AAB using configured upload-key secrets'
         type: boolean
@@ -62,6 +67,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - run: npm ci --prefix mobile
       - run: cd mobile && npx cap sync android
+      - name: Configure Android Firebase
+        env:
+          AUTOCARE_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.AUTOCARE_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          test -n "$AUTOCARE_GOOGLE_SERVICES_JSON_BASE64" || { echo 'Missing Firebase Android app configuration'; exit 1; }
+          printf '%s' "$AUTOCARE_GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > mobile/android/app/google-services.json
       - name: Build signed Google Play AAB
         env:
           AUTOCARE_UPLOAD_KEYSTORE_BASE64: ${{ secrets.AUTOCARE_UPLOAD_KEYSTORE_BASE64 }}
@@ -80,7 +91,7 @@ jobs:
           export JAVA_HOME="$JAVA_HOME_21_X64"
           export PATH="$JAVA_HOME/bin:$PATH"
           cd mobile/android
-          ./gradlew :app:bundleRelease :app:assembleRelease
+          ./gradlew -PautocareDistribution=${{ inputs.distribution || 'direct' }} :app:bundleRelease :app:assembleRelease
           jarsigner -verify app/build/outputs/bundle/release/app-release.aab
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose app/build/outputs/apk/release/app-release.apk
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

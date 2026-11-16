@@ -72,9 +72,9 @@ export const profileInput = z
         z
           .number()
           .int()
-          .refine((n) => [30, 14, 7, 6, 5, 4, 3, 2, 1, 0].includes(n)),
+          .refine((n) => [30, 15, 14, 7, 6, 5, 4, 3, 2, 1, 0].includes(n)),
       )
-      .max(10)
+      .max(11)
       .transform((x) => [...new Set(x)]),
     hour: z.number().int().min(0).max(23),
   })

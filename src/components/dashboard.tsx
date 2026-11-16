@@ -1,4 +1,8 @@
 'use client';
+import AccountSettings from './account-settings';
+import {hasPlayBilling,purchasePlayPlan,restorePlayPurchases} from '@/lib/play-billing-client';
+import PlayBillingPanel from './play-billing-panel';
+import {activateNativePush,disconnectNativePush,hasNativePush} from '@/lib/native-push-client';
 import {saveBrowserLanguage} from '@/lib/language-preference';
 import dynamic from 'next/dynamic';
 import ReferenceArtwork from './reference-artwork';
@@ -315,7 +319,8 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   );
 }
 
-export default function Dashboard({ name, previewData, initialTab='Dashboard', initialDrive, initialVehicle }: { name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
+export default function Dashboard({ name: initialName, previewData, initialTab='Dashboard', initialDrive, initialVehicle }: { name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
+  const [name,setName]=useState(initialName);
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
     [openedSmartDrive, setOpenedSmartDrive] = useState(normalizeWorkspaceTab(initialTab) === 'Plan întreținere'),
@@ -392,6 +397,14 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
         .then(setAdmin)
         .catch((e) => setError(e.message));
   }, [tab]);
+  useEffect(() => {
+    if(previewData || !data?.profile.userId || !hasNativePush() || !data.profile.pushEnabled)return;
+    void activateNativePush(false).catch(()=>{});
+  },[previewData,data?.profile.userId,data?.profile.pushEnabled]);
+  useEffect(()=>{
+    if(previewData || !data?.profile.userId || !hasPlayBilling())return;
+    void restorePlayPurchases().then(()=>refresh(true)).catch(()=>{});
+  },[previewData,data?.profile.userId]);
   // Reconnect an already-authorized desktop/mobile device to Web Push after login.
   useEffect(() => {
     if (previewData || !data?.pushPublicKey || !data.notificationSetup.pushConfigured) return;
@@ -490,6 +503,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
 
   function startCheckout(interval: string, extend = false, billingCurrency:'ron'|'eur'='ron') {
     void act(async () => {
+      if(hasPlayBilling()){if(extend)throw new Error('Prelungirea se gestionează prin abonamentul Google Play.');await purchasePlayPlan(interval);await refresh(true);return;}
       const out = await api(extend ? 'billing/extend' : 'billing/checkout', 'POST', { interval,currency:billingCurrency.toUpperCase(),language });
       if (typeof out?.url !== 'string' || !out.url.startsWith('https://checkout.stripe.com/')) {
         throw new Error(language === 'en' ? 'Invalid Stripe checkout link.' : 'Linkul de plată Stripe este invalid.');
@@ -742,6 +756,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
   }
   async function push() {
     await act(async () => {
+      if(hasNativePush()) {await activateNativePush(); await refresh(true); return;}
       if (!window.isSecureContext)
         throw new Error('Deschide AutoCare prin HTTPS pentru notificări.');
       if (
@@ -797,7 +812,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
       );
       await api('push', 'POST', sub.toJSON());
       await api('profile', 'PUT', { ...profileValues(), pushEnabled: true });
-    }, 'Notificările push au fost activate pentru acest browser.');
+    }, 'Notificările au fost activate pe acest dispozitiv.');
   }
   async function selectVehicle(id: string) {
     if (!data || id === data.primaryVehicleId || busy) return;
@@ -811,7 +826,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
     if (previewData || signingOut) return;
     if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
     setSigningOut(true); setError('');
-    try { if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
+    try { await disconnectNativePush(); if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (
@@ -1678,7 +1693,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             {tab === 'Centru de suport' && (
               <SupportChat role={data.profile.role} preview={!!previewData} />
             )}
-            {tab==='Abonament'&&<SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/>}
+            {tab==='Abonament'&&<><PlayBillingPanel onUpdated={()=>refresh(true)}/><SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(hasPlayBilling())throw new Error('Gestionează abonamentul din Google Play.');if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/></>}
             {tab==='Rapoarte'&&(data.premium?<PremiumDownloads data={data} language={language} preview={!!previewData}/>:<section className="card studio-report-intro"><Download size={32}/><h2>{language==='en'?'Reports, ready when you need them.':'Rapoartele tale, gata când ai nevoie.'}</h2><p>{language==='en'?'PDF and CSV reports are included with Premium. Your personal data export remains free in account settings.':'Rapoartele PDF și CSV sunt incluse cu Premium. Exportul datelor personale rămâne gratuit în setările contului.'}</p><button className="primary" onClick={()=>navigate('Premium')}>{language==='en'?'Compare plans':'Compară planurile'}</button></section>)}
             {tab === 'Premium' && (
               <Membership
@@ -1700,7 +1715,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
             )}
             {tab === 'Setări' && (
               <div className="ws-settings-layout">
-              <nav className="ws-settings-nav" aria-label={language==='en'?'Settings categories':'Categorii setări'} data-workspace-ui>{([['account','Profil și securitate','Profile & security'],['alerts','Notificări și email','Notifications & email'],['device','Aplicație și afișare','App & display'],['help','Ajutor','Help']] as const).map(([id,ro,en])=><button type="button" key={id} aria-current={settingsPanel===id?'page':undefined} onClick={()=>setSettingsPanel(id)}>{language==='en'?en:ro}<ArrowUpRight size={15}/></button>)}</nav>
+              <nav className="ws-settings-nav" aria-label={language==='en'?'Settings categories':'Categorii setări'} data-workspace-ui>{([['account','Setări cont','Account Settings'],['alerts','Notificări și email','Notifications & email'],['device','Aplicație și afișare','App & display'],['help','Ajutor','Help']] as const).map(([id,ro,en])=><button type="button" key={id} aria-current={settingsPanel===id?'page':undefined} onClick={()=>setSettingsPanel(id)}>{language==='en'?en:ro}<ArrowUpRight size={15}/></button>)}</nav>
               <div className="grid2 settings-workspace">
                 <section hidden={settingsPanel!=='device'} className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /><AppUpdateSettings /><WorkspacePreferences language={language} currency={currency} onLanguage={changeLanguage} onCurrency={changeCurrency}/></section>
                 <section hidden={settingsPanel!=='alerts'} className="card">
@@ -1778,14 +1793,14 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                       Web Push, dacă este configurat
                     </label>
                     <div className="offsets">
-                      {[30, 14, 7, 6, 5, 4, 3, 2, 1, 0].map((n) => (
+                      {[30, 15, 14, 7, 6, 5, 4, 3, 2, 1, 0].map((n) => (
                         <label className="check" key={n}>
                           <input
                             type="checkbox"
                             name="offset"
                             value={n}
                             defaultChecked={data.profile.offsets.includes(n)}
-                            disabled={!data.premium && ![30, 7, 1, 0].includes(n)}
+                            disabled={!data.premium && ![30, 15, 7, 1, 0].includes(n)}
                           />
                           {n === 0 ? 'În ziua expirării' : n === 1 ? '1 zi' : n + ' zile'}
                         </label>
@@ -1827,83 +1842,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                     dispozitivele.
                   </p></details>
                 </section>
-                <section hidden={settingsPanel!=='account'} className="card">
-                  <div className="settings-section-title">
-                    <span className="profile-avatar">{name.slice(0, 1).toUpperCase()}</span>
-                    <div>
-                      <p className="eyebrow">CONTUL TĂU</p>
-                      <h3>Profil și securitate</h3>
-                    </div>
-                  </div>
-                  <p className="small muted">Actualizează numele, parola și datele personale.</p>
-                  <form
-                    className="stack"
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      const f = new FormData(e.currentTarget);
-                      await act(async () => {
-                        const out = await authClient.updateUser({ name: String(f.get('name')) });
-                        if (out.error) throw new Error(out.error.message);
-                      });
-                    }}
-                  >
-                    <label>
-                      Nume
-                      <input name="name" defaultValue={name} required maxLength={100} />
-                    </label>
-                    <button>Salvează numele</button>
-                  </form>
-                  <details className="autocare-advanced-settings"><summary>Schimbă parola</summary>
-                  <form
-                    className="stack"
-                    style={{ marginTop: 25 }}
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      const f = new FormData(e.currentTarget);
-                      await act(async () => {
-                        const out = await authClient.changePassword({
-                          currentPassword: String(f.get('current')),
-                          newPassword: String(f.get('new')),
-                          revokeOtherSessions: true,
-                        });
-                        if (out.error) throw new Error(out.error.message);
-                      });
-                    }}
-                  >
-                    <label>
-                      Parola curentă
-                      <input
-                        type="password"
-                        name="current"
-                        autoComplete="current-password"
-                        required
-                      />
-                    </label>
-                    <label>
-                      Parola nouă
-                      <input
-                        type="password"
-                        name="new"
-                        minLength={12}
-                        autoComplete="new-password"
-                        required
-                      />
-                    </label>
-                    <button>Schimbă parola</button>
-                  </form>
-                  </details><details className="autocare-advanced-settings"><summary>Date personale și ștergerea contului</summary>
-                  <h3 style={{ marginTop: 30 }}>Datele personale</h3>
-                  <a className="button small" href="/api/v1/export?format=json">
-                    <Download size={15} />
-                    Descarcă datele personale
-                  </a>
-                  <p className="micro">
-                    Include fișierele atașate codificate Base64. Accesibil gratuit.
-                  </p>
-                  <button className="danger" onClick={() => setDeleteOpen(true)}>
-                    Șterge contul și datele
-                  </button></details>
-                </section>
+                <section hidden={settingsPanel!=='account'}><AccountSettings preview={!!previewData} onUpdated={async updated=>{if(updated)setName(updated);await refresh(true);}} onDelete={()=>setDeleteOpen(true)}/></section>
                 <section hidden={settingsPanel!=='help'} className="card support-area">
                   <div className="settings-section-title">
                     <span className="list-icon">
@@ -1968,8 +1907,7 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
         {deleteOpen && (
           <Dialog title="Șterge contul" onClose={() => setDeleteOpen(false)}>
             <p>
-              Ștergerea contului și a datelor asociate este definitivă. Anulează mai întâi
-              abonamentul.
+              {language==='en'?'Account and associated data deletion is permanent. Confirm deletion by email. An active Stripe subscription will be canceled first. Google Play subscriptions must be managed separately in Google Play and are not automatically canceled. In-app data is removed; payment providers retain legally required records under their own policies.':'Ștergerea contului și a datelor asociate este definitivă. Confirmarea finală se face prin email. Un abonament Stripe activ va fi anulat înainte de ștergere. Abonamentele Google Play se gestionează separat în Google Play și nu sunt anulate automat prin ștergerea contului. Datele din aplicație sunt eliminate; documentele păstrate legal de furnizorii de plăți urmează politicile acestora.'}
             </p>
             <form
               className="stack"
@@ -1977,12 +1915,14 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 e.preventDefault();
                 const f = new FormData(e.currentTarget);
                 await act(async () => {
+                  await disconnectNativePush();
+                  if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId);
                   await api('account', 'DELETE', {
                     password: String(f.get('password')),
                     confirm: language === 'en' && String(f.get('confirm')) === 'DELETE' ? 'ȘTERGE' : String(f.get('confirm')),
                   });
-                  window.location.assign('/');
-                });
+                  setDeleteOpen(false);
+                },language==='en'?'Check your email for the final deletion confirmation.':'Verifică emailul pentru confirmarea finală a ștergerii.');
               }}
             >
               <label>
@@ -1990,8 +1930,8 @@ export default function Dashboard({ name, previewData, initialTab='Dashboard', i
                 <input name="confirm" required pattern={language === 'en' ? 'DELETE' : 'ȘTERGE'} autoComplete="off" />
               </label>
               <label>
-                Confirmă parola
-                <input name="password" type="password" required autoComplete="current-password" />
+                {language==='en'?'Password (for password accounts)':'Parola (pentru conturile cu parolă)'}
+                <input name="password" type="password" autoComplete="current-password" />
               </label>
               <button className="danger" disabled={busy}>
                 Șterge definitiv

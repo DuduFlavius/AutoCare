@@ -1,3 +1,4 @@
+import {activePlaySubscriptions} from './play-billing';
 import { financeBudgetKey, summarize } from './finance-overview';
 import { isPlannedService } from './planned-service';
 export { summarize } from './finance-overview';
@@ -41,12 +42,13 @@ export async function activeGrants(uid: string, now = new Date()) {
     );
 }
 export async function premium(uid: string, now = new Date()) {
-  const [sub, grants, extensions] = await Promise.all([
+  const [sub, grants, extensions, play] = await Promise.all([
     db().select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid)),
     activeGrants(uid, now),
     paidExtensions(uid,now),
+    activePlaySubscriptions(uid,now),
   ]);
-  return (!!sub[0]?.subscriptionId && isPremium(sub[0], now)) || grants.length > 0 || extensions.length>0;
+  return (!!sub[0]?.subscriptionId && isPremium(sub[0], now)) || grants.length > 0 || extensions.length>0 || play.length>0;
 }
 export async function assertActiveAccount(uid: string) {
   const r = (
@@ -100,7 +102,8 @@ export async function createVehicle(uid: string, input: unknown) {
           sql`${s.premiumGrants.revokedAt} IS NULL AND (${s.premiumGrants.expiresAt} IS NULL OR ${s.premiumGrants.expiresAt}>now())`,
         ),
       );
-    const hasPremium = (sub?.subscriptionId && isPremium(sub)) || grants.length > 0;
+    const play=await tx.select().from(s.playSubscriptions).where(and(eq(s.playSubscriptions.userId,uid),eq(s.playSubscriptions.active,true),sql`${s.playSubscriptions.expiresAt}>now()`));
+    const hasPremium = (sub?.subscriptionId && isPremium(sub)) || grants.length > 0 || play.length>0;
     if (!hasPremium && cars.length >= 1)
       throw new AppError(403, 'Planul gratuit permite o singură mașină activă. Activează Premium pentru mașini nelimitate.');
     return (
@@ -266,7 +269,7 @@ export async function saveProfile(uid: string, input: unknown) {
   const data = profileInput.parse(input);
   if (
     !(await premium(uid)) &&
-    (data.afterExpiry || data.hour !== 9 || data.offsets.some((n) => ![30, 7, 1, 0].includes(n)))
+    (data.afterExpiry || data.hour !== 9 || data.offsets.some((n) => ![30, 15, 7, 1, 0].includes(n)))
   )
     throw new AppError(403, 'Aceste preferințe necesită Premium.');
   await profile(uid);
@@ -327,7 +330,8 @@ export async function dashboard(uid: string) {
   const grants = await activeGrants(uid);
   const price = await pricing();
   const extensions=await paidExtensions(uid);
-  const paid = (!!sub[0]?.subscriptionId && isPremium(sub[0])) || grants.length > 0 || extensions.length>0;
+  const play=await activePlaySubscriptions(uid,now);
+  const paid = (!!sub[0]?.subscriptionId && isPremium(sub[0])) || grants.length > 0 || extensions.length>0 || play.length>0;
   const summary = summarize(
     rows.filter((r) => !r.cancelled && !isPlannedService(r, date)).map(r => ({ ...r, amountBani: r.amountKnown ? r.amountBani : 0 })),
     Number(date.slice(0, 4)),
@@ -351,8 +355,8 @@ export async function dashboard(uid: string) {
     premium: paid,
     planLimits:{activeVehicles:paid?null:1,attachments:(await limits()).maxFiles},
     premiumAccess: {
-      paid: (!!sub[0]?.subscriptionId && isPremium(sub[0])) || extensions.length>0,
-      paidUntil: new Date(Math.max(isPremium(sub[0])?sub[0].periodEnd!.getTime():0,...extensions.map(e=>e.endsAt?.getTime()||0))),
+      paid: (!!sub[0]?.subscriptionId && isPremium(sub[0])) || extensions.length>0 || play.length>0,
+      paidUntil: new Date(Math.max(isPremium(sub[0])?sub[0].periodEnd!.getTime():0,...extensions.map(e=>e.endsAt?.getTime()||0),...play.map(p=>p.expiresAt.getTime()))),
       manual: grants.map(({ id, grantedAt, expiresAt }) => ({ id, grantedAt, expiresAt })),
     },
     pricing: {

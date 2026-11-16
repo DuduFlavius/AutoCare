@@ -84,6 +84,7 @@ export function PublicShell({
               <Link href={href('/despre-noi')}>{t('Despre noi')}</Link>
               <Link href={href('/contact')}>{t('Contact')}</Link>
               <Link href={href('/intrebari-frecvente')}>{t('Întrebări')}</Link>
+              <Link href={href('/stergere-cont')}>{language==='en'?'Delete account':'Ștergere cont'}</Link>
               <Link href={href('/confidentialitate')}>{t('Confidențialitate')}</Link>
               <Link href={href('/termeni')}>{t('Termeni')}</Link>
               <Link href={href('/cookie-uri')}>{t('Cookie-uri')}</Link>

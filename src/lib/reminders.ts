@@ -1,3 +1,5 @@
+import {accountPreferences,reminderPreference} from './account-preferences';
+import {sendNativePush} from './native-push';
 import {userLanguage} from './user-language';
 import { calendarRecordDate, isPlannedService } from './planned-service';
 import {reminderOffsets,alertOffsetAllowed} from './maintenance-alerts';
@@ -22,8 +24,11 @@ export async function scheduleReminders(now = new Date()) {
     .leftJoin(s.subscriptions, eq(s.records.userId, s.subscriptions.userId))
     .where(and(eq(s.records.cancelled, false), eq(s.vehicles.archived, false)));
   let queued = 0;
+  const preferences = new Map<string,Awaited<ReturnType<typeof accountPreferences>>>();
   const entitlements = new Map<string, boolean>();
   for (const { r, v, p, u } of rows) {
+    const preference=preferences.get(u.id)??await accountPreferences(u.id); preferences.set(u.id,preference);
+    if(!preference.alerts[reminderPreference(r.category||r.title,r.kind)])continue;
     const hour = Number(
       new Intl.DateTimeFormat('en-GB', {
         timeZone: p.timezone,
@@ -91,16 +96,19 @@ export async function sendPushNotification(
   uid: string,
   payload: { id: string; title: string; body: string },
 ) {
-  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT)
+  const nativeSent = await sendNativePush(uid, payload);
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT) {
+    if (nativeSent) return 'push-accepted';
     throw new Error('PUSH_NOT_CONFIGURED');
+  }
   webpush.setVapidDetails(
     process.env.VAPID_SUBJECT,
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY,
   );
   const list = await db().select().from(s.pushes).where(eq(s.pushes.userId, uid));
-  if (!list.length) throw new Error('PUSH_NO_SUBSCRIPTION');
-  let sent = 0;
+  if (!list.length && !nativeSent) throw new Error('PUSH_NO_SUBSCRIPTION');
+  let sent = nativeSent;
   for (const p of list) {
     try {
       await webpush.sendNotification(
@@ -181,6 +189,7 @@ export async function deliverReminders(now = new Date(), transport: Transport = 
     const paid = context ? await premium(context.u.id, now) : false;
     const valid =
       context &&
+      (await accountPreferences(context.u.id)).alerts[reminderPreference(context.r.category||context.r.title,context.r.kind)] &&
       !context.r.cancelled &&
       !context.v.archived &&
       context.r.revision === n.revision &&

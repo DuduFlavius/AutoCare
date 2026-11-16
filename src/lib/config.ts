@@ -2,7 +2,7 @@ export const appName = process.env.NEXT_PUBLIC_APP_NAME || 'AutoCare';
 export function origin() {
   return new URL(process.env.APP_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000').origin;
 }
-export const offsets = [30, 14, 7, 6, 5, 4, 3, 2, 1, 0];
+export const offsets = [30, 15, 14, 7, 6, 5, 4, 3, 2, 1, 0];
 export function isPremium(
   s: { status: string; periodEnd: Date | null } | undefined,
   now = new Date(),

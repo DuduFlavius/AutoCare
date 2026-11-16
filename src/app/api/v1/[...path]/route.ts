@@ -1,3 +1,6 @@
+import {accountPreferences,accountPreferencesKey,accountPreferencesSchema} from '@/lib/account-preferences';
+import {playBillingConfigured,playProducts,playAccountId,verifyPlayPurchase} from '@/lib/play-billing';
+import {nativePushConfigured} from '@/lib/native-push';
 import {dailyMileageProjection} from '@/lib/daily-mileage-projection';
 import {languageCookie} from '@/lib/language-preference';
 import {after} from 'next/server';
@@ -598,6 +601,28 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         return json({ ok: true });
       }
     }
+    if(route==='billing/play' && method==='GET') {
+      const current=(await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId,uid)))[0];
+      const existing=(await db().select().from(s.playSubscriptions).where(and(eq(s.playSubscriptions.userId,uid),eq(s.playSubscriptions.active,true),sql`${s.playSubscriptions.expiresAt}>now()`))).length>0;
+      return json({configured:playBillingConfigured(),products:playProducts(),accountId:playAccountId(uid),hasActiveSubscription:existing||!!(current?.subscriptionId&&['active','trialing','past_due','unpaid'].includes(current.status))});
+    }
+    if(route==='billing/play' && method==='POST') {
+      await rate(uid,'play-verify',20);
+      const {token}=z.object({token:z.string().min(10).max(4096)}).parse(await body(req));
+      try{return json(await verifyPlayPurchase(uid,token));}catch{throw new svc.AppError(400,'Achiziția Google Play nu a putut fi verificată. Reîncearcă restaurarea achizițiilor.');}
+    }
+    if (route === 'push/native' && method === 'GET') return json({configured:nativePushConfigured()});
+    if (route === 'push/native' && (method === 'POST' || method === 'DELETE')) {
+      const {token} = z.object({token:z.string().min(20).max(4096).regex(/^[A-Za-z0-9_:.-]+$/)}).parse(await body(req));
+      if (method === 'DELETE') {
+        await db().delete(s.nativePushTokens).where(and(eq(s.nativePushTokens.token,token),eq(s.nativePushTokens.userId,uid)));
+      } else {
+        if (!nativePushConfigured()) throw new svc.AppError(503,'Notificările Android nu sunt încă configurate.');
+        await db().insert(s.nativePushTokens).values({token,userId:uid}).onConflictDoUpdate({target:s.nativePushTokens.token,set:{userId:uid,updatedAt:new Date()}});
+        await db().update(s.profiles).set({pushEnabled:true}).where(eq(s.profiles.userId,uid));
+      }
+      return json({ok:true});
+    }
     if (route === 'push/test' && method === 'POST') {
       await sendPushNotification(uid, {
         id: crypto.randomUUID(),
@@ -808,17 +833,22 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         },
       });
     }
+    if(route==='account/settings' && method==='GET') {
+      const person=(await db().select({name:s.user.name,email:s.user.email,createdAt:s.user.createdAt,emailVerified:s.user.emailVerified,image:s.user.image}).from(s.user).where(eq(s.user.id,uid)))[0];
+      const accounts=await db().select({provider:s.account.providerId}).from(s.account).where(eq(s.account.userId,uid));
+      return json({...person,...await accountPreferences(uid),providers:accounts.map(row=>row.provider)});
+    }
+    if(route==='account/settings' && method==='PUT') {
+      const value=accountPreferencesSchema.parse(await body(req));
+      await db().insert(s.settings).values({key:accountPreferencesKey(uid),value}).onConflictDoUpdate({target:s.settings.key,set:{value}});
+      return json(value);
+    }
     if (route === 'account' && method === 'DELETE') {
-      const data = z
-        .object({ password: z.string().min(1), confirm: z.literal('ȘTERGE') })
-        .parse(await body(req));
-      const sub = (
-        await db().select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid))
-      )[0];
-      if (sub?.subscriptionId && ['active', 'past_due', 'trialing'].includes(sub.status))
-        throw new svc.AppError(409, 'Anulează abonamentul înainte de ștergerea contului.');
-      await auth().api.deleteUser({ headers: req.headers, body: { password: data.password } });
-      return json({ ok: true });
+      const input=z.object({password:z.string().optional(),confirm:z.literal('ȘTERGE')}).strict().parse(await body(req));
+      const credential=(await db().select({provider:s.account.providerId}).from(s.account).where(eq(s.account.userId,uid))).some(account=>account.provider==='credential');
+      if(credential&&!input.password)throw new svc.AppError(400,'Confirmă parola contului.');
+      await auth().api.deleteUser({headers:req.headers,body:{...(input.password?{password:input.password}:{}),callbackURL:'/stergere-cont?completed=1'}});
+      return json({ok:true,verificationRequired:true});
     }
     if (['billing/checkout','billing/extend'].includes(route) && method === 'POST') {
       const input=z.object({interval:z.enum(['monthly','quarterly','annual']),currency:z.enum(['RON','EUR','ron','eur']).default('RON'),language:z.enum(['ro','en']).default('ro')}).parse(await body(req));
@@ -927,8 +957,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
                 }).from(s.user).innerJoin(s.profiles, eq(s.user.id, s.profiles.userId))
                   .where(sql`${s.user.id} IN (${sql.join(recipientIds.map((id) => sql`${id}`), sql`, `)})`)
               : [];
-            await Promise.allSettled(users.flatMap((user) => {
+            await Promise.allSettled(users.map(async (user) => {
               const tasks: Promise<unknown>[] = [];
+              if (!(await accountPreferences(user.id)).alerts.chat) return;
               if (user.pushEnabled) tasks.push(sendPushNotification(user.id, {
                 id: 'support-' + messageResult.message.id, title, body: bodyText,
               }));
@@ -938,7 +969,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
                 'support/' + messageResult.message.id + '/' + user.id,
                 renderEmail('administrative', {name:user.name,subject:title,message:bodyText,ctaLabel:'Vezi mesajul de suport',ctaPath:'/cont?tab=Centru%20de%20suport'}),
               ));
-              return tasks;
+              await Promise.allSettled(tasks);
             }));
           }
         } catch { /* A push failure must not affect a successfully saved message. */ }
