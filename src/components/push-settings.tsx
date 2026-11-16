@@ -40,7 +40,8 @@ export default function PushSettings({
       setPermission(allowed);
       if (allowed !== 'granted') { setFeedback('Permisiunea nu a fost acordată. Verifică setările site-ului.'); return; }
       if ('serviceWorker' in navigator) {
-        const reg = await navigator.serviceWorker.register('/sw.js');
+        await navigator.serviceWorker.register('/sw.js');
+        const reg = await navigator.serviceWorker.ready;
         await reg.showNotification('AutoCare · Notificare de test', { body: 'Notificările funcționează pe acest dispozitiv când AutoCare este deschis.', icon: '/icon-192.png', tag: 'autocare-local-test' });
       } else {
         new Notification('AutoCare · Notificare de test', { body: 'Test local de notificare.' });
@@ -54,6 +55,8 @@ export default function PushSettings({
       if (!configured) { await localTest(); return; }
       await onActivate();
       if ('Notification' in window) setPermission(Notification.permission);
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'Activarea notificărilor nu a reușit. Încearcă din nou.');
     } finally {
       setBusy(false);
     }
@@ -108,6 +111,8 @@ export default function PushSettings({
             try {
               if (configured) await onTest();
               else await localTest();
+            } catch (error) {
+              setFeedback(error instanceof Error ? error.message : 'Notificarea de test nu a putut fi trimisă.');
             } finally {
               setBusy(false);
             }
