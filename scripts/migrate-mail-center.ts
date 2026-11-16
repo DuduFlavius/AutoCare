@@ -5,8 +5,8 @@ import { db, closeLocalDb } from '../src/lib/db';
 async function main() {
   // Git branch previews do not share production database credentials.
   // Keep the production migration mandatory; visual previews never mutate a database.
-  if (process.env.VERCEL_ENV === 'preview') {
-    console.log('Mail Center migration skipped for Preview; production migration remains required.');
+  if (process.env.VERCEL_ENV !== 'production') {
+    console.log('Mail Center migration skipped outside Vercel Production; production migration remains required.');
     return;
   }
   if (process.env.DATABASE_URL) {
