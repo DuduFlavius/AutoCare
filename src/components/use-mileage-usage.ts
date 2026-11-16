@@ -4,7 +4,7 @@ import { recentMileageUsage, type OdometerReading } from '@/lib/smartdrive-metri
 /** A snapshot belongs to an exact vehicle and odometer value; stale requests cannot update it. */
 export function useMileageUsage(vehicleId: string, currentKm: number, preview = false) {
   const [revision, refresh] = useState(0);
-  const [manual, setManual] = useState<{ vehicleId: string; dailyKm: number | null } | null>(null);
+  const [manual, setManual] = useState<{ vehicleId: string; dailyKm: number | null; projection?:{days:number;addedKm:number;projectedKm:number} } | null>(null);
   useEffect(() => {
     const reload = () => refresh((n) => n + 1);
     window.addEventListener('autocare-daily-usage', reload);
@@ -16,7 +16,7 @@ export function useMileageUsage(vehicleId: string, currentKm: number, preview = 
     const controller = new AbortController();
     fetch('/api/v1/vehicles/' + encodeURIComponent(vehicleId) + '/daily-usage', { cache: 'no-store', signal: controller.signal })
       .then(async (r) => { if (!r.ok) throw Error('Usage unavailable'); return r.json(); })
-      .then((value) => { if (!controller.signal.aborted) setManual({ vehicleId, dailyKm: value.dailyKm }); })
+      .then((value) => { if (!controller.signal.aborted) setManual({ vehicleId, dailyKm: value.dailyKm, projection:value.projection }); })
       .catch(() => {});
     return () => controller.abort();
   }, [vehicleId, preview, revision]);
@@ -71,6 +71,7 @@ export function useMileageUsage(vehicleId: string, currentKm: number, preview = 
   const manualDailyKm = manual?.vehicleId === vehicleId ? manual.dailyKm : null;
   return {
     manualDailyKm,
+    projection: manual?.vehicleId===vehicleId ? manual.projection : undefined,
     dailyKm: manualDailyKm ?? confirmed?.dailyKm ?? null,
     async saveDailyKm(dailyKm: number | null) {
       if (preview) { setManual({ vehicleId, dailyKm }); return; }
