@@ -23,3 +23,11 @@
 - Explicit separate Pause/Continue controls and active-time accounting still need work; existing Stop/Resume behavior is not claimed equivalent.
 - Dedicated GPS/mileage report exports and the remaining document-vault filter/print audit are not completed by this release. Existing record-based reports share the new renderer.
 - The full cross-page audit requested by the user is not complete. Existing free Render sleeping/robots behavior is a hosting limitation and is not changed by this release.
+
+## Published verification
+- Render deploy dep-dbtb0nmk1f9s73bckc0g: LIVE, source d867cb97e8c4c3b0d7378a991b5557ef3ec0f14a. Public app-version returned this exact commit.
+- 288 automated tests passed, zero failed; TypeScript and ESLint passed; production build passed.
+- 15 isolated support DOM scenarios passed (95 simulated API requests).
+- Live smoke: manifest, SW, launch PNG, RO/EN install pages returned 200; unsupported launch dimensions returned 400; dashboard/export/readings/account APIs returned 401 without a session and private no-store caching. No production user data was created or deleted.
+- Render reported additive migrations completed. Error-level log query after the deploy returned no errors during the smoke window; this is not a guarantee against future errors.
+- All 25 long-fixture pages reviewed in a contact sheet; text extraction checked all four fixtures for A4 dimensions and out-of-page glyphs (zero).
