@@ -49,3 +49,12 @@ Nu s-au schimbat roluri, permisiuni, prețuri, abonamente sau schema bazei de da
 Testele DOM nu măsoară aspectul CSS, suprapunerile, tastatura Android/iOS sau notificările reale de sistem. Accesul browserului conectat și previzualizarea locală nu sunt disponibile în mediul curent, conform încercărilor din intervenția precedentă; nu pretind verificare vizuală pe dispozitive reale. Nu au fost trimise mesaje de probă către clienți în producție.
 
 Rezultatul exact al suitei finale și verificarea Render se adaugă după publicare.
+
+## Rezultat publicare
+
+- **284/284 teste trecute**, 0 eșecuri; **15 scenarii DOM trecute**, cu 95 de cereri către API-ul local simulat. Lint și build trecute.
+- Render LIVE: `dep-dbtae1dg1s2s7398gnag`, commit aplicație `6c9562523db03a2ba88a3ef24d9086c6324f0851`. `/api/app-version` confirmă versiunea.
+- Pagina centrului de suport redirecționează vizitatorul neautentificat către autentificare, păstrând destinația. Răspunsul este privat și nu se salvează în cache partajat.
+- Lista conversațiilor, statisticile, lista echipei și profilul clientului răspund HTTP 401 fără sesiune.
+- Logurile de nivel error nu au returnat intrări în intervalul verificat după activarea deploy-ului. Aceasta nu reprezintă monitorizare permanentă sau certificare a tuturor fluxurilor de producție.
+- Nu s-a schimbat planul Render Free și nu s-au activat costuri noi.
