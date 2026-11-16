@@ -29,7 +29,7 @@ globalThis.fetch=async(url:RequestInfo|URL,init:RequestInit={})=>{
  if(p.endsWith('/join')){thread.assignedTo=actor;return Response.json({ok:true});}
  if(p.endsWith('/assign')){thread.assignedTo=data.assigneeId;return Response.json({ok:true});}
  if(p.endsWith('/read')||p.endsWith('/typing')||p.endsWith('/files'))return Response.json({ok:true});
- if(p.endsWith('/chat')&&method==='GET'){const status=path.searchParams.get('status')??'open',q=path.searchParams.get('q');return Response.json({selfId:viewer,threads:status===thread.status&&(!q||thread.name.includes(q))?[thread]:[],counts:{open:thread.status==='open'?1:0,completed:thread.status==='completed'?1:0,trashed:thread.status==='trashed'?1:0}});}
+ if(p.endsWith('/chat')&&method==='GET'){const status=path.searchParams.get('status')??'open',q=path.searchParams.get('q');return Response.json({selfId:viewer,threads:(viewer===customer?(status==='trashed'?thread.status==='trashed':thread.status!=='trashed'):status===thread.status)&&(!q||thread.name.includes(q))?[thread]:[],counts:{open:thread.status==='open'?1:0,completed:thread.status==='completed'?1:0,trashed:thread.status==='trashed'?1:0}});}
  if(p.endsWith('/chat')&&method==='POST'){const message={id:'m'+(messages.length+1),body:data.message,authorName:viewer===actor?'Operator':thread.name,authorRole:viewer===actor?'admin':'user',authorId:viewer,createdAt:now()};messages.push(message);thread.lastMessage={id:message.id,body:message.body,authorId:viewer,createdAt:message.createdAt};return Response.json({threadId:id,message});}
  if(p.endsWith('/chat/'+id)&&method==='PATCH'){thread.status=data.action==='complete'?'completed':data.action==='trash'?'trashed':'open';return Response.json({ok:true});}
  if(p.endsWith('/chat/'+id))return Response.json({thread,messages,hasMore:false,receipts:[],attachments:[]});
@@ -93,5 +93,8 @@ try{
  await until(()=>messages.at(-1)?.body==='Customer follow-up','customer sent');await act(async()=>{dom.window.dispatchEvent(new dom.window.Event('focus'));await tick();});assert.equal(alerts.length,0);passed.push('Customer messaging; no false alert for own sent message');
  const incoming={id:'team-answer',body:'A real team answer',authorId:'colleague',createdAt:now()};thread.lastMessage=incoming;messages.push({...incoming,authorName:'Colleague',authorRole:'assistant'});
  await act(async()=>{dom.window.dispatchEvent(new dom.window.Event('focus'));await tick();});await until(()=>alerts.length===1,'customer new-reply notification');passed.push('Customer receives team-reply notification');
+ await click(button('Încheie'));await until(()=>thread.status==='completed'&&!!button('Șterge'),'customer ended conversation');passed.push('Customer ends own conversation');
+ await click(button('Șterge'));await until(()=>thread.status==='trashed','customer deleted conversation');
+ await click(document.querySelectorAll('.support-client-folders button')[1]);await until(()=>!!button('Restaurează'),'customer trash');await click(button('Restaurează'));await until(()=>thread.status==='open','customer restore');passed.push('Customer deletes and restores own conversation');
  console.log(JSON.stringify({passed,requests:calls.length,scope:'Isolated DOM, simulated API. No visual-layout or real-device assertion.'},null,2));
 }finally{await act(async()=>root.unmount());globalThis.fetch=realFetch;dom.window.close();}

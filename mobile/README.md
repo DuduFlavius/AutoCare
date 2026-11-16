@@ -65,3 +65,11 @@ Before store submission the owner must complete Play Console setup, app signing,
 
 ## 1.2.0 preview checkpoint
 Debug builds use applicationId `ro.autocare.garage.preview`, versionName `1.2.0-preview`, versionCode 7, to avoid replacing the installed production app. This APK still loads the configured hosted site; unpublished web changes are not bundled into it. Do not enable two automatic trackers for the same car. A production upgrade requires the owner's existing signing key; an unsigned release package is not an installer. No store publication or physical-device validation is claimed.
+
+## 1.4.1 (versionCode 13): native map location and support controls
+
+Android maps use `@capacitor/geolocation` 8.2.4 with high accuracy, a 1-second desired update interval and no cached fixes. The app requests the precise-location alias explicitly; granting only approximate location produces guidance instead of presenting a 2-km fix as precise. Existing APKs without this plugin keep the browser fallback until updated. Background trip tracking remains owned by the existing native foreground service. Foreground map watches stop when hidden and reacquire on return.
+
+Customers can end their own support conversations. Customers and administrators can move active or completed conversations to recoverable trash, which stops new messages in that thread. Customer access stays restricted to their own conversations. No schema migration is needed.
+
+The CI debug installer uses the `.preview` app ID and is for physical-device testing. The release AAB stays unsigned unless the owner's existing signing credentials are provided to the signed-release workflow. An unsigned AAB cannot be submitted to Play. Target SDK remains 36. Physical GPS, background behavior, signing, Play billing eligibility and Console declarations still require verification before store submission.

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { watchBrowserLocation } from '@/lib/browser-location';
+import { watchDeviceLocation } from '@/lib/device-location';
 import { browserGPSFix, type GPSFix } from '@/lib/gps-tracking';
 
 export const mapGPSOptions: PositionOptions = {
@@ -54,7 +54,7 @@ export function useMapLocation(enabled: boolean, english: boolean) {
     if (!shouldWatch || !navigator.geolocation) return;
     let live = true;
     setWaiting(true);
-    const stop = watchBrowserLocation(value => {
+    const stop = watchDeviceLocation(value => {
       if (!live) return;
       const fix = browserGPSFix(value);
       if (!fix || fix.timestamp > Date.now() + 5000 || Date.now() - fix.timestamp > 15000) return;

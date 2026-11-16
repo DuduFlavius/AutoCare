@@ -104,17 +104,10 @@ test('Support: assistant and administrator announce their actual rank', async ()
     m => m.body === 'Bună ziua! Administratorul Ana Admin a intrat în chat.',
   ));
 });
-test('Support: clients cannot finalize/trash/restore; trash requires completion and is reversible', async () => {
-  for (const action of ['complete', 'reopen'])
-    await assert.rejects(
-      () => chat.changeSupportThread(customer, threadId, { action }),
-      status(403),
-    );
-  await assert.rejects(
-    () => chat.changeSupportThread(founder, threadId, { action: 'trash' }),
-    status(409),
-  );
-  await chat.changeSupportThread(founder, threadId, { action: 'complete' });
+test('Support: owners can end conversations; reopening remains staff-only and trash is reversible', async () => {
+  await assert.rejects(() => chat.changeSupportThread(customer, threadId, { action: 'reopen' }), status(403));
+  await assert.rejects(() => chat.changeSupportThread(other, threadId, { action: 'complete' }), status(404));
+  await chat.changeSupportThread(customer, threadId, { action: 'complete' });
   await assert.rejects(
     () =>
       chat.sendSupportMessage(customer, {
@@ -353,4 +346,24 @@ test('Support premium: latest-message previews, customer vehicles and daily stat
  const completed=await chat.supportStatistics(admin);
  await chat.changeSupportThread(admin,first.threadId,{action:'reopen'});
  assert.equal((await chat.supportStatistics(admin)).resolved,completed.resolved-1);
+});
+
+test('Support: owner and admin can delete active conversations without losing history', async () => {
+  const owner = crypto.randomUUID();
+  await db().insert(s.user).values({id: owner,name: 'Delete fixture',email: owner+'@example.invalid',emailVerified:true});
+  const id = (await chat.sendSupportMessage(owner, { message: 'Poți închide această solicitare' })).threadId;
+  await chat.joinSupportThread(assistant, id);
+  await assert.rejects(() => chat.changeSupportThread(customer, id, { action: 'trash' }), status(404));
+  await chat.changeSupportThread(owner, id, { action: 'trash' });
+  const deleted = await chat.readSupportThread(owner, id);
+  assert.equal(deleted.thread.status, 'trashed');
+  assert.ok(deleted.thread.completedAt);
+  assert.ok(deleted.messages.some(m => m.body === 'Poți închide această solicitare'));
+  await assert.rejects(() => chat.sendSupportMessage(owner, { conversationId: id, message: 'Nu trimite' }), status(409));
+  await chat.changeSupportThread(owner, id, { action: 'restore' });
+  await chat.changeSupportThread(admin, id, { action: 'reopen' });
+  await chat.changeSupportThread(admin, id, { action: 'complete' });
+  await chat.changeSupportThread(admin, id, { action: 'reopen' });
+  await chat.changeSupportThread(admin, id, { action: 'trash' });
+  assert.equal((await chat.readSupportThread(owner, id)).thread.status, 'trashed');
 });

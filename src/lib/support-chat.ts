@@ -279,20 +279,20 @@ export async function changeSupportThread(uid: string, id: string, input: unknow
     .strict()
     .parse(input);
   const who = await actor(uid);
-  if (!who.staff && !['trash', 'restore'].includes(action)) throw new AppError(403, 'Acțiune indisponibilă pentru client.');
+  if (!who.staff && !['complete', 'trash', 'restore'].includes(action)) throw new AppError(403, 'Acțiune indisponibilă pentru client.');
   return db().transaction(async (tx) => {
     const thread = (
       await tx.select().from(s.supportThreads).where(eq(s.supportThreads.id, id)).for('update')
     )[0];
     if (!thread || (!who.staff && thread.userId !== uid)) throw new AppError(404, 'Conversație inexistentă.');
-    if (who.staff && action === 'complete' && thread.assignedTo && thread.assignedTo !== uid) throw new AppError(409, 'Conversația este preluată de alt coleg.');
+    if (who.role === 'assistant' && ['complete', 'trash'].includes(action) && thread.assignedTo && thread.assignedTo !== uid) throw new AppError(409, 'Conversația este preluată de alt coleg.');
     const expected = {
       complete: 'open',
       trash: 'completed',
       restore: 'trashed',
       reopen: 'completed',
     }[action];
-    if (thread.status !== expected && !(action === 'trash' && !who.staff && thread.status === 'open'))
+    if (thread.status !== expected && !(action === 'trash' && thread.status === 'open'))
       throw new AppError(409, 'Starea conversației s-a schimbat. Reîncarcă lista.');
     const status = {
       complete: 'completed',
@@ -308,7 +308,7 @@ export async function changeSupportThread(uid: string, id: string, input: unknow
           status,
           updatedAt: now,
           completedAt:
-            action === 'complete' ? now : action === 'reopen' ? null : thread.completedAt,
+            action === 'complete' || (action === 'trash' && thread.status === 'open') ? now : action === 'reopen' ? null : thread.completedAt,
           trashedAt: action === 'trash' ? now : null,
         })
         .where(eq(s.supportThreads.id, id))

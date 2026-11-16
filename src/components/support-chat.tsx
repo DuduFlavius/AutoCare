@@ -647,9 +647,10 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                 }}><LogIn size={17}/> {current.assignedTo ? 'Intră în conversație' : 'Preia conversația'}</button>
                 : <button type="button" className="support-session-exit" onClick={() => { setEntered(false); setNotice('Ai ieșit din conversație. Responsabilul rămâne atribuit.'); }}><LogOut size={17}/> Ieși din conversație</button>
               )}
-              {current.status === 'open' && current.assignedTo === selfId && (
+              {current.status === 'open' && (role !== 'assistant' || !current.assignedTo || current.assignedTo === selfId) && (
                 <button type="button" className="support-session-finish" disabled={busy} onClick={() => void change(current, 'complete')}><CheckCheck size={17}/> Finalizează</button>
               )}
+              {current.status === 'open' && (role !== 'assistant' || !current.assignedTo || current.assignedTo === selfId) && <button type="button" className="support-session-delete" disabled={busy || preview} onClick={() => { if (window.confirm(t('Ștergi conversația? Aceasta se închide și se mută în coș, de unde poate fi restaurată.', 'Delete this conversation? It will be closed and moved to trash, where it can be restored.'))) void change(current, 'trash'); }}><Trash2 size={17}/>{t('Șterge','Delete')}</button>}
               {current.status === 'completed' && (
                 <>
                   <button type="button" className="support-session-enter" disabled={busy} onClick={() => void change(current, 'reopen')}><RotateCcw size={17}/> Redeschide</button>
@@ -659,6 +660,19 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               {current.status === 'trashed' && (
                 <button type="button" className="support-session-enter" disabled={busy} onClick={() => void change(current, 'restore')}><RotateCcw size={17}/> Restaurează</button>
               )}
+            </div>
+          </div>
+        )}
+        {!staff && current && (
+          <div className="support-session-bar support-client-session">
+            <div className="support-session-status">
+              <strong>{current.status === 'open' ? t('Conversație activă', 'Active conversation') : current.status === 'completed' ? t('Conversație încheiată', 'Conversation ended') : t('Conversație în coș', 'Conversation in trash')}</strong>
+              <span>{current.status === 'open' ? t('Tu decizi când închei conversația.', 'You choose when to end the conversation.') : t('Istoricul rămâne disponibil aici.', 'Your history remains available here.')}</span>
+            </div>
+            <div className="support-session-actions">
+              {current.status === 'open' && <button type="button" className="support-session-finish" disabled={busy || preview} onClick={() => { if (window.confirm(t('Închei conversația? Mesajele rămân în istoric.', 'End this conversation? Messages stay in your history.'))) void change(current, 'complete'); }}><CheckCheck size={17}/>{t('Încheie', 'End chat')}</button>}
+              {current.status !== 'trashed' && <button type="button" className="support-session-delete" disabled={busy || preview} onClick={() => { if (window.confirm(t('Ștergi conversația? Aceasta se închide și se mută în coș, de unde poate fi restaurată.', 'Delete this conversation? It will be closed and moved to trash, where it can be restored.'))) void change(current, 'trash'); }}><Trash2 size={17}/>{t('Șterge', 'Delete')}</button>}
+              {current.status === 'trashed' && <button type="button" className="support-session-enter" disabled={busy || preview} onClick={() => void change(current, 'restore')}><RotateCcw size={17}/>{t('Restaurează', 'Restore')}</button>}
             </div>
           </div>
         )}
@@ -782,7 +796,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             <div>{[1, 2, 3, 4, 5].map(value => <button type="button" key={value} aria-pressed={detail?.rating === value} disabled={busy || preview} onClick={() => void rateConversation(value)}>{value}</button>)}</div>
           </section>
         )}
-        {!staff && current?.status === 'trashed' && <button type="button" disabled={busy || preview} onClick={() => void change(current, 'restore')}><RotateCcw size={15} /> Restaurează conversația</button>}
         {(staff && !canWrite) || (!staff && status === 'trashed') ? (
           <footer className="support-readonly">
             <ShieldCheck size={16} />
@@ -796,21 +809,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           </footer>
         ) : (
           <form className="support-composer" onSubmit={send}>
-            {!staff && current && (
-              <div className="support-conversation-management">
-                {current.status === 'trashed' ? (
-                  <button type="button" disabled={busy || preview} onClick={() => void change(current, 'restore')}>
-                    <RotateCcw size={15} /> Restaurează conversația
-                  </button>
-                ) : (
-                  <button type="button" disabled={busy || preview} onClick={() => {
-                    if (window.confirm(translateApplicationCopy('Muți conversația în coșul de gunoi? O poți restaura ulterior.',locale==='ro-RO'?'ro':'en'))) void change(current, 'trash');
-                  }}>
-                    <Trash2 size={15} /> Mută conversația în coș
-                  </button>
-                )}
-              </div>
-            )}
             {!staff && detail?.thread.status === 'completed' && (
               <p className="support-composer-hint">
                 Solicitarea anterioară a fost finalizată. Un mesaj nou deschide o conversație nouă.

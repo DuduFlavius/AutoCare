@@ -10,7 +10,8 @@ import MapStage from './map-stage';
 import { nativeMethodMissing, nativeNavigation } from '@/lib/native-tracking';
 import NearbyDrivePlaces from './nearby-drive-places';
 import DriveDestinationSearch from './drive-destination-search';
-import { mapGPSOptions, mapLocationError, useMapLocation } from './use-map-location';
+import { getDevicePosition } from '@/lib/device-location';
+import { mapLocationError, useMapLocation } from './use-map-location';
 import { useApplicationLocale } from './application-locale';
 
 const RoadMap = dynamic(() => import('./road-map'), { ssr: false });
@@ -82,7 +83,7 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
     setLocationError('');
     setFindingLocation(true);
     location.locate();
-    navigator.geolocation.getCurrentPosition(value => {
+    getDevicePosition(value => {
       if (revision !== locationRevision.current) return;
       setFindingLocation(false);
       const next = browserGPSFix(value);
@@ -95,7 +96,7 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
       if (revision !== locationRevision.current) return;
       setFindingLocation(false);
       setLocationError(mapLocationError(failure.code, english));
-    }, mapGPSOptions);
+    });
   }
 
   async function plan(start: GPSFix, end: Coordinate, startGuidance = false) {
