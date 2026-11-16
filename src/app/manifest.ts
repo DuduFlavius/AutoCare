@@ -4,10 +4,15 @@ export default function manifest(): MetadataRoute.Manifest {
     name: process.env.NEXT_PUBLIC_APP_NAME || 'AutoCare Premium',
     short_name: process.env.NEXT_PUBLIC_APP_NAME || 'AutoCare',
     description: 'Garajul tău digital',
+    id: '/cont',
+    scope: '/',
     start_url: '/cont',
+    orientation: 'any',
+    categories: ['utilities', 'productivity'],
+    display_override: ['standalone'],
     display: 'standalone',
-    background_color: '#090d14',
-    theme_color: '#111925',
+    background_color: '#0d1225',
+    theme_color: '#0d1225',
     lang: 'ro',
     shortcuts: [
       { name: 'Garaj', url: '/cont?tab=Garaj' },
@@ -16,7 +21,7 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     icons: [
       { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
     ],
   };
 }
