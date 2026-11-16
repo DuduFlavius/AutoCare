@@ -5,7 +5,7 @@ import {languagePreferenceKey, userLanguage} from '@/lib/user-language';
 import { financeGroup, financeGroups, isFinancialEntry } from '@/lib/finance-overview';
 import { isPlannedService } from '@/lib/planned-service';
 import { localDate } from '@/lib/config';
-import { aiModes, askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, scanAutoDocument } from '@/lib/auto-assistant';
+import { aiModes, askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, scanAutoDocument } from '@/lib/auto-assistant';
 import { findRoadDestinations } from '@/lib/road-geocoding';
 import { loadDrivingRoutes, roadCoordinate } from '@/lib/road-navigation-server';
 import { autoPointCategories } from '@/lib/auto-points';
@@ -159,23 +159,31 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     if (path[0] === 'auto-assistant') {
       if (!await svc.premium(uid)) throw new svc.AppError(403, 'Asistentul AI este disponibil în Premium.');
       if (route === 'auto-assistant/history' && method === 'DELETE') {
-        const { vehicleId } = z.object({ vehicleId: uuid }).parse(await body(req));
-        return json(await clearAutoAssistantHistory(uid, vehicleId));
+        const { vehicleId, turnIds } = z.object({ vehicleId: uuid, turnIds: z.array(uuid).min(1).max(150).optional() }).parse(await body(req));
+        return json(await clearAutoAssistantHistory(uid, vehicleId, turnIds));
+      }
+      if (route === 'auto-assistant/feedback' && method === 'POST') {
+        await rate(uid, 'auto-assistant-feedback', 60);
+        const input = z.object({ vehicleId: uuid, turnId: uuid, feedback: z.union([z.literal(1), z.literal(-1), z.null()]) }).parse(await body(req));
+        return json(await feedbackAutoAssistant(uid, input.vehicleId, input.turnId, input.feedback));
       }
       if (route === 'auto-assistant/history' && method === 'GET')
         return json(await autoAssistantHistory(uid, uuid.parse(new URL(req.url).searchParams.get('vehicleId'))));
       if (route === 'auto-assistant' && method === 'POST') {
-        const { vehicleId, question, language, mode, localFallback, contextTurns } = z.object({
+        const { vehicleId, question, language, mode, localFallback, contextTurns, conversationId, excludeTurnId, contextIds } = z.object({
           vehicleId: uuid,
           question: z.string().trim().min(1).max(600),
           language: z.enum(['ro', 'en']).default('ro'),
           mode: z.enum(aiModes).default('chat'),
           localFallback: z.boolean().default(false),
           contextTurns: z.number().int().min(0).max(4).optional(),
+          conversationId: uuid.optional(),
+          excludeTurnId: uuid.optional(),
+          contextIds: z.array(uuid).max(4).optional(),
         }).parse(await body(req));
         // Keep a short-window abuse guard, but only count successful AI replies toward daily usage.
         await rate(uid, 'auto-assistant-minute-v3', 12);
-        const answer = await askAutoAssistant(uid, vehicleId, question, language, mode, localFallback, contextTurns);
+        const answer = await askAutoAssistant(uid, vehicleId, question, language, mode, localFallback, contextTurns, conversationId, excludeTurnId, contextIds);
         await rate(uid, 'auto-assistant-success-day-v3', 120, 86400000);
         await rate('all', 'ai-provider-success-day-v3', 3000, 86400000);
         return json(answer);
