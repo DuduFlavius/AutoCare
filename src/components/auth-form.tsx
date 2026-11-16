@@ -76,7 +76,7 @@ export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: stri
                 newPassword: password,
                 token: new URLSearchParams(window.location.search).get('token') || '',
               })
-            : await authClient.signIn.email({ email, password, callbackURL: next });
+            : await authClient.signIn.email({ email, password, callbackURL: next, rememberMe: true });
       if (result.error) throw new Error(authErrorMessage(result.error.code, result.error.message));
       if(signup||!forgot&&!reset)publicConversion(signup?'sign_up':'login');
       if (signup) window.location.assign(next);
