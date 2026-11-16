@@ -105,6 +105,7 @@ export const mileageReadings = pgTable('mileage_readings', {
   userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),
   vehicleId: text().notNull(),
   odometer: integer().notNull(),
+  notes: text(),
   source: text().notNull().default('manual'),
   recordedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
