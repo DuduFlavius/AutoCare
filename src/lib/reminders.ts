@@ -96,9 +96,13 @@ export async function sendPushNotification(
   uid: string,
   payload: { id: string; title: string; body: string },
 ) {
-  const nativeSent = await sendNativePush(uid, payload);
+  // A failing Android provider must not prevent delivery to subscribed browsers.
+  let nativeSent = 0;
+  let nativeError: unknown;
+  try { nativeSent = await sendNativePush(uid, payload); } catch (error) { nativeError = error; }
   if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT) {
     if (nativeSent) return 'push-accepted';
+    if (nativeError) throw nativeError;
     throw new Error('PUSH_NOT_CONFIGURED');
   }
   webpush.setVapidDetails(
@@ -107,8 +111,9 @@ export async function sendPushNotification(
     process.env.VAPID_PRIVATE_KEY,
   );
   const list = await db().select().from(s.pushes).where(eq(s.pushes.userId, uid));
-  if (!list.length && !nativeSent) throw new Error('PUSH_NO_SUBSCRIPTION');
+  if (!list.length && !nativeSent) { if(nativeError) throw nativeError; throw new Error('PUSH_NO_SUBSCRIPTION'); }
   let sent = nativeSent;
+  let providerFailed = false;
   for (const p of list) {
     try {
       await webpush.sendNotification(
@@ -120,10 +125,10 @@ export async function sendPushNotification(
     } catch (e) {
       if ([404, 410].includes((e as { statusCode: number }).statusCode))
         await db().delete(s.pushes).where(eq(s.pushes.id, p.id));
-      else throw new Error('PUSH_PROVIDER_ERROR', { cause: e });
+      else providerFailed = true;
     }
   }
-  if (!sent) throw new Error('PUSH_NO_SUBSCRIPTION');
+  if (!sent) throw new Error(providerFailed ? 'PUSH_PROVIDER_ERROR' : 'PUSH_NO_SUBSCRIPTION');
   return 'push-accepted';
 }
 export async function deliverReminders(now = new Date(), transport: Transport = realTransport) {

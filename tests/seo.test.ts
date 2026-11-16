@@ -21,7 +21,9 @@ test('SEO sitemap contains canonical public pages and image URLs without private
   }
   assert.ok(entries[0].images?.[0].endsWith('.png'));
   const rules = robots().rules;
-  assert.ok(!Array.isArray(rules) && rules.allow === '/');
+  assert.ok(Array.isArray(rules));
+  for(const rule of rules){assert.equal(rule.allow,'/');assert.ok((rule.disallow as string[]).includes('/api/'));assert.ok((rule.disallow as string[]).includes('/cont$'));}
+  assert.ok(rules.some(rule=>Array.isArray(rule.userAgent)&&rule.userAgent.includes('OAI-SearchBot')));
 });
 test('Public metadata has matching canonical, Open Graph URL and real absolute share image', () => {
   const meta = publicMetadata('Documente', 'Organizare documente', '/documente-auto');
@@ -92,19 +94,19 @@ test('Analytics rejects placeholder IDs and unknown events without exposing user
 });
 
 test('Robots keeps account URLs private without accidentally blocking the public contact page',()=>{
- const rule=robots().rules;assert.ok(!Array.isArray(rule));
+ const rules=robots().rules;assert.ok(Array.isArray(rules));for(const rule of rules){
  const values=Array.isArray(rule.disallow)?rule.disallow:[rule.disallow];
  assert.ok(values.includes('/cont$'));assert.ok(values.includes('/cont?'));assert.ok(!values.includes('/cont'));
- assert.ok(indexableSlugs.includes('contact'));
+ assert.ok(indexableSlugs.includes('contact'));}
 });
 
 test('Robots allows every canonical public sitemap URL and still blocks private routes and queries',()=>{
- const rule=robots().rules;assert.ok(!Array.isArray(rule));const patterns=Array.isArray(rule.disallow)?rule.disallow:[rule.disallow];
+ const rules=robots().rules;assert.ok(Array.isArray(rules));for(const rule of rules){const patterns=Array.isArray(rule.disallow)?rule.disallow:[rule.disallow];
  const blocked=(path:string)=>patterns.some(pattern=>{
   if(!pattern)return false;const end=pattern.endsWith('$');const body=end?pattern.slice(0,-1):pattern;
   const escaped=body.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('^'+escaped+(end?'$':'')).test(path);
  });
  for(const entry of sitemap())assert.equal(blocked(new URL(entry.url).pathname),false,entry.url);
  for(const path of ['/cont','/cont?tab=Documente','/admin','/admin?tab=users','/dosar/private-token','/api/v1/files/private','/en/sign-in?next=private'])assert.equal(blocked(path),true,path);
- assert.equal(blocked('/administrarea-masinii'),false);assert.equal(blocked('/contact'),false);
+ assert.equal(blocked('/administrarea-masinii'),false);assert.equal(blocked('/contact'),false);}
 });
