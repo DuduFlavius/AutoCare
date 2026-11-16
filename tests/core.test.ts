@@ -943,6 +943,10 @@ test('SmartDrive: manual readings persist, reject regressions, and isolate owner
   const saved = await r.json();
   assert.equal(saved.reading.source, 'manual');
   assert.equal(saved.vehicle.odometer, start + 100);
+  const future=await call('smartdrive/vehicles/' + id + '/readings','POST',{odometer:start+101,date:'2099-01-01'});
+  assert.equal(future.status,400,'future readings rejected');
+  const invalidDate=await call('smartdrive/vehicles/' + id + '/readings','POST',{odometer:start+101,date:'2026-02-30'});
+  assert.equal(invalidDate.status,400,'invalid calendar dates rejected');
   r = await call('smartdrive/vehicles/' + id + '/readings', 'POST', { odometer: start + 100 });
   assert.equal(r.status, 201, 'equal odometer is an allowed repeated reading');
   r = await call('smartdrive/vehicles/' + id + '/readings', 'POST', { odometer: start });
@@ -952,7 +956,7 @@ test('SmartDrive: manual readings persist, reject regressions, and isolate owner
   r = await call('smartdrive/vehicles/' + id + '/readings');
   assert.equal(r.status, 200);
   const rows = await r.json();
-  assert.ok(rows.length >= 2);
+  assert.equal(rows.filter((row: {odometer:number})=>row.odometer===start+100).length, 1, 'same-day retries must not duplicate readings');
   assert.ok(
     rows.every(
       (x: { userId: string; vehicleId: string }) => x.userId === uid && x.vehicleId === id,
