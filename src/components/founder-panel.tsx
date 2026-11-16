@@ -20,6 +20,7 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import SupportChat from './support-chat';
+import './founder-responsive-layout.css';
 import BillingCatalogAudit from './billing-catalog-audit';
 import SearchConsoleSettings from './search-console-settings';
 import GoogleMailSettings from './google-mail-settings';
