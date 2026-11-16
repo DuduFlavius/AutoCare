@@ -23,6 +23,7 @@ export default function DailyMileageInput({ usage }: { usage: ReturnType<typeof 
   return <details className="ac-daily-usage" data-workspace-ui>
     <summary>{usage.manualDailyKm !== null ? `${usage.manualDailyKm} ${en ? 'km/day · Edit average' : 'km/zi · Modifică media'}` : (en ? 'Set daily mileage' : 'Setează kilometrii pe zi')}</summary>
     <span className="ac-daily-usage-body">
+    {usage.projection&&usage.projection.addedKm>0&&<p>{en?'Declared estimate: ':'Estimare din declarația zilnică: '}<strong>{usage.projection.projectedKm.toLocaleString(en?'en-GB':'ro-RO')} km</strong> · +{usage.projection.addedKm.toLocaleString()} km / {usage.projection.days} {en?'days':'zile'}. {en?'Not confirmed GPS mileage. A new confirmed reading resets the estimate.':'Nu este kilometraj GPS confirmat. O citire confirmată nouă resetează estimarea.'}</p>}
     <label><span>{en ? 'Your daily average · km/day' : 'Media ta zilnică · km/zi'}</span>
       <input type="number" inputMode="decimal" min="1" max="2000" step="any" value={value}
         placeholder={usage.confirmed?.dailyKm?.toFixed(1) ?? (en ? 'e.g. 70' : 'ex. 70')}
