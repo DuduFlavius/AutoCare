@@ -46,6 +46,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, avail
       frame = 0;
       const viewport = window.visualViewport;
       const bottom = (viewport?.height ?? window.innerHeight) + (viewport?.offsetTop ?? 0);
+      element.style.setProperty('--ai-viewport-top', (viewport?.offsetTop ?? 0) + 'px');
       const navigation = document.querySelector<HTMLElement>('.autocare-mobile-dock');
       const navRect = navigation?.getBoundingClientRect();
       const reserved = navRect && navRect.height && navRect.top < bottom && getComputedStyle(navigation!).position === 'fixed' ? bottom - navRect.top : 0;
@@ -220,7 +221,8 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved }:
           <div className="ac-ai-brand"><span className="ac-ai-brand-icon"><Sparkles size={21}/></span><div><h3>AutoCare <span>AI</span></h3><span className="ac-ai-online" data-available={available}><i/>{available ? t('Disponibil', 'Available') : t('Indisponibil', 'Unavailable')}</span></div></div>
           <div className="ac-ai-header-actions">
             <button type="button" className="ac-ai-history-trigger" title={t('Istoric conversații', 'Conversation history')} aria-label={t('Istoric conversații', 'Conversation history')} aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)}><History size={19}/></button>
-            <button className="ac-ai-new-chat" type="button" aria-label={t('Conversație nouă', 'New chat')} disabled={pending || loading} onClick={newConversation}><MessageSquareText size={17}/><span>{t('Conversație nouă', 'New chat')}</span></button>
+            <button className="ac-ai-new-chat" type="button" aria-label={t('Conversație nouă', 'New chat')} disabled={pending || loading} onClick={newConversation}><MessageSquareText size={17}/><span>{t('Chat nou', 'New chat')}</span></button>
+            <a className="ac-ai-close" href="/cont?tab=Dashboard" aria-label={t('Închide chatul', 'Close chat')}><X size={18}/></a>
             <details className="ac-ai-actions-menu"><summary aria-label={t('Opțiuni conversație', 'Conversation options')}><MoreHorizontal size={21}/></summary><div>
               <button type="button" onClick={event => { event.currentTarget.closest('details')?.removeAttribute('open'); setToolsOpen(open => !open); }}><FileScan size={17}/>{t('Documente și rapoarte', 'Documents and reports')}</button>
               <button type="button" disabled={pending || loading || !visibleTurns.length} onClick={event => { event.currentTarget.closest('details')?.removeAttribute('open'); removeConversation(); }}><Trash2 size={17}/>{t('Șterge conversația', 'Delete conversation')}</button>
@@ -250,10 +252,10 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved }:
         <form className="ac-ai-composer" onSubmit={event => { event.preventDefault(); ask(question); }}>
           <input ref={fileInput} type="file" className="ac-ai-file-input" accept="application/pdf,image/png,image/jpeg" aria-label={t('Scanează un document', 'Scan a document')} onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) extract(file); }}/>
           <button className="ac-ai-attach" type="button" title={t('Scanează PDF sau imagine · maximum 2 MB', 'Scan PDF or image · maximum 2 MB')} aria-label={t('Scanează un document sau o imagine', 'Scan a document or image')} disabled={preview || pending || !available} onClick={() => fileInput.current?.click()}><Paperclip size={19}/></button>
-          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Întreabă-mă despre mașina ta…', 'Ask me about your car…')} rows={1} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); ask(question); } }} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending || !available}/>
+          <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Scrie un mesaj…', 'Write a message…')} rows={1} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); ask(question); } }} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending || !available}/>
           <button className="ac-ai-send" type="submit" aria-label={t('Trimite mesajul', 'Send message')} disabled={preview || pending || loading || !available || !question.trim()}><ArrowUp size={21}/></button>
         </form>
-        <div className="ac-ai-composer-hint"><span>{t('Enter trimite · Shift + Enter rând nou', 'Enter to send · Shift + Enter for a new line')}</span><span>{question.length}/600</span></div>
+
         <details className="ac-ai-disclosure"><summary><ShieldCheck size={13}/>{t('Date și recomandări AI', 'AI data and advice')}<ChevronDown size={13}/></summary><p>{t('Întrebarea, istoricul recent și datele relevante ale mașinii sunt trimise furnizorului AI. Fișierele sunt folosite pentru extragerea datelor, nu ca atașamente în conversație. Recomandările nu înlocuiesc un diagnostic în service.', 'Your question, recent history and relevant vehicle data are sent to the AI provider. Files are used for data extraction, not as conversation attachments. Advice does not replace a professional inspection.')}</p></details>
       </section>
       </div>
