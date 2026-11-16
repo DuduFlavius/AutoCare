@@ -81,6 +81,7 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
     }
     setLocationError('');
     setFindingLocation(true);
+    location.locate();
     navigator.geolocation.getCurrentPosition(value => {
       if (revision !== locationRevision.current) return;
       setFindingLocation(false);

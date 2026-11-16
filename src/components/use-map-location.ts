@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { watchBrowserLocation } from '@/lib/browser-location';
 import { browserGPSFix, type GPSFix } from '@/lib/gps-tracking';
 
 export const mapGPSOptions: PositionOptions = {
@@ -13,9 +14,12 @@ export function mapLocationError(code: number, english: boolean) {
   if (code === 1) return english
     ? 'Allow location for AutoCare in your device or browser settings, then tap My location.'
     : 'Permite localizarea precisă pentru AutoCare din setările telefonului și ale browserului, apoi apasă Poziția mea.';
+  if (code === 3) return english
+    ? 'Still searching for a precise position. Move outdoors; GPS will retry automatically.'
+    : 'Se caută o poziție precisă. Ieși într-un loc deschis; GPS-ul reîncearcă automat.';
   return english
-    ? 'GPS position unavailable. Check that location is on and try again.'
-    : 'Poziția GPS nu este disponibilă. Verifică dacă localizarea este pornită și încearcă din nou.';
+    ? 'GPS signal temporarily unavailable. Enable precise location; retrying automatically.'
+    : 'Semnal GPS temporar indisponibil. Activează localizarea precisă; se reîncearcă automat.';
 }
 
 export function useMapLocation(enabled: boolean, english: boolean) {
@@ -50,26 +54,26 @@ export function useMapLocation(enabled: boolean, english: boolean) {
     if (!shouldWatch || !navigator.geolocation) return;
     let live = true;
     setWaiting(true);
-    const watch = navigator.geolocation.watchPosition(value => {
+    const stop = watchBrowserLocation(value => {
       if (!live) return;
       const fix = browserGPSFix(value);
-      if (!fix) return;
+      if (!fix || fix.timestamp > Date.now() + 5000 || Date.now() - fix.timestamp > 15000) return;
       setPosition(previous => !previous || Date.now()-previous.timestamp>10000 || (fix.timestamp>=previous.timestamp && fix.accuracy<=previous.accuracy*1.3) ? fix : previous);
       setWaiting(false);
       setError('');
     }, failure => {
       if (!live) return;
-      setWaiting(false);
+      setWaiting(failure.code !== 1);
       setError(mapLocationError(failure.code, english));
       if (failure.code === 1) {
         setGranted(false);
         setRequested(false);
         setPosition(null);
       }
-    }, mapGPSOptions);
+    });
     return () => {
       live = false;
-      navigator.geolocation.clearWatch(watch);
+      stop();
     };
   }, [shouldWatch, attempt, english]);
 

@@ -8,6 +8,7 @@ import { MapPin, Play, Square, Route } from 'lucide-react';
 
 import {hasNativeTracking,nativeTracking,type NativeTrip} from '@/lib/native-tracking';
 import MapStage from './map-stage';
+import { watchBrowserLocation } from '@/lib/browser-location';
 import { gpsSignal, gpsTelemetry } from '@/lib/gps-status';
 import './smartdrive-premium.css';
 import { storeTripRoutes } from '@/lib/local-trip-routes';
@@ -53,7 +54,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const [trackingSeconds, setTrackingSeconds] = useState(0);
   const [, setClock] = useState('');
   const [startedAt, setStartedAt] = useState<number | null>(null);
-  const watcher = useRef<number | null>(null);
+  const watcher = useRef<(() => void) | null>(null);
   const previous = useRef<Sample | null>(null);
   const started = useRef<number | null>(null);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -110,7 +111,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const stop = () => {
     if(nativeMode.current){void nativeTracking.stop(ownerId).then(value=>{if(value)applyNative(value);}).catch(e=>setError(e instanceof Error?e.message:'Nu s-a putut opri GPS-ul.'));return;}
 
-    if (watcher.current !== null && typeof navigator !== 'undefined' && 'geolocation' in navigator) navigator.geolocation.clearWatch(watcher.current);
+    if (watcher.current !== null && typeof navigator !== 'undefined' && 'geolocation' in navigator) watcher.current();
     watcher.current = null;
     if (tick.current) clearInterval(tick.current);
     tick.current = null;
@@ -126,7 +127,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [active, native]);
-  useEffect(() => () => { if (watcher.current !== null) navigator.geolocation.clearWatch(watcher.current); if (tick.current) clearInterval(tick.current); }, []);
+  useEffect(() => () => { if (watcher.current !== null) watcher.current(); if (tick.current) clearInterval(tick.current); }, []);
   const start = () => {
     if(hasNativeTracking()&&!preview){
       if(nativeStarting.current || saveInFlight.current)return;
@@ -151,10 +152,11 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     setFinalizeOnStop(false);
     setSignal('requesting');lastFix.current=0;setError('');setNotice('');previous.current=null;
     tick.current = setInterval(() => { setTrackingSeconds(started.current ? Math.floor((Date.now() - started.current) / 1000) : 0); setClock(new Date().toLocaleTimeString(locale)); }, 1000);
-    watcher.current = navigator.geolocation.watchPosition(
+    watcher.current = watchBrowserLocation(
       value => {
         const next = browserGPSFix(value);
         if (!next || next.timestamp > Date.now() + 5000 || Date.now() - next.timestamp > 15000) return;
+        setError('');
         setMapPosition(previous => latestGPSFix(previous, next));
         if (next.accuracy > 50) { setSignal('waiting'); return; }
         lastFix.current=Date.now(); setSignal('ok');
@@ -167,7 +169,6 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
 
       },
       e => { setSignal('lost'); setError(e.code === 1 ? t("Permisiune refuzată. Permite locația din setările site-ului și reîncarcă pagina.", "Location permission denied. Allow location in your browser or device settings, then try again.") : t("Semnal GPS temporar indisponibil. Urmărirea rămâne pornită și încearcă din nou.", "GPS is temporarily unavailable. Tracking will retry automatically.")); if (e.code === 1) stop(); },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 },
     );
     setActive(true);
   };
