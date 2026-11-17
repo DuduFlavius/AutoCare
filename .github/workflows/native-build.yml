@@ -71,8 +71,13 @@ jobs:
         env:
           AUTOCARE_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.AUTOCARE_GOOGLE_SERVICES_JSON_BASE64 }}
         run: |
-          test -n "$AUTOCARE_GOOGLE_SERVICES_JSON_BASE64" || { echo 'Missing Firebase Android app configuration'; exit 1; }
-          printf '%s' "$AUTOCARE_GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > mobile/android/app/google-services.json
+          set -euo pipefail
+          if [ -n "$AUTOCARE_GOOGLE_SERVICES_JSON_BASE64" ]; then
+            printf '%s' "$AUTOCARE_GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > mobile/android/app/google-services.json
+          else
+            cp mobile/firebase/google-services.production.json mobile/android/app/google-services.json
+          fi
+          node scripts/verify-android-firebase.mjs
       - name: Build signed Google Play AAB
         env:
           AUTOCARE_UPLOAD_KEYSTORE_BASE64: ${{ secrets.AUTOCARE_UPLOAD_KEYSTORE_BASE64 }}
