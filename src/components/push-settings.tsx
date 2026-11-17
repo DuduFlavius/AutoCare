@@ -1,5 +1,5 @@
 'use client';
-import {hasNativePush} from '@/lib/native-push-client';
+import {hasNativePush,nativePushPermission} from '@/lib/native-push-client';
 import { useEffect, useState } from 'react';
 import { BellRing, Send, ShieldCheck } from 'lucide-react';
 export default function PushSettings({
@@ -21,7 +21,14 @@ export default function PushSettings({
     [busy, setBusy] = useState(false),
     [needsInstall, setNeedsInstall] = useState(false);
   useEffect(() => {
-    if(hasNativePush()){setNative(true);setPermission('default');return;}
+    if(hasNativePush()){
+      setNative(true);
+      let disposed = false;
+      const update = () => { void nativePushPermission().then(value => { if (!disposed) setPermission(value); }).catch(() => { if (!disposed) setPermission('default'); }); };
+      update();
+      document.addEventListener('visibilitychange', update);
+      return () => { disposed = true; document.removeEventListener('visibilitychange', update); };
+    }
     const ios =
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -53,11 +60,14 @@ export default function PushSettings({
     } catch (error) { setFeedback(error instanceof Error ? error.message : 'Testul local nu a reușit.'); }
   }
   async function activate() {
+    setFeedback('');
     setBusy(true);
     try {
       if (!configured && !native) { await localTest(); return; }
       await onActivate();
-      if ('Notification' in window) setPermission(Notification.permission);
+      if (native) setPermission(await nativePushPermission());
+      else if ('Notification' in window) setPermission(Notification.permission);
+      setFeedback('Notificările au fost activate pe acest dispozitiv.');
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : 'Activarea notificărilor nu a reușit. Încearcă din nou.');
     } finally {
@@ -72,16 +82,15 @@ export default function PushSettings({
         </span>
         <div>
           <p className="eyebrow">ALERTE PE DISPOZITIV</p>
-          <h3>Notificări, ca într-o aplicație</h3>
+          <h3>Notificările tale</h3>
         </div>
       </div>
       <p>
-        Primește bannere pe telefon sau calculator pentru termenele tale. Browserul și sistemul
-        trebuie să permită notificările.
+        {native ? 'Primește alerte pentru termenele mașinii și mesaje importante. Apasă „Activează notificările” și acceptă permisiunea Android.' : 'Primește bannere pe telefon sau calculator pentru termenele tale. Permite notificările pe acest dispozitiv.'}
       </p>
       <div className="push-state" role="status">
         <ShieldCheck size={16} />
-        {native ? 'Notificări Android: activează-le pentru mesaje și termene importante.' : needsInstall
+        {native ? (permission === 'granted' ? 'Notificările sunt permise pe acest telefon.' : permission === 'denied' ? 'Notificările sunt blocate. Le poți permite din Setări Android → Aplicații → AutoCare → Notificări.' : 'Activează notificările și acceptă permisiunea Android.') : needsInstall
           ? 'Pe iPhone/iPad: deschide în Safari → Partajează → Adaugă pe ecranul principal. Deschide apoi AutoCare din pictogramă și activează notificările. Necesită iOS/iPadOS 16.4 sau mai nou.'
           : permission === 'granted'
             ? 'Permisiune acordată pe acest dispozitiv'
@@ -105,7 +114,7 @@ export default function PushSettings({
           onClick={() => void activate()}
         >
           <BellRing size={16} />
-          {busy ? 'Se activează…' : configured ? 'Activează notificările' : 'Permite notificările pe dispozitiv'}
+          {busy ? 'Se activează…' : native || configured ? 'Activează notificările' : 'Permite notificările pe dispozitiv'}
         </button>
         <button
           disabled={preview || needsInstall || busy || permission === 'unsupported'}
@@ -126,11 +135,11 @@ export default function PushSettings({
         </button>
       </div>
       {feedback && <p className="push-state" role="status">{feedback}</p>}
-      <p className="micro">
+      {!native && <p className="micro">
         Pe Android folosește Chrome. Pe PC permite notificările pentru acest site și verifică
         setările de notificări ale sistemului, inclusiv modul Nu deranjați. Dacă permisiunea este
         blocată, schimb-o din setările site-ului și reîncarcă pagina.
-      </p>
+      </p>}
       {!configured && !native && <p className="small muted">Web Push în fundal nu este încă configurat pe server. Poți testa notificările locale pe dispozitiv, dar nu se vor trimite automat când aplicația este închisă.</p>}
       {!emailConfigured && (
         <p className="micro">

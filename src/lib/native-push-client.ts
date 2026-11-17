@@ -13,14 +13,28 @@ interface PushPlugin {
 const plugin = registerPlugin<PushPlugin>('PushNotifications');
 export function hasNativePush() { return Capacitor.getPlatform()==='android' && Capacitor.isPluginAvailable('PushNotifications'); }
 let activeToken: string | null = null;
+let activation: Promise<void> | null = null;
+export async function nativePushPermission() {
+  return hasNativePush() ? (await plugin.checkPermissions()).receive : 'unsupported';
+}
 async function saveToken(token:string, method='POST') {
   const response=await fetch('/api/v1/push/native',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
   if(!response.ok)throw Error('Nu s-a putut conecta dispozitivul la notificări.');
 }
 export async function activateNativePush(requestPermission=true) {
+  if (activation) {
+    try { await activation; return; }
+    catch (error) { if (!requestPermission) throw error; }
+  }
+  const operation = registerNativePush(requestPermission);
+  activation = operation;
+  try { await operation; }
+  finally { if (activation === operation) activation = null; }
+}
+async function registerNativePush(requestPermission: boolean) {
   if(!hasNativePush()) throw Error('Actualizează aplicația pentru notificări Android.');
   const config=await fetch('/api/v1/push/native',{cache:'no-store'});
-  if(!config.ok || !(await config.json()).configured)throw Error('Serviciul de notificări Android nu este încă configurat.');
+  if(!config.ok || !(await config.json()).configured)throw Error('Notificările nu pot fi activate momentan. Încearcă din nou în câteva momente.');
   let permission=await plugin.checkPermissions();
   if(permission.receive!=='granted' && requestPermission)permission=await plugin.requestPermissions();
   if(permission.receive!=='granted')throw Error('Permite notificările AutoCare din setările telefonului.');
