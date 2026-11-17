@@ -10,11 +10,11 @@ export function PremiumDateInput({type='date',value,defaultValue,onChange,...pro
  const [local,setLocal]=useState(String(defaultValue??'')),[open,setOpen]=useState(false),[view,setView]=useState<'days'|'months'|'years'>(type==='month'?'months':'days');
  const current=String(value??local),input=useRef<HTMLInputElement>(null),panel=useRef<HTMLDivElement>(null),trigger=useRef<HTMLButtonElement>(null);
  const initial=()=>{const parsed=/^\d{4}-\d{2}/.test(current)?new Date(current.slice(0,7)+'-01T12:00:00Z'):new Date();return Number.isFinite(parsed.getTime())?parsed:new Date();};
- const [month,setMonth]=useState(initial),[position,setPosition]=useState({top:80,left:8});
+ const [month,setMonth]=useState(initial),[position,setPosition]=useState({top:80,left:8,maxHeight:480});
  const year=month.getUTCFullYear(),monthIndex=month.getUTCMonth(),locale=en?'en-GB':'ro-RO';
  useEffect(()=>{
   if(!open)return;
-  const place=()=>{const r=input.current!.getBoundingClientRect(),height=window.visualViewport?.height??window.innerHeight,width=Math.min(336,window.innerWidth-16);setPosition({top:Math.max(8,Math.min(r.bottom+6,height-405)),left:Math.max(8,Math.min(r.left,window.innerWidth-width-8))});};
+  const place=()=>{const r=input.current!.getBoundingClientRect(),height=window.visualViewport?.height??window.innerHeight,width=Math.min(336,window.innerWidth-16);const panelHeight=panel.current?.getBoundingClientRect().height??405;setPosition({top:Math.max(8,Math.min(r.bottom+6,height-panelHeight-8)),left:Math.max(8,Math.min(r.left,window.innerWidth-width-8)),maxHeight:Math.max(150,height-16)});};
   place();const frame=requestAnimationFrame(()=>panel.current?.querySelector<HTMLButtonElement>('button[aria-pressed=true],button')?.focus());
   const close=(e:PointerEvent)=>{if(!panel.current?.contains(e.target as Node)&&!trigger.current?.contains(e.target as Node))setOpen(false);};
   document.addEventListener('pointerdown',close,true);window.addEventListener('resize',place);window.addEventListener('scroll',place,true);
