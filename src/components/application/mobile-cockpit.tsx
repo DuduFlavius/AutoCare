@@ -9,8 +9,8 @@ import { localDate } from '@/lib/config';
 
 type Data=Awaited<ReturnType<typeof dashboard>>;
 type RecordRow=Data['records'][number];
-export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onVehicle,onCreate,onRecord,currency}:{
- data:Data;selectedVehicle:string;onSelectVehicle:(id:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;
+export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onDrill=(tab)=>navigate(tab),onVehicle,onCreate,onRecord,currency}:{
+ data:Data;selectedVehicle:string;onSelectVehicle:(id:string)=>void;onDrill?:(tab:string,vehicleId:string,ids:string[],label:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;
  onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:RecordRow)=>void;currency:'RON'|'EUR';
 }){
  const en=useApplicationLanguage()==='en',locale=useApplicationLocale();
@@ -37,9 +37,9 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onV
    <div className="ac-m-overview">{[
     {Icon:Wallet,label:t('Costuri totale','Total costs'),value:finance.yearKnown?money(finance.yearBani):'—',note:t('Anul curent','Current year'),tab:'Cheltuieli'},
     {Icon:Files,label:t('Documente','Documents'),value:String(docs.total),note:t('în dosarul mașinii','in your vehicle folder'),tab:'Documente'},
-    {Icon:CalendarDays,label:t('Expiră în 30 zile','Expires in 30 days'),value:String(docs.soon+docs.expired),note:docs.expired?t('inclusiv expirate','including expired'):t('de verificat','to review'),tab:'Documente'},
+    {Icon:CalendarDays,label:t('Expiră în 30 zile','Expires in 30 days'),value:String(docs.soon),note:t('de verificat','to review'),tab:'Documente'},
     {Icon:Bell,label:t('Alerte','Alerts'),value:String(unread),note:t('necitite','unread'),tab:'Notificări'},
-   ].map(({Icon,label,value,note,tab})=><button key={tab+label} onClick={()=>navigate(tab)}><Icon size={23}/><span>{label}</span><strong>{value}</strong><small>{note}</small></button>)}</div>
+   ].map(({Icon,label,value,note,tab})=><button key={tab+label} onClick={()=>onDrill(tab,car?.id??'',rows.filter(r=>tab!=='Documente'||(r.kind==='document'&&(Icon!==CalendarDays||(r.status.days!=null&&r.status.days>=0&&r.status.days<=30)))).map(r=>r.id),label)}><Icon size={23}/><span>{label}</span><strong>{value}</strong><small>{note}</small></button>)}</div>
    <button className="ac-m-ai-entry" onClick={()=>navigate(data.premium?'AutoCare AI':'Premium')}><span className="ac-m-icon"><Sparkles size={23}/></span><span><strong>AutoCare AI <small>Premium</small></strong><small>{t('Ajutor pentru mașina ta','Help for your vehicle')}</small></span><ChevronRight size={19}/></button>
    <section className="ac-m-recent"><header><h2>{t('Cheltuieli recente','Recent expenses')}</h2><button onClick={()=>navigate('Cheltuieli')}>{t('Vezi toate','View all')}<ChevronRight size={15}/></button></header>{recent.length?<ul>{recent.map(row=><li key={row.id}><button onClick={()=>onRecord(row)}><span className="ac-m-icon"><Wrench size={22}/></span><span><strong data-user-content>{row.title}</strong><small>{row.date&&date(row.date)}</small></span><b>{row.amountKnown===false?'—':money(row.amountBani)}</b></button></li>)}</ul>:<p>{t('Cheltuielile înregistrate vor apărea aici.','Your recorded expenses will appear here.')}</p>}</section>
   </>}

@@ -550,6 +550,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       setBusy(false);
     }
   }
+  const [drill,setDrill]=useState<{ids:string[];label:string}|null>(null);
   const workspaceViews = useRef(new Map<string,{filter:string;query:string;recordState:string;categoryFilter:string;period:string;showArchived:boolean;scroll:number}>());
   function navigate(t: string, historyMode: 'push' | 'none' = 'push', vehicle: string | null = null) {
     t=normalizeWorkspaceTab(t);
@@ -562,6 +563,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     setLauncherOpen(false);
     setModal(null);
     setRecordDirty(false);
+    setDrill(null);
     setTab(t);
     setVehicleDetail(t === 'Garaj' || t === 'AutoCare AI' ? vehicle : null);
     if (t === 'Plan întreținere') setOpenedSmartDrive(true);
@@ -641,7 +643,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
   const visible =
     data?.records.filter(
       (r) =>
-        (showArchived || recordState === 'archived' || !r.cancelled) &&
+        (!drill || drill.ids.includes(r.id)) && (showArchived || recordState === 'archived' || !r.cancelled) &&
         (!filter || r.vehicleId === filter),
     ) || [];
   const nowDate = new Date().toLocaleDateString('en-CA', {
@@ -669,7 +671,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     to: period === 'all' ? undefined : nowDate,
   };
   const rows = filterRecords(
-    (data?.records || []).filter(row => tab !== 'Întreținere' || !isPlannedService(row, nowDate)),
+    (data?.records || []).filter(row => (!drill || drill.ids.includes(row.id)) && (tab !== 'Întreținere' || !isPlannedService(row, nowDate))),
     exportFilters,
     new Date(),
     data?.profile.timezone || 'Europe/Bucharest',
@@ -1009,7 +1011,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               ) : null}
             </WorkspaceModuleHeader>}
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
-            {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
+            {drill && <div className="card between"><strong>{drill.label}</strong><button type="button" onClick={()=>setDrill(null)}>{language==='en'?'Show all':'Vezi toate'}</button></div>}
+            {tab === 'Dashboard' && <ApplicationHome onDrill={(next,vehicleId,ids,label)=>{if(!navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
             {tab === 'RCA & Rovinietă' && <RenewalCenter key={data.profile.offsets.join(',')+String(data.profile.emailEnabled)+String(data.profile.pushEnabled)} data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} onDocument={(category,record)=>{setRenewalCategory(category);setModal({kind:'document',record});}} onNavigate={next=>{if(navigate(next)&&next==='Setări')setSettingsPanel('alerts');}} onPreferences={async profile=>{await act(()=>api('profile','PUT',{timezone:profile.timezone,emailEnabled:profile.emailEnabled,pushEnabled:profile.pushEnabled,afterExpiry:profile.afterExpiry,offsets:profile.offsets,hour:profile.hour}));}} busy={busy} preview={!!previewData}/>}
             {tab === 'AutoCare AI' && <AutoAiWorkspace
               vehicles={activeCars}
@@ -1081,7 +1084,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               onRestore={record => { void act(() => api('records/' + record.id + '/restore', 'POST')); }}
               onAi={id => navigate('AutoCare AI', 'push', id)} onRefresh={refresh}
             />}
-            {tab === 'Documente' && <DocumentVault onRenewals={()=>navigate('RCA & Rovinietă')} data={data} vehicleId={filter} onVehicle={setFilter} preview={!!previewData} busy={busy}
+            {tab === 'Documente' && <DocumentVault onRenewals={()=>navigate('RCA & Rovinietă')} data={drill?{...data,records:data.records.filter(r=>drill.ids.includes(r.id))}:data} vehicleId={filter} onVehicle={setFilter} preview={!!previewData} busy={busy}
               onEdit={record=>setModal({kind:'document',record})} onCreate={()=>setModal(activeCars.length?{kind:'document'}:{kind:'vehicle'})}
               onArchive={record=>{if(window.confirm(language==='en'?'Archive this document?':'Arhivezi acest document?'))void act(()=>api('records/'+record.id,'DELETE'));}}
               onRestore={record=>{void act(()=>api('records/'+record.id+'/restore','POST'));}}
@@ -1600,7 +1603,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                     {visible
                       .filter(
                         (r) =>
-                          calendarRecordDate(r, nowDate)?.startsWith(calendarMonth) &&
+                          (drill ? !!calendarRecordDate(r, nowDate) : calendarRecordDate(r, nowDate)?.startsWith(calendarMonth)) &&
                           activeCars.some((v) => v.id === r.vehicleId),
                       )
                       .sort((a, b) => calendarRecordDate(a, nowDate)!.localeCompare(calendarRecordDate(b, nowDate)!))
@@ -1625,7 +1628,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                             : <Status record={r} />}
                         </button>
                       ))}
-                    {!visible.some((r) => calendarRecordDate(r, nowDate)?.startsWith(calendarMonth) && activeCars.some(v => v.id === r.vehicleId)) && (
+                    {!visible.some((r) => (drill ? !!calendarRecordDate(r, nowDate) : calendarRecordDate(r, nowDate)?.startsWith(calendarMonth)) && activeCars.some(v => v.id === r.vehicleId)) && (
                       <Empty text="Nu ai termene înregistrate în luna selectată." />
                     )}
                   </div>
