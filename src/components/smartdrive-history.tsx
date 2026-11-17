@@ -1,4 +1,5 @@
 'use client';
+import {PremiumDateInput} from './premium-date-input';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -119,7 +120,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
     </section>
     <div className="ac-trip-history-cockpit">
       <div className="ac-trip-history-list">
-        <label>{t('Data călătoriei', 'Trip date')} <input type="date" value={tripDate} onChange={event => { setTripDate(event.target.value); setPage(0); }} /></label>
+        <label>{t('Data călătoriei', 'Trip date')} <PremiumDateInput type="date" value={tripDate} onChange={event => { setTripDate(event.target.value); setPage(0); }} /></label>
         {tripDate && <button type="button" onClick={() => { setTripDate(''); setPage(0); }}>{t('Toate datele', 'All dates')}</button>}
         {filteredTrips.map(trip => (
           <button type="button" key={trip.id} aria-pressed={selectedTrip?.id === trip.id} onClick={() => setSelectedTripId(trip.id)}>

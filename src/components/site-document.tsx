@@ -1,3 +1,4 @@
+import './document-controls.css';
 import { startupImages } from '@/lib/pwa-launch';
 import AutoUpdate from '@/components/auto-update';
 import type { Metadata, Viewport } from 'next';

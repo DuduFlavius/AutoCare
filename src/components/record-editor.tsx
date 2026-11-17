@@ -1,4 +1,6 @@
 'use client';
+import {PremiumDateInput} from './premium-date-input';
+import {PremiumAttachment} from './premium-attachment';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import { useRef, useState, type FormEvent } from 'react';
 import OperationAlerts from './operation-alerts';
@@ -278,7 +280,7 @@ export default function RecordEditor({
               : kind === 'expense'
                 ? 'Data cheltuielii'
                 : plannedWork ? (en ? 'Scheduled work date' : 'Data planificată') : 'Data intervenției'}
-            <input
+            <PremiumDateInput
               type="date"
               name="date"
               required={kind !== 'document'}
@@ -297,7 +299,7 @@ export default function RecordEditor({
                   ? 'RCA expiry date · required'
                   : 'Data expirării RCA · obligatorie'
                 : 'Data expirării · dacă este cazul'}
-              <input
+              <PremiumDateInput
                 type="date"
                 name="expiresAt"
                 required={category === 'RCA'}
@@ -725,7 +727,7 @@ export default function RecordEditor({
                   )}
                   <label>
                     Data planificată
-                    <input name="expiresAt" type="date" defaultValue={record?.expiresAt || ''} />
+                    <PremiumDateInput name="expiresAt" type="date" defaultValue={record?.expiresAt || ''} />
                   </label>
                   {category !== 'Distribuție' && (
                     <label>
@@ -741,41 +743,14 @@ export default function RecordEditor({
                 </div>
               </div>
             )}
-            {kind !== 'document' && (
-              <label className="record-upload">
-                <Paperclip size={18} />
-                <span>Atașament opțional · PDF, JPEG sau PNG · max. 2 MB</span>
-                <input
-                  type="file"
-                  accept="application/pdf,image/jpeg,image/png"
-                  onChange={(e) => {
-                    setFile(e.target.files?.[0] || null);
-                    mark();
-                  }}
-                />
-                {file && <strong>{file.name}</strong>}
-              </label>
-            )}
+            {kind !== 'document' && <PremiumAttachment file={file} onChange={next=>{setFile(next);mark();}} disabled={busy}/>}
             <label>
               Notițe
               <textarea name="notes" maxLength={4000} defaultValue={record?.notes || ''} />
             </label>
           </div>
         </details>
-        {kind === 'document' && (
-          <label className="record-upload compact-upload">
-            <Paperclip size={18} />
-            <span>{file ? file.name : 'Atașează documentul · opțional'}</span>
-            <input
-              type="file"
-              accept="application/pdf,image/jpeg,image/png"
-              onChange={(e) => {
-                setFile(e.target.files?.[0] || null);
-                mark();
-              }}
-            />
-          </label>
-        )}
+        {kind === 'document' && <PremiumAttachment file={file} onChange={next=>{setFile(next);mark();}} disabled={busy}/>}
         {kind === 'service' && (
           <aside className="ac-service-summary" aria-label="Rezumatul intervenției">
             <h3>Rezumatul intervenției</h3>

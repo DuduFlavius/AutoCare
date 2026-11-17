@@ -1,4 +1,5 @@
 'use client';
+import {DocumentActions} from '../document-actions';
 
 import { MobileFinanceOverview } from './mobile-finance-overview';
 import { useMemo, useState, type FormEvent } from 'react';
@@ -184,7 +185,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
           <td data-label={t('Descriere', 'Description')} data-user-content>{row.title}{row.cancelled && <small> · {t('Arhivată', 'Archived')}</small>}</td>
           <td data-label={t('Valoare', 'Amount')}><strong>{row.amountKnown === false ? '—' : money(row.amountBani)}</strong></td>
           <td data-label={t('Kilometraj', 'Mileage')}>{row.odometer == null ? '—' : row.odometer.toLocaleString(locale) + ' km'}</td>
-          <td data-label={t('Documente', 'Documents')}>{byRecord.has(row.id) ? byRecord.get(row.id)!.map(file => <span key={file.id} className="ac-file-actions"><a href={'/api/v1/files/' + file.id + '?view=1'} key={file.id} target="_blank" rel="noopener noreferrer"><Paperclip size={13} />{t('Vezi', 'View')}</a><a href={'/api/v1/files/'+file.id} download aria-label={t('Descarcă ', 'Download ')+file.name}><Download size={15}/></a></span>) : '—'}</td>
+          <td data-label={t('Documente', 'Documents')}>{byRecord.has(row.id) ? byRecord.get(row.id)!.map(file => <span key={file.id} className="ac-file-actions"><DocumentActions file={file} compact/></span>) : '—'}</td>
           <td data-label={t('Acțiuni', 'Actions')}><details className="ac-expense-menu"><summary aria-label={t('Acțiuni pentru ','Actions for ')+row.title}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={() => onEdit(row)}>{t('Editează', 'Edit')}</button><button type="button" onClick={() => row.cancelled ? onRestore(row) : onArchive(row)}>{row.cancelled ? t('Restaurează','Restore') : t('Arhivează', 'Archive')}</button></div></details></td>
         </tr>)}
       </tbody></table> : <p role="status">{t('Nu există cheltuieli care să corespundă selecției.', 'No expenses match the selection.')}</p>}

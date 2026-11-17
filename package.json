@@ -15,8 +15,8 @@
     "lint": "eslint src scripts tests",
     "founder:identify": "node --import tsx scripts/identify-founder.ts",
     "db:mail-center": "node --import tsx scripts/migrate-mail-center.ts",
-    "prebuild": "node scripts/prepare-road-map.mjs",
-    "predev": "node scripts/prepare-road-map.mjs",
+    "prebuild": "node scripts/prepare-road-map.mjs && node scripts/prepare-document-viewer.mjs",
+    "predev": "node scripts/prepare-road-map.mjs && node scripts/prepare-document-viewer.mjs",
     "start:render": "node scripts/start-render.mjs"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
     "maplibre-gl": "6.16.0",
     "next": "16.4.6",
     "pdf-lib": "latest",
+    "pdfjs-dist": "6.5.438",
     "pg": "latest",
     "react": "19.2.4",
     "react-dom": "19.2.4",

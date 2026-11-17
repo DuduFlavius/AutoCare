@@ -1,4 +1,5 @@
 'use client';
+import {PremiumDateInput} from '@/components/premium-date-input';
 
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowUpRight, FileScan, MapPin, Sparkles, Trash2, ShieldCheck, Copy, ChevronDown, MessageSquareText, Wrench, CalendarDays, BarChart3, CheckCheck, MoreHorizontal, Square, RotateCcw, ThumbsUp, ThumbsDown, Paperclip, History, CarFront, X, ArrowUp } from 'lucide-react';
@@ -279,8 +280,8 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved }:
             <p>{t('Verifică și corectează rezultatele înainte de salvare.', 'Review and correct the extracted fields before saving.')}</p>
             <label>{t('Tip document', 'Document type')}<select value={scan.category} onChange={e => setScan({ ...scan, category: e.target.value })}>{categories.map(category => <option key={category} value={category}>{en && category === 'Rovinietă' ? 'Road vignette' : en && category === 'Talon' ? 'Registration certificate' : en && category === 'Alt document' ? 'Other document' : category}</option>)}</select></label>
             <label>{t('Număr document', 'Document number')}<input maxLength={120} value={scan.number} onChange={e => setScan({ ...scan, number: e.target.value })} /></label>
-            <label>{t('Emitere', 'Issue date')}<input type="date" value={scan.date} onChange={e => setScan({ ...scan, date: e.target.value })} /></label>
-            <label>{t('Expirare', 'Expiry date')}<input type="date" min={scan.date || undefined} required={scan.category === 'RCA'} value={scan.expiresAt} onChange={e => setScan({ ...scan, expiresAt: e.target.value })} /></label>
+            <label>{t('Emitere', 'Issue date')}<PremiumDateInput type="date" value={scan.date} onChange={e => setScan({ ...scan, date: e.target.value })} /></label>
+            <label>{t('Expirare', 'Expiry date')}<PremiumDateInput type="date" min={scan.date || undefined} required={scan.category === 'RCA'} value={scan.expiresAt} onChange={e => setScan({ ...scan, expiresAt: e.target.value })} /></label>
             <label>{t('Cost în RON', 'Cost in RON')}<input type="number" min="0" max="1000000" step=".01" value={scan.amountRon} onChange={e => setScan({ ...scan, amountRon: e.target.value })} /></label>
             <button className="primary" disabled={pending}>{t('Confirmă și salvează', 'Confirm and save')}</button>
             <button type="button" disabled={pending} onClick={() => setScan(null)}>{t('Renunță', 'Cancel')}</button>

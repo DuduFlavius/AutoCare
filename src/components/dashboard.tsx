@@ -1,4 +1,6 @@
 'use client';
+import {DocumentActions} from './document-actions';
+import {PremiumDateInput} from './premium-date-input';
 import { RenewalCenter } from './application/renewal-center';
 import AccountSettings from './account-settings';
 import {hasPlayBilling,purchasePlayPlan,restorePlayPurchases} from '@/lib/play-billing-client';
@@ -1085,7 +1087,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               onRestore={record=>{void act(()=>api('records/'+record.id+'/restore','POST'));}}
               onHistory={record=>{void act(async()=>{setHistory(await api('records/'+record.id+'/history'));},'');}}
               onDeleteFile={file=>{if(window.confirm(language==='en'?'Permanently delete this attachment?':'Ștergi definitiv acest atașament?'))void act(()=>api('files/'+file.id,'DELETE'));}}
-              onUpload={async(record,file)=>{if(file.size>2097152){setError(language==='en'?'Choose a PDF, JPG or PNG up to 2 MB.':'Alege un PDF, JPG sau PNG de maximum 2 MB.');return;}if(!['application/pdf','image/jpeg','image/png'].includes(file.type)){setError(language==='en'?'Choose a PDF, JPG or PNG.':'Alege un PDF, JPG sau PNG.');return;}const form=new FormData();form.set('file',file);form.set('recordId',record.id);await act(async()=>{const res=await fetch('/api/v1/files',{method:'POST',body:form});const out=await res.json().catch(()=>({}));if(!res.ok)throw new Error(out.error||(language==='en'?'Upload failed.':'Încărcarea a eșuat.'));});}}
+              onUpload={async(record,file)=>{if(file.size>2097152)throw Error(language==='en'?'Choose a file up to 2 MB.':'Alege un fișier de maximum 2 MB.');const form=new FormData();form.set('file',file);form.set('recordId',record.id);const res=await fetch('/api/v1/files',{method:'POST',body:form});const out=await res.json().catch(()=>({}));if(!res.ok)throw new Error(out.error||(language==='en'?'Upload failed.':'Încărcarea a eșuat.'));await refresh();setNotice(language==='en'?'Document attached.':'Documentul a fost atașat.');}}
             />}
             {['Întreținere'].includes(tab) && (
               <>
@@ -1404,22 +1406,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                                   .filter((f) => f.recordId === r.id)
                                   .map((f) => (
                                     <div key={f.id} className="inline small">
-                                      <a
-                                        className="document-file-preview"
-                                        href={'/api/v1/files/' + f.id + '?view=1'}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        {f.mime.startsWith('image/') && (
-                                          <img
-                                            src={'/api/v1/files/' + f.id + '?view=1'}
-                                            alt={'Atașament ' + r.category}
-                                            loading="lazy"
-                                          />
-                                        )}
-                                        <span>{f.name} · Vezi</span>
-                                      </a>
-                                      <a className="button document-download" href={'/api/v1/files/'+f.id} download aria-label={(language==='en'?'Download ':'Descarcă ')+f.name}><Download size={16}/></a>
+                                      <span data-user-content>{f.name}</span><DocumentActions file={f}/>
                                       <button
                                         className="close danger"
                                         aria-label={'Șterge ' + f.name}
@@ -1562,7 +1549,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                 <div className="toolbar">
                   <label>
                     Luna
-                    <input
+                    <PremiumDateInput
                       type="month"
                       value={calendarMonth}
                       onChange={(e) => setCalendarMonth(e.target.value)}
@@ -2133,7 +2120,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                   <div className="ac-premium-form-section full"><span>03</span> Alte informații</div>
                   <label>
                     Data achiziției
-                    <input
+                    <PremiumDateInput
                       name="purchasedAt"
                       type="date"
                       defaultValue={modal.vehicle?.purchasedAt || ''}

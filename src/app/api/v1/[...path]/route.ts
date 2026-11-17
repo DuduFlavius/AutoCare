@@ -1,3 +1,4 @@
+import {documentDownloadName,documentDisposition} from '@/lib/document-presentation';
 import {accountPreferences,accountPreferencesKey,accountPreferencesSchema} from '@/lib/account-preferences';
 import {playBillingConfigured,playProducts,playAccountId,verifyPlayPurchase} from '@/lib/play-billing';
 import {nativePushConfigured} from '@/lib/native-push';
@@ -584,16 +585,20 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     }
     if (path[0] === 'files' && path.length === 2) {
       const file = await svc.getFile(uid, uuid.parse(path[1]));
-      if (method === 'GET')
+      if (method === 'GET') {
+        const record=await svc.ownedRecord(uid,file.recordId);
+        const vehicle=await svc.ownedVehicle(uid,record.vehicleId);
+        const name=documentDownloadName(record,vehicle,file.mime);
         return new Response(Buffer.from(file.data, 'base64'), {
           headers: {
             'Content-Type': file.mime,
-            'Content-Disposition': `${new URL(req.url).searchParams.get('view') === '1' ? 'inline' : 'attachment'}; filename*=UTF-8''${encodeURIComponent(file.name)}`,
+            'Content-Disposition': documentDisposition(name,new URL(req.url).searchParams.get('view')==='1'),
             'Cache-Control': 'private, no-store',
             'X-Robots-Tag': 'noindex',
             'X-Content-Type-Options': 'nosniff',
           },
         });
+      }
       if (method === 'DELETE') {
         await db()
           .delete(s.files)

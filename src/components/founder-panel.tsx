@@ -1,4 +1,5 @@
 'use client';
+import {PremiumDateInput} from './premium-date-input';
 import {translateApplicationCopy} from '@/lib/application-language';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useState, useRef, type FormEvent } from 'react';
@@ -712,7 +713,7 @@ const [tab, setTab] = useState('Utilizatori'),
                     {duration === 'custom' && (
                       <label>
                         Data și ora expirării · ora dispozitivului
-                        <input name="expiresAt" type="datetime-local" required />
+                        <PremiumDateInput name="expiresAt" type="datetime-local" required />
                       </label>
                     )}
                     <label>

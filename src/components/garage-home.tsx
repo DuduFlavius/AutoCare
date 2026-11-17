@@ -1,4 +1,6 @@
 'use client';
+import {DocumentActions} from './document-actions';
+import {PremiumDateInput} from './premium-date-input';
 import { isFinancialEntry } from '@/lib/finance-overview';
 import { isPlannedService } from '@/lib/planned-service';
 import { localDate } from '@/lib/config';
@@ -690,11 +692,11 @@ const [car, setCar] = useState(''),
         </select>
         <label>
           De la
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          <PremiumDateInput type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
         </label>
         <label>
           Până la
-          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          <PremiumDateInput type="date" value={to} onChange={(e) => setTo(e.target.value)} />
         </label>
       </div>
       <p className="micro">
@@ -1001,13 +1003,7 @@ export function VehicleSheet({
                   {data.attachments
                     .filter((f) => f.recordId === r.id && r.kind === kind)
                     .map((f) => (
-                      <a
-                        className="attachment-link small"
-                        href={'/api/v1/files/' + f.id}
-                        key={f.id}
-                      >
-                        {f.name} <ArrowUpRight size={13} />
-                      </a>
+                      <DocumentActions file={f} key={f.id}/>
                     ))}
                 </div>
               ))
