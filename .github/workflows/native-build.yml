@@ -37,6 +37,20 @@ jobs:
           export PATH="$JAVA_HOME/bin:$PATH"
           cd mobile/android
           ./gradlew :app:assembleDebug :app:bundleRelease :app:lintRelease :app:testDebugUnitTest
+      - name: Verify production Firebase release compilation
+        run: |
+          cp mobile/firebase/google-services.production.json mobile/android/app/google-services.json
+          node scripts/verify-android-firebase.mjs
+          export JAVA_HOME="$JAVA_HOME_21_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          cd mobile/android
+          ./gradlew :app:assembleRelease :app:lintRelease
+      - name: Archive production APK for protected signing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-production-unsigned-APK
+          path: mobile/android/app/build/outputs/apk/release/app-release-unsigned.apk
+          retention-days: 7
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: AutoCare-Android-debug
