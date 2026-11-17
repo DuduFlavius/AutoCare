@@ -169,3 +169,5 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspa
  html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-composer textarea::placeholder{font-size:14px!important}
 }
 }
+
+.ac-ai-membership-gate{max-width:760px;margin:20px auto;display:grid;gap:18px}.ac-ai-membership-gate h2{font-size:clamp(23px,4vw,32px);line-height:1.2}.ac-ai-membership-gate ul{padding-left:22px;line-height:1.8}.ac-ai-gate-actions{display:flex;flex-wrap:wrap;gap:12px}

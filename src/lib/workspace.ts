@@ -10,6 +10,7 @@ export const workspaceSections = [
   { id: 'Garaj', ro: 'Garajul meu', en: 'My garage', group: 'garage', icon: 'car' },
   { id: 'AutoCare AI', ro: 'AutoCare AI', en: 'AutoCare AI', group: 'garage', icon: 'premium' },
   { id: 'Documente', ro: 'Documente', en: 'Documents', group: 'garage', icon: 'files' },
+  { id: 'RCA & Rovinietă', ro: 'RCA & Rovinietă', en: 'RCA & Road vignette', group: 'garage', icon: 'files' },
   {
     id: 'Istoric auto',
     ro: 'Istoric auto',

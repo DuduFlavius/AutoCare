@@ -6,8 +6,8 @@ import { documentCounts, filterRecords } from '@/lib/record-filters';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 type Data=Awaited<ReturnType<typeof dashboard>>;
 type Row=Data['records'][number];
-export function DocumentVault({data,vehicleId,onVehicle,onEdit,onCreate,onArchive,onRestore,onHistory,onUpload,onDeleteFile,preview,busy}:{
- data:Data;vehicleId:string;onVehicle:(id:string)=>void;onEdit:(row:Row)=>void;onCreate:()=>void;onArchive:(row:Row)=>void;onRestore:(row:Row)=>void;onHistory:(row:Row)=>void;onUpload:(row:Row,file:File)=>Promise<void>;onDeleteFile:(file:Data['attachments'][number])=>void;preview:boolean;busy:boolean;
+export function DocumentVault({data,vehicleId,onVehicle,onEdit,onCreate,onArchive,onRestore,onHistory,onUpload,onDeleteFile,onRenewals,preview,busy}:{
+ onRenewals?:()=>void;data:Data;vehicleId:string;onVehicle:(id:string)=>void;onEdit:(row:Row)=>void;onCreate:()=>void;onArchive:(row:Row)=>void;onRestore:(row:Row)=>void;onHistory:(row:Row)=>void;onUpload:(row:Row,file:File)=>Promise<void>;onDeleteFile:(file:Data['attachments'][number])=>void;preview:boolean;busy:boolean;
 }){
  const en=useApplicationLanguage()==='en',locale=useApplicationLocale(),t=(ro:string,english:string)=>en?english:ro;
  const [query,setQuery]=useState(''),[category,setCategory]=useState(''),[state,setState]=useState(''),[archived,setArchived]=useState(false);
@@ -19,6 +19,7 @@ export function DocumentVault({data,vehicleId,onVehicle,onEdit,onCreate,onArchiv
  const day=(date:string|null)=>date?new Date(date+'T12:00:00Z').toLocaleDateString(locale,{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'}):t('Necompletat','Not provided');
  return <div className="ac-document-screen" data-workspace-ui>
   <div className="ac-vault-toolbar"><label className="ac-vault-car"><CarFront size={26}/><select value={vehicleId} aria-label={t('Dosar vehicul','Vehicle folder')} onChange={e=>onVehicle(e.target.value)}><option value="">{t('Toate vehiculele','All vehicles')}</option>{data.vehicles.map(car=><option key={car.id} value={car.id}>{car.brand} {car.model} · {car.plate}</option>)}</select></label><button className="ac-m-round" onClick={onCreate} disabled={!data.vehicles.some(car=>!car.archived)} aria-label={t('Adaugă document','Add document')}><Plus size={21}/></button></div>
+  {onRenewals&&<button type="button" onClick={onRenewals}><ShieldCheck size={18}/>{t('RCA & Rovinietă','RCA & Road vignette')}</button>}
   <div className="ac-vault-overview">{[
    {Icon:Files,label:t('Total','Total'),value:stats.total,key:''},
    {Icon:CheckCheck,label:t('Valabile','Valid'),value:stats.valid,key:'valid'},

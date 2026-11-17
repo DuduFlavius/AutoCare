@@ -9,7 +9,7 @@ export default function AccountHub({ data, name, navigate, onSettings, onLanguag
   const language = useApplicationLanguage(), en = language === 'en';
   const links = [
     {title: en ? 'My garage tools' : 'Instrumentele garajului', rows: [
-      ['Documente','Documente','Documents',Files],['Întreținere','Întreținere','Maintenance',Wrench],['Rapoarte','Rapoarte','Reports',Files],['Kilometraj','Kilometraj și istoric','Mileage & readings',Gauge],['Cheltuieli','Cheltuieli','Expenses',Wallet],['Calendar','Calendar','Calendar',CalendarDays],['Istoric auto','Istoric complet','Vehicle history',History],['Plan întreținere','SmartDrive GPS','SmartDrive GPS',Route],
+      ['Documente','Documente','Documents',Files],['RCA & Rovinietă','RCA & Rovinietă','RCA & Road vignette',Shield],['Întreținere','Întreținere','Maintenance',Wrench],['Rapoarte','Rapoarte','Reports',Files],['Kilometraj','Kilometraj și istoric','Mileage & readings',Gauge],['Cheltuieli','Cheltuieli','Expenses',Wallet],['Calendar','Calendar','Calendar',CalendarDays],['Istoric auto','Istoric complet','Vehicle history',History],['Plan întreținere','SmartDrive GPS','SmartDrive GPS',Route],
     ]},
     {title: en ? 'Membership' : 'Abonament și beneficii', rows: [['Premium','Instrumente Premium','Premium tools',Star],['Abonament','Gestionează abonamentul','Manage subscription',CreditCard]]},
     {title: en ? 'Preferences & help' : 'Preferințe și ajutor', rows: [['Notificări','Centrul de notificări','Notifications',Bell],['Setări','Setări cont','Account Settings',Settings],['Centru de suport','Ajutor și suport','Help & support',HelpCircle]]},

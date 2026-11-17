@@ -1,7 +1,7 @@
 name: Native GPS builds
 on:
   push:
-    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated]
+    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated, audit/rca-gps-play-20261117]
     paths: ["mobile/**", ".github/workflows/native-build.yml"]
   pull_request:
     branches: [feature/autocare-ai-integrated, feature/autocare-desktop-premium-20261102, feature/autocare-native-gps-20261104]

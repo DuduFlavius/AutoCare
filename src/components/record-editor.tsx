@@ -22,6 +22,7 @@ export default function RecordEditor({
   planned = false,
   data,
   vehicleId,
+  initialCategory,
   onSave,
   onCancel,
   onDirty,
@@ -31,6 +32,7 @@ export default function RecordEditor({
   planned?: boolean;
   data: Data;
   vehicleId?: string;
+  initialCategory?: string;
   onSave: (payload: RecordPayload, file: File | null) => Promise<boolean>;
   onCancel: () => void;
   onDirty: (dirty: boolean) => void;
@@ -41,12 +43,12 @@ export default function RecordEditor({
   const plannedWork = kind === 'service' && (planned || parseServiceDetails(record?.parts ?? '').planned === '1');
   const formRef = useRef<HTMLFormElement>(null);
   const categoryDrafts = useRef<Record<string, string>>({});
-  const [choosing, setChoosing] = useState(!record);
+  const [choosing, setChoosing] = useState(!record&&!initialCategory);
 
   const cars = data.vehicles.filter((v) => !v.archived || v.id === record?.vehicleId);
   const [car, setCar] = useState(record?.vehicleId || vehicleId || cars[0]?.id || ''),
     [category, setCategory] = useState(
-      record?.category ||
+      record?.category || initialCategory ||
         (kind === 'document' ? 'RCA' : kind === 'service' ? 'Schimb ulei' : 'Combustibil'),
     ),
     [serviceKmInterval, setServiceKmInterval] = useState(

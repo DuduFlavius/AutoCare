@@ -30,9 +30,9 @@ function requestErrorEnglish(message: string) {
 }
 const json = (method: string, body: unknown) => ({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
-export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, available, preview, onSaved }: {
+export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, pricing, available, preview, onSaved }: {
   vehicles: Vehicle[]; vehicleId: string; onVehicle: (id: string) => void; premium: boolean;
-  available: boolean; preview: boolean; onSaved: () => Promise<void>;
+  pricing?: Awaited<ReturnType<typeof dashboard>>['pricing']; available: boolean; preview: boolean; onSaved: () => Promise<void>;
 }) {
   const en = useApplicationLanguage() === 'en';
   const page = useRef<HTMLDivElement>(null);
@@ -70,7 +70,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, avail
   return (
     <div ref={page} className="ac-ai-page" data-chat={hasChat || undefined} data-workspace-ui>
       <header className="ac-ai-hero"><TitaniumWave /><span className="ac-ai-icon"><Sparkles size={25} /></span><div><small>AUTOCARE PREMIUM</small><h2>AutoCare AI</h2><p>{en ? 'Your personal automotive AI. Ask anything, naturally.' : 'Discută natural despre orice problemă auto. AI-ul cunoaște și istoricul mașinii tale.'}</p></div></header>
-      {!premium ? <section className="card"><p>{en ? 'AutoCare AI is exclusively available with an active Premium subscription. Upgrade to start a conversation.' : 'AutoCare AI este disponibil exclusiv cu un abonament Premium activ. Activează Premium pentru a începe conversația.'}</p><a className="button primary" href="/cont?tab=Premium">Premium <ArrowUpRight size={15} /></a></section>
+      {!premium ? <section className="card ac-ai-membership-gate" aria-labelledby="ai-membership-title"><span className="ac-ai-icon"><Sparkles size={30}/></span><h2 id="ai-membership-title">{en?'AutoCare AI — Your intelligent car assistant':'AutoCare AI — Asistentul tău auto inteligent'}</h2><p>{en?'AutoCare AI is exclusively available to Premium members. Activate Premium to understand your vehicle information and receive helpful recommendations.':'AutoCare AI este o funcție exclusivă pentru membrii Premium. Activează Premium pentru a înțelege mai ușor informațiile despre mașina ta și pentru recomandări utile.'}</p><ul><li>{en?'Understand recorded vehicle costs':'Înțelege costurile înregistrate ale mașinii'}</li><li>{en?'Prepare maintenance using your saved history':'Pregătește întreținerea folosind istoricul salvat'}</li><li>{en?'Extract document details and confirm before saving':'Extrage date din documente și confirmă înainte de salvare'}</li></ul><div className="ac-ai-gate-actions"><a className="button primary" href="/cont?tab=Premium">{en?'Activate Premium':'Activează Premium'} <ArrowUpRight size={15}/></a><a className="button" href="/cont?tab=Dashboard">{en?'Back to Dashboard':'Înapoi la Dashboard'}</a></div>{pricing&&<p className="small">{new Intl.NumberFormat(en?'en-GB':'ro-RO',{style:'currency',currency:pricing.currency}).format(pricing.monthlyBani/100)} {en?'/ month':'/ lună'}</p>}<p className="small muted">{en?'Already had Premium? Reactivate it to continue. Expiry does not automatically delete your chat history.':'Ai avut Premium? Reactivează-l pentru a continua. Expirarea nu șterge automat istoricul conversațiilor.'}</p></section>
         : !vehicles.length ? <section className="card"><p>{en ? 'Add a vehicle first.' : 'Adaugă întâi un vehicul.'}</p><a className="button" href="/cont?tab=Garaj">{en ? 'My garage' : 'Garajul meu'}</a></section>
         : <>
           <label className="ac-ai-vehicle">{en ? 'Vehicle' : 'Vehicul'}

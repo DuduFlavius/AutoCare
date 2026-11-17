@@ -31,14 +31,15 @@ final class TrackingStore {
             if(!state.optBoolean("bluetoothConnected")||state.has("disconnectedAt"))return;
             if(android.os.Build.VERSION.SDK_INT>=31&&context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)!=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
         }
-        if(!state.optBoolean("active") || !location.hasAccuracy() || location.getAccuracy()<0 || location.getAccuracy()>50 || location.getTime()>now+5000 || now-location.getTime()>15000)return;
-        context.getSharedPreferences("autocare-gps",Context.MODE_PRIVATE).edit().putLong("fix-at",now).apply();
+        if(!state.optBoolean("active") || !location.hasAccuracy() || location.getAccuracy()<0 || location.getTime()>now+5000 || now-location.getTime()>15000)return;
+        if(location.getAccuracy()<=50)context.getSharedPreferences("autocare-gps",Context.MODE_PRIVATE).edit().putLong("fix-at",now).apply();
         // Live location is independent from the distance/movement filter.
         JSONObject live=new JSONObject().put("latitude",location.getLatitude()).put("longitude",location.getLongitude()).put("accuracy",location.getAccuracy()).put("timestamp",location.getTime());
         JSONObject old=state.optJSONObject("lastPosition");
         if(old!=null && location.getTime()<=old.optLong("timestamp"))return;
         state.put("lastPosition",live).put("updatedAt",now);
         write(context,state);
+        if(location.getAccuracy()>50)return;
         if(state.optBoolean("automatic")&&state.optBoolean("awaitingMotion")&&location.getAccuracy()>25)return;
         if(state.optBoolean("automatic")&&!DrivingGate.usableSpeed(location.hasSpeed(),location.getSpeed()))return;
         JSONArray points=state.optJSONArray("points");if(points==null)points=new JSONArray();

@@ -14,6 +14,7 @@ test('Application navigation preserves every existing functional section, includ
     'Garaj',
     'AutoCare AI',
     'Documente',
+    'RCA & Rovinietă',
     'Calendar',
     'Întreținere',
     'Plan întreținere',

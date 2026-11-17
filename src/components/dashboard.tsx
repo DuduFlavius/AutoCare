@@ -1,4 +1,5 @@
 'use client';
+import { RenewalCenter } from './application/renewal-center';
 import AccountSettings from './account-settings';
 import {hasPlayBilling,purchasePlayPlan,restorePlayPurchases} from '@/lib/play-billing-client';
 import PlayBillingPanel from './play-billing-panel';
@@ -338,6 +339,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     [signingOut,setSigningOut]=useState(false),
     [busy, setBusy] = useState(false),
     [modal, setModal] = useState<Modal>(null),
+    [renewalCategory,setRenewalCategory]=useState<string | undefined>(),
     [filter, setFilter] = useState(''),
     [query, setQuery] = useState(''),
     [vehicleDetail, setVehicleDetail] = useState<string | null>(initialVehicle || null),
@@ -1006,11 +1008,12 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             </WorkspaceModuleHeader>}
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
             {tab === 'Dashboard' && <ApplicationHome data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
+            {tab === 'RCA & Rovinietă' && <RenewalCenter key={data.profile.offsets.join(',')+String(data.profile.emailEnabled)+String(data.profile.pushEnabled)} data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} onDocument={(category,record)=>{setRenewalCategory(category);setModal({kind:'document',record});}} onNavigate={next=>{if(navigate(next)&&next==='Setări')setSettingsPanel('alerts');}} onPreferences={async profile=>{await act(()=>api('profile','PUT',{timezone:profile.timezone,emailEnabled:profile.emailEnabled,pushEnabled:profile.pushEnabled,afterExpiry:profile.afterExpiry,offsets:profile.offsets,hour:profile.hour}));}} busy={busy} preview={!!previewData}/>}
             {tab === 'AutoCare AI' && <AutoAiWorkspace
               vehicles={activeCars}
               vehicleId={selectActiveVehicle(activeCars, vehicleDetail ?? primaryVehicleId)?.id ?? ''}
               onVehicle={id => navigate('AutoCare AI', 'push', id)}
-              premium={data.premium} available={data.autoAssistantAvailable} preview={!!previewData} onSaved={refresh}
+              pricing={data.pricing} premium={data.premium} available={data.autoAssistantAvailable} preview={!!previewData} onSaved={refresh}
             />}
             {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onLanguage={changeLanguage} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
             {tab === 'Istoric auto' && <VehicleJournal data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
@@ -1076,7 +1079,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               onRestore={record => { void act(() => api('records/' + record.id + '/restore', 'POST')); }}
               onAi={id => navigate('AutoCare AI', 'push', id)} onRefresh={refresh}
             />}
-            {tab === 'Documente' && <DocumentVault data={data} vehicleId={filter} onVehicle={setFilter} preview={!!previewData} busy={busy}
+            {tab === 'Documente' && <DocumentVault onRenewals={()=>navigate('RCA & Rovinietă')} data={data} vehicleId={filter} onVehicle={setFilter} preview={!!previewData} busy={busy}
               onEdit={record=>setModal({kind:'document',record})} onCreate={()=>setModal(activeCars.length?{kind:'document'}:{kind:'vehicle'})}
               onArchive={record=>{if(window.confirm(language==='en'?'Archive this document?':'Arhivezi acest document?'))void act(()=>api('records/'+record.id,'DELETE'));}}
               onRestore={record=>{void act(()=>api('records/'+record.id+'/restore','POST'));}}
@@ -2003,6 +2006,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               <RecordEditor
                 key={modal.completionOf ? 'completion:' + modal.completionOf : modal.record?.id || modal.kind}
                 kind={modal.kind}
+                initialCategory={tab==='RCA & Rovinietă'?renewalCategory:undefined}
                 record={modal.record}
                 planned={modal.planned || (!modal.completionOf && !!modal.record && isPlannedService(modal.record, nowDate))}
                 data={data}
