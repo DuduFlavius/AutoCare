@@ -25,8 +25,8 @@ test('home prioritizes overdue work and does not invent deadlines',()=>{
   assert.equal(result.length,2);
   assert.equal(upcomingMaintenance([{...service,cancelled:true}],108000,70,'UTC',today).length,0);
 });
-test('mobile navigation has four clear destinations and retains secondary modules',()=>{
-  assert.equal(mobileWorkspaceSections.length,4);
+test('mobile navigation has five clear destinations and retains secondary modules',()=>{
+  assert.equal(mobileWorkspaceSections.length,5);
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Documente'));
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cheltuieli'));
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cont'));
