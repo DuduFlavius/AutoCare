@@ -158,7 +158,11 @@ export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: stri
         <p className="muted small">
           {signup
             ? 'Creează-ți contul pentru a adăuga prima mașină.'
-            : 'Documentele și istoricul mașinii tale, la îndemână.'}
+            : forgot
+              ? t('Introdu emailul contului pentru a primi instrucțiunile de resetare.', 'Enter your account email to receive password reset instructions.')
+              : reset
+                ? t('Alege o parolă nouă de cel puțin 12 caractere.', 'Choose a new password with at least 12 characters.')
+                : t('Documentele și istoricul mașinii tale, la îndemână.', 'Your vehicle documents and history, within reach.')}
         </p>
         {signup && <details className="ac-auth-ai-details"><summary><ShieldCheck size={17}/><span>AutoCare AI · Premium<small>{t('Asistentul AI este disponibil exclusiv cu Premium.','The AI assistant is available exclusively with Premium.')}</small></span></summary><PublicAiIntro compact /></details>}
         <form
@@ -275,10 +279,10 @@ export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: stri
           </p>
         )}
         <div className="stack small" style={{ marginTop: 20 }}>
-          <Link href={(signup ? (en?'/en/sign-in?':'/autentificare?') : (en?'/en/sign-up?':'/inregistrare?')) + new URLSearchParams({ next })}>
-            {signup ? 'Ai deja cont? Autentifică-te' : 'Nu ai cont? Înregistrează-te'}
+          <Link href={((signup||forgot||reset) ? (en?'/en/sign-in?':'/autentificare?') : (en?'/en/sign-up?':'/inregistrare?')) + new URLSearchParams({ next })}>
+            {forgot||reset ? t('Înapoi la autentificare','Back to sign in') : signup ? t('Ai deja cont? Autentifică-te','Already have an account? Sign in') : t('Nu ai cont? Înregistrează-te','No account yet? Sign up')}
           </Link>
-          <Link href={en?'/en/forgot-password':'/recuperare-parola'}>Recuperează parola</Link>
+          {!forgot&&!reset&&<Link href={en?'/en/forgot-password':'/recuperare-parola'}>{t('Recuperează parola','Reset password')}</Link>}
         </div>
       </div>
     </main>
