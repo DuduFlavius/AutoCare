@@ -14,6 +14,7 @@ test('Application navigation preserves every existing functional section, includ
     'Garaj',
     'AutoCare AI',
     'Documente',
+    'RCA & Rovinietă',
     'Calendar',
     'Întreținere',
     'Plan întreținere',
@@ -27,6 +28,7 @@ test('Application navigation preserves every existing functional section, includ
     'Rapoarte',
     'Setări',
     'Cont',
+    'Feedback',
   ];
   assert.deepEqual(new Set(workspaceSections.map((s) => s.id)), new Set(expected));
   assert.equal(new Set(workspaceSections.map((s) => s.id)).size, expected.length);

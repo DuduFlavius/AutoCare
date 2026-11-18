@@ -1,4 +1,5 @@
 'use client';
+import {FilterSelect} from './filter-select';
 
 import dynamic from 'next/dynamic';
 import { ArrowUp, MapPin, Navigation } from 'lucide-react';
@@ -241,9 +242,9 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
           {navigating && !progress && !routing && <p role="status">{t('Traseul este afișat. Indicațiile live pornesc când GPS-ul are o poziție mai precisă.', 'Route shown. Live guidance resumes once GPS has a more accurate fix.')}</p>}
           {routing && <p role="status">{navigating ? t('Se recalculează traseul…', 'Recalculating…') : t('Se calculează traseul…', 'Calculating route…')}</p>}
           {route && <>
-            <label>{t('Traseu', 'Route')}<select value={alternative} onChange={event => { setAlternative(Number(event.target.value)); setStepIndex(0); deviation.current = 0; lastReroute.current = Date.now(); }}>
+            <label>{t('Traseu', 'Route')}<FilterSelect value={alternative} onChange={event => { setAlternative(Number(event.target.value)); setStepIndex(0); deviation.current = 0; lastReroute.current = Date.now(); }}>
               {routes.map((option, index) => <option key={index} value={index}>{index + 1} · {distance(option.distance)} · {Math.ceil(option.duration / 60)} min</option>)}
-            </select></label>
+            </FilterSelect></label>
             {!navigating && <button type="button" className="primary" onClick={() => { setNavigating(true); location.locate(); lastReroute.current = Date.now(); }}><Navigation size={16}/>{t('Navighează aici', 'Navigate here')}</button>}
           </>}
           <div className="ac-navigation-tools">

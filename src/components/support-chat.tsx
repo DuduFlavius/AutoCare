@@ -5,6 +5,7 @@ import {translateApplicationCopy} from '@/lib/application-language';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import {
+  Star,
   Headset,
   Bell,
   BarChart3,
@@ -90,9 +91,11 @@ const initials = (name: string) =>
 export default function SupportChat({
   role,
   preview = false,
+  onFeedback,
 }: {
   role: string;
   preview?: boolean;
+  onFeedback?:()=>void;
 }) {
 
   const locale=useApplicationLocale();
@@ -452,6 +455,8 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   }
   if (view==='statistics' && staff) return <section id="autocare-support" ref={workspace} className="support-workspace ac-support-center support-statistics-mode"><SupportStatistics preview={preview} onClose={()=>setView('inbox')}/></section>;
   return (
+    <>
+      {onFeedback&&<button type="button" className="ac-feedback-entry" onClick={onFeedback}><Star size={18}/>{t('Trimite feedback','Send feedback')}</button>}
     <section id="autocare-support" ref={workspace}
       className={
         'support-workspace ac-support-center ' +
@@ -875,6 +880,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           else void refresh();
         }}
       />}
-    </section>
+    </section></>
   );
 }

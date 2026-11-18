@@ -7,7 +7,7 @@ public class MainActivity extends BridgeActivity {
   super.onCreate(savedInstanceState);
   if(getBridge()!=null&&getBridge().getWebView()!=null){
    android.webkit.WebSettings settings=getBridge().getWebView().getSettings();
-   settings.setSupportZoom(false);settings.setBuiltInZoomControls(false);settings.setDisplayZoomControls(false);
+   settings.setTextZoom(100);settings.setSupportZoom(false);settings.setBuiltInZoomControls(false);settings.setDisplayZoomControls(false);
   }
  }
 }

@@ -1,4 +1,5 @@
 'use client';
+import {PremiumDateInput} from './premium-date-input';
 import { useState } from 'react';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 export default function InlineMileageEditor({ vehicleId, currentKm, preview, onSaved }: { vehicleId: string; currentKm: number; preview: boolean; onSaved: () => Promise<void> }) {
@@ -32,7 +33,7 @@ export default function InlineMileageEditor({ vehicleId, currentKm, preview, onS
       <label>{en ? 'Current odometer reading (km)' : 'Kilometrajul actual de pe bord (km)'}
         <input type="number" inputMode="numeric" min={currentKm} max={99999999} step="1" value={value} disabled={busy} onChange={e => { setValue(e.target.value); setConfirmed(null); setError(''); }} autoFocus required aria-invalid={invalid || undefined}/>
       </label>
-      <label>{en?'Reading date':'Data citirii'}<input type="date" value={date} max={new Date().toLocaleDateString('en-CA')} onChange={event=>setDate(event.target.value)} required disabled={busy}/></label>
+      <label>{en?'Reading date':'Data citirii'}<PremiumDateInput type="date" value={date} max={new Date().toLocaleDateString('en-CA')} onChange={event=>setDate(event.target.value)} required disabled={busy}/></label>
       <label>{en?'Notes (optional)':'Observații (opțional)'}<input value={notes} maxLength={500} onChange={event=>setNotes(event.target.value)} disabled={busy}/></label>
       <small>{en ? 'Previously saved: ' : 'Înregistrat anterior: '}{currentKm.toLocaleString(locale)} km. {en ? 'Enter the total on the dashboard, not just the kilometers driven.' : 'Introdu totalul de pe bord, nu doar kilometrii parcurși.'}</small>
       {!invalid && delta > 0 && <small>+{delta.toLocaleString(locale)} {en ? 'km since the previous reading' : 'km față de citirea anterioară'}</small>}

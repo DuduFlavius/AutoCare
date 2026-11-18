@@ -1,3 +1,4 @@
+process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION='false';
 import { migrate } from '../scripts/migrate';
 import { auth } from '../src/lib/auth';
 import { db, closeLocalDb } from '../src/lib/db';

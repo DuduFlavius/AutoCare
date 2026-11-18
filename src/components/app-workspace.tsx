@@ -69,8 +69,8 @@ export function WorkspaceNavigation({
       aria-label={language === 'en' ? 'Application sections' : 'Secțiunile aplicației'}
       data-workspace-ui
     >
-      {(tab==='Dashboard'?[{ro:'',en:'',ids:['Dashboard','Garaj','Întreținere','Calendar','Cheltuieli','Rapoarte','Istoric auto','Documente','Plan întreținere','Notificări','Setări','Centru de suport','Cont','AutoCare AI']}]:[
-        { ro:'GARAJUL TĂU',en:'YOUR GARAGE', ids:['Dashboard','Garaj','AutoCare AI','Întreținere','Documente'] },
+      {(tab==='Dashboard'?[{ro:'',en:'',ids:['Dashboard','Garaj','Întreținere','Calendar','Cheltuieli','Rapoarte','Istoric auto','Documente','RCA & Rovinietă','Plan întreținere','Notificări','Setări','Centru de suport','Cont','AutoCare AI']}]:[
+        { ro:'GARAJUL TĂU',en:'YOUR GARAGE', ids:['Dashboard','Garaj','AutoCare AI','Întreținere','Documente','RCA & Rovinietă'] },
         { ro:'EVIDENȚĂ ȘI PLANIFICARE',en:'TRACKING & PLANNING', ids:['Kilometraj','Calendar','Cheltuieli','Rapoarte','Istoric auto','Plan întreținere'] },
         { ro:'CONTUL TĂU',en:'YOUR ACCOUNT', ids:['Premium','Abonament','Notificări','Setări','Centru de suport','Cont'] },
       ]).map(group => <div className="ws-nav-group" key={group.en}><p>{group[language]}</p>{group.ids.map(id => {

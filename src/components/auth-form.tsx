@@ -1,4 +1,5 @@
 'use client';
+import {EmailVerification} from './email-verification';
 import {publicConversion} from '@/lib/analytics';
 import {saveBrowserLanguage} from '@/lib/language-preference';
 import VehicleSymbol from './vehicle-symbol';
@@ -11,7 +12,7 @@ import './auth-premium.css';
 import { ShieldCheck, Files, Wrench, Eye, EyeOff } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { authErrorMessage } from '@/lib/auth-messages';
-export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: string; next?: string; initialLanguage?:'ro'|'en' }) {
+export function AuthForm({ mode, next = '/cont', initialLanguage, verificationPreview=false }: { mode: string; next?: string; initialLanguage?:'ro'|'en';verificationPreview?:boolean }) {
   const [language, setLanguage] = useState<'ro' | 'en'>(initialLanguage??'ro');
   useEffect(() => {
     try {
@@ -23,6 +24,7 @@ export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: stri
   useEffect(()=>{saveBrowserLanguage(language);},[language]);
   const en=language==='en';
   const t=(ro:string,english:string)=>en?english:ro;
+  const [pendingEmail,setPendingEmail]=useState(verificationPreview?'demo@example.invalid':'');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -77,7 +79,15 @@ export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: stri
                 token: new URLSearchParams(window.location.search).get('token') || '',
               })
             : await authClient.signIn.email({ email, password, callbackURL: next, rememberMe: true });
-      if (result.error) throw new Error(authErrorMessage(result.error.code, result.error.message));
+      if (result.error) {
+        if(!signup&&!forgot&&!reset&&result.error.code==='EMAIL_NOT_VERIFIED'){
+          const sent=await authClient.emailOtp.sendVerificationOtp({email,type:'email-verification'});
+          if(sent.error)throw new Error(t('Nu am putut trimite codul. Așteaptă un minut și încearcă din nou.','Could not send the code. Wait a minute and try again.'));
+          setPendingEmail(email);return;
+        }
+        throw new Error(authErrorMessage(result.error.code, result.error.message,language));
+      }
+      if(signup&&!(result.data&&'token' in result.data&&result.data.token)){setPendingEmail(email);return;}
       if(signup||!forgot&&!reset)publicConversion(signup?'sign_up':'login');
       if (signup) window.location.assign(next);
       else if (forgot) setMessage('Dacă există un cont, vei primi instrucțiunile prin email.');
@@ -90,7 +100,7 @@ export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: stri
     }
   }
   return (
-    <main className="auth-layout ac-auth-premium">
+    <main className="auth-layout ac-auth-premium" data-verification={!!pendingEmail||undefined}>
       <SiteLanguage language={language} />
       <aside className="auth-editorial">
         <VehicleSymbol/>
@@ -145,20 +155,24 @@ export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: stri
             </select>
           </label>
         </div>
-        </div><p className="eyebrow">{t("GARAJUL TĂU DIGITAL", "YOUR DIGITAL GARAGE")}</p>
+        </div>{pendingEmail?<EmailVerification preview={verificationPreview} email={pendingEmail} language={language} onBack={()=>{setPendingEmail('');setError('');}} onVerified={()=>{publicConversion(signup?'sign_up':'login');window.location.assign(next);}}/>:<><p className="eyebrow">{t("GARAJUL TĂU DIGITAL", "YOUR DIGITAL GARAGE")}</p>
         <h1>
           {signup
-            ? 'Creează cont'
+            ? t('Creează cont','Create account')
             : forgot
-              ? 'Ai uitat parola?'
+              ? t('Ai uitat parola?','Forgot your password?')
               : reset
-                ? 'Alege o parolă nouă.'
+                ? t('Alege o parolă nouă.','Choose a new password.')
                 : t('Bine ai revenit!', 'Welcome back!')}
         </h1>
         <p className="muted small">
           {signup
-            ? 'Creează-ți contul pentru a adăuga prima mașină.'
-            : 'Documentele și istoricul mașinii tale, la îndemână.'}
+            ? t('Creează-ți contul și confirmă emailul cu un cod pentru a adăuga prima mașină.','Create your account and verify your email with a code to add your first vehicle.')
+            : forgot
+              ? t('Introdu emailul contului pentru a primi instrucțiunile de resetare.', 'Enter your account email to receive password reset instructions.')
+              : reset
+                ? t('Alege o parolă nouă de cel puțin 12 caractere.', 'Choose a new password with at least 12 characters.')
+                : t('Documentele și istoricul mașinii tale, la îndemână.', 'Your vehicle documents and history, within reach.')}
         </p>
         {signup && <details className="ac-auth-ai-details"><summary><ShieldCheck size={17}/><span>AutoCare AI · Premium<small>{t('Asistentul AI este disponibil exclusiv cu Premium.','The AI assistant is available exclusively with Premium.')}</small></span></summary><PublicAiIntro compact /></details>}
         <form
@@ -254,13 +268,13 @@ export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: stri
           )}
           <button type="submit" className="primary" disabled={busy}>
             {busy
-              ? 'Se procesează…'
+              ? t('Se procesează…','Processing…')
               : signup
-                ? 'Creează cont'
+                ? t('Trimite codul de verificare','Send verification code')
                 : forgot
-                  ? 'Trimite instrucțiunile'
+                  ? t('Trimite instrucțiunile','Send instructions')
                   : reset
-                    ? 'Salvează parola'
+                    ? t('Salvează parola','Save password')
                     : t('Conectare', 'Sign in')}
           </button>
         </form>
@@ -275,12 +289,12 @@ export function AuthForm({ mode, next = '/cont', initialLanguage }: { mode: stri
           </p>
         )}
         <div className="stack small" style={{ marginTop: 20 }}>
-          <Link href={(signup ? (en?'/en/sign-in?':'/autentificare?') : (en?'/en/sign-up?':'/inregistrare?')) + new URLSearchParams({ next })}>
-            {signup ? 'Ai deja cont? Autentifică-te' : 'Nu ai cont? Înregistrează-te'}
+          <Link href={((signup||forgot||reset) ? (en?'/en/sign-in?':'/autentificare?') : (en?'/en/sign-up?':'/inregistrare?')) + new URLSearchParams({ next })}>
+            {forgot||reset ? t('Înapoi la autentificare','Back to sign in') : signup ? t('Ai deja cont? Autentifică-te','Already have an account? Sign in') : t('Nu ai cont? Înregistrează-te','No account yet? Sign up')}
           </Link>
-          <Link href={en?'/en/forgot-password':'/recuperare-parola'}>Recuperează parola</Link>
+          {!forgot&&!reset&&<Link href={en?'/en/forgot-password':'/recuperare-parola'}>{t('Recuperează parola','Reset password')}</Link>}
         </div>
-      </div>
+      </>} </div>
     </main>
   );
 }

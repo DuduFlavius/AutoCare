@@ -33,6 +33,7 @@ export function PublicShell({
             <Link href={href('/functionalitati')}>{t('Funcționalități')}</Link>
             {!landing && <Link href={href('/cum-functioneaza')}>{t('Cum funcționează')}</Link>}
             <Link href={href('/preturi')}>{t('Prețuri')}</Link>
+            <Link href={href('/rca-rovinieta')}>{language==='en'?'RCA & Road vignette':'RCA & Rovinietă'}</Link>
             <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
             {landing && <Link href={href('/despre-noi')}>{t('Despre')}</Link>}
           </nav>
@@ -50,7 +51,8 @@ export function PublicShell({
               <Link href={href('/autocare-maps')}>{t('AutoCare Maps')}</Link>
               <Link href={href('/smart-maintenance')}>{t('Smart Maintenance')}</Link>
               <Link href={href('/preturi')}>{t('Abonamente')}</Link>
-              <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
+              <Link href={href('/rca-rovinieta')}>{language==='en'?'RCA & Road vignette':'RCA & Rovinietă'}</Link>
+            <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
             </nav>
           </details>
         </header>
@@ -80,7 +82,8 @@ export function PublicShell({
               <Link href={href('/documente-auto')}>{t('Documente auto')}</Link>
               <Link href={href('/intretinere-auto')}>{t('Întreținere')}</Link>
               <Link href={href('/cheltuieli-auto')}>{t('Cheltuieli')}</Link>
-              <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
+              <Link href={href('/rca-rovinieta')}>{language==='en'?'RCA & Road vignette':'RCA & Rovinietă'}</Link>
+            <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
               <Link href={href('/despre-noi')}>{t('Despre noi')}</Link>
               <Link href={href('/contact')}>{t('Contact')}</Link>
               <Link href={href('/intrebari-frecvente')}>{t('Întrebări')}</Link>

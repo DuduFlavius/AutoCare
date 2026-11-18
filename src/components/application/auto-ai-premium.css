@@ -169,3 +169,11 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspa
  html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-composer textarea::placeholder{font-size:14px!important}
 }
 }
+
+.ac-ai-membership-gate{max-width:760px;margin:20px auto;display:grid;gap:18px}.ac-ai-membership-gate h2{font-size:clamp(23px,4vw,32px);line-height:1.2}.ac-ai-membership-gate ul{padding-left:22px;line-height:1.8}.ac-ai-gate-actions{display:flex;flex-wrap:wrap;gap:12px}
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-membership-gate{gap:16px!important;align-content:start!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-membership-gate>h2{font-size:clamp(22px,4vw,30px)!important;line-height:1.25!important;margin:0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-membership-gate>p,html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-membership-gate>ul{font-size:15px!important;line-height:1.6!important;margin:0!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-membership-gate .ac-ai-gate-actions>a{min-height:44px!important}
+}

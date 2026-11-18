@@ -1,4 +1,5 @@
 'use client';
+import {PremiumDateInput} from './premium-date-input';
 import './mail-studio.css';
 import {englishEmailCopy} from '@/lib/email-copy-en';
 import {useApplicationLocale} from './application-locale';
@@ -254,7 +255,7 @@ export default function MailCenter() {
           </label>
           {template === 'release_news' && <div className="form-grid">
             <label>{locale === 'ro-RO' ? 'Versiunea lansării' : 'Release version'}<input value={releaseVersion} maxLength={40} onChange={e => setReleaseVersion(e.target.value)} placeholder="2.4.0" /></label>
-            <label>{locale === 'ro-RO' ? 'Data lansării' : 'Release date'}<input type="date" value={releaseDate} onChange={e => setReleaseDate(e.target.value)} /></label>
+            <label>{locale === 'ro-RO' ? 'Data lansării' : 'Release date'}<PremiumDateInput type="date" value={releaseDate} onChange={e => setReleaseDate(e.target.value)} /></label>
             <p className="small muted">{locale === 'ro-RO' ? 'Anunțul intră în coadă pentru data aleasă. AutoCare verifică acordul pentru noutăți înainte de expediere.' : 'The release is queued for the selected date. AutoCare verifies news consent before sending.'}</p>
           </div>}
           <label>Tip de comunicare — alege sau scrie tu

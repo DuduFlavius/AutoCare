@@ -1,7 +1,7 @@
 name: Native GPS builds
 on:
   push:
-    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated]
+    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated, audit/rca-gps-play-20261117]
     paths: ["mobile/**", ".github/workflows/native-build.yml"]
   pull_request:
     branches: [feature/autocare-ai-integrated, feature/autocare-desktop-premium-20261102, feature/autocare-native-gps-20261104]
@@ -36,7 +36,8 @@ jobs:
           export JAVA_HOME="$JAVA_HOME_21_X64"
           export PATH="$JAVA_HOME/bin:$PATH"
           cd mobile/android
-          ./gradlew :app:assembleDebug :app:bundleRelease :app:lintRelease :app:testDebugUnitTest
+          ./gradlew :app:assembleDebug :app:lintRelease :app:testDebugUnitTest
+          ./gradlew :app:bundleRelease -PautocareDistribution=play
       - name: Verify production Firebase release compilation
         run: |
           cp mobile/firebase/google-services.production.json mobile/android/app/google-services.json

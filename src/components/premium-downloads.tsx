@@ -1,4 +1,5 @@
 'use client';
+import {PremiumDateInput} from './premium-date-input';
 import { useState } from 'react';
 import { Download, FileText, Table2 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
@@ -89,8 +90,8 @@ export default function PremiumDownloads({
           <option value="expense">{en ? 'Expenses' : 'Cheltuieli'}</option>
         </select>
       </label>
-      <label>{en ? 'From' : 'De la'}<input type="date" value={from} onChange={event => setFrom(event.target.value)}/></label>
-      <label>{en ? 'To' : 'Până la'}<input type="date" value={to} onChange={event => setTo(event.target.value)}/></label>
+      <label>{en ? 'From' : 'De la'}<PremiumDateInput type="date" value={from} onChange={event => setFrom(event.target.value)}/></label>
+      <label>{en ? 'To' : 'Până la'}<PremiumDateInput type="date" value={to} onChange={event => setTo(event.target.value)}/></label>
       </div>
       {invalidRange && <p role="alert">{en ? 'The end date must follow the start date.' : 'Data finală trebuie să fie egală cu sau după data de început.'}</p>}
       <div className="ac-premium-download-actions">

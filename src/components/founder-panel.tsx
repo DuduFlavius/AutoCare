@@ -1,4 +1,8 @@
 'use client';
+import FeedbackWorkspace from './feedback-workspace';
+import './feedback.css';
+import './filter-select.css';
+import {PremiumDateInput} from './premium-date-input';
 import {translateApplicationCopy} from '@/lib/application-language';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useState, useRef, type FormEvent } from 'react';
@@ -39,6 +43,7 @@ const nav = [
   ['Abonamente', Star],
   ['Prețuri', Tag],
   ['Chat și suport', MessageSquare],
+  ['Feedback utilizatori', MessageSquare],
   ['Jurnal de audit', ScrollText],
   ['Mail Center', Mail],
   ['Setări administrative', Settings],
@@ -159,7 +164,9 @@ const [tab, setTab] = useState('Utilizatori'),
       setBusy(false);
     }
   }
+  const feedbackDirty=useRef(false),feedbackSaving=useRef(false);
   function navigate(t: string) {
+    if(feedbackSaving.current||feedbackDirty.current&&!window.confirm(locale==='en-GB'?'Discard unsaved feedback changes?':'Renunți la modificările nesalvate din feedback?'))return;
     setTab(t);
     setPage(1);
     setQ('');
@@ -712,7 +719,7 @@ const [tab, setTab] = useState('Utilizatori'),
                     {duration === 'custom' && (
                       <label>
                         Data și ora expirării · ora dispozitivului
-                        <input name="expiresAt" type="datetime-local" required />
+                        <PremiumDateInput name="expiresAt" type="datetime-local" required />
                       </label>
                     )}
                     <label>
@@ -919,7 +926,8 @@ const [tab, setTab] = useState('Utilizatori'),
             </div>
           </section>
         )}
-        {tab === 'Chat și suport' && <SupportChat role="founder" />}
+        {tab === 'Chat și suport' && <SupportChat role="founder" onFeedback={()=>setTab('Feedback utilizatori')} />}
+        {tab==='Feedback utilizatori'&&<FeedbackWorkspace admin onExit={()=>setTab('Utilizatori')} onDirty={value=>{feedbackDirty.current=value;}} onSaving={value=>{feedbackSaving.current=value;}}/>}
         {tab === 'Jurnal de audit' && (
           <section className="card">
             <form className="founder-search" onSubmit={search}>

@@ -1,4 +1,7 @@
 'use client';
+import {FilterSelect} from './filter-select';
+import {PremiumDateInput} from './premium-date-input';
+import {PremiumAttachment} from './premium-attachment';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import { useRef, useState, type FormEvent } from 'react';
 import OperationAlerts from './operation-alerts';
@@ -10,7 +13,7 @@ import ServiceDetailFields, {
   serializeServiceDetails,
   parseServiceDetails,
 } from './service-detail-fields';
-import { Files, Wallet, Wrench, Paperclip, ChevronDown } from 'lucide-react';
+import { Files, Wallet, Wrench, ChevronDown } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type RecordItem = Data['records'][number];
@@ -22,6 +25,7 @@ export default function RecordEditor({
   planned = false,
   data,
   vehicleId,
+  initialCategory,
   onSave,
   onCancel,
   onDirty,
@@ -31,6 +35,7 @@ export default function RecordEditor({
   planned?: boolean;
   data: Data;
   vehicleId?: string;
+  initialCategory?: string;
   onSave: (payload: RecordPayload, file: File | null) => Promise<boolean>;
   onCancel: () => void;
   onDirty: (dirty: boolean) => void;
@@ -41,12 +46,12 @@ export default function RecordEditor({
   const plannedWork = kind === 'service' && (planned || parseServiceDetails(record?.parts ?? '').planned === '1');
   const formRef = useRef<HTMLFormElement>(null);
   const categoryDrafts = useRef<Record<string, string>>({});
-  const [choosing, setChoosing] = useState(!record);
+  const [choosing, setChoosing] = useState(!record&&!initialCategory);
 
   const cars = data.vehicles.filter((v) => !v.archived || v.id === record?.vehicleId);
   const [car, setCar] = useState(record?.vehicleId || vehicleId || cars[0]?.id || ''),
     [category, setCategory] = useState(
-      record?.category ||
+      record?.category || initialCategory ||
         (kind === 'document' ? 'RCA' : kind === 'service' ? 'Schimb ulei' : 'Combustibil'),
     ),
     [serviceKmInterval, setServiceKmInterval] = useState(
@@ -223,16 +228,16 @@ export default function RecordEditor({
         )}
         <label>
           Mașină
-          <select name="vehicleId" value={car} required onChange={(e) => setCar(e.target.value)}>
+          <FilterSelect name="vehicleId" value={car} required onChange={(e) => setCar(e.target.value)}>
             <option value="" disabled>
-              Alege mașina
+              {language === "en" ? "Choose a vehicle" : "Alege mașina"}
             </option>
             {cars.map((v) => (
               <option data-user-content key={v.id} value={v.id}>
                 {v.brand} {v.model} · {v.plate}
               </option>
             ))}
-          </select>
+          </FilterSelect>
         </label>
         <input name="category" value={category} readOnly hidden />
         {kind === 'service' && (
@@ -276,7 +281,7 @@ export default function RecordEditor({
               : kind === 'expense'
                 ? 'Data cheltuielii'
                 : plannedWork ? (en ? 'Scheduled work date' : 'Data planificată') : 'Data intervenției'}
-            <input
+            <PremiumDateInput
               type="date"
               name="date"
               required={kind !== 'document'}
@@ -295,7 +300,7 @@ export default function RecordEditor({
                   ? 'RCA expiry date · required'
                   : 'Data expirării RCA · obligatorie'
                 : 'Data expirării · dacă este cazul'}
-              <input
+              <PremiumDateInput
                 type="date"
                 name="expiresAt"
                 required={category === 'RCA'}
@@ -723,7 +728,7 @@ export default function RecordEditor({
                   )}
                   <label>
                     Data planificată
-                    <input name="expiresAt" type="date" defaultValue={record?.expiresAt || ''} />
+                    <PremiumDateInput name="expiresAt" type="date" defaultValue={record?.expiresAt || ''} />
                   </label>
                   {category !== 'Distribuție' && (
                     <label>
@@ -739,41 +744,14 @@ export default function RecordEditor({
                 </div>
               </div>
             )}
-            {kind !== 'document' && (
-              <label className="record-upload">
-                <Paperclip size={18} />
-                <span>Atașament opțional · PDF, JPEG sau PNG · max. 2 MB</span>
-                <input
-                  type="file"
-                  accept="application/pdf,image/jpeg,image/png"
-                  onChange={(e) => {
-                    setFile(e.target.files?.[0] || null);
-                    mark();
-                  }}
-                />
-                {file && <strong>{file.name}</strong>}
-              </label>
-            )}
+            {kind !== 'document' && <PremiumAttachment file={file} onChange={next=>{setFile(next);mark();}} disabled={busy}/>}
             <label>
               Notițe
               <textarea name="notes" maxLength={4000} defaultValue={record?.notes || ''} />
             </label>
           </div>
         </details>
-        {kind === 'document' && (
-          <label className="record-upload compact-upload">
-            <Paperclip size={18} />
-            <span>{file ? file.name : 'Atașează documentul · opțional'}</span>
-            <input
-              type="file"
-              accept="application/pdf,image/jpeg,image/png"
-              onChange={(e) => {
-                setFile(e.target.files?.[0] || null);
-                mark();
-              }}
-            />
-          </label>
-        )}
+        {kind === 'document' && <PremiumAttachment file={file} onChange={next=>{setFile(next);mark();}} disabled={busy}/>}
         {kind === 'service' && (
           <aside className="ac-service-summary" aria-label="Rezumatul intervenției">
             <h3>Rezumatul intervenției</h3>

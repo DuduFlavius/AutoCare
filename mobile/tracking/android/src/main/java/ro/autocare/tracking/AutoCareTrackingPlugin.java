@@ -16,11 +16,35 @@ import org.json.*;
 
 @CapacitorPlugin(name="AutoCareTracking",permissions={@Permission(alias="location",strings={Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION}),@Permission(alias="notifications",strings={Manifest.permission.POST_NOTIFICATIONS}),@Permission(alias="bluetooth",strings={Manifest.permission.BLUETOOTH_CONNECT})})
 public class AutoCareTrackingPlugin extends Plugin {
+    private byte[] pendingDocument;
+    @PluginMethod public synchronized void saveDocument(PluginCall call){
+        if(pendingDocument!=null){call.reject("Finish the current save first.");return;}
+        try{
+            String encoded=call.getString("data",""),mime=call.getString("mime","");
+            if(encoded.length()>2800000||!java.util.Arrays.asList("application/pdf","image/png","image/jpeg").contains(mime)){call.reject("Invalid document.");return;}
+            byte[] data=android.util.Base64.decode(encoded,android.util.Base64.DEFAULT);
+            boolean valid=mime.equals("application/pdf")?data.length>=5&&new String(data,0,5,java.nio.charset.StandardCharsets.US_ASCII).equals("%PDF-"):mime.equals("image/png")?data.length>=8&&java.util.Arrays.equals(java.util.Arrays.copyOf(data,8),new byte[]{(byte)137,80,78,71,13,10,26,10}):data.length>=3&&(data[0]&255)==255&&(data[1]&255)==216&&(data[2]&255)==255;
+            if(!valid||data.length>2097152){call.reject("Invalid document.");return;}
+            String name=call.getString("name","AutoCare document").replaceAll("[^\\p{L}\\p{N}._ -]","_");
+            if(name.length()>200)name=name.substring(0,200);
+            pendingDocument=data;
+            Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType(mime).putExtra(Intent.EXTRA_TITLE,name);
+            startActivityForResult(call,intent,"documentSaved");
+        }catch(Exception e){pendingDocument=null;call.reject("Unable to save document.","DOCUMENT_SAVE_FAILED");}
+    }
+    @ActivityCallback private synchronized void documentSaved(PluginCall call,ActivityResult result){
+        byte[] data=pendingDocument;pendingDocument=null;
+        if(call==null)return;
+        if(result.getResultCode()!=Activity.RESULT_OK){call.reject("Save cancelled.","DOCUMENT_SAVE_CANCELLED");return;}
+        if(data==null||result.getData()==null||result.getData().getData()==null){call.reject("Select the document again.","DOCUMENT_SAVE_FAILED");return;}
+        Uri destination=result.getData().getData();
+        new Thread(()->{try(java.io.OutputStream output=getContext().getContentResolver().openOutputStream(destination,"w")){if(output==null)throw new java.io.IOException("No output stream");output.write(data);JSObject value=new JSObject();value.put("saved",true);call.resolve(value);}catch(Exception e){call.reject("Unable to save document.","DOCUMENT_SAVE_FAILED");}}).start();
+    }
     @PluginMethod public void appVersion(PluginCall call){
         try{android.content.pm.PackageInfo info=getContext().getPackageManager().getPackageInfo(getContext().getPackageName(),0);JSObject value=new JSObject();value.put("version",info.versionName);value.put("versionCode",Build.VERSION.SDK_INT>=28?info.getLongVersionCode():info.versionCode);call.resolve(value);}catch(Exception e){call.reject("Unable to read app version",e);}
     }
     @PluginMethod public void openAndroidUpdate(PluginCall call){
-        try{if(TrackingStore.read(getContext()).optBoolean("active")){call.reject("Stop and save GPS before installing an update");return;}Uri uri=Uri.parse(call.getString("url",""));if(!"https".equals(uri.getScheme())||!"autocare-premium.vercel.app".equals(uri.getHost())||uri.getPath()==null||!uri.getPath().matches("/downloads/AutoCare-[0-9.]+\\.apk")){call.reject("Invalid update URL");return;}getActivity().startActivity(new Intent(Intent.ACTION_VIEW,uri).addCategory(Intent.CATEGORY_BROWSABLE));call.resolve();}catch(Exception e){call.reject("Unable to open Android installer",e);}
+        try{if(TrackingStore.read(getContext()).optBoolean("active")){call.reject("Stop and save GPS before installing an update");return;}Uri uri=Uri.parse(call.getString("url",""));if(!"https".equals(uri.getScheme())||!java.util.Arrays.asList("www.autocareapp.ro","autocareapp.ro","autocare-premium.vercel.app").contains(uri.getHost())||uri.getPath()==null||!uri.getPath().matches("/downloads/AutoCare-[0-9.]+\\.apk")){call.reject("Invalid update URL");return;}getActivity().startActivity(new Intent(Intent.ACTION_VIEW,uri).addCategory(Intent.CATEGORY_BROWSABLE));call.resolve();}catch(Exception e){call.reject("Unable to open Android installer",e);}
     }
     private PluginCall pairing;
     private ActivityResultLauncher<IntentSenderRequest> chooser;
@@ -30,7 +54,7 @@ public class AutoCareTrackingPlugin extends Plugin {
         if(getContext().getSharedPreferences("autocare-location-consent",0).getBoolean("disclosed-v1",false))return true;
         getActivity().runOnUiThread(() -> {
             boolean en=getContext().getResources().getConfiguration().getLocales().get(0).getLanguage().equals("en");
-            new android.app.AlertDialog.Builder(getActivity())
+            android.app.AlertDialog disclosure = new android.app.AlertDialog.Builder(getActivity(), android.R.style.Theme_Material_Dialog_Alert)
               .setTitle(en?"Location in the background":"Localizarea în fundal")
               .setMessage(en?"AutoCare collects location data to record your route, calculate driving distance and run AutoDrive, even when the app is closed or not in use. Tracking starts only when you press Start GPS or enable AutoDrive for your car. Route coordinates stay on this device; distance and trip times sync to your account when the app is reopened. You can stop GPS from the app or its notification and disable AutoDrive. Location is not used for advertising.":"AutoCare colectează date de locație pentru înregistrarea traseului, calcularea distanței și AutoDrive, inclusiv când aplicația este închisă sau nu este utilizată. Urmărirea pornește doar când apeși Pornește GPS sau activezi AutoDrive pentru mașina ta. Coordonatele traseului rămân pe dispozitiv; distanța și orele călătoriei se sincronizează în cont când redeschizi aplicația. Poți opri GPS-ul din aplicație sau notificare și poți dezactiva AutoDrive. Locația nu este folosită pentru publicitate.")
               .setPositiveButton(en?"Continue":"Continuă",(dialog,which)->{
@@ -39,7 +63,17 @@ public class AutoCareTrackingPlugin extends Plugin {
               })
               .setNegativeButton(en?"Not now":"Nu acum",(dialog,which)->call.reject(en?"Location setup cancelled.":"Configurarea locației a fost anulată.","LOCATION_CONSENT_CANCELLED"))
               .setOnCancelListener(dialog->call.reject("Location setup cancelled.","LOCATION_CONSENT_CANCELLED"))
-              .show();
+              .create();
+            disclosure.setOnShowListener(ignored -> {
+                if(disclosure.getWindow()!=null)disclosure.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.rgb(17,19,43)));
+                android.widget.TextView message=disclosure.findViewById(android.R.id.message);
+                if(message!=null){message.setTextColor(android.graphics.Color.rgb(236,239,255));message.setTextSize(16);}
+                for(int which:new int[]{android.content.DialogInterface.BUTTON_POSITIVE,android.content.DialogInterface.BUTTON_NEGATIVE}){
+                    android.widget.Button button=disclosure.getButton(which);
+                    button.setTextColor(android.graphics.Color.rgb(211,196,255));button.setTextSize(16);button.setAllCaps(false);button.setMinHeight((int)(48*getContext().getResources().getDisplayMetrics().density));
+                }
+            });
+            disclosure.show();
         });
         return false;
     }
@@ -49,7 +83,7 @@ public class AutoCareTrackingPlugin extends Plugin {
         permissionResult(call);
     }
     @PermissionCallback private void permissionResult(PluginCall call){
-        if(getPermissionState("location")!=PermissionState.GRANTED){call.reject("Permite locația precisă pentru a porni GPS-ul.");return;}
+        if(getContext().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED){call.reject("Permite locația precisă pentru a porni GPS-ul. Activează Folosește locația precisă în setările AutoCare.","PRECISE_LOCATION_REQUIRED");return;}
         if(android.os.Build.VERSION.SDK_INT>=33&&getPermissionState("notifications")!=PermissionState.GRANTED){requestPermissionForAlias("notifications",call,"notificationResult");return;}
         beginTracking(call);
     }

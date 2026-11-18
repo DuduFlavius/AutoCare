@@ -115,10 +115,10 @@ test('01 Registration, email verification, login, session and wrong password', a
     password: 'correct-test-password-123',
   });
   assert.equal(r.status, 403);
-  const url = mail[0].text.match(/http:\/\/localhost:3000\/api\/auth\/verify-email[^\s]+/)![0];
+  const otp = mail[0].text.match(/este: (\d{6})/)![1];
   assert.ok(mail[0].html.includes('text/html') || mail[0].html.includes('<!doctype html>'));
-  assert.ok(mail[0].html.includes('Confirmă adresa de email'));
-  r = await auth().handler(new Request(url));
+  assert.ok(mail[0].html.includes('Codul tău de verificare'));
+  r = await authReq('email-otp/verify-email',{email:'alice@example.invalid',otp});
   assert.ok([200, 302].includes(r.status));
   r = await authReq('sign-in/email', {
     email: 'alice@example.invalid',
@@ -868,13 +868,7 @@ test('21 Account deletion requires email identity confirmation and invalidates t
     password: 'remove-test-password-123',
   });
   assert.equal(r.status, 200);
-  await auth().handler(
-    new Request(
-      mail[mail.length - 1].text.match(
-        /http:\/\/localhost:3000\/api\/auth\/verify-email[^\s]+/,
-      )![0],
-    ),
-  );
+  await authReq('email-otp/verify-email',{email:'remove@example.invalid',otp:mail.at(-1)!.text.match(/este: (\d{6})/)![1]});
   r = await authReq('sign-in/email', {
     email: 'remove@example.invalid',
     password: 'remove-test-password-123',

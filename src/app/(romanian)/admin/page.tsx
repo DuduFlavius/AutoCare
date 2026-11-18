@@ -1,3 +1,6 @@
+import {AdminFeedbackPanel} from '@/components/feedback-workspace';
+import '@/components/feedback.css';
+import '@/components/filter-select.css';
 import AdminLocale from '@/components/admin-locale';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -19,7 +22,7 @@ export default async function FounderPage() {
   try {
     const actor = await requireMailStaff(session.user.id);
     if (actor.role === 'assistant') return <AdminLocale><main className="founder-shell mail-staff-shell"><a className="button" href="/cont">Înapoi în garaj</a><SupportChat role="assistant" /></main></AdminLocale>;
-    if (actor.role !== 'founder') return <AdminLocale><main className="founder-shell mail-staff-shell"><a className="button" href="/cont">Înapoi în garaj</a><MailCenter /></main></AdminLocale>;
+    if (actor.role !== 'founder') return <AdminLocale><main className="founder-shell mail-staff-shell"><a className="button" href="/cont">Înapoi în garaj</a><AdminFeedbackPanel/><MailCenter /></main></AdminLocale>;
     await requireFounder(session.user.id);
   } catch {
     return (

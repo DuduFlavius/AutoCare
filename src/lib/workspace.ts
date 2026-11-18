@@ -1,15 +1,18 @@
 export const mobileWorkspaceSections = [
   { id: 'Dashboard', ro: 'Acasă', en: 'Home' },
   { id: 'Documente', ro: 'Documente', en: 'Documents' },
+  { id: 'RCA & Rovinietă', ro: 'RCA & Rovinietă', en: 'RCA & Road vignette' },
   { id: 'Cheltuieli', ro: 'Istoric', en: 'History' },
   { id: 'Cont', ro: 'Setări', en: 'Settings' },
 ] as const;
 export const workspaceSections = [
+  {id:'Feedback',ro:'Trimite feedback',en:'Send feedback',group:'help',icon:'support'},
   { id: 'Cont', ro: 'Cont', en: 'Account', group: 'account', icon: 'settings' },
   { id: 'Dashboard', ro: 'Acasă', en: 'Home', group: 'overview', icon: 'home' },
   { id: 'Garaj', ro: 'Garajul meu', en: 'My garage', group: 'garage', icon: 'car' },
   { id: 'AutoCare AI', ro: 'AutoCare AI', en: 'AutoCare AI', group: 'garage', icon: 'premium' },
   { id: 'Documente', ro: 'Documente', en: 'Documents', group: 'garage', icon: 'files' },
+  { id: 'RCA & Rovinietă', ro: 'RCA & Rovinietă', en: 'RCA & Road vignette', group: 'garage', icon: 'files' },
   {
     id: 'Istoric auto',
     ro: 'Istoric auto',
@@ -62,7 +65,7 @@ export function normalizeWorkspaceTab(value: string | null | undefined) {
     'Garajul meu': 'Garaj',
   };
   const tab = value ? aliases[value] || value : 'Dashboard';
-  return workspaceSections.some((s) => s.id === tab) || tab === 'Administrare' ? tab : 'Dashboard';
+  return workspaceSections.some((s) => s.id === tab) || tab === 'Administrare' || tab === 'Feedback utilizatori' ? tab : 'Dashboard';
 }
 export function workspaceHref(path: string, tab: string, vehicle?: string | null) {
   const url = new URL(path, 'https://autocare.invalid');

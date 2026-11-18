@@ -1,3 +1,5 @@
+import * as feedback from '@/lib/feedback';
+import {documentDownloadName,documentDisposition} from '@/lib/document-presentation';
 import {accountPreferences,accountPreferencesKey,accountPreferencesSchema} from '@/lib/account-preferences';
 import {playBillingConfigured,playProducts,playAccountId,verifyPlayPurchase} from '@/lib/play-billing';
 import {nativePushConfigured} from '@/lib/native-push';
@@ -151,6 +153,36 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     const uid = sess.user.id;
     await svc.assertActiveAccount(uid);
     await rate(uid);
+    if(path[0]==='feedback'){
+      const params=new URL(req.url).searchParams;
+      const publish=(result:{noticeIds:string[]})=>{if(result.noticeIds.length)after(()=>feedback.deliverFeedbackNotices(result.noticeIds).catch(()=>console.error(JSON.stringify({event:'feedback_notification_failed'}))));};
+      if(route==='feedback'&&method==='GET')return json(await feedback.listFeedback(uid,params));
+      if(route==='feedback'&&method==='POST'){
+        let payload:unknown;const files:feedback.ScreenshotUpload[]=[];
+        if(req.headers.get('content-type')?.startsWith('multipart/form-data')){
+          const bytes=await bounded(req,4300000);
+          const data=await new Response(bytes,{headers:{'Content-Type':req.headers.get('content-type')!}}).formData();
+          payload=JSON.parse(String(data.get('payload')||'null'));
+          const screenshots=data.getAll('screenshots');
+          if(screenshots.length>2)throw new svc.AppError(400,'FEEDBACK_FILE_COUNT');
+          for(const file of screenshots){if(!(file instanceof File)||file.size>2097152)throw new svc.AppError(413,'FEEDBACK_FILE_SIZE');files.push({bytes:Buffer.from(await file.arrayBuffer())});}
+        }else payload=await body(req);
+        const result=await feedback.createFeedback(uid,payload,files);publish(result);return json(result,result.duplicate?200:201);
+      }
+      if(route==='feedback/statistics'&&method==='GET')return json(await feedback.feedbackStatistics(uid));
+      if(route==='feedback/notices'&&method==='GET')return json(await feedback.feedbackNotices(uid));
+      if(route==='feedback/invitation'&&method==='GET')return json(await feedback.feedbackInvitation(uid));
+      if(route==='feedback/invitation'&&method==='POST'){const input=z.object({action:z.enum(['shown','dismiss'])}).strict().parse(await body(req));return json(await feedback.feedbackInvitation(uid,input.action));}
+      if(path[1]==='files'&&path.length===3&&method==='GET'){
+        const file=await feedback.feedbackFile(uid,path[2]);
+        return new Response(Buffer.from(file.data,'base64'),{headers:{'Content-Type':file.mime,'Content-Disposition':`inline; filename="${file.name}"`,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow','Content-Security-Policy':"default-src 'none'; sandbox"}});
+      }
+      if(path.length===2&&method==='GET')return json(await feedback.readFeedback(uid,path[1]));
+      if(path.length===2&&method==='PATCH'){const result=await feedback.updateFeedback(uid,path[1],await body(req));publish(result);return json(result);}
+      if(path.length===3&&path[2]==='read'&&method==='POST')return json(await feedback.markFeedbackRead(uid,path[1]));
+      if(path.length===3&&path[2]==='replies'&&method==='POST'){const result=await feedback.replyFeedback(uid,path[1],await body(req));publish(result);return json(result,201);}
+      return json({error:'Ruta nu există.'},404);
+    }
     if (route === 'preferences/language') {
       if (method === 'GET') return json({language:await userLanguage(uid)});
       if (method === 'PUT') {
@@ -543,6 +575,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       }
     }
     if (path[0] === 'records') {
+      if (method === 'DELETE' && path.length === 3 && path[2] === 'permanent') { const input=z.object({confirmation:z.literal('DELETE'),revision:z.number().int().positive()}).strict().parse(await body(req)); return json(await svc.deleteRecord(uid,uuid.parse(path[1]),input.revision)); }
       if (method === 'POST' && path.length === 3 && path[2] === 'restore') { await svc.restoreRecord(uid, uuid.parse(path[1])); return json({ok:true}); }
       if (method === 'POST' && path.length === 1)
         return json(await svc.saveRecord(uid, await body(req)), 201);
@@ -584,16 +617,20 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     }
     if (path[0] === 'files' && path.length === 2) {
       const file = await svc.getFile(uid, uuid.parse(path[1]));
-      if (method === 'GET')
+      if (method === 'GET') {
+        const record=await svc.ownedRecord(uid,file.recordId);
+        const vehicle=await svc.ownedVehicle(uid,record.vehicleId);
+        const name=documentDownloadName(record,vehicle,file.mime);
         return new Response(Buffer.from(file.data, 'base64'), {
           headers: {
             'Content-Type': file.mime,
-            'Content-Disposition': `${new URL(req.url).searchParams.get('view') === '1' ? 'inline' : 'attachment'}; filename*=UTF-8''${encodeURIComponent(file.name)}`,
+            'Content-Disposition': documentDisposition(name,new URL(req.url).searchParams.get('view')==='1'),
             'Cache-Control': 'private, no-store',
             'X-Robots-Tag': 'noindex',
             'X-Content-Type-Options': 'nosniff',
           },
         });
+      }
       if (method === 'DELETE') {
         await db()
           .delete(s.files)
@@ -702,6 +739,10 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           .from(s.recordHistory)
           .where(eq(s.recordHistory.userId, uid));
         const attachments = await db().select().from(s.files).where(eq(s.files.userId, uid));
+        const ownFeedback=await db().select().from(s.feedbackItems).where(eq(s.feedbackItems.userId,uid));
+        const feedbackIds=ownFeedback.map(row=>row.id);
+        const feedbackReplies=feedbackIds.length?await db().select().from(s.feedbackReplies).where(inArray(s.feedbackReplies.feedbackId,feedbackIds)):[];
+        const feedbackFiles=feedbackIds.length?await db().select().from(s.feedbackFiles).where(inArray(s.feedbackFiles.feedbackId,feedbackIds)):[];
         const invoices = await db().select().from(s.invoices).where(eq(s.invoices.userId, uid));
         const photos = await db()
           .select()
@@ -734,6 +775,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               supportMessages,
               history,
               attachments,
+              feedback:ownFeedback, feedbackReplies, feedbackFiles,
               invoices,
               photos,
               sessions,

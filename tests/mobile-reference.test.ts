@@ -18,6 +18,6 @@ test('mobile home and document vault show owner data, no stock BMW or pretend va
  assert.match(vault,/Termen necunoscut/);assert.match(vault,/Adaugă data de expirare/);assert.doesNotMatch(vault,/api\/v1\/files\//);assert.doesNotMatch(vault,/status=&|vehicleId=&|<img|BMW/);
  assert.match(vault,/kind=document/);assert.match(vault,/CSV/);assert.match(vault,/PDF/);
 });
-test('last reference uses four destinations, garage remains a real reachable module',()=>{
- assert.deepEqual(mobileWorkspaceSections.map(section=>section.id),['Dashboard','Documente','Cheltuieli','Cont']);
+test('mobile navigation includes the renewal center among five destinations, garage remains a real reachable module',()=>{
+ assert.deepEqual(mobileWorkspaceSections.map(section=>section.id),['Dashboard','Documente','RCA & Rovinietă','Cheltuieli','Cont']);
 });

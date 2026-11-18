@@ -1,0 +1,18 @@
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio button.ac-action-trigger{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:44px!important;min-height:44px!important;padding:9px!important;border:1px solid #7a6b9d!important;border-radius:12px!important;background:#292640!important;color:#f3edff!important;box-shadow:inset 0 1px #ffffff0a!important}
+ html body .app-shell.ac-workspace.ac-studio .record-form-footer>button:not(.primary){background:#302b48!important;border:1px solid #9b8db8!important;color:#fff!important;-webkit-text-fill-color:#fff!important;opacity:1!important;min-height:46px!important;padding:11px 18px!important}
+ html body .app-shell.ac-workspace.ac-studio .record-form-footer>button:disabled{opacity:.5!important}
+ html body .app-shell.ac-workspace.ac-studio label>.ac-filter-select{flex:none!important;min-height:0!important;height:auto!important}
+}
+html body .ac-action-popover{position:fixed;z-index:10060;display:grid;gap:9px;box-sizing:border-box;padding:10px;border:1px solid #8774a7;border-radius:18px;background:linear-gradient(145deg,#28263f,#1b2035);color:#f0edff;box-shadow:0 18px 60px #03061299;overflow:auto;overscroll-behavior:contain;font:500 14px/1.5 Inter,'Segoe UI',sans-serif;color-scheme:dark}
+html body .ac-action-popover[hidden]{display:none!important}
+html body .ac-action-popover header{display:flex;align-items:center;justify-content:space-between;padding:2px 3px 9px;border-bottom:1px solid #81729555;gap:10px}
+html body .ac-action-popover header strong{font-size:13px;color:#d3c9e7;letter-spacing:.04em}
+html body .ac-action-popover :is(button,a){display:flex;align-items:center;gap:10px;justify-content:flex-start;min-height:44px;width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid transparent;border-radius:10px;background:transparent;color:#f4efff;-webkit-text-fill-color:currentColor;font:600 14px/1.5 Inter,'Segoe UI',sans-serif;text-align:start;text-decoration:none;white-space:normal;cursor:pointer}
+html body .ac-action-popover :is(button,a):is(:hover,:focus-visible){outline:0;background:#403556;border-color:#a38bc8}
+html body .ac-action-popover :is(button,a):disabled{opacity:.45;cursor:default}
+html body .ac-action-popover .ac-action-close{width:36px;min-height:36px;justify-content:center;padding:5px;background:#393149;border-color:#89779d}
+.ac-action-options{display:grid;gap:3px}.ac-action-options .ac-action-danger{color:#ffcade!important;border-top-color:#b88a9b55!important;margin-top:6px}
+.ac-action-options .ac-action-file{display:grid;gap:8px;padding:12px 2px 4px;border-top:1px solid #73617f66;margin-top:6px}.ac-action-file>strong{font-size:12px;line-height:1.6;color:#d6cce8;overflow-wrap:anywhere;padding-inline:10px}
+.ac-action-file .ac-document-actions{display:flex;gap:6px;padding-inline:6px}.ac-action-file .ac-document-actions>button{flex:1;justify-content:center;background:#34304a;border-color:#847199}
+@media(max-width:600px){html body .ac-action-popover{border-radius:18px;padding:9px}html body .ac-action-popover :is(button,a){min-height:46px}}

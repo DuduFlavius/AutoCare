@@ -1,6 +1,7 @@
 import { normalizeWorkspaceTab } from '@/lib/workspace';
 import { notFound } from 'next/navigation';
 import Dashboard from '@/components/dashboard';
+import {AuthForm} from '@/components/auth-form';
 import PublicHome from '@/app/(romanian)/page';
 import type { dashboard } from '@/lib/service';
 import { documentStatus } from '@/lib/config';
@@ -9,7 +10,7 @@ export const metadata = { title: 'Previzualizare design', robots: { index: false
 export default async function DesignPreview({
   searchParams,
 }: {
-  searchParams: Promise<{ echipa?: string; device?:string; tab?:string; plan?:string; garage?:string; view?:string; drive?:string; vehicle?:string }>;
+  searchParams: Promise<{ echipa?: string; device?:string; tab?:string; plan?:string; garage?:string; view?:string; authMode?:string; drive?:string; vehicle?:string }>;
 }) {
   const previewOptions = await searchParams;
   if (process.env.VERCEL_ENV === 'production' || process.env.RENDER === 'true') notFound();
@@ -127,10 +128,20 @@ export default async function DesignPreview({
     summary: { monthBani: 0, annualBani: 0, monthly: [], categories: {}, costPerKm: null, km: 0 },
     pushPublicKey: null,
   };
+  // Synthetic financial history for filter/sort verification; preview is disabled in production.
+  if(previewOptions.view==='finance') {
+    const example=records[0];
+    const costs=[
+      {id:'design-fuel',category:'Combustibil',title:'Alimentare de test',amountBani:25000,date:today,cancelled:false},
+      {id:'design-parking',category:'Parcare',title:'Parcare de test',amountBani:2000,date:today,cancelled:false},
+      {id:'design-archived-cost',category:'Combustibil',title:'Cheltuială arhivată de test',amountBani:10000,date:today,cancelled:true},
+    ];
+    data.records.push(...costs.map(cost=>({...example,...cost,kind:'expense',expiresAt:null,status:documentStatus(null,now)})));
+  }
   if(previewOptions.garage==='empty'){data.vehicles=[];data.records=[];data.photos=[];}
   if(previewOptions.garage==='multi'){data.vehicles.push({...vehicles[0],id:'design-car-2',brand:'A doua',model:'Mașină',plate:'DEMO 02',odometer:83000});}
   const previewVehicle = data.vehicles.find(vehicle => vehicle.id === previewOptions.vehicle)?.id;
-  const application=previewOptions.view==='public'?<PublicHome/>:<Dashboard name="Vizitator" previewData={data} initialTab={normalizeWorkspaceTab(previewOptions.tab)} initialDrive={previewOptions.drive} initialVehicle={previewVehicle} />;
+  const application=previewOptions.view==='auth'?<AuthForm verificationPreview={previewOptions.authMode==='verificare'} mode={['autentificare','inregistrare','recuperare-parola','resetare-parola'].includes(previewOptions.authMode||'')?previewOptions.authMode!:'autentificare'}/>:previewOptions.view==='public'?<PublicHome/>:<Dashboard name="Vizitator" previewData={data} initialTab={normalizeWorkspaceTab(previewOptions.tab)} initialDrive={previewOptions.drive} initialVehicle={previewVehicle} />;
   const deviceWidth = previewOptions.device==='phone'?390:previewOptions.device==='small'?320:previewOptions.device==='tablet'?768:null;
   const frameParams=new URLSearchParams(Object.entries(previewOptions).filter(([key,value])=>key!=='device'&&typeof value==='string') as [string,string][]);
   if(deviceWidth) return <div style={{padding:24,background:'#eaf0f8',minHeight:'100vh'}}><p style={{textAlign:'center'}}>AutoCare · Verificare interfață · Date fictive · {deviceWidth}px</p><iframe title="AutoCare — verificare responsive cu date fictive" src={'/previzualizare?'+frameParams.toString()} style={{display:'block',width:deviceWidth,maxWidth:'100%',height:844,margin:'20px auto',border:'1px solid #cedaeb',borderRadius:22,background:'white'}}/></div>;
