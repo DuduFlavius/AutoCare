@@ -32,7 +32,7 @@ export const englishEmailCopy: Record<string, {title:string;body:string;cta:stri
 ['support_resolved','Review the solution to your request','Read the team reply and check the proposed solution. Reply in your support conversation if the issue persists.','Open account'],
 ['document_update','Review your vehicle documents','Review the documents in your garage and update files or details that have changed.','Open account'],
 ['premium_grant','Review your Premium access','Check the dates and conditions of your granted Premium access. Current details are available under Subscription.','Open account'],
-['feedback','How was your AutoCare experience?','Tell us what works well and what you would improve. Contact us through the support center.','Open account'],
+['feedback','How was your AutoCare experience?','Tell us what works well and what you would improve. Share your opinion in the Feedback section of your account.','Open account'],
 ['feature_news','Discover what is new in AutoCare','Review updates available in your account and discover features that help organize your garage.','Open account'],
 ['special_offer','Discover Premium options','Review the offers and prices in your account. The Subscription section shows the applicable conditions and offer period.','Open account'],
 ['gmail_test','A connection ready for the road','The Gmail API connection works. This email was manually requested by the Founder. Check automation status in Mail Center.','Open AutoCare'],

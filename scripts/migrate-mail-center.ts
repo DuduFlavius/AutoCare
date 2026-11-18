@@ -14,7 +14,7 @@ async function main() {
     if (url.hostname.endsWith('.neon.tech')) url.hostname = url.hostname.replace('-pooler.', '.');
     process.env.DATABASE_URL = url.toString();
   }
-  const migrations = ['0010_mail_center.sql', '0011_mechanic_shares.sql', '0012_subscription_extensions.sql', '0013_ai_support_workspace.sql', '0014_ai_conversations.sql', '0015_manual_reading_notes.sql', '0016_native_push.sql', '0017_play_subscriptions.sql', '0018_account_alert_defaults.sql', '0019_feedback.sql', '0020_email_identity.sql'];
+  const migrations = ['0010_mail_center.sql', '0011_mechanic_shares.sql', '0012_subscription_extensions.sql', '0013_ai_support_workspace.sql', '0014_ai_conversations.sql', '0015_manual_reading_notes.sql', '0016_native_push.sql', '0017_play_subscriptions.sql', '0018_account_alert_defaults.sql', '0019_feedback.sql', '0020_email_identity.sql', '0021_feedback_opinions.sql'];
   const sources = await Promise.all(migrations.map(name => readFile('migrations/' + name, 'utf8')));
   const source = sources.join('\n--> statement-breakpoint\n');
   await db().transaction(async (tx) => {

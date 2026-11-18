@@ -158,7 +158,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       const publish=(result:{noticeIds:string[]})=>{if(result.noticeIds.length)after(()=>feedback.deliverFeedbackNotices(result.noticeIds).catch(()=>console.error(JSON.stringify({event:'feedback_notification_failed'}))));};
       if(route==='feedback'&&method==='GET')return json(await feedback.listFeedback(uid,params));
       if(route==='feedback'&&method==='POST'){
-        let payload:unknown,files:feedback.ScreenshotUpload[]=[];
+        let payload:unknown;const files:feedback.ScreenshotUpload[]=[];
         if(req.headers.get('content-type')?.startsWith('multipart/form-data')){
           const bytes=await bounded(req,4300000);
           const data=await new Response(bytes,{headers:{'Content-Type':req.headers.get('content-type')!}}).formData();

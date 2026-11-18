@@ -13,7 +13,7 @@ import ServiceDetailFields, {
   serializeServiceDetails,
   parseServiceDetails,
 } from './service-detail-fields';
-import { Files, Wallet, Wrench, Paperclip, ChevronDown } from 'lucide-react';
+import { Files, Wallet, Wrench, ChevronDown } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type RecordItem = Data['records'][number];

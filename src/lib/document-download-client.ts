@@ -10,7 +10,7 @@ export async function downloadDocument(url:string,name:string){
  if(Capacitor.getPlatform()==='android'){
   const bytes=new Uint8Array(await blob.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
   try{await native.saveDocument({name,mime:blob.type.split(';')[0],data:btoa(binary)});return;}
-  catch(error){const code=error&&typeof error==='object'&&'code'in error?String(error.code):'';if(code==='DOCUMENT_SAVE_CANCELLED')return;if(code==='UNIMPLEMENTED'||code==='UNAVAILABLE')throw Error('Actualizează aplicația AutoCare pentru salvarea documentelor pe telefon.');throw Error('Documentul nu a putut fi salvat pe telefon. Reîncearcă.');}
+  catch(error){const code=error&&typeof error==='object'&&'code'in error?String(error.code):'';if(code==='DOCUMENT_SAVE_CANCELLED')return;if(code==='UNIMPLEMENTED'||code==='UNAVAILABLE')throw Error('Actualizează aplicația AutoCare pentru salvarea documentelor pe telefon.',{cause:error});throw Error('Documentul nu a putut fi salvat pe telefon. Reîncearcă.',{cause:error});}
  }
  const object=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=object;anchor.download=name;document.body.appendChild(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(object),60000);
 }

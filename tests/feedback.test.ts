@@ -1,7 +1,7 @@
 import {test,before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
-import {eq,sql} from 'drizzle-orm';
+import {eq} from 'drizzle-orm';
 import {migrate} from '../scripts/migrate';
 import {db,closeLocalDb} from '../src/lib/db';
 import * as s from '../src/lib/schema';
@@ -29,7 +29,7 @@ test('Feedback is free, atomic with screenshots, private and idempotent under re
 });
 test('Feedback rejects privilege injection, invalid ratings, oversized or executable files, duplicates and bursts',async()=>{
  await assert.rejects(()=>feedback.createFeedback(other,{...input(),status:'resolved',userId:uid}));
- await assert.rejects(()=>feedback.createFeedback(other,{...input(),rating:6}));await assert.rejects(()=>feedback.createFeedback(other,{...input(),message:'tiny'}));
+ await assert.rejects(()=>feedback.createFeedback(other,{...input(),rating:6}));await assert.rejects(()=>feedback.createFeedback(other,{...input(),message:' '}));
  for(const bytes of [Buffer.from('<svg onload="alert(1)"></svg>'),Buffer.from('%PDF-1.7'),Buffer.from('fake-image')])await assert.rejects(()=>feedback.createFeedback(other,input(),[{bytes}]),status(400));
  await assert.rejects(()=>feedback.createFeedback(other,input(),[{bytes:Buffer.alloc(2097153)}]),status(413));
  await assert.rejects(()=>feedback.createFeedback(other,input(),Array(3).fill({bytes:Buffer.from('bad')})),status(400));
@@ -78,9 +78,24 @@ test('Invitations require real usage, are claimed once, and dismissal/submission
  const claims=await Promise.all([feedback.feedbackInvitation(invited,'shown'),feedback.feedbackInvitation(invited,'shown')]);assert.equal(claims.filter(row=>row.eligible).length,1);
  await feedback.feedbackInvitation(invited,'dismiss');assert.equal((await feedback.feedbackInvitation(invited)).eligible,false);
 });
+test('Founder can read feedback authors for follow-up; ordinary users never receive author contact details',async()=>{
+ const own=await feedback.readFeedback(uid,id);assert.equal('owner' in own,false);
+ const asFounder=await feedback.readFeedback(founder,id);assert.deepEqual(asFounder.owner,{name:'Test user',email:uid+'@example.invalid'});
+ const asAdmin=await feedback.readFeedback(admin,id);assert.equal(asAdmin.owner?.email,uid+'@example.invalid');
+ await assert.rejects(()=>feedback.readFeedback(other,id),status(404));
+ const impostor=crypto.randomUUID();await db().insert(s.user).values({id:impostor,name:'Not owner',email:impostor+'@example.invalid',emailVerified:true});await db().insert(s.profiles).values({userId:impostor,role:'founder'});
+ await assert.rejects(()=>feedback.listFeedback(impostor,new URLSearchParams('scope=admin')),status(403));
+});
+
 test('Feedback translations cover every stored enum and account deletion cascades private data',async()=>{
  for(const [values,group] of [[feedback.feedbackCategories,copy('category')],[feedback.feedbackStatuses,copy('status')],[feedback.feedbackPriorities,copy('priority')],[feedback.feedbackAreas,copy('area')]] as const)for(const value of values)assert.equal(group[value as keyof typeof group]?.length,2);
  await db().delete(s.user).where(eq(s.user.id,uid));assert.equal((await db().select().from(s.feedbackFiles).where(eq(s.feedbackFiles.id,fileId))).length,0);assert.equal((await db().select().from(s.feedbackItems).where(eq(s.feedbackItems.id,id))).length,0);
  assert.equal((await db().select().from(s.feedbackNotices).where(eq(s.feedbackNotices.feedbackId,id))).length,0);
 });
 function copy(group:keyof Omit<typeof feedbackCopy,'error'>){return feedbackCopy[group] as Record<string,readonly[string,string]>;}
+
+test('Simple short opinions are accepted for free users without issue-report fields',async()=>{
+ const reviewer=crypto.randomUUID();await db().insert(s.user).values({id:reviewer,name:'Reviewer',email:reviewer+'@example.invalid',emailVerified:true});
+ const result=await feedback.createFeedback(reviewer,{clientId:crypto.randomUUID(),category:'experience',message:'E fain',rating:5});
+ const saved=await feedback.readFeedback(reviewer,result.id);assert.equal(saved.item.message,'E fain');assert.equal(saved.item.category,'experience');assert.equal(saved.files.length,0);
+});

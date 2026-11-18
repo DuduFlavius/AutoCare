@@ -4,7 +4,7 @@ import { technologyPages } from './public-technology';
 import type { Metadata } from 'next';
 import { origin, appName } from './config';
 export const siteDescription =
-  'Înregistrează călătorii GPS, urmărește kilometrajul și gestionează reviziile, documentele și cheltuielile mașinii în garajul digital AutoCare.';
+  'AutoCare: garaj digital pentru documente auto, expirări ITP, RCA și rovinietă, revizii, cheltuieli și kilometri GPS. Gestionează mașina pe telefon și desktop.';
 export const publicTopics = {
   'documente-auto': {
     title: 'Organizează documentele auto și urmărește expirarea',

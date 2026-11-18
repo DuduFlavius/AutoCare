@@ -560,11 +560,11 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
   }
   const [drill,setDrill]=useState<{ids:string[];label:string}|null>(null);
   const workspaceViews = useRef(new Map<string,{filter:string;query:string;recordState:string;categoryFilter:string;period:string;showArchived:boolean;scroll:number}>());
-  function navigate(t: string, historyMode: 'push' | 'none' = 'push', vehicle: string | null = null) {
+  function navigate(t: string, historyMode: 'push' | 'none' = 'push', vehicle: string | null = null, discardConfirmed=false) {
     t=normalizeWorkspaceTab(t);
 
     if (recordSaving || busy) return false;
-    if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?',locale==='ro-RO'?'ro':'en')))
+    if (recordDirty && !discardConfirmed && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?',locale==='ro-RO'?'ro':'en')))
       return false;
     workspaceViews.current.set(tab,{filter,query,recordState,categoryFilter,period,showArchived,scroll:window.scrollY});
     const view=workspaceViews.current.get(t);
@@ -1019,8 +1019,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               ) : null}
             </WorkspaceModuleHeader>}
             {!['Feedback','Feedback utilizatori'].includes(tab)&&<FeedbackNotice admin={['admin','superadmin','founder'].includes(data.profile.role)} preview={!!previewData} onOpen={()=>navigate(['admin','superadmin','founder'].includes(data.profile.role)?'Feedback utilizatori':'Feedback')}/>}
-            {tab==='Feedback'&&<FeedbackWorkspace preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>}
-            {tab==='Feedback utilizatori'&&(['admin','superadmin','founder'].includes(data.profile.role)?<FeedbackWorkspace admin preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>:<p role="alert">{language==='en'?'Administrator access required.':'Acces rezervat administratorilor.'}</p>)}
+            {tab==='Feedback'&&<FeedbackWorkspace onExit={()=>navigate('Cont','push',null,true)} onSupport={()=>navigate('Centru de suport','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>}
+            {tab==='Feedback utilizatori'&&(['admin','superadmin','founder'].includes(data.profile.role)?<FeedbackWorkspace admin onExit={()=>navigate('Cont','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>:<p role="alert">{language==='en'?'Administrator access required.':'Acces rezervat administratorilor.'}</p>)}
             <FeedbackInvitation enabled={tab==='Dashboard'&&!busy&&!modal&&!recordDirty&&!recordSaving} userId={data.profile.userId} preview={!!previewData} onOpen={()=>navigate('Feedback')}/>
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
             {drill && <div className="card between"><strong>{drill.label}</strong><button type="button" onClick={()=>setDrill(null)}>{language==='en'?'Show all':'Vezi toate'}</button></div>}

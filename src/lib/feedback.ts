@@ -10,7 +10,7 @@ export const feedbackCategories=['suggestion','problem','experience'] as const;
 export const feedbackStatuses=['new','review','progress','resolved','closed'] as const;
 export const feedbackPriorities=['normal','high','critical'] as const;
 export const feedbackAreas=['general','documents','gps','expenses','account','support','ai'] as const;
-export const feedbackInput=z.object({clientId:z.string().uuid(),category:z.enum(feedbackCategories),area:z.enum(feedbackAreas).default('general'),rating:z.number().int().min(1).max(5).nullable().default(null),message:z.string().trim().min(10).max(5000)}).strict();
+export const feedbackInput=z.object({clientId:z.string().uuid(),category:z.enum(feedbackCategories),area:z.enum(feedbackAreas).default('general'),rating:z.number().int().min(1).max(5).nullable().default(null),message:z.string().trim().min(2).max(5000)}).strict();
 export function isFeedbackAdmin(role:string){return ['admin','superadmin','founder'].includes(role);}
 async function actor(uid:string){await assertActiveAccount(uid);return {uid,admin:isFeedbackAdmin((await profile(uid)).role)};}
 async function access(uid:string,id:string){const who=await actor(uid);const item=(await db().select().from(s.feedbackItems).where(eq(s.feedbackItems.id,z.string().uuid().parse(id))))[0];if(!item||(!who.admin&&item.userId!==uid))throw new AppError(404,'FEEDBACK_NOT_FOUND');return {who,item};}
@@ -66,7 +66,8 @@ export async function readFeedback(uid:string,id:string){
   db().select({id:s.feedbackFiles.id,name:s.feedbackFiles.name,mime:s.feedbackFiles.mime,size:s.feedbackFiles.size}).from(s.feedbackFiles).where(eq(s.feedbackFiles.feedbackId,id)),
   db().select({id:s.feedbackEvents.id,action:s.feedbackEvents.action,details:s.feedbackEvents.details,createdAt:s.feedbackEvents.createdAt}).from(s.feedbackEvents).where(eq(s.feedbackEvents.feedbackId,id)).orderBy(s.feedbackEvents.createdAt,s.feedbackEvents.id),
  ]);
- return {item:{...item,userId:undefined,clientId:undefined,fingerprint:undefined},replies,files,events,admin:who.admin};
+ const owner=who.admin?(await db().select({name:s.user.name,email:s.user.email}).from(s.user).where(eq(s.user.id,item.userId)))[0]:undefined;
+ return {item:{...item,userId:undefined,clientId:undefined,fingerprint:undefined},replies,files,events,admin:who.admin,...(owner?{owner}:{})};
 }
 export async function updateFeedback(uid:string,id:string,input:unknown){
  const {who}=await access(uid,id);if(!who.admin)throw new AppError(403,'FEEDBACK_ADMIN_ONLY');

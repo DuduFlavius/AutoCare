@@ -5,6 +5,8 @@ export function attachmentError(file:{size:number;type:string;name:string},engli
  if(!['application/pdf','image/jpeg','image/png'].includes(file.type)&&!((file.type===''||file.type==='application/octet-stream')&&/\.(pdf|jpe?g|png)$/i.test(file.name)))return english?'Choose a PDF, JPEG or PNG.':'Alege un PDF, JPEG sau PNG.';
  return '';
 }
+// Control characters and Windows-reserved filename characters must be removed.
+// eslint-disable-next-line no-control-regex
 function safePart(value:string){return value.normalize('NFC').replace(/[\x00-\x1f\x7f<>:"/\\|?*]/g,' ').replace(/\s+/g,' ').trim().slice(0,70);}
 const stamp=(value:string|null|undefined)=>value&&/^\d{4}-\d{2}-\d{2}$/.test(value)?value.slice(8,10)+'.'+value.slice(5,7)+'.'+value.slice(0,4):null;
 export function documentDownloadName(record:{category:string;title?:string;date:string|null;expiresAt:string|null},vehicle:{plate:string},mime:string){

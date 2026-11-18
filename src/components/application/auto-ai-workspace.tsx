@@ -4,7 +4,7 @@ import {ActionMenu} from '../action-menu';
 import {PremiumDateInput} from '@/components/premium-date-input';
 
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, ArrowUpRight, FileScan, MapPin, Sparkles, Trash2, ShieldCheck, Copy, ChevronDown, MessageSquareText, Wrench, CalendarDays, BarChart3, CheckCheck, MoreHorizontal, Square, RotateCcw, ThumbsUp, ThumbsDown, Paperclip, History, CarFront, X, ArrowUp } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, FileScan, MapPin, Sparkles, Trash2, ShieldCheck, Copy, ChevronDown, MessageSquareText, Wrench, CalendarDays, BarChart3, CheckCheck, Square, RotateCcw, ThumbsUp, ThumbsDown, Paperclip, History, CarFront, X, ArrowUp } from 'lucide-react';
 import { conversationGroups, conversationKey, type AiTurn } from '@/lib/ai-conversations';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';

@@ -5,7 +5,7 @@ import {DocumentActions} from '../document-actions';
 
 import { MobileFinanceOverview } from './mobile-finance-overview';
 import { useMemo, useState, type FormEvent } from 'react';
-import { SlidersHorizontal, ArrowUpRight, BarChart3, CalendarDays, Download, Gauge, MoreHorizontal, Fuel, Wrench, ShieldCheck, CircleDot, Settings2, Files, Paperclip, Sparkles, Wallet } from 'lucide-react';
+import { SlidersHorizontal, ArrowUpRight, BarChart3, CalendarDays, Download, Gauge, Fuel, Wrench, ShieldCheck, CircleDot, Settings2, Files, Sparkles, Wallet } from 'lucide-react';
 import { budgetState, financeSignals, financeGroup, financeOverview, financialChange, type FinanceGroup } from '@/lib/finance-overview';
 import { filterRecords } from '@/lib/record-filters';
 import type { dashboard } from '@/lib/service';

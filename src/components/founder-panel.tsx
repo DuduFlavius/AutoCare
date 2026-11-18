@@ -927,7 +927,7 @@ const [tab, setTab] = useState('Utilizatori'),
           </section>
         )}
         {tab === 'Chat și suport' && <SupportChat role="founder" onFeedback={()=>setTab('Feedback utilizatori')} />}
-        {tab==='Feedback utilizatori'&&<FeedbackWorkspace admin onDirty={value=>{feedbackDirty.current=value;}} onSaving={value=>{feedbackSaving.current=value;}}/>}
+        {tab==='Feedback utilizatori'&&<FeedbackWorkspace admin onExit={()=>setTab('Utilizatori')} onDirty={value=>{feedbackDirty.current=value;}} onSaving={value=>{feedbackSaving.current=value;}}/>}
         {tab === 'Jurnal de audit' && (
           <section className="card">
             <form className="founder-search" onSubmit={search}>
