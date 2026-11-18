@@ -9,7 +9,8 @@ public final class AppLinkTarget {
   if(value==null)return null;
   try{
    URI uri=URI.create(value);
-   if(!"https".equalsIgnoreCase(uri.getScheme())||!"www.autocareapp.ro".equalsIgnoreCase(uri.getHost())||uri.getUserInfo()!=null||(uri.getPort()!=-1&&uri.getPort()!=443))return null;
+   boolean https="https".equalsIgnoreCase(uri.getScheme()),http="http".equalsIgnoreCase(uri.getScheme());
+   if((!https&&!http)||!"www.autocareapp.ro".equalsIgnoreCase(uri.getHost())||uri.getUserInfo()!=null||(uri.getPort()!=-1&&uri.getPort()!=(https?443:80)))return null;
    if("/cont".equals(uri.getPath()))return ORIGIN+"/cont"+(uri.getRawQuery()==null?"":"?"+uri.getRawQuery());
    if(!"/open-app".equals(uri.getPath()))return null;
    String next="/cont";boolean found=false;
