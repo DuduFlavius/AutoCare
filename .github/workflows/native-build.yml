@@ -142,7 +142,14 @@ jobs:
               if not match: raise SystemExit('Cannot verify Android signing identity')
               return match.group(1)
           built=pathlib.Path('mobile/android/app/build/outputs/apk/release/app-release.apk')
-          if certificate(folder/old_name)!=certificate(built): raise SystemExit('Android signing key differs from the existing public installer; update publication blocked')
+          release_certificate=certificate(built)
+          if certificate(folder/old_name)!=release_certificate: raise SystemExit('Android signing key differs from the existing public installer; update publication blocked')
+          associations=json.loads(pathlib.Path('public/.well-known/assetlinks.json').read_text())
+          fingerprints={fingerprint.replace(':','').lower() for entry in associations
+                        if 'delegate_permission/common.handle_all_urls' in entry['relation']
+                        and entry['target'].get('package_name')=='ro.autocare.garage'
+                        for fingerprint in entry['target']['sha256_cert_fingerprints']}
+          if release_certificate not in fingerprints: raise SystemExit('Android signing key is missing from the AutoCare App Links association')
           shutil.copyfile('mobile/android/app/build/outputs/apk/release/app-release.apk',folder/name)
           (folder/'android-release.json').write_text(json.dumps({'version':version,'versionCode':code,'url':f'/downloads/{name}'}))
           PYTHON
