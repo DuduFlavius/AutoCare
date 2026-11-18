@@ -171,7 +171,10 @@ export function renderEmail(template: EmailTemplate, input: TemplateInput = {}):
   const local=(ro:string,english:string)=>en?english:ro;
   const subject = ((!input.subject||input.subject===base.subject)?t.subject:input.subject).replace(/[\r\n]/g, ' ').slice(0, 180);
   const message = (!input.message||input.message===base.body)?t.body:translateApplicationCopy(input.message,en?'en':'ro');
-  const cta = (!input.ctaLabel||input.ctaLabel===base.cta)?t.cta:input.ctaLabel;
+  const isSecurityAction = template === 'verification' || template === 'password_reset';
+  const cta = isSecurityAction ? ((!input.ctaLabel||input.ctaLabel===base.cta)?t.cta:input.ctaLabel) : local('Deschide aplicația','Open the app');
+  // Keep signed verification/reset actions intact. Ordinary email links use the
+  // production app's in-scope /cont route so installed PWAs can handle them.
   const url = input.actionUrl || appLink(input.ctaPath || t.path);
   const parsed = new URL(url);
   if (
