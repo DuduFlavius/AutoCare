@@ -30,7 +30,7 @@ export default function InstallPage() {
   }
   return <main style={{ minHeight: '100dvh', background: 'linear-gradient(145deg,#081729,#142e50)', color: '#f2f7ff', padding: 'min(7vw,36px) 18px', fontFamily: 'system-ui,sans-serif' }}>
     <div style={{ maxWidth: 540, margin: '0 auto' }}>
-      <Link href="/cont" style={{ color: '#bad6ff', textDecoration: 'none', fontSize: 14 }}>← Înapoi la AutoCare</Link>
+      <Link href="/cont" style={{ color: '#bad6ff', textDecoration: 'none', fontSize: 14 }}>← Continuă pe website</Link>
       <div style={{ marginTop: 36, padding: 24, background: '#1b3758', border: '1px solid #42638a', borderRadius: 24 }}>
         <img src="/icon-192.png" alt="AutoCare" width={72} height={72} style={{ borderRadius: 18 }} />
         <h1 style={{ fontSize: 29, margin: '18px 0 8px' }}>AutoCare pe telefonul tău</h1>
@@ -40,6 +40,7 @@ export default function InstallPage() {
         {samsungBrowser && !installed && <p role="status" style={{ padding: 14, background: '#443820', borderRadius: 12, lineHeight: 1.6 }}>Pe Samsung Internet, instalarea poate genera un pachet Android vechi, blocat de Play Protect. Nu alege «Install anyway». Pentru instalarea gratuită, deschide această pagină în Google Chrome și folosește «Adaugă pe ecranul principal».</p>}
         {message && <p role="status">{message}</p>}
       </div>
+      <p style={{ textAlign: 'center', marginTop: 18 }}><Link href="/cont" style={{ display: 'inline-block', padding: '13px 20px', borderRadius: 12, border: '1px solid #7796c3', color: '#f2f7ff', textDecoration: 'none', fontWeight: 700 }}>Continuă pe website fără instalare →</Link></p>
       <section style={{ padding: '22px 5px', lineHeight: 1.75 }}>
         <h2 style={{ fontSize: 19 }}>Android — Samsung, Xiaomi, Motorola și altele</h2>
         <p>Deschide AutoCare direct în Chrome (nu Samsung Internet). Apasă meniul ⋮ și alege <strong>Instalează aplicația</strong> sau <strong>Adaugă pe ecranul principal</strong>. Confirmă instalarea.</p>
