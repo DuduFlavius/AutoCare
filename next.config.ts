@@ -7,7 +7,7 @@ const config: NextConfig = {
   async headers() {
     return [
       { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-store, max-age=0" }] },
-      ...['/api/:path*', '/cont', '/admin', '/start', '/previzualizare', '/dosar/:path*', '/autentificare', '/inregistrare', '/recuperare-parola', '/resetare-parola', '/en/sign-in', '/en/sign-up', '/en/forgot-password', '/en/reset-password'].map((source) => ({
+      ...['/api/:path*', '/open-app', '/cont', '/admin', '/start', '/previzualizare', '/dosar/:path*', '/autentificare', '/inregistrare', '/recuperare-parola', '/resetare-parola', '/en/sign-in', '/en/sign-up', '/en/forgot-password', '/en/reset-password'].map((source) => ({
         source,
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       })),
