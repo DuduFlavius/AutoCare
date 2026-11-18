@@ -1,9 +1,10 @@
 'use client';
+import {FilterSelect} from '../filter-select';
 import {DocumentActions} from '../document-actions';
 
 import { MobileFinanceOverview } from './mobile-finance-overview';
 import { useMemo, useState, type FormEvent } from 'react';
-import { ArrowUpRight, BarChart3, CalendarDays, Download, Gauge, MoreHorizontal, Fuel, Wrench, ShieldCheck, CircleDot, Settings2, Files, Paperclip, Sparkles, Wallet } from 'lucide-react';
+import { SlidersHorizontal, ArrowUpRight, BarChart3, CalendarDays, Download, Gauge, MoreHorizontal, Fuel, Wrench, ShieldCheck, CircleDot, Settings2, Files, Paperclip, Sparkles, Wallet } from 'lucide-react';
 import { budgetState, financeSignals, financeGroup, financeOverview, financialChange, type FinanceGroup } from '@/lib/finance-overview';
 import { filterRecords } from '@/lib/record-filters';
 import type { dashboard } from '@/lib/service';
@@ -97,13 +98,22 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
   const date = (value: string | null) => value ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value + 'T12:00:00Z')) : '—';
 
   return <div className="ac-finance" data-workspace-ui data-mobile-details={mobileDetails||undefined} data-mobile-filters={mobileFilters||undefined}>
+    <div className="ac-m-finance-filter ac-finance-filter-toggle"><span>{t('Cheltuielile tale, pe scurt','Your expenses at a glance')}</span><button type="button" className="ac-m-round" onClick={()=>setMobileFilters(value=>!value)} aria-expanded={mobileFilters} aria-controls="ac-finance-ledger-filters" aria-label={t('Filtre cheltuieli','Expense filters')}><SlidersHorizontal size={21}/></button></div>
+      <div className="ac-finance-filters ac-finance-filter-panel" id="ac-finance-ledger-filters" aria-label={t('Filtre cheltuieli','Expense filters')}>
+        <header><div><strong>{t('Filtre cheltuieli','Expense filters')}</strong><small>{t('Alege categoria, perioada și ordinea.','Choose the category, period and order.')}</small></div><button type="button" onClick={()=>{setQuery('');setGroup('');setRange('year');setSort('recent');setArchived(false);setPage(0);}}>{t('Resetează','Reset')}</button><button type="button" className="ac-finance-filter-close" onClick={()=>setMobileFilters(false)} aria-label={t('Închide filtrele','Close filters')}>×</button></header>
+        <input type="search" maxLength={250} placeholder={t('Caută în cheltuieli…', 'Search expenses…')} aria-label={t('Caută cheltuieli', 'Search expenses')} value={query} onChange={e => { setQuery(e.target.value); setPage(0); }} />
+        <FilterSelect aria-label={t('Categorie', 'Category')} value={group} onChange={e => { setGroup(e.target.value); setPage(0); }}><option value="">{t('Toate categoriile', 'All categories')}</option>{Object.entries(groups).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</FilterSelect>
+        <FilterSelect aria-label={t('Perioadă', 'Period')} value={range} onChange={e => { setRange(e.target.value); if(e.target.value==='month'||e.target.value==='year'){setView(e.target.value);setPoint(null);} setPage(0); }}><option value="6">{t('Ultimele 6 luni','Last 6 months')}</option><option value="12">{t('Ultimele 12 luni','Last 12 months')}</option><option value="24">{t('Ultimele 2 ani','Last 2 years')}</option><option value="all">{t('Tot istoricul', 'All history')}</option><option value="month">{t('Luna curentă', 'Current month')}</option><option value="year">{t('Anul curent', 'Current year')}</option></FilterSelect>
+        <FilterSelect aria-label={t('Sortare', 'Sort order')} value={sort} onChange={e => { setSort(e.target.value); setPage(0); }}><option value="recent">{t('Cele mai recente', 'Newest first')}</option><option value="old">{t('Cele mai vechi', 'Oldest first')}</option><option value="category">{t('Categorie A–Z', 'Category A–Z')}</option><option value="amount">{t('Valoare descrescătoare', 'Highest value')}</option></FilterSelect>
+        <label className="check"><input type="checkbox" checked={archived} onChange={e => { setArchived(e.target.checked); setPage(0); }} /> {t('Include arhivate', 'Include archived')}</label>
+      </div>
     <MobileFinanceOverview rows={report.entries} today={today} money={money} period={range} onPeriod={value=>{setRange(value);setPage(0);}} onFilters={()=>setMobileFilters(value=>!value)} filtersOpen={mobileFilters}/>
     <button className="ac-m-finance-more" aria-expanded={mobileDetails} onClick={()=>setMobileDetails(value=>!value)}>{t('Bugete, categorii și analiză','Budgets, categories & analysis')} <Sparkles size={16}/></button>
     <section className="ac-finance-hero"><TitaniumWave />
       <div><span className="studio-kicker">AUTOCARE · FINANCE</span><h2>{t('Centrul financiar auto', 'Vehicle finance center')}</h2><p>{t('Costuri reale din cheltuieli, intervenții și documente, o singură dată per înregistrare.', 'Actual costs from expenses, service and documents, counted once per record.')}</p></div>
-      <label>{t('Vehicul', 'Vehicle')}<select value={vehicle} onChange={e => { setVehicle(e.target.value); setPage(0); setPoint(null); }}>
+      <label>{t('Vehicul', 'Vehicle')}<FilterSelect aria-label={t('Vehicul','Vehicle')} value={vehicle} onChange={e => { setVehicle(e.target.value); setPage(0); setPoint(null); }}>
         <option value="">{t('Toate vehiculele', 'All vehicles')}</option>{data.vehicles.map(car => <option key={car.id} value={car.id}>{car.brand} {car.model} · {car.plate}</option>)}
-      </select></label>
+      </FilterSelect></label>
     </section>
     <section className="ac-finance-kpis" aria-label={t('Rezumat financiar', 'Financial overview')}>
       {[
@@ -167,13 +177,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
         [t('Medie / cheltuială','Average / expense'), historyKnown.length ? money(historyTotal/historyKnown.length) : '—'],
         [t('Cea mai mare cheltuială','Largest expense'), historyKnown.length ? money(Math.max(...historyKnown.map(row=>row.amountBani))) : '—'],
       ].map(([label,value])=><div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
-      <div className="ac-finance-filters" id="ac-finance-ledger-filters">
-        <input type="search" maxLength={250} placeholder={t('Caută în cheltuieli…', 'Search expenses…')} aria-label={t('Caută cheltuieli', 'Search expenses')} value={query} onChange={e => { setQuery(e.target.value); setPage(0); }} />
-        <select aria-label={t('Categorie', 'Category')} value={group} onChange={e => { setGroup(e.target.value); setPage(0); }}><option value="">{t('Toate categoriile', 'All categories')}</option>{Object.entries(groups).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
-        <select aria-label={t('Perioadă', 'Period')} value={range} onChange={e => { setRange(e.target.value); if(e.target.value==='month'||e.target.value==='year'){setView(e.target.value);setPoint(null);} setPage(0); }}><option value="6">{t('Ultimele 6 luni','Last 6 months')}</option><option value="12">{t('Ultimele 12 luni','Last 12 months')}</option><option value="24">{t('Ultimele 2 ani','Last 2 years')}</option><option value="all">{t('Tot istoricul', 'All history')}</option><option value="month">{t('Luna curentă', 'Current month')}</option><option value="year">{t('Anul curent', 'Current year')}</option></select>
-        <select aria-label={t('Sortare', 'Sort order')} value={sort} onChange={e => { setSort(e.target.value); setPage(0); }}><option value="recent">{t('Cele mai recente', 'Newest first')}</option><option value="old">{t('Cele mai vechi', 'Oldest first')}</option><option value="category">{t('Categorie A–Z', 'Category A–Z')}</option><option value="amount">{t('Valoare descrescătoare', 'Highest value')}</option></select>
-        <label className="check"><input type="checkbox" checked={archived} onChange={e => { setArchived(e.target.checked); setPage(0); }} /> {t('Include arhivate', 'Include archived')}</label>
-      </div>
+
       {rows.length ? <table className="ac-finance-table"><thead><tr>{[
         t('Data', 'Date'), t('Vehicul', 'Vehicle'), t('Categorie', 'Category'), t('Descriere', 'Description'),
         t('Valoare', 'Amount'), t('Kilometraj', 'Mileage'), t('Documente', 'Documents'), t('Acțiuni', 'Actions'),

@@ -1,4 +1,5 @@
 'use client';
+import {FilterSelect} from '../filter-select';
 import { Bell, CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Wallet, Wrench, ShieldCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
@@ -31,7 +32,7 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
    <section className="ac-m-vehicle">
     <button className="ac-m-vehicle-open" onClick={()=>onVehicle(car.id)} aria-label={t('Deschide fișa mașinii','Open vehicle profile')}><span className="ac-m-vehicle-art ac-m-vehicle-emblem" aria-hidden="true"><span className="ac-m-emblem-orbit"/><ShieldCheck size={35} strokeWidth={1.25}/><span className="ac-m-emblem-caption">AUTOCARE</span></span><span className="ac-m-vehicle-identity"><strong data-user-content>{car.brand} {car.model}</strong><small data-user-content>{car.plate}</small></span><ChevronRight size={19}/></button>
     <div className="ac-m-vehicle-bottom"><span><Gauge size={14}/>{car.odometer.toLocaleString(locale)} km</span><button onClick={()=>navigate('Garaj')}>{t('Garajul meu','My garage')}<ChevronRight size={14}/></button></div>
-    {active.length>1&&<label className="ac-m-car-switch"><span>{t('Mașina selectată','Selected vehicle')}</span><select value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{active.map(vehicle=><option key={vehicle.id} value={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}</select></label>}
+    {active.length>1&&<label className="ac-m-car-switch"><span>{t('Mașina selectată','Selected vehicle')}</span><FilterSelect value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{active.map(vehicle=><option key={vehicle.id} value={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}</FilterSelect></label>}
    </section>
    <button className="ac-m-next-service" onClick={()=>{const record=next&&data.records.find(row=>row.id===next.service.id||next.service.id.startsWith(row.id+':'));if(record)onRecord(record);else navigate('Întreținere');}}><span className="ac-m-icon"><Wrench size={27}/></span><span><small>{t('Următoarea revizie','Next service')}</small><strong>{next?.status.remainingKm!=null?(next.status.remainingKm<=0?t('Prag atins','Threshold reached'):t('în ','in ')+next.status.remainingKm.toLocaleString(locale)+' km'):next?.raw?date(next.raw):t('Adaugă un termen','Add a service deadline')}</strong>{next?.raw&&next.status.remainingKm!=null&&<small>{date(next.raw)}</small>}</span><ChevronRight size={20}/></button>
    <div className="ac-m-overview">{[

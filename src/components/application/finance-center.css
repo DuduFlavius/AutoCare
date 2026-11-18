@@ -63,3 +63,34 @@ html body .ac-workspace.ac-studio .ac-service-garage .ac-service-vehicle {
 }
 .ac-service-vehicle > .ac-titanium-wave {z-index:-1;opacity:.55}
 .ac-service-actions {display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance>.ac-finance-filter-panel{display:grid!important;grid-template-columns:1.4fr repeat(3,minmax(0,1fr));gap:12px!important;padding:18px!important;background:#1a2039!important;border:1px solid #595477!important;border-radius:18px!important;order:-2;box-shadow:0 8px 24px #03071926}
+ .ac-finance-filter-panel>header{grid-column:1/-1;display:flex;align-items:center;gap:10px}
+ .ac-finance-filter-panel>header>div{display:grid;gap:4px;flex:1}
+ .ac-finance-filter-panel>header strong{color:#f1f2ff;font-size:16px}
+ .ac-finance-filter-panel>header small{color:#c1c6e1;font-size:12px}
+ .ac-finance-filter-panel>input{width:100%;min-width:0}
+ .ac-finance-filter-panel>.check{grid-column:1/-1;justify-self:start}
+ html body .app-shell.ac-workspace.ac-studio .ac-finance-filter-close{display:none!important}
+ @media(max-width:760px){
+  html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance>.ac-finance-filter-panel{grid-template-columns:minmax(0,1fr)!important;order:-2;margin-top:-8px;padding:14px!important}
+  html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance:not([data-mobile-filters])>.ac-finance-filter-panel{display:none!important}
+  html body .app-shell.ac-workspace.ac-studio .ac-finance-filter-close{display:inline-flex!important;min-width:40px!important;font-size:24px!important}
+  .ac-finance-filter-panel>header{flex-wrap:wrap}.ac-finance-filter-panel>header>div{min-width:150px}
+ }
+}
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio .ac-finance-filter-toggle{display:none!important}
+ @media(max-width:760px){
+  html body .app-shell.ac-workspace.ac-studio .ac-finance-filter-toggle{display:flex!important;order:-5}
+  html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance>.ac-finance-filter-panel{order:-4}
+ }
+}
+@layer autocare-workspace {
+ @media(max-width:760px){
+  html body .app-shell.ac-workspace.ac-studio .ac-finance-filter-panel>header{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
+  .ac-finance-filter-panel>header>div{min-width:0!important}
+  html body .app-shell.ac-workspace.ac-studio .ac-finance-filter-panel>header>button{padding:8px!important;font-size:12px!important}
+ }
+}

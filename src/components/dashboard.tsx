@@ -1,4 +1,6 @@
 'use client';
+import './filter-select.css';
+import {FilterSelect} from './filter-select';
 import {DocumentActions} from './document-actions';
 import {PremiumDateInput} from './premium-date-input';
 import { RenewalCenter } from './application/renewal-center';
@@ -1096,7 +1098,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               <>
                 {tab === 'Documente' && (
                   <>
-                    <section className="ac-vault-folder" data-workspace-ui><div><FolderOpen size={24}/><div><h3>{language==='en'?'Your digital document vault':'Dosarul tău digital'}</h3><p>{language==='en'?'Choose a vehicle to open its documents.':'Alege o mașină pentru a deschide documentele ei.'}</p></div></div><label>{language==='en'?'Vehicle folder':'Dosar vehicul'}<select value={filter} onChange={e=>setFilter(e.target.value)}><option value="">{language==='en'?'All vehicles':'Toate mașinile'}</option>{data.vehicles.map(car=><option key={car.id} value={car.id}>{car.brand} {car.model} · {car.plate}</option>)}</select></label></section>
+                    <section className="ac-vault-folder" data-workspace-ui><div><FolderOpen size={24}/><div><h3>{language==='en'?'Your digital document vault':'Dosarul tău digital'}</h3><p>{language==='en'?'Choose a vehicle to open its documents.':'Alege o mașină pentru a deschide documentele ei.'}</p></div></div><label>{language==='en'?'Vehicle folder':'Dosar vehicul'}<FilterSelect value={filter} onChange={e=>setFilter(e.target.value)}><option value="">{language==='en'?'All vehicles':'Toate mașinile'}</option>{data.vehicles.map(car=><option key={car.id} value={car.id}>{car.brand} {car.model} · {car.plate}</option>)}</FilterSelect></label></section>
                     <div className="stats document-statistics">
                       {([
                         ['', language === 'en' ? 'All documents' : 'Total documente', docStats.total],
@@ -1210,7 +1212,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                       </span>
                     </summary>
                     <div className="record-filter-fields">
-                      <select
+                      <FilterSelect
                         aria-label="Filtrează după mașină"
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
@@ -1221,8 +1223,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                             {v.brand} {v.model} · {v.plate}
                           </option>
                         ))}
-                      </select>
-                      <select
+                      </FilterSelect>
+                      <FilterSelect
                         aria-label="Filtrează după categorie"
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
@@ -1241,9 +1243,9 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                               {c}
                             </option>
                           ))}
-                      </select>
+                      </FilterSelect>
                       {(tab === 'Întreținere' || tab === 'Cheltuieli') && (
-                        <select
+                        <FilterSelect
                           aria-label={language === 'en' ? 'Date range' : 'Perioada înregistrărilor'}
                           value={period}
                           onChange={(e) => setPeriod(e.target.value)}
@@ -1251,10 +1253,10 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                           <option value="all">Tot istoricul</option>
                           <option value="month">Luna curentă</option>
                           <option value="year">Ultimele 12 luni</option>
-                        </select>
+                        </FilterSelect>
                       )}
                       {tab === 'Documente' && (
-                        <select
+                        <FilterSelect
                           aria-label="Starea documentului"
                           value={recordState}
                           onChange={(e) => setRecordState(e.target.value)}
@@ -1265,7 +1267,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                           <option value="expired">Expirat</option>
                           <option value="incomplete">Fără dată de expirare</option>
                           <option value="archived">Arhivat</option>
-                        </select>
+                        </FilterSelect>
                       )}
                       <label className="check">
                         <input
@@ -1576,7 +1578,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                   >
                     Lună
                   </button>
-                  <select
+                  <FilterSelect
                     aria-label="Mașina din calendar"
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
@@ -1587,7 +1589,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                         {v.brand} {v.model} · {v.plate}
                       </option>
                     ))}
-                  </select>
+                  </FilterSelect>
                 </div>
                 {calendarView === 'month' ? (
                   <Calendar

@@ -128,6 +128,16 @@ export default async function DesignPreview({
     summary: { monthBani: 0, annualBani: 0, monthly: [], categories: {}, costPerKm: null, km: 0 },
     pushPublicKey: null,
   };
+  // Synthetic financial history for filter/sort verification; preview is disabled in production.
+  if(previewOptions.view==='finance') {
+    const example=records[0];
+    const costs=[
+      {id:'design-fuel',category:'Combustibil',title:'Alimentare de test',amountBani:25000,date:today,cancelled:false},
+      {id:'design-parking',category:'Parcare',title:'Parcare de test',amountBani:2000,date:today,cancelled:false},
+      {id:'design-archived-cost',category:'Combustibil',title:'Cheltuială arhivată de test',amountBani:10000,date:today,cancelled:true},
+    ];
+    data.records.push(...costs.map(cost=>({...example,...cost,kind:'expense',expiresAt:null,status:documentStatus(null,now)})));
+  }
   if(previewOptions.garage==='empty'){data.vehicles=[];data.records=[];data.photos=[];}
   if(previewOptions.garage==='multi'){data.vehicles.push({...vehicles[0],id:'design-car-2',brand:'A doua',model:'Mașină',plate:'DEMO 02',odometer:83000});}
   const previewVehicle = data.vehicles.find(vehicle => vehicle.id === previewOptions.vehicle)?.id;

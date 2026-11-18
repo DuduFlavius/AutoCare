@@ -1,4 +1,5 @@
 'use client';
+import {FilterSelect} from '../filter-select';
 import {useState} from 'react';
 import {BellRing,Clock3,FilePlus2,ShieldCheck,Route,ArrowUpRight} from 'lucide-react';
 import type {dashboard} from '@/lib/service';
@@ -14,7 +15,7 @@ export function RenewalCenter({data,vehicleId,onVehicle,onDocument,onNavigate,on
  const day=(date:string|null)=>date?new Date(date+'T12:00:00Z').toLocaleDateString(locale,{timeZone:'UTC'}):t('Nesetat','Not set');
  return <div className="ac-renewal-center" data-workspace-ui>
   <div className="card ac-renewal-intro"><ShieldCheck size={28}/><div><h2>{t('Termene clare. Drumuri fără griji.','Clear deadlines. Fewer worries.')}</h2><p>{t('RCA și rovinieta, alături de documentele mașinii tale.','RCA and road vignette, alongside your vehicle documents.')}</p></div></div>
-  <label className="ac-renewal-vehicle">{t('Mașina ta','Your vehicle')}<select value={selected?.id||''} onChange={e=>onVehicle(e.target.value)} disabled={!cars.length}>{!cars.length&&<option value="">{t('Nu ai mașini salvate','No saved vehicles')}</option>}{cars.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>)}</select></label>
+  <label className="ac-renewal-vehicle">{t('Mașina ta','Your vehicle')}<FilterSelect value={selected?.id||''} onChange={e=>onVehicle(e.target.value)} disabled={!cars.length}>{!cars.length&&<option value="">{t('Nu ai mașini salvate','No saved vehicles')}</option>}{cars.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>)}</FilterSelect></label>
   {!selected&&<section className="card"><p>{t('Adaugă o mașină pentru a salva documente și termene. Linkurile externe sunt disponibile mai jos.','Add a vehicle to save documents and deadlines. External links remain available below.')}</p><button onClick={()=>onNavigate('Garaj')}>{t('Garajul meu','My garage')}</button></section>}
   <div className="ac-renewal-grid">{renewalCategories.map(category=>{
    const current=selected?renewalDocument(data.records,selected.id,category,new Date(),data.profile.timezone):null;

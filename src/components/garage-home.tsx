@@ -1,4 +1,5 @@
 'use client';
+import {FilterSelect} from './filter-select';
 import {DocumentActions} from './document-actions';
 import {PremiumDateInput} from './premium-date-input';
 import { isFinancialEntry } from '@/lib/finance-overview';
@@ -126,9 +127,9 @@ const home = dashboardHome(data);
       {currency === 'EUR' && <p className="micro" style={{margin:"0 0 12px",color:"#526582"}}>{language==='en'?'EUR amounts are estimates (EUR 1 ≈ RON 5). Saved amounts and payments remain in RON.':'Sumele în EUR sunt orientative (1 EUR ≈ 5 RON). Valorile salvate și plățile rămân în RON.'}</p>}
       {cars.length > 1 && (
         <label className="ac-premium-car-selector">Mașina afișată
-          <select value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
+          <FilterSelect value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
             {cars.map((v) => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>)}
-          </select>
+          </FilterSelect>
         </label>
       )}
       <div className="ac-premium-overview">
@@ -293,13 +294,13 @@ const home = dashboardHome(data);
       {cars.length > 1 && (
         <label className="dashboard-car-select">
           Mașina selectată
-          <select value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
+          <FilterSelect value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
             {cars.map((v) => (
               <option data-user-content key={v.id} value={v.id}>
                 {v.brand} {v.model} · {v.plate}
               </option>
             ))}
-          </select>
+          </FilterSelect>
         </label>
       )}
       <div className="autocare-dashboard-feature">
@@ -670,15 +671,15 @@ const [car, setCar] = useState(''),
         <span>{locale.startsWith('en') ? 'Matching records' : 'Înregistrări afișate'}</span>
       </div>
       <div className="toolbar">
-        <select aria-label="Mașină" value={car} onChange={(e) => setCar(e.target.value)}>
+        <FilterSelect aria-label="Mașină" value={car} onChange={(e) => setCar(e.target.value)}>
           <option value="">Toate mașinile</option>
           {data.vehicles.map((v) => (
             <option data-user-content key={v.id} value={v.id}>
               {v.brand} {v.model} · {v.plate}
             </option>
           ))}
-        </select>
-        <select
+        </FilterSelect>
+        <FilterSelect
           aria-label="Tip de activitate"
           value={kind}
           onChange={(e) => setKind(e.target.value)}
@@ -689,7 +690,7 @@ const [car, setCar] = useState(''),
               {label}
             </option>
           ))}
-        </select>
+        </FilterSelect>
         <label>
           De la
           <PremiumDateInput type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
