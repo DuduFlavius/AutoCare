@@ -1,7 +1,7 @@
-/** Lossless, content-addressed assets prevent stale Gmail proxy images. */
+/** Content-addressed assets prevent stale Gmail proxy images. */
 export const emailAssets = {
   "hero": {
-    "path": "/email/autocare-hero-1aa3b6e6cfe6.png",
+    "path": "/email/autocare-hero-6c2dc3e1fe8c.jpg",
     "width": 1049,
     "height": 487
   },
