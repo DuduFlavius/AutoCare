@@ -20,7 +20,7 @@ export const user = pgTable('app_user', {
   image: text(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-});
+}, table=>[uniqueIndex('app_user_email_normalized_unique').on(sql`lower(btrim(${table.email}))`)]);
 export const session = pgTable('session', {
   id: text().primaryKey(),
   expiresAt: timestamp({ withTimezone: true }).notNull(),

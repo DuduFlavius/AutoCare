@@ -24,7 +24,8 @@ before(async()=>{
   await db().delete(s.rateLimit);
   const email='role'+index+'@example.invalid';
   assert.equal((await request('sign-up/email',{email,password,name:'Role '+index})).status,200);
-  await auth().handler(new Request(verifyURL()));
+  const otp=mails.at(-1)!.text.match(/(?:este|is): (\d{6})/)![1];
+  assert.equal((await request('email-otp/verify-email',{email,otp})).status,200);
   const response=await request('sign-in/email',{email,password});assert.equal(response.status,200);
   const id=(await db().select().from(s.user).where(eq(s.user.email,email)))[0].id;
   await db().insert(s.profiles).values({userId:id,role});

@@ -2,9 +2,10 @@ import {accountPreferencesKey} from './account-preferences';
 import {registrationLanguage} from './mail-language';
 import {languageCookie} from './language-preference';
 import {languagePreferenceKey,userLanguage} from './user-language';
-import { eq, inArray, like } from 'drizzle-orm';
+import { eq, inArray, like, sql, or } from 'drizzle-orm';
 import { betterAuth } from 'better-auth';
-import { APIError } from 'better-auth/api';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
+import { emailOTP } from 'better-auth/plugins';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { toNextJsHandler } from 'better-auth/next-js';
 import { db } from './db';
@@ -20,16 +21,40 @@ let cached: ReturnType<typeof makeAuth> | undefined;
 function makeAuth() {
   if (!process.env.BETTER_AUTH_SECRET || process.env.BETTER_AUTH_SECRET.length < 32)
     throw new Error('BETTER_AUTH_SECRET trebuie să aibă minimum 32 caractere.');
+  const requireVerification=process.env.NODE_ENV==='production'||process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION!=='false';
   return betterAuth({
     appName: 'AutoCare',
     baseURL: origin(),
     secret: process.env.BETTER_AUTH_SECRET,
     database: drizzleAdapter(db(), { provider: 'pg', schema }),
     trustedOrigins: [origin()],
+    hooks:{before:createAuthMiddleware(async ctx=>{
+      if(ctx.body&&typeof ctx.body.email==='string')ctx.body.email=ctx.body.email.trim().toLowerCase();
+      if(ctx.body&&typeof ctx.body.newEmail==='string')ctx.body.newEmail=ctx.body.newEmail.trim().toLowerCase();
+      if(['/email-otp/send-verification-otp','/email-otp/verify-email'].includes(ctx.path)&&typeof ctx.body?.email==='string'){
+        const person=(await db().select().from(schema.user).where(eq(schema.user.email,ctx.body.email)))[0];
+        if(person?.emailVerified)throw new APIError('BAD_REQUEST',{code:'EMAIL_ALREADY_VERIFIED',message:'Adresa este deja verificată. Autentifică-te cu parola.'});
+      }
+      if(ctx.path==='/sign-up/email'||ctx.path==='/change-email'){
+        const email=ctx.path==='/sign-up/email'?ctx.body?.email:ctx.body?.newEmail;
+        if(typeof email==='string'&&(await db().select({id:schema.user.id}).from(schema.user).where(sql`lower(btrim(${schema.user.email}))=${email}`)).length)
+          throw new APIError('CONFLICT',{code:'USER_ALREADY_EXISTS',message:'Există deja un cont cu această adresă. Intră în cont sau recuperează parola.'});
+      }
+    })},
+    plugins:[emailOTP({otpLength:6,expiresIn:600,allowedAttempts:5,storeOTP:'hashed',disableSignUp:true,
+      sendVerificationOnSignUp:requireVerification,
+      async sendVerificationOTP({email,otp,type},ctx){
+        if(type!=='email-verification')throw new APIError('BAD_REQUEST',{message:'Folosește autentificarea cu parolă.'});
+        const person=(await db().select().from(schema.user).where(eq(schema.user.email,email)))[0];
+        const language=languageCookie(ctx?.headers?.get('cookie'))??(person?await userLanguage(person.id):'ro'),en=language==='en';
+        const content=renderEmail('verification',{name:person?.name,language,subject:en?'Your AutoCare verification code':'Codul tău de verificare AutoCare',message:en?`Your verification code is: ${otp}\n\nEnter it in AutoCare to confirm your email. It expires in 10 minutes. Never share this code. If you did not request it, ignore this email.`:`Codul tău de verificare este: ${otp}\n\nIntrodu-l în AutoCare pentru a confirma adresa de email. Expiră în 10 minute. Nu comunica acest cod altor persoane. Dacă nu l-ai solicitat, ignoră mesajul.`,actionUrl:origin()+(en?'/en/sign-in':'/autentificare'),ctaLabel:en?'Open AutoCare':'Deschide AutoCare'});
+        content.html=content.html.replaceAll(otp,`<strong style="display:block;font-size:32px;letter-spacing:8px;color:#6952bd;padding:18px 0">${otp}</strong>`);
+        await sendMail(email,content.subject,content.text,crypto.randomUUID(),content,person?{userId:person.id,template:'verification'}:undefined);
+      },rateLimit:{window:60,max:3}})],
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION === 'true',
-      autoSignIn: process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION !== 'true',
+      requireEmailVerification: requireVerification,
+      autoSignIn: !requireVerification,
       minPasswordLength: 12,
       revokeSessionsOnPasswordReset: true,
       sendResetPassword: async ({ user, url },request) => {
@@ -44,8 +69,9 @@ function makeAuth() {
       },
     },
     emailVerification: {
-      sendOnSignUp: process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION === 'true',
-      autoSignInAfterVerification: false,
+      sendOnSignUp: false,
+      sendOnSignIn:false,
+      autoSignInAfterVerification: true,
       afterEmailVerification:async(user)=>{
         const key='security-email-change:'+user.id+':'+createHash('sha256').update(user.email).digest('hex');
         const row=(await db().select().from(schema.settings).where(eq(schema.settings.key,key)))[0];
@@ -95,6 +121,7 @@ function makeAuth() {
           await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(u.id), financeBudgetKey(u.id), languagePreferenceKey(u.id),accountPreferencesKey(u.id),'security-email-change:'+u.id]));
         },
         beforeDelete: async (u) => {
+          await db().delete(schema.verification).where(or(eq(schema.verification.value,u.id),inArray(schema.verification.identifier,['email-verification','sign-in','forget-password'].map(type=>type+'-otp-'+u.email.toLowerCase()))));
           const sub = (
             await db()
               .select()
@@ -136,8 +163,9 @@ function makeAuth() {
         },
       },
       user: {
-        update:{after:async user=>{await db().update(schema.supportChatMessages).set({authorName:user.name}).where(eq(schema.supportChatMessages.authorId,user.id));}},
+        update:{before:async (user)=>{if(user.email){const email=user.email.trim().toLowerCase();return {data:{...user,email}};}return {data:user};},after:async user=>{await db().update(schema.supportChatMessages).set({authorName:user.name}).where(eq(schema.supportChatMessages.authorId,user.id));}},
         create: {
+          before:async user=>({data:{...user,email:user.email.trim().toLowerCase()}}),
           after: async (u,ctx) => {
             const language=languageCookie(ctx?.headers?.get('cookie'))??registrationLanguage(ctx?.headers?.get('accept-language'));
             if(language) await db().insert(schema.settings).values({key:languagePreferenceKey(u.id),value:{language}}).onConflictDoUpdate({target:schema.settings.key,set:{value:{language}}});
