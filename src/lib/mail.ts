@@ -29,7 +29,7 @@ function emailHtml(subject: string, text: string) {
   const kind = kindOf(subject, text);
   const action = kind === 'verification' || kind === 'password';
   const secureUrl = action ? safeActionLink(text.trim()) : null;
-  const url = action ? secureUrl : SITE + '/cont';
+  const url = action ? secureUrl : SITE + '/instaleaza';
   const heading: Record<MailKind, string> = {
     verification: 'Confirmă adresa de email.',
     password: 'Resetează parola în siguranță.',
