@@ -538,3 +538,27 @@ export const playSubscriptions = pgTable('play_subscriptions', {
   active:boolean().notNull().default(false),
   updatedAt:timestamp({withTimezone:true}).notNull().defaultNow(),
 },t=>[index('play_subscription_owner').on(t.userId)]);
+
+export const feedbackItems = pgTable('feedback_items', {
+  id:text().primaryKey(), userId:text().notNull().references(()=>user.id,{onDelete:'cascade'}),
+  clientId:text().notNull(), category:text().notNull(), area:text().notNull().default('general'),
+  rating:integer(), message:text().notNull(), fingerprint:text().notNull(),
+  status:text().notNull().default('new'), priority:text().notNull().default('normal'), revision:integer().notNull().default(1),
+  createdAt:timestamp({withTimezone:true}).notNull().defaultNow(),updatedAt:timestamp({withTimezone:true}).notNull().defaultNow(),
+},t=>[uniqueIndex('feedback_client_dedupe').on(t.userId,t.clientId),index('feedback_owner_date').on(t.userId,t.createdAt),index('feedback_queue').on(t.status,t.priority,t.updatedAt)]);
+export const feedbackReplies=pgTable('feedback_replies',{
+ id:text().primaryKey(),feedbackId:text().notNull().references(()=>feedbackItems.id,{onDelete:'cascade'}),
+ authorId:text().references(()=>user.id,{onDelete:'set null'}),authorRole:text().notNull(),message:text().notNull(),clientId:text().notNull(),createdAt:timestamp({withTimezone:true}).notNull().defaultNow(),
+},t=>[uniqueIndex('feedback_reply_dedupe').on(t.feedbackId,t.clientId)]);
+export const feedbackFiles=pgTable('feedback_files',{
+ id:text().primaryKey(),feedbackId:text().notNull().references(()=>feedbackItems.id,{onDelete:'cascade'}),name:text().notNull(),mime:text().notNull(),size:integer().notNull(),data:text().notNull(),createdAt:timestamp({withTimezone:true}).notNull().defaultNow(),
+},t=>[index('feedback_file_parent').on(t.feedbackId)]);
+export const feedbackEvents=pgTable('feedback_events',{
+ id:text().primaryKey(),feedbackId:text().notNull().references(()=>feedbackItems.id,{onDelete:'cascade'}),actorId:text().references(()=>user.id,{onDelete:'set null'}),action:text().notNull(),details:jsonb().$type<Record<string,string>>().notNull().default({}),createdAt:timestamp({withTimezone:true}).notNull().defaultNow(),
+},t=>[index('feedback_event_parent').on(t.feedbackId,t.createdAt)]);
+export const feedbackPreferences=pgTable('feedback_preferences',{
+ userId:text().primaryKey().references(()=>user.id,{onDelete:'cascade'}),dismissedAt:timestamp({withTimezone:true}),invitedAt:timestamp({withTimezone:true}),submittedAt:timestamp({withTimezone:true}),
+});
+export const feedbackNotices=pgTable('feedback_notices',{
+ id:text().primaryKey(),userId:text().notNull().references(()=>user.id,{onDelete:'cascade'}),feedbackId:text().notNull().references(()=>feedbackItems.id,{onDelete:'cascade'}),kind:text().notNull(),readAt:timestamp({withTimezone:true}),pushState:text().notNull().default('pending'),createdAt:timestamp({withTimezone:true}).notNull().defaultNow(),
+},t=>[index('feedback_notice_owner').on(t.userId,t.readAt)]);

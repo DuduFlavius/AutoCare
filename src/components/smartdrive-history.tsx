@@ -1,4 +1,5 @@
 'use client';
+import {FilterSelect} from './filter-select';
 import {PremiumDateInput} from './premium-date-input';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
@@ -108,7 +109,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
   };
   return <section className="ac-smartdrive-history">
     <div className="ac-smartdrive-history-head"><div><span className="ac-premium-kicker"><History size={17}/> SMARTDRIVE · ISTORIC</span><h3>{t('Citiri confirmate și călătorii', 'Trips and confirmed mileage')}</h3></div>
-      {vehicles.length > 1 && <label>{t('Mașina', 'Vehicle')} <select value={vehicleId} onChange={e => { setSelected(e.target.value); setPage(0); }}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}{v.plate ? ' · ' + v.plate : ''}</option>)}</select></label>}</div>
+      {vehicles.length > 1 && <label>{t('Mașina', 'Vehicle')} <FilterSelect value={vehicleId} onChange={e => { setSelected(e.target.value); setPage(0); }}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}{v.plate ? ' · ' + v.plate : ''}</option>)}</FilterSelect></label>}</div>
     <section aria-label={t('Statistici GPS', 'GPS statistics')}>
       <p className="small muted">{tripDate ? t('Total pentru data selectată', 'Selected date totals') : t('Total pentru toate călătoriile mașinii', 'All trips for this vehicle')}</p>
       <div className="ac-smartdrive-history-metrics ac-trip-totals">
@@ -178,7 +179,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
     </div>
     <div className="ac-smartdrive-reminder"><div><span className="ac-premium-kicker"><Bell size={17}/> REMINDER KILOMETRAJ</span><p>{t('Preferința este salvată în cont. Livrarea periodică necesită configurarea notificărilor automate.', 'Preferences are saved to your account. Scheduled delivery requires automatic notifications to be configured.')}</p></div>
       <label><input type="checkbox" checked={prefs.enabled} onChange={e => setPrefs(p => ({...p,enabled:e.target.checked}))}/> {t('Activ', 'Enabled')}</label>
-      <label>{t('La fiecare', 'Every')} <select value={prefs.frequencyDays} onChange={e => setPrefs(p => ({...p,frequencyDays:Number(e.target.value)}))}>{[1,2,3,5,7,14,30].map(n => <option key={n} value={n}>{n + ' ' + (english ? n === 1 ? 'day' : 'days' : n === 1 ? 'zi' : 'zile')}</option>)}</select></label>
+      <label>{t('La fiecare', 'Every')} <FilterSelect value={prefs.frequencyDays} onChange={e => setPrefs(p => ({...p,frequencyDays:Number(e.target.value)}))}>{[1,2,3,5,7,14,30].map(n => <option key={n} value={n}>{n + ' ' + (english ? n === 1 ? 'day' : 'days' : n === 1 ? 'zi' : 'zile')}</option>)}</FilterSelect></label>
       <button type="button" disabled={busy || preview} onClick={save}>{busy ? t('Se salvează…', 'Saving…') : t('Salvează preferința', 'Save preference')}</button>
     </div>
     {error && <p role="alert" className="ac-smartdrive-history-error">{error}</p>}

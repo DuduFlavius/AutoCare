@@ -1,0 +1,61 @@
+@layer autocare-workspace {
+ html body :is(.app-shell,.founder-shell) .ac-feedback{display:grid;gap:20px;max-width:1240px;min-width:0;width:100%;margin-inline:auto;color:#eff1ff}
+ html body :is(.app-shell,.founder-shell) .ac-feedback-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+ .ac-feedback-heading h1{margin:6px 0;font-size:clamp(24px,3.6vw,34px);line-height:1.2}.ac-feedback-heading p{margin:7px 0;color:#bcc6df;max-width:650px}
+ html body :is(.app-shell,.founder-shell) .ac-feedback-actions{display:flex;gap:8px;flex-wrap:wrap}
+ html body :is(.app-shell,.founder-shell) .ac-feedback-card{display:grid;gap:14px;min-width:0;padding:22px;border:1px solid #57527766;border-radius:20px;background:linear-gradient(145deg,#20243e,#151a30);box-shadow:0 10px 30px #04081a26;text-align:start;color:#eff1ff}
+ html body :is(.app-shell,.founder-shell) .ac-feedback :is(h2,p,figure){margin:0}.ac-feedback h2{font-size:19px}.ac-feedback small{color:#bec7dd;font-size:12px;line-height:1.65}
+ html body :is(.app-shell,.founder-shell) .ac-feedback :is(button,.button){display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 14px;border:1px solid #77729870;border-radius:12px;background:#292b4b;color:#f3f0ff;cursor:pointer;font:600 14px/1.4 Inter,'Segoe UI',sans-serif}
+ html body :is(.app-shell,.founder-shell) .ac-feedback button.primary{background:linear-gradient(120deg,#6246dc,#443488);border-color:#a08ae6;color:#fff}
+ html body :is(.app-shell,.founder-shell) .ac-feedback button:disabled{opacity:.5;cursor:default}
+ html body :is(.app-shell,.founder-shell) .ac-feedback :is(button,a,input,select,textarea,summary):focus-visible{outline:2px solid #c5b5ff;outline-offset:3px}
+ html body :is(.app-shell,.founder-shell) .ac-feedback label{display:grid;gap:8px;color:#e0e5f4;font-size:14px;min-width:0}
+ html body :is(.app-shell,.founder-shell) .ac-feedback :is(input:not([type=checkbox]),textarea,select){width:100%;min-width:0;max-width:100%;padding:12px;border:1px solid #686687;border-radius:12px;background:#171c34;color:#f1f2ff;font:400 16px/1.5 Inter,'Segoe UI',sans-serif;box-sizing:border-box;color-scheme:dark;-webkit-text-fill-color:currentColor}
+ html body :is(.app-shell,.founder-shell) .ac-feedback textarea{resize:vertical;min-height:100px}
+ .ac-feedback-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.ac-feedback-form{max-width:860px}
+ html body :is(.app-shell,.founder-shell) .ac-feedback .ac-feedback-rating{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0;padding:14px;border:1px solid #5c5a7c;border-radius:14px;min-width:0}
+ .ac-feedback-rating legend{padding:0 7px;font-size:14px}
+ html body :is(.app-shell,.founder-shell) .ac-feedback .ac-feedback-rating>button:not(:last-child){padding:8px;min-width:44px;background:transparent;color:#d9c5ff;border-color:transparent}
+ html body :is(.app-shell,.founder-shell) .ac-feedback .ac-feedback-rating>button[aria-pressed=true]{background:#473c6c;border-color:#b99af0}
+ .ac-feedback-upload{display:grid;gap:10px;padding:16px;border:1px dashed #8a7aaa;border-radius:14px;background:#ffffff03}
+ .ac-feedback-previews{display:flex;flex-wrap:wrap;gap:12px}.ac-feedback-previews :is(figure,a){display:grid;gap:8px;max-width:220px;overflow-wrap:anywhere;color:#d7c6ff;font-size:13px}
+ .ac-feedback-previews img{display:block;max-width:100%;width:220px;height:150px;object-fit:contain;border:1px solid #6f6a8d;border-radius:12px;background:#0d1527}
+ .ac-feedback-note,.ac-feedback-error,.ac-feedback-success{padding:14px 16px;border:1px solid #7c7299;border-radius:14px;background:#28263f;color:#e5e4f5;line-height:1.6}
+ .ac-feedback-error{border-color:#c3839e;background:#442b3b;color:#ffe2eb}.ac-feedback-success{display:flex;align-items:center;gap:12px;border-color:#6bba9f;background:#15382f;color:#d6fff0}
+ .ac-feedback-statistics,.ac-feedback-detail,.ac-feedback-list{display:grid;gap:16px}.ac-feedback-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.ac-feedback-stat-grid strong{font-size:28px;font-variant-numeric:tabular-nums}.ac-feedback-stat-grid span{font-size:13px;color:#bbc7e1}
+ .ac-feedback-distribution{display:flex;align-items:center;gap:12px;margin:9px 0!important}.ac-feedback-distribution span{flex:1;color:#dce2f5}.ac-feedback-distribution progress{flex:2;max-width:65%;height:8px;accent-color:#b29be9}.ac-feedback-distribution b{min-width:24px;text-align:end}
+ .ac-feedback-filters{grid-template-columns:repeat(3,minmax(0,1fr));align-items:end}
+ .ac-feedback-tags{display:flex;gap:8px;flex-wrap:wrap}.ac-feedback-tags span{padding:5px 9px;font-size:12px;line-height:1.4;background:#493c6b;border:1px solid #a38bc06b;color:#eee2ff;border-radius:9px}.ac-feedback-tags [data-priority=critical]{background:#562938;border-color:#ef8fa9;color:#ffe6ee}
+ html body :is(.app-shell,.founder-shell) .ac-feedback button.ac-feedback-list-item{display:grid;justify-content:stretch;align-items:start;width:100%;gap:12px;padding:20px;text-align:start;background:#1e233d;border-radius:18px;white-space:normal}
+ .ac-feedback-list-item p{font-weight:400;line-height:1.7;color:#e5e8f7;overflow-wrap:anywhere}.ac-feedback-list-item footer,.ac-feedback-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;color:#bfc9e2;font-size:12px}
+ .ac-feedback-message{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;color:#edf0ff;font-size:15px}
+ .ac-feedback-admin-state{display:flex!important;align-items:end;flex-wrap:wrap}.ac-feedback-admin-state>label{flex:1;min-width:150px}
+ .ac-feedback-reply{display:grid;gap:10px;background:#11182b;padding:14px;border:1px solid #54566e;border-radius:14px}.ac-feedback-reply.admin{background:#2c2848;border-color:#9b86c7}.ac-feedback-reply header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;color:#c5cce1}
+ .ac-feedback-detail form{display:grid;gap:12px}.ac-feedback-detail .ac-feedback-admin-state{display:flex}.ac-feedback-history{padding-inline-start:20px;display:grid;gap:14px;color:#bec9e1;font-size:13px}.ac-feedback-history li>time{display:block;margin-bottom:5px;color:#d6dcf1}
+ .ac-feedback-pagination{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;font-size:13px}.ac-feedback-empty{justify-items:center;text-align:center!important;padding:30px!important}.ac-feedback-empty>svg{color:#bba6ef}
+ html body :is(.app-shell,.founder-shell) .ac-feedback .ac-filter-select{min-width:0;max-width:100%;display:block}
+ html body :is(.app-shell,.founder-shell) .ac-feedback .ac-filter-select>select[hidden]{display:none!important}
+ html body :is(.app-shell,.founder-shell) .ac-feedback button.ac-filter-select-trigger{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:start;background:#242942;color:#f2f3ff;min-width:0;border-color:#74718f}
+ html body :is(.app-shell,.founder-shell) .ac-feedback button.ac-filter-select-trigger>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+ html body :is(.app-shell,.founder-shell) .ac-feedback-entry{display:inline-flex;gap:9px;align-items:center;justify-content:flex-start;min-height:42px;padding:9px 13px;background:#242441;border:1px solid #71668a;border-radius:12px;color:#e9e5ff;font-size:13px;margin-bottom:12px}
+ .ac-feedback-entry b{border-radius:8px;padding:2px 6px;background:#bca3ff;color:#18132f;font-size:12px}
+ .ac-feedback-invitation{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px;padding:16px;border:1px solid #8d7aa8;border-radius:16px;background:#24233e;color:#f0eaff}.ac-feedback-invitation>div{flex:1;min-width:180px}.ac-feedback-invitation p{margin:4px 0 0;font-size:13px;color:#c6c8df}.ac-feedback-invitation button{min-height:42px;background:#483b73;color:#fff;border:1px solid #a490ca;border-radius:10px;padding:9px}
+ @media(max-width:760px){
+  html body :is(.app-shell,.founder-shell) .ac-feedback{gap:16px}.ac-feedback-heading h1{font-size:26px}.ac-feedback-heading p{font-size:13px}.ac-feedback-form-grid,.ac-feedback-filters{grid-template-columns:minmax(0,1fr)}.ac-feedback-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  html body :is(.app-shell,.founder-shell) .ac-feedback-card{padding:16px;border-radius:16px}.ac-feedback-heading{display:grid!important}.ac-feedback-actions{width:100%}.ac-feedback-admin-state>label{min-width:100%;flex-basis:100%}.ac-feedback-previews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.ac-feedback-previews img{width:100%;height:120px}.ac-feedback-invitation{align-items:flex-start}
+ }
+ @media(prefers-reduced-motion:no-preference){.ac-feedback-card{animation:ac-feedback-appear .18s ease-out}@keyframes ac-feedback-appear{from{opacity:.6;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}}
+}
+@layer autocare-workspace {
+ html body :is(.app-shell,.founder-shell) .ac-feedback input.ac-feedback-file-input{position:absolute;width:1px!important;height:1px!important;min-height:0!important;padding:0!important;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
+ .ac-feedback-upload>button{justify-self:start}
+}
+@layer autocare-workspace {
+ html body :is(.app-shell,.founder-shell) .ac-feedback label{display:grid!important;align-content:start!important;align-items:start!important;gap:8px!important}
+ html body :is(.app-shell,.founder-shell) .ac-feedback label>.ac-filter-select{flex:none!important;height:auto!important;min-height:0!important;align-self:start!important}
+ html body :is(.app-shell,.founder-shell) .ac-feedback-filters{align-items:start!important;grid-auto-rows:min-content;gap:16px!important}
+ html body :is(.app-shell,.founder-shell) .ac-feedback-filters>button{align-self:end;justify-self:start}
+}
+@layer autocare-workspace {
+ html body :is(.app-shell,.founder-shell) .ac-feedback-card{align-content:start}
+}

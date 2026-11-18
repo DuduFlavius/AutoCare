@@ -1,4 +1,5 @@
 'use client';
+import {FilterSelect} from './filter-select';
 import {PremiumDateInput} from './premium-date-input';
 import {PremiumAttachment} from './premium-attachment';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
@@ -227,16 +228,16 @@ export default function RecordEditor({
         )}
         <label>
           Mașină
-          <select name="vehicleId" value={car} required onChange={(e) => setCar(e.target.value)}>
+          <FilterSelect name="vehicleId" value={car} required onChange={(e) => setCar(e.target.value)}>
             <option value="" disabled>
-              Alege mașina
+              {language === "en" ? "Choose a vehicle" : "Alege mașina"}
             </option>
             {cars.map((v) => (
               <option data-user-content key={v.id} value={v.id}>
                 {v.brand} {v.model} · {v.plate}
               </option>
             ))}
-          </select>
+          </FilterSelect>
         </label>
         <input name="category" value={category} readOnly hidden />
         {kind === 'service' && (

@@ -1,0 +1,21 @@
+import {test,before,after} from 'node:test';
+import assert from 'node:assert/strict';
+import {eq} from 'drizzle-orm';
+import {migrate} from '../scripts/migrate';
+import {db,closeLocalDb} from '../src/lib/db';
+import * as s from '../src/lib/schema';
+import {deleteRecord} from '../src/lib/service';
+process.env.LOCAL_DATABASE_PATH='memory';
+const uid=crypto.randomUUID(),other=crypto.randomUUID(),vid=crypto.randomUUID(),rid=crypto.randomUUID();
+before(async()=>{await migrate();for(const id of [uid,other])await db().insert(s.user).values({id,name:'Test',email:id+'@example.invalid',emailVerified:true});await db().insert(s.vehicles).values({id:vid,userId:uid,brand:'Test',model:'Model',plate:'TEST1',year:2020,fuel:'benzina'});await db().insert(s.records).values({id:rid,userId:uid,vehicleId:vid,kind:'document',category:'ITP',title:'Test'});await db().insert(s.files).values({id:crypto.randomUUID(),userId:uid,recordId:rid,name:'test.png',mime:'image/png',size:1,data:'AA=='});});
+after(closeLocalDb);
+test('Permanent deletion enforces ownership and revision and cascades private attachments',async()=>{
+ await assert.rejects(()=>deleteRecord(other,rid,1),e=>e instanceof Error&&'status' in e&&e.status===404);
+ await assert.rejects(()=>deleteRecord(uid,rid,2),e=>e instanceof Error&&'status' in e&&e.status===409);
+ await assert.rejects(()=>deleteRecord(uid,rid,0),e=>e instanceof Error&&'status' in e&&e.status===400);
+ assert.equal((await db().select().from(s.files).where(eq(s.files.recordId,rid))).length,1);
+ await deleteRecord(uid,rid,1);
+ assert.equal((await db().select().from(s.records).where(eq(s.records.id,rid))).length,0);
+ assert.equal((await db().select().from(s.files).where(eq(s.files.recordId,rid))).length,0);
+ assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,vid))).length,1);
+});

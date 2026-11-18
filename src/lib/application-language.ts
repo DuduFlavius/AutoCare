@@ -2,6 +2,7 @@ import {dashboardCopy} from './dashboard-copy';
 import {reviewedPublicCopy} from './reviewed-public-copy';
 import {applicationCopy} from './application-copy';
 export const dictionary:Record<string,string>={
+'Feedback utilizatori':'User feedback','Trimite feedback':'Send feedback','Feedback și răspunsuri':'Feedback & replies',
 '. Dacă apare opțiunea „Deschide ca aplicație web”, activeaz-o.':'. If “Open as Web App” is offered, turn it on.',
 'Notificările push pe iPhone necesită iOS 16.4 sau ulterior, instalare pe ecranul principal și activare din Setări, printr-o apăsare a utilizatorului. GPS-ul în fundal și automatizarea Bluetooth necesită aplicația nativă și permisiunile dispozitivului.':'Push notifications on iPhone require iOS 16.4 or later, a Home Screen installation and activation in Settings by the user. Background GPS and Bluetooth automation require the native app and device permissions.',
 

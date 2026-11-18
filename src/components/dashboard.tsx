@@ -1,4 +1,9 @@
 'use client';
+import FeedbackWorkspace from './feedback-workspace';
+import {FeedbackNotice,FeedbackInvitation} from './feedback-entry';
+import './feedback.css';
+import './action-menu.css';
+import './mobile-polish.css';
 import './filter-select.css';
 import {FilterSelect} from './filter-select';
 import {DocumentActions} from './document-actions';
@@ -356,6 +361,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     [recordView, setRecordView] = useState('timeline'),
     [calendarView, setCalendarView] = useState('list'),
     [showArchived, setShowArchived] = useState(false),
+    [deleteRecordTarget, setDeleteRecordTarget] = useState<Data['records'][number] | null>(null),
     [archiveVehicleTarget, setArchiveVehicleTarget] = useState<Data['vehicles'][number] | null>(null),
     [deleteOpen, setDeleteOpen] = useState(false),
     [history, setHistory] = useState<Array<{
@@ -933,7 +939,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       </aside>
       {data&&!previewData&&<NativeTripSync ownerId={data.profile.userId} vehicles={data.vehicles.filter(v=>!v.archived)} onUpdated={refresh} onReview={()=>navigate('Plan întreținere')} english={language==='en'}/>}
       <SiteLanguage language={language} />
-      <ApplicationHeader reference onLanguage={changeLanguage} title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (workspaceSections.find(s=>s.id===tab)?.[language] ?? tab)} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
+      <ApplicationHeader reference onLanguage={changeLanguage} title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (tab==='Feedback utilizatori'?(language==='en'?'User feedback':'Feedback utilizatori'):(workspaceSections.find(s=>s.id===tab)?.[language] ?? tab))} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
       <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'}/>
       <main id="workspace-main" tabIndex={-1} aria-busy={busy||!data}
         className={
@@ -983,7 +989,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
           </div>
         ) : (
           <>
-            {!['Dashboard','Cont'].includes(tab) && <WorkspaceModuleHeader tab={tab} language={language}>
+            {!['Feedback','Feedback utilizatori','Dashboard','Cont'].includes(tab) && <WorkspaceModuleHeader tab={tab} language={language}>
               {['Documente', 'Întreținere', 'Cheltuieli'].includes(tab) ? (
                 <button
                   className="primary"
@@ -1012,11 +1018,15 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                 </button>
               ) : null}
             </WorkspaceModuleHeader>}
+            {!['Feedback','Feedback utilizatori'].includes(tab)&&<FeedbackNotice admin={['admin','superadmin','founder'].includes(data.profile.role)} preview={!!previewData} onOpen={()=>navigate(['admin','superadmin','founder'].includes(data.profile.role)?'Feedback utilizatori':'Feedback')}/>}
+            {tab==='Feedback'&&<FeedbackWorkspace preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>}
+            {tab==='Feedback utilizatori'&&(['admin','superadmin','founder'].includes(data.profile.role)?<FeedbackWorkspace admin preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>:<p role="alert">{language==='en'?'Administrator access required.':'Acces rezervat administratorilor.'}</p>)}
+            <FeedbackInvitation enabled={tab==='Dashboard'&&!busy&&!modal&&!recordDirty&&!recordSaving} userId={data.profile.userId} preview={!!previewData} onOpen={()=>navigate('Feedback')}/>
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
             {drill && <div className="card between"><strong>{drill.label}</strong><button type="button" onClick={()=>setDrill(null)}>{language==='en'?'Show all':'Vezi toate'}</button></div>}
             {tab === 'Dashboard' && <ApplicationHome onDrill={(next,vehicleId,ids,label)=>{if(!navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
             {tab === 'RCA & Rovinietă' && <RenewalCenter key={data.profile.offsets.join(',')+String(data.profile.emailEnabled)+String(data.profile.pushEnabled)} data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} onDocument={(category,record)=>{setRenewalCategory(category);setModal({kind:'document',record});}} onNavigate={next=>{if(navigate(next)&&next==='Setări')setSettingsPanel('alerts');}} onPreferences={async profile=>{await act(()=>api('profile','PUT',{timezone:profile.timezone,emailEnabled:profile.emailEnabled,pushEnabled:profile.pushEnabled,afterExpiry:profile.afterExpiry,offsets:profile.offsets,hour:profile.hour}));}} busy={busy} preview={!!previewData}/>}
-            {tab === 'AutoCare AI' && <AutoAiWorkspace
+            {tab === 'AutoCare AI' && <AutoAiWorkspace onExit={()=>navigate('Dashboard')}
               vehicles={activeCars}
               vehicleId={selectActiveVehicle(activeCars, vehicleDetail ?? primaryVehicleId)?.id ?? ''}
               onVehicle={id => navigate('AutoCare AI', 'push', id)}
@@ -1077,7 +1087,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               />
             )}
             {tab === 'Cheltuieli' && <FinanceCenter
-              data={data} today={nowDate} primaryId={primaryVehicleId} preview={!!previewData} money={moneyDisplay}
+              onDelete={setDeleteRecordTarget} data={data} today={nowDate} primaryId={primaryVehicleId} preview={!!previewData} money={moneyDisplay}
               onEdit={record => setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })}
               onArchive={record => {
                 if (window.confirm(language === 'en' ? 'Archive this record and stop its reminders?' : 'Arhivezi înregistrarea și oprești alertele asociate?'))
@@ -1086,7 +1096,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               onRestore={record => { void act(() => api('records/' + record.id + '/restore', 'POST')); }}
               onAi={id => navigate('AutoCare AI', 'push', id)} onRefresh={refresh}
             />}
-            {tab === 'Documente' && <DocumentVault onRenewals={()=>navigate('RCA & Rovinietă')} data={drill?{...data,records:data.records.filter(r=>drill.ids.includes(r.id))}:data} vehicleId={filter} onVehicle={setFilter} preview={!!previewData} busy={busy}
+            {tab === 'Documente' && <DocumentVault onDelete={setDeleteRecordTarget} onRenewals={()=>navigate('RCA & Rovinietă')} data={drill?{...data,records:data.records.filter(r=>drill.ids.includes(r.id))}:data} vehicleId={filter} onVehicle={setFilter} preview={!!previewData} busy={busy}
               onEdit={record=>setModal({kind:'document',record})} onCreate={()=>setModal(activeCars.length?{kind:'document'}:{kind:'vehicle'})}
               onArchive={record=>{if(window.confirm(language==='en'?'Archive this document?':'Arhivezi acest document?'))void act(()=>api('records/'+record.id,'DELETE'));}}
               onRestore={record=>{void act(()=>api('records/'+record.id+'/restore','POST'));}}
@@ -1696,7 +1706,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               </div>
             )}
             {tab === 'Centru de suport' && (
-              <SupportChat role={data.profile.role} preview={!!previewData} />
+              <SupportChat role={data.profile.role} preview={!!previewData} onFeedback={()=>navigate('Feedback')} />
             )}
             {tab==='Abonament'&&<><PlayBillingPanel onUpdated={()=>refresh(true)}/><SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(hasPlayBilling())throw new Error('Gestionează abonamentul din Google Play.');if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/></>}
             {tab==='Rapoarte'&&(data.premium?<PremiumDownloads data={data} language={language} preview={!!previewData}/>:<section className="card studio-report-intro"><Download size={32}/><h2>{language==='en'?'Reports, ready when you need them.':'Rapoartele tale, gata când ai nevoie.'}</h2><p>{language==='en'?'PDF and CSV reports are included with Premium. Your personal data export remains free in account settings.':'Rapoartele PDF și CSV sunt incluse cu Premium. Exportul datelor personale rămâne gratuit în setările contului.'}</p><button className="primary" onClick={()=>navigate('Premium')}>{language==='en'?'Compare plans':'Compară planurile'}</button></section>)}
@@ -1882,6 +1892,12 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               ))}
           </>
         )}
+        {deleteRecordTarget && <Dialog title={language==='en'?'Delete permanently':'Șterge definitiv'} onClose={()=>{if(!busy)setDeleteRecordTarget(null);}}>
+          <p data-user-content><strong>{deleteRecordTarget.title||deleteRecordTarget.category}</strong></p>
+          <p>{language==='en'?'This permanently removes the entry, its attachments, change history and reminders. This cannot be undone.':'Înregistrarea, atașamentele, istoricul modificărilor și alertele vor fi șterse definitiv. Acțiunea nu poate fi anulată.'}</p>
+          {error&&<p role="alert">{error}</p>}
+          <div className="ac-garage-confirm-actions"><button type="button" disabled={busy} onClick={()=>setDeleteRecordTarget(null)}>{language==='en'?'Cancel':'Anulează'}</button><button type="button" className="danger" disabled={busy||!!previewData} onClick={async()=>{const deleted=await act(()=>api('records/'+deleteRecordTarget.id+'/permanent','DELETE',{confirmation:'DELETE',revision:deleteRecordTarget.revision}));if(deleted)setDeleteRecordTarget(null);}}>{language==='en'?'Delete permanently':'Șterge definitiv'}</button></div>
+        </Dialog>}
         {archiveVehicleTarget && (
           <Dialog title={language === 'en' ? 'Archive vehicle' : 'Arhivează vehiculul'} onClose={() => { if (!busy) setArchiveVehicleTarget(null); }}>
             <p data-user-content><strong>{archiveVehicleTarget.brand} {archiveVehicleTarget.model}</strong> · {archiveVehicleTarget.plate}</p>

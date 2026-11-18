@@ -1,4 +1,5 @@
 'use client';
+import {ActionMenu} from '../action-menu';
 import {FilterSelect} from '../filter-select';
 import {DocumentActions} from '../document-actions';
 import {PremiumAttachment} from '../premium-attachment';
@@ -10,8 +11,8 @@ import { documentCounts, filterRecords } from '@/lib/record-filters';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 type Data=Awaited<ReturnType<typeof dashboard>>;
 type Row=Data['records'][number];
-export function DocumentVault({data,vehicleId,onVehicle,onEdit,onCreate,onArchive,onRestore,onHistory,onUpload,onDeleteFile,onRenewals,preview,busy}:{
- onRenewals?:()=>void;data:Data;vehicleId:string;onVehicle:(id:string)=>void;onEdit:(row:Row)=>void;onCreate:()=>void;onArchive:(row:Row)=>void;onRestore:(row:Row)=>void;onHistory:(row:Row)=>void;onUpload:(row:Row,file:File)=>Promise<void>;onDeleteFile:(file:Data['attachments'][number])=>void;preview:boolean;busy:boolean;
+export function DocumentVault({data,vehicleId,onVehicle,onEdit,onCreate,onArchive,onDelete,onRestore,onHistory,onUpload,onDeleteFile,onRenewals,preview,busy}:{
+ onDelete?:(row:Row)=>void;onRenewals?:()=>void;data:Data;vehicleId:string;onVehicle:(id:string)=>void;onEdit:(row:Row)=>void;onCreate:()=>void;onArchive:(row:Row)=>void;onRestore:(row:Row)=>void;onHistory:(row:Row)=>void;onUpload:(row:Row,file:File)=>Promise<void>;onDeleteFile:(file:Data['attachments'][number])=>void;preview:boolean;busy:boolean;
 }){
  const en=useApplicationLanguage()==='en',locale=useApplicationLocale(),t=(ro:string,english:string)=>en?english:ro;
  const [uploadRow,setUploadRow]=useState<Row|null>(null),[uploadFile,setUploadFile]=useState<File|null>(null),[uploadError,setUploadError]=useState(''),[uploading,setUploading]=useState(false);
@@ -46,7 +47,7 @@ export function DocumentVault({data,vehicleId,onVehicle,onEdit,onCreate,onArchiv
     <dl><div><dt>{t('Emis','Issued')}</dt><dd>{day(row.date)}</dd></div><div><dt>{t('Expiră','Expires')}</dt><dd>{day(row.expiresAt)}</dd></div></dl>
     <p className="ac-vault-days"><Clock3 size={15}/>{row.status.days==null?t('Adaugă data de expirare','Add an expiry date'):row.status.days<0?Math.abs(row.status.days)+' '+t('zile de la expirare','days since expiry'):row.status.days+' '+t('zile rămase','days remaining')}</p>
     <footer>{files[0]?<DocumentActions file={files[0]}/>:<button className="ac-vault-preview" onClick={()=>onEdit(row)}><Eye size={16}/>{t('Vezi detalii','View details')}</button>}
-     <details className="ac-vault-menu"><summary className="ac-m-round" aria-label={t('Acțiuni pentru ','Actions for ')+row.category}><MoreHorizontal size={20}/></summary><div><button onClick={()=>onEdit(row)}>{t('Editează','Edit')}</button><button disabled={preview||busy} onClick={()=>{setUploadRow(row);setUploadFile(null);setUploadError('');}}><Upload size={15}/>{t('Atașează document','Attach document')}</button><button onClick={()=>onHistory(row)}>{t('Istoric modificări','Change history')}</button><button disabled={preview||busy} onClick={()=>row.cancelled?onRestore(row):onArchive(row)}>{row.cancelled?t('Restaurează','Restore'):t('Arhivează','Archive')}</button>{files.map(file=><span className="ac-vault-extra-file" key={file.id}><strong data-user-content>{file.name}</strong><DocumentActions file={file} compact/><button disabled={preview||busy} onClick={()=>onDeleteFile(file)}>{t('Șterge atașamentul','Delete attachment')}</button></span>)}</div></details>
+     <ActionMenu label={t('Acțiuni pentru ','Actions for ')+row.category}><button onClick={()=>onEdit(row)}>{t('Editează','Edit')}</button><button disabled={preview||busy} onClick={()=>{setUploadRow(row);setUploadFile(null);setUploadError('');}}><Upload size={15}/>{t('Atașează document','Attach document')}</button><button onClick={()=>onHistory(row)}>{t('Istoric modificări','Change history')}</button><button disabled={preview||busy} onClick={()=>row.cancelled?onRestore(row):onArchive(row)}>{row.cancelled?t('Restaurează','Restore'):t('Arhivează','Archive')}</button>{files.map(file=><span className="ac-action-file" key={file.id}><strong data-user-content>{file.name}</strong><DocumentActions file={file}/><button disabled={preview||busy} onClick={()=>onDeleteFile(file)}>{t('Șterge atașamentul','Delete attachment')}</button></span>)}{onDelete&&<button className="ac-action-danger" disabled={busy} onClick={()=>onDelete(row)}>{t('Șterge definitiv','Delete permanently')}</button>}</ActionMenu>
     </footer>
    </article>;
   })}</div>

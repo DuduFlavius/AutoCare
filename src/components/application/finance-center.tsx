@@ -1,4 +1,5 @@
 'use client';
+import {ActionMenu} from '../action-menu';
 import {FilterSelect} from '../filter-select';
 import {DocumentActions} from '../document-actions';
 
@@ -17,9 +18,9 @@ type Entry = Data['records'][number];
 type Sample = { bani: number; count: number; known: number };
 const pageSize = 10;
 
-export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, onArchive, onRestore, onAi, onRefresh }: {
+export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, onArchive, onDelete, onRestore, onAi, onRefresh }: {
   data: Data; today: string; primaryId: string; preview: boolean; money: (bani: number) => string;
-  onEdit: (row: Entry) => void; onArchive: (row: Entry) => void; onRestore: (row: Entry) => void; onAi: (vehicleId: string) => void;
+  onDelete?: (row: Entry) => void; onEdit: (row: Entry) => void; onArchive: (row: Entry) => void; onRestore: (row: Entry) => void; onAi: (vehicleId: string) => void;
   onRefresh: () => Promise<void>;
 }) {
   const en = useApplicationLanguage() === 'en';
@@ -190,7 +191,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
           <td data-label={t('Valoare', 'Amount')}><strong>{row.amountKnown === false ? '—' : money(row.amountBani)}</strong></td>
           <td data-label={t('Kilometraj', 'Mileage')}>{row.odometer == null ? '—' : row.odometer.toLocaleString(locale) + ' km'}</td>
           <td data-label={t('Documente', 'Documents')}>{byRecord.has(row.id) ? byRecord.get(row.id)!.map(file => <span key={file.id} className="ac-file-actions"><DocumentActions file={file} compact/></span>) : '—'}</td>
-          <td data-label={t('Acțiuni', 'Actions')}><details className="ac-expense-menu"><summary aria-label={t('Acțiuni pentru ','Actions for ')+row.title}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={() => onEdit(row)}>{t('Editează', 'Edit')}</button><button type="button" onClick={() => row.cancelled ? onRestore(row) : onArchive(row)}>{row.cancelled ? t('Restaurează','Restore') : t('Arhivează', 'Archive')}</button></div></details></td>
+          <td data-label={t('Acțiuni', 'Actions')}><ActionMenu label={t('Acțiuni pentru ','Actions for ')+row.title}><button type="button" onClick={() => onEdit(row)}>{t('Editează', 'Edit')}</button><button type="button" onClick={() => row.cancelled ? onRestore(row) : onArchive(row)}>{row.cancelled ? t('Restaurează','Restore') : t('Arhivează', 'Archive')}</button>{onDelete&&<button className="ac-action-danger" onClick={()=>onDelete(row)}>{t('Șterge definitiv','Delete permanently')}</button>}</ActionMenu></td>
         </tr>)}
       </tbody></table> : <p role="status">{t('Nu există cheltuieli care să corespundă selecției.', 'No expenses match the selection.')}</p>}
       {pages > 1 && <nav className="ac-finance-toggle" aria-label={t('Pagini istoric', 'Expense history pages')}><button type="button" disabled={!visiblePage} onClick={() => setPage(visiblePage - 1)}>{t('Anterior', 'Previous')}</button><span>{visiblePage + 1} / {pages}</span><button type="button" disabled={visiblePage + 1 >= pages} onClick={() => setPage(visiblePage + 1)}>{t('Următor', 'Next')}</button></nav>}

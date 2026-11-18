@@ -1,4 +1,5 @@
 'use client';
+import {FilterSelect} from './filter-select';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useRef, useState } from 'react';
 import AutoDrivePanel from './auto-drive-panel';
@@ -246,7 +247,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
       </MapStage>
     <div className="ac-drive-console">
     <DriveSessionSummary distance={distance} seconds={trackingSeconds} phase={phase} accuracy={telemetry.accuracy} speed={speed} signal={status} english={english}/>
-    {vehicles.length > 0 && <label className="ac-drive-vehicle">{t('Mașina pentru călătorie', 'Your vehicle')} <select value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active || (distance>0 && !saved)} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}{v.plate ? ' · ' + v.plate : ''}</option>)}</select></label>}
+    {vehicles.length > 0 && <label className="ac-drive-vehicle">{t('Mașina pentru călătorie', 'Your vehicle')} <FilterSelect value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active || (distance>0 && !saved)} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}{v.plate ? ' · ' + v.plate : ''}</option>)}</FilterSelect></label>}
     <div className="ac-smartdrive-trip-controls">
       {driveButton}
       {!active && !automatic && distance > 0 && <button type="button" disabled={saving || preview || saved} onClick={() => void saveTrip()}>{saved ? t("Călătorie salvată", "Trip saved") : saving ? 'Se salvează…' : syncMileage ? t("Salvează și sincronizează", "Save and sync mileage") : t("Salvează călătoria GPS", "Save GPS trip")}</button>}

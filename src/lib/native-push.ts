@@ -21,7 +21,7 @@ export async function sendNativePush(uid: string, payload: {id:string;title:stri
   for (const row of tokens) {
     try {
       await send({token:row.token,notification:{title:payload.title,body:payload.body},
-        data:{notificationId:payload.id,url:'/cont?tab=Notific%C4%83ri'},
+        data:{notificationId:payload.id,url:payload.id.startsWith('feedback-team-')?'/cont?tab=Feedback%20utilizatori':payload.id.startsWith('feedback-')?'/cont?tab=Feedback':'/cont?tab=Notific%C4%83ri'},
         android:{priority:'high',ttl:3600000,notification:{channelId:'autocare-updates',tag:payload.id}}});
       accepted++;
     } catch (error) {

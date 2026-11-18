@@ -5,6 +5,12 @@ import * as s from './schema';
 // Explicit dependency order. No credentials or environment configuration are exported.
 const tables = {
   user: s.user,
+  feedbackItems:s.feedbackItems,
+  feedbackReplies:s.feedbackReplies,
+  feedbackFiles:s.feedbackFiles,
+  feedbackEvents:s.feedbackEvents,
+  feedbackPreferences:s.feedbackPreferences,
+  feedbackNotices:s.feedbackNotices,
   account: s.account,
   session: s.session,
   verification: s.verification,
@@ -114,6 +120,7 @@ export async function restoreEncrypted(bytes: Buffer, key: Buffer) {
     ])
       if (!(key in backup.tables)) backup.tables[key] = [];
   if (backup.version === 2 && backup.tables) for(const key of ['nativePushTokens','playSubscriptions']) if(!(key in backup.tables))backup.tables[key]=[];
+  for(const key of ['feedbackItems','feedbackReplies','feedbackFiles','feedbackEvents','feedbackPreferences','feedbackNotices']) if(backup.tables && !(key in backup.tables)) backup.tables[key]=[];
   if (![1,2].includes(backup.version) || Object.keys(tables).some((k) => !Array.isArray(backup.tables[k])))
     throw new Error('Invalid backup');
   await db().transaction(async (tx) => {

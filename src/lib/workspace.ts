@@ -6,6 +6,7 @@ export const mobileWorkspaceSections = [
   { id: 'Cont', ro: 'Setări', en: 'Settings' },
 ] as const;
 export const workspaceSections = [
+  {id:'Feedback',ro:'Trimite feedback',en:'Send feedback',group:'help',icon:'support'},
   { id: 'Cont', ro: 'Cont', en: 'Account', group: 'account', icon: 'settings' },
   { id: 'Dashboard', ro: 'Acasă', en: 'Home', group: 'overview', icon: 'home' },
   { id: 'Garaj', ro: 'Garajul meu', en: 'My garage', group: 'garage', icon: 'car' },
@@ -64,7 +65,7 @@ export function normalizeWorkspaceTab(value: string | null | undefined) {
     'Garajul meu': 'Garaj',
   };
   const tab = value ? aliases[value] || value : 'Dashboard';
-  return workspaceSections.some((s) => s.id === tab) || tab === 'Administrare' ? tab : 'Dashboard';
+  return workspaceSections.some((s) => s.id === tab) || tab === 'Administrare' || tab === 'Feedback utilizatori' ? tab : 'Dashboard';
 }
 export function workspaceHref(path: string, tab: string, vehicle?: string | null) {
   const url = new URL(path, 'https://autocare.invalid');

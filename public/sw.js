@@ -17,7 +17,7 @@ self.addEventListener('push', (event) => {
   let payload = {};
   try { payload = event.data ? event.data.json() : {}; } catch {}
   const isSupport = String(payload.id || '').startsWith('support-');
-  const target = isSupport ? '/cont?tab=Centru%20de%20suport' : '/cont?tab=Notific%C4%83ri';
+  const target = String(payload.id || '').startsWith('feedback-team-') ? '/cont?tab=Feedback%20utilizatori' : String(payload.id || '').startsWith('feedback-') ? '/cont?tab=Feedback' : isSupport ? '/cont?tab=Centru%20de%20suport' : '/cont?tab=Notific%C4%83ri';
   event.waitUntil(self.registration.showNotification(payload.title || 'AutoCare', {
     body: payload.body || 'Ai o notificare nouă în AutoCare.',
     tag: payload.id || 'autocare-reminder',

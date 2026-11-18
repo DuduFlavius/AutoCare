@@ -235,6 +235,16 @@ export async function saveRecord(uid: string, input: unknown, id?: string, compl
     )[0];
   });
 }
+export async function deleteRecord(uid: string, id: string, revision: number) {
+  if (!Number.isInteger(revision) || revision < 1) throw new AppError(400, 'Revizie invalidă.');
+  return db().transaction(async tx => {
+    const row = (await tx.select().from(s.records).where(and(eq(s.records.id,id),eq(s.records.userId,uid))).for('update'))[0];
+    if (!row) throw new AppError(404, 'Înregistrarea nu există.');
+    if (row.revision !== revision) throw new AppError(409, 'Înregistrarea a fost modificată. Reîncarcă pagina.');
+    await tx.delete(s.records).where(and(eq(s.records.id,id),eq(s.records.userId,uid)));
+    return {ok:true};
+  });
+}
 export async function archiveRecord(uid: string, id: string) {
   await ownedRecord(uid, id);
   await db().transaction(async (tx) => {
