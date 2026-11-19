@@ -710,6 +710,19 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     new Date(),
     data?.profile.timezone || 'Europe/Bucharest',
   );
+  // Real service activity from the currently filtered records; never demo values.
+  const serviceActivity = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date();
+    date.setDate(1);
+    date.setMonth(date.getMonth() - (5 - index));
+    const key = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0')].join('-');
+    return {
+      key,
+      label: date.toLocaleDateString(locale, { month: 'short' }),
+      count: rows.filter(record => record.kind === 'service' && record.date?.startsWith(key)).length,
+    };
+  });
+  const serviceActivityMax = Math.max(1, ...serviceActivity.map(month => month.count));
   const moneyDisplay = (bani: number): string => currency === 'EUR'
     ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR'}).format(bani / 500)
     : new Intl.NumberFormat(locale, {style:'currency',currency:'RON'}).format(bani / 100);
@@ -1210,6 +1223,26 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                       </section>
                     ))}
                   </div>
+                )}
+                {tab === 'Întreținere' && (
+                  <section className="ac-service-activity" aria-label={language === 'en' ? 'Maintenance activity over six months' : 'Activitate întreținere în ultimele șase luni'}>
+                    <div className="ac-service-activity-heading">
+                      <div><span className="eyebrow">AUTOCARE · INSIGHTS</span>
+                        <h3>{language === 'en' ? 'Maintenance activity' : 'Statistica întreținerii'}</h3>
+                        <p>{language === 'en' ? 'Recorded service operations in the last six months. Updates with your filters.' : 'Intervenții înregistrate în ultimele șase luni. Se actualizează după filtrele selectate.'}</p>
+                      </div>
+                      <span className="ac-service-activity-total">{serviceActivity.reduce((sum, month) => sum + month.count, 0)} <small>{language === 'en' ? 'operations' : 'intervenții'}</small></span>
+                    </div>
+                    <div className="ac-service-activity-chart" role="img" aria-label={serviceActivity.map(month => month.label + ': ' + month.count).join(', ')}>
+                      {serviceActivity.map(month => (
+                        <div className="ac-service-activity-month" key={month.key}>
+                          <strong>{month.count}</strong>
+                          <div className="ac-service-activity-track"><span style={{ height: (month.count ? Math.max(9, month.count / serviceActivityMax * 100) : 0) + '%' }} /></div>
+                          <span>{month.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
                 )}
                 <div className="record-tools ac-premium-record-tools">
                   <div className="record-search">
