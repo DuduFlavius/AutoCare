@@ -1,5 +1,6 @@
 'use client';
 import {FilterSelect} from './filter-select';
+import './smartdrive-premium.css';
 
 import dynamic from 'next/dynamic';
 import { ArrowUp, CornerUpLeft, CornerUpRight, Flag, LocateFixed, MapPin, Navigation, RotateCcw, X } from 'lucide-react';
@@ -13,6 +14,41 @@ import DriveDestinationSearch, { type DriveDestination } from './drive-destinati
 import { getDevicePosition } from '@/lib/device-location';
 import { mapLocationError, useMapLocation } from './use-map-location';
 import { useApplicationLocale } from './application-locale';
+
+
+// The destination map remains implemented but is temporarily hidden from users.
+// No scheduled reopening: release the feature manually after validation.
+export default function AutoPointsMap(props: Parameters<typeof AutoPointsMapContent>[0]) {
+  const locale = useApplicationLocale();
+  const english = locale.startsWith('en');
+  if (!props.visible) return null;
+  return (
+    <section className="ac-gps-maintenance" aria-label={english ? 'Maps and destinations maintenance' : 'Mentenanță hartă și destinație'}>
+      <div className="ac-gps-maintenance-top">
+        <a className="ac-gps-maintenance-exit" href="/cont" aria-label={english ? 'Exit maps' : 'Ieșire din hartă'}>
+          <span aria-hidden="true">←</span> {english ? 'Exit' : 'Ieșire'}
+        </a>
+        <span className="ac-gps-maintenance-brand">AUTOCARE <strong>PREMIUM</strong></span>
+      </div>
+      <div className="ac-gps-maintenance-body">
+        <div className="ac-gps-maintenance-icon" aria-hidden="true">✦</div>
+        <span className="ac-gps-maintenance-kicker">SMARTDRIVE · MAPS</span>
+        <h2>{english ? 'Better navigation is on its way.' : 'Pregătim o navigație mai bună pentru tine.'}</h2>
+        <p>{english
+          ? 'Maps and Destinations are temporarily under maintenance. We are improving routes, location accuracy and the navigation experience. We apologize for the inconvenience and thank you for your patience.'
+          : 'Harta și Destinația sunt temporar în mentenanță. Îmbunătățim traseele, precizia localizării și experiența de navigație. Ne cerem scuze pentru inconvenient și îți mulțumim pentru înțelegere.'}</p>
+        <div className="ac-gps-maintenance-date">
+          <span>{english ? 'Estimated return' : 'Revenire estimată'}</span>
+          <strong>{english ? '1 January 2027' : '1 ianuarie 2027'}</strong>
+        </div>
+        <p className="ac-gps-maintenance-footnote">{english
+          ? 'The date is an estimate. This feature may return sooner once testing is complete.'
+          : 'Data este estimativă. Funcția poate reveni mai devreme, imediat ce terminăm testele.'}</p>
+        <a className="ac-gps-maintenance-home" href="/cont">{english ? 'Back to my account' : 'Înapoi în cont'}</a>
+      </div>
+    </section>
+  );
+}
 
 const RoadMap = dynamic(() => import('./road-map'), { ssr: false });
 const noRoute: GPSFix[] = [];
@@ -43,7 +79,7 @@ function turnText(turn: Turn, english: boolean) {
   return english ? 'Continue straight' : 'Continuă înainte';
 }
 
-export default function AutoPointsMap({ preview, visible, ownerId }: { preview: boolean; visible: boolean; ownerId: string }) {
+function AutoPointsMapContent({ preview, visible, ownerId }: { preview: boolean; visible: boolean; ownerId: string }) {
   const locale = useApplicationLocale();
   const english = locale.startsWith('en');
   const t = (ro: string, en: string) => english ? en : ro;
