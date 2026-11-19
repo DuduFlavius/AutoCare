@@ -1,5 +1,6 @@
 'use client';
 import FeedbackWorkspace from './feedback-workspace';
+import SmartDriveMaintenance from './smartdrive-maintenance';
 import {FeedbackNotice,FeedbackInvitation} from './feedback-entry';
 import './feedback.css';
 import './action-menu.css';
@@ -1493,7 +1494,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             )}
             {tab==='Calendar'&&<RacingCalendar data={data} today={nowDate} onOpen={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onCreate={day=>setModal({kind:'service',planned:true,initialDate:day})}/>}
             {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
-            {openedSmartDrive && <div hidden={tab !== 'Plan întreținere'}><MileagePlanner data={data} initialDrive={initialDrive} driveVisible={tab === 'Plan întreținere'} preview={!!previewData} onUpdated={refresh} onError={setError} /></div>}
+            {tab === 'Plan întreținere' && <SmartDriveMaintenance english={language === 'en'} onBack={() => navigate('Acasă')} />}
             {tab === 'Notificări' && (
               <div className="overview-stack">
                 <section className="ac-notification-toolbar" data-workspace-ui><span><BellRing size={24} strokeWidth={1.6}/><b>{data.notifications.filter(row=>!row.readAt).length}</b></span><h2>{data.notifications.some(row=>!row.readAt)?(language==='en'?'Your new notifications':'Notificările tale noi'):(language==='en'?'You are up to date':'Ești la zi')}</h2><p>{language==='en'?'Your vehicle deadlines and important alerts, in one place.':'Termenele mașinii și alertele importante, într-un singur loc.'}</p><button className="ac-m-primary" type="button" disabled={busy||!!previewData} onClick={()=>void act(registerPush,language==='en'?'Notifications activated on this device.':'Notificările au fost activate pe acest dispozitiv.') }><BellRing size={18}/>{language==='en'?'Activate notifications':'Activează notificările'}</button></section>
