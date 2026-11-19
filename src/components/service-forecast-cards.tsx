@@ -1,6 +1,7 @@
 'use client';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
 import DailyMileageInput from './daily-mileage-input';
+import './service-forecast-premium.css';
 import { rankMaintenanceForecasts } from '@/lib/maintenance-schedule';
 import { CalendarClock, TrendingUp } from 'lucide-react';
 import { useMileageUsage } from './use-mileage-usage';
