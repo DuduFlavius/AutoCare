@@ -20,3 +20,8 @@
 
 .rg-premium-downloads .ac-garage-report-links>button{width:100%;font:inherit;text-align:left;cursor:pointer}
 .rg-premium-downloads .ac-garage-report-links>button:disabled{opacity:.6;cursor:wait;transform:none}
+
+/* Native download links work in browsers and Android webviews without blob URLs. */
+.rg-premium-downloads .ac-garage-report-links>a{display:flex;flex-direction:column;gap:6px;text-decoration:none;cursor:pointer;min-height:96px;justify-content:center}
+.rg-premium-downloads .ac-garage-report-links>a:focus-visible{outline:2px solid #8cf4b5;outline-offset:3px}
+.rg-premium-downloads .ac-premium-download-actions>a.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:#1b4a32!important;color:#f6fff8!important;border:1px solid #4c9e6c!important;border-radius:12px!important;text-decoration:none!important;min-height:44px;padding:10px 16px}
