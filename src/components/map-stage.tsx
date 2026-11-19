@@ -8,16 +8,22 @@ export default function MapStage({
   english,
   children,
   actions,
+  driving = false,
 }: {
   title: string;
   english: boolean;
   children: ReactNode;
   actions?: ReactNode;
+  driving?: boolean;
 }) {
   const panel = useRef<HTMLDialogElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const wasExpanded = useRef(false);
   const [expanded, setExpanded] = useState(false);
+
+  useLayoutEffect(() => {
+    setExpanded(driving);
+  }, [driving]);
 
   // Own the native dialog state after React commits. Reopening in onClose alone
   // races the browser's close algorithm and can leave the embedded map hidden.
@@ -45,7 +51,7 @@ export default function MapStage({
     <dialog
       ref={panel}
       aria-label={title}
-      className="ac-map-stage"
+      className={driving ? "ac-map-stage ac-map-stage-driving" : "ac-map-stage"}
       onClose={() => setExpanded(false)}
       onCancel={event => { event.preventDefault(); setExpanded(false); }}
     >

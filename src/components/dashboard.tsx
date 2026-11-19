@@ -110,6 +110,7 @@ async function api(path: string, method = 'GET', data?: unknown) {
   if(method!=='GET' && typeof navigator!=='undefined' && !navigator.onLine) throw new Error('Ești offline. Reconectează-te înainte de a salva.');
   const r = await fetch('/api/v1/' + path, {
     method,
+    cache: 'no-store',
     headers: data ? { 'Content-Type': 'application/json' } : undefined,
     body: data ? JSON.stringify(data) : undefined,
   });
@@ -218,8 +219,9 @@ function Dialog({
 }
 
 type DriveView = 'live' | 'history' | 'points' | 'bluetooth';
-function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false, initialDrive, driveVisible = false }: {
-  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean; initialDrive?: string; driveVisible?: boolean;
+function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false, initialDrive, driveVisible = false, onVehicle, onTripSaved }: {
+  onTripSaved?: (receipt?: {vehicleId: string; odometerBefore: number | null; odometerAfter: number | null})=>Promise<unknown>;
+  onVehicle?: (id:string)=>void; data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean; initialDrive?: string; driveVisible?: boolean;
 }) {
 
   const locale=useApplicationLocale();
@@ -280,7 +282,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
             </button>
           </div>
           <div hidden={driveView !== 'live' && driveView !== 'bluetooth'}>
-            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible} liveVisible={driveView === 'live' && driveVisible}/>
+            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onTripSaved ?? onUpdated} onVehicle={onVehicle} onHistory={()=>setDriveView('history')} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible} liveVisible={driveView === 'live' && driveVisible}/>
           </div>
           {driveView === 'points' && <AutoPointsMap preview={preview} visible={driveVisible} ownerId={data.profile.userId}/>}
           {driveView === 'history' && (
@@ -521,6 +523,17 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     } catch (e) {
       if (!silent && request === dashboardRequest.current) setError((e as Error).message);
     }
+  }
+  async function refreshAfterTrip(receipt?: {vehicleId: string; odometerBefore: number | null; odometerAfter: number | null}) {
+    const updated = receipt?.odometerAfter;
+    if (receipt && updated != null) {
+      setData(current => current ? {
+        ...current,
+        vehicles: current.vehicles.map(vehicle => vehicle.id === receipt.vehicleId && vehicle.odometer === receipt.odometerBefore
+          ? { ...vehicle, odometer: updated } : vehicle),
+      } : current);
+    }
+    await refresh();
   }
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
@@ -1648,7 +1661,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               </section>
             )}
             {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
-            {openedSmartDrive && <div hidden={tab !== 'Plan întreținere'}><MileagePlanner data={data} initialDrive={initialDrive} driveVisible={tab === 'Plan întreținere'} preview={!!previewData} onUpdated={refresh} onError={setError} /></div>}
+            {openedSmartDrive && <div hidden={tab !== 'Plan întreținere'}><MileagePlanner data={data} onTripSaved={refreshAfterTrip} onVehicle={id=>navigate('Garaj', 'push', id)} initialDrive={initialDrive} driveVisible={tab === 'Plan întreținere'} preview={!!previewData} onUpdated={refresh} onError={setError} /></div>}
             {tab === 'Notificări' && (
               <div className="overview-stack">
                 <section className="ac-notification-toolbar" data-workspace-ui><span><BellRing size={24} strokeWidth={1.6}/><b>{data.notifications.filter(row=>!row.readAt).length}</b></span><h2>{data.notifications.some(row=>!row.readAt)?(language==='en'?'Your new notifications':'Notificările tale noi'):(language==='en'?'You are up to date':'Ești la zi')}</h2><p>{language==='en'?'Your vehicle deadlines and important alerts, in one place.':'Termenele mașinii și alertele importante, într-un singur loc.'}</p><button className="ac-m-primary" type="button" disabled={busy||!!previewData} onClick={()=>void act(registerPush,language==='en'?'Notifications activated on this device.':'Notificările au fost activate pe acest dispozitiv.') }><BellRing size={18}/>{language==='en'?'Activate notifications':'Activează notificările'}</button></section>

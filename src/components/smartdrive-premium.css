@@ -65,3 +65,20 @@
  }
  @media(prefers-reduced-motion:reduce) { .drive-session * {animation:none!important;transition:none!important} }
 }
+
+.ac-trip-receipt {
+  width: min(460px, calc(100% - 28px));
+  max-height: calc(100dvh - 28px);
+  margin: auto;
+  padding: clamp(16px, 4vw, 26px);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+.ac-trip-receipt::backdrop { background: rgb(0 0 0 / .65); }
+.ac-trip-receipt > svg { color: var(--color-primary); }
+.ac-trip-receipt dl { display: grid; gap: .35rem; }
+.ac-trip-receipt dl > div { display: flex; gap: .75rem; justify-content: space-between; padding: .5rem; background: var(--color-surface-muted); border-radius: 8px; }
+.ac-trip-receipt dd { margin: 0; font-weight: 700; text-align: end; }
+.ac-trip-receipt-actions { display: flex; flex-wrap: wrap; gap: .5rem; }

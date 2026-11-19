@@ -122,6 +122,8 @@ export const gpsTrips = pgTable('gps_trips', {
   durationSeconds: integer().notNull(),
   startedAt: timestamp({ withTimezone: true }).notNull(),
   endedAt: timestamp({ withTimezone: true }).notNull(),
+  odometerBefore: integer(),
+  odometerAfter: integer(),
   source: text().notNull().default('browser-gps'),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 }, (t) => [

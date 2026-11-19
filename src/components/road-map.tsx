@@ -7,6 +7,7 @@ import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-p
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { roadMapStyle, plannedRouteBounds, routeGeometry, streetOnlyStyle, tripBounds } from '@/lib/road-map';
+import { driveFrame, shortestAngle } from '@/lib/drive-camera';
 import 'maplibre-gl/dist/maplibre-gl.css';
 const RasterRoadMap = dynamic(() => import('./raster-road-map'), { ssr: false });
 export default function RoadMapView({
@@ -26,8 +27,12 @@ export default function RoadMapView({
   destination,
   routeStart,
   onDestination,
+  maneuverDistance,
+  matchedPosition,
 }: {
   points: GPSFix[];
+  maneuverDistance?: number;
+  matchedPosition?: [number, number];
   position?: GPSFix | null;
   active: boolean;
   english?: boolean;
@@ -55,6 +60,18 @@ export default function RoadMapView({
   autoPointAction.current = onAutoPoint;
   const destinationAction = useRef(onDestination);
   destinationAction.current = onDestination;
+  const activeRef = useRef(active);
+  activeRef.current = active;
+  const latestManeuver = useRef(maneuverDistance);
+  latestManeuver.current = maneuverDistance;
+  const latestMatch = useRef(matchedPosition);
+  latestMatch.current = matchedPosition;
+  const previousFix = useRef<GPSFix | null>(null);
+  const drivingBearing = useRef(0);
+  const renderedBearing = useRef(0);
+  const frame = useRef(0);
+  const [recenter, setRecenter] = useState(0);
+  const [threeD, setThreeD] = useState(true);
   const shownRoute = useRef(false);
   const wasActive = useRef(false);
   const follow = useRef(true);
@@ -66,7 +83,8 @@ export default function RoadMapView({
     if (!view || !plannedRoute?.length) return;
     follow.current = false;
     setFollowing(false);
-    view.fitBounds(plannedRouteBounds(plannedRoute), { padding: 58, maxZoom: 16, duration: 650 });
+    view.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
+    view.fitBounds(plannedRouteBounds(plannedRoute), { padding: 58, maxZoom: 16, duration: 650, pitch: 0, bearing: 0 });
   }
   useEffect(() => {
     let disposed = false,
@@ -100,7 +118,8 @@ export default function RoadMapView({
           });
           map.current = view;
           view.addControl(new lib.NavigationControl({ showCompass: false }), 'top-right');
-          if (onAreaChange) view.on('moveend', () => {
+          if (onAreaChange) view.on('moveend', (event) => {
+            if (activeRef.current && !event.originalEvent) return;
             const center = view.getCenter().wrap();
             onAreaChange({ latitude: center.lat, longitude: center.lng, zoom: view.getZoom() });
           });
@@ -112,15 +131,27 @@ export default function RoadMapView({
           view.on('load', () => {
             if (disposed) return;
             window.clearTimeout(fallbackTimer);
+            const building = view.getLayer('building');
+            if (building?.type === 'fill' && building.source && building.sourceLayer) view.addLayer({
+              id: 'driving-buildings', type: 'fill-extrusion',
+              source: building.source, 'source-layer': building.sourceLayer, minzoom: 15.6,
+              layout: { visibility: 'none' },
+              paint: {
+                'fill-extrusion-color': '#263b56',
+                'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 6],
+                'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+                'fill-extrusion-opacity': 0.78,
+              },
+            }, 'building');
             view.addSource('directions', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
             view.addLayer({
               id: 'directions-outline', type: 'line', source: 'directions',
-              paint: { 'line-color': '#10192a', 'line-width': 11 },
+              paint: { 'line-color': '#0555ba', 'line-width': 13, 'line-opacity': 0.7, 'line-blur': 2 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addLayer({
               id: 'directions-line', type: 'line', source: 'directions',
-              paint: { 'line-color': '#56a8ff', 'line-width': 7 },
+              paint: { 'line-color': '#43caff', 'line-width': 7 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addSource('trip', { type: 'geojson', data: routeGeometry(latest.current) });
@@ -191,6 +222,8 @@ export default function RoadMapView({
       });
     return () => {
       disposed = true;
+      cancelAnimationFrame(frame.current);
+      previousFix.current = null;
       window.clearTimeout(fallbackTimer);
       resize?.disconnect();
       marker.current?.remove();
@@ -200,42 +233,79 @@ export default function RoadMapView({
     };
   }, [english, history, initialArea, onAreaChange]);
   useEffect(() => {
+    const view = map.current;
+    if (view?.getLayer('driving-buildings'))
+      view.setLayoutProperty('driving-buildings', 'visibility', active && threeD ? 'visible' : 'none');
+  }, [active, threeD, loading]);
+  useEffect(() => {
     const view = map.current,
       p = position;
     if (!view || history) return;
     if (!p) {
+      cancelAnimationFrame(frame.current);
+      previousFix.current = null;
       marker.current?.remove();
       marker.current = null;
       return;
     }
-    if (marker.current) marker.current.setLngLat([p.longitude, p.latitude]);
-    else {
-      void import('maplibre-gl').then((lib) => {
-        if (map.current !== view || latestPosition.current !== p) return;
-        if (marker.current) {
-          marker.current.setLngLat([p.longitude, p.latitude]);
-          return;
-        }
-        const element = createRoadPositionMarker(english);
-        updateRoadPositionMarker(element, active, p, points);
-        marker.current = new lib.Marker({ element })
-          .setLngLat([p.longitude, p.latitude])
-          .addTo(view);
-      });
-    }
+    if (loading) return;
+    const previous = previousFix.current;
     if (active && !wasActive.current) {
       follow.current = true;
       setFollowing(true);
     }
     wasActive.current = active;
-    if (follow.current)
-      view.easeTo({
-        center: [p.longitude, p.latitude],
-        zoom: Math.max(15, view.getZoom()),
-        duration: 750,
+    const camera = driveFrame(previous, p, drivingBearing.current, latestManeuver.current);
+    if (previous?.timestamp !== p.timestamp && (!active || (p.accuracy <= 50 && !camera.outlier))) previousFix.current = p;
+    if (active && p.accuracy <= 50) drivingBearing.current = camera.bearing;
+    const animate = (pin: Marker) => {
+      cancelAnimationFrame(frame.current);
+      const target: [number, number] = (active && latestMatch.current) || [p.longitude, p.latitude];
+      const start = pin.getLngLat();
+      const driving = active && threeD;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration = active && !reducedMotion ? camera.duration : 0;
+      const stationary = active && (camera.hold || (p.accuracy > 50 && !!previous));
+      const center: [number, number] = stationary ? [start.lng, start.lat] : target;
+      const ease = (value: number) => value * (2 - value);
+      const bearing = driving ? drivingBearing.current : 0;
+      if (follow.current) view.easeTo({
+        center,
+        bearing,
+        pitch: driving ? 60 : 0,
+        padding: { top: driving ? Math.round(view.getContainer().clientHeight * 0.36) : 0, bottom: 0, left: 0, right: 0 },
+        zoom: driving ? camera.zoom : Math.max(15, view.getZoom()),
+        duration: active ? duration : 600,
+        easing: ease,
       });
-    updateRoadPositionMarker(marker.current?.getElement(), active, p, points);
-  }, [points, position, english, history, active, loading]);
+      const element = pin.getElement();
+      updateRoadPositionMarker(element, active, p, points);
+      if (!active) {
+        pin.setLngLat(center);
+        return;
+      }
+      const started = performance.now();
+      const headingStart = renderedBearing.current;
+      const headingChange = shortestAngle(headingStart, drivingBearing.current);
+      const render = (now: number) => {
+        if (map.current !== view || marker.current !== pin) return;
+        const time = duration ? Math.min(1, (now - started) / duration) : 1;
+        const amount = ease(time);
+        pin.setLngLat([start.lng + shortestAngle(start.lng, center[0]) * amount, start.lat + (center[1] - start.lat) * amount]);
+        renderedBearing.current = headingStart + headingChange * amount;
+        element.style.setProperty('--gps-bearing', shortestAngle(view.getBearing(), renderedBearing.current) + 'deg');
+        if (time < 1) frame.current = requestAnimationFrame(render);
+      };
+      render(started);
+    };
+    if (marker.current) animate(marker.current);
+    else void import('maplibre-gl').then(({ Marker }) => {
+      if (map.current !== view || latestPosition.current !== p || marker.current) return;
+      marker.current = new Marker({ element: createRoadPositionMarker(english) })
+        .setLngLat([p.longitude, p.latitude]).addTo(view);
+      animate(marker.current);
+    });
+  }, [points, position, english, history, active, loading, threeD, recenter]);
   useEffect(() => {
     const source = map.current?.getSource('trip') as GeoJSONSource | undefined;
     source?.setData(routeGeometry(points));
@@ -292,7 +362,7 @@ export default function RoadMapView({
   if (failed)
     return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart} />;
   return (
-    <div className="ac-road-map" data-workspace-ui>
+    <div className={active ? "ac-road-map ac-road-map-driving" : "ac-road-map"} data-workspace-ui>
       <div
         ref={host}
         className="ac-road-map-canvas"
@@ -311,19 +381,27 @@ export default function RoadMapView({
         type="button"
         className="ac-road-map-center"
         aria-pressed={following}
+        aria-label={english ? 'Recenter on my location' : 'Recentrează pe poziția mea'}
         onClick={() => {
           follow.current = true;
           setFollowing(true);
-          onLocate?.();
           const p = position;
-          if (p)
-            map.current?.easeTo({ center: [p.longitude, p.latitude], zoom: 16, duration: 700 });
+          if (!p || Date.now() - p.timestamp > 15000) onLocate?.();
+          if (active) setRecenter(value => value + 1);
+          if (p && !active) map.current?.easeTo({ center: [p.longitude, p.latitude], zoom: 16, duration: 700 });
         }}
       >
-        <Crosshair size={17}/>{locating && !position
+        <Crosshair size={20} aria-hidden="true"/><span>{locating && !position
           ? (english ? 'Finding position…' : 'Se caută poziția…')
-          : (english ? 'My location' : 'Poziția mea')}
+          : (english ? 'My location' : 'Poziția mea')}</span>
       </button>}
+      {active && <button type="button" className="ac-road-map-mode" aria-pressed={threeD}
+        aria-label={english ? '3D driving view' : 'Perspectivă de condus 3D'}
+        onClick={() => {
+          follow.current = true;
+          setFollowing(true);
+          setThreeD(value => !value);
+        }}>{threeD ? '3D' : '2D'}</button>}
       {!!plannedRoute?.length && <button type="button" className="ac-road-map-overview" onClick={showRoute}>
         {english ? 'Show full route' : 'Vezi traseul complet'}
       </button>}

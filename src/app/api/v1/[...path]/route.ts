@@ -465,18 +465,31 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           if(!vehicle)throw new svc.AppError(404,'Mașina nu există.');
           const ids=input.trips.map(t=>t.id),existing=await tx.select().from(s.gpsTrips).where(inArray(s.gpsTrips.id,ids));
           if(existing.some(t=>t.userId!==uid||t.vehicleId!==vehicleId))throw new svc.AppError(409,'Identificator de traseu invalid.');
+          if (input.syncMileage && existing.some(t => t.source !== 'browser-gps-synced'))
+            throw new svc.AppError(409, 'O călătorie din acest lot este salvată fără sincronizare. Verifică kilometrajul înainte de o corecție.');
           const known=new Set(existing.map(t=>t.id)),fresh=input.trips.filter(t=>!known.has(t.id));
           if(!fresh.length)return {ids,odometer:vehicle.odometer};
           let odometer=vehicle.odometer;
+          let cumulativeMeters = 0;
           if(input.syncMileage){
             if(vehicle.odometer!==input.expectedOdometer)throw new svc.AppError(409,'Kilometrajul a fost modificat între timp. Verifică traseele înainte de sincronizare.');
             const previous=(await tx.select({meters:sql<string>`coalesce(sum(${s.gpsTrips.distanceMeters}),0)`}).from(s.gpsTrips).where(and(eq(s.gpsTrips.userId,uid),eq(s.gpsTrips.vehicleId,vehicleId),eq(s.gpsTrips.source,'browser-gps-synced'))))[0];
-            odometer+=Math.floor((Number(previous.meters)%1000+fresh.reduce((sum,t)=>sum+t.distanceMeters,0))/1000);
+            cumulativeMeters = Number(previous.meters) % 1000;
+            odometer += Math.floor((cumulativeMeters + fresh.reduce((sum,t)=>sum+t.distanceMeters,0))/1000);
             if(odometer>99999999)throw new svc.AppError(400,'Kilometraj invalid.');
             await tx.update(s.vehicles).set({odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
             await tx.insert(s.mileageReadings).values({id:crypto.randomUUID(),userId:uid,vehicleId,odometer,source:'gps'});
           }
-          await tx.insert(s.gpsTrips).values(fresh.map(t=>({...t,userId:uid,vehicleId,startedAt:new Date(t.startedAt),endedAt:new Date(t.endedAt),source:input.syncMileage?'browser-gps-synced':'browser-gps'})));
+          await tx.insert(s.gpsTrips).values(fresh.map(t => {
+            const before = vehicle.odometer + Math.floor(cumulativeMeters / 1000);
+            cumulativeMeters += t.distanceMeters;
+            return {
+              ...t, userId: uid, vehicleId, startedAt: new Date(t.startedAt), endedAt: new Date(t.endedAt),
+              source: input.syncMileage ? 'browser-gps-synced' : 'browser-gps',
+              odometerBefore: input.syncMileage ? before : null,
+              odometerAfter: input.syncMileage ? vehicle.odometer + Math.floor(cumulativeMeters / 1000) : null,
+            };
+          }));
           return {ids,odometer};
         });
         return json(result,201);
@@ -520,17 +533,30 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             // Serialize saves on this vehicle, then deduplicate retries before changing mileage.
             const vehicle=(await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid))).for('update'))[0];
             if(!vehicle) throw new svc.AppError(404,'Mașina nu există.');
-            if(value.id){const existing=(await tx.select().from(s.gpsTrips).where(eq(s.gpsTrips.id,value.id)))[0];if(existing){if(existing.userId!==uid || existing.vehicleId!==vehicleId)throw new svc.AppError(409,'Identificator de călătorie invalid.');return existing;}}
+            if (value.id) {
+              const [existing] = await tx.select().from(s.gpsTrips).where(eq(s.gpsTrips.id, value.id));
+              if (existing) {
+                if (existing.userId !== uid || existing.vehicleId !== vehicleId)
+                  throw new svc.AppError(409, 'Identificator de călătorie invalid.');
+                if (value.syncMileage && existing.source !== 'browser-gps-synced')
+                  throw new svc.AppError(409, 'Călătoria există în istoric fără sincronizare. Verifică kilometrajul înainte de a corecta manual.');
+                if (existing.distanceMeters !== value.distanceMeters || existing.startedAt.getTime() !== startedAt.getTime())
+                  throw new svc.AppError(409, 'Există deja o altă înregistrare pentru această sesiune.');
+                return existing;
+              }
+            }
+            let odometerAfter: number | null = null;
             if(value.syncMileage){
-              if(value.expectedOdometer===undefined || value.expectedOdometer!==vehicle.odometer)throw new svc.AppError(409,'Kilometrajul a fost modificat între timp. Debifează sincronizarea pentru a salva separat călătoria și verifică bordul.');
+              if(value.expectedOdometer===undefined || value.expectedOdometer!==vehicle.odometer)throw new svc.AppError(409,'Kilometrajul a fost modificat între timp. Verifică bordul. Sesiunea este păstrată pentru verificare.');
               const previous=(await tx.select({meters:sql<string>`coalesce(sum(${s.gpsTrips.distanceMeters}),0)`}).from(s.gpsTrips).where(and(eq(s.gpsTrips.vehicleId,vehicleId),eq(s.gpsTrips.userId,uid),eq(s.gpsTrips.source,'browser-gps-synced'))))[0];
               const carry=Number(previous.meters)%1000;
               const odometer=vehicle.odometer+Math.floor((carry+value.distanceMeters)/1000);
+              odometerAfter = odometer;
               if(odometer>99999999)throw new svc.AppError(400,'Kilometraj invalid.');
               await tx.update(s.vehicles).set({odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
             await tx.insert(s.mileageReadings).values({id:crypto.randomUUID(),userId:uid,vehicleId,odometer,source:'gps'});
             }
-            return (await tx.insert(s.gpsTrips).values({id:value.id??crypto.randomUUID(),userId:uid,vehicleId,distanceMeters:value.distanceMeters,durationSeconds:value.durationSeconds,startedAt,endedAt,source:value.syncMileage?'browser-gps-synced':'browser-gps'}).returning())[0];
+            return (await tx.insert(s.gpsTrips).values({id:value.id??crypto.randomUUID(),userId:uid,vehicleId,distanceMeters:value.distanceMeters,durationSeconds:value.durationSeconds,startedAt,endedAt,source:value.syncMileage?'browser-gps-synced':'browser-gps',odometerBefore:value.syncMileage?vehicle.odometer:null,odometerAfter}).returning())[0];
           });
           return json(result,201);
         }

@@ -968,3 +968,132 @@ html body .ac-workspace.ac-studio .ac-map-compact .ac-map-stage:not(:modal) .ac-
 }
 .ac-map-compact .ac-auto-points-layout { grid-template-columns: minmax(0, 1fr); }
 .ac-navigation-background { color: var(--color-muted); }
+
+html body .ac-workspace .ac-road-map .ac-road-map-mode {
+  position: absolute;
+  top: 112px;
+  right: 10px;
+  z-index: 3;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #385475;
+  border-radius: 50%;
+  background: #101d2b;
+  color: #b9ddff;
+  font-weight: 700;
+}
+html body .ac-workspace .ac-road-map .ac-road-map-mode[aria-pressed="true"] {
+  background: #183757;
+  color: #d9ecff;
+}
+.ac-guidance-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem 1rem;
+  padding: .75rem;
+  border: 1px solid #385475;
+  border-radius: 16px;
+  color: #e1edf9;
+  background: #101d2b;
+}
+.ac-guidance-footer dl { display: flex; flex: 1; gap: .75rem; margin: 0; justify-content: space-between; }
+.ac-guidance-footer dl > div { display: flex; flex-direction: column-reverse; }
+.ac-guidance-footer dt { font-size: .75rem; color: #c5d4e5; }
+.ac-guidance-footer dd { margin: 0; font-weight: 700; white-space: nowrap; font-size: clamp(1rem, 3vw, 1.5rem); }
+html body .ac-workspace .ac-guidance-footer button { min-height: 44px; color: #fff; background: #a72835; border-color: #e76773; }
+@media (max-width: 480px) {
+  .ac-guidance-footer dl { flex-basis: 100%; }
+  .ac-guidance-footer button { width: 100%; }
+}
+
+html body .ac-workspace.ac-studio .ac-auto-points .ac-map-stage-driving:modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+.ac-map-stage-driving:modal > .ac-auto-points-layout {
+  flex: 1;
+  display: flex;
+  min-height: 180px;
+}
+.ac-map-stage-driving:modal > .ac-auto-points-layout > div,
+.ac-map-stage-driving:modal .ac-road-map {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+html body .ac-workspace.ac-studio .ac-auto-points .ac-map-stage-driving:modal .ac-road-map-canvas {
+  height: 100% !important;
+}
+.ac-map-stage-driving:modal > .ac-next-turn { position: static; margin-block-end: 6px; }
+.ac-map-stage-driving:modal > .ac-guidance-footer { margin-block-start: 6px; }
+.ac-map-stage-driving:modal .ac-destination-search ul { max-height: min(27dvh, 240px); overflow: auto; }
+.ac-drive-favorites { display: flex; flex-wrap: wrap; gap: .5rem; margin: 8px 12px; }
+.ac-drive-favorites > div { display: flex; }
+
+/* Keep navigation chrome off the route and preserve space for the map. */
+.ac-guidance-map { position: relative; }
+.ac-guidance-maneuver {
+  position: absolute;
+  z-index: 6;
+  inset-block-start: 12px;
+  inset-inline-start: 12px;
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  max-width: min(340px, calc(100% - 84px));
+  padding: .8rem 1rem;
+  color: #f4f8ff;
+  background: #101d2b;
+  border: 1px solid #385475;
+  border-radius: 16px;
+  box-shadow: 0 8px 22px #080f19a8;
+  pointer-events: none;
+}
+.ac-guidance-maneuver svg { flex: 0 0 auto; color: #b9ddff; }
+.ac-guidance-maneuver div { min-width: 0; display: grid; gap: .2rem; overflow-wrap: anywhere; }
+.ac-guidance-maneuver strong { font-size: clamp(1.25rem, 4vw, 2.3rem); line-height: 1; font-variant-numeric: tabular-nums; }
+.ac-guidance-maneuver span { font-size: .92rem; font-weight: 650; }
+.ac-guidance-maneuver small { color: #c5d4e5; }
+.ac-destination-search-icon { display: none; }
+.ac-map-stage-driving .ac-destination-search form label {
+  position: absolute;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.ac-map-stage-driving .ac-destination-search-row { position: relative; }
+.ac-map-stage-driving .ac-destination-search-icon {
+  display: block;
+  position: absolute;
+  inset-inline-start: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9bc7ef;
+  pointer-events: none;
+}
+html body .ac-workspace .ac-map-stage-driving .ac-destination-search-row input {
+  padding-inline-start: 44px;
+  border-radius: 24px;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-road-map-driving .ac-road-map-center {
+  inset: 166px 10px auto auto !important;
+  padding: 0 !important;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+  border-radius: 50% !important;
+}
+.ac-road-map-driving .ac-road-map-center span,
+.ac-road-map-driving .ac-road-map-status { display: none; }
+.ac-road-map-driving .ac-map-location-state { inset-block-end: 22px; }
+.ac-guidance-footer dl { gap: .5rem; }
+.ac-guidance-footer dl > div + div { border-inline-start: 1px solid #385475; padding-inline-start: .65rem; }
+.ac-guidance-footer dd { font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) {
+  .ac-guidance-maneuver { padding: .65rem; gap: .55rem; }
+  .ac-guidance-maneuver svg { width: 30px; height: 30px; }
+  .ac-guidance-footer dt { font-size: .7rem; }
+}

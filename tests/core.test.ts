@@ -10,6 +10,8 @@ import { migrate } from '../scripts/migrate';
 import { db, closeLocalDb } from '../src/lib/db';
 import * as s from '../src/lib/schema';
 import * as svc from '../src/lib/service';
+import { reminderOffsets } from '../src/lib/maintenance-alerts';
+import { forecastService } from '../src/lib/service-forecast';
 import { date } from '../src/lib/validation';
 import { daysRemaining, documentStatus } from '../src/lib/config';
 import { scheduleReminders, deliverReminders } from '../src/lib/reminders';
@@ -1131,6 +1133,48 @@ test('SmartDrive: reminder preferences validate frequency and persist', async ()
   assert.equal(r.status, 200);
   r = await call('smartdrive/preferences');
   assert.deepEqual({ frequencyDays: (await r.json()).frequencyDays }, { frequencyDays: 7 });
+});
+
+test('SmartDrive returns a persisted mileage receipt after a lost response and protects legacy unsynced trips', async () => {
+  await db().delete(s.requestLimits).where(eq(s.requestLimits.key, `api:${uid}:${Math.floor(Date.now() / 60000)}`));
+  const id = crypto.randomUUID();
+  await db().insert(s.vehicles).values({ id, userId: uid, brand: 'AutoCare', model: 'GPS test', year: 2020, fuel: 'Benzină', plate: 'GPS TEST', odometer: 100000 });
+  const path = 'smartdrive/vehicles/' + id + '/trips';
+  const trip = { id: crypto.randomUUID(), syncMileage: true, expectedOdometer: 100000, distanceMeters: 15000,
+    durationSeconds: 1200, startedAt: '2020-03-15T10:00:00.000Z', endedAt: '2020-03-15T10:20:00.000Z' };
+
+  // Discard the first response as a client would if the connection dropped after commit.
+  assert.equal((await call(path, 'POST', trip)).status, 201);
+  const retry = await call(path, 'POST', trip);
+  assert.equal(retry.status, 201);
+  const receipt = await retry.json();
+  assert.equal(receipt.source, 'browser-gps-synced');
+  assert.equal(receipt.odometerBefore, 100000);
+  assert.equal(receipt.odometerAfter, 100015);
+  const freshDashboard = await (await call('dashboard')).json();
+  const refreshed = freshDashboard.vehicles.find((vehicle: { id: string }) => vehicle.id === id);
+  assert.equal(refreshed.odometer, 100015);
+  assert.equal(forecastService({ currentKm: refreshed.odometer, nextKm: 100515 })?.remainingKm, 500);
+  const alert = { parts: 'AutoCare · alertKm: 500', paid: true, defaults: [], days: null, nextKm: 100515, afterExpiry: false };
+  assert.deepEqual(reminderOffsets({ ...alert, odometer: 100000 }), []);
+  assert.deepEqual(reminderOffsets({ ...alert, odometer: refreshed.odometer }), ['km-before-500']);
+  const history = await (await call(path)).json();
+  assert.equal(history.length, 1);
+  assert.equal(history[0].odometerAfter, 100015);
+  const [firstReading] = await db().select().from(s.mileageReadings).where(eq(s.mileageReadings.vehicleId, id));
+  assert.equal(firstReading.odometer, 100015);
+
+  const next = { ...trip, id: crypto.randomUUID(), expectedOdometer: 100015, distanceMeters: 5000,
+    startedAt: '2020-03-15T11:00:00.000Z', endedAt: '2020-03-15T11:20:00.000Z' };
+  const nextReceipt = await (await call(path, 'POST', next)).json();
+  assert.equal(nextReceipt.odometerAfter, 100020);
+  const legacy = { ...trip, id: crypto.randomUUID(), syncMileage: false };
+  assert.equal((await call(path, 'POST', legacy)).status, 201);
+  assert.equal((await call(path, 'POST', { ...legacy, syncMileage: true })).status, 409);
+  assert.equal((await call(path, 'POST', { ...trip, distanceMeters: 17000 })).status, 409);
+  const [vehicle] = await db().select().from(s.vehicles).where(eq(s.vehicles.id, id));
+  assert.equal(vehicle.odometer, 100020);
+  assert.equal((await db().select().from(s.mileageReadings).where(eq(s.mileageReadings.vehicleId, id))).length, 2);
 });
 
 test('SmartDrive: expired authenticated session cannot read or write readings', async () => {

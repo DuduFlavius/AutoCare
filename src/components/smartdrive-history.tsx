@@ -12,7 +12,7 @@ import { mileageMetrics } from '@/lib/smartdrive-metrics';
 const RoadMapView = dynamic(() => import('./road-map'), { ssr: false });
 type Vehicle = { id: string; brand: string; model: string; plate?: string; odometer: number };
 type Reading = { id: string; odometer: number; recordedAt: string; source: string };
-type Trip = { id: string; distanceMeters: number; durationSeconds: number; startedAt: string };
+type Trip = { id: string; distanceMeters: number; durationSeconds: number; startedAt: string; source: string; odometerBefore: number | null; odometerAfter: number | null };
 type TripStats = { count: number; meters: number; seconds: number };
 type Preferences = { frequencyDays: number; enabled: boolean };
 async function request<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
@@ -126,6 +126,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
         {filteredTrips.map(trip => (
           <button type="button" key={trip.id} aria-pressed={selectedTrip?.id === trip.id} onClick={() => setSelectedTripId(trip.id)}>
             <small data-user-content>{currentVehicle?.brand} {currentVehicle?.model}{currentVehicle?.plate ? ' · ' + currentVehicle.plate : ''}</small><span>{new Date(trip.startedAt).toLocaleString(locale, { timeZone: timezone, dateStyle: 'medium', timeStyle: 'short' })}</span>
+            <small>{trip.source === 'browser-gps-synced' ? t('Sincronizat', 'Synced') : t('Salvat separat', 'Saved separately')}</small>
             <strong>{(trip.distanceMeters / 1000).toLocaleString(locale, { maximumFractionDigits: 2 })} km · {driveDuration(trip.durationSeconds)}</strong>
           </button>
         ))}
@@ -137,6 +138,15 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
         </nav>}
       </div>
       <div className="ac-trip-history-map">
+        {selectedTrip && <p className="small muted">
+          {selectedTrip.odometerBefore != null && selectedTrip.odometerAfter != null
+            ? t('Kilometraj', 'Odometer') + ' · ' + selectedTrip.odometerBefore.toLocaleString(locale) + ' → ' + selectedTrip.odometerAfter.toLocaleString(locale) + ' km'
+            : selectedTrip.source === 'browser-gps-synced'
+              ? t('Sesiune sincronizată anterior. Valorile înainte și după nu sunt disponibile.', 'Previously synced. Odometer values before and after are unavailable.')
+              : t('Sesiunea există în istoric fără sincronizare. Verifică valoarea de pe bord înainte de o corecție.', 'The trip exists without mileage sync. Check the vehicle odometer before correcting it.')}
+        </p>}
+        {selectedTrip && selectedTrip.source !== 'browser-gps-synced' && <button type="button"
+          onClick={() => onUpdateMileage(vehicleId)}>{t('Verifică și corectează kilometrajul', 'Review and correct odometer')}</button>}
         {route && route.length > 1 ? (
           <MapStage title={t('Traseu salvat', 'Saved route')} english={english}>
             <RoadMapView key={selectedTrip.id} points={route} history active={false} english={english} />

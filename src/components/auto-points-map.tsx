@@ -2,20 +2,33 @@
 import {FilterSelect} from './filter-select';
 
 import dynamic from 'next/dynamic';
-import { ArrowUp, MapPin, Navigation } from 'lucide-react';
+import { ArrowUp, CornerUpLeft, CornerUpRight, Flag, LocateFixed, MapPin, Navigation, RotateCcw, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { defaultAutoPointsArea, type MapArea } from '@/lib/auto-points';
 import { browserGPSFix, latestGPSFix, type GPSFix } from '@/lib/gps-tracking';
 import { navigationProgress, type Coordinate, type DrivingRoute, type Turn } from '@/lib/road-navigation';
 import MapStage from './map-stage';
 import { nativeMethodMissing, nativeNavigation } from '@/lib/native-tracking';
-import DriveDestinationSearch from './drive-destination-search';
+import DriveDestinationSearch, { type DriveDestination } from './drive-destination-search';
 import { getDevicePosition } from '@/lib/device-location';
 import { mapLocationError, useMapLocation } from './use-map-location';
 import { useApplicationLocale } from './application-locale';
 
 const RoadMap = dynamic(() => import('./road-map'), { ssr: false });
 const noRoute: GPSFix[] = [];
+type SavedDestination = DriveDestination & { slot?: 'home' | 'work' };
+
+function loadSavedDestinations(key: string): SavedDestination[] {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
+    if (!Array.isArray(value)) return [];
+    return value.filter(point => point && typeof point.name === 'string'
+      && Number.isFinite(point.latitude) && Math.abs(point.latitude) <= 85
+      && Number.isFinite(point.longitude) && Math.abs(point.longitude) <= 180).slice(0, 12);
+  } catch {
+    return [];
+  }
+}
 
 function turnText(turn: Turn, english: boolean) {
   const left = turn.modifier?.includes('left');
@@ -44,6 +57,38 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
   const [locationError, setLocationError] = useState('');
   const [findingLocation, setFindingLocation] = useState(false);
   const [destination, setDestination] = useState<(Coordinate & { name?: string; details?: string }) | null>(null);
+  const favoritesKey = 'autocare.drive.favorites.' + ownerId;
+  const [favorites, setFavorites] = useState<{ key: string; points: SavedDestination[] }>({ key: '', points: [] });
+  const [favoriteError, setFavoriteError] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const saved = favorites.key === favoritesKey ? favorites.points : [];
+  useEffect(() => {
+    setShowFavorites(false);
+    setFavoriteError(false);
+    if (!preview && ownerId) setFavorites({ key: favoritesKey, points: loadSavedDestinations(favoritesKey) });
+  }, [favoritesKey, ownerId, preview]);
+
+  function updateFavorites(points: SavedDestination[]) {
+    if (preview || !ownerId) return;
+    try {
+      const entries = points.slice(0, 12);
+      localStorage.setItem(favoritesKey, JSON.stringify(entries));
+      setFavorites({ key: favoritesKey, points: entries });
+      setFavoriteError(false);
+      setShowFavorites(true);
+    } catch {
+      setFavoriteError(true);
+    }
+  }
+
+  function saveDestination(slot?: SavedDestination['slot']) {
+    if (!destination) return;
+    const name = destination.name || t('Punct salvat pe hartă', 'Saved map point');
+    const remaining = saved.filter(point => slot ? point.slot !== slot
+      : point.slot || point.latitude !== destination.latitude || point.longitude !== destination.longitude);
+    updateFavorites([{ ...destination, name, slot }, ...remaining]);
+  }
+
   const [selecting, setSelecting] = useState(false);
   const [routes, setRoutes] = useState<DrivingRoute[]>([]);
   const [alternative, setAlternative] = useState(0);
@@ -194,7 +239,16 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
   }, [navigating, route, destinationName, english, ownerId, preview]);
 
   const searchPosition = position && position.accuracy <= 500 && Date.now() - position.timestamp < 20000 ? position : null;
-  const precisePosition = position && position.accuracy <= 50 && Date.now() - position.timestamp <= 15000 ? position : null;
+  const [fixExpired, setFixExpired] = useState(false);
+  useEffect(() => {
+    if (!navigating || !position) return;
+    const remaining = 15000 - (Date.now() - position.timestamp);
+    setFixExpired(remaining <= 0);
+    if (remaining <= 0) return;
+    const timer = window.setTimeout(() => setFixExpired(true), remaining);
+    return () => window.clearTimeout(timer);
+  }, [navigating, position]);
+  const precisePosition = !fixExpired && position && position.accuracy <= 50 && Date.now() - position.timestamp < 15000 ? position : null;
   const progress = useMemo(() => navigating && route && precisePosition ? navigationProgress(route, precisePosition, stepIndex) : null, [navigating, route, precisePosition, stepIndex]);
   useEffect(() => {
     if (!progress || !precisePosition || !destination) return;
@@ -209,23 +263,41 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
     // Only a new GPS reading can confirm a deviation.
   }, [position, navigating, route, destination]);
 
+  const stopGuidance = () => {
+    routingRequest.current?.abort();
+    setRouting(false);
+    setNavigating(false);
+    setStepIndex(0);
+    deviation.current = 0;
+  };
   const arrived = !!progress && progress.distance < 35 && progress.gap < 30;
+  const turn = progress?.next;
+  const modifier = turn?.maneuver.modifier;
+  const TurnIcon = arrived ? Flag : !progress ? LocateFixed : turn?.maneuver.exit || modifier === 'uturn' ? RotateCcw
+    : modifier?.includes('left') ? CornerUpLeft : modifier?.includes('right') ? CornerUpRight : ArrowUp;
   return (
     <section className="ac-auto-points ac-map-compact" aria-label="AutoCare Maps">
       <header><div><span className="eyebrow">AUTOCARE MAPS</span><h3>{t('Hartă și navigație', 'Map and navigation')}</h3></div></header>
-      <MapStage title={navigating ? t('Ghidare AutoCare', 'AutoCare guidance') : 'AutoCare Maps'} english={english}>
-        {!navigating && <DriveDestinationSearch area={searchPosition??area} nearPosition={!!searchPosition} disabled={preview} english={english} onChoose={point => choose(point)}/>}
-        {navigating && progress && <div className="ac-next-turn">
-                <ArrowUp size={24} style={{ rotate: progress.next?.maneuver.modifier?.includes('left') ? '-90deg' : progress.next?.maneuver.modifier?.includes('right') ? '90deg' : undefined }}/>
-                <div><strong>{arrived ? t('Ai ajuns', 'You arrived') : progress.next ? turnText(progress.next.maneuver, english) : t('Continuă către destinație', 'Continue to destination')}</strong>
-                {progress.next && !arrived && <small>{distance(progress.untilTurn)}{progress.next.name ? ` · ${progress.next.name}` : ''}</small>}</div>
-                <small>{distance(progress.distance)} · {Math.ceil(progress.seconds / 60)} min · ETA {new Date(Date.now() + progress.seconds * 1000).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</small>
-              </div>}
+      <MapStage title={navigating ? t('Ghidare AutoCare', 'AutoCare guidance') : 'AutoCare Maps'} english={english} driving={navigating}>
+        <DriveDestinationSearch area={searchPosition??area} nearPosition={!!searchPosition} disabled={preview} english={english} onChoose={point => choose(point)}/>
         {!navigating && <div className="ac-navigation-tools">
           <button type="button" disabled={preview} aria-pressed={selecting} onClick={() => setSelecting(!selecting)}><MapPin size={17}/>{t('Alege destinația pe hartă', 'Pick destination on map')}</button>
+          {!preview && ownerId && <button type="button" aria-expanded={showFavorites}
+            onClick={() => setShowFavorites(value => !value)}>{t('Destinații salvate', 'Saved destinations')}</button>}
           {selecting && <span role="status">{t('Atinge harta pentru destinație.', 'Tap the map for your destination.')}</span>}
         </div>}
-        {destination && <section ref={routeCard} className="ac-navigation-card ac-navigation-destination" aria-label={t('Navigație', 'Navigation')}>
+        {!navigating && showFavorites && <section className="ac-drive-favorites" aria-label={t('Destinații salvate', 'Saved destinations')}>
+          {saved.length === 0 && <small>{t('Alege o destinație pentru a o salva aici.', 'Choose a destination to save it here.')}</small>}
+          {saved.map((point, index) => {
+            const label = point.slot === 'home' ? t('Acasă', 'Home') : point.slot === 'work' ? t('Serviciu', 'Work') : point.name;
+            return <div key={point.slot ?? `${point.latitude}:${point.longitude}`}>
+              <button type="button" onClick={() => choose(point)}>{label}</button>
+              <button type="button" aria-label={t('Elimină ', 'Remove ') + label}
+                onClick={() => updateFavorites(saved.filter((_, i) => i !== index))}>×</button>
+            </div>;
+          })}
+        </section>}
+        {destination && !navigating && <section ref={routeCard} className="ac-navigation-card ac-navigation-destination" aria-label={t('Navigație', 'Navigation')}>
           <span className="eyebrow">{t('DESTINAȚIE', 'DESTINATION')}</span>
           <div className="ac-journey-stops">
             <div><span>{t('Plecare', 'Start')}</span><strong>{t('Poziția ta GPS', 'Your GPS location')}</strong></div>
@@ -234,7 +306,6 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
           </div>
           {findingLocation && <p role="status">{t('Se caută poziția GPS…', 'Finding GPS position…')}</p>}
           {(routeError || locationError) && <p className="ac-navigation-alert" role="alert">{routeError || locationError}</p>}
-          {navigating && !progress && !routing && <p role="status">{t('Traseul este afișat. Indicațiile live pornesc când GPS-ul are o poziție mai precisă.', 'Route shown. Live guidance resumes once GPS has a more accurate fix.')}</p>}
           {routing && <p role="status">{navigating ? t('Se recalculează traseul…', 'Recalculating…') : t('Se calculează traseul…', 'Calculating route…')}</p>}
           {route && <>
             <label>{t('Traseu', 'Route')}<FilterSelect value={alternative} onChange={event => { setAlternative(Number(event.target.value)); setStepIndex(0); deviation.current = 0; lastReroute.current = Date.now(); }}>
@@ -243,32 +314,49 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
             {!navigating && <button type="button" className="primary" onClick={() => { setNavigating(true); location.locate(); lastReroute.current = Date.now(); }}><Navigation size={16}/>{t('Navighează aici', 'Navigate here')}</button>}
           </>}
           <div className="ac-navigation-tools">
-            {navigating ? <button type="button" onClick={() => { setNavigating(false); setStepIndex(0); }}>{t('Oprește ghidarea', 'Stop guidance')}</button>
-              : !route && !routing && !findingLocation && <button type="button" onClick={() => choose(destination, true)}>{t('Calculează traseul', 'Calculate route')}</button>}
+            {!route && !routing && !findingLocation && <button type="button" onClick={() => choose(destination, true)}>{t('Calculează traseul', 'Calculate route')}</button>}
           </div>
-          {navigating && <small className="ac-navigation-background" role="status">
-            {background === 'active'
-              ? t('Ghidarea în fundal este activă. Indicațiile apar în notificarea AutoCare.', 'Background guidance is active. Directions appear in the AutoCare notification.')
-              : background === 'upgrade'
-                ? t('Pentru ghidare în fundal, ai nevoie de o versiune Android actualizată.', 'Background guidance requires an updated Android app.')
-                : background === 'blocked'
-                  ? t('Ghidarea în fundal nu a pornit. Verifică permisiunile pentru locație precisă și notificări.', 'Background guidance could not start. Check precise location and notification permissions.')
-                  : t('Ține această pagină deschisă pentru ghidare. Modul în fundal este disponibil în aplicația Android compatibilă.', 'Keep this page open for guidance. Background mode is available in the compatible Android app.')}
-          </small>}
-          {!navigating && !preview && <div className="ac-navigation-tools">
+          {!preview && ownerId && <div className="ac-navigation-tools">
+            <button type="button" onClick={() => saveDestination()}>{t('Salvează la favorite', 'Save to favorites')}</button>
+            <button type="button" onClick={() => saveDestination('home')}>{t('Setează Acasă', 'Set Home')}</button>
+            <button type="button" onClick={() => saveDestination('work')}>{t('Setează Serviciu', 'Set Work')}</button>
+            {favoriteError && <small role="alert">{t('Destinația nu a putut fi salvată pe acest dispozitiv.', 'The destination could not be saved on this device.')}</small>}
+          </div>}
+          {!preview && <div className="ac-navigation-tools">
             <a className="button" target="_blank" rel="noopener noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}&travelmode=driving&dir_action=navigate`}>Google Maps</a>
             <a className="button" target="_blank" rel="noopener noreferrer" href={`https://waze.com/ul?ll=${destination.latitude},${destination.longitude}&navigate=yes`}>Waze</a>
           </div>}
           <button type="button" onClick={() => { ++destinationRevision.current; ++locationRevision.current; routingRequest.current?.abort(); setFindingLocation(false); setRouting(false); setNavigating(false); setRoutes([]); setDestination(null); setRouteError(''); setLocationError(''); }}>{t('Șterge destinația', 'Clear destination')}</button>
         </section>}
         <div className="ac-auto-points-layout is-guiding">
-          <div className={selecting ? 'ac-map-selecting' : undefined}>
+          <div className={selecting ? 'ac-map-selecting ac-guidance-map' : 'ac-guidance-map'}>
             <RoadMap points={noRoute} position={position} active={navigating} english={english}
+              maneuverDistance={progress?.untilTurn}
+              matchedPosition={progress && precisePosition && progress.gap <= Math.min(20, precisePosition.accuracy) ? progress.matched : undefined}
               initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview ? undefined : location.locate}
               locating={location.waiting} locationError={location.error}
               plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting ? choose : undefined}/>
+            {navigating && <div className="ac-guidance-maneuver">
+              <TurnIcon aria-hidden="true" size={38}/>
+              <div>
+                {turn && progress && !arrived && <strong>{distance(progress.untilTurn)}</strong>}
+                <span>{arrived ? t('Ai ajuns', 'You arrived') : turn ? turnText(turn.maneuver, english)
+                  : progress ? t('Continuă către destinație', 'Continue to destination')
+                    : t('Se caută semnalul GPS', 'Acquiring GPS signal')}</span>
+                {turn?.name && !arrived && <small data-user-content>{turn.name}</small>}
+              </div>
+            </div>}
           </div>
         </div>
+        {navigating && <footer className="ac-guidance-footer">
+          {progress ? <dl>
+            <div><dt>{t('Sosire estimată', 'Estimated arrival')}</dt><dd>{new Date(Date.now() + progress.seconds * 1000).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</dd></div>
+            <div><dt>{t('Timp rămas', 'Time left')}</dt><dd>{Math.ceil(progress.seconds / 60)} min</dd></div>
+            <div><dt>{t('Distanță rămasă', 'Distance left')}</dt><dd>{distance(progress.distance)}</dd></div>
+          </dl> : <small role="status">{t('În așteptarea unei poziții GPS precise…', 'Waiting for a precise GPS fix…')}</small>}
+          <button type="button" onClick={stopGuidance}><X size={18} aria-hidden="true"/>{t('Oprește navigația', 'Stop navigation')}</button>
+          {(routeError || routing || background === 'blocked' || background === 'upgrade') && <small role="status">{routeError || (routing ? t('Se recalculează traseul…', 'Recalculating…') : t('Ghidarea continuă cu aplicația deschisă.', 'Guidance continues while the app is open.'))}</small>}
+        </footer>}
       </MapStage>
     </section>
   );
