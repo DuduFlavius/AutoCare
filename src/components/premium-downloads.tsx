@@ -1,5 +1,7 @@
 'use client';
 import {PremiumDateInput} from './premium-date-input';
+import {FilterSelect} from './filter-select';
+import './premium-reports-green.css';
 import { useState } from 'react';
 import { ReportOverview } from './application/report-overview';
 import {upcomingMaintenance} from '@/lib/application-home';
@@ -32,6 +34,12 @@ export default function PremiumDownloads({
   const nextDistances=includedCars.flatMap(car=>upcomingMaintenance(data.records.filter(r=>r.vehicleId===car.id&&!r.cancelled),car.odometer,null,data.profile.timezone).flatMap(item=>item.status.remainingKm==null?[]:[Math.max(0,item.status.remainingKm)]));
   const nextKm=nextDistances.length?Math.min(...nextDistances):null;
   const previewQuery=new URLSearchParams({format:'pdf',view:'1',archived:'active',...(vehicle?{vehicleId:vehicle}:{}),...(kind?{kind}:{}),...(from?{from}:{}),...(to?{to}:{})});
+  const reportDate=localDate(new Date(),data.profile.timezone);
+  function quickReport(months:number,kind:'service'|'expense'|'',format:'pdf'|'csv'){
+    const [year,month]=reportDate.split('-').map(Number);
+    const start=new Date(Date.UTC(year,month-months,1)).toISOString().slice(0,10);
+    return '/api/v1/export?'+new URLSearchParams({format,archived:'active',from:start,to:reportDate,...(kind?{kind}:{})});
+  }
   async function download(format: 'pdf' | 'csv') {
     if (preview) {
       setError(
@@ -69,6 +77,14 @@ export default function PremiumDownloads({
   }
   return (
     <section className="rg-premium-downloads" data-workspace-ui>
+      <div className="ac-garage-report-library">
+        <div><span className="ac-garage-report-kicker">{en?'GARAGE REPORT LIBRARY':'BIBLIOTECA RAPOARTELOR'}</span><h3>{en?'Your garage dossier':'Dosarul garajului tău'}</h3><p>{en?'Your vehicle records, organized by period and ready for export.':'Istoricul mașinilor, organizat pe perioade și pregătit pentru export.'}</p></div>
+        <div className="ac-garage-report-links">
+          <a href={quickReport(1,'service','pdf')}><span>{en?'LAST MONTH':'ULTIMA LUNĂ'}</span><strong>{en?'Monthly service dossier':'Fișa reviziilor lunare'}</strong><small>PDF ↗</small></a>
+          <a href={quickReport(3,'expense','csv')}><span>{en?'LAST 3 MONTHS':'ULTIMELE 3 LUNI'}</span><strong>{en?'Expense overview':'Situația cheltuielilor'}</strong><small>CSV ↗</small></a>
+          <a href={quickReport(12,'','pdf')}><span>{en?'LAST 12 MONTHS':'ULTIMELE 12 LUNI'}</span><strong>{en?'Complete garage dossier':'Dosarul garajului pe 12 luni'}</strong><small>PDF ↗</small></a>
+        </div>
+      </div>
       <div className="rg-report-tabs" role="group" aria-label={en?'Report view':'Vizualizare raport'}><button aria-pressed={reportView==='general'} onClick={()=>setReportView('general')}>{en?'General':'General'}</button><button aria-pressed={reportView==='details'} onClick={()=>setReportView('details')}>{en?'Details & export':'Detalii și export'}</button></div>
       <ReportOverview nextKm={nextKm} rows={reportRows} vehicleCount={includedCars.length} today={localDate(new Date(),data.profile.timezone)} en={en}/>
       <div className="rg-report-details" hidden={reportView!=='details'}>
@@ -84,18 +100,18 @@ export default function PremiumDownloads({
       <div className="ac-report-filters">
       <label>
         {en ? 'Vehicles included' : 'Mașini incluse'}
-        <select value={vehicle} onChange={(e) => setVehicle(e.target.value)}>
+        <FilterSelect value={vehicle} onChange={(e) => setVehicle(e.target.value)}>
           <option value="">{en ? 'All my vehicles' : 'Toate mașinile mele'}</option>
           {data.vehicles.map((car) => (
             <option key={car.id} value={car.id}>
               {car.brand} {car.model} · {car.plate}
             </option>
           ))}
-        </select>
+        </FilterSelect>
       </label>
       <label>
         {en ? 'Record type' : 'Tip de înregistrare'}
-        <select value={kind} onChange={event => setKind(event.target.value)}>
+        <FilterSelect value={kind} onChange={event => setKind(event.target.value)}>
           <option value="">{en ? 'All records' : 'Toate înregistrările'}</option>
           <option value="document">{en ? 'Documents' : 'Documente'}</option>
           <option value="service">{en ? 'Service sheet' : 'Fișă de service'}</option>
