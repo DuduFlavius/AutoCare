@@ -265,3 +265,56 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-tools-toggle{min-height:25px!important;font-size:10px!important}
 }
 }
+
+
+/* Desktop-only refinement. Mobile chat remains unchanged. */
+@layer autocare-workspace {
+@media(min-width:761px) {
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] {
+ width:min(100%,1040px)!important;max-width:1040px!important;
+ display:flex!important;flex-direction:column!important;gap:10px!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-hero{display:none!important}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-vehicle-header{
+ justify-content:flex-start!important;padding:0 8px!important;min-height:42px!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-vehicle{
+ font-size:12px!important;color:#b8c9e5!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-vehicle select{
+ min-height:40px!important;padding:7px 12px!important;border-radius:10px!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-layout,
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-main{
+ width:100%!important;min-width:0!important;min-height:0!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-chat{
+ height:clamp(490px,calc(100dvh - 210px),720px)!important;
+ max-height:none!important;min-height:0!important;
+ display:flex!important;flex-direction:column!important;overflow:hidden!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-message-scroll{
+ flex:1 1 0!important;min-height:0!important;height:auto!important;max-height:none!important;
+ overflow-y:auto!important;overscroll-behavior:contain!important;
+ padding:20px clamp(20px,5vw,64px)!important;
+ scrollbar-width:thin!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-turns{
+ width:min(100%,780px)!important;max-width:780px!important;margin:0 auto!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-quick-prompts{
+ padding:6px clamp(20px,5vw,64px)!important;flex:0 0 auto!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-composer{
+ width:calc(100% - 40px)!important;max-width:820px!important;
+ margin:8px auto!important;flex:0 0 auto!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-composer-hint,
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-disclosure{
+ padding:3px 24px!important;margin:0!important;flex:0 0 auto!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-tools-toggle{
+ min-height:35px!important;margin:0 auto!important;
+}
+}
+}
