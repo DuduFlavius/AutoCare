@@ -25,6 +25,26 @@ export function AuthForm({ mode, next = '/cont', initialLanguage, verificationPr
   const en=language==='en';
   const t=(ro:string,english:string)=>en?english:ro;
   const [pendingEmail,setPendingEmail]=useState(verificationPreview?'demo@example.invalid':'');
+  useEffect(() => {
+    // A previously authenticated account may still have an unverified email.
+    // Show the verification flow on the next visit, even without another password login.
+    if (mode !== 'autentificare' || verificationPreview) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const session = await authClient.getSession();
+        const user = session.data?.user;
+        if (!user || user.emailVerified || cancelled) return;
+        const email = user.email.trim().toLowerCase();
+        setPendingEmail(email);
+        const sent = await authClient.emailOtp.sendVerificationOtp({email,type:'email-verification'});
+        if (!cancelled && sent.error) setError(language === 'en' ? 'The verification email could not be sent. Use Resend code to try again.' : 'Codul nu a putut fi trimis. Folosește „Retrimite codul” pentru a încerca din nou.');
+      } catch {
+        if (!cancelled) setError(language === 'en' ? 'Could not check your email verification status.' : 'Nu am putut verifica starea adresei de email.');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [mode, verificationPreview]);
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
