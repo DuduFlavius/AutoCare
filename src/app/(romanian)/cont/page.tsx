@@ -26,7 +26,7 @@ export default async function Account({searchParams}:{searchParams:Promise<{tab?
   }
   if (
     !sess?.user ||
-    (process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION === 'true' && !sess.user.emailVerified)
+    !sess.user.emailVerified
   )
     redirect(params.tab ? '/autentificare?' + new URLSearchParams({ next: '/cont?' + new URLSearchParams({ tab: normalizeWorkspaceTab(params.tab), ...(params.drive ? { drive: params.drive } : {}), ...(params.plan && ['monthly', 'quarterly', 'annual'].includes(params.plan) ? { plan: params.plan } : {}), ...(params.currency && ['RON','EUR'].includes(params.currency.toUpperCase()) ? {currency:params.currency.toUpperCase()} : {}), ...(params.vehicle && ['Garaj', 'AutoCare AI'].includes(normalizeWorkspaceTab(params.tab)) ? { vehicle: params.vehicle } : {}) }) }).toString() : '/autentificare');
   return <Dashboard name={sess.user.name} initialTab={normalizeWorkspaceTab(params.tab)} initialDrive={params.drive} initialVehicle={['Garaj', 'AutoCare AI'].includes(normalizeWorkspaceTab(params.tab)) ? params.vehicle : undefined} />;
