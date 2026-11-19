@@ -25,3 +25,11 @@
 .rg-premium-downloads .ac-garage-report-links>a{display:flex;flex-direction:column;gap:6px;text-decoration:none;cursor:pointer;min-height:96px;justify-content:center}
 .rg-premium-downloads .ac-garage-report-links>a:focus-visible{outline:2px solid #8cf4b5;outline-offset:3px}
 .rg-premium-downloads .ac-premium-download-actions>a.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:#1b4a32!important;color:#f6fff8!important;border:1px solid #4c9e6c!important;border-radius:12px!important;text-decoration:none!important;min-height:44px;padding:10px 16px}
+
+/* Restore the original framed Racing Green dossier cards after native-link export change. */
+.rg-premium-downloads .ac-garage-report-links>a{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;min-height:unset;justify-content:initial;padding:19px;border:1px solid #2a614a;border-radius:15px;background:#10251d!important;text-decoration:none;color:#fff!important;transition:border-color .18s,transform .18s,background .18s}
+.rg-premium-downloads .ac-garage-report-links>a:is(:hover,:focus-visible){border-color:#5affc4;background:#173b2b!important;transform:translateY(-2px);outline-offset:3px}
+.rg-premium-downloads .ac-garage-report-links>a span{font-size:11px;font-weight:800;letter-spacing:.08em;color:#79e8bb!important}
+.rg-premium-downloads .ac-garage-report-links>a strong{font-size:16px;line-height:1.4;color:#fff!important}
+.rg-premium-downloads .ac-garage-report-links>a small{color:#5affc4!important;font-weight:700}
+@media(max-width:720px){.rg-premium-downloads .ac-garage-report-links>a{padding:16px}}
