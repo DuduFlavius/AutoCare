@@ -3,6 +3,7 @@ import { startupImages } from '@/lib/pwa-launch';
 import AutoUpdate from '@/components/auto-update';
 import type { Metadata, Viewport } from 'next';
 import '@/app/design-system.css';
+import '@/app/emerald-theme.css';
 import '@/app/globals.css';
 import '@/app/premium.css';
 import '@/app/autocare-ui.css';
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
     ],
   },
 };
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#090d14' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#020b09' };
 export default function SiteDocument({ children, language }: { children: React.ReactNode; language:'ro'|'en' }) {
   return (
     <html lang={language}>

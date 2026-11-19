@@ -1,6 +1,6 @@
 'use client';
 import {FilterSelect} from '../filter-select';
-import { Bell, CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Wallet, Wrench, ShieldCheck } from 'lucide-react';
+import { CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Wallet, Wrench, ShieldCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { selectActiveVehicle, upcomingMaintenance } from '@/lib/application-home';
@@ -23,25 +23,28 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
  const docs=documentCounts(rows,new Date(today+'T12:00:00Z'),data.profile.timezone);
  const next=car?upcomingMaintenance(rows,car.odometer,null,data.profile.timezone)[0]:undefined;
  const recent=finance.entries.filter(row=>!row.cancelled&&row.date&&row.date<=today).sort((a,b)=>(b.date??'').localeCompare(a.date??'')).slice(0,3);
- const unread=data.notifications.filter(row=>!row.readAt).length;
+ const itp=rows.filter(row=>row.kind==='document'&&row.category==='ITP'&&row.expiresAt).sort((a,b)=>(b.expiresAt??'').localeCompare(a.expiresAt??''))[0];
  const money=(bani:number)=>new Intl.NumberFormat(locale,{style:'currency',currency,maximumFractionDigits:0}).format(bani/(currency==='EUR'?500:100));
  const date=(value:string)=>new Date(value+'T12:00:00Z').toLocaleDateString(locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
  const active=data.vehicles.filter(row=>!row.archived);
  return <div className="ac-mobile-home" data-workspace-ui>
   {!car?<section className="ac-m-empty"><CarFront size={52}/><h2>{t('Garajul tău începe aici','Your garage starts here')}</h2><p>{t('Adaugă mașina pentru a organiza documentele și întreținerea.','Add your vehicle to organize documents and maintenance.')}</p><button className="ac-m-primary" onClick={()=>onCreate('vehicle')}><Plus size={18}/>{t('Adaugă vehicul','Add vehicle')}</button></section>:<>
-   <section className="ac-m-vehicle">
+   <section className="ac-m-vehicle" data-multiple={active.length>1||undefined}>
     <button className="ac-m-vehicle-open" onClick={()=>onVehicle(car.id)} aria-label={t('Deschide fișa mașinii','Open vehicle profile')}><span className="ac-m-vehicle-art ac-m-vehicle-emblem" aria-hidden="true"><span className="ac-m-emblem-orbit"/><ShieldCheck size={35} strokeWidth={1.25}/><span className="ac-m-emblem-caption">AUTOCARE</span></span><span className="ac-m-vehicle-identity"><strong data-user-content>{car.brand} {car.model}</strong><small data-user-content>{car.plate}</small></span><ChevronRight size={19}/></button>
-    <div className="ac-m-vehicle-bottom"><span><Gauge size={14}/>{car.odometer.toLocaleString(locale)} km</span><button onClick={()=>navigate('Garaj')}>{t('Garajul meu','My garage')}<ChevronRight size={14}/></button></div>
+    <div className="ac-m-vehicle-bottom"><span><Gauge size={19}/><span>{car.odometer.toLocaleString(locale)} km<small>{t('Kilometraj actual','Current mileage')}</small></span></span><button onClick={()=>onDrill('Documente',car.id,itp?[itp.id]:[],t('Inspecție tehnică','Vehicle inspection'))}><CalendarDays size={18}/><span>{itp?.expiresAt?date(itp.expiresAt):t('Necompletat','Not recorded')}<small>ITP</small></span></button></div>
     {active.length>1&&<label className="ac-m-car-switch"><span>{t('Mașina selectată','Selected vehicle')}</span><FilterSelect value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{active.map(vehicle=><option key={vehicle.id} value={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}</FilterSelect></label>}
    </section>
-   <button className="ac-m-next-service" onClick={onNextService}><span className="ac-m-icon"><Wrench size={27}/></span><span><small>{t('Următoarea revizie','Next service')}</small><strong>{next?.status.remainingKm!=null?(next.status.remainingKm<=0?t('Prag atins','Threshold reached'):t('în ','in ')+next.status.remainingKm.toLocaleString(locale)+' km'):next?.raw?date(next.raw):t('Adaugă un termen','Add a service deadline')}</strong>{next?.raw&&next.status.remainingKm!=null&&<small>{date(next.raw)}</small>}</span><ChevronRight size={20}/></button>
+   <button className="ac-m-next-service" onClick={onNextService}><span className="ac-m-icon"><Wrench size={27}/></span><span><small>{t('Următoarea intervenție','Next maintenance')}</small><strong>{next?.service.title??t('Adaugă un termen','Add a service deadline')}</strong><small>{next?.status.remainingKm!=null?(next.status.remainingKm<=0?t('Prag atins','Threshold reached'):t('în ','in ')+next.status.remainingKm.toLocaleString(locale)+' km'):next?.raw?date(next.raw):t('Planifică întreținerea mașinii','Plan your vehicle maintenance')}</small></span><ChevronRight size={20}/></button>
+   <div className="ac-m-shortcuts">{[
+    {Icon:Wrench,title:t('Întreținere','Maintenance'),note:t('Plan și istoric','Plan & history'),tab:'Întreținere'},
+    {Icon:Files,title:t('Documente','Documents'),note:'ITP, RCA, CASCO',tab:'Documente'},
+    {Icon:ShieldCheck,title:t('RCA & Rovinietă','RCA & Road vignette'),note:t('Expirări și reînnoiri','Expiry & renewals'),tab:'RCA & Rovinietă'},
+    {Icon:Sparkles,title:'AutoCare AI',note:t('Asistentul tău auto','Your car assistant'),tab:data.premium?'AutoCare AI':'Premium'},
+   ].map(({Icon,title,note,tab})=><button type="button" key={title} onClick={()=>navigate(tab)}><Icon size={29}/><strong>{title}</strong><small>{note}</small></button>)}</div>
    <div className="ac-m-overview">{[
     {Icon:Wallet,label:t('Costuri totale','Total costs'),value:finance.yearKnown?money(finance.yearBani):'—',note:t('Anul curent','Current year'),tab:'Cheltuieli'},
-    {Icon:Files,label:t('Documente','Documents'),value:String(docs.total),note:t('în dosarul mașinii','in your vehicle folder'),tab:'Documente'},
-    {Icon:CalendarDays,label:t('Expiră în 30 zile','Expires in 30 days'),value:String(docs.soon),note:t('de verificat','to review'),tab:'Documente'},
-    {Icon:Bell,label:t('Alerte','Alerts'),value:String(unread),note:t('necitite','unread'),tab:'Notificări'},
-   ].map(({Icon,label,value,note,tab})=><button key={tab+label} onClick={()=>onDrill(tab,car?.id??'',rows.filter(r=>tab!=='Documente'||(r.kind==='document'&&(Icon!==CalendarDays||(r.status.days!=null&&r.status.days>=0&&r.status.days<=30)))).map(r=>r.id),label)}><Icon size={23}/><span>{label}</span><strong>{value}</strong><small>{note}</small></button>)}</div>
-   <button className="ac-m-ai-entry" onClick={()=>navigate(data.premium?'AutoCare AI':'Premium')}><span className="ac-m-icon"><Sparkles size={23}/></span><span><strong>AutoCare AI <small>Premium</small></strong><small>{t('Ajutor pentru mașina ta','Help for your vehicle')}</small></span><ChevronRight size={19}/></button>
+    {Icon:Files,label:t('Documente','Documents'),value:String(docs.total),note:docs.soon+' '+t('expiră în 30 zile','expire in 30 days'),tab:'Documente'},
+   ].map(({Icon,label,value,note,tab})=><button key={tab+label} onClick={()=>onDrill(tab,car?.id??'',rows.filter(r=>tab!=='Documente'||r.kind==='document').map(r=>r.id),label)}><Icon size={23}/><span>{label}</span><strong>{value}</strong><small>{note}</small></button>)}</div>
    <section className="ac-m-recent"><header><h2>{t('Cheltuieli recente','Recent expenses')}</h2><button onClick={()=>navigate('Cheltuieli')}>{t('Vezi toate','View all')}<ChevronRight size={15}/></button></header>{recent.length?<ul>{recent.map(row=><li key={row.id}><button onClick={()=>onRecord(row)}><span className="ac-m-icon"><Wrench size={22}/></span><span><strong data-user-content>{row.title}</strong><small>{row.date&&date(row.date)}</small></span><b>{row.amountKnown===false?'—':money(row.amountBani)}</b></button></li>)}</ul>:<p>{t('Cheltuielile înregistrate vor apărea aici.','Your recorded expenses will appear here.')}</p>}</section>
   </>}
  </div>;

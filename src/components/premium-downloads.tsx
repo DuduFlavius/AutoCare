@@ -1,6 +1,8 @@
 'use client';
 import {PremiumDateInput} from './premium-date-input';
 import { useState } from 'react';
+import { ReportOverview } from './application/report-overview';
+import { localDate } from '@/lib/config';
 import { Download, FileText, Table2 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -22,6 +24,9 @@ export default function PremiumDownloads({
     [error, setError] = useState('');
   if (!data.premium) return null;
   const invalidRange = !!from && !!to && from > to;
+  const includedCars=data.vehicles.filter(car=>!car.archived&&(!vehicle||car.id===vehicle));
+  const includedIds=new Set(includedCars.map(car=>car.id));
+  const reportRows=data.records.filter(row=>includedIds.has(row.vehicleId)&&!row.cancelled&&(!kind||row.kind===kind)&&(!from||(row.date!=null&&row.date>=from))&&(!to||(row.date!=null&&row.date<=to)));
   const previewQuery=new URLSearchParams({format:'pdf',view:'1',archived:'active',...(vehicle?{vehicleId:vehicle}:{}),...(kind?{kind}:{}),...(from?{from}:{}),...(to?{to}:{})});
   async function download(format: 'pdf' | 'csv') {
     if (preview) {
@@ -60,6 +65,7 @@ export default function PremiumDownloads({
   }
   return (
     <section className="card ac-premium-downloads" data-workspace-ui>
+      <ReportOverview rows={reportRows} vehicleCount={includedCars.length} today={localDate(new Date(),data.profile.timezone)} en={en}/>
       <h3>
         <Download size={20} />
         {en ? 'Your reports & exports' : 'Rapoartele și exporturile tale'}

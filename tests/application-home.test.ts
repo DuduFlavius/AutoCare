@@ -28,7 +28,7 @@ test('home prioritizes overdue work and does not invent deadlines',()=>{
 test('mobile navigation has five clear destinations and retains secondary modules',()=>{
   assert.equal(mobileWorkspaceSections.length,5);
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Documente'));
-  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cheltuieli'));
+  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Rapoarte'));
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cont'));
   for(const section of mobileWorkspaceSections)assert.ok(workspaceSections.some(s=>s.id===section.id));
   for(const id of ['Notificări','Setări','Plan întreținere','Premium','Abonament','Centru de suport','Istoric auto','Cheltuieli','Calendar','Kilometraj'])assert.ok(workspaceSections.some(s=>s.id===id));

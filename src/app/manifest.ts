@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['utilities', 'productivity'],
     display_override: ['standalone'],
     display: 'standalone',
-    background_color: '#0d1225',
-    theme_color: '#0d1225',
+    background_color: '#020b09',
+    theme_color: '#020b09',
     lang: 'ro',
     shortcuts: [
       { name: 'Garaj', url: '/cont?tab=Garaj' },
