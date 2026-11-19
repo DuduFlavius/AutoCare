@@ -8,6 +8,7 @@ import * as s from '../src/lib/schema';
 import {auth} from '../src/lib/auth';
 import {GET,POST} from '../src/app/api/v1/[...path]/route';
 process.env.LOCAL_DATABASE_PATH='memory';process.env.APP_URL='http://localhost:3000';process.env.BETTER_AUTH_SECRET='feedback-api-isolated-secret-never-production-1234';process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION='false';delete process.env.AUTOCARE_FOUNDER_USER_ID;delete process.env.RESEND_API_KEY;
+delete process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED;
 let cookie='',otherCookie='',uid='',other='';
 async function signIn(email:string){
  const response=await auth().handler(new Request('http://localhost:3000/api/auth/sign-up/email',{method:'POST',headers:{'Content-Type':'application/json',Origin:'http://localhost:3000'},body:JSON.stringify({name:'Feedback Test',email,password:'Strong-test-only-password-12345'})}));assert.equal(response.status,200);

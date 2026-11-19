@@ -169,7 +169,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         }else payload=await body(req);
         const result=await feedback.createFeedback(uid,payload,files);
         publish(result);
-        if(!result.duplicate)after(async()=>{await dispatchMailSafely();});
+        if(!result.duplicate&&process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED==='true')after(async()=>{await dispatchMailSafely();});
         return json(result,result.duplicate?200:201);
       }
       if(route==='feedback/statistics'&&method==='GET')return json(await feedback.feedbackStatistics(uid));

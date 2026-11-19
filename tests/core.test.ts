@@ -74,7 +74,7 @@ before(async () => {
     if (String(input).startsWith('https://photon.komoot.io/api/')) {
       const url = new URL(String(input));
       assert.equal(url.searchParams.get('q'), 'Calea Șagului 100');
-      assert.equal(url.searchParams.get('lat'), '45.7');
+      assert.equal(url.searchParams.get('lat'), '45.72');
       return Response.json({ features: [
         { geometry: { type: 'Point', coordinates: [21.1987, 45.7247] }, properties: { street: 'Calea Șagului', housenumber: '100', city: 'Timișoara' } },
         { geometry: { type: 'Point', coordinates: [200, 45.72] }, properties: { name: 'Invalid place' } },
@@ -152,7 +152,7 @@ test('destination search authenticates, validates input, and normalizes provider
   const response = await call('smartdrive/destinations', 'POST', payload);
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('cache-control'), 'private, no-store');
-  assert.deepEqual(await response.json(), [{ latitude: 45.7247, longitude: 21.1987, name: 'Calea Șagului 100', details: 'Timișoara' }]);
+  assert.deepEqual(await response.json(), [{ latitude: 45.7247, longitude: 21.1987, name: 'Calea Șagului 100', details: 'Timișoara', distanceKm: 0 }]);
 });
 
 test('SmartDrive directions require a session, validate coordinates and return real provider fields', async () => {
