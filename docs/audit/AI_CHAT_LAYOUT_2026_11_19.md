@@ -26,3 +26,6 @@ Only two production files change: `auto-ai-workspace.tsx` viewport measurement a
 
 ## Limits
 The physical iOS/Android keyboard and real-device safe-area insets were not tested. The constrained-height viewport exercises layout, not a physical keyboard. The signed-in production browser account has no vehicle, so Premium conversation layout was verified in the isolated real-component fixture rather than by creating production records.
+
+## Follow-up validation of the current dashboard Back control
+The fixture now passes `onExit`, matching the current dashboard. At390x844 the message area remains265.52px tall, composer bottom660.06 and dock top776. At390x500, the old compact selector targeted only a direct child and missed the newer vehicle-header wrapper. The compact rule now hides the nested vehicle label (not the Back control); the message area remains67.95px tall, composer bottom384 and dock top432. This was visually rechecked before publishing the final compact-rule adjustment.

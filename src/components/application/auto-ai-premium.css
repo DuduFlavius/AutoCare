@@ -148,7 +148,7 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspa
 html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-inline-error,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-notice,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page .ac-ai-state {margin:4px 10px 8px!important}
 }
 html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] {gap:5px!important}
-html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] > .ac-ai-vehicle,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] .ac-ai-composer-hint,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] .ac-ai-disclosure {display:none!important}
+html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] .ac-ai-vehicle,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] .ac-ai-composer-hint,html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page[data-compact-chat] .ac-ai-disclosure {display:none!important}
 @media(prefers-reduced-motion:reduce) {html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-ai-page * {animation:none!important;scroll-behavior:auto!important;transition:none!important}}
 }
 
