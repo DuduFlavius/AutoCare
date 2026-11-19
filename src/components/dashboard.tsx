@@ -53,6 +53,7 @@ import MaintenanceForecast from './maintenance-forecast';
 import {maintenanceTargets} from '@/lib/maintenance-schedule';
 import ServiceForecastCards from './service-forecast-cards';
 import RecordEditor from './record-editor';
+import './targeted-green-ui-fixes.css';
 import ServiceMileage from './service-mileage';
 import {parseServiceDetails} from '@/lib/service-details';
 import {completedServiceSeed} from '@/lib/completed-service';
