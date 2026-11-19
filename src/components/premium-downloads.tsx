@@ -40,6 +40,29 @@ export default function PremiumDownloads({
     const start=new Date(Date.UTC(year,month-months,1)).toISOString().slice(0,10);
     return '/api/v1/export?'+new URLSearchParams({format,archived:'active',from:start,to:reportDate,...(kind?{kind}:{})});
   }
+  async function downloadQuick(months:number,kind:'service'|'expense'|'',format:'pdf'|'csv'){
+    if(preview){setError(en?'Sign in to download your reports.':'Autentifică-te pentru a descărca rapoartele.');return;}
+    const key='quick-'+months;
+    setBusy(key);setError('');
+    try{
+      const response=await fetch(quickReport(months,kind,format),{credentials:'same-origin',cache:'no-store'});
+      if(!response.ok){
+        const body=await response.json().catch(()=>null);
+        throw new Error(body?.error|| (en?'Report download failed.':'Descărcarea raportului nu a reușit.'));
+      }
+      const blob=await response.blob();
+      if(!blob.size)throw new Error(en?'The report is empty.':'Raportul generat este gol.');
+      const url=URL.createObjectURL(blob);
+      const anchor=document.createElement('a');
+      anchor.href=url;
+      anchor.download='autocare-'+(months===12?'dosar-garaj-12-luni':months===3?'cheltuieli-3-luni':'revizii-lunare')+'.'+format;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(()=>URL.revokeObjectURL(url),30000);
+    }catch(err){setError(err instanceof Error?err.message:String(err));}
+    finally{setBusy('');}
+  }
   async function download(format: 'pdf' | 'csv') {
     if (preview) {
       setError(
@@ -80,11 +103,12 @@ export default function PremiumDownloads({
       <div className="ac-garage-report-library">
         <div><span className="ac-garage-report-kicker">{en?'GARAGE REPORT LIBRARY':'BIBLIOTECA RAPOARTELOR'}</span><h3>{en?'Your garage dossier':'Dosarul garajului tău'}</h3><p>{en?'Your vehicle records, organized by period and ready for export.':'Istoricul mașinilor, organizat pe perioade și pregătit pentru export.'}</p></div>
         <div className="ac-garage-report-links">
-          <a href={quickReport(1,'service','pdf')}><span>{en?'LAST MONTH':'ULTIMA LUNĂ'}</span><strong>{en?'Monthly service dossier':'Fișa reviziilor lunare'}</strong><small>PDF ↗</small></a>
-          <a href={quickReport(3,'expense','csv')}><span>{en?'LAST 3 MONTHS':'ULTIMELE 3 LUNI'}</span><strong>{en?'Expense overview':'Situația cheltuielilor'}</strong><small>CSV ↗</small></a>
-          <a href={quickReport(12,'','pdf')}><span>{en?'LAST 12 MONTHS':'ULTIMELE 12 LUNI'}</span><strong>{en?'Complete garage dossier':'Dosarul garajului pe 12 luni'}</strong><small>PDF ↗</small></a>
+          <button type="button" disabled={!!busy} onClick={()=>void downloadQuick(1,'service','pdf')}><span>{en?'LAST MONTH':'ULTIMA LUNĂ'}</span><strong>{en?'Monthly service dossier':'Fișa reviziilor lunare'}</strong><small>PDF ↗</small></button>
+          <button type="button" disabled={!!busy} onClick={()=>void downloadQuick(3,'expense','csv')}><span>{en?'LAST 3 MONTHS':'ULTIMELE 3 LUNI'}</span><strong>{en?'Expense overview':'Situația cheltuielilor'}</strong><small>CSV ↗</small></button>
+          <button type="button" disabled={!!busy} onClick={()=>void downloadQuick(12,'','pdf')}><span>{en?'LAST 12 MONTHS':'ULTIMELE 12 LUNI'}</span><strong>{en?'Complete garage dossier':'Dosarul garajului pe 12 luni'}</strong><small>PDF ↗</small></button>
         </div>
       </div>
+      {error&&<p role="alert" className="error">{error}</p>}
       <div className="rg-report-tabs" role="group" aria-label={en?'Report view':'Vizualizare raport'}><button aria-pressed={reportView==='general'} onClick={()=>setReportView('general')}>{en?'General':'General'}</button><button aria-pressed={reportView==='details'} onClick={()=>setReportView('details')}>{en?'Details & export':'Detalii și export'}</button></div>
       <ReportOverview nextKm={nextKm} rows={reportRows} vehicleCount={includedCars.length} today={localDate(new Date(),data.profile.timezone)} en={en}/>
       <div className="rg-report-details" hidden={reportView!=='details'}>
