@@ -1,5 +1,6 @@
 'use client';
 import {FilterSelect} from './filter-select';
+import './application/maintenance-timeline.css';
 import {PremiumDateInput} from './premium-date-input';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
