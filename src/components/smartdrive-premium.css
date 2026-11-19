@@ -134,3 +134,36 @@
     }
   }
 }
+
+
+/* Temporary SmartDrive maintenance experience — scoped, responsive and accessible. */
+.ac-gps-maintenance {
+  position:relative;isolation:isolate;display:flex;flex-direction:column;
+  width:100%;min-height:min(760px,calc(100dvh - 110px));overflow:hidden;
+  border:1px solid #304568;border-radius:24px;
+  background:radial-gradient(ellipse at 50% 12%,#17345d 0%,transparent 58%),linear-gradient(145deg,#0b1427,#0b1020 75%);
+  color:#f4f7ff;box-shadow:0 24px 65px #0004;
+}
+.ac-gps-maintenance::after {
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(#ffffff06 1px,transparent 1px),linear-gradient(90deg,#ffffff06 1px,transparent 1px);
+  background-size:48px 48px;mask-image:linear-gradient(transparent,#000 45%,transparent);
+}
+.ac-gps-maintenance-top {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:clamp(16px,3vw,28px);}
+.ac-gps-maintenance-exit {display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:10px 16px;border:1px solid #466083;border-radius:12px;background:#172743;color:#fff!important;text-decoration:none!important;font-weight:700;}
+.ac-gps-maintenance-exit:hover,.ac-gps-maintenance-home:hover {filter:brightness(1.13);}
+.ac-gps-maintenance-exit:focus-visible,.ac-gps-maintenance-home:focus-visible {outline:3px solid #8dc2ff;outline-offset:3px;}
+.ac-gps-maintenance-exit span {font-size:22px;line-height:1;}
+.ac-gps-maintenance-brand {font-size:clamp(11px,1.6vw,14px);font-weight:800;letter-spacing:.15em;text-align:right;}
+.ac-gps-maintenance-brand strong {color:#76b4ff;}
+.ac-gps-maintenance-body {flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px clamp(18px,5vw,48px) 65px;text-align:center;}
+.ac-gps-maintenance-icon {display:grid;place-items:center;width:76px;height:76px;border:1px solid #4875ad;border-radius:24px;background:#1b3c69;color:#9dccff;font-size:42px;box-shadow:0 0 50px #2175ed33;}
+.ac-gps-maintenance-kicker {color:#8abfff;letter-spacing:.18em;font-size:12px;font-weight:800;}
+.ac-gps-maintenance-body h2 {max-width:740px;margin:0!important;color:#fff!important;font-size:clamp(27px,4.5vw,48px)!important;line-height:1.15!important;letter-spacing:-.04em!important;}
+.ac-gps-maintenance-body > p {max-width:650px;margin:0!important;color:#bdcce1!important;font-size:clamp(14px,1.8vw,17px)!important;line-height:1.75!important;}
+.ac-gps-maintenance-date {display:flex;flex-direction:column;gap:8px;margin-top:8px;padding:20px 36px;border:1px solid #3c5a82;border-radius:18px;background:#172943cc;}
+.ac-gps-maintenance-date span {color:#aebfda;font-size:13px;}
+.ac-gps-maintenance-date strong {color:#fff;font-size:clamp(24px,3vw,32px);}
+.ac-gps-maintenance-body .ac-gps-maintenance-footnote {font-size:13px!important;color:#a4b8d0!important;}
+.ac-gps-maintenance-home {display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 24px;border-radius:12px;background:#1879e9;color:#fff!important;text-decoration:none!important;font-weight:750;}
+@media(max-width:600px) {.ac-gps-maintenance {min-height:calc(100dvh - 125px);border-radius:16px}.ac-gps-maintenance-top{padding:14px}.ac-gps-maintenance-body{gap:16px;padding:18px 18px 45px}.ac-gps-maintenance-date{padding:16px 22px}}
