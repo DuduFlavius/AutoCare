@@ -15,9 +15,43 @@ import './smartdrive-premium.css';
 import { storeTripRoutes } from '@/lib/local-trip-routes';
 import { useMapLocation } from './use-map-location';
 import { acceptGPSFix, browserGPSFix, latestGPSFix, type GPSFix as Sample } from '@/lib/gps-tracking';
+
+// Maintenance gate: the GPS workspace is temporarily unavailable until 1 January 2027.
+// Keep the existing GPS implementation intact and unmounted during maintenance.
+export default function SmartDriveTrip(props: Parameters<typeof SmartDriveTripContent>[0]) {
+  const locale = useApplicationLocale();
+  const english = locale.startsWith('en');
+  return (
+    <section className="ac-gps-maintenance" aria-label={english ? 'SmartDrive GPS maintenance' : 'Mentenanță SmartDrive GPS'}>
+      <div className="ac-gps-maintenance-top">
+        <a className="ac-gps-maintenance-exit" href="/cont" aria-label={english ? 'Exit SmartDrive GPS' : 'Ieșire din SmartDrive GPS'}>
+          <span aria-hidden="true">←</span> {english ? 'Exit' : 'Ieșire'}
+        </a>
+        <span className="ac-gps-maintenance-brand">AUTOCARE <strong>PREMIUM</strong></span>
+      </div>
+      <div className="ac-gps-maintenance-body">
+        <div className="ac-gps-maintenance-icon" aria-hidden="true">✦</div>
+        <span className="ac-gps-maintenance-kicker">SMARTDRIVE · GPS</span>
+        <h2>{english ? 'We’re making every journey better.' : 'Pregătim o experiență de navigație mai bună.'}</h2>
+        <p>{english
+          ? 'SmartDrive GPS is temporarily unavailable while we improve navigation, accuracy and trip recording. We apologize for the inconvenience and thank you for your patience.'
+          : 'SmartDrive GPS este temporar indisponibil pentru lucrări de mentenanță și îmbunătățiri ale navigației, preciziei și înregistrării traseelor. Ne cerem scuze pentru inconvenient și îți mulțumim pentru înțelegere.'}</p>
+        <div className="ac-gps-maintenance-date">
+          <span>{english ? 'Expected return' : 'Revenim pe'}</span>
+          <strong>{english ? '1 January 2027' : '1 ianuarie 2027'}</strong>
+        </div>
+        <p className="ac-gps-maintenance-footnote">{english
+          ? 'Your vehicles, documents and other AutoCare features remain available.'
+          : 'Mașinile, documentele și celelalte funcții AutoCare rămân disponibile.'}</p>
+        <a className="ac-gps-maintenance-home" href="/cont">{english ? 'Back to my account' : 'Înapoi în cont'}</a>
+      </div>
+    </section>
+  );
+}
+
 type MileageReceipt = { id: string; vehicleId: string; distanceMeters: number; odometerBefore: number | null; odometerAfter: number | null };
 const RoadMapView=dynamic(()=>import('./road-map'),{ssr:false});
-export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bluetoothOnly, bluetoothVisible, liveVisible, onVehicle, onHistory }: { preview: boolean; bluetoothOnly: boolean; bluetoothVisible: boolean; liveVisible: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; plate?: string; odometer:number }[]; onSaved:(receipt?:MileageReceipt)=>Promise<unknown>; onVehicle?:(id:string)=>void; onHistory:()=>void }) {
+function SmartDriveTripContent({ preview, vehicles, onSaved, ownerId, bluetoothOnly, bluetoothVisible, liveVisible, onVehicle, onHistory }: { preview: boolean; bluetoothOnly: boolean; bluetoothVisible: boolean; liveVisible: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; plate?: string; odometer:number }[]; onSaved:(receipt?:MileageReceipt)=>Promise<unknown>; onVehicle?:(id:string)=>void; onHistory:()=>void }) {
 
   const locale=useApplicationLocale();
   const [waitingCar,setWaitingCar]=useState(false);
