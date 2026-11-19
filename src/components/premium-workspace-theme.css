@@ -48,3 +48,28 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme .app-header.app-t
 }
 @media(max-width:360px){html body .app-shell.ac-workspace.ac-studio.ac-reference-theme main.main#workspace-main .ac-finance .ac-finance-categories{grid-template-columns:minmax(0,1fr)!important}}
 }
+
+
+/* Maintenance workspace: separate surface, clear statistics and natural scrolling. */
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main.workspace-service {
+  min-width:0;overscroll-behavior-y:contain;scroll-snap-type:none!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main.workspace-service .ac-service-garage,
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main.workspace-service .ac-maintenance-views,
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main.workspace-service .ac-premium-service-stats,
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main.workspace-service .record-tools {
+  scroll-snap-align:none!important;
+}
+.ac-service-activity {min-width:0;margin:20px 0 26px;padding:clamp(18px,2.8vw,30px);border:1px solid #314765;border-radius:22px;background:linear-gradient(135deg,#14263f,#0d192b 85%);color:#eef6ff;box-shadow:0 12px 32px #0002;}
+.ac-service-activity-heading {display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.ac-service-activity-heading h3 {margin:8px 0!important;color:#fff!important;font-size:clamp(21px,2.6vw,29px)!important;letter-spacing:-.03em;}
+.ac-service-activity-heading p {margin:0!important;color:#aabfd8!important;font-size:13px!important;line-height:1.6;}
+.ac-service-activity-total {display:flex;align-items:baseline;gap:8px;padding:10px 16px;border:1px solid #42658c;border-radius:14px;background:#1c385a;font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;}
+.ac-service-activity-total small {font-size:12px;color:#b8cde6;font-weight:500;}
+.ac-service-activity-chart {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(7px,2vw,22px);height:220px;margin-top:26px;}
+.ac-service-activity-month {display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;color:#b9cbe2;font-size:12px;text-transform:capitalize;}
+.ac-service-activity-month strong {color:#f5f9ff;font-size:14px;font-variant-numeric:tabular-nums;}
+.ac-service-activity-track {display:flex;align-items:flex-end;width:100%;max-width:76px;flex:1;min-height:0;border:1px solid #355070;border-radius:10px 10px 5px 5px;background:#1d324c;overflow:hidden;}
+.ac-service-activity-track span {display:block;width:100%;min-height:0;background:linear-gradient(0deg,#1369d9,#6db8ff);border-radius:8px 8px 0 0;transition:height .3s ease;}
+@media(max-width:600px){.ac-service-activity{margin:14px 0 20px;border-radius:17px}.ac-service-activity-chart{height:170px;gap:7px}.ac-service-activity-month{font-size:10px}.ac-service-activity-total{font-size:23px}}
+@media(prefers-reduced-motion:reduce){.ac-service-activity-track span{transition:none}}
