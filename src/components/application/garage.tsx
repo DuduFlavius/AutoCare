@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { garageOverview, garageVehicleSummary } from '@/lib/garage-overview';
-import { TitaniumWave } from '../titanium-wave';
 import InlineMileageEditor from '../inline-mileage-editor';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import './garage.css';
@@ -56,16 +55,16 @@ export function ApplicationGarage({
     unscheduled: t('Neplanificată', 'Not scheduled'),
   };
   return (
-    <div className="ac-garage-page" data-workspace-ui>
-      <section aria-labelledby="ac-garage-vehicles-title" className="ac-garage-inventory">
-        <header className="ac-garage-bar">
+    <div className="rg-garage-page" data-workspace-ui>
+      <section aria-labelledby="rg-garage-vehicles-title" className="rg-garage-inventory">
+        <header className="rg-garage-bar">
           <div>
-            <h2 id="ac-garage-vehicles-title">{t('Vehiculele tale', 'Your vehicles')}</h2>
+            <h2 id="rg-garage-vehicles-title">{t('Vehiculele tale', 'Your vehicles')}</h2>
             <p>{number.format(totals.active)} {totals.active === 1 ? t('vehicul activ', 'active vehicle') : t('vehicule active', 'active vehicles')}</p>
           </div>
-          <div className="ac-garage-filters">
+          <div className="rg-garage-filters">
             {data.vehicles.length > 1 && (
-              <label className="ac-garage-search">
+              <label className="rg-garage-search">
                 <Search size={17} aria-hidden="true" />
                 <input type="search" aria-label={t('Caută un vehicul', 'Find a vehicle')} placeholder={t('Marcă, model sau număr…', 'Make, model or plate…')} value={query} onChange={event => onQuery(event.target.value)} />
               </label>
@@ -75,7 +74,7 @@ export function ApplicationGarage({
             )}
           </div>
         </header>
-        <div className="ac-garage-vehicles">
+        <div className="rg-garage-vehicles">
           {vehicles.map(vehicle => {
             const primary = !vehicle.archived && primaryId === vehicle.id;
             const { activeDocuments, maintenance, deadline } = garageVehicleSummary(records.get(vehicle.id) ?? [], vehicle.odometer, data.profile.timezone);
@@ -83,38 +82,37 @@ export function ApplicationGarage({
               ? date.format(new Date(deadline.date + 'T12:00:00Z'))
               : maintenance?.service.nextKm != null ? number.format(maintenance.service.nextKm) + ' km' : '—';
             return (
-              <article key={vehicle.id} className="ac-garage-vehicle" data-primary={primary || undefined} aria-labelledby={'ac-garage-vehicle-' + vehicle.id}>
-                <div className="ac-garage-identity">
-                  <TitaniumWave />
+              <article key={vehicle.id} className="rg-garage-vehicle" data-primary={primary || undefined} aria-labelledby={'rg-garage-vehicle-' + vehicle.id}>
+                <div className="rg-garage-identity">
                   <VehicleSymbol compact/>
-                  <div className="ac-garage-identity-main">
-                    <span className="ac-garage-plate" data-user-content>{vehicle.plate}</span>
-                    <span className="ac-garage-badge" data-status={vehicle.archived ? 'archived' : primary ? 'primary' : 'active'}>
+                  <div className="rg-garage-identity-main">
+                    <span className="rg-garage-plate" data-user-content>{vehicle.plate}</span>
+                    <span className="rg-garage-badge" data-status={vehicle.archived ? 'archived' : primary ? 'primary' : 'active'}>
                       {primary && <Check size={13} aria-hidden="true" />}
                       {vehicle.archived ? t('Arhivat', 'Archived') : primary ? t('Vehicul principal', 'Primary vehicle') : t('Activ', 'Active')}
                     </span>
                   </div>
-                  <h3 id={'ac-garage-vehicle-' + vehicle.id} data-user-content>{vehicle.brand} {vehicle.model}</h3>
+                  <h3 id={'rg-garage-vehicle-' + vehicle.id} data-user-content>{vehicle.brand} {vehicle.model}</h3>
                   <p>{vehicle.year} · <span data-user-content>{translateApplicationCopy(vehicle.fuel,english?'en':'ro')}{vehicle.engine ? ' · ' + vehicle.engine : ''}{vehicle.capacity ? ' · ' + number.format(vehicle.capacity) + ' cm³' : ''}</span></p>
                 </div>
-                <div className="ac-garage-mileage">
+                <div className="rg-garage-mileage">
                   <Gauge size={21} aria-hidden="true" />
                   <div><span>{t('Kilometraj înregistrat', 'Recorded odometer')}</span><strong>{number.format(vehicle.odometer)} <small>km</small></strong></div>
                 </div>
-                <dl className="ac-garage-metrics">
+                <dl className="rg-garage-metrics">
                   <div><dt><FileText size={14} />{t('Documente active', 'Active documents')}</dt><dd>{number.format(activeDocuments)}</dd></div>
                   <div><dt><CalendarDays size={14} />{deadline?.overdue ? t('Scadență depășită', 'Overdue deadline') : t('Următoarea scadență', 'Next deadline')}</dt><dd data-status={deadline?.overdue ? 'overdue' : undefined}>{deadlineText}</dd>{(deadline || maintenance?.service.nextKm != null) && <small data-user-content>{deadline?.title ?? maintenance?.service.title}</small>}</div>
                   <div><dt><Wrench size={14} />{t('Mentenanță', 'Maintenance')}</dt><dd data-status={maintenance?.status.state}>{maintenanceLabels[maintenance?.status.state ?? 'unscheduled'] ?? maintenanceLabels.unscheduled}</dd></div>
                 </dl>
-                <div className="ac-garage-document-strip">{['ITP','RCA','Rovinietă'].map(kind=>{const doc=(records.get(vehicle.id)??[]).find(r=>r.kind==='document'&&r.category===kind);return <button type="button" key={kind} onClick={()=>onDocuments(vehicle.id)}><FileText size={13}/><span>{kind==='Rovinietă'?t('Rovinietă','Vignette'):kind}</span><small>{!doc?t('Lipsește','Missing'):doc.status.days==null?'—':doc.status.days<0?t('Expirat','Expired'):doc.status.days+' '+t('zile','days')}</small></button>})}</div>
-                <div className="ac-garage-actions">
+                <div className="rg-garage-document-strip">{['ITP','RCA','Rovinietă'].map(kind=>{const doc=(records.get(vehicle.id)??[]).find(r=>r.kind==='document'&&r.category===kind);return <button type="button" key={kind} onClick={()=>onDocuments(vehicle.id)}><FileText size={13}/><span>{kind==='Rovinietă'?t('Rovinietă','Vignette'):kind}</span><small>{!doc?t('Lipsește','Missing'):doc.status.days==null?'—':doc.status.days<0?t('Expirat','Expired'):doc.status.days+' '+t('zile','days')}</small></button>})}</div>
+                <div className="rg-garage-actions">
                   <button type="button" className="primary" onClick={() => onDetails(vehicle.id)}>{t('Vezi detalii', 'View details')} <ArrowUpRight size={15} /></button>
                   <button type="button" disabled={busy || vehicle.archived} onClick={() => onEdit(vehicle)}><Pencil size={15} />{t('Editează', 'Edit')}</button>
                   <button type="button" onClick={() => onDocuments(vehicle.id)}><FileText size={15} />{t('Documente', 'Documents')}</button>
-                  {!vehicle.archived && <button type="button" className="ac-garage-archive" disabled={busy} onClick={() => onArchive(vehicle)}><Archive size={15} />{t('Arhivează', 'Archive')}</button>}
+                  {!vehicle.archived && <button type="button" className="rg-garage-archive" disabled={busy} onClick={() => onArchive(vehicle)}><Archive size={15} />{t('Arhivează', 'Archive')}</button>}
                 </div>
                 {!vehicle.archived && (
-                  <div className="ac-garage-secondary">
+                  <div className="rg-garage-secondary">
                     <button type="button" onClick={() => onAi(vehicle.id)}><Sparkles size={15} />{t('Analizează cu AI', 'Analyze with AI')}</button>
                     <InlineMileageEditor vehicleId={vehicle.id} currentKm={vehicle.odometer} preview={preview} onSaved={onRefresh} />
                     <button type="button" aria-pressed={primary} disabled={busy} onClick={() => onSelect(vehicle.id)}>
@@ -125,16 +123,16 @@ export function ApplicationGarage({
               </article>
             );
           })}
-          {!vehicles.length && data.vehicles.length > 0 && <p className="ac-garage-no-results" role="status">{t('Niciun vehicul nu corespunde filtrelor active.', 'No vehicles match the current filters.')}</p>}
-          <article className="ac-garage-add">
-            <span className="ac-garage-icon"><CarFront size={25} aria-hidden="true" /></span>
+          {!vehicles.length && data.vehicles.length > 0 && <p className="rg-garage-no-results" role="status">{t('Niciun vehicul nu corespunde filtrelor active.', 'No vehicles match the current filters.')}</p>}
+          <article className="rg-garage-add">
+            <span className="rg-garage-icon"><CarFront size={25} aria-hidden="true" /></span>
             <div><h3>{t('Adaugă un vehicul', 'Add a vehicle')}</h3><p>{t('Extinde-ți garajul digital', 'Expand your digital garage')}</p></div>
             <button type="button" className="primary" disabled={busy} onClick={onAdd}><Plus size={17} />{t('Adaugă mașină', 'Add vehicle')}</button>
           </article>
         </div>
       </section>
-      <section className="ac-garage-numbers" aria-labelledby="ac-garage-numbers-title">
-        <header><h2 id="ac-garage-numbers-title">{t('Garajul tău în cifre', 'Your garage in numbers')}</h2><p>{t('Totalurile istorice includ vehiculele arhivate. Documentele active sunt cele valabile sau fără expirare, de pe vehiculele active.', 'Historical totals include archived vehicles. Active documents are valid or non-expiring documents for active vehicles.')}</p></header>
+      <section className="rg-garage-numbers" aria-labelledby="rg-garage-numbers-title">
+        <header><h2 id="rg-garage-numbers-title">{t('Garajul tău în cifre', 'Your garage in numbers')}</h2><p>{t('Totalurile istorice includ vehiculele arhivate. Documentele active sunt cele valabile sau fără expirare, de pe vehiculele active.', 'Historical totals include archived vehicles. Active documents are valid or non-expiring documents for active vehicles.')}</p></header>
         <dl>
           {[
             { Icon: Layers3, label: t('Total vehicule', 'Total vehicles'), value: number.format(totals.vehicles) },
@@ -142,7 +140,7 @@ export function ApplicationGarage({
             { Icon: Wallet, label: t('Cheltuieli totale', 'Total expenses'), value: money(totals.costs) },
             { Icon: Wrench, label: t('Intervenții efectuate', 'Completed services'), value: number.format(totals.services) },
             { Icon: FileText, label: t('Documente active', 'Active documents'), value: number.format(totals.documents) },
-          ].map(({ Icon, label, value }) => <div key={label}><dt><span className="ac-garage-icon"><Icon size={17} aria-hidden="true" /></span>{label}</dt><dd>{value}</dd></div>)}
+          ].map(({ Icon, label, value }) => <div key={label}><dt><span className="rg-garage-icon"><Icon size={17} aria-hidden="true" /></span>{label}</dt><dd>{value}</dd></div>)}
         </dl>
       </section>
     </div>

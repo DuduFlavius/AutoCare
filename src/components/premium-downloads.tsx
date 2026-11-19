@@ -2,6 +2,7 @@
 import {PremiumDateInput} from './premium-date-input';
 import { useState } from 'react';
 import { ReportOverview } from './application/report-overview';
+import {upcomingMaintenance} from '@/lib/application-home';
 import { localDate } from '@/lib/config';
 import { Download, FileText, Table2 } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
@@ -28,6 +29,8 @@ export default function PremiumDownloads({
   const includedCars=data.vehicles.filter(car=>!car.archived&&(!vehicle||car.id===vehicle));
   const includedIds=new Set(includedCars.map(car=>car.id));
   const reportRows=data.records.filter(row=>includedIds.has(row.vehicleId)&&!row.cancelled&&(!kind||row.kind===kind)&&(!from||(row.date!=null&&row.date>=from))&&(!to||(row.date!=null&&row.date<=to)));
+  const nextDistances=includedCars.flatMap(car=>upcomingMaintenance(data.records.filter(r=>r.vehicleId===car.id&&!r.cancelled),car.odometer,null,data.profile.timezone).flatMap(item=>item.status.remainingKm==null?[]:[Math.max(0,item.status.remainingKm)]));
+  const nextKm=nextDistances.length?Math.min(...nextDistances):null;
   const previewQuery=new URLSearchParams({format:'pdf',view:'1',archived:'active',...(vehicle?{vehicleId:vehicle}:{}),...(kind?{kind}:{}),...(from?{from}:{}),...(to?{to}:{})});
   async function download(format: 'pdf' | 'csv') {
     if (preview) {
@@ -65,9 +68,9 @@ export default function PremiumDownloads({
     }
   }
   return (
-    <section className="card ac-premium-downloads" data-workspace-ui>
+    <section className="rg-premium-downloads" data-workspace-ui>
       <div className="rg-report-tabs" role="group" aria-label={en?'Report view':'Vizualizare raport'}><button aria-pressed={reportView==='general'} onClick={()=>setReportView('general')}>{en?'General':'General'}</button><button aria-pressed={reportView==='details'} onClick={()=>setReportView('details')}>{en?'Details & export':'Detalii și export'}</button></div>
-      <ReportOverview rows={reportRows} vehicleCount={includedCars.length} today={localDate(new Date(),data.profile.timezone)} en={en}/>
+      <ReportOverview nextKm={nextKm} rows={reportRows} vehicleCount={includedCars.length} today={localDate(new Date(),data.profile.timezone)} en={en}/>
       <div className="rg-report-details" hidden={reportView!=='details'}>
       <h3>
         <Download size={20} />

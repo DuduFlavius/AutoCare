@@ -69,17 +69,16 @@ export function WorkspaceNavigation({
       aria-label={language === 'en' ? 'Application sections' : 'Secțiunile aplicației'}
       data-workspace-ui
     >
-      {(tab==='Dashboard'?[{ro:'',en:'',ids:['Dashboard','Garaj','Întreținere','Calendar','Cheltuieli','Rapoarte','Istoric auto','Documente','RCA & Rovinietă','Plan întreținere','Notificări','Setări','Centru de suport','Cont','AutoCare AI']}]:[
-        { ro:'GARAJUL TĂU',en:'YOUR GARAGE', ids:['Dashboard','Garaj','AutoCare AI','Întreținere','Documente','RCA & Rovinietă'] },
-        { ro:'EVIDENȚĂ ȘI PLANIFICARE',en:'TRACKING & PLANNING', ids:['Kilometraj','Calendar','Cheltuieli','Rapoarte','Istoric auto','Plan întreținere'] },
-        { ro:'CONTUL TĂU',en:'YOUR ACCOUNT', ids:['Premium','Abonament','Notificări','Setări','Centru de suport','Cont'] },
-      ]).map(group => <div className="ws-nav-group" key={group.en}><p>{group[language]}</p>{group.ids.map(id => {
+      {[
+        {ro:'',en:'',ids:['Dashboard','Garaj','Documente','Întreținere','Rapoarte','Calendar','RCA & Rovinietă','AutoCare AI','Centru de suport','Cont']},
+        {ro:'INSTRUMENTE',en:'TOOLS',ids:['Cheltuieli','Istoric auto','Kilometraj','Plan întreținere','Notificări','Premium','Abonament','Setări']},
+      ].map(group => {const Group=group.ro?'details':'div';return <Group className="ws-nav-group" key={group.en}>{group.ro&&<summary>{group[language]}</summary>}{group.ids.map(id => {
         const section=workspaceSections.find(section=>section.id===id)!;
         const Icon=icons[section.icon];
         const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
-        const label = id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj' ? (tab==='Dashboard'?(language==='en'?'Vehicles':'Mașini'):(language==='en'?'My garage':'Garajul meu')) : section[language];
+        const label = id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj'?(language==='en'?'Garage':'Garaj'):id==='Cont'?(language==='en'?'Settings':'Setări'):id==='Rapoarte'?(language==='en'?'Report':'Raport'):id==='Setări'?(language==='en'?'Preferences':'Preferințe'):section[language];
         return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}>{referenceIcons[id]?<ReferenceArtwork name={referenceIcons[id]} width={32} height={32}/>:<Icon size={18}/>}<span>{label}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
-      })}</div>)}
+      })}</Group>;})}
     </nav>
   );
 }
@@ -265,15 +264,12 @@ const moduleCopy: Record<string, { title: [string, string]; description: [string
 
 export function WorkspaceModuleHeader({ tab, language, children }: { tab: string; language: Language; children?: ReactNode }) {
   const section = workspaceSections.find(item => item.id === tab);
-  const Icon = section ? icons[section.icon] : Settings;
   const copy = moduleCopy[tab];
   const lang = language === 'en' ? 1 : 0;
   return (
-    <header className="page-head between ac-workspace-hero ac-module-header" data-workspace-ui>
-      <div className="ac-module-heading">
-        <span className="ac-module-icon" aria-hidden="true"><Icon size={25} strokeWidth={1.65}/></span>
+    <header className="rg-page-heading" data-workspace-ui>
+      <div>
         <div>
-          <p className="studio-kicker">AUTOCARE · {language === 'en' ? 'WORKSPACE' : 'SPAȚIU DE LUCRU'}</p>
           <h1 id="workspace-page-title" tabIndex={-1}>{copy?.title[lang] ?? section?.[language] ?? tab}</h1>
           {copy && <p className="muted small">{copy.description[lang]}</p>}
         </div>

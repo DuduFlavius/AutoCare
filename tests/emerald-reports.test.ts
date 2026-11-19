@@ -12,3 +12,8 @@ test('report summary uses real completed costs without duplicates, unknown costs
  assert.match(html,/Intervenții înregistrate<\/span><strong>1<\/strong>/);
  assert.match(html,/Vehicule incluse<\/span><strong>1<\/strong>/);
 });
+test('report chart, category totals and service count share the selected twelve-month window',()=>{
+ const base:FinanceEntry={id:'current',vehicleId:'car',kind:'service',title:'Current service',category:'Current category',date:'2026-11-01',cancelled:false,amountBani:12300,amountKnown:true,odometer:1000};
+ const html=renderToStaticMarkup(createElement(ReportOverview,{rows:[base,{...base,id:'old',category:'Outside period',date:'2024-01-01',amountBani:900000}],vehicleCount:1,today:'2026-11-19',en:false}));
+ assert.match(html,/123,00/);assert.doesNotMatch(html,/Outside period|9\.000,00/);assert.match(html,/Intervenții înregistrate<\/span><strong>1<\/strong>/);
+});

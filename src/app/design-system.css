@@ -21,7 +21,9 @@
   --color-primary-soft: #1E4538;
   --color-primary-ink: #71E5BB;
   --color-bg: var(--obsidian-black);
-  --color-surface: var(--midnight-navy);
+  --color-secondary: var(--midnight-navy);
+  --color-card: var(--graphite);
+  --color-surface: var(--color-card);
   --color-surface-muted: var(--graphite);
   --color-border: var(--steel);
   --color-border-strong: color-mix(in srgb, var(--steel) 78%, var(--titanium-silver));

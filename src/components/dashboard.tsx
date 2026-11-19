@@ -35,7 +35,6 @@ import {RacingMenu,RacingMaintenance,RacingCalendar} from './application/racing-
 import {RacingSupport} from './application/racing-support';
 import { AutoAiWorkspace } from './application/auto-ai-workspace';
 import ApplicationHeader from './application/header';
-import LanguageMenu from './language-menu';
 import MobileNavigation from './application/mobile-navigation';
 import AccountHub from './application/account';
 import { ApplicationGarage } from './application/garage';
@@ -860,84 +859,14 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
       {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>navigate('Garaj', 'push', id)} /></Dialog>}
       {racingMenu&&<Dialog className="rg-menu-dialog" title={language==='en'?'Menu':'Meniu'} onClose={()=>setRacingMenu(false)}><RacingMenu active={tab} onClose={()=>setRacingMenu(false)} name={name} premium={!!data?.premium} navigate={next=>{if(navigate(next))setRacingMenu(false);}} onSignOut={()=>void signOut()} preview={!!previewData}/></Dialog>}
-      <aside className="sidebar">
-        <Brand
-          href={previewData ? '/previzualizare' : '/cont'}
-          onClick={(e) => {
-            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-            e.preventDefault();
-            navigate('Dashboard');
-          }}
-        />
-        <span className="sidebar-tagline">GARAJUL TĂU DIGITAL</span>
-        <button type="button" className="ws-sidebar-search" data-workspace-ui onClick={()=>setLauncherOpen(true)} disabled={!!modal}><Search size={18}/><span>{language==='en'?'Search & actions':'Căutare și acțiuni'}</span><kbd>⌘ K</kbd></button>
-        <div className="ws-sidebar-sections">
-          <WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} premium={!!data?.premium} path={previewData?'/previzualizare':'/cont'} />
-          {['founder', 'superadmin', 'admin', 'assistant'].includes(data?.profile.role || '') && (
-            <a className="founder-nav-link" href="/admin">
-              <Shield size={18} /> {data?.profile.role === 'founder' ? 'Panou Fondator' : 'Mail Center'} <ArrowUpRight size={13} />
-            </a>
-          )}
-          {data?.profile.role === 'admin' && (
-            <button
-              className={tab === 'Administrare' ? 'active' : ''}
-              onClick={() => navigate('Administrare')}
-            >
-              <Shield size={18} />
-              Administrare
-            </button>
-          )}
-        </div>
-        {(
-          <div
-            className={
-              'sidebar-bottom ' + (data?.premium ? 'membership-active' : 'membership-promo')
-            }
-          >
-            <ReferenceArtwork name="crown" width={44} height={44} className="ac-ref-crown"/>
-            <p className="eyebrow">{data?.premium ? (language === 'en' ? 'PREMIUM ACTIVE' : 'PREMIUM ACTIV') : 'AUTOCARE PREMIUM'}</p>
-            <p>
-              {data?.premium
-                ? 'Garajul tău, cu toate avantajele.'
-                : 'Mai mult control asupra garajului tău.'}
-            </p>
-            <button onClick={() => navigate('Abonament')}>
-              {tab==='Dashboard'?(language==='en'?'Manage plan':'Gestionează'):data?.premium ? 'Gestionează abonamentul' : 'Descoperă Premium'}{' '}
-              <ArrowUpRight size={15} />
-            </button>
-          </div>
-        )}
-        <LanguageMenu language={language} onChange={changeLanguage}/>
-        <details className="sidebar-account">
-          {' '}
-          <summary className="sidebar-profile">
-            <span className="profile-avatar">{name.slice(0, 1).toUpperCase()}</span>
-            <span>
-              <strong>{name}</strong>
-              <small>
-                {(
-                  {
-                    founder: 'Fondator',
-                    admin: 'Administrator',
-                    assistant: 'Asistent',
-                    user: 'Utilizator',
-                  } as Record<string, string>
-                )[data?.profile.role || 'user'] || 'Utilizator'}
-              </small>
-            </span>
-            <ArrowUpRight size={15} />
-          </summary>
-          <div className="profile-actions">
-            <button onClick={() => navigate('Setări')}>Profil și preferințe</button>
-            <button
-              disabled={signingOut || !!previewData}
-              onClick={() => void signOut()}
-            >
-              <LogOut size={16} />
-              Deconectare
-            </button>
-          </div>
-        </details>
+      <aside className="rg-sidebar sidebar">
+        <Brand href={previewData?'/previzualizare':'/cont'} onClick={e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();navigate('Dashboard');}}/>
+        <div className="rg-sidebar-scroll"><WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} premium={!!data?.premium} path={previewData?'/previzualizare':'/cont'}/>
+        {['founder','superadmin','admin','assistant'].includes(data?.profile.role||'')&&<a className="rg-admin-link" href="/admin"><Shield size={17}/>{data?.profile.role==='founder'?(language==='en'?'Founder panel':'Panou Fondator'):'Mail Center'}<ArrowUpRight size={14}/></a>}
+        {data?.profile.role==='admin'&&<button onClick={()=>navigate('Administrare')}><Shield size={17}/>{language==='en'?'Administration':'Administrare'}</button>}</div>
+        <footer className="rg-sidebar-footer"><button className="rg-membership" onClick={()=>navigate('Abonament')}><ReferenceArtwork name="crown" width={22} height={22}/><span><strong>{data?.premium?(language==='en'?'Premium active':'Premium activ'):'AutoCare Premium'}</strong><small>{language==='en'?'Manage plan':'Gestionează planul'}</small></span><ChevronRight size={16}/></button>
+        <button className="rg-sidebar-profile" onClick={()=>navigate('Cont')}><span className="rg-icon">{name.slice(0,1).toUpperCase()}</span><span><strong data-user-content>{name}</strong><small>{language==='en'?'Account & settings':'Cont și setări'}</small></span><ChevronRight size={16}/></button>
+        <button className="rg-signout" disabled={signingOut||!!previewData} onClick={()=>void signOut()}><LogOut size={16}/>{language==='en'?'Sign out':'Deconectare'}</button></footer>
       </aside>
       {data&&!previewData&&<NativeTripSync ownerId={data.profile.userId} vehicles={data.vehicles.filter(v=>!v.archived)} onUpdated={refresh} onReview={()=>navigate('Plan întreținere')} english={language==='en'}/>}
       <SiteLanguage language={language} />
@@ -992,7 +921,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
         ) : (
           <>
             {!['Feedback','Feedback utilizatori','Dashboard','Cont'].includes(tab) && <WorkspaceModuleHeader tab={tab} language={language}>
-              {['Documente', 'Întreținere', 'Cheltuieli'].includes(tab) ? (
+              {['Cheltuieli'].includes(tab) ? (
                 <button
                   className="primary"
                   disabled={!activeCars.length}
@@ -1024,7 +953,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             {tab==='Feedback'&&<FeedbackWorkspace onExit={()=>navigate('Cont','push',null,true)} onSupport={()=>navigate('Centru de suport','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>}
             {tab==='Feedback utilizatori'&&(['admin','superadmin','founder'].includes(data.profile.role)?<FeedbackWorkspace admin onExit={()=>navigate('Cont','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>:<p role="alert">{language==='en'?'Administrator access required.':'Acces rezervat administratorilor.'}</p>)}
             <FeedbackInvitation enabled={tab==='Dashboard'&&!busy&&!modal&&!recordDirty&&!recordSaving} userId={data.profile.userId} preview={!!previewData} onOpen={()=>navigate('Feedback')}/>
-            <WorkspaceContext tab={tab} language={language} navigate={navigate} />
+            {!['Dashboard','Garaj','Documente','Întreținere','Rapoarte','Calendar','RCA & Rovinietă','Cont','Centru de suport'].includes(tab)&&<WorkspaceContext tab={tab} language={language} navigate={navigate}/>}
             {drill && <div className="card between"><strong>{drill.label}</strong><button type="button" onClick={()=>setDrill(null)}>{language==='en'?'Show all':'Vezi toate'}</button></div>}
             {tab==='Întreținere'&&<RacingMaintenance data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} today={nowDate} onOpen={record=>setModal({kind:'service',record})} onCreate={()=>setModal({kind:'service'})}/>}
             {tab === 'Dashboard' && <ApplicationHome onDrill={(next,vehicleId,ids,label)=>{if(!navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
@@ -1108,7 +1037,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               onUpload={async(record,file)=>{if(file.size>2097152)throw Error(language==='en'?'Choose a file up to 2 MB.':'Alege un fișier de maximum 2 MB.');const form=new FormData();form.set('file',file);form.set('recordId',record.id);const res=await fetch('/api/v1/files',{method:'POST',body:form});const out=await res.json().catch(()=>({}));if(!res.ok)throw new Error(out.error||(language==='en'?'Upload failed.':'Încărcarea a eșuat.'));await refresh();setNotice(language==='en'?'Document attached.':'Documentul a fost atașat.');}}
             />}
             {['Întreținere'].includes(tab) && (
-              <div className="maintenance-desktop">
+              <details className="maintenance-advanced"><summary>{language==='en'?'All records, filters & exports':'Toate înregistrările, filtre și exporturi'}</summary>
                 {tab === 'Documente' && (
                   <>
                     <section className="ac-vault-folder" data-workspace-ui><div><FolderOpen size={24}/><div><h3>{language==='en'?'Your digital document vault':'Dosarul tău digital'}</h3><p>{language==='en'?'Choose a vehicle to open its documents.':'Alege o mașină pentru a deschide documentele ei.'}</p></div></div><label>{language==='en'?'Vehicle folder':'Dosar vehicul'}<FilterSelect value={filter} onChange={e=>setFilter(e.target.value)}><option value="">{language==='en'?'All vehicles':'Toate mașinile'}</option>{data.vehicles.map(car=><option key={car.id} value={car.id}>{car.brand} {car.model} · {car.plate}</option>)}</FilterSelect></label></section>
@@ -1560,7 +1489,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                     </div>
                   </div>
                 )}
-              </div>
+              </details>
             )}
             {tab==='Calendar'&&<RacingCalendar data={data} today={nowDate} onOpen={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onCreate={day=>setModal({kind:'service',planned:true,initialDate:day})}/>}
             {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
