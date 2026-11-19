@@ -40,6 +40,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
   const [statsError, setStatsError] = useState(false);
   const [tripResult, setTripResult] = useState<{ key: string; trips: Trip[] } | null>(null);
   const [readings, setReadings] = useState<Reading[]>([]);
+  const [readingDate,setReadingDate]=useState('');
   const [prefs, setPrefs] = useState<Preferences>({ frequencyDays: 3, enabled: true });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -100,6 +101,12 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
     finally { setClearingRoutes(false); }
   }
   const { deltaKm, dailyKm, monthlyKm } = mileageMetrics(visibleReadings);
+  const chronological=[...visibleReadings].sort((a,b)=>new Date(a.recordedAt).getTime()-new Date(b.recordedAt).getTime());
+  const filteredReadings=readingDate?chronological.filter(r=>new Date(r.recordedAt).toLocaleDateString('en-CA',{timeZone:timezone})===readingDate):chronological;
+  const points=chronological.map((r,i)=>{const min=chronological[0]?.odometer??0,max=chronological[chronological.length-1]?.odometer??min;return {x:chronological.length===1?50:5+i*90/(chronological.length-1),y:85-(r.odometer-min)*70/Math.max(1,max-min)};});
+  const graphLine=points.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' ');
+  const [selectedReading,setSelectedReading]=useState('');
+  const activeReading=chronological.find(r=>r.id===selectedReading)??filteredReadings[filteredReadings.length-1];
   const save = async () => {
     if (preview) return;
     setBusy(true);
@@ -175,7 +182,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
     </div>
     <p className="ac-smartdrive-history-note">{t('Mediile folosesc numai citirile confirmate, nu distanțele GPS. Sunt necesare două citiri la cel puțin o zi distanță.', 'Averages use confirmed mileage readings, not GPS distances. At least two readings one day apart are required.')}</p>
     <div className="ac-smartdrive-history-columns">
-      <div><h4>{t('Citiri kilometraj', 'Mileage readings')}</h4>{visibleReadings.length ? visibleReadings.slice(0,8).map((r,i) => <div className="ac-smartdrive-history-row" key={r.id}><span>{new Date(r.recordedAt).toLocaleDateString(locale)} · {r.source === 'manual' ? 'Manual' : r.source}</span><strong>{r.odometer.toLocaleString(locale)} km</strong>{visibleReadings[i+1] && <small>+{Math.max(0,r.odometer-visibleReadings[i+1].odometer).toLocaleString(locale)} km</small>}</div>) : <p>{t('Nu există citiri salvate în istoricul nou.', 'No mileage readings saved yet.')}</p>}</div>
+      <div className="ac-mileage-timeline"><h4>{t('Evoluția kilometrajului', 'Mileage timeline')}</h4><label>{t('Caută după dată','Search by date')} <PremiumDateInput type="date" value={readingDate} onChange={e=>{setReadingDate(e.target.value);setSelectedReading('');}}/></label>{readingDate&&<button type="button" onClick={()=>{setReadingDate('');setSelectedReading('');}}>{t('Toate datele','All dates')}</button>}{chronological.length>0&&<div className="ac-mileage-chart" role="img" aria-label={t('Graficul citirilor de kilometraj în ordine cronologică','Chronological mileage readings chart')}><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M5 85H95 M5 50H95 M5 15H95" stroke="#365c49" strokeWidth=".5" fill="none"/><path d={graphLine} stroke="#65e6a1" strokeWidth="1.5" fill="none" vectorEffect="non-scaling-stroke"/>{points.map((p,i)=><circle key={chronological[i].id} cx={p.x} cy={p.y} r="1.8" fill={chronological[i].id===activeReading?.id?'#ffffff':'#65e6a1'}/>)}</svg></div>}{activeReading&&<p className="ac-mileage-selected">{new Date(activeReading.recordedAt).toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric',timeZone:timezone})}: <strong>{activeReading.odometer.toLocaleString(locale)} km</strong></p>}{filteredReadings.length?filteredReadings.slice().reverse().map(r=><button type="button" className="ac-smartdrive-history-row ac-mileage-reading" key={r.id} onClick={()=>setSelectedReading(r.id)}><span>{new Date(r.recordedAt).toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric',timeZone:timezone})} · {r.source==='manual'?t('Manual','Manual'):r.source}</span><strong>{r.odometer.toLocaleString(locale)} km</strong></button>):<p>{readingDate?t('Nu există citire salvată în această zi. Nu estimăm kilometrajul.','No saved reading for this date. Mileage is not estimated.'):t('Nu există citiri salvate.','No saved readings.')}</p>}</div>
     </div>
     <div className="ac-smartdrive-reminder"><div><span className="ac-premium-kicker"><Bell size={17}/> REMINDER KILOMETRAJ</span><p>{t('Preferința este salvată în cont. Livrarea periodică necesită configurarea notificărilor automate.', 'Preferences are saved to your account. Scheduled delivery requires automatic notifications to be configured.')}</p></div>
       <label><input type="checkbox" checked={prefs.enabled} onChange={e => setPrefs(p => ({...p,enabled:e.target.checked}))}/> {t('Activ', 'Enabled')}</label>
