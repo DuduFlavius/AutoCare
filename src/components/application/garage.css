@@ -1,7 +1,7 @@
 .ac-garage-page {
-  --garage-edge: #263e62;
-  --garage-blue: #6eb8ff;
-  --garage-panel: linear-gradient(150deg,#101d31,#0c1525 74%);
+  --garage-edge: #304B40;
+  --garage-blue: #71E5BB;
+  --garage-panel: linear-gradient(150deg,#17241F,#101A16 74%);
   display: grid;
   min-width: 0;
   gap: clamp(18px, 2vw, 26px);
@@ -45,9 +45,9 @@ html body .ac-workspace.ac-studio .ac-garage-search input {
   display: grid;
   gap: 11px;
   padding: clamp(12px, 1.3vw, 17px);
-  box-shadow: 0 10px 24px #04081436;
+  box-shadow: 0 10px 24px #0B121036;
 }
-.ac-garage-vehicle[data-primary='true'] { border-color: #375c92; }
+.ac-garage-vehicle[data-primary='true'] { border-color: #34C997; }
 .ac-garage-identity {
   position: relative;
   isolation: isolate;
@@ -55,10 +55,10 @@ html body .ac-workspace.ac-studio .ac-garage-search input {
   display: grid;
   gap: 7px;
   min-width: 0;
-  border: 1px solid #284367;
+  border: 1px solid #304B40;
   border-radius: 11px;
   padding: 12px;
-  background: radial-gradient(ellipse at 75% 5%,#183b72,transparent 66%), #0c172b;
+  background: radial-gradient(ellipse at 75% 5%,#1E4538,transparent 66%), #101A16;
 }
 .ac-garage-identity > .ac-titanium-wave { z-index: -1; opacity: .48; }
 .ac-garage-identity-main { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; }
@@ -69,10 +69,10 @@ html body .ac-workspace.ac-studio .ac-garage-search input {
   max-width: 100%; overflow-wrap: anywhere; border-radius: 6px;
   padding: 4px 7px; font-size: 11px; font-weight: 650;
 }
-.ac-garage-plate { background: #14243d; color: var(--color-text); border: 1px solid #30496b; letter-spacing: .07em; }
-.ac-garage-badge { color: #9dd9c6; background: #15332f; border: 1px solid #2b514b; }
-.ac-garage-badge[data-status='primary'] { color: #c3e1ff; background: #183e71; border-color: #3b659e; }
-.ac-garage-badge[data-status='archived'] { color: #c6ceda; background: #252e40; border-color: #455269; }
+.ac-garage-plate { background: #17241F; color: var(--color-text); border: 1px solid #304B40; letter-spacing: .07em; }
+.ac-garage-badge { color: #A5B8AF; background: #17241F; border: 1px solid #304B40; }
+.ac-garage-badge[data-status='primary'] { color: #F3F8F5; background: #1E4538; border-color: #34C997; }
+.ac-garage-badge[data-status='archived'] { color: #c6ceda; background: #17241F; border-color: #304B40; }
 .ac-garage-mileage { display: flex; align-items: center; gap: 10px; min-width: 0; padding-inline: 4px; }
 .ac-garage-mileage > svg { flex: none; color: var(--garage-blue); }
 .ac-garage-mileage span, .ac-garage-metrics dt, .ac-garage-numbers dt { color: var(--color-muted); font-size: 11px; }
@@ -84,7 +84,7 @@ html body .ac-workspace.ac-studio .ac-garage-search input {
 }
 .ac-garage-metrics > div, .ac-garage-numbers dl > div {
   min-width: 0; padding: 8px; border-radius: 8px;
-  border: 1px solid #233650; background: #0b1424;
+  border: 1px solid #304B40; background: #101A16;
   overflow-wrap: anywhere;
 }
 .ac-garage-metrics dt { display: flex; align-items: center; gap: 4px; }
@@ -92,14 +92,14 @@ html body .ac-workspace.ac-studio .ac-garage-search input {
 .ac-garage-metrics dd, .ac-garage-numbers dd { margin: 4px 0 0; font-weight: 720; }
 .ac-garage-metrics dd { font-size: 13px; }
 .ac-garage-metrics small { display: block; color: var(--color-muted); font-size: 11px; }
-.ac-garage-metrics [data-status='valid'] { color: #9dd9c6; }
+.ac-garage-metrics [data-status='valid'] { color: #A5B8AF; }
 .ac-garage-metrics :is([data-status='soon'],[data-status='due']) { color: #f5d393; }
 .ac-garage-metrics [data-status='overdue'] { color: #ffafaa; }
 .ac-garage-actions, .ac-garage-secondary, .ac-garage-confirm-actions {
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
 }
 .ac-garage-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
-.ac-garage-secondary { border-top: 1px solid #243550; padding-top: 8px; }
+.ac-garage-secondary { border-top: 1px solid #304B40; padding-top: 8px; }
 html body .ac-workspace.ac-studio .ac-garage-page button {
   min-width: 0; max-width: 100%; min-height: 42px;
   padding: 6px 8px !important; gap: 5px;
@@ -107,13 +107,13 @@ html body .ac-workspace.ac-studio .ac-garage-page button {
 }
 .ac-garage-page button > svg { flex-shrink: 0; }
 html body .ac-workspace.ac-studio .ac-garage-page .primary {
-  background: linear-gradient(135deg,#398bff,#66b9ff) !important;
-  border-color: #71b3f9 !important; color: #071425 !important;
+  background: linear-gradient(135deg,#71E5BB,#71E5BB) !important;
+  border-color: #71E5BB !important; color: #101A16 !important;
 }
 html body .ac-workspace.ac-studio .ac-garage-page .ac-garage-archive { color: #ffbcb7 !important; }
 .ac-garage-secondary .ac-inline-mileage, .ac-garage-secondary form, .ac-garage-secondary input { min-width: 0; max-width: 100%; }
 .ac-garage-secondary form > div { display: flex; flex-wrap: wrap; gap: 6px; }
-.ac-garage-secondary [aria-pressed='true'] { color: #b5d9ff; }
+.ac-garage-secondary [aria-pressed='true'] { color: #71E5BB; }
 .ac-garage-add {
   display: grid; grid-template-columns: auto minmax(0,1fr);
   align-items: center; gap: 8px 10px;
@@ -123,8 +123,8 @@ html body .ac-workspace.ac-studio .ac-garage-page .ac-garage-archive { color: #f
 .ac-garage-add > button { grid-column: 2; justify-self: start; }
 .ac-garage-icon {
   display: inline-grid; place-items: center; width: 33px; height: 33px;
-  border: 1px solid #2d4d77; border-radius: 9px;
-  color: var(--garage-blue); background: #122a4b;
+  border: 1px solid #1E4538; border-radius: 9px;
+  color: var(--garage-blue); background: #304B40;
 }
 .ac-garage-add .ac-garage-icon { width: 43px; height: 43px; }
 .ac-garage-numbers { padding: clamp(12px, 1.3vw, 17px); }
@@ -147,5 +147,5 @@ html body .ac-workspace.ac-studio .ac-garage-page .ac-garage-archive { color: #f
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .ac-garage-vehicle, .ac-garage-add { transition: border-color 160ms ease; }
-  .ac-garage-vehicle:hover, .ac-garage-add:hover { border-color: #426795; }
+  .ac-garage-vehicle:hover, .ac-garage-add:hover { border-color: #34C997; }
 }

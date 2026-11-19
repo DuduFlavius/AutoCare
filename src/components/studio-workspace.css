@@ -1,6 +1,6 @@
 /* Clarity rebuild: one scoped account layer, replacing the rejected redesign. */
-@layer autocare-workspace {
-  html body .app-shell.ac-workspace.ac-studio {
+@layer autocare-workspace{
+  html body .app-shell.ac-workspace.ac-studio:not(:where([class^="rg-"],[class^="rg-"] *)){
     --app-bg: var(--color-bg);
     --app-surface: var(--color-surface);
     --app-ink: var(--color-text);
@@ -17,27 +17,27 @@
     font-size: 16px !important;
     line-height: 1.6 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio > .sidebar {
+  html body .app-shell.ac-workspace.ac-studio > .sidebar:not(:where([class^="rg-"],[class^="rg-"] *)){
     width: var(--app-sidebar) !important;
     padding: 28px 16px 20px !important;
     background: var(--color-nav) !important;
     border-right: 1px solid #ffffff12 !important;
     gap: 20px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar .brand {
+  html body .app-shell.ac-workspace.ac-studio .sidebar .brand:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 25px !important;
     letter-spacing: -0.5px !important;
     color: var(--color-text) !important;
     padding: 0 10px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar .brand span {
+  html body .app-shell.ac-workspace.ac-studio .sidebar .brand span:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: inherit !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar .brandmark {
+  html body .app-shell.ac-workspace.ac-studio .sidebar .brandmark:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-primary-deep) !important;
     box-shadow: 0 5px 18px color-mix(in srgb, var(--color-primary) 17%, transparent) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-sidebar-search {
+  html body .app-shell.ac-workspace.ac-studio .ws-sidebar-search:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 13px !important;
     min-height: 44px !important;
     background: var(--color-surface) !important;
@@ -45,25 +45,25 @@
     color: var(--color-text) !important;
     border-radius: 10px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-sidebar-sections {
+  html body .app-shell.ac-workspace.ac-studio .ws-sidebar-sections:not(:where([class^="rg-"],[class^="rg-"] *)){
     scrollbar-width: thin !important;
-    scrollbar-color: #3d4d66 transparent !important;
+    scrollbar-color: #304B40 transparent !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-navigation {
+  html body .app-shell.ac-workspace.ac-studio .ws-navigation:not(:where([class^="rg-"],[class^="rg-"] *)){
     gap: 23px !important;
     display: grid !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-nav-group {
+  html body .app-shell.ac-workspace.ac-studio .ws-nav-group:not(:where([class^="rg-"],[class^="rg-"] *)){
     gap: 4px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-nav-group > p {
+  html body .app-shell.ac-workspace.ac-studio .ws-nav-group > p:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 11px !important;
     letter-spacing: 1.2px !important;
     line-height: 1.5 !important;
     color: var(--color-muted) !important;
     margin: 0 12px 8px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a {
+  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     line-height: 1.4 !important;
     min-height: 44px !important;
@@ -74,50 +74,50 @@
     background: transparent !important;
     font-weight: 500 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a.active {
+  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a.active:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-primary-soft) !important;
     color: var(--color-text) !important;
     box-shadow: inset 2px 0 var(--electric-blue) !important;
     font-weight: 650 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a:hover:not(.active) {
+  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation a:hover:not(.active):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation svg {
+  html body .app-shell.ac-workspace.ac-studio .sidebar .ws-navigation svg:not(:where([class^="rg-"],[class^="rg-"] *)){
     width: 20px !important;
     height: 20px !important;
     stroke-width: 1.7 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar-profile {
+  html body .app-shell.ac-workspace.ac-studio .sidebar-profile:not(:where([class^="rg-"],[class^="rg-"] *)){
     border-top: 1px solid #ffffff14 !important;
     padding: 18px 8px 0 !important;
     color: var(--color-text) !important;
     gap: 12px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar-profile strong {
+  html body .app-shell.ac-workspace.ac-studio .sidebar-profile strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
     font-size: 14px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .sidebar-profile small {
+  html body .app-shell.ac-workspace.ac-studio .sidebar-profile small:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-muted) !important;
     font-size: 12px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .profile-avatar {
+  html body .app-shell.ac-workspace.ac-studio .profile-avatar:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface-muted) !important;
     color: var(--color-text) !important;
     border-radius: 11px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .profile-actions {
+  html body .app-shell.ac-workspace.ac-studio .profile-actions:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border: 1px solid var(--color-border) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .profile-actions button {
+  html body .app-shell.ac-workspace.ac-studio .profile-actions button:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: transparent !important;
     color: var(--color-text) !important;
     font-size: 14px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio > .app-header.app-topbar {
+  html body .app-shell.ac-workspace.ac-studio > .app-header.app-topbar:not(:where([class^="rg-"],[class^="rg-"] *)){
     left: var(--app-sidebar) !important;
     width: calc(100% - var(--app-sidebar)) !important;
     height: 76px !important;
@@ -128,26 +128,26 @@
     box-shadow: none !important;
     backdrop-filter: blur(14px);
   }
-  html body .app-shell.ac-workspace.ac-studio .app-topbar-title {
+  html body .app-shell.ac-workspace.ac-studio .app-topbar-title:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
     font-size: 14px !important;
     gap: 14px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-topbar-title strong {
+  html body .app-shell.ac-workspace.ac-studio .app-topbar-title strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
     font-size: 15px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-topbar-actions {
+  html body .app-shell.ac-workspace.ac-studio .app-topbar-actions:not(:where([class^="rg-"],[class^="rg-"] *)){
     gap: 10px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-icon-button {
+  html body .app-shell.ac-workspace.ac-studio .app-icon-button:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
     background: transparent !important;
     border: 0 !important;
     min-width: 42px !important;
     min-height: 42px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-header-premium {
+  html body .app-shell.ac-workspace.ac-studio .app-header-premium:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface-muted) !important;
     border: 1px solid var(--color-border) !important;
     color: var(--color-text) !important;
@@ -155,19 +155,19 @@
     font-size: 13px !important;
     min-height: 40px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-avatar-button {
+  html body .app-shell.ac-workspace.ac-studio .app-avatar-button:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface-muted) !important;
     border: 1px solid var(--color-border) !important;
     color: var(--color-text) !important;
     border-radius: 50% !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-header-signout {
+  html body .app-shell.ac-workspace.ac-studio .app-header-signout:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: transparent !important;
     border: 0 !important;
     color: var(--color-text) !important;
     font-size: 13px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio > .main {
+  html body .app-shell.ac-workspace.ac-studio > .main:not(:where([class^="rg-"],[class^="rg-"] *)){
     width: calc(100% - var(--app-sidebar)) !important;
     margin: 0 0 0 var(--app-sidebar) !important;
     padding: 104px 30px 42px !important;
@@ -175,29 +175,29 @@
     min-width: 0 !important;
     overflow: visible !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main > * {
+  html body .app-shell.ac-workspace.ac-studio .main > *:not(:where([class^="rg-"],[class^="rg-"] *)){
     max-width: 1560px !important;
     margin-inline: auto !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main :is(h1, h2, h3, h4, strong, .value, .price) {
+  html body .app-shell.ac-workspace.ac-studio .main :is(h1, h2, h3, h4, strong, .value, .price):not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--app-ink) !important;
     -webkit-text-fill-color: currentColor !important;
     letter-spacing: normal !important;
     text-shadow: none !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main h1 {
+  html body .app-shell.ac-workspace.ac-studio .main h1:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 32px !important;
     line-height: 1.2 !important;
     letter-spacing: -0.9px !important;
     font-weight: 650 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main h2 {
+  html body .app-shell.ac-workspace.ac-studio .main h2:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 20px !important;
     line-height: 1.35 !important;
     font-weight: 650 !important;
     letter-spacing: -0.3px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main h3 {
+  html body .app-shell.ac-workspace.ac-studio .main h3:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 18px !important;
     line-height: 1.4 !important;
     font-weight: 600 !important;
@@ -206,19 +206,19 @@
     body
     .app-shell.ac-workspace.ac-studio
     .main
-    :is(p, small, .small, .muted, .micro, .app-caption) {
+    :is(p, small, .small, .muted, .micro, .app-caption):not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--app-muted) !important;
     font-size: 14px !important;
     line-height: 1.65 !important;
     opacity: 1 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main .eyebrow {
+  html body .app-shell.ac-workspace.ac-studio .main .eyebrow:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 12px !important;
     color: var(--color-text) !important;
     letter-spacing: 1px !important;
     line-height: 1.5 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main :is(button, .button) {
+  html body .app-shell.ac-workspace.ac-studio .main :is(button, .button):not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     font-weight: 600 !important;
     min-height: 43px !important;
@@ -234,25 +234,25 @@
       background-color 0.18s,
       border-color 0.18s !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main :is(button, .button):hover {
+  html body .app-shell.ac-workspace.ac-studio .main :is(button, .button):hover:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface-muted) !important;
     border-color: var(--color-border-strong) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main :is(button.primary, .button.primary) {
+  html body .app-shell.ac-workspace.ac-studio .main :is(button.primary, .button.primary):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-primary) !important;
     border-color: var(--color-border-strong) !important;
     color: var(--color-on-primary) !important;
     box-shadow: 0 5px 16px color-mix(in srgb, var(--color-primary) 11%, transparent) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main :is(button.primary, .button.primary):hover {
+  html body .app-shell.ac-workspace.ac-studio .main :is(button.primary, .button.primary):hover:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-primary-hover) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main :is(button.danger, .danger) {
+  html body .app-shell.ac-workspace.ac-studio .main :is(button.danger, .danger):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-danger-soft) !important;
     border-color: var(--color-danger) !important;
     color: var(--color-danger-ink) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio :is(.main, .dialog) :is(input, select, textarea) {
+  html body .app-shell.ac-workspace.ac-studio :is(.main, .dialog) :is(input, select, textarea):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 9px !important;
@@ -268,26 +268,26 @@
     body
     .app-shell.ac-workspace.ac-studio
     :is(.main, .dialog)
-    :is(input, textarea)::placeholder {
+    :is(input, textarea):not(:where([class^="rg-"],[class^="rg-"] *))::placeholder {
     color: var(--color-muted) !important;
-    -webkit-text-fill-color: #a2b4ce !important;
+    -webkit-text-fill-color: #A5B8AF !important;
   }
   html
     body
     .app-shell.ac-workspace.ac-studio
     :is(.main, .dialog)
-    :is(input, select, textarea):focus {
+    :is(input, select, textarea):focus:not(:where([class^="rg-"],[class^="rg-"] *)){
     outline: 2px solid var(--color-primary) !important;
     outline-offset: 2px !important;
     border-color: var(--color-primary) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio :is(.main, .dialog) label {
+  html body .app-shell.ac-workspace.ac-studio :is(.main, .dialog) label:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     color: var(--color-text) !important;
     line-height: 1.55 !important;
     font-weight: 550 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio :is(input[type='checkbox'], input[type='radio']) {
+  html body .app-shell.ac-workspace.ac-studio :is(input[type='checkbox'], input[type='radio']):not(:where([class^="rg-"],[class^="rg-"] *)){
     width: 20px !important;
     min-height: 20px !important;
     height: 20px !important;
@@ -298,7 +298,7 @@
     body
     .app-shell.ac-workspace.ac-studio
     .main
-    :is(.card, .app-section, .app-account-identity, .app-empty) {
+    :is(.card, .app-section, .app-account-identity, .app-empty):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border: 1px solid #ffffff19 !important;
     border-radius: 15px !important;
@@ -307,7 +307,7 @@
     color: var(--color-text) !important;
     min-width: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .page-head {
+  html body .app-shell.ac-workspace.ac-studio .page-head:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex !important;
     justify-content: space-between !important;
     align-items: flex-end !important;
@@ -318,12 +318,12 @@
     margin-bottom: 24px !important;
     background: transparent !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .page-head p {
+  html body .app-shell.ac-workspace.ac-studio .page-head p:not(:where([class^="rg-"],[class^="rg-"] *)){
     max-width: 900px !important;
     margin-top: 10px !important;
     font-size: 15px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .preview-note {
+  html body .app-shell.ac-workspace.ac-studio .preview-note:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 12px !important;
     color: var(--color-text) !important;
     background: var(--color-surface) !important;
@@ -333,7 +333,7 @@
     margin-bottom: 22px !important;
     line-height: 1.6 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio :is(.app-section-head, .studio-panel-head) {
+  html body .app-shell.ac-workspace.ac-studio :is(.app-section-head, .studio-panel-head):not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
@@ -341,7 +341,7 @@
     margin-bottom: 20px !important;
     flex-wrap: wrap !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main :is(.app-text-action, .studio-text-button) {
+  html body .app-shell.ac-workspace.ac-studio .main :is(.app-text-action, .studio-text-button):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: transparent !important;
     border: 0 !important;
     color: var(--color-primary-ink) !important;
@@ -350,7 +350,7 @@
     font-size: 14px !important;
     box-shadow: none !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-status {
+  html body .app-shell.ac-workspace.ac-studio .app-status:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: inline-flex !important;
     align-items: center !important;
     background: var(--color-success-soft) !important;
@@ -363,61 +363,61 @@
     line-height: 1.4 !important;
     white-space: normal !important;
   }
-  html body .app-shell.ac-workspace.ac-studio :is(.app-status-soon, .app-status-due) {
+  html body .app-shell.ac-workspace.ac-studio :is(.app-status-soon, .app-status-due):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-warning-soft) !important;
     border-color: var(--color-warning) !important;
     color: var(--color-warning-ink) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-status-overdue {
+  html body .app-shell.ac-workspace.ac-studio .app-status-overdue:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-danger-soft) !important;
     border-color: var(--color-danger) !important;
     color: var(--color-danger-ink) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-status-unscheduled {
+  html body .app-shell.ac-workspace.ac-studio .app-status-unscheduled:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface-muted) !important;
     border-color: var(--color-border) !important;
     color: var(--color-text) !important;
   }
   /* New dashboard layout: photography and urgent information above operational detail. */
-  html body .app-shell.ac-workspace.ac-studio .studio-home {
+  html body .app-shell.ac-workspace.ac-studio .studio-home:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid !important;
     gap: 22px !important;
     max-width: 1560px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-home-heading {
+  html body .app-shell.ac-workspace.ac-studio .studio-home-heading:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 20px;
     flex-wrap: wrap;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-home-heading h1 {
+  html body .app-shell.ac-workspace.ac-studio .studio-home-heading h1:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin: 7px 0 5px !important;
     font-size: 34px !important;
     letter-spacing: -1px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-home-heading p {
+  html body .app-shell.ac-workspace.ac-studio .studio-home-heading p:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin: 0 !important;
     font-size: 15px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-kicker {
+  html body .app-shell.ac-workspace.ac-studio .studio-kicker:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 11px !important;
     letter-spacing: 1.6px !important;
     font-weight: 600 !important;
     color: var(--color-primary-ink) !important;
     line-height: 1.5 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-heading-actions {
+  html body .app-shell.ac-workspace.ac-studio .studio-heading-actions:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-overview {
+  html body .app-shell.ac-workspace.ac-studio .studio-overview:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
     gap: 22px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel:not(:where([class^="rg-"],[class^="rg-"] *)){
     position: relative;
     min-height: 320px;
     isolation: isolate;
@@ -426,7 +426,7 @@
     overflow: hidden;
     background: var(--color-surface);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)){
     position: relative;
     height: 210px;
     width: 100%;
@@ -434,7 +434,7 @@
     border-radius: 11px;
     background: var(--color-surface);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo img {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo img:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: block;
     width: 100%;
     height: 100%;
@@ -443,7 +443,7 @@
     transition: transform 0.8s ease;
     max-width: 100%;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-photo-caption {
+  html body .app-shell.ac-workspace.ac-studio .studio-photo-caption:not(:where([class^="rg-"],[class^="rg-"] *)){
     position: absolute;
     right: 10px;
     bottom: 10px;
@@ -456,17 +456,17 @@
     border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
     border-radius: 5px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel > .studio-vehicle-photo {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel > .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)){
     position: absolute;
     inset: 0;
     height: 100%;
     z-index: -2;
     border-radius: 0;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel > .studio-vehicle-photo img {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel > .studio-vehicle-photo img:not(:where([class^="rg-"],[class^="rg-"] *)){
     object-position: 72% center;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel > .studio-vehicle-photo::after {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel > .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *))::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -474,13 +474,13 @@
       linear-gradient(90deg, color-mix(in srgb, var(--color-nav) 96%, transparent) 0%, color-mix(in srgb, var(--color-nav) 82%, transparent) 35%, color-mix(in srgb, var(--color-primary) 8%, transparent) 85%),
       linear-gradient(0deg, color-mix(in srgb, var(--color-nav) 50%, transparent), transparent 65%);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-photo-caption {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-photo-caption:not(:where([class^="rg-"],[class^="rg-"] *)){
     z-index: 1;
     bottom: 12px;
     right: 12px;
     font-size: 10px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-overlay {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-overlay:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 25px 28px;
     min-height: 320px;
     display: flex;
@@ -488,16 +488,16 @@
     align-items: flex-start;
     position: relative;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity:not(:where([class^="rg-"],[class^="rg-"] *)){
     max-width: 90%;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity h2 {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity h2:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 27px !important;
     letter-spacing: -0.7px !important;
     margin: 10px 0 !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity p {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity p:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     color: var(--color-text) !important;
     margin: 0 !important;
@@ -506,13 +506,13 @@
     gap: 12px;
     flex-wrap: wrap;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity select {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity select:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin: 8px 0 !important;
     max-width: 100% !important;
     font-size: 18px !important;
     background: color-mix(in srgb, var(--color-nav) 87%, transparent) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-plate {
+  html body .app-shell.ac-workspace.ac-studio .studio-plate:not(:where([class^="rg-"],[class^="rg-"] *)){
     border: 1px solid color-mix(in srgb, var(--color-nav) 47%, transparent);
     background: #eaf1ff0d;
     border-radius: 5px;
@@ -521,21 +521,21 @@
     color: var(--color-text) !important;
     font-size: 13px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-mileage {
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin-top: auto;
     padding-top: 22px;
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-mileage > span {
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage > span:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     gap: 8px;
     align-items: center;
     color: var(--color-text);
     font-size: 13px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-mileage > strong {
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage > strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 36px !important;
     line-height: 1.25 !important;
     letter-spacing: -1px !important;
@@ -543,12 +543,12 @@
     color: var(--color-text) !important;
     font-variant-numeric: tabular-nums;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-mileage > strong small {
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage > strong small:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 17px !important;
     color: var(--color-muted) !important;
     font-weight: 500 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-mileage button {
+  html body .app-shell.ac-workspace.ac-studio .studio-mileage button:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin-top: 6px !important;
     font-size: 12px !important;
     min-height: 32px !important;
@@ -557,7 +557,7 @@
     color: var(--color-text) !important;
     border-color: color-mix(in srgb, var(--color-primary) 37%, transparent) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-open {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-open:not(:where([class^="rg-"],[class^="rg-"] *)){
     position: absolute;
     top: 22px;
     right: 22px;
@@ -567,7 +567,7 @@
     min-width: 40px !important;
     padding: 8px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio :is(.studio-priority, .studio-panel) {
+  html body .app-shell.ac-workspace.ac-studio :is(.studio-priority, .studio-panel):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface);
     border: 1px solid color-mix(in srgb, var(--color-nav) 46%, transparent);
     border-radius: 16px;
@@ -575,31 +575,31 @@
     min-width: 0;
     box-shadow: 0 6px 22px #0000000b;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-priority {
+  html body .app-shell.ac-workspace.ac-studio .studio-priority:not(:where([class^="rg-"],[class^="rg-"] *)){
     border-top: 3px solid var(--color-border-strong);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-panel-head h2 {
+  html body .app-shell.ac-workspace.ac-studio .studio-panel-head h2:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     gap: 10px;
     align-items: center;
     font-size: 17px !important;
     margin: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-priority-main {
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-main:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     align-items: center;
     gap: 18px;
     margin: 20px 0;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-priority-main h3 {
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-main h3:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 21px !important;
     margin: 0 0 5px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-priority-main p {
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-main p:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 13px !important;
     margin: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-progress-ring {
+  html body .app-shell.ac-workspace.ac-studio .studio-progress-ring:not(:where([class^="rg-"],[class^="rg-"] *)){
     width: 76px;
     height: 76px;
     flex-shrink: 0;
@@ -610,7 +610,7 @@
     place-items: center;
     rotate: -90deg;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-progress-ring > span {
+  html body .app-shell.ac-workspace.ac-studio .studio-progress-ring > span:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid;
     place-items: center;
     width: 100%;
@@ -620,7 +620,7 @@
     color: var(--color-primary-ink);
     rotate: 90deg;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics {
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid;
     grid-template-columns: 1fr 1fr;
     border-top: 1px solid #ffffff15;
@@ -628,29 +628,29 @@
     padding: 16px 0;
     gap: 22px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics > div {
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics > div:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics strong {
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 29px !important;
     line-height: 1.3 !important;
     letter-spacing: -0.7px !important;
     font-variant-numeric: tabular-nums;
     white-space: normal;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics small {
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics small:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 16px !important;
     font-weight: 500 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics span {
+  html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics span:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 12px;
     color: var(--color-text);
     line-height: 1.55;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-panel-footer {
+  html body .app-shell.ac-workspace.ac-studio .studio-panel-footer:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -658,22 +658,22 @@
     margin-top: 12px;
     flex-wrap: wrap;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-priority-empty {
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-empty:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 10px 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-priority-empty p {
+  html body .app-shell.ac-workspace.ac-studio .studio-priority-empty p:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-status-row {
+  html body .app-shell.ac-workspace.ac-studio .studio-status-row:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
   }
-  html body .app-shell.ac-workspace.ac-studio .main .studio-maintenance-tile {
+  html body .app-shell.ac-workspace.ac-studio .main .studio-maintenance-tile:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex !important;
     align-items: center !important;
     text-align: left !important;
@@ -686,7 +686,7 @@
     padding: 17px !important;
     min-height: 116px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > .studio-tile-icon {
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > .studio-tile-icon:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid;
     place-items: center;
     width: 42px;
@@ -696,50 +696,50 @@
     border-radius: 11px;
     color: var(--color-primary-ink) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > span:nth-child(2) {
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > span:nth-child(2):not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     flex-direction: column;
     gap: 5px;
     min-width: 0;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > svg {
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > svg:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin-left: auto;
     flex-shrink: 0;
     color: var(--color-primary-ink) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-tile-label {
+  html body .app-shell.ac-workspace.ac-studio .studio-tile-label:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     color: var(--color-text) !important;
     font-weight: 500;
     line-height: 1.4;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile strong {
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 20px !important;
     letter-spacing: -0.3px !important;
     font-variant-numeric: tabular-nums;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile small {
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile small:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 13px !important;
     color: var(--color-muted) !important;
     line-height: 1.5 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main .studio-tile-warning {
+  html body .app-shell.ac-workspace.ac-studio .main .studio-tile-warning:not(:where([class^="rg-"],[class^="rg-"] *)){
     border-color: color-mix(in srgb, var(--color-warning) 37%, transparent) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-tile-warning > .studio-tile-icon {
+  html body .app-shell.ac-workspace.ac-studio .studio-tile-warning > .studio-tile-icon:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-warning-ink);
     background: var(--color-warning-soft);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-detail-grid {
+  html body .app-shell.ac-workspace.ac-studio .studio-detail-grid:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid;
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr);
     gap: 18px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-detail-grid .studio-panel {
+  html body .app-shell.ac-workspace.ac-studio .studio-detail-grid .studio-panel:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 21px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-service-list > button,
-  html body .app-shell.ac-workspace.ac-studio .studio-document-list > button {
+  html body .app-shell.ac-workspace.ac-studio .studio-service-list > button:not(:where([class^="rg-"],[class^="rg-"] *)),
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list > button:not(:where([class^="rg-"],[class^="rg-"] *)){
     width: 100% !important;
     padding: 15px 0 !important;
     display: flex !important;
@@ -753,27 +753,27 @@
     background: transparent !important;
     min-width: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-service-list > button > span:nth-child(2),
-  html body .app-shell.ac-workspace.ac-studio .studio-document-list > button > span:nth-child(2) {
+  html body .app-shell.ac-workspace.ac-studio .studio-service-list > button > span:nth-child(2):not(:where([class^="rg-"],[class^="rg-"] *)),
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list > button > span:nth-child(2):not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     flex-direction: column;
     gap: 5px;
     min-width: 0;
     flex: 1;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-service-list strong,
-  html body .app-shell.ac-workspace.ac-studio .studio-document-list strong {
+  html body .app-shell.ac-workspace.ac-studio .studio-service-list strong:not(:where([class^="rg-"],[class^="rg-"] *)),
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     font-weight: 600 !important;
     line-height: 1.4 !important;
     overflow-wrap: anywhere;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-service-list small,
-  html body .app-shell.ac-workspace.ac-studio .studio-document-list small {
+  html body .app-shell.ac-workspace.ac-studio .studio-service-list small:not(:where([class^="rg-"],[class^="rg-"] *)),
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list small:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 12px !important;
     line-height: 1.4 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-row-icon {
+  html body .app-shell.ac-workspace.ac-studio .studio-row-icon:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid;
     place-items: center;
     width: 34px;
@@ -783,7 +783,7 @@
     background: var(--color-surface-muted);
     color: var(--color-primary-ink);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-row-cost {
+  html body .app-shell.ac-workspace.ac-studio .studio-row-cost:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin-left: auto;
     display: flex;
     align-items: center;
@@ -792,35 +792,35 @@
     white-space: nowrap;
     color: var(--color-text);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-document-list {
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin-bottom: 12px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-document-list > button > svg {
+  html body .app-shell.ac-workspace.ac-studio .studio-document-list > button > svg:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-primary-ink);
     flex-shrink: 0;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-cost-total {
+  html body .app-shell.ac-workspace.ac-studio .studio-cost-total:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-cost-total strong {
+  html body .app-shell.ac-workspace.ac-studio .studio-cost-total strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 28px !important;
     letter-spacing: -0.5px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-cost-total > span {
+  html body .app-shell.ac-workspace.ac-studio .studio-cost-total > span:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 12px;
     color: var(--color-text);
     line-height: 1.5;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart {
+  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart:not(:where([class^="rg-"],[class^="rg-"] *)){
     height: 140px;
     display: flex;
     align-items: stretch;
     gap: 10px;
     margin-top: 20px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart > button {
+  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart > button:not(:where([class^="rg-"],[class^="rg-"] *)){
     flex: 1 !important;
     min-width: 0 !important;
     display: flex !important;
@@ -832,7 +832,7 @@
     border: 0 !important;
     border-radius: 5px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart .studio-chart-track {
+  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart .studio-chart-track:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -842,7 +842,7 @@
     border-radius: 5px;
     overflow: hidden;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-chart-track > i {
+  html body .app-shell.ac-workspace.ac-studio .studio-chart-track > i:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: block;
     width: 100%;
     min-height: 0;
@@ -856,15 +856,15 @@
     .app-shell.ac-workspace.ac-studio
     .studio-mini-chart
     > button[aria-pressed='true']
-    .studio-chart-track {
+    .studio-chart-track:not(:where([class^="rg-"],[class^="rg-"] *)){
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart small {
+  html body .app-shell.ac-workspace.ac-studio .studio-mini-chart small:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 11px !important;
     text-transform: capitalize;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-chart-empty {
+  html body .app-shell.ac-workspace.ac-studio .studio-chart-empty:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin: 24px 0 0 !important;
     padding: 22px 14px !important;
     border: 1px dashed var(--color-border) !important;
@@ -872,7 +872,7 @@
     font-size: 13px !important;
     min-height: 100px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-empty-inline {
+  html body .app-shell.ac-workspace.ac-studio .studio-empty-inline:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 15px 0;
     display: flex;
     flex-direction: column;
@@ -880,7 +880,7 @@
     align-items: flex-start;
     color: var(--color-muted);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-tools-row {
+  html body .app-shell.ac-workspace.ac-studio .studio-tools-row:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     align-items: center;
     gap: 12px;
@@ -890,59 +890,59 @@
     border-radius: 14px;
     background: var(--color-surface);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-tools-row > div {
+  html body .app-shell.ac-workspace.ac-studio .studio-tools-row > div:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin-right: auto;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-tools-row h2 {
+  html body .app-shell.ac-workspace.ac-studio .studio-tools-row h2:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 17px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-tools-row p {
+  html body .app-shell.ac-workspace.ac-studio .studio-tools-row p:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 13px !important;
     margin: 4px 0 0 !important;
   }
   /* Page-specific density and layouts: each existing workflow keeps its controls. */
-  html body .app-shell.ac-workspace.ac-studio .main .grid3 {
+  html body .app-shell.ac-workspace.ac-studio .main .grid3:not(:where([class^="rg-"],[class^="rg-"] *)){
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 22px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main .grid2 {
+  html body .app-shell.ac-workspace.ac-studio .main .grid2:not(:where([class^="rg-"],[class^="rg-"] *)){
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 22px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .car-card {
+  html body .app-shell.ac-workspace.ac-studio .car-card:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 20px !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 16px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .car-card .studio-vehicle-photo {
+  html body .app-shell.ac-workspace.ac-studio .car-card .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)){
     height: 195px;
     flex-shrink: 0;
     margin: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .car-card h2 {
+  html body .app-shell.ac-workspace.ac-studio .car-card h2:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 23px !important;
     margin: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .car-card p {
+  html body .app-shell.ac-workspace.ac-studio .car-card p:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .car-card .actions {
+  html body .app-shell.ac-workspace.ac-studio .car-card .actions:not(:where([class^="rg-"],[class^="rg-"] *)){
     margin-top: auto !important;
     gap: 8px !important;
     flex-wrap: wrap !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .stats {
+  html body .app-shell.ac-workspace.ac-studio .stats:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid !important;
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     gap: 16px !important;
     margin-bottom: 24px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .stats .card {
+  html body .app-shell.ac-workspace.ac-studio .stats .card:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 20px !important;
     background: linear-gradient(145deg, var(--color-surface-muted), var(--color-surface)) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .stats .value {
+  html body .app-shell.ac-workspace.ac-studio .stats .value:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 25px !important;
     line-height: 1.4 !important;
     margin-top: 10px !important;
@@ -950,40 +950,40 @@
     font-weight: 650 !important;
     font-variant-numeric: tabular-nums;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-service-stat-icon {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-service-stat-icon:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface-muted) !important;
     color: var(--color-text) !important;
     width: 40px !important;
     height: 40px !important;
     border-radius: 11px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .record-tools {
+  html body .app-shell.ac-workspace.ac-studio .record-tools:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex !important;
     align-items: center !important;
     gap: 14px !important;
     flex-wrap: wrap !important;
     margin-bottom: 22px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .record-search {
+  html body .app-shell.ac-workspace.ac-studio .record-search:not(:where([class^="rg-"],[class^="rg-"] *)){
     flex: 1 1 300px !important;
     background: var(--color-surface) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 10px !important;
-    padding: 0 14px !important;
+    padding: env(safe-area-inset-top,0px) 14px 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .record-search input {
+  html body .app-shell.ac-workspace.ac-studio .record-search input:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: transparent !important;
     border: 0 !important;
     min-height: 48px !important;
     box-shadow: none !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .record-filter-panel {
+  html body .app-shell.ac-workspace.ac-studio .record-filter-panel:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 10px !important;
     padding: 4px 14px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .record-filter-panel summary {
+  html body .app-shell.ac-workspace.ac-studio .record-filter-panel summary:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     background: transparent !important;
     border: 0 !important;
@@ -991,22 +991,22 @@
     min-height: 38px !important;
     padding: 5px 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .record-filter-fields {
+  html body .app-shell.ac-workspace.ac-studio .record-filter-fields:not(:where([class^="rg-"],[class^="rg-"] *)){
     gap: 14px !important;
     background: transparent !important;
     padding: 16px 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .table-scroll {
+  html body .app-shell.ac-workspace.ac-studio .table-scroll:not(:where([class^="rg-"],[class^="rg-"] *)){
     overflow-x: auto !important;
     padding: 0 !important;
     max-width: 100% !important;
   }
-  html body .app-shell.ac-workspace.ac-studio table {
+  html body .app-shell.ac-workspace.ac-studio table:not(:where([class^="rg-"],[class^="rg-"] *)){
     width: 100% !important;
     border-collapse: collapse !important;
     font-size: 14px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio th {
+  html body .app-shell.ac-workspace.ac-studio th:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     color: var(--color-text) !important;
     font-size: 12px !important;
@@ -1017,7 +1017,7 @@
     white-space: normal !important;
     text-align: left !important;
   }
-  html body .app-shell.ac-workspace.ac-studio td {
+  html body .app-shell.ac-workspace.ac-studio td:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: transparent !important;
     color: var(--color-text) !important;
     font-size: 14px !important;
@@ -1027,27 +1027,27 @@
     overflow-wrap: anywhere !important;
     vertical-align: top !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .row-actions {
+  html body .app-shell.ac-workspace.ac-studio .row-actions:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex !important;
     gap: 8px !important;
     flex-wrap: wrap !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .row-actions button {
+  html body .app-shell.ac-workspace.ac-studio .row-actions button:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 13px !important;
     padding: 8px 11px !important;
     min-height: 38px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio :is(.record-timeline, .service-timeline) {
+  html body .app-shell.ac-workspace.ac-studio :is(.record-timeline, .service-timeline):not(:where([class^="rg-"],[class^="rg-"] *)){
     gap: 16px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-maintenance-plan {
+  html body .app-shell.ac-workspace.ac-studio .app-maintenance-plan:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border: 1px solid var(--color-border) !important;
     padding: 18px !important;
     border-radius: 12px !important;
     margin-bottom: 22px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-maintenance-plan > summary {
+  html body .app-shell.ac-workspace.ac-studio .app-maintenance-plan > summary:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 16px !important;
     font-weight: 600 !important;
     color: var(--color-text) !important;
@@ -1055,13 +1055,13 @@
     padding: 3px !important;
     cursor: pointer;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-context-nav {
+  html body .app-shell.ac-workspace.ac-studio .ws-context-nav:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex !important;
     gap: 8px !important;
     flex-wrap: wrap !important;
     margin-bottom: 24px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-context-nav a {
+  html body .app-shell.ac-workspace.ac-studio .ws-context-nav a:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     background: var(--color-surface) !important;
     color: var(--color-text) !important;
@@ -1070,7 +1070,7 @@
     padding: 10px 14px !important;
     min-height: 40px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-context-nav a[aria-current='page'] {
+  html body .app-shell.ac-workspace.ac-studio .ws-context-nav a[aria-current='page']:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
     border-color: var(--color-border-strong) !important;
     background: var(--color-primary-deep) !important;
@@ -1078,100 +1078,100 @@
   html
     body
     .app-shell.ac-workspace.ac-studio
-    :is(.ac-smartdrive-trip, .ac-auto-drive, .ac-gps-history-details) {
+    :is(.ac-smartdrive-trip, .ac-auto-drive, .ac-gps-history-details):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 16px !important;
     padding: 25px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-trip-heading h3 {
+  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-trip-heading h3:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 28px !important;
     letter-spacing: -0.5px !important;
   }
   html
     body
     .app-shell.ac-workspace.ac-studio
-    :is(.ac-smartdrive-live > div, .ac-auto-steps, .ac-auto-pending, .ac-smartdrive-sync) {
+    :is(.ac-smartdrive-live > div, .ac-auto-steps, .ac-auto-pending, .ac-smartdrive-sync):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 11px !important;
     padding: 17px !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-live strong {
+  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-live strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 23px !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-live small {
+  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-live small:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 13px !important;
     color: var(--color-muted) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-gps-history-details > summary {
+  html body .app-shell.ac-workspace.ac-studio .ac-gps-history-details > summary:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 16px !important;
     color: var(--color-text) !important;
     background: transparent !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-auto-drive :is(p, li) {
+  html body .app-shell.ac-workspace.ac-studio .ac-auto-drive :is(p, li):not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-map {
+  html body .app-shell.ac-workspace.ac-studio .ac-smartdrive-map:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: transparent !important;
     padding: 0 !important;
     border: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .drive-session {
+  html body .app-shell.ac-workspace.ac-studio .drive-session:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: linear-gradient(120deg, var(--color-surface-muted), var(--color-surface)) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 16px !important;
     padding: 25px !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .drive-session-distance > span {
+  html body .app-shell.ac-workspace.ac-studio .drive-session-distance > span:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 64px !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .drive-session-details {
+  html body .app-shell.ac-workspace.ac-studio .drive-session-details:not(:where([class^="rg-"],[class^="rg-"] *)){
     border-color: color-mix(in srgb, var(--color-primary) 36%, transparent) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-road-map-status {
+  html body .app-shell.ac-workspace.ac-studio .ac-road-map-status:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 13px !important;
     padding: 11px 14px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .category-cost {
+  html body .app-shell.ac-workspace.ac-studio .category-cost:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: transparent !important;
     border: 0 !important;
     padding: 16px 0 !important;
     border-bottom: 1px solid #ffffff16 !important;
     border-radius: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .category-track {
+  html body .app-shell.ac-workspace.ac-studio .category-track:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border-radius: 5px !important;
     height: 7px !important;
     margin-top: 12px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .category-track > span {
+  html body .app-shell.ac-workspace.ac-studio .category-track > span:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: linear-gradient(90deg, var(--color-primary-deep), var(--color-primary-deep)) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .monthly-cost strong,
-  html body .app-shell.ac-workspace.ac-studio .price {
+  html body .app-shell.ac-workspace.ac-studio .monthly-cost strong:not(:where([class^="rg-"],[class^="rg-"] *)),
+  html body .app-shell.ac-workspace.ac-studio .price:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 34px !important;
     letter-spacing: -0.6px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .chart .bar {
+  html body .app-shell.ac-workspace.ac-studio .chart .bar:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: transparent !important;
     border: 0 !important;
     padding: 0 !important;
     min-width: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .chart .bar-fill {
+  html body .app-shell.ac-workspace.ac-studio .chart .bar-fill:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: linear-gradient(to top, var(--electric-blue), var(--ice-cyan)) !important;
     border-radius: 6px 6px 0 0 !important;
     transform-origin: bottom;
     animation: studio-chart-in 0.6s ease both;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 38px !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 18px !important;
@@ -1179,7 +1179,7 @@
       radial-gradient(ellipse at 100% 10%, color-mix(in srgb, var(--color-nav) 40%, transparent), transparent 70%), var(--color-surface) !important;
     margin-bottom: 24px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales h2 {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales h2:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 34px !important;
     line-height: 1.2 !important;
     letter-spacing: -0.8px !important;
@@ -1187,21 +1187,21 @@
     max-width: 850px !important;
     margin: 15px 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales p {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales p:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 16px !important;
     color: var(--color-text) !important;
     max-width: 800px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales small {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-sales small:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 13px !important;
     color: var(--color-muted) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-plan-grid {
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-grid:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 24px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-plan-card {
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 28px !important;
     background: var(--color-surface) !important;
     border: 1px solid var(--color-border) !important;
@@ -1210,22 +1210,22 @@
     align-items: flex-start !important;
     gap: 12px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-plan-card:last-child {
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card:last-child:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: linear-gradient(130deg, var(--color-surface-muted), var(--color-surface)) !important;
     border: 2px solid var(--color-border-strong) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .subscription-price {
+  html body .app-shell.ac-workspace.ac-studio .subscription-price:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 44px !important;
     color: var(--color-text) !important;
     line-height: 1.2 !important;
     letter-spacing: -1px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .subscription-price span {
+  html body .app-shell.ac-workspace.ac-studio .subscription-price span:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 16px !important;
     color: var(--color-text) !important;
     letter-spacing: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-plan-card li {
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card li:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 15px !important;
     line-height: 1.6 !important;
     display: flex !important;
@@ -1233,18 +1233,18 @@
     gap: 10px !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-plan-card li svg {
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card li svg:not(:where([class^="rg-"],[class^="rg-"] *)){
     flex-shrink: 0;
     color: var(--color-success-ink);
     margin-top: 4px;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-plan-card ul {
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card ul:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid !important;
     gap: 12px !important;
     list-style: none !important;
     padding: 8px 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-plan-card button {
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-card button:not(:where([class^="rg-"],[class^="rg-"] *)){
     width: 100% !important;
     min-height: 48px !important;
     margin-top: auto !important;
@@ -1253,7 +1253,7 @@
     border-color: var(--color-border-strong) !important;
     color: var(--color-on-primary) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row'] {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row']:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid !important;
     grid-template-columns: minmax(180px, 1.6fr) minmax(100px, 1fr) minmax(120px, 1fr) !important;
     gap: 20px !important;
@@ -1263,35 +1263,35 @@
     font-size: 14px !important;
     line-height: 1.6 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row']:first-child {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row']:first-child:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border-radius: 8px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-summary-grid > article {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-summary-grid > article:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface-muted) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 12px !important;
     padding: 21px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-summary-grid > article strong {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-summary-grid > article strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 27px !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-premium-overview-dashboard > header {
+  html body .app-shell.ac-workspace.ac-studio .ac-premium-overview-dashboard > header:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 30px !important;
     border-radius: 16px !important;
     background: var(--color-surface-muted) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-account {
+  html body .app-shell.ac-workspace.ac-studio .app-account:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 22px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-account > h1,
-  html body .app-shell.ac-workspace.ac-studio .app-account-identity {
+  html body .app-shell.ac-workspace.ac-studio .app-account > h1:not(:where([class^="rg-"],[class^="rg-"] *)),
+  html body .app-shell.ac-workspace.ac-studio .app-account-identity:not(:where([class^="rg-"],[class^="rg-"] *)){
     grid-column: 1/-1 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-record-row {
+  html body .app-shell.ac-workspace.ac-studio .app-record-row:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: transparent !important;
     border: 0 !important;
     border-bottom: 1px solid #ffffff15 !important;
@@ -1303,28 +1303,28 @@
     width: 100% !important;
     justify-content: flex-start !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-record-row strong {
+  html body .app-shell.ac-workspace.ac-studio .app-record-row strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 15px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .app-icon {
+  html body .app-shell.ac-workspace.ac-studio .app-icon:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface-muted) !important;
     color: var(--color-text) !important;
     border-radius: 10px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-settings-layout {
+  html body .app-shell.ac-workspace.ac-studio .ws-settings-layout:not(:where([class^="rg-"],[class^="rg-"] *)){
     gap: 24px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button {
+  html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 14px !important;
     min-height: 46px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .dialog-backdrop {
+  html body .app-shell.ac-workspace.ac-studio .dialog-backdrop:not(:where([class^="rg-"],[class^="rg-"] *)){
     padding: 24px !important;
     background: color-mix(in srgb, var(--color-nav) 66%, transparent) !important;
     backdrop-filter: blur(6px);
     z-index: 220 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .dialog {
+  html body .app-shell.ac-workspace.ac-studio .dialog:not(:where([class^="rg-"],[class^="rg-"] *)){
     width: min(900px, 100%) !important;
     max-height: calc(100dvh - 48px) !important;
     overflow: auto !important;
@@ -1335,17 +1335,17 @@
     padding: 28px !important;
     box-shadow: 0 30px 100px #0005 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .dialog :is(h2, h3, strong) {
+  html body .app-shell.ac-workspace.ac-studio .dialog :is(h2, h3, strong):not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
     font-size: 20px !important;
     line-height: 1.4 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .dialog :is(p, small) {
+  html body .app-shell.ac-workspace.ac-studio .dialog :is(p, small):not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-muted) !important;
     font-size: 14px !important;
     line-height: 1.65 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .dialog :is(button, summary) {
+  html body .app-shell.ac-workspace.ac-studio .dialog :is(button, summary):not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
     border-color: var(--color-border) !important;
     background: var(--color-surface-muted) !important;
@@ -1354,7 +1354,7 @@
     padding: 10px 14px !important;
     border-radius: 9px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .dialog button.primary {
+  html body .app-shell.ac-workspace.ac-studio .dialog button.primary:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-primary) !important;
     border-color: var(--color-border-strong) !important;
     color: var(--color-on-primary) !important;
@@ -1370,7 +1370,7 @@
       .record-technical-details,
       .record-extra,
       .record-cost-details
-    ) {
+    ):not(:where([class^="rg-"],[class^="rg-"] *)){
     min-width: 0 !important;
     max-width: 100% !important;
     background: transparent !important;
@@ -1388,18 +1388,18 @@
       .ac-service-advice,
       .ac-service-summary > div,
       .service-reminder-box
-    ) {
+    ):not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 10px !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .dialog .form-grid {
+  html body .app-shell.ac-workspace.ac-studio .dialog .form-grid:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 20px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .dialog .record-form-footer {
+  html body .app-shell.ac-workspace.ac-studio .dialog .record-form-footer:not(:where([class^="rg-"],[class^="rg-"] *)){
     position: sticky !important;
     bottom: -28px !important;
     padding: 18px 0 !important;
@@ -1410,7 +1410,7 @@
     flex-wrap: wrap !important;
     z-index: 2 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .dialog .record-category-grid > button {
+  html body .app-shell.ac-workspace.ac-studio .dialog .record-category-grid > button:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface-muted) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 12px !important;
@@ -1423,22 +1423,22 @@
     .app-shell.ac-workspace.ac-studio
     .dialog
     .record-category-grid
-    > button[aria-pressed='true'] {
+    > button[aria-pressed='true']:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-primary-deep) !important;
     border-color: var(--color-primary) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .main :is(.notice, .error, .ws-offline) {
+  html body .app-shell.ac-workspace.ac-studio .main :is(.notice, .error, .ws-offline):not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 15px !important;
     padding: 16px 18px !important;
     border-radius: 10px !important;
     line-height: 1.6 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .notice {
+  html body .app-shell.ac-workspace.ac-studio .notice:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-success-soft) !important;
     border-color: var(--color-success) !important;
     color: var(--color-success-ink) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .error {
+  html body .app-shell.ac-workspace.ac-studio .error:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-danger-soft) !important;
     border-color: var(--color-danger) !important;
     color: var(--color-danger-ink) !important;
@@ -1452,123 +1452,123 @@
     }
   }
   @media (min-width: 901px) {
-    html body .app-shell.ac-workspace.ac-studio .app-topbar-brand {
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-brand:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: none !important;
     }
   }
   @media (min-width: 901px) and (max-width: 1250px) {
-    html body .app-shell.ac-workspace.ac-studio {
+    html body .app-shell.ac-workspace.ac-studio:not(:where([class^="rg-"],[class^="rg-"] *)){
       --app-sidebar: 230px;
     }
-    html body .app-shell.ac-workspace.ac-studio > .main {
+    html body .app-shell.ac-workspace.ac-studio > .main:not(:where([class^="rg-"],[class^="rg-"] *)){
       padding-inline: 22px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-status-row {
+    html body .app-shell.ac-workspace.ac-studio .studio-status-row:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-detail-grid {
+    html body .app-shell.ac-workspace.ac-studio .studio-detail-grid:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-costs {
+    html body .app-shell.ac-workspace.ac-studio .studio-costs:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-column: 1/-1;
     }
-    html body .app-shell.ac-workspace.ac-studio .main .grid3 {
+    html body .app-shell.ac-workspace.ac-studio .main .grid3:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-row-cost {
+    html body .app-shell.ac-workspace.ac-studio .studio-row-cost:not(:where([class^="rg-"],[class^="rg-"] *)){
       white-space: normal;
       flex-wrap: wrap;
     }
   }
   @media (max-width: 900px) {
-    html body .app-shell.ac-workspace.ac-studio {
+    html body .app-shell.ac-workspace.ac-studio:not(:where([class^="rg-"],[class^="rg-"] *)){
       --app-sidebar: 0px;
       font-size: 16px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio > .sidebar {
+    html body .app-shell.ac-workspace.ac-studio > .sidebar:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: none !important;
     }
-    html body .app-shell.ac-workspace.ac-studio > .app-header.app-topbar {
+    html body .app-shell.ac-workspace.ac-studio > .app-header.app-topbar:not(:where([class^="rg-"],[class^="rg-"] *)){
       left: 0 !important;
       width: 100% !important;
-      height: 68px !important;
-      min-height: 68px !important;
-      padding: 0 14px !important;
+      height: calc(108px + env(safe-area-inset-top,0px)) !important;
+      min-height: calc(108px + env(safe-area-inset-top,0px)) !important;
+      padding: env(safe-area-inset-top,0px) 14px 0 !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .app-topbar-title {
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-title:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: none !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .app-topbar-brand {
-      display: flex !important;
-      align-items: center !important;
-      gap: 8px !important;
-      font-size: 18px !important;
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-brand:not(:where([class^="rg-"],[class^="rg-"] *)){
+      display: none !important;
+      align-items: center;
+      gap:8px;
+      font-size:18px;
       color: var(--color-text) !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .app-topbar-mark {
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-mark:not(:where([class^="rg-"],[class^="rg-"] *)){
       background: var(--color-primary-deep) !important;
       color: var(--color-text) !important;
       padding: 8px !important;
       border-radius: 9px !important;
       display: flex !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .app-topbar-actions {
-      gap: 3px !important;
-      margin-left: auto !important;
+    html body .app-shell.ac-workspace.ac-studio .app-topbar-actions:not(:where([class^="rg-"],[class^="rg-"] *)){
+      display:none !important;
+      gap:3px;
     }
-    html body .app-shell.ac-workspace.ac-studio :is(.app-header-premium, .app-header-signout) {
+    html body .app-shell.ac-workspace.ac-studio :is(.app-header-premium, .app-header-signout):not(:where([class^="rg-"],[class^="rg-"] *)){
       display: none !important;
     }
-    html body .app-shell.ac-workspace.ac-studio > .main {
-      padding: 90px 16px 112px !important;
+    html body .app-shell.ac-workspace.ac-studio > .main:not(:where([class^="rg-"],[class^="rg-"] *)){
+      padding: 128px 16px 108px !important;
       margin: 0 !important;
       width: 100% !important;
       overflow-x: clip !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .main h1 {
+    html body .app-shell.ac-workspace.ac-studio .main h1:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 28px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-home {
+    html body .app-shell.ac-workspace.ac-studio .studio-home:not(:where([class^="rg-"],[class^="rg-"] *)){
       gap: 18px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-home-heading {
+    html body .app-shell.ac-workspace.ac-studio .studio-home-heading:not(:where([class^="rg-"],[class^="rg-"] *)){
       gap: 16px;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-home-heading h1 {
+    html body .app-shell.ac-workspace.ac-studio .studio-home-heading h1:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 30px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-heading-actions {
+    html body .app-shell.ac-workspace.ac-studio .studio-heading-actions:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       width: 100%;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-heading-actions button {
+    html body .app-shell.ac-workspace.ac-studio .studio-heading-actions button:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 13px !important;
       padding: 10px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-overview {
+    html body .app-shell.ac-workspace.ac-studio .studio-overview:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: minmax(0, 1fr);
       gap: 18px;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel {
+    html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel:not(:where([class^="rg-"],[class^="rg-"] *)){
       min-height: 300px;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-vehicle-overlay {
+    html body .app-shell.ac-workspace.ac-studio .studio-vehicle-overlay:not(:where([class^="rg-"],[class^="rg-"] *)){
       min-height: 300px;
       padding: 23px;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity h2 {
+    html body .app-shell.ac-workspace.ac-studio .studio-vehicle-identity h2:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 25px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-mileage > strong {
+    html body .app-shell.ac-workspace.ac-studio .studio-mileage > strong:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 34px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-status-row {
+    html body .app-shell.ac-workspace.ac-studio .studio-status-row:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
-    html body .app-shell.ac-workspace.ac-studio .main .studio-maintenance-tile {
+    html body .app-shell.ac-workspace.ac-studio .main .studio-maintenance-tile:not(:where([class^="rg-"],[class^="rg-"] *)){
       padding: 15px !important;
       flex-direction: column !important;
       align-items: flex-start !important;
@@ -1576,39 +1576,39 @@
       min-height: 160px !important;
       position: relative;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > svg {
+    html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile > svg:not(:where([class^="rg-"],[class^="rg-"] *)){
       position: absolute;
       top: 16px;
       right: 14px;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile strong {
+    html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile strong:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 19px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile small {
+    html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile small:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 12px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-detail-grid {
+    html body .app-shell.ac-workspace.ac-studio .studio-detail-grid:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: minmax(0, 1fr);
       gap: 18px;
     }
-    html body .app-shell.ac-workspace.ac-studio :is(.studio-panel, .studio-priority) {
+    html body .app-shell.ac-workspace.ac-studio :is(.studio-panel, .studio-priority):not(:where([class^="rg-"],[class^="rg-"] *)){
       padding: 20px;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-row-cost {
+    html body .app-shell.ac-workspace.ac-studio .studio-row-cost:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 12px;
       white-space: normal;
       gap: 4px;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-tools-row {
+    html body .app-shell.ac-workspace.ac-studio .studio-tools-row:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
       padding: 18px;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-tools-row > div {
+    html body .app-shell.ac-workspace.ac-studio .studio-tools-row > div:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-column: 1/-1;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-tools-row button {
+    html body .app-shell.ac-workspace.ac-studio .studio-tools-row button:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 12px !important;
       padding: 10px !important;
       justify-content: flex-start !important;
@@ -1618,43 +1618,43 @@
       body
       .app-shell.ac-workspace.ac-studio
       .main
-      :is(.grid2, .grid3, .ac-plan-grid, .app-account) {
+      :is(.grid2, .grid3, .ac-plan-grid, .app-account):not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: minmax(0, 1fr) !important;
       gap: 18px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .main :is(.card, .app-section) {
+    html body .app-shell.ac-workspace.ac-studio .main :is(.card, .app-section):not(:where([class^="rg-"],[class^="rg-"] *)){
       padding: 20px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .page-head {
+    html body .app-shell.ac-workspace.ac-studio .page-head:not(:where([class^="rg-"],[class^="rg-"] *)){
       align-items: flex-start !important;
       gap: 16px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .stats {
+    html body .app-shell.ac-workspace.ac-studio .stats:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
       gap: 12px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .stats .card {
+    html body .app-shell.ac-workspace.ac-studio .stats .card:not(:where([class^="rg-"],[class^="rg-"] *)){
       padding: 16px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .stats .value {
+    html body .app-shell.ac-workspace.ac-studio .stats .value:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 20px !important;
       overflow-wrap: anywhere !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table:not(:where([class^="rg-"],[class^="rg-"] *)){
       background: transparent !important;
       border: 0 !important;
       padding: 0 !important;
       overflow: visible !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table :is(table, tbody) {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table :is(table, tbody):not(:where([class^="rg-"],[class^="rg-"] *)){
       display: block !important;
       width: 100% !important;
       min-width: 0 !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table thead {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table thead:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: none !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table tr {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table tr:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: grid !important;
       grid-template-columns: minmax(0, 1fr) !important;
       gap: 16px !important;
@@ -1664,7 +1664,7 @@
       border-radius: 14px !important;
       background: var(--color-surface) !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table td {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table td:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: block !important;
       width: 100% !important;
       max-width: 100% !important;
@@ -1675,7 +1675,7 @@
       overflow: visible !important;
       max-height: none !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table td::before {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table td:not(:where([class^="rg-"],[class^="rg-"] *))::before {
       content: attr(data-label);
       display: block !important;
       font-size: 11px !important;
@@ -1683,95 +1683,95 @@
       color: var(--color-text) !important;
       margin-bottom: 7px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table td p {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-record-table td p:not(:where([class^="rg-"],[class^="rg-"] *)){
       white-space: pre-wrap !important;
       overflow: visible !important;
       max-height: none !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .row-actions button {
+    html body .app-shell.ac-workspace.ac-studio .row-actions button:not(:where([class^="rg-"],[class^="rg-"] *)){
       min-height: 44px !important;
       flex: 1 1 110px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .dialog-backdrop {
+    html body .app-shell.ac-workspace.ac-studio .dialog-backdrop:not(:where([class^="rg-"],[class^="rg-"] *)){
       padding: 8px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .dialog {
+    html body .app-shell.ac-workspace.ac-studio .dialog:not(:where([class^="rg-"],[class^="rg-"] *)){
       max-width: calc(100vw - 16px) !important;
       width: 100% !important;
       max-height: calc(100dvh - 16px) !important;
       padding: 20px !important;
       overflow-x: clip !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .dialog .form-grid {
+    html body .app-shell.ac-workspace.ac-studio .dialog .form-grid:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: minmax(0, 1fr) !important;
       gap: 18px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .dialog .record-form-footer {
+    html body .app-shell.ac-workspace.ac-studio .dialog .record-form-footer:not(:where([class^="rg-"],[class^="rg-"] *)){
       bottom: -20px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .dialog .record-form-footer button {
+    html body .app-shell.ac-workspace.ac-studio .dialog .record-form-footer button:not(:where([class^="rg-"],[class^="rg-"] *)){
       flex: 1 1 110px !important;
       min-height: 46px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-sales {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-sales:not(:where([class^="rg-"],[class^="rg-"] *)){
       padding: 25px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-sales h2 {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-sales h2:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 28px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison:not(:where([class^="rg-"],[class^="rg-"] *)){
       overflow-x: auto !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row'] {
+    html body .app-shell.ac-workspace.ac-studio .ac-premium-comparison [role='row']:not(:where([class^="rg-"],[class^="rg-"] *)){
       min-width: 420px !important;
       font-size: 13px !important;
       grid-template-columns: 1.6fr 1fr 1fr !important;
       gap: 14px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav {
+    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav:not(:where([class^="rg-"],[class^="rg-"] *)){
       background: var(--color-surface) !important;
       border-top: 1px solid var(--color-border) !important;
       padding: 8px 8px calc(8px + env(safe-area-inset-bottom)) !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav a {
+    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav a:not(:where([class^="rg-"],[class^="rg-"] *)){
       color: var(--color-text) !important;
       font-size: 11px !important;
       min-width: 0 !important;
       gap: 5px !important;
       padding: 6px 2px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav a.active {
+    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav a.active:not(:where([class^="rg-"],[class^="rg-"] *)){
       background: var(--color-primary-deep) !important;
       color: var(--color-text) !important;
       border-radius: 9px !important;
     }
   }
   @media (max-width: 360px) {
-    html body .app-shell.ac-workspace.ac-studio .stats .value {
+    html body .app-shell.ac-workspace.ac-studio .stats .value:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 16px !important;
       letter-spacing: -0.3px !important;
       overflow-wrap: normal !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav a {
+    html body .app-shell.ac-workspace.ac-studio .app-bottom-nav a:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 9px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics strong {
+    html body .app-shell.ac-workspace.ac-studio .studio-deadline-metrics strong:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 25px !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-row-icon {
+    html body .app-shell.ac-workspace.ac-studio .studio-row-icon:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: none;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-heading-actions {
+    html body .app-shell.ac-workspace.ac-studio .studio-heading-actions:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: 1fr;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-status-row {
+    html body .app-shell.ac-workspace.ac-studio .studio-status-row:not(:where([class^="rg-"],[class^="rg-"] *)){
       gap: 10px;
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    html body .app-shell.ac-workspace.ac-studio *,
-    html body .app-shell.ac-workspace.ac-studio *::before,
-    html body .app-shell.ac-workspace.ac-studio *::after {
+    html body .app-shell.ac-workspace.ac-studio *:not(:where([class^="rg-"],[class^="rg-"] *)),
+    html body .app-shell.ac-workspace.ac-studio *:not(:where([class^="rg-"],[class^="rg-"] *))::before,
+    html body .app-shell.ac-workspace.ac-studio *:not(:where([class^="rg-"],[class^="rg-"] *))::after {
       animation: none !important;
       transition: none !important;
       scroll-behavior: auto !important;
@@ -1779,12 +1779,12 @@
   }
 }
 @layer autocare-workspace {
-  html body .app-shell.ac-workspace.ac-studio .studio-search-label {
+  html body .app-shell.ac-workspace.ac-studio .studio-search-label:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 13px !important;
     margin-left: 6px !important;
     font-weight: 500 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-premium-offer {
+  html body .app-shell.ac-workspace.ac-studio .studio-premium-offer:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: grid;
     grid-template-columns: 1.6fr 1fr;
     gap: 34px;
@@ -1797,24 +1797,24 @@
     padding: 34px;
     margin-bottom: 24px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-premium-offer h2 {
+  html body .app-shell.ac-workspace.ac-studio .studio-premium-offer h2:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 33px !important;
     line-height: 1.15 !important;
     letter-spacing: -0.8px !important;
     margin: 14px 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-premium-offer p {
+  html body .app-shell.ac-workspace.ac-studio .studio-premium-offer p:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 16px !important;
     max-width: 650px !important;
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips {
+  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
     margin-top: 22px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips span {
+  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips span:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     align-items: center;
     gap: 7px;
@@ -1825,10 +1825,10 @@
     font-size: 12px;
     color: var(--color-text);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips svg {
+  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips svg:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-success-ink);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-offer-price {
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -1836,12 +1836,12 @@
     border-left: 1px solid #ffffff26;
     padding-left: 30px;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > span {
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > span:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 11px;
     letter-spacing: 1.5px;
     color: var(--color-text);
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > strong {
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 38px !important;
     letter-spacing: -1px !important;
     display: flex;
@@ -1849,166 +1849,177 @@
     gap: 10px;
     flex-wrap: wrap;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > strong small {
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > strong small:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 16px !important;
     letter-spacing: 0 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > small {
+  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > small:not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 12px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .ac-plan-grid {
+  html body .app-shell.ac-workspace.ac-studio .ac-plan-grid:not(:where([class^="rg-"],[class^="rg-"] *)){
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-report-intro {
+  html body .app-shell.ac-workspace.ac-studio .studio-report-intro:not(:where([class^="rg-"],[class^="rg-"] *)){
     max-width: 900px !important;
     display: grid;
     gap: 18px;
   }
   @media (max-width: 1200px) {
-    html body .app-shell.ac-workspace.ac-studio .ac-plan-grid {
+    html body .app-shell.ac-workspace.ac-studio .ac-plan-grid:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: minmax(0, 1fr) !important;
     }
   }
   @media (max-width: 900px) {
-    html body .app-shell.ac-workspace.ac-studio .studio-search-label {
+    html body .app-shell.ac-workspace.ac-studio .studio-search-label:not(:where([class^="rg-"],[class^="rg-"] *)){
       display: none !important;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-premium-offer {
+    html body .app-shell.ac-workspace.ac-studio .studio-premium-offer:not(:where([class^="rg-"],[class^="rg-"] *)){
       grid-template-columns: 1fr;
       padding: 25px;
       gap: 25px;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-offer-price {
+    html body .app-shell.ac-workspace.ac-studio .studio-offer-price:not(:where([class^="rg-"],[class^="rg-"] *)){
       border-left: 0;
       border-top: 1px solid #ffffff26;
       padding: 24px 0 0;
     }
-    html body .app-shell.ac-workspace.ac-studio .studio-premium-offer h2 {
+    html body .app-shell.ac-workspace.ac-studio .studio-premium-offer h2:not(:where([class^="rg-"],[class^="rg-"] *)){
       font-size: 29px !important;
     }
   }
 }
 
 @layer autocare-workspace {
-  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile .studio-tile-icon svg {
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile .studio-tile-icon svg:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: inherit !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile .studio-tile-label {
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile .studio-tile-label:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
     font-size: 14px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile strong {
+  html body .app-shell.ac-workspace.ac-studio .studio-maintenance-tile strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
   }
 }
 @layer autocare-workspace {
-  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo img {
+  html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo img:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .car-card > .small {
+  html body .app-shell.ac-workspace.ac-studio .car-card > .small:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: block !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .car-metrics {
+  html body .app-shell.ac-workspace.ac-studio .car-metrics:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
     border: 1px solid #ffffff20 !important;
     padding: 15px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .car-metrics :is(span, small) {
+  html body .app-shell.ac-workspace.ac-studio .car-metrics :is(span, small):not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-muted) !important;
     font-size: 13px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .car-metrics strong {
+  html body .app-shell.ac-workspace.ac-studio .car-metrics strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
     font-size: 15px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .add-car-tile {
+  html body .app-shell.ac-workspace.ac-studio .add-car-tile:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: linear-gradient(150deg, var(--color-surface-muted), var(--color-surface)) !important;
     min-height: 360px !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .add-car-tile :is(span, svg) {
+  html body .app-shell.ac-workspace.ac-studio .add-car-tile :is(span, svg):not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .add-car-tile strong {
+  html body .app-shell.ac-workspace.ac-studio .add-car-tile strong:not(:where([class^="rg-"],[class^="rg-"] *)){
     color: var(--color-text) !important;
   }
 }
 @layer autocare-workspace {
- html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) svg {color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) button.primary svg {color:var(--color-on-primary) !important;}
- html body .app-shell.ac-workspace.ac-studio .record-category-grid svg {background:var(--color-surface-muted) !important; color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) svg:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.main,.dialog) button.primary svg:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-on-primary) !important;}
+ html body .app-shell.ac-workspace.ac-studio .record-category-grid svg:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted) !important; color:var(--color-text) !important;}
 }
 @layer autocare-workspace {
- html body .app-shell.ac-workspace.ac-studio :is(.document-gallery,.maintenance-timeline) tbody tr {background:var(--color-surface) !important; border:1px solid #ffffff20 !important; box-shadow:0 12px 30px #0002 !important;}
- html body .app-shell.ac-workspace.ac-studio .empty {background:var(--color-surface) !important; border:1px dashed var(--color-border-strong) !important; color:var(--color-text) !important; padding:36px !important; border-radius:16px !important;}
- html body .app-shell.ac-workspace.ac-studio .empty p {color:var(--color-text) !important; font-size:16px !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.drive-session-status,.drive-session-caption,.drive-session-details span,.ac-smartdrive-trip .ac-premium-kicker) {color:var(--color-muted) !important; font-size:14px !important;}
- html body .app-shell.ac-workspace.ac-studio .drive-session-details strong {color:var(--color-text) !important; font-size:20px !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.forecast-service-card,.forecast-reading-stamp,.forecast-thresholds,.ac-smartdrive-map) {background:var(--color-surface) !important; color:var(--color-text) !important; border-color:#ffffff25 !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.forecast-service-card,.ac-smartdrive-map) :is(span,p,strong,small) {color:var(--color-muted) !important;}
- html body .app-shell.ac-workspace.ac-studio .pill.valid {background:var(--color-success-soft) !important; color:var(--color-success-ink) !important; border-color:var(--color-success) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.pill.warning,.pill.expiring) {background:var(--color-warning-soft) !important; color:var(--color-warning-ink) !important; border-color:var(--color-warning) !important;}
- html body .app-shell.ac-workspace.ac-studio .pill.expired {background:var(--color-danger-soft) !important; color:var(--color-danger-ink) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.document-gallery,.maintenance-timeline) tbody tr:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid #ffffff20 !important; box-shadow:0 12px 30px #0002 !important;}
+ html body .app-shell.ac-workspace.ac-studio .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px dashed var(--color-border-strong) !important; color:var(--color-text) !important; padding:36px !important; border-radius:16px !important;}
+ html body .app-shell.ac-workspace.ac-studio .empty p:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important; font-size:16px !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.drive-session-status,.drive-session-caption,.drive-session-details span,.ac-smartdrive-trip .ac-premium-kicker):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted) !important; font-size:14px !important;}
+ html body .app-shell.ac-workspace.ac-studio .drive-session-details strong:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important; font-size:20px !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.forecast-service-card,.forecast-reading-stamp,.forecast-thresholds,.ac-smartdrive-map):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; color:var(--color-text) !important; border-color:#ffffff25 !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.forecast-service-card,.ac-smartdrive-map) :is(span,p,strong,small):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted) !important;}
+ html body .app-shell.ac-workspace.ac-studio .pill.valid:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-success-soft) !important; color:var(--color-success-ink) !important; border-color:var(--color-success) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.pill.warning,.pill.expiring):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-warning-soft) !important; color:var(--color-warning-ink) !important; border-color:var(--color-warning) !important;}
+ html body .app-shell.ac-workspace.ac-studio .pill.expired:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-danger-soft) !important; color:var(--color-danger-ink) !important;}
 }
 @layer autocare-workspace {
- html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips span {color:var(--color-text) !important; font-size:14px !important; opacity:1 !important;}
- html body .app-shell.ac-workspace.ac-studio .studio-offer-price > span {color:var(--color-text) !important; font-size:13px !important; opacity:1 !important; display:block !important;}
- html body .app-shell.ac-workspace.ac-studio .membership-access {background:var(--color-surface) !important; border:1px solid #ffffff20 !important; border-radius:12px !important; padding:18px !important; gap:20px !important;}
- html body .app-shell.ac-workspace.ac-studio .membership-access :is(span,p) {color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio .membership-access strong {color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio .app-account-section button {margin-bottom:8px !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips span:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important; font-size:14px !important; opacity:1 !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-offer-price > span:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important; font-size:13px !important; opacity:1 !important; display:block !important;}
+ html body .app-shell.ac-workspace.ac-studio .membership-access:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid #ffffff20 !important; border-radius:12px !important; padding:18px !important; gap:20px !important;}
+ html body .app-shell.ac-workspace.ac-studio .membership-access :is(span,p):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio .membership-access strong:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio .app-account-section button:not(:where([class^="rg-"],[class^="rg-"] *)){margin-bottom:8px !important;}
 }
 @layer autocare-workspace {
- html body .app-shell.ac-workspace.ac-studio .main .settings-workspace.grid2 {grid-template-columns:minmax(0,1fr) !important; width:100% !important; max-width:none !important;}
- html body .app-shell.ac-workspace.ac-studio .ws-settings-nav {background:var(--color-surface) !important; border:1px solid #ffffff20 !important; padding:10px !important; border-radius:14px !important;}
- html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button {margin-bottom:6px !important;}
- html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button[aria-current=page] {background:var(--color-primary-deep) !important; border-color:var(--color-border-strong) !important;}
- html body .app-shell.ac-workspace.ac-studio .settings-workspace details {background:var(--color-surface) !important; border:1px solid #ffffff25 !important; color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio .settings-workspace details > summary {background:transparent !important; color:var(--color-text) !important; padding:18px !important; font-size:15px !important;}
+ html body .app-shell.ac-workspace.ac-studio .main .settings-workspace.grid2:not(:where([class^="rg-"],[class^="rg-"] *)){grid-template-columns:minmax(0,1fr) !important; width:100% !important; max-width:none !important;}
+ html body .app-shell.ac-workspace.ac-studio .ws-settings-nav:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid #ffffff20 !important; padding:10px !important; border-radius:14px !important;}
+ html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button:not(:where([class^="rg-"],[class^="rg-"] *)){margin-bottom:6px !important;}
+ html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button[aria-current=page]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-primary-deep) !important; border-color:var(--color-border-strong) !important;}
+ html body .app-shell.ac-workspace.ac-studio .settings-workspace details:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid #ffffff25 !important; color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio .settings-workspace details > summary:not(:where([class^="rg-"],[class^="rg-"] *)){background:transparent !important; color:var(--color-text) !important; padding:18px !important; font-size:15px !important;}
 }
 
 /* Complete graphite surfaces, including nested widgets that carry legacy light styles. */
-@layer autocare-workspace {
- html body .app-shell.ac-workspace.ac-studio {
+@layer autocare-workspace{
+ html body .app-shell.ac-workspace.ac-studio:not(:where([class^="rg-"],[class^="rg-"] *)){
   color-scheme: dark;
   --bg:var(--color-bg); --panel:var(--color-surface); --panel2:var(--color-surface-muted); --border:var(--color-border); --muted:var(--color-muted); --text:var(--color-text);
  }
- html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.support-workspace,.support-chat-panel) {
+ html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.support-workspace,.support-chat-panel):not(:where([class^="rg-"],[class^="rg-"] *)){
   background:var(--color-surface) !important; background-image:none !important; color:var(--color-text) !important; border-color:#ffffff24 !important;
  }
- html body .app-shell.ac-workspace.ac-studio :is(.mileage-planner-odometer,.service-reminder-box,.ac-smartdrive-reminder,.ac-smartdrive-history-metrics>div,.ac-smartdrive-history>div[style],.ac-smartdrive-history-columns>div,.record-context,.record-context>summary,.record-context>div,.push-state,.section-title,.filter-pills) {
+ html body .app-shell.ac-workspace.ac-studio :is(.mileage-planner-odometer,.service-reminder-box,.ac-smartdrive-reminder,.ac-smartdrive-history-metrics>div,.ac-smartdrive-history>div[style],.ac-smartdrive-history-columns>div,.record-context,.record-context>summary,.record-context>div,.push-state,.section-title,.filter-pills):not(:where([class^="rg-"],[class^="rg-"] *)){
   background:var(--color-surface) !important; background-image:none !important; color:var(--color-text) !important; border-color:#ffffff24 !important;
  }
- html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.service-reminder-box,.ac-smartdrive-reminder) :is(p,span,small,label) {color:var(--color-muted) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.service-reminder-box,.ac-smartdrive-reminder) :is(h2,h3,h4,strong) {color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.mileage-planner-icon,.subscription-symbol,.list-icon,.event-date,.app-profile-avatar) {background:var(--color-surface-muted) !important; color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.best-plan,.subscription-saving) {background:var(--color-surface-muted) !important; color:var(--color-text) !important; border-color:var(--color-border) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.mileage-ok,.forecast-maintenance-state.is-valid) {background:var(--color-surface) !important; color:var(--color-success-ink) !important;}
- html body .app-shell.ac-workspace.ac-studio .pill.soon {background:var(--color-surface) !important; color:var(--color-warning-ink) !important; border-color:var(--color-warning) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.support-client-folders,.support-client-intro,.support-chat-header,.support-composer) {background:var(--color-surface) !important; color:var(--color-text) !important; border-color:#ffffff24 !important;}
- html body .app-shell.ac-workspace.ac-studio .support-messages {background:var(--color-surface) !important; color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.support-workspace,.support-chat-panel) :is(p,span,small,label) {color:var(--color-muted) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.support-workspace,.support-chat-panel) :is(h2,h3,h4,strong) {color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio :is(.support-message,.support-empty>div) {background:var(--color-surface-muted) !important; color:var(--color-text) !important; border-color:#ffffff24 !important;}
- html body .app-shell.ac-workspace.ac-studio .main .view-toggle {background:var(--color-surface) !important; border:1px solid var(--color-border) !important; padding:4px !important;}
- html body .app-shell.ac-workspace.ac-studio .plate {background:var(--color-surface-muted) !important; color:var(--color-text) !important; border-color:var(--color-border) !important;}
- html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo {background:radial-gradient(ellipse at 75% 30%,var(--color-primary-deep) 0%,var(--color-surface) 40%,var(--color-nav) 85%) !important;}
- html body .app-shell.ac-workspace.ac-studio .studio-brand-emblem {display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; width:100%; height:100%; color:var(--color-primary-ink) !important; background:repeating-linear-gradient(125deg,transparent 0 45px,#ffffff05 46px 47px);}
- html body .app-shell.ac-workspace.ac-studio .studio-brand-emblem span {font-size:12px !important; letter-spacing:4px !important; color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel>.studio-vehicle-photo {opacity:.48 !important;}
- html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-brand-emblem {align-items:flex-end; padding-right:35px;}
- html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-brand-emblem span {display:none !important;}
- html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-brand-emblem svg {width:150px; height:150px;}
+ html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.service-reminder-box,.ac-smartdrive-reminder) :is(p,span,small,label):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.service-reminder-box,.ac-smartdrive-reminder) :is(h2,h3,h4,strong):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.mileage-planner-icon,.subscription-symbol,.list-icon,.event-date,.app-profile-avatar):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted) !important; color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.best-plan,.subscription-saving):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted) !important; color:var(--color-text) !important; border-color:var(--color-border) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.mileage-ok,.forecast-maintenance-state.is-valid):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; color:var(--color-success-ink) !important;}
+ html body .app-shell.ac-workspace.ac-studio .pill.soon:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; color:var(--color-warning-ink) !important; border-color:var(--color-warning) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.support-client-folders,.support-client-intro,.support-chat-header,.support-composer):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; color:var(--color-text) !important; border-color:#ffffff24 !important;}
+ html body .app-shell.ac-workspace.ac-studio .support-messages:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.support-workspace,.support-chat-panel) :is(p,span,small,label):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.support-workspace,.support-chat-panel) :is(h2,h3,h4,strong):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.support-message,.support-empty>div):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted) !important; color:var(--color-text) !important; border-color:#ffffff24 !important;}
+ html body .app-shell.ac-workspace.ac-studio .main .view-toggle:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid var(--color-border) !important; padding:4px !important;}
+ html body .app-shell.ac-workspace.ac-studio .plate:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted) !important; color:var(--color-text) !important; border-color:var(--color-border) !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)){background:radial-gradient(ellipse at 75% 30%,var(--color-primary-deep) 0%,var(--color-surface) 40%,var(--color-nav) 85%) !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-brand-emblem:not(:where([class^="rg-"],[class^="rg-"] *)){display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; width:100%; height:100%; color:var(--color-primary-ink) !important; background:repeating-linear-gradient(125deg,transparent 0 45px,#ffffff05 46px 47px);}
+ html body .app-shell.ac-workspace.ac-studio .studio-brand-emblem span:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:12px !important; letter-spacing:4px !important; color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel>.studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)){opacity:.48 !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-brand-emblem:not(:where([class^="rg-"],[class^="rg-"] *)){align-items:flex-end; padding-right:35px;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-brand-emblem span:not(:where([class^="rg-"],[class^="rg-"] *)){display:none !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-panel .studio-brand-emblem svg:not(:where([class^="rg-"],[class^="rg-"] *)){width:150px; height:150px;}
 }
 @layer autocare-workspace {
- html body .app-shell.ac-workspace.ac-studio .record-view-switch>div {background:var(--color-surface) !important; border:1px solid var(--color-border) !important; padding:4px !important; border-radius:10px !important;}
- html body .app-shell.ac-workspace.ac-studio .record-view-switch button[aria-pressed=true] {background:var(--color-primary-deep) !important; color:var(--color-text) !important;}
- html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo img {background:var(--color-surface) !important;}
- html body .app-shell.ac-workspace.ac-studio .support-empty>div {background:var(--color-surface-muted) !important;}
+ html body .app-shell.ac-workspace.ac-studio .record-view-switch>div:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid var(--color-border) !important; padding:4px !important; border-radius:10px !important;}
+ html body .app-shell.ac-workspace.ac-studio .record-view-switch button[aria-pressed=true]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-primary-deep) !important; color:var(--color-text) !important;}
+ html body .app-shell.ac-workspace.ac-studio .studio-vehicle-photo img:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important;}
+ html body .app-shell.ac-workspace.ac-studio .support-empty>div:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted) !important;}
 }
 @layer autocare-workspace {
- html body .app-shell.ac-workspace.ac-studio label.check {background:var(--color-surface) !important; color:var(--color-text) !important; border-color:#ffffff25 !important;}
- html body .app-shell.ac-workspace.ac-studio label.check :is(span,strong,small) {color:var(--color-muted) !important;}
- html body .app-shell.ac-workspace.ac-studio .support-header-role {background:var(--color-surface-muted) !important; color:var(--color-text) !important; border-color:var(--color-border-strong) !important; padding:6px 10px !important; border-radius:7px !important;}
+ html body .app-shell.ac-workspace.ac-studio label.check:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; color:var(--color-text) !important; border-color:#ffffff25 !important;}
+ html body .app-shell.ac-workspace.ac-studio label.check :is(span,strong,small):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted) !important;}
+ html body .app-shell.ac-workspace.ac-studio .support-header-role:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted) !important; color:var(--color-text) !important; border-color:var(--color-border-strong) !important; padding:6px 10px !important; border-radius:7px !important;}
 }
+/* Mobile screens have their own title/actions; these desktop controls stay desktop-only. */
+@layer autocare-workspace {
+ @media(max-width:900px){
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main>.ac-module-header,
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main>.ws-context-nav{display:none!important}
+ }
+}
+
+@layer autocare-workspace {@media(max-width:900px){html body .app-shell.ac-workspace.ac-studio main.main#workspace-main>.maintenance-desktop{display:none!important}}}
+
+@layer autocare-workspace {@media(min-width:901px){html body .app-shell.ac-workspace.ac-studio>.app-topbar .app-topbar-title{display:flex!important;white-space:nowrap!important;flex:none!important;gap:10px!important;font-size:14px!important}html body .app-shell.ac-workspace.ac-studio>.app-topbar .app-topbar-brand{display:none!important}html body .app-shell.ac-workspace.ac-studio>.app-topbar .app-topbar-actions{flex:1!important;min-width:0!important}html body .app-shell.ac-workspace.ac-studio>.app-topbar .studio-search-label{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:280px!important}}}

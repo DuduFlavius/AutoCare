@@ -1,99 +1,46 @@
 'use client';
+import {useState} from 'react';
+import {CarFront,Files,Wrench,Wallet,Plus,ChevronRight,Sparkles} from 'lucide-react';
+import type {dashboard} from '@/lib/service';
+import {selectActiveVehicle,upcomingMaintenance} from '@/lib/application-home';
+import {financeOverview} from '@/lib/finance-overview';
+import {isPlannedService} from '@/lib/planned-service';
+import {localDate} from '@/lib/config';
+import {useApplicationLanguage,useApplicationLocale} from '../application-locale';
 import {FilterSelect} from '../filter-select';
-import {DocumentActions} from '../document-actions';
-import { useState } from 'react';
-import { MobileCockpit } from './mobile-cockpit';
-import ReferenceArtwork,{type ReferenceArtworkName} from '../reference-artwork';
-import { dashboardCopy } from '@/lib/dashboard-copy';
-import { ArrowUpRight, Files, CarFront, History, Sparkles, Send, CalendarDays, ChevronRight, Clock3, Plus } from 'lucide-react';
-import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
-import { useMileageUsage } from '../use-mileage-usage';
-import { selectActiveVehicle, upcomingMaintenance, homeCareAssessment } from '@/lib/application-home';
-import { financeOverview } from '@/lib/finance-overview';
-import { calendarRecordDate, isPlannedService } from '@/lib/planned-service';
-import { localDate } from '@/lib/config';
-import { AppEmpty } from './ui';
-import type { dashboard } from '@/lib/service';
-import './reference-dashboard.css';
-type Data = Awaited<ReturnType<typeof dashboard>>;
-type Row = Data['records'][number];
-type Props = {data:Data;name:string;selectedVehicle:string;onSelectVehicle:(id:string)=>void;onDrill:(tab:string,vehicleId:string,ids:string[],label:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(record:Row)=>void;onRefresh:()=>Promise<void>;currency:'RON'|'EUR';preview:boolean};
-export default function ApplicationHome({data,name,selectedVehicle,onSelectVehicle,navigate,onDrill,onVehicle,onCreate,onRecord,currency,preview}:Props) {
- const en=useApplicationLanguage()==='en', locale=useApplicationLocale();
- const t=(ro:string)=>en?(dashboardCopy[ro]??ro):ro;
- const car=selectActiveVehicle(data.vehicles,selectedVehicle),cars=data.vehicles.filter(v=>!v.archived);
+import {useMileageUsage} from '../use-mileage-usage';
+import {MobileCockpit} from './mobile-cockpit';
+import {MobileFinanceOverview} from './mobile-finance-overview';
+type Data=Awaited<ReturnType<typeof dashboard>>;
+type Row=Data['records'][number];
+type Props={data:Data;name:string;selectedVehicle:string;onSelectVehicle:(id:string)=>void;onDrill:(tab:string,vehicleId:string,ids:string[],label:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:Row)=>void;onRefresh:()=>Promise<void>;currency:'RON'|'EUR';preview:boolean};
+export default function ApplicationHome(props:Props){
+ const {data,name,selectedVehicle,onSelectVehicle,onDrill,navigate,onVehicle,onCreate,onRecord,currency,preview}=props;
+ const en=useApplicationLanguage()==='en',locale=useApplicationLocale(),t=(ro:string,english:string)=>en?english:ro;
+ const cars=data.vehicles.filter(v=>!v.archived),car=selectActiveVehicle(cars,selectedVehicle);
  const usage=useMileageUsage(car?.id??'',car?.odometer??0,preview);
- const [period,setPeriod]=useState('12'),[question,setQuestion]=useState('');
- const today=localDate(new Date(),data.profile.timezone);
- const rows=data.records.filter(r=>!r.cancelled&&r.vehicleId===car?.id);
- const recorded=rows.filter(r=>!isPlannedService(r,today));
- const maintenance=car?upcomingMaintenance(recorded,car.odometer,usage.dailyKm,data.profile.timezone):[];
- const next=maintenance[0];
- const [serviceDetails,setServiceDetails]=useState(false);
- const appointments=rows.filter(r=>isPlannedService(r,today)).map(row=>({row,date:calendarRecordDate(row,today)})).filter((item):item is {row:Row;date:string}=>Boolean(item.date)).sort((a,b)=>a.date.localeCompare(b.date));
- const docs=recorded.filter(r=>r.kind==='document').sort((a,b)=>(a.status.days??Infinity)-(b.status.days??Infinity));
- const attention=docs.filter(r=>r.status.days!=null&&r.status.days>=0&&r.status.days<=30);
- const care=homeCareAssessment(docs,maintenance,car?.odometer??0);
+ const today=localDate(new Date(),data.profile.timezone),rows=data.records.filter(r=>!r.cancelled&&r.vehicleId===car?.id);
+ const maintenance=car?upcomingMaintenance(rows.filter(r=>!isPlannedService(r,today)),car.odometer,usage.dailyKm,data.profile.timezone):[],next=maintenance[0];
  const finance=financeOverview(rows,today,car?.id??'');
- const activity=recorded.filter(r=>r.date&&r.date<=today).sort((a,b)=>(b.date??'').localeCompare(a.date??'')).slice(0,3);
- const money=(bani:number)=>new Intl.NumberFormat(locale,{style:'currency',currency,maximumFractionDigits:2}).format(bani/(currency==='EUR'?500:100));
- const date=(value:string)=>new Date(value+'T12:00:00Z').toLocaleDateString(locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
- const bilingual=(ro:string,english:string)=>en?english:ro;
- const km=(value:number|null|undefined)=>value==null?'—':value.toLocaleString(locale)+' km';
- const source=next&&rows.find(row=>row.id===next.service.id||next.service.id.startsWith(row.id+':'));
- if(serviceDetails&&car) return <section className="ac-next-service-page" data-workspace-ui>
-  <button type="button" onClick={()=>setServiceDetails(false)}>{bilingual('Înapoi la garaj','Back to dashboard')}</button>
-  <article>
-   <header><CalendarDays size={24}/><h1>{bilingual('Următoarea revizie','Next service')}</h1></header>
-   <p data-user-content>{car.brand} {car.model} · {car.plate}</p>
-   {next&&(next.raw||next.service.nextKm!=null)?<>
-    <h2 data-user-content>{next.service.title}</h2>
-    <dl>
-     <div><dt>{bilingual('Termen calendaristic','Due date')}</dt><dd>{next.raw?date(next.raw):bilingual('Nesetat','Not set')}</dd></div>
-     <div><dt>{bilingual('Kilometraj la revizie','Mileage threshold')}</dt><dd>{km(next.service.nextKm)}</dd></div>
-     <div><dt>{bilingual('Kilometraj actual','Current mileage')}</dt><dd>{km(car.odometer)}</dd></div>
-     <div><dt>{bilingual('Până la revizie','Until service')}</dt><dd>{next.status.remainingKm==null?'—':next.status.remainingKm<=0?bilingual('Prag atins','Threshold reached'):km(next.status.remainingKm)}</dd></div>
-    </dl>
-   </>:<p>{bilingual('Nu ai încă un termen de revizie pentru mașina aceasta.','No service deadline is set for this vehicle yet.')}</p>}
-   {source?<button type="button" className="primary" onClick={()=>onRecord(source)}>{bilingual('Editează revizia','Edit service')}</button>:<button type="button" className="primary" onClick={()=>navigate('Întreținere')}>{bilingual('Vezi întreținerea','View maintenance')}</button>}
-  </article>
- </section>;
- const openAI=()=>{
-  if(!car)return;
-  if(!data.premium){navigate('Premium');return;}
-  try { sessionStorage.setItem('autocare-ai-draft:'+car.id,question.trim()); } catch { /* Full chat remains accessible without storage. */ }
-  navigate('AutoCare AI');
- };
-
- const months=period==='6'?finance.series.filter(m=>m.month<=today.slice(0,7)).slice(-6):finance.series;
- const largest=Math.max(100,...months.flatMap(m=>[m.current.bani,m.previous.bani]));
- const chartPoints=(key:'current'|'previous')=>months.map((m,i)=>({x:58+i*700/Math.max(1,months.length-1),y:172-m[key].bani/largest*152,known:m[key].known>0,bani:m[key].bani,month:m.month}));
- const line=(key:'current'|'previous')=>{let open=false;return chartPoints(key).map(p=>{if(!p.known){open=false;return '';}const segment=(open?'L':'M')+p.x+','+p.y;open=true;return segment;}).join(' ');};
- const area=()=>{let output='';let segment:ReturnType<typeof chartPoints>=[];const close=()=>{if(segment.length>1)output+='M'+segment[0].x+',172 '+segment.map(p=>'L'+p.x+','+p.y).join(' ')+' L'+segment[segment.length-1].x+',172 Z ';segment=[];};for(const point of chartPoints('current')){if(point.known)segment.push(point);else close();}close();return output;};
- const total=months.reduce((sum,m)=>sum+m.current.bani,0);
- const measured=months.some(m=>m.current.known>0);
- const stats=[
-  {art:'car' as ReferenceArtworkName,label:t('Total mașini'),value:String(cars.length),detail:'',go:'Garaj',ids:null},
-  {art:'wrench' as ReferenceArtworkName,label:t('Lucrări planificate'),value:String(appointments.length),detail:t('În calendar'),go:'Calendar',ids:appointments.map(x=>x.row.id)},
-  {art:'calendar' as ReferenceArtworkName,label:t('Revizii următoare'),value:String(maintenance.length),detail:next?.status.remainingKm!=null?Math.max(0,next.status.remainingKm).toLocaleString(locale)+' km '+t('până la prag'):t('Intervale înregistrate'),go:'Întreținere',ids:rows.filter(r=>maintenance.some(x=>x.service.id===r.id||x.service.id.startsWith(r.id+':'))).map(r=>r.id)},
-  {art:'document' as ReferenceArtworkName,label:t('Documente care expiră'),value:String(attention.length),detail:t('≤ 30 zile'),go:'Documente',ids:attention.map(x=>x.id)},
-  {art:'gauge' as ReferenceArtworkName,label:t('Kilometraj confirmat'),value:car?car.odometer.toLocaleString(locale):'—',detail:car?'km':'',go:'Kilometraj',ids:null},
- ];
- return <><MobileCockpit data={data} selectedVehicle={selectedVehicle} onSelectVehicle={onSelectVehicle} navigate={navigate} onDrill={onDrill} onVehicle={onVehicle} onCreate={onCreate} onRecord={onRecord} onNextService={()=>setServiceDetails(true)} currency={currency}/><div className="ac-reference ac-home-desktop" data-workspace-ui>
-  <header className="ac-ref-welcome"><div><p>{t('Bine ai venit,')}</p><h1 id="workspace-page-title" tabIndex={-1}><span data-user-content>{name.trim().split(/\s+/)[0]}!</span> <span className="ac-ref-wave" aria-hidden="true"><ReferenceArtwork name="wave" width={48} height={49}/></span></h1><span>{t('Garajul tău. Mereu sub control.')}</span></div><div className="ac-ref-hero-actions"><button onClick={()=>navigate('Garaj')}><ReferenceArtwork name="garage-button" width={28} height={26}/>{t('Garajul meu')}</button><button className="ac-ref-primary" onClick={()=>navigate('Plan întreținere')}><ReferenceArtwork name="plane" width={29} height={29}/>SmartDrive</button></div></header>
-  {!car?<AppEmpty Icon={CarFront} title={t('Adaugă prima mașină')} description={t('Documente, revizii și costuri. Totul începe cu mașina ta.')} action={t('Adaugă vehicul')} onAction={()=>onCreate('vehicle')}/>:<>
-  {cars.length>3&&<div className="ac-ref-scope"><span><span className="ac-ref-live"/>{t('Prezentarea garajului')}</span><label><CarFront size={14}/><FilterSelect aria-label={t('Vehicul selectat')} value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{cars.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>)}</FilterSelect></label></div>}
-  <nav className="ac-ref-stats" aria-label={t('Prezentarea garajului')}>{stats.map(({art,label,value,detail,go,ids},i)=><button key={go} className={'ac-ref-stat ac-ref-stat-'+i} onClick={()=>go==='Întreținere'?setServiceDetails(true):ids?onDrill(go,car?.id??'',ids,label):navigate(go)}><span className="ac-ref-stat-icon"><ReferenceArtwork name={art} width={38} height={38}/></span><span className="ac-ref-stat-copy"><span>{label}</span><span className="ac-ref-stat-value-row"><strong>{value}</strong>{detail&&<small>{detail}</small>}</span></span></button>)}</nav>
-  <div className="ac-ref-main">
-   <section className="ac-ref-panel ac-ref-finance"><header><h2><span className="ac-ref-heading-icon"><ReferenceArtwork name="chart" width={42} height={39}/></span>{t('Statistici financiare')}</h2><FilterSelect aria-label={t('Perioada financiară')} value={period} onChange={e=>setPeriod(e.target.value)}><option value="12">{t('Anul curent')}</option><option value="6">{t('Ultimele 6 luni')}</option></FilterSelect></header><div className="ac-ref-chart-meta"><strong>{measured?money(total):'—'}</strong><div><span><i/>{today.slice(0,4)}</span><span><i/>{Number(today.slice(0,4))-1}</span></div></div><div className="ac-ref-chart"><svg viewBox="0 0 800 200" role="img" aria-label={t('Cheltuieli înregistrate, comparate cu anul precedent')}><defs><linearGradient id="ref-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#7863ff" stopOpacity=".28"/><stop offset="1" stopColor="#7863ff" stopOpacity="0"/></linearGradient></defs>{[0,1,2,3].map(i=><g key={i}><line x1="58" x2="770" y1={172-i*(152/3)} y2={172-i*(152/3)}/><text x="45" y={176-i*(152/3)} textAnchor="end">{new Intl.NumberFormat(locale,{notation:'compact',maximumFractionDigits:1}).format(largest*i/3/(currency==='EUR'?500:100))}</text></g>)}{months.map((m,i)=><line key={m.month} className="ac-ref-chart-vertical" x1={58+i*700/Math.max(1,months.length-1)} x2={58+i*700/Math.max(1,months.length-1)} y1="20" y2="172"/>)}<path d={area()} fill="url(#ref-chart-fill)"/>{(['current','previous'] as const).map((key,index)=><g key={key} className={'ac-ref-series-'+index}><path d={line(key)} fill="none" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>{chartPoints(key).map(p=><g key={p.month}><title>{(index?Number(today.slice(0,4))-1:today.slice(0,4))+' · '+p.month.slice(5)+' · '+(p.known?money(p.bani):t('Fără înregistrări'))}</title>{p.known?<circle cx={p.x} cy={p.y} r="4.5"/>:index===0?<circle className="ac-ref-missing" cx={p.x} cy="172" r="3"/>:null}</g>)}</g>)}{months.map((m,i)=><text className={i%2?'ac-ref-month-alternate':undefined} key={m.month} x={58+i*700/Math.max(1,months.length-1)} y="196" textAnchor="middle">{new Date(m.month+'-01T12:00:00Z').toLocaleDateString(locale,{month:'short',timeZone:'UTC'})}</text>)}</svg></div><footer><span>{currency==='EUR'?t('Conversie orientativă: 1 EUR = 5 RON.'):t('Doar cheltuieli înregistrate')} · {t('Cerc gol: fără înregistrări')}</span><button onClick={()=>navigate('Cheltuieli')}>{t('Vezi finanțele')}<ArrowUpRight size={15}/></button></footer></section>
-   <section className="ac-ref-panel ac-ref-garage"><header><h2><span className="ac-ref-heading-icon"><ReferenceArtwork name="garage" width={39} height={36}/></span>{t('Mașinile din garaj')}</h2><div className="ac-ref-garage-actions"><button onClick={()=>onCreate('vehicle')} aria-label={t('Adaugă vehicul')}><Plus size={17}/></button><button onClick={()=>navigate('Garaj')}>{t('Vezi toate')}<ArrowUpRight size={16}/></button></div></header><ul>{cars.slice(0,3).map(v=><li key={v.id} data-selected={v.id===car.id}><button className="ac-ref-garage-select" onClick={()=>onSelectVehicle(v.id)} aria-pressed={v.id===car.id}><span className="ac-ref-vehicle-icon"><ReferenceArtwork name="car-badge" width={61} height={61}/></span><span><strong data-user-content>{v.brand} {v.model}</strong><small data-user-content>{v.plate}</small></span><span className="ac-ref-active">{t('Activă')}</span><span className="ac-ref-vehicle-km">{v.odometer.toLocaleString(locale)} km</span></button><button className="ac-ref-car-open" onClick={()=>onVehicle(v.id)} aria-label={t('Vezi detalii')+' '+v.brand+' '+v.model}><ArrowUpRight size={17}/></button></li>)}</ul><div className="ac-ref-care"><span><span className="ac-ref-live"/>{care.complete?care.valid+'/'+care.total+' '+t('verificări în regulă'):t('Evaluare incompletă')}</span><button onClick={()=>navigate('Întreținere')}>{t('Întreținere')}<ArrowUpRight size={14}/></button></div></section>
-  </div>
-  <div className="ac-ref-bottom">
-   <section className="ac-ref-panel"><header><h2><ReferenceArtwork name="appointment" width={35} height={36}/>{t('Următoarele programări')}</h2><button onClick={()=>onDrill('Calendar',car?.id??'',appointments.map(x=>x.row.id),t('Lucrări planificate'))} aria-label={t('Vezi calendarul')}><ArrowUpRight size={17}/></button></header>{appointments.length?<ul className="ac-ref-appointments">{appointments.slice(0,2).map(({row,date:d})=><li key={row.id}><button onClick={()=>onRecord(row)}><span className="ac-ref-date"><strong>{Number(d.slice(8))}</strong><small>{new Date(d+'T12:00:00Z').toLocaleDateString(locale,{month:'short',timeZone:'UTC'})}</small></span><span className="ac-ref-row-copy"><strong data-user-content>{row.title}</strong><small data-user-content>{car.brand} {car.model}</small></span><Clock3 size={16}/></button></li>)}</ul>:<div className="ac-ref-empty"><CalendarDays size={26}/><p>{t('Nicio lucrare planificată')}</p><button onClick={()=>onCreate('service',car.id)}>{t('Adaugă intervenție')}<Plus size={15}/></button></div>}</section>
-   <section className="ac-ref-panel"><header><h2><ReferenceArtwork name="activity" width={34} height={36}/>{t('Activitate recentă')}</h2><button onClick={()=>navigate('Istoric auto')} aria-label={t('Deschide istoricul complet')}><ArrowUpRight size={17}/></button></header>{activity.length?<ul className="ac-ref-timeline">{activity.map(r=><li key={r.id}><button onClick={()=>onRecord(r)}><i/><span className="ac-ref-row-copy"><strong data-user-content>{r.title}</strong><small>{r.date&&date(r.date)}</small></span><ChevronRight size={15}/></button></li>)}</ul>:<div className="ac-ref-empty"><History size={26}/><p>{t('Activitatea apare după prima înregistrare.')}</p></div>}</section>
-   <section className="ac-ref-panel"><header><h2><ReferenceArtwork name="documents" width={35} height={36}/>{t('Documente importante')}</h2><button onClick={()=>navigate('Documente')} aria-label={t('Toate documentele')}><ArrowUpRight size={17}/></button></header>{docs.length?<ul className="ac-ref-documents">{docs.slice(0,3).map(r=><li key={r.id}><button className="ac-ref-document-view" onClick={()=>onRecord(r)}><span className="ac-ref-doc-icon"><ReferenceArtwork name={r.status.days!=null&&r.status.days>30?'check-badge':'document'} width={38} height={38}/></span><span className="ac-ref-row-copy"><strong data-user-content>{r.category} · {car.brand}</strong><small>{r.expiresAt?date(r.expiresAt):t('Fără termen')}</small></span></button>{data.attachments.find(file=>file.recordId===r.id)?<DocumentActions file={data.attachments.find(file=>file.recordId===r.id)!} compact downloadOnly/>:<button className="ac-ref-document-download" onClick={()=>onRecord(r)} aria-label={t('Vezi detalii')}><ArrowUpRight size={17}/></button>}</li>)}</ul>:<div className="ac-ref-empty"><Files size={26}/><p>{t('Adaugă actele pentru a urmări termenele.')}</p><button onClick={()=>onCreate('document',car.id)}>{t('Adaugă document')}<Plus size={15}/></button></div>}</section>
-  </div>
-  <section className="ac-ref-ai"><span className="ac-ref-ai-icon"><Sparkles size={22}/></span><div><strong>AutoCare AI <small>Premium</small></strong><p>{t('Claritate pentru următorul drum.')}</p></div><form onSubmit={e=>{e.preventDefault();openAI();}}><input aria-label={t('Întrebarea pentru AI')} placeholder={data.premium?t('Întreabă despre mașina ta…'):t('Disponibil cu Premium')} maxLength={600} value={question} onChange={e=>setQuestion(e.target.value)} disabled={!data.premium}/><button type="submit" aria-label={t('Deschide chatul')}><Send size={18}/></button></form></section>
-  </>}
+ const docs=rows.filter(r=>r.kind==='document'),soon=docs.filter(r=>r.status.days!=null&&r.status.days<=30);
+ const services=rows.filter(r=>r.kind==='service'&&isPlannedService(r,today));
+ const [period,setPeriod]=useState('12');
+ const money=(bani:number)=>new Intl.NumberFormat(locale,{style:'currency',currency}).format(bani/(currency==='EUR'?500:100));
+ const date=(v:string|null)=>v?new Date(v+'T12:00:00Z').toLocaleDateString(locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}):'—';
+ const openNext=()=>{const r=rows.find(r=>r.id===next?.service.id||next?.service.id.startsWith(r.id+':'));if(r)onRecord(r);else navigate('Întreținere');};
+ return <><MobileCockpit {...props} onNextService={openNext}/><div className="rg-home-desktop">
+  <header className="rg-hero"><div><p>{t('Bine ai venit,','Welcome back,')}</p><h1 id="workspace-page-title" tabIndex={-1}>{name.trim().split(/\s+/)[0]}!</h1><p>{t('Garajul tău inteligent, mereu la zi.','Your digital garage, always up to date.')}</p></div><div className="rg-actions"><button onClick={()=>onCreate('vehicle')}><Plus size={18}/>{t('Adaugă vehicul','Add vehicle')}</button><button className="primary" onClick={()=>navigate('Garaj')}><CarFront size={19}/>{t('Garajul meu','My garage')}</button></div></header>
+  <nav className="rg-stat-grid" aria-label={t('Prezentarea garajului','Garage overview')}>{[
+   {Icon:CarFront,label:t('Vehicule','Vehicles'),value:cars.length,tab:'Garaj'},
+   {Icon:Wallet,label:t('Cheltuieli în acest an','Expenses this year'),value:finance.yearKnown?money(finance.yearBani):'—',tab:'Cheltuieli'},
+   {Icon:Wrench,label:t('Revizii următoare','Upcoming maintenance'),value:maintenance.length,tab:'Întreținere'},
+   {Icon:Files,label:t('Documente de verificat','Documents to review'),value:soon.length,tab:'Documente'},
+  ].map(({Icon,label,value,tab})=><button key={tab} onClick={()=>navigate(tab)}><Icon size={23}/><span>{label}</span><strong>{value}</strong></button>)}</nav>
+  {currency==='EUR'&&<small className="rg-currency-note">{en?'Indicative display: 1 EUR = 5 RON. Original records remain in RON.':'Afișare orientativă: 1 EUR = 5 RON. Înregistrările originale rămân în RON.'}</small>}
+  <div className="rg-home-grid"><section className="rg-panel"><header><h2>{t('Evoluția cheltuielilor','Expense history')}</h2>{car&&<FilterSelect aria-label={t('Vehicul selectat','Selected vehicle')} value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{cars.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>)}</FilterSelect>}</header><MobileFinanceOverview rows={rows} today={today} money={money} period={period} onPeriod={setPeriod} onFilters={()=>{}} filtersOpen={false}/><button className="rg-text-action" onClick={()=>navigate('Cheltuieli')}>{t('Vezi cheltuielile','View expenses')}<ChevronRight size={17}/></button></section>
+  <section className="rg-panel"><header><h2>{t('Mașinile din garaj','Your garage')}</h2><button onClick={()=>onCreate('vehicle')} aria-label={t('Adaugă vehicul','Add vehicle')}><Plus size={20}/></button></header><div className="rg-garage-list">{cars.map(v=>{const vr=data.records.filter(r=>r.vehicleId===v.id&&!r.cancelled),doc=vr.filter(r=>r.kind==='document'),up=upcomingMaintenance(vr,v.odometer,null,data.profile.timezone)[0];return <button key={v.id} onClick={()=>onVehicle(v.id)}><span className="rg-icon"><CarFront size={25}/></span><span><strong data-user-content>{v.brand} {v.model}</strong><small data-user-content>{v.plate} · {v.odometer.toLocaleString(locale)} km</small><small>{doc.length} {t('documente','documents')} · {up?.status.remainingKm!=null?Math.max(0,up.status.remainingKm).toLocaleString(locale)+' km '+t('până la revizie','until service'):t('Revizie nesetată','Maintenance not set')}</small></span><ChevronRight size={18}/></button>;})}</div>{!cars.length&&<p>{t('Adaugă prima mașină pentru a începe.','Add your first vehicle to get started.')}</p>}</section></div>
+  <div className="rg-home-bottom"><section className="rg-panel"><header><h2>{t('Următoarea intervenție','Next maintenance')}</h2><Wrench size={21}/></header><button className="rg-record" onClick={openNext}><strong>{next?.service.title??t('Planifică întreținerea','Plan maintenance')}</strong><small>{next?.status.remainingKm!=null?Math.max(0,next.status.remainingKm).toLocaleString(locale)+' km':next?.raw?date(next.raw):t('Adaugă un termen','Add a deadline')}</small></button><button onClick={()=>navigate('Calendar')}>{t('Deschide calendarul','Open calendar')} · {services.length}</button></section>
+  <section className="rg-panel"><header><h2>{t('Documentele mașinii','Vehicle documents')}</h2><Files size={21}/></header>{docs.slice(0,3).map(r=><button className="rg-record" key={r.id} onClick={()=>onRecord(r)}><strong>{r.category}</strong><small>{date(r.expiresAt)}</small></button>)}<button onClick={()=>onDrill('Documente',car?.id??'',docs.map(r=>r.id),t('Documente','Documents'))}>{t('Vezi toate documentele','View all documents')}</button></section>
+  <section className="rg-panel"><header><h2>AutoCare AI</h2><Sparkles size={21}/></header><p>{t('Întreținere, documente și costuri, în contextul mașinii tale.','Maintenance, documents and costs, with your vehicle in context.')}</p><button className="primary" onClick={()=>navigate(data.premium?'AutoCare AI':'Premium')}>{t('Deschide asistentul','Open assistant')}</button></section></div>
  </div></>;
 }

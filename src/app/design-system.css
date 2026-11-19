@@ -1,25 +1,25 @@
-@layer autocare-emerald, autocare-workspace;
+@layer autocare-workspace;
 :root {
   color-scheme: dark;
-  /* Midnight Titanium */
-  --obsidian-black: #090d14;
-  --midnight-navy: #111925;
-  --graphite: #1b2633;
-  --steel: #344253;
-  --electric-blue: #398bff;
-  --ice-cyan: #56d6e8;
-  --titanium-silver: #b8c4d2;
-  --titanium-white: #f3f6fa;
+  /* Racing Green — canonical brand tokens */
+  --obsidian-black: #0B1210;
+  --midnight-navy: #101A16;
+  --graphite: #17241F;
+  --steel: #304B40;
+  --electric-blue: #34C997;
+  --ice-cyan: #71E5BB;
+  --titanium-silver: #A5B8AF;
+  --titanium-white: #F3F8F5;
   --color-on-primary: var(--obsidian-black);
-  --color-primary-deep: color-mix(in srgb, var(--electric-blue) 23%, var(--midnight-navy));
+  --color-primary-deep: #1E4538;
   --color-shadow-color: #0005;
   --color-platinum: var(--titanium-silver);
   --color-nav: var(--midnight-navy);
   --color-nav-raised: var(--graphite);
   --color-primary: var(--electric-blue);
   --color-primary-hover: color-mix(in srgb, var(--electric-blue) 83%, var(--titanium-white));
-  --color-primary-soft: color-mix(in srgb, var(--electric-blue) 13%, var(--midnight-navy));
-  --color-primary-ink: color-mix(in srgb, var(--electric-blue) 42%, var(--titanium-white));
+  --color-primary-soft: #1E4538;
+  --color-primary-ink: #71E5BB;
   --color-bg: var(--obsidian-black);
   --color-surface: var(--midnight-navy);
   --color-surface-muted: var(--graphite);
@@ -28,9 +28,9 @@
   --color-text: var(--titanium-white);
   --color-muted: var(--titanium-silver);
   --color-subtle: color-mix(in srgb, var(--titanium-silver) 86%, var(--steel));
-  --color-success: #75c9ac;
-  --color-success-ink: #a6e7cf;
-  --color-success-soft: #203c35;
+  --color-success: #34C997;
+  --color-success-ink: #71E5BB;
+  --color-success-soft: #17241F;
   --color-warning: #e5b96d;
   --color-warning-ink: #f3d599;
   --color-warning-soft: #403421;

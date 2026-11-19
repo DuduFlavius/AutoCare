@@ -29,8 +29,8 @@ export function LandingCockpit() {
                 <div>
                   <b>Evoluția cheltuielilor</b>
                   <svg viewBox="0 0 240 68" fill="none">
-                    <path d="M0 17h240M0 34h240M0 51h240" stroke="#203353" />
-                    <path d="M0 57 30 48 48 51 70 34 93 41 119 24 140 29 164 16 187 23 207 15 240 7" stroke="#398bff" strokeWidth="2" />
+                    <path d="M0 17h240M0 34h240M0 51h240" stroke="#304B40" />
+                    <path d="M0 57 30 48 48 51 70 34 93 41 119 24 140 29 164 16 187 23 207 15 240 7" stroke="#71E5BB" strokeWidth="2" />
                   </svg>
                 </div>
                 <div><b>Remindere</b><span><Bell /> Revizie</span><span><FileText /> ITP</span></div>

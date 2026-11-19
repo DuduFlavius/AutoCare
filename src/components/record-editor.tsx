@@ -26,6 +26,7 @@ export default function RecordEditor({
   data,
   vehicleId,
   initialCategory,
+  initialDate,
   onSave,
   onCancel,
   onDirty,
@@ -36,6 +37,7 @@ export default function RecordEditor({
   data: Data;
   vehicleId?: string;
   initialCategory?: string;
+  initialDate?: string;
   onSave: (payload: RecordPayload, file: File | null) => Promise<boolean>;
   onCancel: () => void;
   onDirty: (dirty: boolean) => void;
@@ -71,7 +73,7 @@ export default function RecordEditor({
     [filterCostLive, setFilterCostLive] = useState(0),
     [live, setLive] = useState({
       date:
-        record?.date ||
+        record?.date || initialDate ||
         (kind === 'document'
           ? ''
           : new Date().toLocaleDateString('en-CA', { timeZone: data.profile.timezone })),
@@ -286,7 +288,7 @@ export default function RecordEditor({
               name="date"
               required={kind !== 'document'}
               defaultValue={
-                record?.date ||
+                record?.date || initialDate ||
                 (kind === 'document'
                   ? ''
                   : new Date().toLocaleDateString('en-CA', { timeZone: data.profile.timezone }))

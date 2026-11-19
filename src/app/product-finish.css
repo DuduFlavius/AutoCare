@@ -1,78 +1,78 @@
 html{scroll-behavior:smooth}body{-webkit-font-smoothing:antialiased}
-:where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid var(--color-primary);outline-offset:3px}
-html body .ac-workspace .app-home{max-width:1180px;margin-inline:auto;gap:24px}
-html body .ac-workspace .app-home .app-section{background:var(--color-surface)!important;border:1px solid var(--color-border)!important;border-radius:22px!important;box-shadow:0 4px 22px color-mix(in srgb, var(--color-nav) 2%, transparent)!important;padding:24px!important}
-html body .ac-workspace .app-home .app-section-head{margin-bottom:20px;gap:12px;flex-wrap:wrap}
-html body .ac-workspace .app-home .app-section-head h2{font-size:17px;letter-spacing:-.025em}
-html body .ac-workspace .app-home .app-caption{font-size:12px;line-height:1.65;color:var(--color-muted)!important}
-html body .ac-workspace .app-home .app-highlight-description small{line-height:1.6}
-html body .ac-workspace .app-home .app-maintenance-highlights{gap:14px}
-html body .ac-workspace .app-home .app-maintenance-highlights>button{border-radius:18px!important;background:var(--color-surface)!important;border:1px solid var(--color-border)!important}
-html body .ac-workspace .app-home .app-record-row{min-height:64px;padding-block:14px}
-html body .ac-workspace .app-home .app-record-row>span{min-width:0}
-html body .ac-workspace .app-home .app-record-row strong{overflow-wrap:anywhere}
-html body .ac-workspace .app-estimate-settings{margin-block:16px;border-top:1px solid var(--color-border);padding-top:12px}
-html body .ac-workspace .app-estimate-settings summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--color-primary-ink);padding-block:10px}
-html body .ac-workspace .app-home .app-upcoming{border:1px solid var(--color-border);border-radius:18px;background:var(--color-surface);padding:16px 20px}
-html body .ac-workspace .app-home .app-upcoming summary{cursor:pointer;min-height:28px;font-size:14px;font-weight:600}
-html body .ac-workspace .app-home .app-upcoming>.app-section{border:0!important;box-shadow:none!important;padding:16px 0 0!important}
-html body .ac-workspace :is(.app-icon-button,.app-avatar-button){min-width:44px;min-height:44px}
-html body .ac-workspace :is(.app-text-action,.row-actions button,.app-quick-actions button){min-height:44px}
-html body .ac-workspace .app-home button{transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
-@media(max-width:760px){html body .ac-workspace .app-home{gap:18px}html body .ac-workspace .app-home .app-section{border-radius:18px!important;padding:20px!important}html body .ac-workspace .app-home .app-home-secondary{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}html body .ac-workspace .app-topbar :is(.app-header-premium,.app-header-signout){display:none!important}html body .ac-workspace .app-topbar{gap:12px!important;padding:10px 16px!important}html body .ac-workspace .app-topbar .app-topbar-actions{gap:4px;margin-left:auto}html body .ac-workspace .app-home .app-inline-empty{align-items:flex-start;flex-wrap:wrap}html body .ac-workspace .app-home .app-inline-empty p{margin:4px 0}html body .ac-workspace .app-home .app-inline-empty .app-text-action{margin-left:auto}html body .ac-workspace .app-bottom-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))!important}}
+:where(a,button,input,select,textarea,summary):focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)){outline:3px solid var(--color-primary);outline-offset:3px}
+html body .ac-workspace .app-home:not(:where([class^="rg-"],[class^="rg-"] *)){max-width:1180px;margin-inline:auto;gap:24px}
+html body .ac-workspace .app-home .app-section:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;border:1px solid var(--color-border)!important;border-radius:22px!important;box-shadow:0 4px 22px color-mix(in srgb, var(--color-nav) 2%, transparent)!important;padding:24px!important}
+html body .ac-workspace .app-home .app-section-head:not(:where([class^="rg-"],[class^="rg-"] *)){margin-bottom:20px;gap:12px;flex-wrap:wrap}
+html body .ac-workspace .app-home .app-section-head h2:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:17px;letter-spacing:-.025em}
+html body .ac-workspace .app-home .app-caption:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:12px;line-height:1.65;color:var(--color-muted)!important}
+html body .ac-workspace .app-home .app-highlight-description small:not(:where([class^="rg-"],[class^="rg-"] *)){line-height:1.6}
+html body .ac-workspace .app-home .app-maintenance-highlights:not(:where([class^="rg-"],[class^="rg-"] *)){gap:14px}
+html body .ac-workspace .app-home .app-maintenance-highlights>button:not(:where([class^="rg-"],[class^="rg-"] *)){border-radius:18px!important;background:var(--color-surface)!important;border:1px solid var(--color-border)!important}
+html body .ac-workspace .app-home .app-record-row:not(:where([class^="rg-"],[class^="rg-"] *)){min-height:64px;padding-block:14px}
+html body .ac-workspace .app-home .app-record-row>span:not(:where([class^="rg-"],[class^="rg-"] *)){min-width:0}
+html body .ac-workspace .app-home .app-record-row strong:not(:where([class^="rg-"],[class^="rg-"] *)){overflow-wrap:anywhere}
+html body .ac-workspace .app-estimate-settings:not(:where([class^="rg-"],[class^="rg-"] *)){margin-block:16px;border-top:1px solid var(--color-border);padding-top:12px}
+html body .ac-workspace .app-estimate-settings summary:not(:where([class^="rg-"],[class^="rg-"] *)){cursor:pointer;font-size:13px;font-weight:600;color:var(--color-primary-ink);padding-block:10px}
+html body .ac-workspace .app-home .app-upcoming:not(:where([class^="rg-"],[class^="rg-"] *)){border:1px solid var(--color-border);border-radius:18px;background:var(--color-surface);padding:16px 20px}
+html body .ac-workspace .app-home .app-upcoming summary:not(:where([class^="rg-"],[class^="rg-"] *)){cursor:pointer;min-height:28px;font-size:14px;font-weight:600}
+html body .ac-workspace .app-home .app-upcoming>.app-section:not(:where([class^="rg-"],[class^="rg-"] *)){border:0!important;box-shadow:none!important;padding:16px 0 0!important}
+html body .ac-workspace :is(.app-icon-button,.app-avatar-button):not(:where([class^="rg-"],[class^="rg-"] *)){min-width:44px;min-height:44px}
+html body .ac-workspace :is(.app-text-action,.row-actions button,.app-quick-actions button):not(:where([class^="rg-"],[class^="rg-"] *)){min-height:44px}
+html body .ac-workspace .app-home button:not(:where([class^="rg-"],[class^="rg-"] *)){transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
+@media(max-width:760px){html body .ac-workspace .app-home:not(:where([class^="rg-"],[class^="rg-"] *)){gap:18px}html body .ac-workspace .app-home .app-section:not(:where([class^="rg-"],[class^="rg-"] *)){border-radius:18px!important;padding:20px!important}html body .ac-workspace .app-home .app-home-secondary:not(:where([class^="rg-"],[class^="rg-"] *)){display:grid;grid-template-columns:minmax(0,1fr);gap:18px}html body .ac-workspace .app-topbar :is(.app-header-premium,.app-header-signout):not(:where([class^="rg-"],[class^="rg-"] *)){display:none!important}html body .ac-workspace .app-topbar:not(:where([class^="rg-"],[class^="rg-"] *)){gap:12px!important;padding:10px 16px!important}html body .ac-workspace .app-topbar .app-topbar-actions:not(:where([class^="rg-"],[class^="rg-"] *)){gap:4px;margin-left:auto}html body .ac-workspace .app-home .app-inline-empty:not(:where([class^="rg-"],[class^="rg-"] *)){align-items:flex-start;flex-wrap:wrap}html body .ac-workspace .app-home .app-inline-empty p:not(:where([class^="rg-"],[class^="rg-"] *)){margin:4px 0}html body .ac-workspace .app-home .app-inline-empty .app-text-action:not(:where([class^="rg-"],[class^="rg-"] *)){margin-left:auto}html body .ac-workspace .app-bottom-nav:not(:where([class^="rg-"],[class^="rg-"] *)){padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))!important}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;animation-iteration-count:1!important}}
 /* Mobile service forms stay within the viewport; field focus must not resize the page. */
-html body .ac-workspace :is(.dialog,.quick-record-form,.record-form-stage,.record-extra,.record-technical-details,.form-grid,.ac-service-summary){box-sizing:border-box;min-width:0;max-width:100%}
-html body .ac-workspace .dialog .quick-record-form :is(input,select,textarea){box-sizing:border-box!important;min-width:0!important;width:100%;max-width:100%!important;font-size:16px!important;line-height:1.4!important}
-html body .ac-workspace .quick-record-form :is(label,fieldset,.field,.service-reminder-box){min-width:0;max-width:100%;overflow-wrap:anywhere}
+html body .ac-workspace :is(.dialog,.quick-record-form,.record-form-stage,.record-extra,.record-technical-details,.form-grid,.ac-service-summary):not(:where([class^="rg-"],[class^="rg-"] *)){box-sizing:border-box;min-width:0;max-width:100%}
+html body .ac-workspace .dialog .quick-record-form :is(input,select,textarea):not(:where([class^="rg-"],[class^="rg-"] *)){box-sizing:border-box!important;min-width:0!important;width:100%;max-width:100%!important;font-size:16px!important;line-height:1.4!important}
+html body .ac-workspace .quick-record-form :is(label,fieldset,.field,.service-reminder-box):not(:where([class^="rg-"],[class^="rg-"] *)){min-width:0;max-width:100%;overflow-wrap:anywhere}
 @media(max-width:760px){
- html body .ac-workspace .main{min-width:0!important;overflow-x:clip!important}
- html body .ac-workspace .dialog-backdrop{padding:8px!important;box-sizing:border-box}
- html body .ac-workspace .dialog-backdrop .dialog{width:100%!important;max-width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;margin:0!important;padding:18px!important;overflow-y:auto!important;overflow-x:clip!important;border-radius:18px!important}
- html body .ac-workspace .quick-record-form .form-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px!important}
- html body .ac-workspace .quick-record-form :is(.record-form-footer,.record-selected-category,.record-cost-mode){display:flex;flex-wrap:wrap;gap:10px}
- html body .ac-workspace .quick-record-form .record-form-footer button{flex:1 1 120px;min-height:48px}
- html body .ac-workspace .ac-premium-record-table:has(.ac-maintenance-record){overflow:visible!important}
- html body .ac-workspace .ac-premium-record-table:has(.ac-maintenance-record) :is(table,tbody){display:block;width:100%;min-width:0!important}
- html body .ac-workspace .ac-premium-record-table:has(.ac-maintenance-record) thead{display:none}
- html body .ac-workspace .ac-maintenance-record{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;margin:0 0 14px!important;padding:18px!important;background:var(--color-surface)!important;border:1px solid var(--color-border)!important;border-radius:16px!important}
- html body .ac-workspace .ac-maintenance-record td{display:block!important;min-width:0!important;max-width:100%!important;width:auto!important;padding:0!important;border:0!important;white-space:normal!important;overflow-wrap:anywhere}
- html body .ac-workspace .ac-maintenance-record .row-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
- html body .ac-workspace .ac-maintenance-record .row-actions :is(button,.button){flex:1 1 110px!important;min-height:44px!important;white-space:normal!important}
+ html body .ac-workspace .main:not(:where([class^="rg-"],[class^="rg-"] *)){min-width:0!important;overflow-x:clip!important}
+ html body .ac-workspace .dialog-backdrop:not(:where([class^="rg-"],[class^="rg-"] *)){padding:8px!important;box-sizing:border-box}
+ html body .ac-workspace .dialog-backdrop .dialog:not(:where([class^="rg-"],[class^="rg-"] *)){width:100%!important;max-width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;margin:0!important;padding:18px!important;overflow-y:auto!important;overflow-x:clip!important;border-radius:18px!important}
+ html body .ac-workspace .quick-record-form .form-grid:not(:where([class^="rg-"],[class^="rg-"] *)){display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px!important}
+ html body .ac-workspace .quick-record-form :is(.record-form-footer,.record-selected-category,.record-cost-mode):not(:where([class^="rg-"],[class^="rg-"] *)){display:flex;flex-wrap:wrap;gap:10px}
+ html body .ac-workspace .quick-record-form .record-form-footer button:not(:where([class^="rg-"],[class^="rg-"] *)){flex:1 1 120px;min-height:48px}
+ html body .ac-workspace .ac-premium-record-table:has(.ac-maintenance-record):not(:where([class^="rg-"],[class^="rg-"] *)){overflow:visible!important}
+ html body .ac-workspace .ac-premium-record-table:has(.ac-maintenance-record) :is(table,tbody):not(:where([class^="rg-"],[class^="rg-"] *)){display:block;width:100%;min-width:0!important}
+ html body .ac-workspace .ac-premium-record-table:has(.ac-maintenance-record) thead:not(:where([class^="rg-"],[class^="rg-"] *)){display:none}
+ html body .ac-workspace .ac-maintenance-record:not(:where([class^="rg-"],[class^="rg-"] *)){display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;margin:0 0 14px!important;padding:18px!important;background:var(--color-surface)!important;border:1px solid var(--color-border)!important;border-radius:16px!important}
+ html body .ac-workspace .ac-maintenance-record td:not(:where([class^="rg-"],[class^="rg-"] *)){display:block!important;min-width:0!important;max-width:100%!important;width:auto!important;padding:0!important;border:0!important;white-space:normal!important;overflow-wrap:anywhere}
+ html body .ac-workspace .ac-maintenance-record .row-actions:not(:where([class^="rg-"],[class^="rg-"] *)){display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+ html body .ac-workspace .ac-maintenance-record .row-actions :is(button,.button):not(:where([class^="rg-"],[class^="rg-"] *)){flex:1 1 110px!important;min-height:44px!important;white-space:normal!important}
 }
 /* Clear connection state and measured trip data without administrative clutter. */
-html body .ac-workspace .drive-session{padding:26px;border:1px solid var(--color-border);border-radius:24px;background:linear-gradient(135deg,var(--color-surface),var(--color-surface-muted));margin:16px 0 22px;color:var(--color-text)}
-html body .ac-workspace .drive-session-status{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:650;color:var(--color-muted);flex-wrap:wrap}
-html body .ac-workspace .drive-session-dot{width:7px;height:7px;border-radius:50%;background:var(--color-surface-muted);flex-shrink:0}
-html body .ac-workspace .drive-session--driving .drive-session-dot{background:var(--color-success);box-shadow:0 0 0 4px color-mix(in srgb, var(--color-success) 9%, transparent)}
-html body .ac-workspace :is(.drive-session--waiting,.drive-session--reconnecting) .drive-session-dot{background:var(--color-warning)}
-html body .ac-workspace .drive-session-distance{display:flex;align-items:baseline;gap:10px;margin:24px 0 2px;font-variant-numeric:tabular-nums;letter-spacing:-.055em;line-height:1}
-html body .ac-workspace .drive-session-distance>span{font-size:clamp(48px,8vw,74px);font-weight:700}
-html body .ac-workspace .drive-session-distance>small{font-size:22px;font-weight:550;letter-spacing:-.02em;color:var(--color-muted)}
-html body .ac-workspace .drive-session-caption{margin:10px 0 22px;font-size:12px;color:var(--color-muted)}
-html body .ac-workspace .drive-session-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;border-top:1px solid var(--color-border);padding-top:18px}
-html body .ac-workspace .drive-session-details>div{display:flex;flex-direction:column;gap:7px;min-width:0}
-html body .ac-workspace .drive-session-details svg{color:var(--color-primary-ink)}
-html body .ac-workspace .drive-session-details span{font-size:11px;color:var(--color-muted)}
-html body .ac-workspace .drive-session-details strong{font-size:17px;font-weight:650;letter-spacing:-.025em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-html body .ac-workspace .ac-smartdrive-map{padding:8px!important;border-radius:22px!important;border-color:var(--color-border)!important;overflow:hidden}
-html body .ac-workspace .ac-smartdrive-trip-controls{display:flex;flex-wrap:wrap;gap:10px}
-html body .ac-workspace .ac-smartdrive-trip-controls button{min-height:48px;border-radius:13px}
-@media(max-width:480px){html body .ac-workspace .drive-session{padding:20px;border-radius:20px}html body .ac-workspace .drive-session-details{gap:10px}html body .ac-workspace .drive-session-details strong{font-size:14px}html body .ac-workspace .drive-session-details span{font-size:10px}html body .ac-workspace .ac-smartdrive-trip-controls button{flex:1 1 140px}}
+html body .ac-workspace .drive-session:not(:where([class^="rg-"],[class^="rg-"] *)){padding:26px;border:1px solid var(--color-border);border-radius:24px;background:linear-gradient(135deg,var(--color-surface),var(--color-surface-muted));margin:16px 0 22px;color:var(--color-text)}
+html body .ac-workspace .drive-session-status:not(:where([class^="rg-"],[class^="rg-"] *)){display:flex;gap:8px;align-items:center;font-size:12px;font-weight:650;color:var(--color-muted);flex-wrap:wrap}
+html body .ac-workspace .drive-session-dot:not(:where([class^="rg-"],[class^="rg-"] *)){width:7px;height:7px;border-radius:50%;background:var(--color-surface-muted);flex-shrink:0}
+html body .ac-workspace .drive-session--driving .drive-session-dot:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-success);box-shadow:0 0 0 4px color-mix(in srgb, var(--color-success) 9%, transparent)}
+html body .ac-workspace :is(.drive-session--waiting,.drive-session--reconnecting) .drive-session-dot:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-warning)}
+html body .ac-workspace .drive-session-distance:not(:where([class^="rg-"],[class^="rg-"] *)){display:flex;align-items:baseline;gap:10px;margin:24px 0 2px;font-variant-numeric:tabular-nums;letter-spacing:-.055em;line-height:1}
+html body .ac-workspace .drive-session-distance>span:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:clamp(48px,8vw,74px);font-weight:700}
+html body .ac-workspace .drive-session-distance>small:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:22px;font-weight:550;letter-spacing:-.02em;color:var(--color-muted)}
+html body .ac-workspace .drive-session-caption:not(:where([class^="rg-"],[class^="rg-"] *)){margin:10px 0 22px;font-size:12px;color:var(--color-muted)}
+html body .ac-workspace .drive-session-details:not(:where([class^="rg-"],[class^="rg-"] *)){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;border-top:1px solid var(--color-border);padding-top:18px}
+html body .ac-workspace .drive-session-details>div:not(:where([class^="rg-"],[class^="rg-"] *)){display:flex;flex-direction:column;gap:7px;min-width:0}
+html body .ac-workspace .drive-session-details svg:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-primary-ink)}
+html body .ac-workspace .drive-session-details span:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:11px;color:var(--color-muted)}
+html body .ac-workspace .drive-session-details strong:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:17px;font-weight:650;letter-spacing:-.025em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+html body .ac-workspace .ac-smartdrive-map:not(:where([class^="rg-"],[class^="rg-"] *)){padding:8px!important;border-radius:22px!important;border-color:var(--color-border)!important;overflow:hidden}
+html body .ac-workspace .ac-smartdrive-trip-controls:not(:where([class^="rg-"],[class^="rg-"] *)){display:flex;flex-wrap:wrap;gap:10px}
+html body .ac-workspace .ac-smartdrive-trip-controls button:not(:where([class^="rg-"],[class^="rg-"] *)){min-height:48px;border-radius:13px}
+@media(max-width:480px){html body .ac-workspace .drive-session:not(:where([class^="rg-"],[class^="rg-"] *)){padding:20px;border-radius:20px}html body .ac-workspace .drive-session-details:not(:where([class^="rg-"],[class^="rg-"] *)){gap:10px}html body .ac-workspace .drive-session-details strong:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:14px}html body .ac-workspace .drive-session-details span:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:10px}html body .ac-workspace .ac-smartdrive-trip-controls button:not(:where([class^="rg-"],[class^="rg-"] *)){flex:1 1 140px}}
 
 /* Cockpit surfaces shared by the garage, maintenance and SmartDrive. */
-.ac-workspace.ac-studio {
+.ac-workspace.ac-studio:not(:where([class^="rg-"],[class^="rg-"] *)){
   --cockpit-night: var(--midnight-navy);
   --cockpit-edge: var(--steel);
   --cockpit-blue: var(--electric-blue);
 }
-.studio-dashboard-metrics {
+.studio-dashboard-metrics:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
-html body .ac-workspace.ac-studio .studio-dashboard-metrics button {
+html body .ac-workspace.ac-studio .studio-dashboard-metrics button:not(:where([class^="rg-"],[class^="rg-"] *)){
   position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
@@ -86,27 +86,27 @@ html body .ac-workspace.ac-studio .studio-dashboard-metrics button {
   background: linear-gradient(145deg, var(--graphite), var(--cockpit-night));
   border: 1px solid var(--cockpit-edge);
 }
-.studio-dashboard-metrics button > span { color: var(--color-muted); font-size: 12px; }
-.studio-dashboard-metrics button > strong {
+.studio-dashboard-metrics button > span:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-muted); font-size: 12px; }
+.studio-dashboard-metrics button > strong:not(:where([class^="rg-"],[class^="rg-"] *)){
   grid-column: 1 / -1;
   color: var(--color-text);
   font-size: clamp(17px, 2vw, 24px);
   font-variant-numeric: tabular-nums;
 }
-.studio-dashboard-metrics svg { color: var(--color-primary-ink); }
-.studio-metric-arrow { position: absolute; inset: 9px 7px auto auto; opacity: .7; }
-html body .ac-workspace.ac-studio .studio-overview,
-html body .ac-workspace.ac-studio .studio-detail-grid { gap: 14px; }
-html body .ac-workspace.ac-studio .studio-home .studio-panel,
-html body .ac-workspace.ac-studio .studio-home .studio-priority {
+.studio-dashboard-metrics svg:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-primary-ink); }
+.studio-metric-arrow:not(:where([class^="rg-"],[class^="rg-"] *)){ position: absolute; inset: 9px 7px auto auto; opacity: .7; }
+html body .ac-workspace.ac-studio .studio-overview:not(:where([class^="rg-"],[class^="rg-"] *)),
+html body .ac-workspace.ac-studio .studio-detail-grid:not(:where([class^="rg-"],[class^="rg-"] *)){ gap: 14px; }
+html body .ac-workspace.ac-studio .studio-home .studio-panel:not(:where([class^="rg-"],[class^="rg-"] *)),
+html body .ac-workspace.ac-studio .studio-home .studio-priority:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: linear-gradient(155deg, var(--graphite), var(--cockpit-night));
   border-color: var(--cockpit-edge);
 }
-html body .ac-workspace.ac-studio .studio-home .studio-vehicle-photo,
-html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo {
+html body .ac-workspace.ac-studio .studio-home .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)),
+html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: radial-gradient(ellipse at 76% 28%, var(--color-primary-deep), var(--graphite) 44%, var(--midnight-navy) 80%);
 }
-.ac-service-garage {
+.ac-service-garage:not(:where([class^="rg-"],[class^="rg-"] *)){
   min-width: 0;
   margin-block: 0 16px;
   padding: 14px;
@@ -114,14 +114,14 @@ html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo {
   border-radius: 16px;
   background: var(--cockpit-night);
 }
-.ac-service-vehicles { display: flex; flex-wrap: wrap; gap: 8px; }
-.ac-service-vehicles button { min-width: 0; }
-.ac-service-vehicles button[aria-pressed='true'],
-.ac-trip-history-list button[aria-pressed='true'] {
+.ac-service-vehicles:not(:where([class^="rg-"],[class^="rg-"] *)){ display: flex; flex-wrap: wrap; gap: 8px; }
+.ac-service-vehicles button:not(:where([class^="rg-"],[class^="rg-"] *)){ min-width: 0; }
+.ac-service-vehicles button[aria-pressed='true']:not(:where([class^="rg-"],[class^="rg-"] *)),
+.ac-trip-history-list button[aria-pressed='true']:not(:where([class^="rg-"],[class^="rg-"] *)){
   box-shadow: inset 0 0 0 1px var(--cockpit-blue);
   color: var(--cockpit-blue);
 }
-.ac-service-vehicle {
+.ac-service-vehicle:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
   gap: 14px;
@@ -129,45 +129,45 @@ html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo {
   margin-top: 14px;
   padding: 14px;
   border-radius: 13px;
-  background: linear-gradient(115deg, #1b2737, #202d43);
+  background: linear-gradient(115deg, #17241F, #17241F);
 }
-.ac-service-vehicle p { color: var(--color-muted); margin-block: 6px; }
-html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo {
+.ac-service-vehicle p:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-muted); margin-block: 6px; }
+html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)){
   height: clamp(100px, 16vw, 205px);
 }
-.ac-drive-cockpit,
-.ac-trip-history-cockpit {
+.ac-drive-cockpit:not(:where([class^="rg-"],[class^="rg-"] *)),
+.ac-trip-history-cockpit:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(215px, 26%);
   gap: 14px;
   align-items: start;
 }
-.ac-trip-history-cockpit { grid-template-columns: minmax(210px, 30%) minmax(0, 1fr); }
-html body .ac-workspace.ac-studio .ac-drive-cockpit .ac-smartdrive-map {
+.ac-trip-history-cockpit:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: minmax(210px, 30%) minmax(0, 1fr); }
+html body .ac-workspace.ac-studio .ac-drive-cockpit .ac-smartdrive-map:not(:where([class^="rg-"],[class^="rg-"] *)){
   padding: 0 !important;
   border: 1px solid var(--cockpit-edge) !important;
   border-radius: 16px !important;
   background: var(--cockpit-night) !important;
 }
-.ac-workspace .ac-drive-cockpit .ac-road-map,
-.ac-workspace .ac-trip-history-map .ac-road-map {
+.ac-workspace .ac-drive-cockpit .ac-road-map:not(:where([class^="rg-"],[class^="rg-"] *)),
+.ac-workspace .ac-trip-history-map .ac-road-map:not(:where([class^="rg-"],[class^="rg-"] *)){
   border: 0 !important;
   border-radius: 15px 15px 0 0 !important;
-  background: #172231 !important;
+  background: #17241F !important;
 }
-.ac-workspace .ac-road-map .ac-road-map-message {
+.ac-workspace .ac-road-map .ac-road-map-message:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: var(--cockpit-night) !important;
   color: var(--color-text) !important;
 }
-.ac-road-map .ac-dark-road-tiles { filter: invert(.91) hue-rotate(172deg) saturate(.75) brightness(.85); }
-.ac-road-map .maplibregl-ctrl-group .maplibregl-ctrl-icon { filter: invert(1); }
-.ac-workspace .ac-road-map .maplibregl-ctrl-attrib {
+.ac-road-map .ac-dark-road-tiles:not(:where([class^="rg-"],[class^="rg-"] *)){ filter: invert(.91) hue-rotate(172deg) saturate(.75) brightness(.85); }
+.ac-road-map .maplibregl-ctrl-group .maplibregl-ctrl-icon:not(:where([class^="rg-"],[class^="rg-"] *)){ filter: invert(1); }
+.ac-workspace .ac-road-map .maplibregl-ctrl-attrib:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: var(--cockpit-night);
   color: var(--color-muted);
 }
-.ac-workspace .ac-road-map .maplibregl-ctrl-attrib-button { filter: invert(1); }
-.ac-drive-map-footer,
-.ac-trip-map-legend {
+.ac-workspace .ac-road-map .maplibregl-ctrl-attrib-button:not(:where([class^="rg-"],[class^="rg-"] *)){ filter: invert(1); }
+.ac-drive-map-footer:not(:where([class^="rg-"],[class^="rg-"] *)),
+.ac-trip-map-legend:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -178,32 +178,32 @@ html body .ac-workspace.ac-studio .ac-drive-cockpit .ac-smartdrive-map {
   color: var(--color-text);
   font-size: 13px;
 }
-.ac-drive-map-footer span { display: inline-flex; gap: 7px; align-items: center; }
-.ac-smartdrive-map > p { margin: 10px 14px; }
-html body .ac-workspace.ac-studio .ac-drive-cockpit .drive-session { padding: 16px !important; min-width: 0; }
-html body .ac-workspace.ac-studio .ac-drive-cockpit .drive-session-distance > span {
+.ac-drive-map-footer span:not(:where([class^="rg-"],[class^="rg-"] *)){ display: inline-flex; gap: 7px; align-items: center; }
+.ac-smartdrive-map > p:not(:where([class^="rg-"],[class^="rg-"] *)){ margin: 10px 14px; }
+html body .ac-workspace.ac-studio .ac-drive-cockpit .drive-session:not(:where([class^="rg-"],[class^="rg-"] *)){ padding: 16px !important; min-width: 0; }
+html body .ac-workspace.ac-studio .ac-drive-cockpit .drive-session-distance > span:not(:where([class^="rg-"],[class^="rg-"] *)){
   font-size: clamp(34px, 4vw, 52px) !important;
 }
-html body .ac-workspace .ac-drive-cockpit .drive-session-details { grid-template-columns: minmax(0, 1fr); }
-.ac-trip-history-list {
+html body .ac-workspace .ac-drive-cockpit .drive-session-details:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: minmax(0, 1fr); }
+.ac-trip-history-list:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   gap: 8px;
   max-height: 450px;
   overflow: auto;
   padding: 3px;
 }
-.ac-trip-history-list label { display: grid; gap: 6px; }
-.ac-trip-history-list input { min-width: 0; width: 100%; }
-html body .ac-workspace .ac-trip-history-list button {
+.ac-trip-history-list label:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; gap: 6px; }
+.ac-trip-history-list input:not(:where([class^="rg-"],[class^="rg-"] *)){ min-width: 0; width: 100%; }
+html body .ac-workspace .ac-trip-history-list button:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   justify-content: start;
   text-align: left;
   gap: 4px;
   background: var(--cockpit-night);
 }
-.ac-trip-history-list button span { font-size: 12px; }
-.ac-trip-history-map { min-width: 0; }
-.ac-trip-map-empty {
+.ac-trip-history-list button span:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: 12px; }
+.ac-trip-history-map:not(:where([class^="rg-"],[class^="rg-"] *)){ min-width: 0; }
+.ac-trip-map-empty:not(:where([class^="rg-"],[class^="rg-"] *)){
   min-height: 225px;
   display: grid;
   align-content: center;
@@ -211,14 +211,14 @@ html body .ac-workspace .ac-trip-history-list button {
   gap: 8px;
   padding: 18px;
   text-align: center;
-  background: radial-gradient(ellipse at 50% 10%, #263653, var(--cockpit-night));
+  background: radial-gradient(ellipse at 50% 10%, #304B40, var(--cockpit-night));
   border: 1px solid var(--cockpit-edge);
   border-radius: 14px;
 }
-.ac-trip-map-empty svg { color: var(--cockpit-blue); }
-.ac-trip-map-empty p { color: var(--color-muted); margin: 0; }
-.ac-trip-map-legend { justify-content: start; gap: 20px; }
-.ac-trip-map-legend span::before {
+.ac-trip-map-empty svg:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--cockpit-blue); }
+.ac-trip-map-empty p:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-muted); margin: 0; }
+.ac-trip-map-legend:not(:where([class^="rg-"],[class^="rg-"] *)){ justify-content: start; gap: 20px; }
+.ac-trip-map-legend span:not(:where([class^="rg-"],[class^="rg-"] *))::before {
   display: inline-block;
   content: '';
   width: 9px;
@@ -227,8 +227,8 @@ html body .ac-workspace .ac-trip-history-list button {
   border-radius: 50%;
   background: var(--color-success);
 }
-.ac-trip-map-legend span + span::before { background: var(--ice-cyan); }
-.ac-mileage-history-callout {
+.ac-trip-map-legend span + span:not(:where([class^="rg-"],[class^="rg-"] *))::before { background: var(--ice-cyan); }
+.ac-mileage-history-callout:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -240,31 +240,31 @@ html body .ac-workspace .ac-trip-history-list button {
   border-radius: 12px;
   background: var(--cockpit-night);
 }
-.ac-mileage-history-callout p { margin: 4px 0 0; }
+.ac-mileage-history-callout p:not(:where([class^="rg-"],[class^="rg-"] *)){ margin: 4px 0 0; }
 @media (max-width: 1150px) {
-  .ac-drive-cockpit { grid-template-columns: minmax(0, 1fr); }
-  html body .ac-workspace .ac-drive-cockpit .drive-session-details { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ac-drive-cockpit:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: minmax(0, 1fr); }
+  html body .ac-workspace .ac-drive-cockpit .drive-session-details:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 720px) {
-  .studio-dashboard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .ac-trip-history-cockpit { grid-template-columns: minmax(0, 1fr); }
-  .ac-trip-history-list { max-height: 265px; }
-  .ac-workspace .ac-road-map .ac-road-map-canvas { height: clamp(240px, 42vh, 390px) !important; }
+  .studio-dashboard-metrics:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .ac-trip-history-cockpit:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: minmax(0, 1fr); }
+  .ac-trip-history-list:not(:where([class^="rg-"],[class^="rg-"] *)){ max-height: 265px; }
+  .ac-workspace .ac-road-map .ac-road-map-canvas:not(:where([class^="rg-"],[class^="rg-"] *)){ height: clamp(240px, 42vh, 390px) !important; }
 }
 @media (max-width: 390px) {
-  html body .ac-workspace .ac-drive-cockpit .drive-session-details,
-  .ac-service-vehicle { grid-template-columns: minmax(0, 1fr); }
+  html body .ac-workspace .ac-drive-cockpit .drive-session-details:not(:where([class^="rg-"],[class^="rg-"] *)),
+  .ac-service-vehicle:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: minmax(0, 1fr); }
 }
 
-html body .app-shell.ac-workspace.ac-studio :is(.sidebar, .app-topbar, .autocare-mobile-dock) {
+html body .app-shell.ac-workspace.ac-studio :is(.sidebar, .app-topbar, .autocare-mobile-dock):not(:where([class^="rg-"],[class^="rg-"] *)){
   background: linear-gradient(150deg, var(--graphite), var(--midnight-navy) 70%) !important;
 }
-html body .app-shell.ac-workspace.ac-studio .ws-navigation a.active {
+html body .app-shell.ac-workspace.ac-studio .ws-navigation a.active:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: var(--color-primary-soft) !important;
   box-shadow: inset 2px 0 var(--cockpit-blue) !important;
 }
 
-.ac-smartdrive-views {
+.ac-smartdrive-views:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
@@ -273,37 +273,37 @@ html body .app-shell.ac-workspace.ac-studio .ws-navigation a.active {
   border-radius: 13px;
   background: var(--cockpit-night);
 }
-html body .ac-workspace .ac-smartdrive-views button {
+html body .ac-workspace .ac-smartdrive-views button:not(:where([class^="rg-"],[class^="rg-"] *)){
   flex: 1 1 135px;
   justify-content: center;
 }
-html body .ac-workspace .ac-smartdrive-views button[aria-pressed='true'] {
+html body .ac-workspace .ac-smartdrive-views button[aria-pressed='true']:not(:where([class^="rg-"],[class^="rg-"] *)){
   border-color: var(--cockpit-blue);
-  background: #293953;
+  background: #304B40;
   color: #e5ebff;
 }
 
 /* Midnight Titanium cockpit. Each figure is driven by the selected vehicle. */
-html body .ac-workspace.ac-studio .studio-home {
+html body .ac-workspace.ac-studio .studio-home:not(:where([class^="rg-"],[class^="rg-"] *)){
   gap: clamp(12px, 1.4vw, 19px) !important;
 }
-.studio-home-heading {
+.studio-home-heading:not(:where([class^="rg-"],[class^="rg-"] *)){
   min-width: 0;
   padding: clamp(16px, 2vw, 27px);
   border: 1px solid var(--steel);
   border-radius: 14px;
   background:
     radial-gradient(ellipse at 82% 0%, color-mix(in srgb, var(--electric-blue) 20%, transparent), transparent 65%),
-    repeating-linear-gradient(90deg, transparent 0 47px, #b8c4d20a 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, #A5B8AF0a 47px 48px),
     var(--midnight-navy);
 }
-.studio-telemetry {
+.studio-telemetry:not(:where([class^="rg-"],[class^="rg-"] *)){
   min-width: 0;
   border: 1px solid var(--steel);
   border-radius: 14px;
   background: var(--midnight-navy);
 }
-.studio-telemetry-heading {
+.studio-telemetry-heading:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -312,24 +312,24 @@ html body .ac-workspace.ac-studio .studio-home {
   padding: 11px 16px;
   border-bottom: 1px solid var(--steel);
 }
-.studio-telemetry-heading h2 { margin: 0; font-size: 15px; }
-.studio-telemetry-heading > span { color: var(--titanium-silver); font-size: 12px; }
-.studio-telemetry .studio-dashboard-metrics { gap: 0; margin: 0; }
-html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button {
+.studio-telemetry-heading h2:not(:where([class^="rg-"],[class^="rg-"] *)){ margin: 0; font-size: 15px; }
+.studio-telemetry-heading > span:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--titanium-silver); font-size: 12px; }
+.studio-telemetry .studio-dashboard-metrics:not(:where([class^="rg-"],[class^="rg-"] *)){ gap: 0; margin: 0; }
+html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:not(:where([class^="rg-"],[class^="rg-"] *)){
   min-height: 88px;
   border: 0 !important;
   border-radius: 0 !important;
   border-inline-end: 1px solid var(--steel) !important;
   background: transparent !important;
 }
-html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:last-child {
+html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:last-child:not(:where([class^="rg-"],[class^="rg-"] *)){
   border-inline-end: 0 !important;
 }
-html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:hover {
+html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:hover:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: var(--color-primary-soft) !important;
 }
-.studio-telemetry .studio-dashboard-metrics svg { color: var(--color-primary-ink); }
-.studio-vehicle-illustration {
+.studio-telemetry .studio-dashboard-metrics svg:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-primary-ink); }
+.studio-vehicle-illustration:not(:where([class^="rg-"],[class^="rg-"] *)){
   position: absolute;
   inset: auto 0 20% auto;
   display: grid;
@@ -337,7 +337,7 @@ html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-
   width: min(75%, 480px);
   aspect-ratio: 2.5;
 }
-.studio-vehicle-illustration::before {
+.studio-vehicle-illustration:not(:where([class^="rg-"],[class^="rg-"] *))::before {
   position: absolute;
   inset: 57% 3% -6%;
   content: '';
@@ -345,45 +345,45 @@ html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-
   border-radius: 50%;
   background: radial-gradient(ellipse, color-mix(in srgb, var(--electric-blue) 22%, transparent), transparent 69%);
 }
-.studio-vehicle-illustration .car-art { position: relative; width: 100%; height: auto; }
-html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-mini-chart {
+.studio-vehicle-illustration .car-art:not(:where([class^="rg-"],[class^="rg-"] *)){ position: relative; width: 100%; height: auto; }
+html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-mini-chart:not(:where([class^="rg-"],[class^="rg-"] *)){
   padding-inline: 10px;
   margin-top: 8px;
-  background: repeating-linear-gradient(to top, transparent 0 27px, #b8c4d219 27px 28px);
+  background: repeating-linear-gradient(to top, transparent 0 27px, #A5B8AF19 27px 28px);
   border-radius: 9px;
 }
-html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-chart-track {
+html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-chart-track:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: transparent;
 }
-html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-chart-track > i {
+html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-chart-track > i:not(:where([class^="rg-"],[class^="rg-"] *)){
   width: min(78%, 38px);
   background: linear-gradient(to top, var(--electric-blue) 25%, var(--ice-cyan));
 }
-html body .ac-workspace.ac-studio .studio-telemetry-chart button[aria-pressed='true'] .studio-chart-track > i {
+html body .ac-workspace.ac-studio .studio-telemetry-chart button[aria-pressed='true'] .studio-chart-track > i:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: linear-gradient(to top, var(--electric-blue), var(--titanium-silver));
 }
-html body .ac-lux-public.ac-studio-public .studio-landing-hero {
+html body .ac-lux-public.ac-studio-public .studio-landing-hero:not(:where([class^="rg-"],[class^="rg-"] *)){
   background:
     radial-gradient(ellipse at 84% 6%, var(--color-primary-deep), transparent 60%),
-    repeating-linear-gradient(90deg, transparent 0 71px, #b8c4d209 71px 72px),
+    repeating-linear-gradient(90deg, transparent 0 71px, #A5B8AF09 71px 72px),
     var(--obsidian-black);
 }
-html body .ac-lux-public.ac-studio-public .studio-landing-photography {
+html body .ac-lux-public.ac-studio-public .studio-landing-photography:not(:where([class^="rg-"],[class^="rg-"] *)){
   border-color: var(--steel);
   box-shadow: 0 22px 70px #0006, 0 0 40px color-mix(in srgb, var(--electric-blue) 12%, transparent);
 }
 @media (max-width: 720px) {
-  html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:nth-child(-n+2) {
+  html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:nth-child(-n+2):not(:where([class^="rg-"],[class^="rg-"] *)){
     border-bottom: 1px solid var(--steel) !important;
   }
-  html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:nth-child(2) {
+  html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-metrics button:nth-child(2):not(:where([class^="rg-"],[class^="rg-"] *)){
     border-inline-end: 0 !important;
   }
-  .studio-vehicle-illustration { width: 80%; bottom: 23%; }
+  .studio-vehicle-illustration:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 80%; bottom: 23%; }
 }
 
-html body .app-shell.ac-workspace.ac-studio .sidebar .brand .brandmark svg,
-html body .ac-public-shell .brandmark svg {
+html body .app-shell.ac-workspace.ac-studio .sidebar .brand .brandmark svg:not(:where([class^="rg-"],[class^="rg-"] *)),
+html body .ac-public-shell .brandmark svg:not(:where([class^="rg-"],[class^="rg-"] *)){
   color: var(--ice-cyan) !important;
   stroke: currentColor !important;
 }

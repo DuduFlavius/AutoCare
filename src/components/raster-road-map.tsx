@@ -96,17 +96,17 @@ export default function RasterRoadMap({
         layer.on('load', () => {
           if (!disposed) setTileError(false);
         });
-        planned.current = L.polyline([], { color: '#56a8ff', weight: 7, interactive: false }).addTo(view);
+        planned.current = L.polyline([], { color: '#71E5BB', weight: 7, interactive: false }).addTo(view);
         line.current = L.polyline(
           routeGeometry(latest.current).features.map((f) =>
             f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
           ),
-          { color: history ? '#56d6e8' : '#398bff', weight: 4, lineCap: 'round', lineJoin: 'round' },
+          { color: history ? '#71E5BB' : '#71E5BB', weight: 4, lineCap: 'round', lineJoin: 'round' },
         ).addTo(view);
         if (history && last && latest.current.length > 1) {
           const first = latest.current[0];
-          L.circleMarker([first.latitude, first.longitude], { radius: 6, color: '#75c9ac', fillOpacity: 1 }).addTo(view);
-          L.circleMarker([last.latitude, last.longitude], { radius: 6, color: '#56d6e8', fillOpacity: 1 }).addTo(view);
+          L.circleMarker([first.latitude, first.longitude], { radius: 6, color: '#34C997', fillOpacity: 1 }).addTo(view);
+          L.circleMarker([last.latitude, last.longitude], { radius: 6, color: '#71E5BB', fillOpacity: 1 }).addTo(view);
           const [sw, ne] = tripBounds(latest.current);
           view.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], { padding: [48, 48], maxZoom: 16, animate: false });
         } else if (last) {
@@ -205,7 +205,7 @@ export default function RasterRoadMap({
     const pins: import('leaflet').CircleMarker[] = [];
     void import('leaflet').then(L => {
       if (disposed || map.current !== view) return;
-      pins.push(L.circleMarker([destination.latitude, destination.longitude], { radius: 8, color: '#56d6e8', fillOpacity: 1 }).addTo(view));
+      pins.push(L.circleMarker([destination.latitude, destination.longitude], { radius: 8, color: '#71E5BB', fillOpacity: 1 }).addTo(view));
       if (routeStart) pins.push(L.circleMarker([routeStart[1], routeStart[0]], { radius: 7, color: '#76e3b1', fillOpacity: 1 }).addTo(view));
     });
     return () => { disposed = true; pins.forEach(pin => pin.remove()); };

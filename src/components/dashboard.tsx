@@ -21,9 +21,6 @@ import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
 import './studio-workspace.css';
-import './application/reference-dashboard.css';
-import './premium-workspace-theme.css';
-import './application/product-refinement.css';
 import { DocumentVault } from './application/document-vault';
 import './application/mobile-reference.css';
 import { FinanceCenter } from './application/finance-center';
@@ -34,6 +31,8 @@ import { WorkspaceNavigation, WorkspaceLauncher, WorkspaceContext, WorkspacePref
 import { normalizeWorkspaceSearch, normalizeWorkspaceTab, workspaceHref, workspaceSections } from '@/lib/workspace';
 import SiteLanguage from './site-language';
 import ApplicationHome from './application/home';
+import {RacingMenu,RacingMaintenance,RacingCalendar} from './application/racing-screens';
+import {RacingSupport} from './application/racing-support';
 import { AutoAiWorkspace } from './application/auto-ai-workspace';
 import ApplicationHeader from './application/header';
 import LanguageMenu from './language-menu';
@@ -103,6 +102,7 @@ type Modal = {
   record?: RecordItem;
   completionOf?: string;
   planned?: boolean;
+  initialDate?: string;
 } | null;
 const _money = (b: number) =>
   new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(b / 100);
@@ -199,7 +199,7 @@ function Dialog({
   return (
     <div className="dialog-backdrop">
       <div
-        className={'dialog ' + className}
+        className={className.startsWith('rg-')?className+' dialog':'dialog '+className}
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
@@ -359,7 +359,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     [recordDirty, setRecordDirty] = useState(false),
     [recordSaving, setRecordSaving] = useState(false),
     [recordView, setRecordView] = useState('timeline'),
-    [calendarView, setCalendarView] = useState('list'),
+    [, setCalendarView] = useState('list'),
+    [racingMenu,setRacingMenu]=useState(false),
     [showArchived, setShowArchived] = useState(false),
     [deleteRecordTarget, setDeleteRecordTarget] = useState<Data['records'][number] | null>(null),
     [archiveVehicleTarget, setArchiveVehicleTarget] = useState<Data['vehicles'][number] | null>(null),
@@ -371,7 +372,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     }> | null>(null),
     [admin, setAdmin] = useState<any>(null),
     [invoices, setInvoices] = useState<any[]>([]),
-    [calendarMonth, setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
+    [_calendarMonth, _setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
   const dashboardRequest = useRef(0);
   const locale=language==='en'?'en-GB':'ro-RO';
   useEffect(()=>{if(previewData||tab!=='Abonament')return;const timer=setInterval(()=>{if(document.visibilityState==='visible'){void api('billing/sync','POST').then(()=>refresh(true)).catch(()=>{});void refresh(true);void api('billing/invoices').then(setInvoices).catch(e=>setError(e.message));}},15000);return()=>clearInterval(timer);},[tab,previewData]);
@@ -858,8 +859,9 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       <WorkspaceViewport service={tab==='Întreținere'}/>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
       {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>navigate('Garaj', 'push', id)} /></Dialog>}
+      {racingMenu&&<Dialog className="rg-menu-dialog" title={language==='en'?'Menu':'Meniu'} onClose={()=>setRacingMenu(false)}><RacingMenu active={tab} onClose={()=>setRacingMenu(false)} name={name} premium={!!data?.premium} navigate={next=>{if(navigate(next))setRacingMenu(false);}} onSignOut={()=>void signOut()} preview={!!previewData}/></Dialog>}
       <aside className="sidebar">
-        <Brand reference
+        <Brand
           href={previewData ? '/previzualizare' : '/cont'}
           onClick={(e) => {
             if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -939,7 +941,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       </aside>
       {data&&!previewData&&<NativeTripSync ownerId={data.profile.userId} vehicles={data.vehicles.filter(v=>!v.archived)} onUpdated={refresh} onReview={()=>navigate('Plan întreținere')} english={language==='en'}/>}
       <SiteLanguage language={language} />
-      <ApplicationHeader reference onLanguage={changeLanguage} title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (tab==='Feedback utilizatori'?(language==='en'?'User feedback':'Feedback utilizatori'):(workspaceSections.find(s=>s.id===tab)?.[language] ?? tab))} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
+      <ApplicationHeader onMenu={()=>setRacingMenu(true)} reference onLanguage={changeLanguage} title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (tab==='Feedback utilizatori'?(language==='en'?'User feedback':'Feedback utilizatori'):(workspaceSections.find(s=>s.id===tab)?.[language] ?? tab))} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
       <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'}/>
       <main id="workspace-main" tabIndex={-1} aria-busy={busy||!data}
         className={
@@ -1018,12 +1020,13 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                 </button>
               ) : null}
             </WorkspaceModuleHeader>}
-            {!['Feedback','Feedback utilizatori'].includes(tab)&&<FeedbackNotice admin={['admin','superadmin','founder'].includes(data.profile.role)} preview={!!previewData} onOpen={()=>navigate(['admin','superadmin','founder'].includes(data.profile.role)?'Feedback utilizatori':'Feedback')}/>}
+            {!['Feedback','Feedback utilizatori'].includes(tab)&&<div className="rg-feedback-slot"><FeedbackNotice admin={['admin','superadmin','founder'].includes(data.profile.role)} preview={!!previewData} onOpen={()=>navigate(['admin','superadmin','founder'].includes(data.profile.role)?'Feedback utilizatori':'Feedback')}/></div>}
             {tab==='Feedback'&&<FeedbackWorkspace onExit={()=>navigate('Cont','push',null,true)} onSupport={()=>navigate('Centru de suport','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>}
             {tab==='Feedback utilizatori'&&(['admin','superadmin','founder'].includes(data.profile.role)?<FeedbackWorkspace admin onExit={()=>navigate('Cont','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>:<p role="alert">{language==='en'?'Administrator access required.':'Acces rezervat administratorilor.'}</p>)}
             <FeedbackInvitation enabled={tab==='Dashboard'&&!busy&&!modal&&!recordDirty&&!recordSaving} userId={data.profile.userId} preview={!!previewData} onOpen={()=>navigate('Feedback')}/>
             <WorkspaceContext tab={tab} language={language} navigate={navigate} />
             {drill && <div className="card between"><strong>{drill.label}</strong><button type="button" onClick={()=>setDrill(null)}>{language==='en'?'Show all':'Vezi toate'}</button></div>}
+            {tab==='Întreținere'&&<RacingMaintenance data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} today={nowDate} onOpen={record=>setModal({kind:'service',record})} onCreate={()=>setModal({kind:'service'})}/>}
             {tab === 'Dashboard' && <ApplicationHome onDrill={(next,vehicleId,ids,label)=>{if(!navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
             {tab === 'RCA & Rovinietă' && <RenewalCenter key={data.profile.offsets.join(',')+String(data.profile.emailEnabled)+String(data.profile.pushEnabled)} data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} onDocument={(category,record)=>{setRenewalCategory(category);setModal({kind:'document',record});}} onNavigate={next=>{if(navigate(next)&&next==='Setări')setSettingsPanel('alerts');}} onPreferences={async profile=>{await act(()=>api('profile','PUT',{timezone:profile.timezone,emailEnabled:profile.emailEnabled,pushEnabled:profile.pushEnabled,afterExpiry:profile.afterExpiry,offsets:profile.offsets,hour:profile.hour}));}} busy={busy} preview={!!previewData}/>}
             {tab === 'AutoCare AI' && <AutoAiWorkspace onExit={()=>navigate('Dashboard')}
@@ -1105,7 +1108,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               onUpload={async(record,file)=>{if(file.size>2097152)throw Error(language==='en'?'Choose a file up to 2 MB.':'Alege un fișier de maximum 2 MB.');const form=new FormData();form.set('file',file);form.set('recordId',record.id);const res=await fetch('/api/v1/files',{method:'POST',body:form});const out=await res.json().catch(()=>({}));if(!res.ok)throw new Error(out.error||(language==='en'?'Upload failed.':'Încărcarea a eșuat.'));await refresh();setNotice(language==='en'?'Document attached.':'Documentul a fost atașat.');}}
             />}
             {['Întreținere'].includes(tab) && (
-              <>
+              <div className="maintenance-desktop">
                 {tab === 'Documente' && (
                   <>
                     <section className="ac-vault-folder" data-workspace-ui><div><FolderOpen size={24}/><div><h3>{language==='en'?'Your digital document vault':'Dosarul tău digital'}</h3><p>{language==='en'?'Choose a vehicle to open its documents.':'Alege o mașină pentru a deschide documentele ei.'}</p></div></div><label>{language==='en'?'Vehicle folder':'Dosar vehicul'}<FilterSelect value={filter} onChange={e=>setFilter(e.target.value)}><option value="">{language==='en'?'All vehicles':'Toate mașinile'}</option>{data.vehicles.map(car=><option key={car.id} value={car.id}>{car.brand} {car.model} · {car.plate}</option>)}</FilterSelect></label></section>
@@ -1557,96 +1560,9 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                     </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
-            {tab === 'Calendar' && (
-              <section className="card">
-                <div className="toolbar">
-                  <label>
-                    Luna
-                    <PremiumDateInput
-                      type="month"
-                      value={calendarMonth}
-                      onChange={(e) => setCalendarMonth(e.target.value)}
-                    />
-                  </label>
-                  <button type="button" onClick={() => setCalendarMonth(nowDate.slice(0, 7))} disabled={calendarMonth === nowDate.slice(0, 7)}>
-                    <CalendarDays size={17}/> {language === 'en' ? 'Current month' : 'Luna curentă'}
-                  </button>
-                  <span className="small muted">Scadențele documentelor și lucrărilor active</span>
-                </div>
-                <div className="toolbar">
-                  <button
-                    aria-pressed={calendarView === 'list'}
-                    onClick={() => setCalendarView('list')}
-                  >
-                    Listă
-                  </button>
-                  <button
-                    aria-pressed={calendarView === 'month'}
-                    onClick={() => setCalendarView('month')}
-                  >
-                    Lună
-                  </button>
-                  <FilterSelect
-                    aria-label="Mașina din calendar"
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                  >
-                    <option value="">Toate mașinile</option>
-                    {activeCars.map((v) => (
-                      <option data-user-content key={v.id} value={v.id}>
-                        {v.brand} {v.model} · {v.plate}
-                      </option>
-                    ))}
-                  </FilterSelect>
-                </div>
-                {calendarView === 'month' ? (
-                  <Calendar
-                    month={calendarMonth}
-                    today={nowDate}
-                    open={(record) =>
-                      setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })
-                    }
-                    rows={visible.filter((r) => activeCars.some((v) => v.id === r.vehicleId))}
-                  />
-                ) : (
-                  <div>
-                    {visible
-                      .filter(
-                        (r) =>
-                          (drill ? !!calendarRecordDate(r, nowDate) : calendarRecordDate(r, nowDate)?.startsWith(calendarMonth)) &&
-                          activeCars.some((v) => v.id === r.vehicleId),
-                      )
-                      .sort((a, b) => calendarRecordDate(a, nowDate)!.localeCompare(calendarRecordDate(b, nowDate)!))
-                      .map((r) => (
-                        <button
-                          className="event-line"
-                          key={r.id}
-                          onClick={() =>
-                            setModal({
-                              kind: r.kind as 'document' | 'service' | 'expense',
-                              record: r,
-                            })
-                          }
-                        >
-                          <span className="event-date">{calendarRecordDate(r, nowDate)?.slice(-2)}</span>
-                          <span className="list-grow">
-                            <strong data-user-content>{r.title}</strong>
-                            <span className="muted small">{vehicleName(r.vehicleId)}</span>
-                          </span>
-                          {isPlannedService(r, nowDate)
-                            ? <span className="badge">{language === 'en' ? 'Scheduled work' : 'Lucrare planificată'}</span>
-                            : <Status record={r} />}
-                        </button>
-                      ))}
-                    {!visible.some((r) => (drill ? !!calendarRecordDate(r, nowDate) : calendarRecordDate(r, nowDate)?.startsWith(calendarMonth)) && activeCars.some(v => v.id === r.vehicleId)) && (
-                      <Empty text="Nu ai termene înregistrate în luna selectată." />
-                    )}
-                  </div>
-                )}
-              </section>
-            )}
+            {tab==='Calendar'&&<RacingCalendar data={data} today={nowDate} onOpen={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onCreate={day=>setModal({kind:'service',planned:true,initialDate:day})}/>}
             {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
             {openedSmartDrive && <div hidden={tab !== 'Plan întreținere'}><MileagePlanner data={data} initialDrive={initialDrive} driveVisible={tab === 'Plan întreținere'} preview={!!previewData} onUpdated={refresh} onError={setError} /></div>}
             {tab === 'Notificări' && (
@@ -1706,7 +1622,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               </div>
             )}
             {tab === 'Centru de suport' && (
-              <SupportChat role={data.profile.role} preview={!!previewData} onFeedback={()=>navigate('Feedback')} />
+              <RacingSupport role={data.profile.role} preview={!!previewData} onFeedback={()=>navigate('Feedback')} />
             )}
             {tab==='Abonament'&&<><PlayBillingPanel onUpdated={()=>refresh(true)}/><SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(hasPlayBilling())throw new Error('Gestionează abonamentul din Google Play.');if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/></>}
             {tab==='Rapoarte'&&(data.premium?<PremiumDownloads data={data} language={language} preview={!!previewData}/>:<section className="card studio-report-intro"><Download size={32}/><h2>{language==='en'?'Reports, ready when you need them.':'Rapoartele tale, gata când ai nevoie.'}</h2><p>{language==='en'?'PDF and CSV reports are included with Premium. Your personal data export remains free in account settings.':'Rapoartele PDF și CSV sunt incluse cu Premium. Exportul datelor personale rămâne gratuit în setările contului.'}</p><button className="primary" onClick={()=>navigate('Premium')}>{language==='en'?'Compare plans':'Compară planurile'}</button></section>)}
@@ -2016,6 +1932,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                 kind={modal.kind}
                 initialCategory={tab==='RCA & Rovinietă'?renewalCategory:undefined}
                 record={modal.record}
+                initialDate={modal.initialDate}
                 planned={modal.planned || (!modal.completionOf && !!modal.record && isPlannedService(modal.record, nowDate))}
                 data={data}
                 vehicleId={filter || undefined}
@@ -2174,7 +2091,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     </div></ApplicationLanguageProvider>
   );
 }
-function Calendar({
+export function Calendar({
   month,
   today,
   rows,

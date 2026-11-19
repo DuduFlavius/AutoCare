@@ -1,43 +1,43 @@
 /* Shared visual identity for the public product and its authenticated workspace. */
-:where(button, a, input, select, textarea, summary):focus-visible {
+:where(button, a, input, select, textarea, summary):focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)){
   outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
-input::placeholder,
-textarea::placeholder {
+input:not(:where([class^="rg-"],[class^="rg-"] *))::placeholder,
+textarea:not(:where([class^="rg-"],[class^="rg-"] *))::placeholder {
   color: var(--color-subtle);
   opacity: 1;
 }
-:where(label, h1, h2, h3, p, strong, small) {
+:where(label, h1, h2, h3, p, strong, small):not(:where([class^="rg-"],[class^="rg-"] *)){
   overflow-wrap: anywhere;
 }
-html body .ac-lux-public.ac-studio-public .lux-primary {
+html body .ac-lux-public.ac-studio-public .lux-primary:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: var(--color-primary) !important;
   color: var(--color-on-primary) !important;
   border-color: var(--color-primary) !important;
 }
-html body .ac-lux-public.ac-studio-public .lux-primary:hover {
+html body .ac-lux-public.ac-studio-public .lux-primary:hover:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: var(--color-primary-hover) !important;
 }
-html body .ac-lux-public.ac-studio-public .studio-landing-hero {
+html body .ac-lux-public.ac-studio-public .studio-landing-hero:not(:where([class^="rg-"],[class^="rg-"] *)){
   gap: clamp(22px, 4vw, 60px);
   padding-block: clamp(32px, 6vw, 90px);
 }
-.product-hero-photo {
+.product-hero-photo:not(:where([class^="rg-"],[class^="rg-"] *)){
   margin: 0;
 }
-.product-hero-photo picture,
-.product-hero-photo img {
+.product-hero-photo picture:not(:where([class^="rg-"],[class^="rg-"] *)),
+.product-hero-photo img:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: block;
   width: 100%;
 }
-.product-hero-photo img {
+.product-hero-photo img:not(:where([class^="rg-"],[class^="rg-"] *)){
   height: 100%;
   object-fit: cover;
   position: absolute;
   inset: 0;
 }
-.product-tour {
+.product-tour:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr);
   align-items: center;
@@ -46,19 +46,19 @@ html body .ac-lux-public.ac-studio-public .studio-landing-hero {
   margin: auto;
   padding: clamp(32px, 6vw, 96px) 4%;
 }
-.product-tour h2 {
+.product-tour h2:not(:where([class^="rg-"],[class^="rg-"] *)){
   font-size: clamp(30px, 3.7vw, 55px);
   line-height: 1.08;
   margin-block: 0 15px;
 }
-.product-tour p:not(.lux-eyebrow) {
+.product-tour p:not(.lux-eyebrow):not(:where([class^="rg-"],[class^="rg-"] *)){
   color: var(--color-muted);
 }
-.product-mockup {
+.product-mockup:not(:where([class^="rg-"],[class^="rg-"] *)){
   margin: 0;
   min-width: 0;
 }
-.product-mockup-frame {
+.product-mockup-frame:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2.5fr);
   background: var(--color-bg);
@@ -67,7 +67,7 @@ html body .ac-lux-public.ac-studio-public .studio-landing-hero {
   box-shadow: var(--shadow-md);
   overflow: hidden;
 }
-.product-mockup-rail {
+.product-mockup-rail:not(:where([class^="rg-"],[class^="rg-"] *)){
   padding: 16px 12px;
   border-right: 1px solid var(--color-border);
   display: flex;
@@ -76,33 +76,33 @@ html body .ac-lux-public.ac-studio-public .studio-landing-hero {
   font-size: 12px;
   color: var(--color-muted);
 }
-.product-mockup-rail strong {
+.product-mockup-rail strong:not(:where([class^="rg-"],[class^="rg-"] *)){
   color: var(--color-primary-ink);
   font-size: 17px;
 }
-.product-mockup-rail span {
+.product-mockup-rail span:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.product-mockup-rail span:first-of-type {
+.product-mockup-rail span:first-of-type:not(:where([class^="rg-"],[class^="rg-"] *)){
   color: var(--color-primary-ink);
 }
-.product-mockup-rail svg {
+.product-mockup-rail svg:not(:where([class^="rg-"],[class^="rg-"] *)){
   flex: none;
 }
-.product-mockup-main {
+.product-mockup-main:not(:where([class^="rg-"],[class^="rg-"] *)){
   padding: 16px;
 }
-.product-mockup-main h3 {
+.product-mockup-main h3:not(:where([class^="rg-"],[class^="rg-"] *)){
   margin: 0 0 10px;
 }
-.product-mockup-cards {
+.product-mockup-cards:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
-.product-mockup-cards article {
+.product-mockup-cards article:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -111,92 +111,92 @@ html body .ac-lux-public.ac-studio-public .studio-landing-hero {
   display: grid;
   gap: 4px;
 }
-.product-mockup-cards svg {
+.product-mockup-cards svg:not(:where([class^="rg-"],[class^="rg-"] *)){
   color: var(--color-primary);
   margin-bottom: 4px;
 }
-.product-mockup-cards strong {
+.product-mockup-cards strong:not(:where([class^="rg-"],[class^="rg-"] *)){
   font-size: 13px;
 }
-.product-mockup figcaption,
-.product-mockup-cards small {
+.product-mockup figcaption:not(:where([class^="rg-"],[class^="rg-"] *)),
+.product-mockup-cards small:not(:where([class^="rg-"],[class^="rg-"] *)){
   color: var(--color-muted);
   font-size: 12px;
 }
-.product-mockup figcaption {
+.product-mockup figcaption:not(:where([class^="rg-"],[class^="rg-"] *)){
   margin-top: 8px;
 }
-.public-faq details {
+.public-faq details:not(:where([class^="rg-"],[class^="rg-"] *)){
   padding: 16px 20px;
   margin-block: 12px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
-.public-faq summary {
+.public-faq summary:not(:where([class^="rg-"],[class^="rg-"] *)){
   cursor: pointer;
   font-weight: 650;
 }
-.public-faq details p {
+.public-faq details p:not(:where([class^="rg-"],[class^="rg-"] *)){
   margin-bottom: 0;
 }
-.studio-create-row {
+.studio-create-row:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
-html body .ac-workspace.ac-studio .main .studio-create-row button {
+html body .ac-workspace.ac-studio .main .studio-create-row button:not(:where([class^="rg-"],[class^="rg-"] *)){
   min-height: 48px;
   justify-content: flex-start;
   text-align: left;
   border-color: var(--color-border-strong) !important;
 }
-.studio-create-row svg {
+.studio-create-row svg:not(:where([class^="rg-"],[class^="rg-"] *)){
   flex: none;
   color: var(--color-primary);
 }
 @media (max-width: 760px) {
-  .product-tour {
+  .product-tour:not(:where([class^="rg-"],[class^="rg-"] *)){
     grid-template-columns: minmax(0, 1fr);
   }
-  .product-mockup-frame {
+  .product-mockup-frame:not(:where([class^="rg-"],[class^="rg-"] *)){
     grid-template-columns: minmax(0, 1fr);
   }
-  .product-mockup-rail {
+  .product-mockup-rail:not(:where([class^="rg-"],[class^="rg-"] *)){
     display: none;
   }
-  .studio-create-row {
+  .studio-create-row:not(:where([class^="rg-"],[class^="rg-"] *)){
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
   }
-  .public-nav :is(.button, a) {
+  .public-nav :is(.button, a):not(:where([class^="rg-"],[class^="rg-"] *)){
     min-height: 42px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .product-hero-photo img {
+  .product-hero-photo img:not(:where([class^="rg-"],[class^="rg-"] *)){
     animation: none;
   }
 }
 
 /* The public tour uses the same compact panel treatment as the real dashboard. */
-.product-mockup-frame {
+.product-mockup-frame:not(:where([class^="rg-"],[class^="rg-"] *)){
   padding: 8px;
   gap: 8px;
   background: linear-gradient(145deg, var(--color-primary-deep), var(--graphite) 55%, var(--midnight-navy));
-  border-color: #50627c;
+  border-color: #1E4538;
 }
-.product-mockup-rail {
-  border: 1px solid #364358;
+.product-mockup-rail:not(:where([class^="rg-"],[class^="rg-"] *)){
+  border: 1px solid #304B40;
   border-radius: 9px;
-  background: #141e2b;
+  background: #101A16;
 }
-.product-mockup-main {
-  border: 1px solid #364358;
+.product-mockup-main:not(:where([class^="rg-"],[class^="rg-"] *)){
+  border: 1px solid #304B40;
   border-radius: 9px;
-  background: #141e2b;
+  background: #101A16;
 }
-.product-mockup-cards article {
-  background: linear-gradient(155deg, #25354d, #192334);
-  border-color: #3b4a61;
+.product-mockup-cards article:not(:where([class^="rg-"],[class^="rg-"] *)){
+  background: linear-gradient(155deg, #304B40, #17241F);
+  border-color: #304B40;
 }

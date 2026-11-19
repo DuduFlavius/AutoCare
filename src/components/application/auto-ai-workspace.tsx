@@ -121,7 +121,7 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved }:
   useLayoutEffect(()=>{const field=input.current;if(!field)return;field.style.setProperty('height','auto','important');field.style.setProperty('height',Math.min(120,field.scrollHeight)+'px','important');field.style.setProperty('overflow-y',field.scrollHeight>120?'auto':'hidden','important');},[question]);
   const messageScroll = useRef<HTMLDivElement>(null);
   const autoScroll = useRef(true);
-  useEffect(() => { if (autoScroll.current && messageScroll.current) messageScroll.current.scrollTo({ top: messageScroll.current.scrollHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }, [turns.length, pending, activeConversation]);
+  useEffect(() => { if (autoScroll.current && messageScroll.current) messageScroll.current.scrollTo({ top: turns.length || pending ? messageScroll.current.scrollHeight : 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }, [turns.length, pending, activeConversation]);
 
   useEffect(() => {
     try { const draft = sessionStorage.getItem('autocare-ai-draft:' + vehicleId); if (draft) { setQuestion(draft.slice(0,600)); sessionStorage.removeItem('autocare-ai-draft:' + vehicleId); } } catch { /* Storage is optional. */ }

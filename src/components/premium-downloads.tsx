@@ -17,6 +17,7 @@ export default function PremiumDownloads({
 }) {
   const en = language === 'en',
     [vehicle, setVehicle] = useState(''),
+    [reportView,setReportView]=useState('general'),
     [kind, setKind] = useState(''),
     [from, setFrom] = useState(''),
     [to, setTo] = useState(''),
@@ -65,7 +66,9 @@ export default function PremiumDownloads({
   }
   return (
     <section className="card ac-premium-downloads" data-workspace-ui>
+      <div className="rg-report-tabs" role="group" aria-label={en?'Report view':'Vizualizare raport'}><button aria-pressed={reportView==='general'} onClick={()=>setReportView('general')}>{en?'General':'General'}</button><button aria-pressed={reportView==='details'} onClick={()=>setReportView('details')}>{en?'Details & export':'Detalii și export'}</button></div>
       <ReportOverview rows={reportRows} vehicleCount={includedCars.length} today={localDate(new Date(),data.profile.timezone)} en={en}/>
+      <div className="rg-report-details" hidden={reportView!=='details'}>
       <h3>
         <Download size={20} />
         {en ? 'Your reports & exports' : 'Rapoartele și exporturile tale'}
@@ -133,6 +136,7 @@ export default function PremiumDownloads({
           ? 'Account data is synchronized on the server. This export contains records, not a full attachment backup.'
           : 'Datele contului sunt sincronizate pe server. Exportul conține înregistrări, nu un backup complet al atașamentelor.'}
       </p>
+      </div>
     </section>
   );
 }

@@ -6,10 +6,10 @@ export function TitaniumWave() {
     <svg className="ac-titanium-wave" viewBox="0 0 960 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={id}>
-          <stop stopColor="#1456c9" stopOpacity="0" />
-          <stop offset=".42" stopColor="#398bff" />
-          <stop offset=".67" stopColor="#56d6e8" />
-          <stop offset="1" stopColor="#398bff" stopOpacity=".06" />
+          <stop stopColor="#34C997" stopOpacity="0" />
+          <stop offset=".42" stopColor="#71E5BB" />
+          <stop offset=".67" stopColor="#71E5BB" />
+          <stop offset="1" stopColor="#71E5BB" stopOpacity=".06" />
         </linearGradient>
       </defs>
       <g fill="none" stroke={`url(#${id})`}>

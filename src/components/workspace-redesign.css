@@ -218,7 +218,7 @@ html body .app-shell.ac-workspace .main :is(button,.button){background:var(--col
 html body .app-shell.ac-workspace .main :is(button.primary,.button.primary){background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border-strong)!important}
 html body .app-shell.ac-workspace .main button.danger{background:var(--color-danger-soft)!important;color:var(--color-danger-ink)!important;border-color:var(--color-danger)!important}
 html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,select,textarea){background:var(--color-nav)!important;border-color:var(--color-border)!important;color:var(--color-text)!important;caret-color:var(--color-primary-ink)!important}
-html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,textarea)::placeholder{color:var(--color-muted)!important;-webkit-text-fill-color:#8093ab!important}
+html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,textarea)::placeholder{color:var(--color-muted)!important;-webkit-text-fill-color:#A5B8AF!important}
 html body .app-shell.ac-workspace :is(.main,.dialog) label{color:var(--color-text)!important}
 html body .app-shell.ac-workspace .preview-note{background:var(--color-surface)!important;border-color:var(--color-border)!important;color:var(--color-muted)!important}
 html body .app-shell.ac-workspace .page-head{border-color:#ffffff12!important}
