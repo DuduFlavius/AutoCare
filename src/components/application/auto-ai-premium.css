@@ -318,3 +318,32 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page
 }
 }
 }
+
+
+/* Desktop full-width AutoCare AI workspace; mobile intentionally untouched. */
+@layer autocare-workspace {
+@media (min-width:761px) {
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] {
+ width:100%!important;max-width:none!important;min-width:0!important;
+ margin:0!important;padding:0 clamp(12px,2vw,30px)!important;
+ box-sizing:border-box!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-layout,
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-main {
+ width:100%!important;max-width:none!important;min-width:0!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-chat {
+ width:100%!important;max-width:none!important;
+ height:clamp(540px,calc(100dvh - 185px),1200px)!important;max-height:none!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-message-scroll {
+ padding:24px clamp(24px,5vw,96px)!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-turns {
+ width:100%!important;max-width:1100px!important;margin-inline:auto!important;
+}
+html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat] .ac-ai-composer {
+ width:calc(100% - 48px)!important;max-width:1100px!important;
+}
+}
+}
