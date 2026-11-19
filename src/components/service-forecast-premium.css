@@ -48,3 +48,20 @@
 .ac-forecast-list>.forecast-source{padding:8px 10px!important;font-size:11px!important}
 .ac-forecast-list>.micro{font-size:10px!important}
 @media(max-width:600px){.ac-forecast-list{padding:10px!important;gap:9px!important}.ac-forecast-list>.forecast-service-card{padding:13px!important}.ac-forecast-list>.forecast-reading-stamp button{width:auto!important}.ac-forecast-list .forecast-result{align-items:center!important}}
+
+
+/* Fix the split/masonry layout: the mileage editor must never occupy a forecast card slot. */
+.ac-forecast-list{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important}
+.ac-forecast-list>.ac-daily-usage{width:100%!important;max-width:none!important;margin:0!important;padding:4px 0!important;grid-column:1/-1!important;align-self:stretch!important}
+.ac-forecast-list>.forecast-service-card{width:100%!important;max-width:none!important;min-height:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;column-gap:16px!important;row-gap:7px!important;padding:14px 17px!important}
+.ac-forecast-list>.forecast-service-card>strong{grid-column:1;max-width:none!important;margin:0!important}
+.ac-forecast-list>.forecast-service-card>.forecast-maintenance-state{grid-column:2;grid-row:1;position:static!important;justify-self:end}
+.ac-forecast-list>.forecast-service-card>.forecast-result{grid-column:1/-1;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:8px 0!important;margin:0!important}
+.ac-forecast-list>.forecast-service-card>.forecast-thresholds{grid-column:1/-1;display:flex!important;flex-wrap:wrap!important;gap:6px 18px!important}
+.ac-forecast-list>.forecast-service-card>.forecast-thresholds label{flex-basis:100%}
+.ac-forecast-list>.forecast-service-card>p,.ac-forecast-list>.forecast-service-card>small{grid-column:1/-1;margin:0!important}
+.ac-forecast-list>.forecast-service-card>small{display:none!important}
+.ac-forecast-list>.forecast-service-card>p{font-size:11px!important}
+.ac-forecast-list>.forecast-source,.ac-forecast-list>.micro{display:none!important}
+@media(min-width:900px){.ac-forecast-list>.forecast-service-card{grid-template-columns:minmax(0,1fr) auto!important}.ac-forecast-list>.forecast-service-card>.forecast-result{grid-column:1/-1}}
+@media(max-width:600px){.ac-forecast-list>.forecast-service-card{padding:12px!important;gap:6px!important}.ac-forecast-list>.forecast-service-card>.forecast-result>span{font-size:16px!important}}
