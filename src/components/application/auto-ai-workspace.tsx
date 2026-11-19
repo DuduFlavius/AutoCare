@@ -49,11 +49,10 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, prici
       frame = 0;
       const viewport = window.visualViewport;
       const bottom = (viewport?.height ?? window.innerHeight) + (viewport?.offsetTop ?? 0);
-      element.style.setProperty('--ai-viewport-top', (viewport?.offsetTop ?? 0) + 'px');
       const navigation = document.querySelector<HTMLElement>('.autocare-mobile-dock');
       const navRect = navigation?.getBoundingClientRect();
       const reserved = navRect && navRect.height && navRect.top < bottom && getComputedStyle(navigation!).position === 'fixed' ? bottom - navRect.top : 0;
-      const height = Math.max(180, bottom - element.getBoundingClientRect().top - reserved - 12);
+      const height = Math.max(0, Math.floor(bottom - element.getBoundingClientRect().top - reserved - 12));
       if (Math.abs(height - previousHeight) < 1) return;
       previousHeight = height;
       element.style.setProperty('--ai-page-height', height + 'px');
@@ -62,7 +61,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, prici
     update();
     const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
     const observer = new ResizeObserver(schedule);
-    observer.observe(document.querySelector('header') ?? element);
+    observer.observe(document.querySelector('.app-topbar') ?? element);
     const dock = document.querySelector('.autocare-mobile-dock');
     if (dock) observer.observe(dock);
     window.addEventListener('resize', schedule);
