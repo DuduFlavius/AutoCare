@@ -99,10 +99,6 @@ export function PriceCards({
             <Check size={15} /> {en?'Manage in the billing portal':'Gestionare din portalul de facturare'}
           </li>
         </ul>
-        <div className="ac-plan-report">
-          <span>{en ? 'QUICK REPORT' : 'RAPORT RAPID'}</span>
-          {reportTimezone ? <a href={reportLink(1, 'service', 'pdf')}>{en ? 'Monthly service PDF' : 'Fișa de revizii a lunii'} <ArrowUpRight size={14}/></a> : <strong>{en ? 'Monthly service PDF' : 'Fișa de revizii a lunii'}</strong>}
-        </div>
         {checkout ? (
           <button className="button" disabled={busy} onClick={() => checkout('monthly',currency)}>
             {prepaid?(en?'Add 1 month':'Adaugă 1 lună'):(en?'Choose monthly':'Alege lunar')} <ArrowUpRight size={15} />
@@ -162,10 +158,6 @@ export function PriceCards({
             <Check size={15} /> {en?'Manage in the billing portal':'Gestionare din portalul de facturare'}
           </li>
         </ul>
-        <div className="ac-plan-report">
-          <span>{en ? 'QUICK REPORT' : 'RAPORT RAPID'}</span>
-          {reportTimezone ? <a href={reportLink(3, 'expense', 'csv')}>{en ? 'Three-month expense CSV' : 'Cheltuieli pe 3 luni'} <ArrowUpRight size={14}/></a> : <strong>{en ? 'Three-month expense CSV' : 'Cheltuieli pe 3 luni'}</strong>}
-        </div>
         {checkout ? (
           <button className="button" disabled={busy} onClick={() => checkout('quarterly',currency)}>
             {prepaid?(en?'Add 3 months':'Adaugă 3 luni'):(en?'Choose 3 months':'Alege 3 luni')} <ArrowUpRight size={15} />
@@ -236,10 +228,6 @@ export function PriceCards({
             {s.savingBani>0?(en?'Lower cost than 12 monthly payments':'Cost mai mic față de 12 plăți lunare'):(en?'One payment per year':'O singură plată pe an')}
           </li>
         </ul>
-        <div className="ac-plan-report">
-          <span>{en ? 'QUICK REPORT' : 'RAPORT RAPID'}</span>
-          {reportTimezone ? <a href={reportLink(12, '', 'pdf')}>{en ? '12-month garage PDF' : 'Dosarul garajului pe 12 luni'} <ArrowUpRight size={14}/></a> : <strong>{en ? '12-month garage PDF' : 'Dosarul garajului pe 12 luni'}</strong>}
-        </div>
         {checkout ? (
           <button className="primary" disabled={busy} onClick={() => checkout('annual',currency)}>
             {prepaid?(en?'Add 12 months':'Adaugă 12 luni'):(en?'Choose annual':'Alege anual')} <ArrowUpRight size={15} />
