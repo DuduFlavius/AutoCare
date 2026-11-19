@@ -10,7 +10,6 @@ import './membership-premium.css';
 import { useApplicationLocale } from './application-locale';
 import { Check, ArrowUpRight, CreditCard, ShieldCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
-import { localDate } from '@/lib/config';
 import { savings } from '@/lib/pricing-display';
 import type {BillingCurrency} from '@/lib/billing-currency';
 type Data = Awaited<ReturnType<typeof dashboard>>;
@@ -21,7 +20,6 @@ export function PriceCards({
   busy = false,
   prepaid = false,
   language,
-  reportTimezone,
   selectedPlan,
 }: {
   monthlyBani: number;
@@ -40,12 +38,6 @@ export function PriceCards({
   const euro=price;
   const localizedAmount=price;
   const signup=(plan:string)=>(en?'/en/sign-up?next=':'/inregistrare?next=')+encodeURIComponent('/cont?tab=Abonament&plan='+plan+'&currency='+currency.toUpperCase());
-  const to = reportTimezone ? localDate(new Date(), reportTimezone) : '';
-  function reportLink(months: number, kind: 'service' | 'expense' | '', format: 'pdf' | 'csv') {
-    const [year, month] = to.split('-').map(Number);
-    const from = new Date(Date.UTC(year, month - months, 1)).toISOString().slice(0, 10);
-    return '/api/v1/export?' + new URLSearchParams({ format, archived: 'active', from, to, ...(kind && { kind }) });
-  }
   return (
     <div className="ac-billing-plans" data-workspace-ui>
       <div className="ac-billing-currency"><div><strong>{en?'Choose your currency':'Alege moneda'}</strong><p>{en?'The selected currency is used at Checkout.':'Moneda aleasă se păstrează la plată.'}</p></div><div className="ac-currency-toggle" role="group" aria-label={en?'Billing currency':'Moneda plății'}>{(['ron','eur'] as const).map(code=><button type="button" key={code} aria-pressed={currency===code} onClick={()=>changeBillingCurrency(code)}>{code.toUpperCase()}</button>)}</div></div>
