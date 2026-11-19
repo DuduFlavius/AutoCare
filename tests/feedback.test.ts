@@ -19,6 +19,10 @@ test('Feedback is free, atomic with screenshots, private and idempotent under re
  const image=await sharp({create:{width:20,height:20,channels:3,background:'#7859aa'}}).jpeg().withMetadata({exif:{IFD0:{Artist:'PRIVATE-HIDDEN-METADATA'}}}).toBuffer();
  const value=input();const results=await Promise.all([feedback.createFeedback(uid,value,[{bytes:image}]),feedback.createFeedback(uid,value,[{bytes:image}])]);id=results[0].id;
  assert.equal(results[1].id,id);assert.equal((await feedback.listFeedback(uid)).total,1);
+ const receipts=await db().select().from(s.mailDeliveries).innerJoin(s.mailCampaigns,eq(s.mailCampaigns.id,s.mailDeliveries.campaignId)).where(eq(s.mailDeliveries.dedupeKey,'feedback-received:'+id));
+ assert.equal(receipts.length,1);
+ assert.equal(receipts[0].mail_deliveries.userId,uid);
+ assert.equal(receipts[0].mail_campaigns.template,'feedback_received');
  const detail=await feedback.readFeedback(uid,id);assert.equal(detail.item.status,'new');assert.equal(detail.files.length,1);assert.equal(detail.events.length,1);fileId=detail.files[0].id;
  assert.equal((await feedback.listFeedback(other)).total,0);await assert.rejects(()=>feedback.readFeedback(other,id),status(404));await assert.rejects(()=>feedback.feedbackFile(other,fileId),status(404));
  const stored=await feedback.feedbackFile(uid,fileId);assert.equal(stored.mime,'image/png');assert.equal((await sharp(Buffer.from(stored.data,'base64')).metadata()).exif,undefined);

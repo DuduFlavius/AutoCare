@@ -4,10 +4,11 @@ import { MapPin, Search } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Coordinate } from '@/lib/road-navigation';
 
-export type DriveDestination = Coordinate & { name: string; details?: string };
+export type DriveDestination = Coordinate & { name: string; details?: string; distanceKm?: number };
 
-export default function DriveDestinationSearch({ area, disabled, english, onChoose }: {
+export default function DriveDestinationSearch({ area, nearPosition, disabled, english, onChoose }: {
   area: Coordinate;
+  nearPosition: boolean;
   disabled: boolean;
   english: boolean;
   onChoose: (point: DriveDestination) => void;
@@ -18,6 +19,7 @@ export default function DriveDestinationSearch({ area, disabled, english, onChoo
   const [error, setError] = useState('');
   const pending = useRef<AbortController | null>(null);
   const t = (ro: string, en: string) => english ? en : ro;
+  const distance = new Intl.NumberFormat(english ? 'en' : 'ro', { maximumFractionDigits: 1 });
 
   useEffect(() => () => pending.current?.abort(), []);
 
@@ -50,7 +52,7 @@ export default function DriveDestinationSearch({ area, disabled, english, onChoo
       <form onSubmit={search}>
         <label htmlFor="ac-destination-address">{t('Unde mergi?', 'Where are you going?')}</label>
         <div className="ac-destination-search-row">
-          <input id="ac-destination-address" type="search" placeholder={t('Stradă, număr și oraș', 'Street, number and city')} value={query}
+          <input id="ac-destination-address" type="search" placeholder={t('Ex. Auchan, gară sau o adresă', 'E.g. Auchan, station or an address')} value={query}
             maxLength={160} disabled={disabled} autoComplete="off"
             onChange={event => { pending.current?.abort(); setQuery(event.target.value); setMatches(null); setLoading(false); setError(''); }}/>
           <button type="submit" className="primary" disabled={disabled || loading || query.trim().length < 3}><Search size={17}/>{t('Caută', 'Search')}</button>
@@ -62,7 +64,7 @@ export default function DriveDestinationSearch({ area, disabled, english, onChoo
       {!!matches?.length && <ul aria-label={t('Destinații găsite', 'Matching destinations')}>
         {matches.map((point, index) => <li key={`${point.latitude}:${point.longitude}:${index}`}>
           <button type="button" onClick={() => { setMatches(null); onChoose(point); }}>
-            <MapPin size={18}/><span data-user-content><strong>{point.name}</strong>{point.details && <small>{point.details}</small>}</span>
+            <MapPin size={18}/><span data-user-content><strong>{point.name}</strong>{point.details&&<small>{point.details}</small>}{nearPosition&&point.distanceKm!=null&&<small>{distance.format(point.distanceKm)} {t('km în linie dreaptă', 'km away in a straight line')}</small>}</span>
           </button>
         </li>)}
       </ul>}

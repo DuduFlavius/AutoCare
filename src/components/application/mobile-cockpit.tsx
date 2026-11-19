@@ -10,9 +10,9 @@ import { localDate } from '@/lib/config';
 
 type Data=Awaited<ReturnType<typeof dashboard>>;
 type RecordRow=Data['records'][number];
-export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onDrill=(tab)=>navigate(tab),onVehicle,onCreate,onRecord,currency}:{
+export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onDrill=(tab)=>navigate(tab),onVehicle,onCreate,onRecord,onNextService,currency}:{
  data:Data;selectedVehicle:string;onSelectVehicle:(id:string)=>void;onDrill?:(tab:string,vehicleId:string,ids:string[],label:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;
- onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:RecordRow)=>void;currency:'RON'|'EUR';
+ onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:RecordRow)=>void;onNextService:()=>void;currency:'RON'|'EUR';
 }){
  const en=useApplicationLanguage()==='en',locale=useApplicationLocale();
  const t=(ro:string,enText:string)=>en?enText:ro;
@@ -34,7 +34,7 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
     <div className="ac-m-vehicle-bottom"><span><Gauge size={14}/>{car.odometer.toLocaleString(locale)} km</span><button onClick={()=>navigate('Garaj')}>{t('Garajul meu','My garage')}<ChevronRight size={14}/></button></div>
     {active.length>1&&<label className="ac-m-car-switch"><span>{t('Mașina selectată','Selected vehicle')}</span><FilterSelect value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{active.map(vehicle=><option key={vehicle.id} value={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}</FilterSelect></label>}
    </section>
-   <button className="ac-m-next-service" onClick={()=>{const record=next&&data.records.find(row=>row.id===next.service.id||next.service.id.startsWith(row.id+':'));if(record)onRecord(record);else navigate('Întreținere');}}><span className="ac-m-icon"><Wrench size={27}/></span><span><small>{t('Următoarea revizie','Next service')}</small><strong>{next?.status.remainingKm!=null?(next.status.remainingKm<=0?t('Prag atins','Threshold reached'):t('în ','in ')+next.status.remainingKm.toLocaleString(locale)+' km'):next?.raw?date(next.raw):t('Adaugă un termen','Add a service deadline')}</strong>{next?.raw&&next.status.remainingKm!=null&&<small>{date(next.raw)}</small>}</span><ChevronRight size={20}/></button>
+   <button className="ac-m-next-service" onClick={onNextService}><span className="ac-m-icon"><Wrench size={27}/></span><span><small>{t('Următoarea revizie','Next service')}</small><strong>{next?.status.remainingKm!=null?(next.status.remainingKm<=0?t('Prag atins','Threshold reached'):t('în ','in ')+next.status.remainingKm.toLocaleString(locale)+' km'):next?.raw?date(next.raw):t('Adaugă un termen','Add a service deadline')}</strong>{next?.raw&&next.status.remainingKm!=null&&<small>{date(next.raw)}</small>}</span><ChevronRight size={20}/></button>
    <div className="ac-m-overview">{[
     {Icon:Wallet,label:t('Costuri totale','Total costs'),value:finance.yearKnown?money(finance.yearBani):'—',note:t('Anul curent','Current year'),tab:'Cheltuieli'},
     {Icon:Files,label:t('Documente','Documents'),value:String(docs.total),note:t('în dosarul mașinii','in your vehicle folder'),tab:'Documente'},

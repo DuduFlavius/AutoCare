@@ -272,7 +272,7 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved }:
             ['monthly', t('Generează raportul lunii curente', 'Generate current month report')],
             ['annual', t('Generează raportul anului curent', 'Generate current year report')],
           ] as const).map(([mode, label]) => <button key={mode} type="button" disabled={preview || pending || loading} onClick={() => ask(label, mode)}>{label} <ArrowUpRight size={14} /></button>)}
-          <a href="/cont?tab=Plan+%C3%AEntre%C8%9Binere&drive=points#service-finder" className="button"><MapPin size={17} /> Service Finder</a>
+          <a href="/cont?tab=Plan+%C3%AEntre%C8%9Binere&drive=points" className="button"><MapPin size={17} /> {t("Hartă și navigație","Map and navigation")}</a>
         </section>
         <section className="card"><h3><FileScan size={18} /> {t('Scanează un document', 'Scan a document')}</h3>
           <p>{t('PDF, JPEG sau PNG, maximum 2 MB. Fișierul ales este trimis furnizorului AI pentru extragere.', 'PDF, JPEG or PNG, maximum 2 MB. The selected file is sent to the AI provider for extraction.')}</p>

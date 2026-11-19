@@ -50,7 +50,7 @@ export default function NearbyDrivePlaces({ area, position, english, onResults, 
       if (!response.ok) throw new Error('Search unavailable');
       const points: AutoPoint[] = await response.json();
       if (controller.signal.aborted) return;
-      const distance = (point: AutoPoint) => segmentMeters(center, { ...point, accuracy: 0, timestamp: 0 });
+      const distance = (point: AutoPoint) => segmentMeters(center, point);
       points.sort((a, b) => distance(a) - distance(b));
       setResults(points);
       if (disclosure.current?.open) onResults(points);

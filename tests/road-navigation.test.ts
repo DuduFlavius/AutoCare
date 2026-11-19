@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { navigationProgress, type DrivingRoute, type RoadStep } from '../src/lib/road-navigation';
+import { findRoadDestinations } from '../src/lib/road-geocoding';
 import { parseAutoPoints } from '../src/lib/auto-points';
 
 const step = (start: [number, number], end: [number, number], type: string): RoadStep => ({
@@ -35,4 +36,23 @@ test('POI data includes real provider details and rejects unsafe phone links', (
   assert.equal(valid.hours, 'Mo-Fr 09:00-17:00');
   assert.equal(valid.phone, '+40 701 234 567');
   assert.equal(invalid.phone, undefined);
+});
+
+
+test('destination search preserves branch names and addresses and removes duplicate pins', async context => {
+  const shop = (longitude: number, street: string, housenumber: string) => ({
+    geometry: { type: 'Point', coordinates: [longitude, 45.75] },
+    properties: { name: 'Auchan', street, housenumber, city: 'Timișoara' },
+  });
+  const fetch = context.mock.method(globalThis, 'fetch', async () => Response.json({
+    features: [shop(21.23, 'Calea Șagului', '100'), shop(21.23, 'Calea Șagului', '100'), shop(21.25, 'Calea Aradului', '56')],
+  }));
+  const options = await findRoadDestinations('Auchan', 45.75, 21.23);
+  assert.deepEqual(options.map(option => [option.name, option.details]), [
+    ['Auchan', 'Calea Șagului 100, Timișoara'],
+    ['Auchan', 'Calea Aradului 56, Timișoara'],
+  ]);
+  assert.equal(options[0].distanceKm, 0);
+  assert.ok(options[1].distanceKm > 1);
+  assert.equal(fetch.mock.callCount(), 1);
 });

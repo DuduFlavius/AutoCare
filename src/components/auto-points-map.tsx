@@ -3,13 +3,12 @@ import {FilterSelect} from './filter-select';
 
 import dynamic from 'next/dynamic';
 import { ArrowUp, MapPin, Navigation } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { autoPointCategories, defaultAutoPointsArea, type AutoPoint, type MapArea } from '@/lib/auto-points';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { defaultAutoPointsArea, type MapArea } from '@/lib/auto-points';
 import { browserGPSFix, latestGPSFix, type GPSFix } from '@/lib/gps-tracking';
 import { navigationProgress, type Coordinate, type DrivingRoute, type Turn } from '@/lib/road-navigation';
 import MapStage from './map-stage';
 import { nativeMethodMissing, nativeNavigation } from '@/lib/native-tracking';
-import NearbyDrivePlaces from './nearby-drive-places';
 import DriveDestinationSearch from './drive-destination-search';
 import { getDevicePosition } from '@/lib/device-location';
 import { mapLocationError, useMapLocation } from './use-map-location';
@@ -35,7 +34,6 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
   const locale = useApplicationLocale();
   const english = locale.startsWith('en');
   const t = (ro: string, en: string) => english ? en : ro;
-  const [nearby, setNearby] = useState<AutoPoint[]>([]);
   const [area, setArea] = useState<MapArea>(defaultAutoPointsArea);
   const location = useMapLocation(visible && !preview, english);
   const [oneShotPosition, setOneShotPosition] = useState<GPSFix | null>(null);
@@ -195,31 +193,28 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
     };
   }, [navigating, route, destinationName, english, ownerId, preview]);
 
+  const searchPosition = position && position.accuracy <= 500 && Date.now() - position.timestamp < 20000 ? position : null;
   const precisePosition = position && position.accuracy <= 50 && Date.now() - position.timestamp <= 15000 ? position : null;
-  const progress = navigating && route && precisePosition ? navigationProgress(route, precisePosition, stepIndex) : null;
+  const progress = useMemo(() => navigating && route && precisePosition ? navigationProgress(route, precisePosition, stepIndex) : null, [navigating, route, precisePosition, stepIndex]);
   useEffect(() => {
-    if (!navigating || !route || !position || !destination || position.accuracy > 50 || Date.now() - position.timestamp > 15000) return;
-    const next = navigationProgress(route, position, stepIndex);
+    if (!progress || !precisePosition || !destination) return;
+    const next = progress;
     if (next.gap < 40 && next.index > stepIndex) setStepIndex(next.index);
-    deviation.current = next.gap > Math.max(65, position.accuracy * 2) ? deviation.current + 1 : 0;
+    deviation.current = next.gap > Math.max(65, precisePosition.accuracy * 2) ? deviation.current + 1 : 0;
     if (deviation.current >= 3 && Date.now() - lastReroute.current > 30000) {
       lastReroute.current = Date.now();
       deviation.current = 0;
-      void plan(position, destination);
+      void plan(precisePosition, destination);
     }
     // Only a new GPS reading can confirm a deviation.
   }, [position, navigating, route, destination]);
 
-  function chooseNearby(point: AutoPoint) {
-    const label = autoPointCategories[point.category];
-    choose({ ...point, name: point.name || (english ? label.english : label.label) });
-  }
   const arrived = !!progress && progress.distance < 35 && progress.gap < 30;
   return (
     <section className="ac-auto-points ac-map-compact" aria-label="AutoCare Maps">
       <header><div><span className="eyebrow">AUTOCARE MAPS</span><h3>{t('Hartă și navigație', 'Map and navigation')}</h3></div></header>
       <MapStage title={navigating ? t('Ghidare AutoCare', 'AutoCare guidance') : 'AutoCare Maps'} english={english}>
-        {!navigating && <DriveDestinationSearch area={area} disabled={preview} english={english} onChoose={point => choose(point)}/>}
+        {!navigating && <DriveDestinationSearch area={searchPosition??area} nearPosition={!!searchPosition} disabled={preview} english={english} onChoose={point => choose(point)}/>}
         {navigating && progress && <div className="ac-next-turn">
                 <ArrowUp size={24} style={{ rotate: progress.next?.maneuver.modifier?.includes('left') ? '-90deg' : progress.next?.maneuver.modifier?.includes('right') ? '90deg' : undefined }}/>
                 <div><strong>{arrived ? t('Ai ajuns', 'You arrived') : progress.next ? turnText(progress.next.maneuver, english) : t('Continuă către destinație', 'Continue to destination')}</strong>
@@ -260,6 +255,10 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
                   ? t('Ghidarea în fundal nu a pornit. Verifică permisiunile pentru locație precisă și notificări.', 'Background guidance could not start. Check precise location and notification permissions.')
                   : t('Ține această pagină deschisă pentru ghidare. Modul în fundal este disponibil în aplicația Android compatibilă.', 'Keep this page open for guidance. Background mode is available in the compatible Android app.')}
           </small>}
+          {!navigating && !preview && <div className="ac-navigation-tools">
+            <a className="button" target="_blank" rel="noopener noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}&travelmode=driving&dir_action=navigate`}>Google Maps</a>
+            <a className="button" target="_blank" rel="noopener noreferrer" href={`https://waze.com/ul?ll=${destination.latitude},${destination.longitude}&navigate=yes`}>Waze</a>
+          </div>}
           <button type="button" onClick={() => { ++destinationRevision.current; ++locationRevision.current; routingRequest.current?.abort(); setFindingLocation(false); setRouting(false); setNavigating(false); setRoutes([]); setDestination(null); setRouteError(''); setLocationError(''); }}>{t('Șterge destinația', 'Clear destination')}</button>
         </section>}
         <div className="ac-auto-points-layout is-guiding">
@@ -267,14 +266,9 @@ export default function AutoPointsMap({ preview, visible, ownerId }: { preview: 
             <RoadMap points={noRoute} position={position} active={navigating} english={english}
               initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview ? undefined : location.locate}
               locating={location.waiting} locationError={location.error}
-              autoPoints={navigating ? undefined : nearby} onAutoPoint={id => {
-                const match = nearby.find(point => point.id === id);
-                if (match) chooseNearby(match);
-              }}
               plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting ? choose : undefined}/>
           </div>
         </div>
-        {!navigating && !preview && <NearbyDrivePlaces area={area} position={position} english={english} onResults={setNearby} onChoose={chooseNearby}/>}
       </MapStage>
     </section>
   );

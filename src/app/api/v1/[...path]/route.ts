@@ -167,7 +167,10 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           if(screenshots.length>2)throw new svc.AppError(400,'FEEDBACK_FILE_COUNT');
           for(const file of screenshots){if(!(file instanceof File)||file.size>2097152)throw new svc.AppError(413,'FEEDBACK_FILE_SIZE');files.push({bytes:Buffer.from(await file.arrayBuffer())});}
         }else payload=await body(req);
-        const result=await feedback.createFeedback(uid,payload,files);publish(result);return json(result,result.duplicate?200:201);
+        const result=await feedback.createFeedback(uid,payload,files);
+        publish(result);
+        if(!result.duplicate)after(async()=>{await dispatchMailSafely();});
+        return json(result,result.duplicate?200:201);
       }
       if(route==='feedback/statistics'&&method==='GET')return json(await feedback.feedbackStatistics(uid));
       if(route==='feedback/notices'&&method==='GET')return json(await feedback.feedbackNotices(uid));

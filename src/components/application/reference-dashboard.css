@@ -265,3 +265,14 @@ html body .app-shell.ac-workspace.ac-studio.ac-reference-theme>.sidebar .ws-navi
 html body .app-shell.ac-workspace.ac-studio.ac-reference-theme>.sidebar .ws-navigation a>span:not(.ws-nav-count){font-size:15px!important}
 }
 }
+
+.ac-next-service-page{display:grid;gap:20px;width:min(100%,760px);margin:0 auto}
+.ac-next-service-page>button{justify-self:start}
+.ac-next-service-page article{display:grid;gap:14px;padding:clamp(18px,4vw,36px);border:1px solid #8173b45c;border-radius:22px;background:linear-gradient(145deg,#272147,#151b31);color:#f4efff}
+.ac-next-service-page header{display:flex;align-items:center;gap:12px}
+.ac-next-service-page :is(h1,h2,p,dl,dd){margin:0}
+.ac-next-service-page dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px}
+.ac-next-service-page dl div{padding:14px;border-radius:12px;background:#11172c}
+.ac-next-service-page dt{font-size:.83rem;color:#c7c1dc}
+.ac-next-service-page dd{font-weight:700;margin-top:6px}
+.ac-next-service-page article>button{justify-self:start;margin-top:4px}

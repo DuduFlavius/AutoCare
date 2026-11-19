@@ -70,3 +70,12 @@
 }
 
 @layer autocare-workspace {html body :is(.app-shell,.founder-shell) .ac-feedback .ac-feedback-rating button[aria-pressed] svg{width:24px!important;height:24px!important;color:#d9b6ff!important}.ac-feedback-rating button[aria-pressed=true]{border-color:#ba8ef0!important;background:#47305f!important}}
+
+@layer autocare-workspace {
+ .ac-feedback-heading{align-items:center}
+ .ac-feedback-form{width:min(100%,720px);justify-self:center;box-sizing:border-box}
+ .ac-feedback-list-filters > summary{cursor:pointer;font-weight:650}
+ .ac-feedback-list-filters .ac-feedback-filters{display:grid;margin:0}
+ .ac-feedback-list-filters[open] > summary{margin-bottom:16px}
+ html body :is(.app-shell,.founder-shell) .ac-feedback .ac-feedback-free-message textarea{min-height:155px!important}
+}

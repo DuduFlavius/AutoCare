@@ -1,9 +1,10 @@
 /** Reviewed English templates. Custom campaign messages and user records stay unchanged. */
 export const englishEmailCopy: Record<string, {title:string;body:string;cta:string}> = Object.fromEntries([
+['feedback_received','Thanks for sharing your feedback!','The AutoCare team received your feedback. Thank you for helping us improve the app. If we reply, you will find our response in the Feedback section of your account.','View feedback'],
 ['invoice_help','Your billing documents','Open your subscription to view payment history. For help, send support the payment date and invoice reference, without card details.','View subscription'],
 ['subscription_cancelled','Check your remaining access','Check your account for your access end date. Vehicle history remains available according to your plan after expiry.','View subscription'],
 ['export_help','Prepare a garage report','Select your vehicle, records and date range in Premium reports. Personal data export is available separately in account settings.','Open Premium'],
-['map_help','Set up your map location','In AutoCare Maps, choose My location and allow precise location. Select an automotive place or a map destination, then choose an available route.','Open account'],
+['map_help','Set up your map location','In AutoCare Maps, choose My location and allow precise location. Search for a destination or pick it on the map, then choose an available route.','Open account'],
 ['service_folder','Share essential history with your workshop','Create a temporary vehicle folder link in Premium. Review the information before sharing. You can revoke the link at any time.','Open Premium'],
 ['first_vehicle','Set up your garage','Add your vehicle and enter the dashboard mileage. Then record liability insurance, technical inspection and your last service so reminders use accurate information.','Open garage'],
 ['incident_open','Your reported issue is under investigation','Your report has been recorded. Add confirmed symptoms and any temporary measures here. We will update your support conversation.','Open account'],

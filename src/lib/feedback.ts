@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { db } from './db';
 import * as s from './schema';
 import { AppError, assertActiveAccount, profile } from './service';
+import { queueAutomatedMail } from './mail-automation';
 import { founderId } from './permissions';
 export const feedbackCategories=['suggestion','problem','experience'] as const;
 export const feedbackStatuses=['new','review','progress','resolved','closed'] as const;
@@ -49,6 +50,7 @@ export async function createFeedback(uid:string,input:unknown,uploads:Screenshot
   await tx.insert(s.feedbackPreferences).values({userId:uid,submittedAt:now}).onConflictDoUpdate({target:s.feedbackPreferences.userId,set:{submittedAt:now}});
   const notices=recipients.map(userId=>({id:randomUUID(),userId,feedbackId:id,kind:'new'}));
   if(notices.length)await tx.insert(s.feedbackNotices).values(notices);
+  await queueAutomatedMail(uid,'feedback_received','feedback-received:'+id,{},tx);
   return {id,noticeIds:notices.map(n=>n.id),duplicate:false};
  });
 }
