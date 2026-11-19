@@ -116,7 +116,7 @@ export default function PremiumDownloads({
           <option value="document">{en ? 'Documents' : 'Documente'}</option>
           <option value="service">{en ? 'Service sheet' : 'Fișă de service'}</option>
           <option value="expense">{en ? 'Expenses' : 'Cheltuieli'}</option>
-        </select>
+        </FilterSelect>
       </label>
       <label>{en ? 'From' : 'De la'}<PremiumDateInput type="date" value={from} onChange={event => setFrom(event.target.value)}/></label>
       <label>{en ? 'To' : 'Până la'}<PremiumDateInput type="date" value={to} onChange={event => setTo(event.target.value)}/></label>
