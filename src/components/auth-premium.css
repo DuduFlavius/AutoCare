@@ -69,3 +69,52 @@
  html body .auth-layout.ac-auth-premium[data-verification]>.auth-box{justify-content:flex-start!important}
  @media(max-width:600px){.ac-auth-code-actions>*{flex:1}.ac-auth-verification h2{font-size:25px}}
 }
+
+/* AutoCare Premium 5.0 — Pearl White + Petrol: public sign-in, sign-up,
+   recovery and verification. Deliberately no changes to authentication logic. */
+@layer autocare-auth-refinement {
+ html body:has(.ac-auth-premium){background:#F6F9FB!important;color:#142333!important;color-scheme:light!important}
+ html body .auth-layout.ac-auth-premium{background:#FFFFFF!important;border:1px solid #E3EBF0!important;box-shadow:0 22px 65px rgba(8,59,74,.11)!important}
+ html body .auth-layout.ac-auth-premium>.auth-editorial{background:linear-gradient(145deg,#083B4A,#075365 65%,#117D89)!important}
+ html body .auth-layout.ac-auth-premium .auth-editorial-content>h2 em{color:#A3F0EA!important}
+ html body .auth-layout.ac-auth-premium .auth-editorial-content>p,
+ html body .auth-layout.ac-auth-premium .section-kicker{color:#CBE4E9!important}
+ html body .auth-layout.ac-auth-premium .auth-editorial-content>div>span{color:#F7FCFD!important}
+ html body .auth-layout.ac-auth-premium .auth-editorial-content svg{color:#A3F0EA!important}
+ html body .auth-layout.ac-auth-premium>.auth-box{background:#FFFFFF!important}
+ html body .auth-layout.ac-auth-premium .ac-auth-brand{color:#142333!important}
+ html body .auth-layout.ac-auth-premium .ac-auth-brand span,
+ html body .auth-layout.ac-auth-premium .ac-auth-brand svg{color:#075365!important}
+ html body .auth-layout.ac-auth-premium .auth-box>h1{color:#142333!important}
+ html body .auth-layout.ac-auth-premium .auth-box>.eyebrow,
+ html body .auth-layout.ac-auth-premium .auth-box>p.muted,
+ html body .auth-layout.ac-auth-premium .ac-auth-language label{color:#657584!important}
+ html body .auth-layout.ac-auth-premium .auth-box form label{color:#142333!important;font-weight:600!important}
+ html body .auth-layout.ac-auth-premium .auth-box form input:not([type=checkbox]){
+   background:#F9FBFC!important;color:#142333!important;border:1px solid #D9E6EC!important;
+   box-shadow:0 1px 2px rgba(8,59,74,.025)!important
+ }
+ html body .auth-layout.ac-auth-premium .auth-box form input:not([type=checkbox])::placeholder{color:#758895!important}
+ html body .auth-layout.ac-auth-premium .auth-box form input:focus-visible{outline:3px solid rgba(32,166,166,.18)!important;border-color:#20A6A6!important}
+ html body .auth-layout.ac-auth-premium .auth-box form>button[type=submit]{background:linear-gradient(125deg,#075365,#083B4A)!important;color:#FFFFFF!important;box-shadow:0 8px 18px rgba(7,83,101,.16)!important}
+ html body .auth-layout.ac-auth-premium .auth-box form>button[type=submit]:hover:not(:disabled){background:#0C6977!important}
+ html body .auth-layout.ac-auth-premium .ac-auth-language .ac-filter-select-trigger{background:#EDF4F7!important;color:#142333!important;border:1px solid #E3EBF0!important}
+ html body .auth-layout.ac-auth-premium .auth-password-toggle,
+ html body .auth-layout.ac-auth-premium .auth-box .check,
+ html body .auth-layout.ac-auth-premium .ac-auth-ai-details small{color:#657584!important}
+ html body .auth-layout.ac-auth-premium .ac-auth-ai-details>summary{color:#142333!important}
+ html body .auth-layout.ac-auth-premium .auth-box :is(a,button):focus-visible{outline:3px solid rgba(32,166,166,.28)!important;outline-offset:3px!important}
+ html body .auth-layout.ac-auth-premium .ac-auth-verification{color:#142333!important}
+ html body .auth-layout.ac-auth-premium .ac-auth-verification p,
+ html body .auth-layout.ac-auth-premium .ac-auth-verification small,
+ html body .auth-layout.ac-auth-premium .ac-auth-steps{color:#657584!important}
+ html body .auth-layout.ac-auth-premium .ac-auth-verification p strong,
+ html body .auth-layout.ac-auth-premium .ac-auth-steps strong{color:#142333!important}
+ html body .auth-layout.ac-auth-premium .ac-auth-code-icon{background:#DCEEF1!important;color:#075365!important}
+ html body .auth-layout.ac-auth-premium .ac-auth-code-actions button{background:#EDF4F7!important;color:#075365!important;border:1px solid #E3EBF0!important}
+ @media(max-width:760px){
+  html body:has(.ac-auth-premium){background:#F6F9FB!important}
+  html body .auth-layout.ac-auth-premium{background:#F6F9FB!important;border:0!important;box-shadow:none!important}
+  html body .auth-layout.ac-auth-premium>.auth-box{background:#F6F9FB!important}
+ }
+}
