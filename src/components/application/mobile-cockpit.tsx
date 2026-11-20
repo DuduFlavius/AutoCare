@@ -1,6 +1,6 @@
 'use client';
 import {FilterSelect} from '../filter-select';
-import { CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Wallet, Wrench, ShieldCheck } from 'lucide-react';
+import { CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Coins, ChartNoAxesCombined, Wrench, ShieldCheck } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { selectActiveVehicle, upcomingMaintenance } from '@/lib/application-home';
@@ -31,7 +31,7 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
  return <div className="rg-mobile-home" data-workspace-ui>
   {!car?<section className="rg-m-empty"><CarFront size={52}/><h2>{t('Garajul tău începe aici','Your garage starts here')}</h2><p>{t('Adaugă mașina pentru a organiza documentele și întreținerea.','Add your vehicle to organize documents and maintenance.')}</p><button className="rg-m-primary" onClick={()=>onCreate('vehicle')}><Plus size={18}/>{t('Adaugă vehicul','Add vehicle')}</button></section>:<>
    <section className="rg-m-vehicle" data-multiple={active.length>1||undefined}>
-    <button className="rg-m-vehicle-open" onClick={()=>onVehicle(car.id)} aria-label={t('Deschide fișa mașinii','Open vehicle profile')}><span className="rg-m-vehicle-art rg-m-vehicle-emblem" aria-hidden="true"><span className="rg-m-emblem-orbit"/><CarFront size={35} strokeWidth={1.25}/><span className="rg-m-emblem-caption">AUTOCARE</span></span><span className="rg-m-vehicle-identity"><strong data-user-content>{car.brand} {car.model}</strong><small data-user-content>{car.plate}</small></span><ChevronRight size={19}/></button>
+    <button className="rg-m-vehicle-open" onClick={()=>onVehicle(car.id)} aria-label={t('Deschide fișa mașinii','Open vehicle profile')}><span className="rg-m-vehicle-art rg-m-vehicle-emblem" aria-hidden="true"><span className="rg-m-emblem-orbit"/><CarFront size={35} strokeWidth={1.25}/><span className="rg-m-emblem-caption">AUTOCARE</span></span><span className="rg-m-vehicle-sweep" aria-hidden="true"/><span className="rg-m-vehicle-identity"><strong data-user-content>{car.brand} {car.model}</strong><small data-user-content>{car.plate}</small></span><ChevronRight size={19}/></button>
     <div className="rg-m-vehicle-bottom"><span><Gauge size={19}/><span>{car.odometer.toLocaleString(locale)} km<small>{t('Kilometraj actual','Current mileage')}</small></span></span><button onClick={()=>onDrill('Documente',car.id,itp?[itp.id]:[],t('Inspecție tehnică','Vehicle inspection'))}><CalendarDays size={18}/><span>{itp?.expiresAt?date(itp.expiresAt):t('Necompletat','Not recorded')}<small>ITP</small></span></button></div>
     {active.length>1&&<label className="rg-m-car-switch"><span>{t('Mașina selectată','Selected vehicle')}</span><FilterSelect value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{active.map(vehicle=><option key={vehicle.id} value={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}</FilterSelect></label>}
    </section>
@@ -43,8 +43,8 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
     {Icon:Sparkles,title:'AutoCare AI',note:t('Asistentul tău auto','Your car assistant'),tab:data.premium?'AutoCare AI':'Premium'},
    ].map(({Icon,title,note,tab})=><button type="button" key={title} onClick={()=>navigate(tab)}><Icon size={29}/><strong>{title}</strong><small>{note}</small></button>)}</div>
    <div className="rg-m-overview">{[
-    {Icon:Wallet,label:t('Costuri totale','Total costs'),value:finance.yearKnown?money(finance.yearBani):'—',note:t('Anul curent','Current year'),tab:'Cheltuieli'},
-    {Icon:Wrench,label:t('Intervenții','Service entries'),value:String(rows.filter(r=>r.kind==='service'&&r.date&&r.date<=today&&!isPlannedService(r,today)).length),note:t('Istoric înregistrat','Recorded history'),tab:'Întreținere'},
+    {Icon:Coins,label:t('Costuri totale','Total costs'),value:finance.yearKnown?money(finance.yearBani):'—',note:t('Anul curent','Current year'),tab:'Cheltuieli'},
+    {Icon:ChartNoAxesCombined,label:t('Intervenții','Service entries'),value:String(rows.filter(r=>r.kind==='service'&&r.date&&r.date<=today&&!isPlannedService(r,today)).length),note:t('Istoric înregistrat','Recorded history'),tab:'Întreținere'},
     {Icon:Gauge,label:t('Revizie în','Next service in'),value:next?.status.remainingKm!=null?Math.max(0,next.status.remainingKm).toLocaleString(locale)+' km':'—',note:t('Prag de kilometraj','Mileage threshold'),tab:'Întreținere'},
    ].map(({Icon,label,value,note,tab})=><button key={tab+label} onClick={()=>onDrill(tab,car?.id??'',rows.filter(r=>tab==='Întreținere'?r.kind==='service':true).map(r=>r.id),label)}><Icon size={23}/><span>{label}</span><strong>{value}</strong><small>{note}</small></button>)}</div>
    {currency==='EUR'&&<small className="rg-currency-note">{t('Afișare orientativă: 1 EUR = 5 RON.','Indicative display: 1 EUR = 5 RON.')}</small>}

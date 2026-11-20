@@ -1,4 +1,5 @@
 'use client';
+import './reference-home.css';
 import type {dashboard} from '@/lib/service';
 import {selectActiveVehicle,upcomingMaintenance} from '@/lib/application-home';
 import {useApplicationLanguage} from '../application-locale';
