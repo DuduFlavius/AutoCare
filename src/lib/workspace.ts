@@ -1,9 +1,9 @@
 export const mobileWorkspaceSections = [
   { id: 'Dashboard', ro: 'Acasă', en: 'Home' },
-  { id: 'Documente', ro: 'Documente', en: 'Documents' },
+  { id: 'Garaj', ro: 'Garaj', en: 'Garage' },
+  { id: 'Acțiuni', ro: 'Adaugă', en: 'Add' },
   { id: 'Rapoarte', ro: 'Rapoarte', en: 'Reports' },
-  { id: 'Calendar', ro: 'Calendar', en: 'Calendar' },
-  { id: 'Cont', ro: 'Setări', en: 'Settings' },
+  { id: 'Cont', ro: 'Cont', en: 'Account' },
 ] as const;
 export const workspaceSections = [
   {id:'Feedback',ro:'Trimite feedback',en:'Send feedback',group:'help',icon:'support'},
