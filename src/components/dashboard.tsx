@@ -330,7 +330,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   );
 }
 
-export default function Dashboard({ name: initialName, previewData, initialTab='Dashboard', initialVehicle, initialDrive, smartDriveValidation=false }: { smartDriveValidation?:boolean; name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
+export default function Dashboard({ name: initialName, previewData, initialTab='Dashboard', initialVehicle, initialDrive, smartDriveEnabled=true }: { smartDriveEnabled?:boolean; name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
   const [name,setName]=useState(initialName);
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
@@ -371,6 +371,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     [admin, setAdmin] = useState<any>(null),
     [invoices, setInvoices] = useState<any[]>([]),
     [_calendarMonth, _setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [smartDriveOpened,setSmartDriveOpened]=useState(normalizeWorkspaceTab(initialTab)==='Plan întreținere');
+  useEffect(()=>{if(tab==='Plan întreținere')setSmartDriveOpened(true)},[tab]);
   const dashboardRequest = useRef(0);
   const locale=language==='en'?'en-GB':'ro-RO';
   useEffect(()=>{if(previewData||tab!=='Abonament')return;const timer=setInterval(()=>{if(document.visibilityState==='visible'){void api('billing/sync','POST').then(()=>refresh(true)).catch(()=>{});void refresh(true);void api('billing/invoices').then(setInvoices).catch(e=>setError(e.message));}},15000);return()=>clearInterval(timer);},[tab,previewData]);
@@ -1491,7 +1493,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             )}
             {tab==='Calendar'&&<RacingCalendar data={data} today={nowDate} onOpen={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onCreate={day=>setModal({kind:'service',planned:true,initialDate:day})}/>}
             {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
-            {smartDriveValidation&&(!!previewData||data.profile.role==='founder')?<div hidden={tab!=='Plan întreținere'}><MileagePlanner data={data} preview={!!previewData} onUpdated={refresh} onError={setError} driveVisible={tab==='Plan întreținere'} initialDrive={initialDrive}/></div>:tab==='Plan întreținere'&&<SmartDriveMaintenance english={language==='en'} onBack={()=>navigate('Acasă')}/>}
+            {smartDriveEnabled?(smartDriveOpened||tab==='Plan întreținere')&&<div hidden={tab!=='Plan întreținere'}><MileagePlanner data={data} preview={!!previewData} onUpdated={refresh} onError={setError} driveVisible={tab==='Plan întreținere'} initialDrive={initialDrive}/></div>:tab==='Plan întreținere'&&<SmartDriveMaintenance english={language==='en'} onBack={()=>navigate('Acasă')}/>}
             {tab === 'Notificări' && (
               <div className="overview-stack">
                 <section className="ac-notification-toolbar" data-workspace-ui><span><BellRing size={24} strokeWidth={1.6}/><b>{data.notifications.filter(row=>!row.readAt).length}</b></span><h2>{data.notifications.some(row=>!row.readAt)?(language==='en'?'Your new notifications':'Notificările tale noi'):(language==='en'?'You are up to date':'Ești la zi')}</h2><p>{language==='en'?'Your vehicle deadlines and important alerts, in one place.':'Termenele mașinii și alertele importante, într-un singur loc.'}</p><button className="ac-m-primary" type="button" disabled={busy||!!previewData} onClick={()=>void act(registerPush,language==='en'?'Notifications activated on this device.':'Notificările au fost activate pe acest dispozitiv.') }><BellRing size={18}/>{language==='en'?'Activate notifications':'Activează notificările'}</button></section>

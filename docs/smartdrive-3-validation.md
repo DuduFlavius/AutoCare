@@ -1,14 +1,14 @@
 # SmartDrive GPS 3.0 — release gate and validation
 
-Status: IMPLEMENTED FOR PREVIEW; NOT VALIDATED FOR PUBLIC RELEASE.
+Status: PUBLIC RELEASE REQUESTED BY THE FOUNDER BEFORE REAL-DEVICE VALIDATION. Automated checks passed; visual and real Android driving checks remain unverified.
 
 ## Entry point
 
-The live SmartDrive entry is the `Plan întreținere` workspace tab. Production continues to render its maintenance screen. The new map/recording workspace is available ONLY on a non-production deployment with `drive=validation`, a verified authenticated founder (configured AUTOCARE_FOUNDER_USER_ID), and the Plan întreținere tab. A browser parameter alone never authorizes it. The isolated design fixture can opt in with smartDriveValidation; it has no production writes.
+The live SmartDrive entry is the `Plan întreținere` workspace tab (labelled SmartDrive GPS). Following the founder's explicit instruction to publish GPS first, authenticated accounts now receive the new navigation and recording workspace. `smartDriveEnabled=false` retains the maintenance fallback for rollback. Existing API ownership checks and subscription permissions are unchanged. Design fixtures remain read-only.
 
-Preview URL query: `/cont?tab=Plan%20%C3%AEntre%C8%9Binere&drive=validation`.
+URL query: `/cont?tab=Plan%20%C3%AEntre%C8%9Binere`.
 
-Do not change the production gate until visual and real-device validation is recorded.
+The real-device checks below are still required; publication is not evidence that they passed.
 
 ## Implementation
 
