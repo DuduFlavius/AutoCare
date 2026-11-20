@@ -75,7 +75,7 @@ export function WorkspaceNavigation({
       data-workspace-ui
     >
       {[
-        {ro:'',en:'',ids:['Dashboard','Garaj','Documente','Întreținere','Cheltuieli','Kilometraj','Plan întreținere','Calendar','AutoCare AI','Centru de suport','Administrare','Setări']},
+        {ro:'',en:'',ids:['Dashboard','Garaj','Documente','Întreținere','Cheltuieli','Kilometraj','Plan întreținere','Calendar','AutoCare AI','Centru de suport','Setări']},
         {ro:'MAI MULTE',en:'MORE',ids:['RCA & Rovinietă','Rapoarte','Istoric auto','Notificări','Premium','Abonament','Cont']},
       ].map(group => {const Group=group.ro?'details':'div';return <Group className="ws-nav-group" key={group.en}>{group.ro&&<summary>{group[language]}</summary>}{group.ids.map(id => {
         const section=workspaceSections.find(section=>section.id===id) ?? {id,ro:'Administrare',en:'Administration',icon:'settings'};
