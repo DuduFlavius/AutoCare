@@ -18,6 +18,6 @@ test('mobile home and document vault show owner data, no stock BMW or pretend va
  assert.match(vault,/Termen necunoscut/);assert.match(vault,/Adaugă data de expirare/);assert.doesNotMatch(vault,/api\/v1\/files\//);assert.doesNotMatch(vault,/status=&|vehicleId=&|<img|BMW/);
  assert.match(vault,/kind=document/);assert.match(vault,/CSV/);assert.match(vault,/PDF/);
 });
-test('approved mobile reference exposes home, documents, reports, calendar and settings',()=>{
- assert.deepEqual(mobileWorkspaceSections.map(section=>section.id),['Dashboard','Documente','Rapoarte','Calendar','Cont']);
+test('approved mobile reference exposes home, garage, add, reports and account',()=>{
+ assert.deepEqual(mobileWorkspaceSections.map(section=>section.id),['Dashboard','Garaj','Acțiuni','Rapoarte','Cont']);
 });
