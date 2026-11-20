@@ -1,0 +1,57 @@
+name: Android UI preview validation
+on:
+  push:
+    branches: [fix/global-controls-gps-fullscreen-20261120]
+    paths: [.github/workflows/android-ui-preview.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      AUTOCARE_PREVIEW_URL: https://auto-care-31bgt5hno-auto-care4.vercel.app/cont
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify Java 21 compiler and Android SDK
+        run: |
+          "$JAVA_HOME_21_X64/bin/javac" -version
+          test -d "$ANDROID_HOME/platforms"
+      - run: npm ci --prefix mobile
+      - name: Target only the founder preview
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const path='mobile/capacitor.config.json';
+          const url=new URL(process.env.AUTOCARE_PREVIEW_URL);
+          if(url.protocol!=='https:'||url.hostname!=='auto-care-31bgt5hno-auto-care4.vercel.app')throw Error('Unexpected preview destination');
+          const config=JSON.parse(fs.readFileSync(path,'utf8'));
+          config.server.url=url.href;
+          fs.writeFileSync(path,JSON.stringify(config,null,2));
+          JS
+          cd mobile
+          npx cap sync android
+      - name: Build preview APK and run Android checks
+        run: |
+          export JAVA_HOME="$JAVA_HOME_21_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          cd mobile/android
+          ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug --console=plain
+      - name: Archive installable preview APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-UI-GPS-preview-APK
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+      - name: Archive Android quality reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-UI-GPS-Android-reports
+          path: mobile/android/app/build/reports/
+          if-no-files-found: warn
+          retention-days: 7
