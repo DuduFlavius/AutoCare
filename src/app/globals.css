@@ -997,3 +997,68 @@ html body .app-shell.ac-workspace main.main .ac-inline-mileage [role=alert]:not(
   color: var(--color-on-primary) !important;
   -webkit-text-fill-color: var(--color-on-primary) !important;
 }
+
+
+/* AutoCare Premium 5.0 — Pearl White + Petrol visual foundation.
+   Scoped to the authenticated workspace; no data, routing or GPS logic changes. */
+.ac-workspace {
+  --color-bg: #F6F9FB;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #EDF4F7;
+  --color-nav: #F7FAFC;
+  --color-primary: #075365;
+  --color-primary-hover: #083B4A;
+  --color-primary-deep: #083B4A;
+  --color-primary-ink: #075365;
+  --color-on-primary: #FFFFFF;
+  --color-text: #142333;
+  --color-muted: #657584;
+  --color-border: #E3EBF0;
+  --color-border-strong: #657584;
+  --bg: #F6F9FB;
+  --panel: #FFFFFF;
+  --panel2: #EDF4F7;
+  --border: #E3EBF0;
+  --muted: #657584;
+  --text: #142333;
+  --accent: #075365;
+  --cyan: #20A6A6;
+  background: #F6F9FB;
+  color: #142333;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.ac-workspace .sidebar:not(:where([class^="rg-"],[class^="rg-"] *)) {
+  background: #F7FAFC;
+  border-right: 1px solid #E3EBF0;
+}
+.ac-workspace .sidebar nav button.active:not(:where([class^="rg-"],[class^="rg-"] *)) {
+  background: linear-gradient(125deg,#075365,#083B4A);
+  color: #FFFFFF;
+  border-radius: 12px;
+}
+.ac-workspace .main .card:not(:where([class^="rg-"],[class^="rg-"] *)) {
+  border: 1px solid #E3EBF0;
+  background: #FFFFFF;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(8,59,74,.055);
+}
+.ac-workspace .app-header:not(:where([class^="rg-"],[class^="rg-"] *)) {
+  background: rgba(246,249,251,.96);
+  border-bottom: 1px solid #E3EBF0;
+}
+.ac-workspace button.primary:not(:where([class^="rg-"],[class^="rg-"] *)),
+.ac-workspace .button.primary:not(:where([class^="rg-"],[class^="rg-"] *)) {
+  background: linear-gradient(120deg,#075365,#083B4A);
+  color: #FFFFFF;
+  border-color: #075365;
+  border-radius: 11px;
+}
+.ac-workspace :is(input,select,textarea):not(:where([class^="rg-"],[class^="rg-"] *)) {
+  background: #FFFFFF;
+  color: #142333;
+  border-color: #D8E4EA;
+}
+@media (max-width:760px) {
+  .ac-workspace .main:not(:where([class^="rg-"],[class^="rg-"] *)) {padding-inline:16px}
+  .ac-workspace .main .card:not(:where([class^="rg-"],[class^="rg-"] *)) {border-radius:16px}
+}
