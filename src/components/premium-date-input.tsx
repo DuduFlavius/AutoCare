@@ -12,6 +12,7 @@ export function PremiumDateInput({type='date',value,defaultValue,onChange,...pro
  const current=String(value??local),input=useRef<HTMLInputElement>(null),panel=useRef<HTMLDivElement>(null),trigger=useRef<HTMLButtonElement>(null);
  const initial=()=>{const parsed=/^\d{4}-\d{2}/.test(current)?new Date(current.slice(0,7)+'-01T12:00:00Z'):new Date();return Number.isFinite(parsed.getTime())?parsed:new Date();};
  const [month,setMonth]=useState(initial),[position,setPosition]=useState({top:80,left:8,maxHeight:480});
+ useEffect(()=>{const form=input.current?.form;if(!form)return;const reset=()=>setLocal(String(defaultValue??''));form.addEventListener('reset',reset);return()=>form.removeEventListener('reset',reset);},[defaultValue]);
  const year=month.getUTCFullYear(),monthIndex=month.getUTCMonth(),locale=en?'en-GB':'ro-RO';
  useEffect(()=>{
   if(!open)return;

@@ -172,12 +172,12 @@ function Dialog({
   closeRef.current = onClose;
   useEffect(() => {
     const previous = document.activeElement as HTMLElement;
-    (ref.current?.querySelector<HTMLElement>('input[type=search]') || ref.current?.querySelector<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled)'))?.focus();
+    (ref.current?.querySelector<HTMLElement>('input[type=search]') || ref.current?.querySelector<HTMLElement>('button:not(:disabled):not([hidden]),input:not(:disabled):not([hidden]),select:not(:disabled):not([hidden])'))?.focus();
     function key(e: KeyboardEvent) {
       if (e.key === 'Escape') closeRef.current();
       if (e.key === 'Tab') {
         const nodes = ref.current?.querySelectorAll<HTMLElement>(
-          'button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]',
+          'button:not(:disabled):not([hidden]),input:not(:disabled):not([hidden]),select:not(:disabled):not([hidden]),textarea:not(:disabled),a[href]',
         );
         if (!nodes?.length) return;
         const first = nodes[0],
@@ -1747,7 +1747,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
           <p data-user-content><strong>{deleteRecordTarget.title||deleteRecordTarget.category}</strong></p>
           <p>{language==='en'?'This permanently removes the entry, its attachments, change history and reminders. This cannot be undone.':'Înregistrarea, atașamentele, istoricul modificărilor și alertele vor fi șterse definitiv. Acțiunea nu poate fi anulată.'}</p>
           {error&&<p role="alert">{error}</p>}
-          <div className="ac-garage-confirm-actions"><button type="button" disabled={busy} onClick={()=>setDeleteRecordTarget(null)}>{language==='en'?'Cancel':'Anulează'}</button><button type="button" className="danger" disabled={busy||!!previewData} onClick={async()=>{const deleted=await act(()=>api('records/'+deleteRecordTarget.id+'/permanent','DELETE',{confirmation:'DELETE',revision:deleteRecordTarget.revision}));if(deleted)setDeleteRecordTarget(null);}}>{language==='en'?'Delete permanently':'Șterge definitiv'}</button></div>
+          <div className="ac-garage-confirm-actions"><button type="button" disabled={busy} onClick={()=>setDeleteRecordTarget(null)}>{language==='en'?'Cancel':'Anulează'}</button><button type="button" className="danger" disabled={busy||!!previewData} onClick={async()=>{const deleted=await act(()=>api('records/'+deleteRecordTarget.id+'/permanent','DELETE',{confirmation:'DELETE',revision:deleteRecordTarget.revision}));if(deleted)setDeleteRecordTarget(null);}}>{busy?(language==='en'?'Deleting…':'Se șterge…'):(language==='en'?'Delete permanently':'Șterge definitiv')}</button></div>
         </Dialog>}
         {archiveVehicleTarget && (
           <Dialog title={language === 'en' ? 'Archive vehicle' : 'Arhivează vehiculul'} onClose={() => { if (!busy) setArchiveVehicleTarget(null); }}>
@@ -1759,7 +1759,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               <button type="button" disabled={busy} className="danger" onClick={async () => {
                 const archived = await act(() => api('vehicles/' + archiveVehicleTarget.id, 'DELETE'));
                 if (archived || previewData) setArchiveVehicleTarget(null);
-              }}>{language === 'en' ? 'Confirm archive' : 'Confirmă arhivarea'}</button>
+              }}>{busy?(language==='en'?'Archiving…':'Se arhivează…'):(language === 'en' ? 'Confirm archive' : 'Confirmă arhivarea')}</button>
             </div>
           </Dialog>
         )}

@@ -3,19 +3,17 @@ import {useEffect,useId,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {AlertTriangle,Info,LoaderCircle} from 'lucide-react';
 
-type Request={action?:()=>Promise<void>;message:string;resolve:(confirmed:boolean)=>void;language:'ro'|'en'};
-let current:Request|null=null;
-const subscribers=new Set<(value:Request|null)=>void>();
-/** One pending decision at a time: repeated clicks cannot enqueue duplicate mutations. */
+import {ConfirmationQueue,type ConfirmationRequest as Request} from '@/lib/confirmation-queue';
+const queue=new ConfirmationQueue();
 export function requestConfirmation(message:string,action?:()=>Promise<void>):Promise<boolean>{
- if(typeof window==='undefined'||current||!subscribers.size)return Promise.resolve(false);
+ if(typeof window==='undefined')return Promise.resolve(false);
  const language=(document.querySelector<HTMLElement>('[data-language]')?.dataset.language||document.documentElement.lang).startsWith('en')?'en':'ro';
- return new Promise(resolve=>{current={message,resolve,language,action};subscribers.forEach(fn=>fn(current));});
+ return queue.request(message,language,action);
 }
-function settle(value:boolean){const request=current;if(!request)return;current=null;subscribers.forEach(fn=>fn(null));request.resolve(value);}
+function settle(value:boolean){queue.settle(value);}
 export function PremiumDialogHost(){
  const [request,setRequest]=useState<Request|null>(null),[working,setWorking]=useState(false),[error,setError]=useState(''),actionLock=useRef(false),root=useRef<HTMLDivElement>(null),id=useId();
- useEffect(()=>{subscribers.add(setRequest);return()=>{subscribers.delete(setRequest);if(!subscribers.size)settle(false);};},[]);
+ useEffect(()=>queue.subscribe(setRequest),[]);
  useEffect(()=>{
   if(!request)return;
   setError('');

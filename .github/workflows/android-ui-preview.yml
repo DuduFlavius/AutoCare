@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      AUTOCARE_PREVIEW_URL: https://auto-care-31bgt5hno-auto-care4.vercel.app/cont
+      AUTOCARE_PREVIEW_URL: https://auto-care-git-fix-global-controls-gps-fullscr-66c69c-auto-care4.vercel.app/cont
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -27,7 +27,7 @@ jobs:
           import fs from 'node:fs';
           const path='mobile/capacitor.config.json';
           const url=new URL(process.env.AUTOCARE_PREVIEW_URL);
-          if(url.protocol!=='https:'||url.hostname!=='auto-care-31bgt5hno-auto-care4.vercel.app')throw Error('Unexpected preview destination');
+          if(url.protocol!=='https:'||url.hostname!=='auto-care-git-fix-global-controls-gps-fullscr-66c69c-auto-care4.vercel.app')throw Error('Unexpected preview destination');
           const config=JSON.parse(fs.readFileSync(path,'utf8'));
           config.server.url=url.href;
           fs.writeFileSync(path,JSON.stringify(config,null,2));

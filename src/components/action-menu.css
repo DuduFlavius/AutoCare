@@ -16,3 +16,5 @@ html body .ac-action-popover .ac-action-close{width:36px;min-height:36px;justify
 .ac-action-options .ac-action-file{display:grid;gap:8px;padding:12px 2px 4px;border-top:1px solid #0B1C1666;margin-top:6px}.ac-action-file>strong{font-size:12px;line-height:1.6;color:#FFFFFF;overflow-wrap:anywhere;padding-inline:10px}
 .ac-action-file .ac-document-actions{display:flex;gap:6px;padding-inline:6px}.ac-action-file .ac-document-actions>button{flex:1;justify-content:center;background:#1C8062;border-color:#20E6A2}
 @media(max-width:600px){html body .ac-action-popover{border-radius:18px;padding:9px}html body .ac-action-popover :is(button,a){min-height:46px}}
+
+html body .ac-action-popover[hidden]{display:none!important}
