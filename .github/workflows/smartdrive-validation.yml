@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/autocare-premium-rebuild
+      - feature/autocare-premium-5-pearl-petrol
   workflow_dispatch:
 permissions:
   contents: read
