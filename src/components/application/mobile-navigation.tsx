@@ -7,6 +7,6 @@ export default function MobileNavigation({ tab, navigate, path, onAdd }: { tab: 
   const language = useApplicationLanguage();
   return <nav className="rg-mobile-dock" aria-label={language === 'en' ? 'Main navigation' : 'Navigare principală'} data-workspace-ui>{mobileWorkspaceSections.map((section,index) => {
     const Icon = icons[index], isAdd = section.id === 'Acțiuni', active = !isAdd && (section.id === tab || (section.id === 'Cont' && tab === 'Setări'));
-    return <a key={section.id} href={isAdd ? workspaceHref(path,'Garaj') : workspaceHref(path,section.id)} aria-label={section[language]} title={section[language]} aria-current={active ? 'page' : undefined} className={isAdd ? 'rg-dock-add' : active ? 'active' : ''} onClick={e => { if(e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)return; e.preventDefault();if(isAdd)onAdd();else navigate(section.id); }}><Icon size={21}/><span>{section[language]}</span></a>;
+    return isAdd ? <button key={section.id} type="button" aria-label={section[language]} title={section[language]} className="rg-dock-add" onClick={onAdd}><Icon size={21}/><span>{section[language]}</span></button> : <a key={section.id} href={workspaceHref(path,section.id)} aria-label={section[language]} title={section[language]} aria-current={active ? 'page' : undefined} className={active ? 'active' : ''} onClick={e => { if(e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)return; e.preventDefault();navigate(section.id); }}><Icon size={21}/><span>{section[language]}</span></a>;
   })}</nav>;
 }
