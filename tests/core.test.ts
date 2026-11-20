@@ -145,35 +145,16 @@ test('01 Registration, email verification, login, session and wrong password', a
   });
   assert.equal(r.status, 401);
 });
-test('destination search authenticates, validates input, and normalizes provider addresses', async () => {
-  const payload = { query: 'Calea Șagului 100', area: { latitude: 45.7247, longitude: 21.1987 } };
-  assert.equal((await call('smartdrive/destinations', 'POST', payload, '')).status, 401);
-  assert.equal((await call('smartdrive/destinations', 'POST', { ...payload, query: ' a ' })).status, 400);
-  const response = await call('smartdrive/destinations', 'POST', payload);
-  assert.equal(response.status, 200);
-  assert.equal(response.headers.get('cache-control'), 'private, no-store');
-  assert.deepEqual(await response.json(), [{ latitude: 45.7247, longitude: 21.1987, name: 'Calea Șagului 100', details: 'Timișoara', distanceKm: 0 }]);
+test('browser navigation endpoints are retired even for authenticated clients; anonymous remains unauthorized',async()=>{
+  requestRadius=null;
+  for(const route of ['smartdrive/destinations','smartdrive/directions']){
+    assert.equal((await call(route,'POST',{},'')).status,401);
+    const response=await call(route,'POST',{query:'Timișoara',start:{latitude:45.7,longitude:21.2},end:{latitude:45.71,longitude:21.21}});
+    assert.equal(response.status,410);
+    assert.equal(response.headers.get('cache-control'),'private, no-store');
+  }
+  assert.equal(requestRadius,null,'Retired web routes must never contact the routing provider');
 });
-
-test('SmartDrive directions require a session, validate coordinates and return real provider fields', async () => {
-  const request = { start: { latitude: 45.7, longitude: 21.2 }, end: { latitude: 45.71, longitude: 21.21 } };
-  assert.equal((await call('smartdrive/directions', 'POST', request, '')).status, 401);
-  const invalid = await call('smartdrive/directions', 'POST', { ...request, end: { latitude: 100, longitude: 1 } });
-  assert.equal(invalid.status, 400);
-  const result = await call('smartdrive/directions', 'POST', request);
-  assert.equal(result.status, 200);
-  assert.equal(result.headers.get('cache-control'), 'private, no-store');
-  const [route] = await result.json();
-  assert.equal(route.distance, 1200);
-  assert.equal(route.legs[0].steps[0].maneuver.type, 'depart');
-  assert.equal(requestRadius, '250;250');
-  assert.equal((await call('smartdrive/directions', 'POST', { ...request, startAccuracy: 202 })).status, 200);
-  assert.equal(requestRadius, '250;250');
-  assert.equal((await call('smartdrive/directions', 'POST', { ...request, startAccuracy: 320 })).status, 200);
-  assert.equal(requestRadius, '320;250');
-  assert.equal((await call('smartdrive/directions', 'POST', { ...request, startAccuracy: 999 })).status, 400);
-});
-
 
 test('02 Password recovery token is required and can reset a password', async () => {
   let r = await authReq('request-password-reset', {

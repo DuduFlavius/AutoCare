@@ -1,7 +1,8 @@
 'use client';
+import {nativeNavigation} from '@/lib/native-tracking';
 import {FilterSelect} from '@/components/filter-select';
 
-import { useState, useDeferredValue, type ReactNode } from 'react';
+import { useState, useEffect, useDeferredValue, type ReactNode } from 'react';
 import ReferenceArtwork,{type ReferenceArtworkName} from './reference-artwork';
 import {
   House,
@@ -65,6 +66,8 @@ export function WorkspaceNavigation({
   premium?: boolean;
   path?: string;
 }) {
+  const [androidNavigation,setAndroidNavigation]=useState(false);
+  useEffect(()=>setAndroidNavigation(nativeNavigation.available()),[]);
   return (
     <nav
       className="ws-navigation"
@@ -78,7 +81,7 @@ export function WorkspaceNavigation({
         const section=workspaceSections.find(section=>section.id===id)!;
         const Icon=icons[section.icon];
         const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
-        const label = id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj'?(language==='en'?'Garage':'Garaj'):id==='Cont'?(language==='en'?'Settings':'Setări'):id==='Rapoarte'?(language==='en'?'Report':'Raport'):id==='Setări'?(language==='en'?'Preferences':'Preferințe'):section[language];
+        const label = id==='Plan întreținere'&&!androidNavigation?(language==='en'?'Trip history':'Istoric călătorii'):id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj'?(language==='en'?'Garage':'Garaj'):id==='Cont'?(language==='en'?'Settings':'Setări'):id==='Rapoarte'?(language==='en'?'Report':'Raport'):id==='Setări'?(language==='en'?'Preferences':'Preferințe'):section[language];
         return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}>{referenceIcons[id]?<ReferenceArtwork name={referenceIcons[id]} width={32} height={32}/>:<Icon size={18}/>}<span>{label}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
       })}</Group>;})}
     </nav>
@@ -103,7 +106,9 @@ export function WorkspaceLauncher({
   const deferred = useDeferredValue(query);
   const terms = normalizeWorkspaceSearch(deferred).split(/\s+/).filter(Boolean);
   const match = (text: string) => terms.every((t) => normalizeWorkspaceSearch(text).includes(t));
-  const sections = workspaceSections.filter((s) => match(`${s.ro} ${s.en} ${s.id}`));
+  const [androidNavigation,setAndroidNavigation]=useState(false);
+  useEffect(()=>setAndroidNavigation(nativeNavigation.available()),[]);
+  const sections = workspaceSections.map(s=>s.id==='Plan întreținere'&&!androidNavigation?{...s,ro:'Istoric călătorii',en:'Trip history'}:s).filter((s) => match(`${s.ro} ${s.en} ${s.id}`));
   const cars = data?.vehicles.filter((v) => !v.archived) || [];
   const carById = new Map(cars.map(car => [car.id, car]));
   const records = terms.length
@@ -266,7 +271,9 @@ const moduleCopy: Record<string, { title: [string, string]; description: [string
 
 export function WorkspaceModuleHeader({ tab, language, children }: { tab: string; language: Language; children?: ReactNode }) {
   const section = workspaceSections.find(item => item.id === tab);
-  const copy = moduleCopy[tab];
+  const [androidNavigation,setAndroidNavigation]=useState(false);
+  useEffect(()=>setAndroidNavigation(nativeNavigation.available()),[]);
+  const copy = tab==='Plan întreținere'&&!androidNavigation?{title:['Istoric călătorii','Trip history'],description:['Cursele salvate și kilometrajul din cont. Navigația este disponibilă în Android.','Saved trips and account mileage. Navigation is available on Android.']}:moduleCopy[tab];
   const lang = language === 'en' ? 1 : 0;
   return (
     <header className="rg-page-heading" data-workspace-ui>

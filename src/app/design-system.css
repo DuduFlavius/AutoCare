@@ -26,12 +26,12 @@
   --color-card: color-mix(in srgb, var(--graphite) 40%, var(--obsidian-black));
   --color-surface: var(--color-card);
   --color-surface-muted: color-mix(in srgb, var(--graphite) 55%, var(--obsidian-black));
-  --color-border: color-mix(in srgb, var(--steel) 38%, transparent);
+  --color-border: #ffffff0e;
   --surface-card: radial-gradient(ellipse at top left, #20E6A209, transparent 65%), linear-gradient(140deg, #0B1C16, #050E0B);
   --surface-raised: linear-gradient(145deg, #10251E, #050E0B);
   --brand-ribbon: url('/emerald-reference/home-ribbons.svg');
   --workspace-canvas: var(--brand-ribbon) right top / min(1200px, 100%) 190px no-repeat, var(--color-bg);
-  --color-border-strong: color-mix(in srgb, var(--steel) 78%, var(--titanium-silver));
+  --color-border-strong: #ffffff20;
   --color-text: var(--titanium-white);
   --color-muted: var(--titanium-silver);
   --color-subtle: color-mix(in srgb, var(--titanium-silver) 86%, var(--steel));

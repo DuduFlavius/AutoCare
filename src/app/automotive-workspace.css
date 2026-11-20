@@ -868,7 +868,7 @@ html body .app-shell.ac-workspace .ac-road-map .ac-road-map-center:not(:where([c
   align-items: center;
   gap: 7px;
   background: #091611 !important;
-  border-color: #5AFFC4 !important;
+  border-color: #ffffff0e !important;
   color: #f3f6fa !important;
 }
 .ac-road-map-center svg:not(:where([class^="rg-"],[class^="rg-"] *)){ color: #5AFFC4; }
@@ -915,7 +915,7 @@ html body .app-shell.ac-workspace .ac-road-map .ac-road-map-center:not(:where([c
   max-inline-size: calc(100% - 150px);
   background: #091611 !important;
   color: #f3f6fa !important;
-  border-color: #5AFFC4 !important;
+  border-color: #ffffff0e !important;
   white-space: normal !important;
   font-size: 12px !important;
 }
@@ -959,7 +959,7 @@ html body .app-shell.ac-workspace .ac-road-map .ac-road-map-center:not(:where([c
 .ac-destination-search li button small:not(:where([class^="rg-"],[class^="rg-"] *)){ display: block; color: var(--color-muted); }
 .ac-journey-stops:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .ac-journey-stops > div:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; gap: 2px; border-inline-start: 3px solid #76e3b1; padding-inline-start: 9px; }
-.ac-journey-stops > div + div:not(:where([class^="rg-"],[class^="rg-"] *)){ border-color: #5AFFC4; }
+.ac-journey-stops > div + div:not(:where([class^="rg-"],[class^="rg-"] *)){ border-color: #ffffff0e; }
 .ac-journey-stops span:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-journey-stops small:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-muted); }
 .ac-auto-points-layout.is-guiding:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: minmax(0, 1fr); padding-top: 10px; }
 

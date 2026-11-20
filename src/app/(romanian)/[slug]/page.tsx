@@ -6,7 +6,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { PriceCards } from '@/components/membership';
 import { publicPricing, DEFAULT_PRICING } from '@/lib/pricing';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound,permanentRedirect } from 'next/navigation';
 import { PublicShell } from '@/components/public-shell';
 import { AuthForm } from '@/components/auth-form';
 import { pages } from '@/lib/pages';
@@ -45,6 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 export default async function Page({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ next?: string }> }) {
   const { slug } = await params;
+  if(slug==='smart-gps')permanentRedirect('/smartdrive-gps');
   if (authPages.includes(slug)) {
     const { next } = await searchParams;
     return (

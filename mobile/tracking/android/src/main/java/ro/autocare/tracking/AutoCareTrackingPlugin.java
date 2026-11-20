@@ -16,6 +16,11 @@ import org.json.*;
 
 @CapacitorPlugin(name="AutoCareTracking",permissions={@Permission(alias="location",strings={Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION}),@Permission(alias="notifications",strings={Manifest.permission.POST_NOTIFICATIONS}),@Permission(alias="bluetooth",strings={Manifest.permission.BLUETOOTH_CONNECT})})
 public class AutoCareTrackingPlugin extends Plugin {
+    private final java.util.concurrent.atomic.AtomicInteger pendingNavigationRequests=new java.util.concurrent.atomic.AtomicInteger();
+    @PluginMethod public void navigationRequest(PluginCall call){
+        if(pendingNavigationRequests.incrementAndGet()>2){pendingNavigationRequests.decrementAndGet();call.reject("Navigation request already in progress.","NAVIGATION_BUSY");return;}
+        new Thread(()->{try{JSONObject data=NativeRoadProvider.request(call.getData());JSObject result=new JSObject();result.put("data",data);call.resolve(result);}catch(Exception error){call.reject("Navigation provider unavailable. Try again.","NAVIGATION_PROVIDER_UNAVAILABLE");}finally{pendingNavigationRequests.decrementAndGet();}},"AutoCare-routing").start();
+    }
     private byte[] pendingDocument;
     @PluginMethod public synchronized void saveDocument(PluginCall call){
         if(pendingDocument!=null){call.reject("Finish the current save first.");return;}

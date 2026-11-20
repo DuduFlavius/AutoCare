@@ -1,23 +1,23 @@
 /* Scoped public AI surface, independent of landing-card typography. */
-html body .ac-public-ai {display:grid;gap:20px;box-sizing:border-box;width:100%;max-width:1160px;margin:36px auto;padding:clamp(22px,3vw,36px);border:1px solid #1C8062;border-radius:22px;background:linear-gradient(120deg,#10251E,#091611);color:#edf4ff;box-shadow:0 12px 36px #0000001a}
+html body .ac-public-ai {display:grid;gap:20px;box-sizing:border-box;width:100%;max-width:1160px;margin:36px auto;padding:clamp(22px,3vw,36px);border:1px solid #ffffff0e;border-radius:22px;background:linear-gradient(120deg,#10251E,#091611);color:#edf4ff;box-shadow:0 12px 36px #0000001a}
 html body .ac-public-ai .ac-public-ai-heading {display:flex;gap:16px;align-items:center;min-width:0}
-html body .ac-public-ai .ac-public-ai-heading>span {display:grid;place-items:center;flex:none;width:48px;height:48px;border:1px solid #20E6A2;border-radius:14px;background:#1C8062;color:#5AFFC4}
+html body .ac-public-ai .ac-public-ai-heading>span {display:grid;place-items:center;flex:none;width:48px;height:48px;border:1px solid #ffffff0e;border-radius:14px;background:#1C8062;color:#5AFFC4}
 html body .ac-public-ai .ac-public-ai-heading p {font-size:11px!important;letter-spacing:.15em;color:#5AFFC4!important;margin:0 0 7px!important}
 html body .ac-public-ai h2 {font-size:clamp(21px,2.4vw,30px)!important;line-height:1.25!important;letter-spacing:-.025em!important;margin:0!important;color:#f1f6ff!important}
 html body .ac-public-ai p {font-size:15px!important;line-height:1.75!important;color:#FFFFFF!important;margin:0!important;max-width:850px}
 html body .ac-public-ai .ac-public-ai-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-html body .ac-public-ai .ac-public-ai-grid article {min-width:0;padding:22px!important;background:#10251E!important;border:1px solid #1C8062!important;border-radius:15px!important;box-shadow:none!important;display:block!important;height:auto!important}
+html body .ac-public-ai .ac-public-ai-grid article {min-width:0;padding:22px!important;background:#10251E!important;border:1px solid #ffffff0e!important;border-radius:15px!important;box-shadow:none!important;display:block!important;height:auto!important}
 html body .ac-public-ai .ac-public-ai-grid svg {width:24px;height:24px;color:#5AFFC4;margin-bottom:12px}
 html body .ac-public-ai h3 {font-size:17px!important;line-height:1.4!important;margin:0 0 9px!important;letter-spacing:-.01em!important;color:#f0f6ff!important;white-space:normal!important}
 html body .ac-public-ai .ac-public-ai-grid p {font-size:14px!important;line-height:1.7!important}
-html body .ac-public-ai .ac-public-ai-note {display:flex;align-items:start;gap:9px;font-size:13px!important;border-top:1px solid #1C8062;padding-top:18px}
+html body .ac-public-ai .ac-public-ai-note {display:flex;align-items:start;gap:9px;font-size:13px!important;border-top:1px solid #ffffff0e;padding-top:18px}
 html body .ac-public-ai-note svg {flex:none;margin-top:4px;color:#5AFFC4}
 html body .ac-public-ai .ac-public-ai-actions {display:flex;align-items:center;flex-wrap:wrap;gap:18px}
 html body .ac-public-ai .ac-public-ai-actions a {display:inline-flex;gap:8px;align-items:center;font-size:14px!important;min-height:46px;line-height:1.5!important}
 html body .ac-public-ai[data-compact] {padding:20px;margin:18px 0;gap:14px}
 html body .ac-public-ai[data-compact] h2 {font-size:20px!important}
 html body .ac-public-ai[data-compact] p {font-size:14px!important}
-.ac-public-language {display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 10px;border:1px solid #1C8062;border-radius:10px;background:#10251E;color:#e6f1ff;font-size:13px;cursor:pointer}
+.ac-public-language {display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 10px;border:1px solid #ffffff0e;border-radius:10px;background:#10251E;color:#e6f1ff;font-size:13px;cursor:pointer}
 @media(max-width:700px){html body .ac-public-ai .ac-public-ai-grid{grid-template-columns:minmax(0,1fr)}html body .ac-public-ai .ac-public-ai-heading{align-items:start}html body .ac-public-ai{gap:18px;margin:24px auto}html body .ac-public-ai .ac-public-ai-grid article{padding:18px!important}.ac-public-language{padding:7px;gap:4px}}
 
 html body .ac-public-ai .ac-public-ai-access {font-size:14px!important;color:#5AFFC4!important;padding:11px 14px;border:1px solid #0B1C16;border-radius:11px;background:#10251E;max-width:none}

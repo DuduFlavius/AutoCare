@@ -1,4 +1,5 @@
 'use client';
+import {nativeNavigation} from '@/lib/native-tracking';
 
 import { MapPin, Search } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
@@ -36,12 +37,7 @@ export default function DriveDestinationSearch({ area, nearPosition, disabled, e
     setError('');
     setMatches(null);
     try {
-      const response = await fetch('/api/v1/smartdrive/destinations', {
-        method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: text, area: { latitude: area.latitude, longitude: area.longitude } }),
-      });
-      if (!response.ok) throw new Error('Destination search unavailable');
-      const results=await response.json();
+      const results=await nativeNavigation.search(text,area.latitude,area.longitude);
       if(!controller.signal.aborted)setMatches(results);
     } catch {
       if (!controller.signal.aborted) setError(t('Nu am putut căuta adresa. Reîncearcă sau alege un punct pe hartă.', 'Could not search the address. Retry or choose a point on the map.'));

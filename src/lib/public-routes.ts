@@ -1,5 +1,6 @@
 /** Stable, language-specific public URLs; private routes are deliberately excluded. */
 export const publicRoutePairs: Record<string, string> = {
+ '/smartdrive-gps':'/en/smartdrive-gps',
  '/rca-rovinieta':'/en/rca-road-vignette',
  '/stergere-cont':'/en/delete-account',
  '/':'/en', '/despre-noi':'/en/about', '/aplicatie-auto':'/en/car-management-app',

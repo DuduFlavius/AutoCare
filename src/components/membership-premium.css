@@ -751,7 +751,7 @@ html body .subscription-options.ac-plan-grid > article.ac-plan-card > :is(a,butt
  display:flex!important;justify-content:center!important;align-items:center!important;gap:7px!important;min-height:44px!important;
  margin-top:0!important;padding:11px!important;border-radius:10px!important;font-size:13px!important;font-weight:600!important;line-height:1.4!important;white-space:normal!important;
 }
-html body .subscription-options.ac-plan-grid > article.annual-option {border-color:#5AFFC4!important}
+html body .subscription-options.ac-plan-grid > article.annual-option {border-color:#ffffff0e!important}
 html body .subscription-options.ac-plan-grid > article.annual-option > :is(a,button) {background:#5AFFC4!important;color:#fff!important}
 @media(max-width:850px) {
  html body .subscription-options.ac-plan-grid {grid-template-columns:minmax(0,1fr)!important;gap:12px!important}

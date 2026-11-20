@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {notFound} from 'next/navigation';
+import {notFound,permanentRedirect} from 'next/navigation';
 import {PublicShell} from '@/components/public-shell';
 import {AuthForm} from '@/components/auth-form';
 import {PriceCards} from '@/components/membership';
@@ -18,7 +18,7 @@ const auth:Record<string,string>={'/autentificare':'Sign in','/inregistrare':'Cr
 export function generateStaticParams(){return Object.entries(publicRoutePairs).filter(([ro])=>!auth[ro]).map(([,en])=>({segments:en.slice(4).split('/').filter(Boolean)}));}
 function contentFor(ro:string) {
  if(ro==='/')return {title:'Car management, documents and maintenance app',intro:'Manage vehicle documents, service history, mileage and expenses in one private digital garage. AutoCare works on your phone and computer.',sections:[['Everything about your vehicle, in one place','Start with one vehicle on the free plan. Keep document expiry dates, maintenance records and costs linked to the right vehicle. Premium adds more vehicles, reports and AutoCare AI.'],['Useful records, without invented data','Review the information you save, plan maintenance from your vehicle’s confirmed intervals and check original documents before acting on reminders. AutoCare is an organization tool, not an official vehicle-history database.']]};
- if(ro==='/aplicatie-auto')return {title:'Car management app for Android and web',intro:'Organize insurance, inspections, maintenance, mileage and expenses with the same AutoCare account on phone and desktop.',sections:[['Web and Android experiences','Use the web app in a compatible browser or the available Android installer. Store publication is separate; AutoCare does not claim an available Google Play or App Store listing.'],['GPS and Bluetooth availability','Start GPS manually in a browser while keeping the app open. Background GPS needs native permissions. Car-audio Bluetooth automation is Android-specific and does not provide OBD readings.']]};
+ if(ro==='/aplicatie-auto')return {title:'Car management app for Android and web',intro:'Organize insurance, inspections, maintenance, mileage and expenses with the same AutoCare account on phone and desktop.',sections:[['Web and Android experiences','Use the web app in a compatible browser or the available Android installer. Store publication is separate; AutoCare does not claim an available Google Play or App Store listing.'],['GPS and Bluetooth availability','SmartDrive GPS navigation and recording are exclusive to the Android app. Trip history remains available on the web. Native location permissions are required. Car-audio Bluetooth automation is Android-specific and does not provide OBD readings.']]};
  if(ro==='/instaleaza')return {title:'Install AutoCare on your phone',intro:'Add the web app to your home screen and keep using the same account.',sections:[['Android','Open AutoCare in Chrome. Use the browser menu to choose Install app or Add to Home screen, then confirm.'],['iPhone and iPad','Open AutoCare in Safari. Tap Share, Add to Home Screen, then Add. Background GPS and Bluetooth features require the appropriate native app and permissions.']]};
  if(ro==='/ghiduri')return {title:'Vehicle management guides',intro:'Practical guides for document expiry dates, service history and vehicle expenses.',sections:[]};
  if(['/preturi','/comparatie'].includes(ro))return {title:'AutoCare pricing — Free and Premium plans',intro:'Start with one vehicle for free. Choose RON or EUR for monthly, three-month or annual Premium billing.',sections:[]};
@@ -35,6 +35,7 @@ export async function generateMetadata({params}:Props){
 }
 export default async function EnglishPublicPage({params,searchParams}:Props){
  const {segments=[]}=await params;const path='/en'+(segments.length?'/'+segments.join('/'):'');
+ if(path==='/en/gps-trip-tracking')permanentRedirect('/en/smartdrive-gps');
  const ro=romanianPublicPath(path);const page=ro&&contentFor(ro);if(!ro||!page||!Object.values(publicRoutePairs).includes(path))notFound();
  const description='intro' in page?page.intro:page.description;
  if(auth[ro]){const {next}=await searchParams;return <PublicShell language="en"><AuthForm mode={ro.slice(1)} initialLanguage="en" next={next?.startsWith('/cont?')?next:'/cont'}/></PublicShell>;}

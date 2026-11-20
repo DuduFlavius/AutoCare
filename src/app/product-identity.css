@@ -187,16 +187,16 @@ html body .ac-workspace.ac-studio .main .studio-create-row button:not(:where([cl
   border-color: #0B1C16;
 }
 .product-mockup-rail:not(:where([class^="rg-"],[class^="rg-"] *)){
-  border: 1px solid #1C8062;
+  border: 1px solid #ffffff0e;
   border-radius: 9px;
   background: #091611;
 }
 .product-mockup-main:not(:where([class^="rg-"],[class^="rg-"] *)){
-  border: 1px solid #1C8062;
+  border: 1px solid #ffffff0e;
   border-radius: 9px;
   background: #091611;
 }
 .product-mockup-cards article:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: linear-gradient(155deg, #1C8062, #10251E);
-  border-color: #1C8062;
+  border-color: #ffffff0e;
 }

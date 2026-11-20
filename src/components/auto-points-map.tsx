@@ -2,7 +2,7 @@
 import {FilterSelect} from './filter-select';
 
 import dynamic from 'next/dynamic';
-import { ArrowUp, MapPin, Navigation,Volume2,VolumeX,ChevronDown,RotateCw,Search,X,SlidersHorizontal } from 'lucide-react';
+import { ArrowUp, MapPin, Navigation,Volume2,VolumeX,ChevronDown,RotateCw,Search,X,SlidersHorizontal,ArrowLeft,MoreHorizontal,History,Bluetooth } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState,type ReactNode } from 'react';
 import { defaultAutoPointsArea, type MapArea } from '@/lib/auto-points';
 import { browserGPSFix, latestGPSFix, type GPSFix } from '@/lib/gps-tracking';
@@ -33,10 +33,12 @@ function turnText(turn: Turn, english: boolean) {
 }
 
 export type NavigationSession={position:GPSFix|null;points:GPSFix[];meters:number;active:boolean;controls:ReactNode;vehicle:ReactNode;messages?:ReactNode;start:()=>void;stop:()=>void;locate:()=>void};
-export default function AutoPointsMap({ preview, visible, ownerId, session }: { preview: boolean; visible: boolean; ownerId: string;session?:NavigationSession }) {
+export default function AutoPointsMap({ preview, visible, ownerId, session,onExit,onView }: { preview: boolean; visible: boolean; ownerId: string;session?:NavigationSession;onExit?:()=>void;onView?:(view:'live'|'history'|'points'|'bluetooth')=>void }) {
   const locale = useApplicationLocale();
   const english = locale.startsWith('en');
   const t = (ro: string, en: string) => english ? en : ro;
+  const [nativeScreen,setNativeScreen]=useState(false);
+  useEffect(()=>{const active=visible&&nativeNavigation.available();setNativeScreen(active);if(!active)return;document.documentElement.dataset.autocareSmartdriveScreen='true';return()=>{delete document.documentElement.dataset.autocareSmartdriveScreen;};},[visible]);
   const [recent,setRecent]=useState<SavedDestination[]>([]);
   const [favorites,setFavorites]=useState<SavedDestination[]>([]);
   const placesKey='autocare-destinations:'+ownerId;
@@ -135,12 +137,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session }: { 
     setRouting(true);
     setRouteError('');
     try {
-      const response = await fetch('/api/v1/smartdrive/directions', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ start, end, startAccuracy: Math.round(start.accuracy) }), signal: controller.signal,
-      });
-      const value = await response.json();
-      if (!response.ok) throw new Error(value.error || 'Routing unavailable');
+      const value=await nativeNavigation.directions(start,end,Math.round(start.accuracy));
       if (controller.signal.aborted) return;
       setRoutes(value);
       setAlternative(0);
@@ -152,7 +149,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session }: { 
         requestLocate();
       }
     } catch (failure) {
-      if (!controller.signal.aborted) setRouteError(failure instanceof Error ? failure.message : t('Traseul nu este disponibil.', 'Route unavailable.'));
+      if (!controller.signal.aborted) setRouteError(nativeMethodMissing(failure)?t('Actualizează aplicația Android pentru SmartDrive GPS 4.0.','Update the Android app for SmartDrive GPS 4.0.'):t('Traseul nu este disponibil momentan. Reîncearcă.','The route is temporarily unavailable. Please retry.'));
     } finally {
       if (!controller.signal.aborted) setRouting(false);
     }
@@ -251,13 +248,14 @@ export default function AutoPointsMap({ preview, visible, ownerId, session }: { 
   useEffect(()=>{if((muted||!navigating)&&'speechSynthesis' in window)window.speechSynthesis.cancel();return()=>{if('speechSynthesis' in window)window.speechSynthesis.cancel()}},[muted,navigating]);
   const minutes=progress?Math.ceil(progress.seconds/60):!navigating&&route?Math.ceil(route.duration/60):null;
   const remaining=navigating?progress?.distance:route?.distance;
-  return <section ref={root} className="rg-smartdrive-map" data-guiding={navigating} data-search-open={searchOpen} data-expanded={journeyExpanded} aria-label="SmartDrive GPS">
+  return <section ref={root} className="rg-smartdrive-map" data-native-fullscreen={nativeScreen} data-guiding={navigating} data-search-open={searchOpen} data-expanded={journeyExpanded} aria-label="SmartDrive GPS">
     <div className="rg-navigation-layout" data-sidebar-open={searchOpen||details}>
       <div className="rg-navigation-canvas">
         <RoadMap points={session?.points||noRoute} position={position} active={navigating||!!session?.active} english={english}
           initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview?undefined:requestLocate}
           locating={findingLocation||location.waiting} locationError={locationError||location.error}
           untilTurn={progress?.untilTurn} plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting?choose:undefined}/>
+        {!navigating&&nativeScreen&&<><button type="button" className="rg-navigation-back" aria-label={t('Înapoi în AutoCare','Back to AutoCare')} onClick={onExit}><ArrowLeft size={20}/></button><details className="rg-navigation-tools"><summary aria-label={t('Meniu SmartDrive','SmartDrive menu')}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={()=>onView?.('history')}><History size={17}/>{t('Istoric trasee','Trip history')}</button><button type="button" onClick={()=>onView?.('bluetooth')}><Bluetooth size={17}/>Bluetooth</button></div></details></>}
         {!navigating&&<button type="button" className="rg-navigation-search-toggle" aria-expanded={searchOpen} onClick={()=>setSearchOpen(v=>!v)}><Search size={19}/><span>{destination?.name||t('Unde mergem?','Where to?')}</span><SlidersHorizontal size={18}/></button>}
         {navigating&&<button type="button" className="rg-navigation-exit" aria-label={t('Încheie navigația, păstrează înregistrarea','End navigation, keep recording')} onClick={()=>{setNavigating(false);setStepIndex(0);}}><X size={21}/></button>}
         {navigating&&<div className="rg-guidance-turn" role="status"><ManeuverIcon size={30} style={{rotate:progress?.next?.maneuver.modifier?.includes('left')?'-90deg':progress?.next?.maneuver.modifier?.includes('right')?'90deg':undefined}}/><div><strong>{arrived?t('Ai ajuns','You arrived'):progress?distance(progress.untilTurn):t('Se caută semnal GPS precis…','Waiting for accurate GPS…')}</strong><span>{progress?.next?turnText(progress.next.maneuver,english):t('Urmează traseul','Follow the route')}</span><small>{progress?.next?.name}</small></div><button type="button" aria-expanded={details} onClick={()=>setDetails(v=>!v)}><ChevronDown size={20}/></button></div>}

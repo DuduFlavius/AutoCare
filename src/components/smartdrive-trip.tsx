@@ -18,7 +18,7 @@ import { storeTripRoutes } from '@/lib/local-trip-routes';
 import { useMapLocation } from './use-map-location';
 import { acceptGPSFix, browserGPSFix, latestGPSFix, type GPSFix as Sample } from '@/lib/gps-tracking';
 
-export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bluetoothOnly, bluetoothVisible, liveVisible }: { preview: boolean; bluetoothOnly: boolean; bluetoothVisible: boolean; liveVisible: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; plate?: string; odometer:number }[]; onSaved:()=>Promise<unknown> }) {
+export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bluetoothOnly, bluetoothVisible, liveVisible,onExit,onView }: { preview: boolean; bluetoothOnly: boolean; bluetoothVisible: boolean; liveVisible: boolean; ownerId:string; vehicles: { id: string; brand: string; model: string; plate?: string; odometer:number }[]; onSaved:()=>Promise<unknown>;onExit?:()=>void;onView?:(view:'live'|'history'|'points'|'bluetooth')=>void }) {
 
   const locale=useApplicationLocale();
   const [waitingCar,setWaitingCar]=useState(false);
@@ -235,7 +235,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const driveButton = (!active ? <button type="button" className="primary" disabled={saving || preview || !currentCar || (automatic&&!saved)} onClick={start}><Play size={17}/> {automatic&&!saved ? (locale.startsWith('en')?'Awaiting trip sync':'În așteptarea sincronizării') : distance>0&&!saved ? (english ? 'Resume drive' : 'Reia călătoria') : (english ? 'Start Drive' : 'Pornește călătoria')}</button> : <button type="button" className="ac-drive-stop" onClick={stop}><Square size={17}/> {english ? 'Stop Drive' : 'Oprește călătoria'}</button>);
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-drive-live-content" hidden={bluetoothOnly}>
-    <AutoPointsMap preview={preview} visible={liveVisible} ownerId={ownerId} session={{position:currentPosition,points:routePoints,meters:distance,active,locate:idleLocation.locate,start,stop,
+    <AutoPointsMap onExit={onExit} onView={onView} preview={preview} visible={liveVisible} ownerId={ownerId} session={{position:currentPosition,points:routePoints,meters:distance,active,locate:idleLocation.locate,start,stop,
       vehicle:vehicles.length>0?<label>{t('Vehicul','Vehicle')}<FilterSelect value={currentCar?.id||''} disabled={active||distance>0&&!saved} onChange={e=>setVehicleId(e.target.value)}>{vehicles.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model}{v.plate?' · '+v.plate:''}</option>)}</FilterSelect></label>:null,
       messages:<>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}</>,
       controls:<>{!active?driveButton:<button type="button" onClick={async ()=>{if(await requestConfirmation(t('Oprești înregistrarea? Distanța validă va fi salvată și sincronizată conform opțiunii alese.','Stop recording? Valid distance will be saved and synchronized according to your selected setting.')))stop();}}>{t('Oprește înregistrarea','Stop recording')}</button>}{!active&&distance>0&&!automatic&&<button type="button" disabled={saving||preview||saved} onClick={()=>void saveTrip()}>{saved?t('Cursă salvată','Trip saved'):saving?t('Se salvează…','Saving…'):t('Salvează cursa','Save trip')}</button>}</>

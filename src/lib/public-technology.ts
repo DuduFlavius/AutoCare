@@ -5,11 +5,11 @@ export const technologyPages = {
     intro:
       'Pornește urmărirea, vezi traseul pe hartă și salvează distanța și durata pentru mașina aleasă.',
     action: 'Deschide SmartDrive',
-    workspace: '/cont?tab=Plan%20%C3%AEntre%C8%9Binere',
+    workspace: '/smartdrive-gps',
     sections: [
       [
         'Alege mașina înainte de plecare',
-        'SmartDrive înregistrează călătoria pentru mașina selectată. În browser, acordă permisiunea de localizare și păstrează aplicația deschisă. Înregistrarea în fundal necesită aplicația nativă și permisiunile sistemului.',
+        'SmartDrive înregistrează călătoria pentru mașina selectată. Navigația și înregistrarea GPS sunt disponibile exclusiv în aplicația Android actualizată, cu permisiunile sistemului. Pe web rămân disponibile istoricul și kilometrajul.',
       ],
       [
         'Sincronizează distanța cu kilometrajul',
@@ -39,7 +39,7 @@ export const technologyPages = {
       ],
       [
         'Pe iPhone și în browser',
-        'Folosește pornirea manuală GPS. Identificarea sistemului Bluetooth auto și citirea directă a datelor OBD nu sunt disponibile în aceste interfețe.',
+        'Consultă istoricul curselor și kilometrajul. Navigația SmartDrive și automatizarea Bluetooth sunt disponibile exclusiv în aplicația Android; citirea datelor OBD nu este oferită.',
       ],
     ],
   },

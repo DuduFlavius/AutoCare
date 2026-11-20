@@ -293,9 +293,7 @@ html body .ac-workspace.ac-studio .studio-home:not(:where([class^="rg-"],[class^
   border: 1px solid var(--steel);
   border-radius: 14px;
   background:
-    radial-gradient(ellipse at 82% 0%, color-mix(in srgb, var(--electric-blue) 20%, transparent), transparent 65%),
-    repeating-linear-gradient(90deg, transparent 0 47px, #A8BFB50a 47px 48px),
-    var(--midnight-navy);
+    var(--color-surface);
 }
 .studio-telemetry:not(:where([class^="rg-"],[class^="rg-"] *)){
   min-width: 0;
@@ -364,9 +362,7 @@ html body .ac-workspace.ac-studio .studio-telemetry-chart button[aria-pressed='t
 }
 html body .ac-lux-public.ac-studio-public .studio-landing-hero:not(:where([class^="rg-"],[class^="rg-"] *)){
   background:
-    radial-gradient(ellipse at 84% 6%, var(--color-primary-deep), transparent 60%),
-    repeating-linear-gradient(90deg, transparent 0 71px, #A8BFB509 71px 72px),
-    var(--obsidian-black);
+    var(--color-surface);
 }
 html body .ac-lux-public.ac-studio-public .studio-landing-photography:not(:where([class^="rg-"],[class^="rg-"] *)){
   border-color: var(--steel);

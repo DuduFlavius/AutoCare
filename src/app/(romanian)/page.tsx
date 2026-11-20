@@ -78,7 +78,7 @@ export default async function Home() {
             </header>
             <div className="ac-landing-feature-grid">
               {[
-                { Icon: MapPin, title: 'SmartDrive GPS', description: 'Înregistrează traseul și distanța parcursă.', href: '/smart-gps' },
+                { Icon: MapPin, title: 'SmartDrive GPS', description: 'Înregistrează traseul și distanța parcursă.', href: '/smartdrive-gps' },
                 { Icon: Wrench, title: 'Mentenanță automată', description: 'Urmărește reviziile și intervalele de service.', href: '/smart-maintenance' },
                 { Icon: Files, title: 'Documente digitale', description: 'Păstrează actele și termenele la un loc.', href: '/documente-auto' },
                 { Icon: CarFront, title: 'Garaj digital', description: 'Vezi istoricul fiecărei mașini.', href: '/functionalitati' },

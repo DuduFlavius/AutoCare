@@ -1,4 +1,2 @@
-import Image from 'next/image';
-export function LandingCockpit() {
-  return <figure className="ac-landing-cockpit"><Image src="/images/autocare-racing-green-preview.png" alt="AutoCare Premium: garaj digital pentru documente, istoric service și cheltuieli auto" width={1200} height={630} priority style={{width:'100%',height:'auto',borderRadius:24}}/><figcaption>Garajul tău digital · AutoCare Premium</figcaption></figure>;
-}
+import {CarFront,Files,Wrench,Wallet} from 'lucide-react';
+export function LandingCockpit(){return <figure className="ac-landing-cockpit"><div className="ac-landing-cockpit-preview"><div className="ac-landing-cockpit-brand"><CarFront size={24}/><strong>AutoCare <span>Premium</span></strong></div><h2>Mașina ta.<br/><span>Totul sub control.</span></h2><p>Documente, întreținere și cheltuieli.<br/>Garajul tău digital, oriunde te-ai afla.</p><div className="ac-landing-cockpit-items"><span><Files size={20}/>Documente auto</span><span><Wrench size={20}/>Istoric service</span><span><Wallet size={20}/>Cheltuieli auto</span></div></div><figcaption>Garajul tău digital · AutoCare Premium</figcaption></figure>;}

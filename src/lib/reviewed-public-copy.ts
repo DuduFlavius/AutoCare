@@ -1,6 +1,9 @@
 import {discoveryPages,discoveryPagesEn} from './discovery-pages';
 // Reviewed English copy for public pages. Source data and legal draft qualifications are preserved.
 export const reviewedPublicCopy: Record<string,string> = {
+  "SmartDrive înregistrează călătoria pentru mașina selectată. Navigația și înregistrarea GPS sunt disponibile exclusiv în aplicația Android actualizată, cu permisiunile sistemului. Pe web rămân disponibile istoricul și kilometrajul.": "SmartDrive records trips for your selected vehicle. GPS navigation and recording are exclusive to the updated Android app with system permissions. Trip history and mileage remain available on the web.",
+  "Consultă istoricul curselor și kilometrajul. Navigația SmartDrive și automatizarea Bluetooth sunt disponibile exclusiv în aplicația Android; citirea datelor OBD nu este oferită.": "Review trip history and mileage. SmartDrive navigation and Bluetooth automation are exclusive to the Android app; OBD readings are not provided.",
+
   "Înregistrează drumurile cu Smart GPS": "Record your drives with Smart GPS",
   "Alege mașina înainte de plecare": "Choose your vehicle before you leave",
   "SmartDrive înregistrează călătoria pentru mașina selectată. În browser, acordă permisiunea de localizare și păstrează aplicația deschisă. Înregistrarea în fundal necesită aplicația nativă și permisiunile sistemului.": "SmartDrive records the trip for your selected vehicle. In a browser, allow location access and keep the app open. Background recording requires the native app and system permissions.",

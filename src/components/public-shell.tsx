@@ -46,7 +46,7 @@ export function PublicShell({
             <nav aria-label={language==='en'?'Mobile navigation':'Navigare mobilă'}>
               {landing && <Link href={href('/inregistrare')}>{t('Creează cont gratuit')}</Link>}
               <Link href={href('/functionalitati')}>{t('Funcționalități')}</Link>
-              <Link href={href('/smart-gps')}>{t('SmartDrive GPS')}</Link>
+              <Link href={href('/smartdrive-gps')}>{t('SmartDrive GPS')}</Link>
               <Link href={href('/bluetooth')}>{t('Bluetooth')}</Link>
               <Link href={href('/autocare-maps')}>{t('AutoCare Maps')}</Link>
               <Link href={href('/smart-maintenance')}>{t('Smart Maintenance')}</Link>
@@ -70,7 +70,7 @@ export function PublicShell({
               © {new Date().getFullYear()} {appName}
             </span>
             <div className="footer-links">
-              <Link href={href('/smart-gps')}>{t('Smart GPS')}</Link>
+              <Link href={href('/smartdrive-gps')}>{t('Smart GPS')}</Link>
               <Link href={href('/bluetooth')}>{t('Bluetooth')}</Link>
               <Link href={href('/smart-maintenance')}>{t('Smart Maintenance')}</Link>
               <Link href={href('/autocare-maps')}>{t('AutoCare Maps')}</Link>

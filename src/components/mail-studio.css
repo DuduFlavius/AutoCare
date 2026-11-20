@@ -12,7 +12,7 @@ html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .inline{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-center-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start;min-width:0}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio [hidden]{display:none!important}
-html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-tabs{margin:0;padding:6px;background:#091611;border:1px solid #1C8062;border-radius:13px;display:flex;gap:6px}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-tabs{margin:0;padding:6px;background:#091611;border:1px solid #ffffff0e;border-radius:13px;display:flex;gap:6px}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-tabs button[aria-pressed=true]{background:#0B1C16!important;border-color:#5AFFC4!important;color:white!important;box-shadow:none}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-quick-templates{display:flex;gap:8px;flex-wrap:wrap;padding:10px 0}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-quick-templates button:first-child{background:#20E6A2!important;border-color:#5AFFC4!important}
@@ -22,13 +22,13 @@ html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel>p{color:#0B1C16!important;font-size:13px!important}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel iframe{border-radius:12px;background:#edf1f7;min-height:650px;height:850px!important;width:100%;max-width:100%}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#1C8062;font-size:12px}
-html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-recipients{max-height:310px;overflow-y:auto;border:1px solid #1C8062;border-radius:12px;padding:12px;display:grid;gap:8px;background:#091611}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-recipients{max-height:310px;overflow-y:auto;border:1px solid #ffffff0e;border-radius:12px;padding:12px;display:grid;gap:8px;background:#091611}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-recipients .check{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:8px;min-height:46px}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-recipients .check:has(input:checked){background:#1C8062}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button.mail-send-action{background:linear-gradient(110deg,#5AFFC4,#20E6A2)!important;border:1px solid #5AFFC4!important;color:white!important;min-height:52px!important;font-size:15px!important;font-weight:650!important;box-shadow:0 6px 20px #0B1C162a}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button.mail-send-action[aria-disabled=true]{opacity:.55!important;cursor:not-allowed!important}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-automation-flows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
-html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-automation-flows article{padding:18px;border:1px solid #1C8062;border-radius:12px;background:#10251E}
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-automation-flows article{padding:18px;border:1px solid #ffffff0e;border-radius:12px;background:#10251E}
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-automation-flows strong{font-size:15px;color:#e2edff}
 @media(min-width:1250px){html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-preview-panel{position:sticky;top:80px}}
 @media(max-width:1100px){html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-center-grid{grid-template-columns:minmax(0,1fr)}html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .mail-automation-flows{grid-template-columns:minmax(0,1fr)}}

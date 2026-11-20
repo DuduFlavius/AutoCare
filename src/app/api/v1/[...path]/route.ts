@@ -12,8 +12,6 @@ import { financeGroup, financeGroups, isFinancialEntry } from '@/lib/finance-ove
 import { isPlannedService } from '@/lib/planned-service';
 import { localDate } from '@/lib/config';
 import { aiModes, askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, scanAutoDocument } from '@/lib/auto-assistant';
-import { findRoadDestinations } from '@/lib/road-geocoding';
-import { loadDrivingRoutes, roadCoordinate } from '@/lib/road-navigation-server';
 import { autoPointCategories } from '@/lib/auto-points';
 import { loadAutoPoints } from '@/lib/auto-points-server';
 import {automaticTripBatch} from '@/lib/automatic-trips';
@@ -237,16 +235,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         return json(await scanAutoDocument(uid, uuid.parse(data.get('vehicleId')), Buffer.from(await file.arrayBuffer())));
       }
     }
-    if (route === 'smartdrive/destinations' && method === 'POST') {
-      await rate(uid, 'smartdrive-destinations', 12);
-      const { query, area } = z.object({ query: z.string().trim().min(3).max(160), area: roadCoordinate }).parse(await body(req));
-      return json(await findRoadDestinations(query, area.latitude, area.longitude));
-    }
-    if (route === 'smartdrive/directions' && method === 'POST') {
-      await rate(uid, 'smartdrive-directions', 8);
-      const { start, end, startAccuracy } = z.object({ start: roadCoordinate, end: roadCoordinate, startAccuracy: z.number().min(0).max(500).optional() }).parse(await body(req));
-      return json(await loadDrivingRoutes(start, end, startAccuracy));
-    }
+    if (['smartdrive/destinations','smartdrive/directions'].includes(route))throw new svc.AppError(410,'Navigația SmartDrive este disponibilă exclusiv în aplicația Android actualizată.');
     if (route === 'smartdrive/auto-points' && method === 'POST') {
       await rate(uid, 'auto-points', 10);
       const { latitude, longitude, category } = z.object({

@@ -1,5 +1,6 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { z } from 'zod';
+import {parseDrivingRoutes,parseRoadDestinations} from './road-provider-data';
 import type { GPSFix } from './gps-tracking';
 /** Native service owns the distance; JavaScript only reads snapshots. */
 export type NativeTrip = {
@@ -23,6 +24,7 @@ export type NativeTrip = {
 };
 type NativeNavigationStep = { coordinates: [number, number][]; meters: number; instruction: string };
 interface TrackingPlugin {
+  navigationRequest(input:Record<string,unknown>):Promise<{data:unknown}>;
   navigationStart(input: { ownerId: string; destination: string; english: boolean; steps: NativeNavigationStep[] }): Promise<void>;
   navigationSnapshot(input: { ownerId: string }): Promise<unknown>;
   navigationStop(input: { ownerId: string }): Promise<void>;
@@ -115,6 +117,8 @@ export const nativeTracking = {
 
 export const nativeNavigation = {
   available: () => hasNativeTracking() && Capacitor.getPlatform() === 'android',
+  async search(query:string,latitude:number,longitude:number){if(!nativeNavigation.available())throw Error('SmartDrive GPS este disponibil exclusiv în aplicația Android.');const response=await plugin.navigationRequest({kind:'search',query,latitude,longitude});return parseRoadDestinations(response.data,latitude,longitude);},
+  async directions(start:{latitude:number;longitude:number},end:{latitude:number;longitude:number},accuracy:number){if(!nativeNavigation.available())throw Error('SmartDrive GPS este disponibil exclusiv în aplicația Android.');const response=await plugin.navigationRequest({kind:'route',start,end,accuracy});return parseDrivingRoutes(response.data);},
   async start(ownerId: string, destination: string, english: boolean, steps: NativeNavigationStep[]) {
     await plugin.navigationStart({ ownerId, destination: destination.slice(0, 200), english, steps });
   },

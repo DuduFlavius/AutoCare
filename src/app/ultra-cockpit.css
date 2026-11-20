@@ -52,7 +52,7 @@ html body .app-shell.ac-workspace.ac-studio .ac-vehicle-instrument .studio-vehic
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 12px 18px;
-  border-block-start: 1px solid #5AFFC427;
+  border-block-start: 1px solid #ffffff0e;
   padding-block-start: 14px;
   min-width: 0;
 }
@@ -177,7 +177,7 @@ html body .ac-workspace.ac-studio .ac-garage-grid .studio-vehicle-photo:not(:whe
   html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock:not(:where([class^="rg-"],[class^="rg-"] *)){
     backdrop-filter: blur(16px);
     background: #091611f5 !important;
-    border-top: 1px solid #1C8062;
+    border-top: 1px solid #ffffff0e;
     box-shadow: 0 -7px 24px #050E0B66;
   }
   html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock a[aria-current='page']:not(:where([class^="rg-"],[class^="rg-"] *)){
@@ -197,7 +197,7 @@ html body .ac-workspace.ac-studio .ac-workspace-toast:not(:where([class^="rg-"],
   gap: 12px;
   max-width: min(420px, calc(100vw - 36px));
   padding: 10px 12px;
-  border: 1px solid #20E6A2;
+  border: 1px solid #ffffff0e;
   border-radius: 13px;
   background: #10251E;
   color: #FFFFFF;
@@ -319,7 +319,7 @@ html body .ac-workspace.ac-studio .ac-cockpit-home .studio-home-heading h1:not(:
   align-items: start;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #1C8062;
+  border: 1px solid #ffffff0e;
   border-radius: 14px;
   background: linear-gradient(148deg,#10251E,#091611);
 }
@@ -423,7 +423,7 @@ html body .ac-workspace.ac-studio .ac-cockpit-home .ac-readiness-actions button:
 html body .ac-workspace.ac-studio .ac-cockpit-home :is(.ac-cockpit-data, .ac-cockpit-bottom) :is(.studio-panel, .studio-priority):not(:where([class^="rg-"],[class^="rg-"] *)){
   padding: clamp(10px, 1.1vw, 16px) !important;
   background: linear-gradient(145deg,#10251E,#091611) !important;
-  border-color: #1C8062 !important;
+  border-color: #ffffff0e !important;
 }
 .ac-cockpit-home :is(.ac-cockpit-data, .ac-cockpit-bottom) h2:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: 15px; overflow-wrap: anywhere; }
 .ac-cockpit-home :is(.ac-cockpit-data, .ac-cockpit-bottom) .studio-panel-head:not(:where([class^="rg-"],[class^="rg-"] *)){ flex-wrap: wrap; }
@@ -468,7 +468,7 @@ html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titaniu
 }
 .ac-titanium-vehicle .vehicle-sheet-actions:not(:where([class^="rg-"],[class^="rg-"] *)){ justify-content: flex-end; }
 .ac-vehicle-overview:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: repeat(2, minmax(0,1.2fr)) repeat(2,minmax(0,1fr)); }
-.ac-vehicle-overview .card:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; align-content: start; gap: 7px; padding: 13px; background: linear-gradient(145deg,#10251E,#091611); border-color: #1C8062; overflow-wrap: anywhere; }
+.ac-vehicle-overview .card:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; align-content: start; gap: 7px; padding: 13px; background: linear-gradient(145deg,#10251E,#091611); border-color: #ffffff0e; overflow-wrap: anywhere; }
 .ac-vehicle-overview :is(h3,p,dl,dd):not(:where([class^="rg-"],[class^="rg-"] *)){ margin: 0; }
 .ac-vehicle-overview h3:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: 15px; }
 .ac-vehicle-overview .ac-vehicle-notes:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-column: 1/-1; }
@@ -503,7 +503,7 @@ html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titaniu
   .ac-cockpit-home .ac-care-content .ac-readiness-value:not(:where([class^="rg-"],[class^="rg-"] *)){ flex-direction: row; text-align: start; justify-content: flex-start; gap: 8px; }
 }
 .ac-vehicle-reading-list:not(:where([class^="rg-"],[class^="rg-"] *)){ list-style: none; display: grid; gap: 4px; padding: 0; }
-.ac-vehicle-reading-list li:not(:where([class^="rg-"],[class^="rg-"] *)){ display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #1C8062; padding-block: 4px; }
+.ac-vehicle-reading-list li:not(:where([class^="rg-"],[class^="rg-"] *)){ display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #ffffff0e; padding-block: 4px; }
 html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-data .studio-mini-chart:not(:where([class^="rg-"],[class^="rg-"] *)){ padding-inline: 0; background: transparent; }
 .ac-cockpit-home .ac-cockpit-data .studio-mini-chart button[aria-pressed='true'] small:not(:where([class^="rg-"],[class^="rg-"] *)){ color: #5AFFC4; }
 

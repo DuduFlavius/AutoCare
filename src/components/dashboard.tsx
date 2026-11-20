@@ -51,7 +51,7 @@ import SubscriptionPage from './subscription-page';
 import MobileInstall from './mobile-install';
 import {AppUpdateSettings} from './auto-update';
 import PushSettings from './push-settings';
-import {hasNativeTracking,nativeAutomation} from '@/lib/native-tracking';
+import {hasNativeTracking,nativeAutomation,nativeNavigation} from '@/lib/native-tracking';
 import NativeTripSync from './native-trip-sync';
 import MaintenanceForecast from './maintenance-forecast';
 import {maintenanceTargets} from '@/lib/maintenance-schedule';
@@ -222,11 +222,13 @@ function Dialog({
 }
 
 type DriveView = 'live' | 'history' | 'points' | 'bluetooth';
-function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false, initialDrive, driveVisible = false }: {
-  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean; initialDrive?: string; driveVisible?: boolean;
+function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false, initialDrive, driveVisible = false, onExit }: {
+  data: Data; preview: boolean; onUpdated: () => Promise<unknown>; onError: (message: string) => void; mileageOnly?: boolean; initialDrive?: string; driveVisible?: boolean;onExit?:()=>void;
 }) {
 
   const locale=useApplicationLocale();
+  const [androidNavigation,setAndroidNavigation]=useState(false);
+  useEffect(()=>{setAndroidNavigation(nativeNavigation.available());},[]);
   const [driveView, setDriveView] = useState<DriveView>(initialDrive === 'bluetooth' || initialDrive === 'history' ? initialDrive : 'live');
   const [editing, setEditing] = useState<string | null>(null);
   useEffect(() => { if (window.location.hash === '#actualizeaza-km' && data.vehicles.length) { setEditing(data.vehicles[0].id); setKm(String(data.vehicles[0].odometer)); setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 150); } }, []);
@@ -260,14 +262,15 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
     finally { setSaving(false); }
   }
   return (
-    <section className="mileage-planner" data-live-map={!mileageOnly&&driveView==='live'}>
+    <section className="mileage-planner" data-live-map={!mileageOnly&&androidNavigation&&driveView==='live'}>
       <div className="mileage-planner-heading">
         <div><span className="eyebrow">AUTOCARE · PLANIFICARE</span><h2>{mileageOnly ? 'Kilometrajul mașinilor' : 'SmartDrive GPS'}</h2>
           <p>{mileageOnly ? 'Calcule bazate pe kilometrajul introdus și termenele salvate în istoricul mașinii.' : 'Înregistrează traseul și sincronizează distanța cu întreținerea la salvare.'}</p></div>
         <span className="mileage-planner-icon"><Gauge size={27}/></span>
       </div>
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
-      {!mileageOnly && (
+      {!mileageOnly && !androidNavigation && <><section className="card"><h2>{locale.startsWith('en')?'SmartDrive GPS · Android':'SmartDrive GPS · Android'}</h2><p>{locale.startsWith('en')?'Navigation is available in the Android app. Your saved trips and mileage remain available here.':'Navigația este disponibilă în aplicația Android. Istoricul curselor și kilometrajul rămân disponibile aici.'}</p><a className="button primary" href="/smartdrive-gps">{locale.startsWith('en')?'Discover SmartDrive':'Descoperă SmartDrive'}</a></section><SmartDriveHistory ownerId={data.profile.userId} timezone={data.profile.timezone} vehicles={cars} preview={preview} onUpdateMileage={id=>{setEditing(id);setKm(String(cars.find(car=>car.id===id)?.odometer??''));}}/></>}
+      {!mileageOnly && androidNavigation && (
         <>
           <details className="ac-smartdrive-view-menu"><summary>SmartDrive · {locale.startsWith('en')?'Menu':'Meniu'}</summary><div className="ac-smartdrive-views" role="group" aria-label="SmartDrive">
             <button type="button" aria-pressed={driveView === 'live'} onClick={() => setDriveView('live')}>
@@ -281,7 +284,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
             </button>
           </div>
           </details><div hidden={driveView !== 'live' && driveView !== 'bluetooth'}>
-            <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible} liveVisible={driveView === 'live' && driveVisible}/>
+            <SmartDriveTrip onExit={onExit} onView={setDriveView} key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible} liveVisible={driveView === 'live' && driveVisible}/>
           </div>
 
           {driveView === 'history' && (
@@ -373,6 +376,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     [admin, setAdmin] = useState<any>(null),
     [invoices, setInvoices] = useState<any[]>([]),
     [_calendarMonth, _setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [androidNative,setAndroidNative]=useState(false);
+  useEffect(()=>setAndroidNative(nativeNavigation.available()),[]);
   const [smartDriveOpened,setSmartDriveOpened]=useState(normalizeWorkspaceTab(initialTab)==='Plan întreținere');
   useEffect(()=>{if(tab==='Plan întreținere')setSmartDriveOpened(true)},[tab]);
   const dashboardRequest = useRef(0);
@@ -877,7 +882,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       </aside>
       {data&&!previewData&&<NativeTripSync ownerId={data.profile.userId} vehicles={data.vehicles.filter(v=>!v.archived)} onUpdated={refresh} onReview={()=>navigate('Plan întreținere')} english={language==='en'}/>}
       <SiteLanguage language={language} />
-      <ApplicationHeader onMenu={()=>setRacingMenu(true)} reference onLanguage={changeLanguage} title={tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (tab==='Feedback utilizatori'?(language==='en'?'User feedback':'Feedback utilizatori'):(workspaceSections.find(s=>s.id===tab)?.[language] ?? tab))} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
+      <ApplicationHeader onMenu={()=>setRacingMenu(true)} reference onLanguage={changeLanguage} title={tab==='Plan întreținere'&&!androidNative?(language==='en'?'Trip history':'Istoric călătorii'):tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (tab==='Feedback utilizatori'?(language==='en'?'User feedback':'Feedback utilizatori'):(workspaceSections.find(s=>s.id===tab)?.[language] ?? tab))} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
       <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'}/>
       <main id="workspace-main" tabIndex={-1} aria-busy={busy||!data}
         className={
@@ -1499,7 +1504,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             )}
             {tab==='Calendar'&&<RacingCalendar data={data} today={nowDate} onOpen={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onCreate={day=>setModal({kind:'service',planned:true,initialDate:day})}/>}
             {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
-            {smartDriveEnabled?(smartDriveOpened||tab==='Plan întreținere')&&<div hidden={tab!=='Plan întreținere'}><MileagePlanner data={data} preview={!!previewData} onUpdated={refresh} onError={setError} driveVisible={tab==='Plan întreținere'} initialDrive={initialDrive}/></div>:tab==='Plan întreținere'&&<SmartDriveMaintenance english={language==='en'} onBack={()=>navigate('Acasă')}/>}
+            {smartDriveEnabled?(smartDriveOpened||tab==='Plan întreținere')&&<div hidden={tab!=='Plan întreținere'}><MileagePlanner onExit={()=>{void navigate('Dashboard');}} data={data} preview={!!previewData} onUpdated={refresh} onError={setError} driveVisible={tab==='Plan întreținere'} initialDrive={initialDrive}/></div>:tab==='Plan întreținere'&&<SmartDriveMaintenance english={language==='en'} onBack={()=>navigate('Acasă')}/>}
             {tab === 'Notificări' && (
               <div className="overview-stack">
                 <section className="ac-notification-toolbar" data-workspace-ui><span><BellRing size={24} strokeWidth={1.6}/><b>{data.notifications.filter(row=>!row.readAt).length}</b></span><h2>{data.notifications.some(row=>!row.readAt)?(language==='en'?'Your new notifications':'Notificările tale noi'):(language==='en'?'You are up to date':'Ești la zi')}</h2><p>{language==='en'?'Your vehicle deadlines and important alerts, in one place.':'Termenele mașinii și alertele importante, într-un singur loc.'}</p><button className="ac-m-primary" type="button" disabled={busy||!!previewData} onClick={()=>void act(registerPush,language==='en'?'Notifications activated on this device.':'Notificările au fost activate pe acest dispozitiv.') }><BellRing size={18}/>{language==='en'?'Activate notifications':'Activează notificările'}</button></section>

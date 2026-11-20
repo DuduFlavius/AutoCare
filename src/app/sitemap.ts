@@ -8,7 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '',
     'stergere-cont',
     'rca-rovinieta',
-    ...indexableSlugs,
+    ...indexableSlugs.filter(slug=>slug!=='smart-gps'),
     'ghiduri',
     ...Object.keys(guides).map((slug) => 'ghiduri/' + slug),
   ].map((path) => ({

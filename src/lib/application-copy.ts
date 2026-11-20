@@ -1,5 +1,8 @@
 // Reviewed application copy. Keys are whitespace-normalized Romanian UI messages.
 export const applicationCopy: Record<string, string> = {
+  "Documente, întreținere și cheltuieli.": "Documents, maintenance and expenses.",
+  "Garajul tău digital, oriunde te-ai afla.": "Your digital garage, wherever you are.",
+
   "Înregistrează o revizie sau o reparație. Poți adăuga costul și următorul termen.": "Record maintenance or a repair. You can add the cost and the next deadline.",
   "Completează datele actului. Dacă are termen de expirare, introdu data pentru a o urmări.": "Enter the document details and its expiry date, if applicable.",
   "Completează mașina, suma și data cheltuielii.": "Select the vehicle and enter the amount and expense date.",
