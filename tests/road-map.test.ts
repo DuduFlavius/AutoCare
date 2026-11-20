@@ -31,7 +31,7 @@ test('the street palette gives roads, water and labels distinct dark-map contras
   {id:'highway_minor',type:'line',source:'streets'},
   {id:'road_label',type:'symbol',source:'streets',layout:{'text-field':'{name}'}},
  ]});
- assert.equal(style.layers[0].paint?.['background-color' as keyof typeof style.layers[0]['paint']], '#101d2b');
+ assert.equal(style.layers[0].paint?.['background-color' as keyof typeof style.layers[0]['paint']], '#091611');
  assert.notDeepEqual(style.layers[2].paint,style.layers[3].paint);
- assert.ok(JSON.stringify(style.layers[4].paint).includes('#bdcee0'));
+ assert.ok(JSON.stringify(style.layers[4].paint).includes('#b9cec1'));
 });

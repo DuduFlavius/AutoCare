@@ -1,6 +1,7 @@
 import { normalizeWorkspaceTab } from '@/lib/workspace';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import {isFounder} from '@/lib/permissions';
 import { auth } from '@/lib/auth';
 import Dashboard from '@/components/dashboard';
 import { PublicShell } from '@/components/public-shell';
@@ -29,5 +30,5 @@ export default async function Account({searchParams}:{searchParams:Promise<{tab?
     !sess.user.emailVerified
   )
     redirect(params.tab ? '/autentificare?' + new URLSearchParams({ next: '/cont?' + new URLSearchParams({ tab: normalizeWorkspaceTab(params.tab), ...(params.drive ? { drive: params.drive } : {}), ...(params.plan && ['monthly', 'quarterly', 'annual'].includes(params.plan) ? { plan: params.plan } : {}), ...(params.currency && ['RON','EUR'].includes(params.currency.toUpperCase()) ? {currency:params.currency.toUpperCase()} : {}), ...(params.vehicle && ['Garaj', 'AutoCare AI'].includes(normalizeWorkspaceTab(params.tab)) ? { vehicle: params.vehicle } : {}) }) }).toString() : '/autentificare');
-  return <Dashboard name={sess.user.name} initialTab={normalizeWorkspaceTab(params.tab)} initialDrive={params.drive} initialVehicle={['Garaj', 'AutoCare AI'].includes(normalizeWorkspaceTab(params.tab)) ? params.vehicle : undefined} />;
+  return <Dashboard smartDriveValidation={params.drive==='validation'&&process.env.VERCEL_ENV!=='production'&&isFounder(sess.user.id)} name={sess.user.name} initialTab={normalizeWorkspaceTab(params.tab)} initialDrive={params.drive} initialVehicle={['Garaj', 'AutoCare AI'].includes(normalizeWorkspaceTab(params.tab)) ? params.vehicle : undefined} />;
 }

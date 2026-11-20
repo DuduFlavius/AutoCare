@@ -17,7 +17,7 @@ import type {dashboard} from '${root}/src/lib/service';
 const params=new URLSearchParams(location.search);
 const previewOptions={plan:'premium',view:'finance',garage:'multi',tab:params.get('tab')||'Dashboard',echipa:'0'};
 ${data}
-createRoot(document.getElementById('root')).render(<Dashboard name="Vizitator" previewData={data} initialTab={normalizeWorkspaceTab(previewOptions.tab)}/>);`;
+createRoot(document.getElementById('root')).render(<Dashboard smartDriveValidation name="Vizitator" previewData={data} initialTab={normalizeWorkspaceTab(previewOptions.tab)}/>);`;
 await writeFile(out+'/entry.tsx',entry);
 await build({entryPoints:[out+'/entry.tsx'],bundle:true,outfile:out+'/dist/app.js',absWorkingDir:root,tsconfig:root+'/tsconfig.json',jsx:'automatic',nodePaths:[root+'/node_modules'],external:['/images/*','/mobile-reference/*','/dashboard-reference/*','/emerald-reference/*','/fonts/*'],define:{'process.env':'{}'},loader:{'.woff2':'dataurl','.woff':'dataurl','.png':'dataurl','.svg':'dataurl'},logLevel:'error'});
 await writeFile(out+'/dist/fixture.html','<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/app.css"><style>.preview-note{display:none!important}</style></head><body style="margin:0"><div id="root"></div><script src="/app.js"></script></body></html>');

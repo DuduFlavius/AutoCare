@@ -1,10 +1,11 @@
 'use client';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
-import { Crosshair } from 'lucide-react';
-import type { Map as RoadMap, Marker, GeoJSONSource } from 'maplibre-gl';
+import { Crosshair,Layers,Sun,Moon } from 'lucide-react';
+import type { Map as RoadMap, Marker, GeoJSONSource, AllPaintProperties } from 'maplibre-gl';
 import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
+import {drivingBearing,drivingZoom,daylightMap} from '@/lib/driving-camera';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { roadMapStyle, plannedRouteBounds, routeGeometry, streetOnlyStyle, tripBounds } from '@/lib/road-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -26,7 +27,9 @@ export default function RoadMapView({
   destination,
   routeStart,
   onDestination,
+  untilTurn,
 }: {
+  untilTurn?: number;
   points: GPSFix[];
   position?: GPSFix | null;
   active: boolean;
@@ -47,6 +50,13 @@ export default function RoadMapView({
   const host = useRef<HTMLDivElement>(null),
     map = useRef<RoadMap | null>(null),
     marker = useRef<Marker | null>(null);
+  const [perspective,setPerspective]=useState(true);
+  const [theme,setTheme]=useState<'auto'|'day'|'night'>('auto');
+  const [hour,setHour]=useState(()=>new Date().getHours());
+  const daylight=theme==='day'||theme==='auto'&&daylightMap(hour);
+  const dayRef=useRef(daylight);dayRef.current=daylight;
+  const cameraBearing=useRef(0),cameraPosition=useRef<GPSFix|null>(null);
+  useEffect(()=>{const timer=setInterval(()=>setHour(new Date().getHours()),60000);return()=>clearInterval(timer)},[]);
   const latest = useRef(points);
   latest.current = points;
   const latestPosition = useRef(position);
@@ -90,7 +100,7 @@ export default function RoadMapView({
           const view = new lib.Map({
             container: host.current,
             style: roadMapStyle,
-            transformStyle: (_previous, next) => streetOnlyStyle(next),
+            transformStyle: (_previous, next) => streetOnlyStyle(next,dayRef.current),
             center: initialArea ? [initialArea.longitude, initialArea.latitude] : p ? [p.longitude, p.latitude] : [24.9668, 45.9432],
             zoom: initialArea?.zoom ?? (p ? 15.8 : 5.2),
             maxZoom: 19,
@@ -99,7 +109,7 @@ export default function RoadMapView({
             renderWorldCopies: false,
           });
           map.current = view;
-          view.addControl(new lib.NavigationControl({ showCompass: false }), 'top-right');
+          view.addControl(new lib.NavigationControl({ showCompass: true }), 'top-right');
           if (onAreaChange) view.on('moveend', () => {
             const center = view.getCenter().wrap();
             onAreaChange({ latitude: center.lat, longitude: center.lng, zoom: view.getZoom() });
@@ -112,7 +122,9 @@ export default function RoadMapView({
           view.on('load', () => {
             if (disposed) return;
             window.clearTimeout(fallbackTimer);
-            view.addSource('directions', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+            const building=view.getStyle().layers.find(layer=>layer.type==='fill'&&layer['source-layer']==='building');
+            if(building&&'source' in building){view.addLayer({id:'autocare-buildings',type:'fill-extrusion',source:building.source,'source-layer':'building',minzoom:15,paint:{'fill-extrusion-color':'#456357','fill-extrusion-height':['coalesce',['get','render_height'],0],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':.5}},view.getStyle().layers.find(layer=>layer.type==='symbol')?.id);}
+            view.addSource('directions' , { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
             view.addLayer({
               id: 'directions-outline', type: 'line', source: 'directions',
               paint: { 'line-color': '#091611', 'line-width': 11 },
@@ -208,6 +220,8 @@ export default function RoadMapView({
       marker.current = null;
       return;
     }
+    // Keep the last precise camera/marker while a coarse fix is reported in the status.
+    if(active&&p.accuracy>50)return;
     if (marker.current) marker.current.setLngLat([p.longitude, p.latitude]);
     else {
       void import('maplibre-gl').then((lib) => {
@@ -228,14 +242,16 @@ export default function RoadMapView({
       setFollowing(true);
     }
     wasActive.current = active;
-    if (follow.current)
-      view.easeTo({
-        center: [p.longitude, p.latitude],
-        zoom: Math.max(15, view.getZoom()),
-        duration: 750,
-      });
+    if(active&&p.timestamp!==cameraPosition.current?.timestamp){cameraBearing.current=!cameraPosition.current&&p.speed!=null&&p.speed>=1.5&&p.heading!=null&&p.heading>=0&&p.heading<360&&p.accuracy<=50?p.heading:drivingBearing(cameraPosition.current,p,cameraBearing.current);cameraPosition.current=p;}
+    if (follow.current) view.easeTo({
+      center:[p.longitude,p.latitude],bearing:active?cameraBearing.current:0,
+      pitch:active&&perspective?52:0,zoom:active?drivingZoom(p.speed,untilTurn):16,
+      offset:active?[0,Math.min(140,view.getContainer().clientHeight*.2)]:[0,0],
+      duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:800,
+    });
+    if(marker.current){marker.current.setRotationAlignment('map');marker.current.setRotation(active?cameraBearing.current:0);marker.current.setPitchAlignment('map');}
     updateRoadPositionMarker(marker.current?.getElement(), active, p, points);
-  }, [points, position, english, history, active, loading]);
+  }, [points, position, english, history, active, loading, perspective,untilTurn]);
   useEffect(() => {
     const source = map.current?.getSource('trip') as GeoJSONSource | undefined;
     source?.setData(routeGeometry(points));
@@ -289,15 +305,23 @@ export default function RoadMapView({
     });
     return () => { cancelled = true; pins.forEach(pin => pin.remove()); };
   }, [autoPoints, loading, failed, english]);
+  useEffect(()=>{
+    const view=map.current;if(!view||loading||failed)return;
+    const styled=streetOnlyStyle(view.getStyle(),daylight);
+    for(const layer of styled.layers){if(['directions','trip'].some(id=>layer.id.startsWith(id)))continue;
+      for(const [property,value] of Object.entries(layer.paint||{}))view.setPaintProperty(layer.id,property as keyof AllPaintProperties,value);
+    }
+  },[daylight,loading,failed]);
   if (failed)
-    return <RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart} />;
+    return <div className="rg-map-fallback"><RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart} /><p className="rg-map-fallback-note" role="status">{english?'2D fallback map · 3D unavailable on this device.':'Hartă de rezervă 2D · 3D indisponibil pe acest dispozitiv.'}</p></div>;
   return (
-    <div className="ac-road-map" data-workspace-ui>
+    <div className="ac-road-map" data-workspace-ui data-map-theme={daylight?'day':'night'}>
       <div
         ref={host}
         className="ac-road-map-canvas"
         aria-label={english ? 'Interactive street map' : 'Hartă rutieră interactivă'}
       />
+      {!history&&<div className="rg-map-modes"><button type="button" aria-pressed={perspective} aria-label={english?'Toggle 2D or 3D':'Comută 2D sau 3D'} onClick={()=>setPerspective(v=>!v)}><Layers size={18}/>{perspective?'3D':'2D'}</button><button type="button" aria-label={english?'Map theme':'Tema hărții'} title={theme} onClick={()=>setTheme(v=>v==='auto'?'day':v==='day'?'night':'auto')}>{daylight?<Sun size={18}/>:<Moon size={18}/>}<small>{theme==='auto'?'Auto':daylight?(english?'Day':'Zi'):(english?'Night':'Noapte')}</small></button></div>}
       <span className="ac-road-map-status">
         {initialArea && active ? (english ? 'GPS · GUIDANCE' : 'GPS · GHIDARE') : history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
           ? english
@@ -316,7 +340,7 @@ export default function RoadMapView({
           setFollowing(true);
           onLocate?.();
           const p = position;
-          if (p)
+          if (p && (!active || p.accuracy<=50))
             map.current?.easeTo({ center: [p.longitude, p.latitude], zoom: 16, duration: 700 });
         }}
       >

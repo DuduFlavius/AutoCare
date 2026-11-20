@@ -83,7 +83,6 @@ import {
   Search,
   Route,
   History,
-  MapPin,
   Bluetooth,
 } from 'lucide-react';
 import { Brand } from './public-shell';
@@ -91,7 +90,7 @@ import { VehicleJournal, VehicleSheet, ReminderInbox } from './garage-home';
 import { authClient } from '@/lib/auth-client';
 import type { dashboard } from '@/lib/service';
 const SmartDriveTrip = dynamic(() => import('./smartdrive-trip'), { loading: DriveModuleLoading });
-const AutoPointsMap = dynamic(() => import('./auto-points-map'), { loading: DriveModuleLoading });
+
 const SmartDriveHistory = dynamic(() => import('./smartdrive-history'), { loading: DriveModuleLoading });
 function DriveModuleLoading() {
   return <div className="ws-loading" role="status"><span className="sr-only">SmartDrive GPS</span><div className="ws-loading-grid" aria-hidden="true"><span/><span/></div></div>;
@@ -226,7 +225,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
 }) {
 
   const locale=useApplicationLocale();
-  const [driveView, setDriveView] = useState<DriveView>(initialDrive === 'points' || initialDrive === 'bluetooth' || initialDrive === 'history' ? initialDrive : 'live');
+  const [driveView, setDriveView] = useState<DriveView>(initialDrive === 'bluetooth' || initialDrive === 'history' ? initialDrive : 'live');
   const [editing, setEditing] = useState<string | null>(null);
   useEffect(() => { if (window.location.hash === '#actualizeaza-km' && data.vehicles.length) { setEditing(data.vehicles[0].id); setKm(String(data.vehicles[0].odometer)); setTimeout(() => document.getElementById('ac-mileage-editor')?.scrollIntoView({behavior:'smooth',block:'center'}), 150); } }, []);
   const [km, setKm] = useState('');
@@ -275,9 +274,6 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
             <button type="button" aria-pressed={driveView === 'history'} onClick={() => setDriveView('history')}>
               <History size={17}/> {locale.startsWith('en') ? 'Trip History' : 'Istoric trasee'}
             </button>
-            <button type="button" aria-pressed={driveView === 'points'} onClick={() => setDriveView('points')}>
-              <MapPin size={17}/> {locale.startsWith('en') ? 'Map and navigation' : 'Hartă și navigație'}
-            </button>
             <button type="button" aria-pressed={driveView === 'bluetooth'} onClick={() => setDriveView('bluetooth')}>
               <Bluetooth size={17}/> Bluetooth
             </button>
@@ -285,7 +281,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
           <div hidden={driveView !== 'live' && driveView !== 'bluetooth'}>
             <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible} liveVisible={driveView === 'live' && driveVisible}/>
           </div>
-          {driveView === 'points' && <AutoPointsMap preview={preview} visible={driveVisible} ownerId={data.profile.userId}/>}
+
           {driveView === 'history' && (
             <SmartDriveHistory ownerId={data.profile.userId} timezone={data.profile.timezone} vehicles={cars} preview={preview} onUpdateMileage={id => {
               const car = cars.find(vehicle => vehicle.id === id);
@@ -334,7 +330,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   );
 }
 
-export default function Dashboard({ name: initialName, previewData, initialTab='Dashboard', initialVehicle }: { name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
+export default function Dashboard({ name: initialName, previewData, initialTab='Dashboard', initialVehicle, initialDrive, smartDriveValidation=false }: { smartDriveValidation?:boolean; name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
   const [name,setName]=useState(initialName);
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
@@ -1495,7 +1491,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             )}
             {tab==='Calendar'&&<RacingCalendar data={data} today={nowDate} onOpen={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onCreate={day=>setModal({kind:'service',planned:true,initialDate:day})}/>}
             {tab === 'Kilometraj' && <MileagePlanner mileageOnly data={data} preview={!!previewData} onUpdated={refresh} onError={setError} />}
-            {tab === 'Plan întreținere' && <SmartDriveMaintenance english={language === 'en'} onBack={() => navigate('Acasă')} />}
+            {smartDriveValidation&&(!!previewData||data.profile.role==='founder')?<div hidden={tab!=='Plan întreținere'}><MileagePlanner data={data} preview={!!previewData} onUpdated={refresh} onError={setError} driveVisible={tab==='Plan întreținere'} initialDrive={initialDrive}/></div>:tab==='Plan întreținere'&&<SmartDriveMaintenance english={language==='en'} onBack={()=>navigate('Acasă')}/>}
             {tab === 'Notificări' && (
               <div className="overview-stack">
                 <section className="ac-notification-toolbar" data-workspace-ui><span><BellRing size={24} strokeWidth={1.6}/><b>{data.notifications.filter(row=>!row.readAt).length}</b></span><h2>{data.notifications.some(row=>!row.readAt)?(language==='en'?'Your new notifications':'Notificările tale noi'):(language==='en'?'You are up to date':'Ești la zi')}</h2><p>{language==='en'?'Your vehicle deadlines and important alerts, in one place.':'Termenele mașinii și alertele importante, într-un singur loc.'}</p><button className="ac-m-primary" type="button" disabled={busy||!!previewData} onClick={()=>void act(registerPush,language==='en'?'Notifications activated on this device.':'Notificările au fost activate pe acest dispozitiv.') }><BellRing size={18}/>{language==='en'?'Activate notifications':'Activează notificările'}</button></section>
