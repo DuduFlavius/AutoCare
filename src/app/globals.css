@@ -1062,3 +1062,54 @@ html body .app-shell.ac-workspace main.main .ac-inline-mileage [role=alert]:not(
   .ac-workspace .main:not(:where([class^="rg-"],[class^="rg-"] *)) {padding-inline:16px}
   .ac-workspace .main .card:not(:where([class^="rg-"],[class^="rg-"] *)) {border-radius:16px}
 }
+
+/* Premium 5.0: bridge the existing Racing components onto the new palette. */
+html body .app-shell.ac-workspace {
+  color-scheme: light !important;
+  --color-button: #075365;
+  --color-card: #FFFFFF;
+  --color-nav-raised: #FFFFFF;
+  --color-secondary: #EDF4F7;
+  --color-primary-soft: #DCEEF1;
+  --color-subtle: #657584;
+  --color-success: #16866E;
+  --color-success-ink: #126D59;
+  --color-success-soft: #E1F4EC;
+  --color-warning: #C58A25;
+  --color-warning-ink: #8C5D10;
+  --color-warning-soft: #FFF3D9;
+  --color-danger: #C74747;
+  --color-danger-ink: #9B2929;
+  --color-danger-soft: #FDE8E8;
+  --surface-card: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --workspace-canvas: #F6F9FB;
+  --app-bg: #F6F9FB;
+  --app-surface: #FFFFFF;
+  --app-ink: #142333;
+  --app-muted: #657584;
+  --app-line: #E3EBF0;
+  --app-blue: #075365;
+  --app-blue-soft: #DCEEF1;
+}
+html body .ac-workspace .rg-panel,
+html body .ac-workspace .rg-vault-document,
+html body .ac-workspace .ac-premium-panel {
+  background: #FFFFFF;
+  border-color: #E3EBF0;
+  box-shadow: 0 8px 26px rgba(8,59,74,.055);
+}
+html body .ac-workspace .rg-app-header {
+  background: #F6F9FB;
+  border-bottom-color: #E3EBF0;
+}
+html body .ac-workspace :is(.rg-panel,.rg-vault-document,.ac-premium-panel) :is(h1,h2,h3,strong) {
+  color: #142333;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ac-workspace *, .ac-workspace *::before, .ac-workspace *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
