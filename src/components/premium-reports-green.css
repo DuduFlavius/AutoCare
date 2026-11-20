@@ -22,4 +22,4 @@
 .rg-premium-downloads .ac-garage-report-links>a:disabled{opacity:.6;cursor:wait;transform:none}
 
 
-.rg-premium-downloads .ac-premium-download-actions>a.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:#20D99A;color:var(--color-bg);border:1px solid #20E6A2;border-radius:12px;text-decoration:none;min-height:44px;padding:10px 16px}
+.rg-premium-downloads .ac-premium-download-actions>a.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:var(--color-primary);color:var(--color-bg);border:1px solid var(--color-border);border-radius:12px;text-decoration:none;min-height:44px;padding:10px 16px}

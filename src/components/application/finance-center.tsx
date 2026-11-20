@@ -139,7 +139,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
               {[0,1,2,3,4].map(i=><line key={i} x1="24" x2="776" y1={20+i*44} y2={20+i*44} stroke="currentColor" opacity=".1"/>)}
               {[0,1].map(series=>{
                 const points=chart.map((row,i)=>`${24+i*752/Math.max(1,chart.length-1)},${196-(series?row.previous:row.current).bani/scale*176}`);
-                return <g key={series}>{!series&&<polygon points={`24,196 ${points.join(' ')} 776,196`} fill="url(#financeFill)"/>}<polyline points={points.join(' ')} fill="none" stroke={series?'#20E6A2':'var(--color-primary)'} strokeWidth={series?2:3} strokeDasharray={series?'5 5':undefined}/></g>;
+                return <g key={series}>{!series&&<polygon points={`24,196 ${points.join(' ')} 776,196`} fill="url(#financeFill)"/>}<polyline points={points.join(' ')} fill="none" stroke={series?'var(--color-muted)':'var(--color-primary)'} strokeWidth={series?2:3} strokeDasharray={series?'5 5':undefined}/></g>;
               })}
               {chart.map((row,i)=>{const x=24+i*752/Math.max(1,chart.length-1);return <g key={row.label}>
                 <circle cx={x} cy={196-row.current.bani/scale*176} r={point===i?6:3} fill="var(--color-primary)"/>
@@ -163,7 +163,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
     {data.premium && <section className="ac-finance-categories" aria-label={t('Categorii financiare', 'Expense categories')}>
       <h3 className="ac-category-heading">{t('Cheltuieli pe categorii','Expenses by category')} <small>{customCategoryPeriod?(range==='all'?t('Tot istoricul','All history'):from+' – '+today):view==='year'?year:month}</small></h3>
       {categoryItems.map(item => <button key={item.group} type="button" className="ac-finance-card" aria-pressed={group === item.group} onClick={() => { setGroup(group === item.group ? '' : item.group); setPage(0); }}>
-        <span className="ac-category-label">{(() => { const Icon = categoryIcons[item.group]; return <Icon size={20}/>; })()}{groups[item.group]}</span><strong>{money(item.bani).replace(/\u00a0/g,' ')}</strong>
+        <span className="ac-category-label">{(() => { const Icon = categoryIcons[item.group]; return <Icon size={20}/>; })()}{groups[item.group]}</span><strong>{money(item.bani)}</strong>
         <progress max={100} value={item.share} aria-label={t('Pondere în total', 'Share of total')} />
         <small>{item.share.toLocaleString(locale, { maximumFractionDigits: 1 })}% · {changeText(item.change)}</small>
       </button>)}

@@ -7,10 +7,15 @@
 .ac-finance-card > svg { color:var(--color-primary); }
 .ac-finance-hero label,.ac-finance-budget label { display:grid; gap:5px; min-width:0; }
 .ac-finance :is(input,select) { min-width:0; max-width:100%; }
-.ac-finance-kpis,.ac-finance-categories { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.ac-finance-kpis {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ac-finance-categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ac-category-heading{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.ac-category-heading small{font-size:12px;font-weight:400}
+.ac-category-label{display:flex;align-items:center;gap:8px;min-width:0;color:var(--color-text)}
+.ac-category-label svg{flex:none;color:var(--color-primary)}
 .ac-finance-kpis .ac-finance-card,.ac-finance-categories .ac-finance-card { display:grid; gap:5px; align-content:start; text-align:start; }
 .ac-finance-kpis strong,.ac-finance-categories strong { font-size:clamp(16px,1.7vw,24px); font-variant-numeric:tabular-nums; }
-html body .ac-workspace.ac-studio .ac-finance-categories button.ac-finance-card { width:100%; white-space:normal !important; padding:12px !important; justify-items:start; }
+html body .ac-workspace.ac-studio .ac-finance-categories button.ac-finance-card { display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important;width:100%;min-width:0;white-space:normal!important;padding:14px!important;justify-items:stretch; }
 .ac-finance :is(progress,.ac-finance-budget input) { width:100%; }
 .ac-finance progress { accent-color:var(--color-primary); height:7px; }
 .ac-finance-insights { display:grid; grid-template-columns:minmax(0,1.9fr) minmax(0,1fr); gap:9px; align-items:start; }
@@ -94,3 +99,7 @@ html body .ac-workspace.ac-studio .ac-service-garage .ac-service-vehicle {
   html body .app-shell.ac-workspace.ac-studio .ac-finance-filter-panel>header>button{padding:8px!important;font-size:12px!important}
  }
 }
+
+.ac-finance-categories .ac-finance-card>strong{white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;text-align:right;line-height:1.3;font-size:clamp(16px,1.5vw,22px)}
+.ac-finance-categories .ac-finance-card>progress,.ac-finance-categories .ac-finance-card>small{grid-column:1/-1;width:100%;min-width:0}
+@media(max-width:650px){.ac-finance-categories{grid-template-columns:minmax(0,1fr)}}

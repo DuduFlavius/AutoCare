@@ -63,7 +63,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, prici
     update();
     const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
     const observer = new ResizeObserver(schedule);
-    observer.observe(document.querySelector('.app-topbar') ?? element);
+    observer.observe(document.querySelector('.rg-app-header, .app-topbar') ?? element);
     const dock = document.querySelector('.rg-mobile-dock');
     if (dock) observer.observe(dock);
     window.addEventListener('resize', schedule);

@@ -78,3 +78,14 @@
 | Setări | Pending visual review | Pending device review | Pending end-to-end |
 
 CSS parse check: 53 stylesheets parsed successfully. Computed palette contrast: main ink/white 15.93:1; muted ink/white 4.74:1; white/Petrol action 8.63:1; white/destructive action 7.66:1. These checks do not replace rendered accessibility validation.
+
+## Follow-up corrections requested by founder
+
+- Removed additional hardcoded green fills from maintenance filters, mileage timeline, button states and SmartDrive controls at their source. Semantic success/error indicators remain distinct.
+- Expense category heading spans the complete grid. Category rows keep label and formatted amount together; the currency is no longer split by replacing nonbreaking spaces. Mobile uses one column.
+- AI uses the full workspace width. On mobile, the conversation owns the viewport and hides duplicate global navigation while keeping its own exit, history and composer.
+- Support uses the actual mobile dock selector and no longer forces a minimum 220px chat under a short keyboard viewport. Its mobile conversation also hides duplicate global navigation.
+- Maintenance page uses Pearl/Petrol with the same 503/no-store semantics, dates and server-session access exception.
+- Auth editorial panel now has a light surface and readable ink. Install banner uses a dedicated icon/copy group and full-width mobile install action.
+- SmartDrive location action has an explicit accessible label and enough width for its visible label; map controls use the current palette. Map, GPS, routing and mileage persistence algorithms are unchanged.
+- Validation: 354 Node tests passed; TypeScript, ESLint, production build and parsing all 53 stylesheets passed. Physical Android, on-road GPS and full rendered page comparisons remain pending.

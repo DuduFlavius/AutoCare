@@ -334,6 +334,8 @@ export default function RoadMapView({
       {!history && (onLocate || active || position) && <button
         type="button"
         className="ac-road-map-center"
+        title={english?'My location':'Poziția mea'}
+        aria-label={locating?(english?'Finding position':'Se caută poziția'):(english?'My location':'Poziția mea')}
         aria-pressed={following}
         onClick={() => {
           follow.current = true;
@@ -344,9 +346,9 @@ export default function RoadMapView({
             map.current?.easeTo({ center: [p.longitude, p.latitude], zoom: 16, duration: 700 });
         }}
       >
-        <Crosshair size={17}/>{locating && !position
+        <Crosshair size={19}/><span>{locating && !position
           ? (english ? 'Finding position…' : 'Se caută poziția…')
-          : (english ? 'My location' : 'Poziția mea')}
+          : (english ? 'My location' : 'Poziția mea')}</span>
       </button>}
       {!!plannedRoute?.length && <button type="button" className="ac-road-map-overview" onClick={showRoute}>
         {english ? 'Show full route' : 'Vezi traseul complet'}

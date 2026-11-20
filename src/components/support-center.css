@@ -309,3 +309,6 @@ html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspa
 html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center .support-conversation-menu-content{box-sizing:border-box!important}
 @media(max-width:760px){html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center.support-client .support-header-actions{display:none!important}}
 }
+
+.ac-support-page{display:flex;flex-direction:column;gap:8px;min-width:0;width:100%;min-height:0}.ac-support-page>button{align-self:flex-start;display:flex;align-items:center;gap:8px;flex:none}
+@media(max-width:900px){html:has(.ac-support-page) :is(.rg-app-header,.rg-mobile-dock){display:none!important}html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-support-page){padding:max(8px,env(safe-area-inset-top)) 8px env(safe-area-inset-bottom)!important;overflow:hidden!important}html body .ac-support-page .support-workspace#autocare-support#autocare-support.ac-support-center{border:0!important;border-radius:0!important;padding-bottom:env(safe-area-inset-bottom)!important}}

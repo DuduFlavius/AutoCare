@@ -3,7 +3,7 @@ import {ApplicationLanguageProvider} from './application-locale';
 import { localizedPublicPath } from '@/lib/public-routes';
 import { translateApplicationCopy } from '@/lib/application-language';
 import Link from 'next/link';
-import { ArrowUpRight, Menu } from 'lucide-react';
+import { ArrowUpRight, Menu, Smartphone } from 'lucide-react';
 import { appName } from '@/lib/config';
 import { Brand } from './brand';
 import MobileInstall from './mobile-install';
@@ -58,10 +58,10 @@ export function PublicShell({
         </header>
         {children}
         <section className="ac-install-banner" aria-label={language==='en'?'Install AutoCare on your phone':'Instalează AutoCare pe telefon'}>
-          <div>
+          <div className="ac-install-intro"><Smartphone size={34} aria-hidden="true"/><div>
             <strong>{t('AutoCare, direct pe telefonul tău')}</strong>
             <p>{language==='en'?'Add the web app to your phone and access your garage faster.':'Adaugă aplicația web pe telefon și accesează-ți garajul mai rapid.'}</p>
-          </div>
+          </div></div>
           <MobileInstall />
         </section>
         <PublicAnalytics/><footer className="footer">
