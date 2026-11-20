@@ -16,3 +16,40 @@
 .rg-ai-page{background-image:var(--brand-ribbon);background-repeat:no-repeat;background-position:right top;background-size:900px 160px}.rg-menu-dialog{background:var(--surface-card)}
 @media(max-width:900px){.app-shell.ac-reference-theme:not([data-workspace-section="Dashboard"]):not([data-workspace-section="Plan întreținere"]){--workspace-canvas:var(--brand-ribbon) right top/650px 150px no-repeat,var(--color-bg)}.rg-page-heading{padding-bottom:14px}.rg-ai-page{background-size:600px 130px}}
 @media print{.app-shell.ac-reference-theme{--workspace-canvas:white}.rg-page-heading,.rg-ai-page{background-image:none}}
+
+/* AutoCare 5.0: reference desktop sidebar, navigation rows and membership card. */
+@media(min-width:901px){
+ html body .ac-workspace .rg-sidebar.sidebar{
+   background:#F7FAFC!important;color:#142333!important;
+   border-right:1px solid #E3EBF0!important;
+   box-shadow:4px 0 20px rgba(8,59,74,.025)!important;
+ }
+ html body .ac-workspace .rg-sidebar .ws-navigation{padding:12px 10px!important}
+ html body .ac-workspace .rg-sidebar .ws-nav-group{margin-bottom:8px!important}
+ html body .ac-workspace .rg-sidebar .ws-nav-group>summary{
+   color:#657584!important;letter-spacing:.09em!important;
+ }
+ html body .ac-workspace .rg-sidebar .ws-nav-button,
+ html body .ac-workspace .rg-sidebar .ws-navigation a{
+   min-height:42px!important;border-radius:11px!important;
+   color:#142333!important;background:transparent!important;
+   border:1px solid transparent!important;box-shadow:none!important;
+ }
+ html body .ac-workspace .rg-sidebar .ws-navigation a:hover{
+   background:#EDF4F7!important;color:#075365!important;
+ }
+ html body .ac-workspace .rg-sidebar .ws-navigation a[aria-current=page]{
+   color:#FFFFFF!important;background:linear-gradient(125deg,#075365,#083B4A)!important;
+   border-color:#075365!important;box-shadow:0 5px 12px rgba(8,59,74,.12)!important;
+ }
+ html body .ac-workspace .rg-sidebar .ws-navigation a[aria-current=page] :is(svg,span){color:#FFFFFF!important}
+ html body .ac-workspace .rg-sidebar .rg-sidebar-footer{
+   background:#F7FAFC!important;border-top:1px solid #E3EBF0!important;
+ }
+ html body .ac-workspace .rg-sidebar .rg-membership{
+   background:linear-gradient(130deg,#075365,#083B4A)!important;
+   color:#FFFFFF!important;border:0!important;border-radius:14px!important;
+ }
+ html body .ac-workspace .rg-sidebar .rg-membership :is(strong,small,svg){color:#FFFFFF!important}
+ html body .ac-workspace .rg-sidebar .rg-sidebar-profile{color:#142333!important}
+}
