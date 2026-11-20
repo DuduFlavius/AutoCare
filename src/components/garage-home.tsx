@@ -124,7 +124,7 @@ const home = dashboardHome(data);
   // The existing detailed overview remains below for compatibility.
   return (
     <div className="ac-premium-dashboard">
-      {currency === 'EUR' && <p className="micro" style={{margin:"0 0 12px",color:"#1E4538"}}>{language==='en'?'EUR amounts are estimates (EUR 1 ≈ RON 5). Saved amounts and payments remain in RON.':'Sumele în EUR sunt orientative (1 EUR ≈ 5 RON). Valorile salvate și plățile rămân în RON.'}</p>}
+      {currency === 'EUR' && <p className="micro" style={{margin:"0 0 12px",color:"#0B1C16"}}>{language==='en'?'EUR amounts are estimates (EUR 1 ≈ RON 5). Saved amounts and payments remain in RON.':'Sumele în EUR sunt orientative (1 EUR ≈ 5 RON). Valorile salvate și plățile rămân în RON.'}</p>}
       {cars.length > 1 && (
         <label className="ac-premium-car-selector">Mașina afișată
           <FilterSelect value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
@@ -168,17 +168,17 @@ const home = dashboardHome(data);
           <div className="ac-oil-hero">
             <div className="ac-oil-product" aria-hidden="true">
               <svg viewBox="0 0 82 108" role="img" focusable="false">
-                <defs><linearGradient id="oilCanBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#304B40"/><stop offset=".32" stopColor="#101A16"/><stop offset=".8" stopColor="#0B1210"/><stop offset="1" stopColor="#17241F"/></linearGradient><linearGradient id="oilCanLabel" x1="0" x2="1"><stop stopColor="#71E5BB"/><stop offset=".5" stopColor="#71E5BB"/><stop offset="1" stopColor="#304B40"/></linearGradient></defs>
-                <ellipse cx="40" cy="103" rx="30" ry="4" fill="#101A16" opacity=".19"/>
-                <path d="M20 13h31l7 8v9h8q7 0 7 7v57q0 6-7 6H18q-7 0-7-7V27q0-8 9-8z" fill="url(#oilCanBody)" stroke="#17241F" strokeWidth="2"/>
-                <path d="M51 19l9 8v17h-8z" fill="#1E4538"/><path d="M53 29h9v13h-9z" fill="#101A16"/>
-                <rect x="24" y="6" width="24" height="10" rx="2" fill="#101A16"/><rect x="22" y="3" width="28" height="5" rx="2" fill="#17241F"/>
-                <rect x="17" y="42" width="47" height="42" rx="4" fill="#101A16" stroke="#304B40" strokeWidth=".8"/>
-                <path d="M20 47h41M20 78h41" stroke="#71E5BB" strokeWidth="1.5"/>
+                <defs><linearGradient id="oilCanBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#1C8062"/><stop offset=".32" stopColor="#091611"/><stop offset=".8" stopColor="#050E0B"/><stop offset="1" stopColor="#10251E"/></linearGradient><linearGradient id="oilCanLabel" x1="0" x2="1"><stop stopColor="#5AFFC4"/><stop offset=".5" stopColor="#5AFFC4"/><stop offset="1" stopColor="#1C8062"/></linearGradient></defs>
+                <ellipse cx="40" cy="103" rx="30" ry="4" fill="#091611" opacity=".19"/>
+                <path d="M20 13h31l7 8v9h8q7 0 7 7v57q0 6-7 6H18q-7 0-7-7V27q0-8 9-8z" fill="url(#oilCanBody)" stroke="#10251E" strokeWidth="2"/>
+                <path d="M51 19l9 8v17h-8z" fill="#0B1C16"/><path d="M53 29h9v13h-9z" fill="#091611"/>
+                <rect x="24" y="6" width="24" height="10" rx="2" fill="#091611"/><rect x="22" y="3" width="28" height="5" rx="2" fill="#10251E"/>
+                <rect x="17" y="42" width="47" height="42" rx="4" fill="#091611" stroke="#1C8062" strokeWidth=".8"/>
+                <path d="M20 47h41M20 78h41" stroke="#5AFFC4" strokeWidth="1.5"/>
                 <path d="M38 49c-6 10-10 13-10 18a10 10 0 0 0 20 0c0-5-4-8-10-18z" fill="url(#oilCanLabel)"/>
-                <text x="40" y="75" textAnchor="middle" fontSize="9" fontWeight="900" fill="#71E5BB">OIL</text>
-                <text x="40" y="91" textAnchor="middle" fontSize="7" fontWeight="800" fill="#A5B8AF">AutoCare</text>
-                <path d="M17 28v61" stroke="#34C997" strokeWidth="2" opacity=".32"/>
+                <text x="40" y="75" textAnchor="middle" fontSize="9" fontWeight="900" fill="#5AFFC4">OIL</text>
+                <text x="40" y="91" textAnchor="middle" fontSize="7" fontWeight="800" fill="#A8BFB5">AutoCare</text>
+                <path d="M17 28v61" stroke="#20E6A2" strokeWidth="2" opacity=".32"/>
               </svg>
             </div>
             <div className="ac-oil-info">

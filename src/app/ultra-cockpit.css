@@ -1,8 +1,8 @@
 /* AutoCare cockpit: electric blue highlights, dark instruments and the digital garage. */
 .app-shell.ac-studio:not(:where([class^="rg-"],[class^="rg-"] *)){
-  --ac-ultra-edge: #304B40;
-  --ac-ultra-panel: #101A16;
-  --ac-ultra-accent: #71E5BB;
+  --ac-ultra-edge: #1C8062;
+  --ac-ultra-panel: #091611;
+  --ac-ultra-accent: #5AFFC4;
 }
 html body .ac-workspace.ac-studio .ac-cockpit-home:not(:where([class^="rg-"],[class^="rg-"] *)){ gap: clamp(12px, 1.7vw, 24px); }
 .ac-cockpit-home .studio-home-heading:not(:where([class^="rg-"],[class^="rg-"] *)){
@@ -28,8 +28,8 @@ html body .ac-workspace.ac-studio .ac-cockpit-home .ac-vehicle-instrument:not(:w
   min-width: 0;
   padding: clamp(15px, 2vw, 26px);
   border: 1px solid var(--ac-ultra-edge);
-  background: radial-gradient(ellipse at 76% 26%, #1E453873, transparent 50%),
-    linear-gradient(139deg, #101A16 4%, #17241F 59%, #101A16);
+  background: radial-gradient(ellipse at 76% 26%, #0B1C1673, transparent 50%),
+    linear-gradient(139deg, #091611 4%, #10251E 59%, #091611);
 }
 .ac-instrument-heading:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
@@ -46,13 +46,13 @@ html body .app-shell.ac-workspace.ac-studio .ac-vehicle-instrument .studio-vehic
 .ac-instrument-identity:not(:where([class^="rg-"],[class^="rg-"] *)){ display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--color-muted); }
 .ac-instrument-identity .studio-plate:not(:where([class^="rg-"],[class^="rg-"] *)){ max-width: 100%; white-space: normal; }
 .ac-instrument-heading select:not(:where([class^="rg-"],[class^="rg-"] *)){ display: block; width: 100%; min-width: 0; margin-block-start: 10px; text-overflow: ellipsis; }
-.ac-instrument-art:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 100%; height: auto; max-height: 205px; color: #71E5BB; }
+.ac-instrument-art:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 100%; height: auto; max-height: 205px; color: #5AFFC4; }
 .ac-instrument-footer:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 12px 18px;
-  border-block-start: 1px solid #71E5BB27;
+  border-block-start: 1px solid #5AFFC427;
   padding-block-start: 14px;
   min-width: 0;
 }
@@ -95,8 +95,8 @@ html body .ac-workspace.ac-studio .studio-vehicle-illustration img:not(:where([c
   z-index: 1;
   border-radius: 5px;
   padding: 3px 6px;
-  background: #101A16dd;
-  color: #F3F8F5;
+  background: #091611dd;
+  color: #FFFFFF;
   font-size: 10px;
 }
 .ac-cockpit-home .studio-mileage strong:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-readiness-value strong:not(:where([class^="rg-"],[class^="rg-"] *)){ font-variant-numeric: tabular-nums; }
@@ -109,7 +109,7 @@ html body .ac-workspace.ac-studio .studio-vehicle-illustration img:not(:where([c
   padding: clamp(14px, 2vw, 24px);
   border: 1px solid var(--ac-ultra-edge);
   border-radius: 16px;
-  background: radial-gradient(ellipse at top right, #304B40, transparent 65%), var(--ac-ultra-panel);
+  background: radial-gradient(ellipse at top right, #1C8062, transparent 65%), var(--ac-ultra-panel);
 }
 .ac-readiness-heading:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-readiness-value:not(:where([class^="rg-"],[class^="rg-"] *)){ display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .ac-readiness-heading svg:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--ac-ultra-accent); }
@@ -117,8 +117,8 @@ html body .ac-workspace.ac-studio .studio-vehicle-illustration img:not(:where([c
 .ac-readiness-panel p:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-readiness-value span:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-muted); font-size: 12px; }
 .ac-readiness-value strong:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: clamp(36px, 4vw, 58px); line-height: 1.1; letter-spacing: -.05em; }
 .ac-readiness-panel meter:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 100%; height: 12px; }
-.ac-readiness-panel meter:not(:where([class^="rg-"],[class^="rg-"] *))::-webkit-meter-optimum-value { background: #71E5BB; }
-.ac-readiness-panel meter:not(:where([class^="rg-"],[class^="rg-"] *))::-moz-meter-bar { background: #71E5BB; }
+.ac-readiness-panel meter:not(:where([class^="rg-"],[class^="rg-"] *))::-webkit-meter-optimum-value { background: #5AFFC4; }
+.ac-readiness-panel meter:not(:where([class^="rg-"],[class^="rg-"] *))::-moz-meter-bar { background: #5AFFC4; }
 .ac-readiness-actions:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; gap: 6px; }
 html body .ac-workspace.ac-studio .ac-readiness-actions button:not(:where([class^="rg-"],[class^="rg-"] *)){ justify-content: flex-start !important; width: 100% !important; }
 .ac-readiness-actions button > svg:last-child:not(:where([class^="rg-"],[class^="rg-"] *)){ margin-inline-start: auto; }
@@ -140,7 +140,7 @@ html body .ac-workspace.ac-studio .ac-nearby-places li button:not(:where([class^
 html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .sheet-overview:not(:where([class^="rg-"],[class^="rg-"] *)){
   border-radius: 18px;
   border: 1px solid var(--ac-ultra-edge);
-  background: linear-gradient(130deg, #17241F, #101A16 70%);
+  background: linear-gradient(130deg, #10251E, #091611 70%);
   padding: clamp(12px, 2vw, 23px);
 }
 html body .ac-workspace.ac-studio .ac-vehicle-profile .sheet-overview .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)),
@@ -162,7 +162,7 @@ html body .ac-workspace.ac-studio .ac-garage-grid .studio-vehicle-photo:not(:whe
 .ac-studio :is(button, a):focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)){ outline: 2px solid var(--ac-ultra-accent); outline-offset: 3px; }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .ac-cockpit-home :is(.studio-panel, .ac-readiness-panel):not(:where([class^="rg-"],[class^="rg-"] *)), .ac-garage-grid .car-card:not(:where([class^="rg-"],[class^="rg-"] *)){ transition: border-color 180ms ease, box-shadow 180ms ease; }
-  .ac-cockpit-home :is(.studio-panel, .ac-readiness-panel):hover:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-garage-grid .car-card:hover:not(:where([class^="rg-"],[class^="rg-"] *)){ border-color: #34C997; box-shadow: 0 14px 34px #0B121080; }
+  .ac-cockpit-home :is(.studio-panel, .ac-readiness-panel):hover:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-garage-grid .car-card:hover:not(:where([class^="rg-"],[class^="rg-"] *)){ border-color: #20E6A2; box-shadow: 0 14px 34px #050E0B80; }
 }
 @media (max-width: 1050px) {
   .ac-cockpit-home .studio-dashboard-metrics:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -176,13 +176,13 @@ html body .ac-workspace.ac-studio .ac-garage-grid .studio-vehicle-photo:not(:whe
   .ac-cockpit-insights:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: minmax(0, 1fr); }
   html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock:not(:where([class^="rg-"],[class^="rg-"] *)){
     backdrop-filter: blur(16px);
-    background: #101A16f5 !important;
-    border-top: 1px solid #304B40;
-    box-shadow: 0 -7px 24px #0B121066;
+    background: #091611f5 !important;
+    border-top: 1px solid #1C8062;
+    box-shadow: 0 -7px 24px #050E0B66;
   }
   html body .app-shell.ac-workspace.ac-studio .autocare-mobile-dock a[aria-current='page']:not(:where([class^="rg-"],[class^="rg-"] *)){
-    background: #304B40 !important;
-    color: #71E5BB !important;
+    background: #1C8062 !important;
+    color: #5AFFC4 !important;
   }
   .ac-vehicle-profile .ac-vehicle-sheet-tabs:not(:where([class^="rg-"],[class^="rg-"] *)){ position: static; }
 }
@@ -197,11 +197,11 @@ html body .ac-workspace.ac-studio .ac-workspace-toast:not(:where([class^="rg-"],
   gap: 12px;
   max-width: min(420px, calc(100vw - 36px));
   padding: 10px 12px;
-  border: 1px solid #34C997;
+  border: 1px solid #20E6A2;
   border-radius: 13px;
-  background: #17241F;
-  color: #F3F8F5;
-  box-shadow: 0 8px 28px #0B121099;
+  background: #10251E;
+  color: #FFFFFF;
+  box-shadow: 0 8px 28px #050E0B99;
 }
 html body .ac-workspace.ac-studio .ac-workspace-toast button:not(:where([class^="rg-"],[class^="rg-"] *)){
   flex: none;
@@ -213,17 +213,17 @@ html body .ac-workspace.ac-studio .ac-workspace-toast button:not(:where([class^=
 }
 
 html body .app-shell.ac-workspace.ac-studio > .sidebar:not(:where([class^="rg-"],[class^="rg-"] *)){
-  background: linear-gradient(180deg, #101A16, #101A16 60%) !important;
+  background: linear-gradient(180deg, #091611, #091611 60%) !important;
   border-inline-end: 1px solid var(--ac-ultra-edge) !important;
 }
 html body .app-shell.ac-workspace.ac-studio .ws-navigation a[aria-current='page']:not(:where([class^="rg-"],[class^="rg-"] *)){
-  background: linear-gradient(90deg, #304B40, #17241F) !important;
-  border-color: #1E4538 !important;
+  background: linear-gradient(90deg, #1C8062, #10251E) !important;
+  border-color: #0B1C16 !important;
   color: #eaf3ff !important;
 }
 .ac-studio .ws-navigation a[aria-current='page'] svg:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--ac-ultra-accent); }
 .ac-studio .ws-loading:not(:where([class^="rg-"],[class^="rg-"] *)){ border-color: var(--ac-ultra-edge); background: var(--ac-ultra-panel); }
-.ac-studio .ws-loading-grid span:not(:where([class^="rg-"],[class^="rg-"] *)){ background: linear-gradient(105deg, #17241F 18%, #304B40 48%, #17241F 80%); background-size: 240% 100%; }
+.ac-studio .ws-loading-grid span:not(:where([class^="rg-"],[class^="rg-"] *)){ background: linear-gradient(105deg, #10251E 18%, #1C8062 48%, #10251E 80%); background-size: 240% 100%; }
 @media (prefers-reduced-motion: no-preference) {
   .ac-studio .ws-loading-grid span:not(:where([class^="rg-"],[class^="rg-"] *)){ animation: ac-instrument-loading 1.45s ease-in-out infinite; }
 }
@@ -307,8 +307,8 @@ html body .ac-workspace.ac-studio .ac-cockpit-home .studio-home-heading h1:not(:
   width: clamp(82px, 9vw, 106px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, #101A16 58%, transparent 61%), conic-gradient(from 220deg, #71E5BB 0, #71E5BB var(--ac-care-score), #304B40 var(--ac-care-score));
-  box-shadow: 0 0 24px #71E5BB28;
+  background: radial-gradient(circle, #091611 58%, transparent 61%), conic-gradient(from 220deg, #5AFFC4 0, #5AFFC4 var(--ac-care-score), #1C8062 var(--ac-care-score));
+  box-shadow: 0 0 24px #5AFFC428;
 }
 .ac-cockpit-home .ac-care-ring strong:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: clamp(24px, 2.5vw, 33px); }
 .ac-titanium-action-deck:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
@@ -319,9 +319,9 @@ html body .ac-workspace.ac-studio .ac-cockpit-home .studio-home-heading h1:not(:
   align-items: start;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #304B40;
+  border: 1px solid #1C8062;
   border-radius: 14px;
-  background: linear-gradient(148deg,#17241F,#101A16);
+  background: linear-gradient(148deg,#10251E,#091611);
 }
 .ac-titanium-action-deck h2:not(:where([class^="rg-"],[class^="rg-"] *)){ margin: 0 0 4px; font-size: 15px; }
 .ac-titanium-action-deck p:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-titanium-action-deck small:not(:where([class^="rg-"],[class^="rg-"] *)){ margin: 0; color: var(--color-muted); overflow-wrap: anywhere; }
@@ -329,12 +329,12 @@ html body .ac-workspace.ac-studio .ac-cockpit-home .studio-home-heading h1:not(:
 .ac-assistant-icon:not(:where([class^="rg-"],[class^="rg-"] *)){
   display: grid;
   place-items: center;
-  color: #71E5BB;
+  color: #5AFFC4;
   width: 42px;
   height: 42px;
   border-radius: 13px;
-  border: 1px solid #1E4538;
-  background: radial-gradient(ellipse at 20% 10%, #34C997, #17241F 85%);
+  border: 1px solid #0B1C16;
+  background: radial-gradient(ellipse at 20% 10%, #20E6A2, #10251E 85%);
 }
 .ac-titanium-assistant form:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 6px; margin-top: 8px; }
 .ac-titanium-assistant input:not(:where([class^="rg-"],[class^="rg-"] *)){ min-width: 0; width: 100%; }
@@ -356,13 +356,13 @@ html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-insights:not(:whe
   height: 74px;
   display: flex;
   align-items: end;
-  background: #101A16;
+  background: #091611;
   border-radius: 5px;
 }
-.ac-drive-track i:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 100%; border-radius: 5px; background: linear-gradient(#71E5BB,#34C997); }
+.ac-drive-track i:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 100%; border-radius: 5px; background: linear-gradient(#5AFFC4,#20E6A2); }
 html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titanium-vehicle:not(:where([class^="rg-"],[class^="rg-"] *)){
   grid-template-columns: minmax(0, 1fr);
-  background: radial-gradient(ellipse at 72% 58%,#304B40,transparent 64%), linear-gradient(125deg,#17241F,#101A16);
+  background: radial-gradient(ellipse at 72% 58%,#1C8062,transparent 64%), linear-gradient(125deg,#10251E,#091611);
 }
 .ac-titanium-vehicle > div:not(:where([class^="rg-"],[class^="rg-"] *)){ min-width: 0; overflow-wrap: anywhere; }
 .ac-titanium-vehicle h2:not(:where([class^="rg-"],[class^="rg-"] *)){ margin: 4px 0; font-size: clamp(28px,4vw,49px); }
@@ -403,8 +403,8 @@ html body .ac-workspace.ac-studio .ac-cockpit-home .studio-home-heading h1:not(:
   isolation: isolate;
   overflow: clip;
   padding: clamp(12px, 1.5vw, 20px);
-  background: radial-gradient(ellipse at 15% 0,#304B40,transparent 72%), linear-gradient(142deg,#101A16,#0B1210);
-  border-color: #1E4538;
+  background: radial-gradient(ellipse at 15% 0,#1C8062,transparent 72%), linear-gradient(142deg,#091611,#050E0B);
+  border-color: #0B1C16;
 }
 .ac-cockpit-lead .ac-titanium-action-deck:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: minmax(0, 1fr); gap: 9px; }
 .ac-cockpit-lead .ac-titanium-action-deck > section:not(:where([class^="rg-"],[class^="rg-"] *)){ padding: 11px; }
@@ -415,15 +415,15 @@ html body .ac-workspace.ac-studio .ac-care-metrics button:not(:where([class^="rg
   display: flex; align-items: center; justify-content: flex-start; gap: 7px;
   min-width: 0; padding: 6px !important; text-align: left; white-space: normal !important;
 }
-.ac-care-metrics svg:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-cockpit-quick svg:not(:where([class^="rg-"],[class^="rg-"] *)){ flex-shrink: 0; color: #71E5BB; }
+.ac-care-metrics svg:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-cockpit-quick svg:not(:where([class^="rg-"],[class^="rg-"] *)){ flex-shrink: 0; color: #5AFFC4; }
 .ac-care-metrics span:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: 11px; color: var(--color-muted); overflow-wrap: anywhere; }
 .ac-care-metrics strong:not(:where([class^="rg-"],[class^="rg-"] *)){ display: block; color: var(--color-text); font-size: 13px; }
 .ac-cockpit-home .ac-readiness-actions:not(:where([class^="rg-"],[class^="rg-"] *)){ display: flex; flex-wrap: wrap; }
 html body .ac-workspace.ac-studio .ac-cockpit-home .ac-readiness-actions button:not(:where([class^="rg-"],[class^="rg-"] *)){ width: auto !important; }
 html body .ac-workspace.ac-studio .ac-cockpit-home :is(.ac-cockpit-data, .ac-cockpit-bottom) :is(.studio-panel, .studio-priority):not(:where([class^="rg-"],[class^="rg-"] *)){
   padding: clamp(10px, 1.1vw, 16px) !important;
-  background: linear-gradient(145deg,#17241F,#101A16) !important;
-  border-color: #304B40 !important;
+  background: linear-gradient(145deg,#10251E,#091611) !important;
+  border-color: #1C8062 !important;
 }
 .ac-cockpit-home :is(.ac-cockpit-data, .ac-cockpit-bottom) h2:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: 15px; overflow-wrap: anywhere; }
 .ac-cockpit-home :is(.ac-cockpit-data, .ac-cockpit-bottom) .studio-panel-head:not(:where([class^="rg-"],[class^="rg-"] *)){ flex-wrap: wrap; }
@@ -434,12 +434,12 @@ html body .ac-workspace.ac-studio .ac-cockpit-home :is(.ac-cockpit-data, .ac-coc
   gap: 0;
   padding-top: 72px;
 }
-.ac-cost-line:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-vehicle-line:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 100%; color: #71E5BB; overflow: visible; }
+.ac-cost-line:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-vehicle-line:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 100%; color: #5AFFC4; overflow: visible; }
 .ac-cost-line:not(:where([class^="rg-"],[class^="rg-"] *)){ position: absolute; inset: 0 0 auto; height: 72px; pointer-events: none; }
-.ac-cost-gridlines:not(:where([class^="rg-"],[class^="rg-"] *)){ fill: none; stroke: #304B40; stroke-width: 1; }
+.ac-cost-gridlines:not(:where([class^="rg-"],[class^="rg-"] *)){ fill: none; stroke: #1C8062; stroke-width: 1; }
 :is(.ac-cost-line, .ac-vehicle-line) polyline:not(:where([class^="rg-"],[class^="rg-"] *)){ fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
 :is(.ac-cost-line, .ac-vehicle-line) circle:not(:where([class^="rg-"],[class^="rg-"] *)){ fill: currentColor; }
-.ac-cost-line polygon:not(:where([class^="rg-"],[class^="rg-"] *)){ fill: #71E5BB21; }
+.ac-cost-line polygon:not(:where([class^="rg-"],[class^="rg-"] *)){ fill: #5AFFC421; }
 html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-data .studio-priority-main:not(:where([class^="rg-"],[class^="rg-"] *)){ gap: 8px; }
 .ac-cockpit-data .studio-progress-ring:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 38px; height: 38px; }
 .ac-cockpit-data .studio-progress-ring svg:not(:where([class^="rg-"],[class^="rg-"] *)){ width: 17px; }
@@ -468,7 +468,7 @@ html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titaniu
 }
 .ac-titanium-vehicle .vehicle-sheet-actions:not(:where([class^="rg-"],[class^="rg-"] *)){ justify-content: flex-end; }
 .ac-vehicle-overview:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: repeat(2, minmax(0,1.2fr)) repeat(2,minmax(0,1fr)); }
-.ac-vehicle-overview .card:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; align-content: start; gap: 7px; padding: 13px; background: linear-gradient(145deg,#17241F,#101A16); border-color: #304B40; overflow-wrap: anywhere; }
+.ac-vehicle-overview .card:not(:where([class^="rg-"],[class^="rg-"] *)){ display: grid; align-content: start; gap: 7px; padding: 13px; background: linear-gradient(145deg,#10251E,#091611); border-color: #1C8062; overflow-wrap: anywhere; }
 .ac-vehicle-overview :is(h3,p,dl,dd):not(:where([class^="rg-"],[class^="rg-"] *)){ margin: 0; }
 .ac-vehicle-overview h3:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: 15px; }
 .ac-vehicle-overview .ac-vehicle-notes:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-column: 1/-1; }
@@ -483,7 +483,7 @@ html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titaniu
 .ac-vehicle-documents .event-line:not(:where([class^="rg-"],[class^="rg-"] *)){ display: flex; align-items: center; gap: 6px; min-width: 0; text-align: start; }
 .ac-vehicle-documents .event-line svg:not(:where([class^="rg-"],[class^="rg-"] *)){ flex: none; }
 .ac-vehicle-documents .event-line small:not(:where([class^="rg-"],[class^="rg-"] *)){ display: block; color: var(--color-muted); }
-.ac-vehicle-sheet-tabs button[aria-pressed='true']:not(:where([class^="rg-"],[class^="rg-"] *)){ color: #71E5BB; border-color: #71E5BB; }
+.ac-vehicle-sheet-tabs button[aria-pressed='true']:not(:where([class^="rg-"],[class^="rg-"] *)){ color: #5AFFC4; border-color: #5AFFC4; }
 @media (max-width: 1250px) {
   .ac-cockpit-data:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-vehicle-overview:not(:where([class^="rg-"],[class^="rg-"] *)){ grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
@@ -503,9 +503,9 @@ html body .ac-workspace.ac-studio .ac-vehicle-profile .vehicle-sheet .ac-titaniu
   .ac-cockpit-home .ac-care-content .ac-readiness-value:not(:where([class^="rg-"],[class^="rg-"] *)){ flex-direction: row; text-align: start; justify-content: flex-start; gap: 8px; }
 }
 .ac-vehicle-reading-list:not(:where([class^="rg-"],[class^="rg-"] *)){ list-style: none; display: grid; gap: 4px; padding: 0; }
-.ac-vehicle-reading-list li:not(:where([class^="rg-"],[class^="rg-"] *)){ display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #304B40; padding-block: 4px; }
+.ac-vehicle-reading-list li:not(:where([class^="rg-"],[class^="rg-"] *)){ display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #1C8062; padding-block: 4px; }
 html body .ac-workspace.ac-studio .ac-cockpit-home .ac-cockpit-data .studio-mini-chart:not(:where([class^="rg-"],[class^="rg-"] *)){ padding-inline: 0; background: transparent; }
-.ac-cockpit-home .ac-cockpit-data .studio-mini-chart button[aria-pressed='true'] small:not(:where([class^="rg-"],[class^="rg-"] *)){ color: #71E5BB; }
+.ac-cockpit-home .ac-cockpit-data .studio-mini-chart button[aria-pressed='true'] small:not(:where([class^="rg-"],[class^="rg-"] *)){ color: #5AFFC4; }
 
 @media print {
   .ac-vehicle-profile .vehicle-sheet .ac-vehicle-records[hidden]:not(:where([class^="rg-"],[class^="rg-"] *)){ display: block !important; }

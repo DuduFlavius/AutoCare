@@ -34,7 +34,7 @@ test('Public metadata has matching canonical, Open Graph URL and real absolute s
   const english=publicMetadata('Vehicle documents','Your vehicle documents','/en/vehicle-documents');
   assert.equal(english.openGraph?.locale,'en_GB');
   assert.equal((english.openGraph?.images as {url:string}[])[0].url,process.env.APP_URL+'/en/opengraph-image');
-  assert.ok(sitemap()[0].images?.some(url=>url.endsWith('/images/autocare-app-premium.webp')));
+  assert.ok(sitemap()[0].images?.some(url=>url.endsWith('/images/autocare-racing-green-preview.png')));
   assert.equal(Object.keys(publicTopics).length, 3);
   assert.equal(Object.keys(guides).length, 3);
 });

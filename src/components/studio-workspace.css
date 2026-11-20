@@ -47,7 +47,7 @@
   }
   html body .app-shell.ac-workspace.ac-studio .ws-sidebar-sections:not(:where([class^="rg-"],[class^="rg-"] *)){
     scrollbar-width: thin !important;
-    scrollbar-color: #304B40 transparent !important;
+    scrollbar-color: #1C8062 transparent !important;
   }
   html body .app-shell.ac-workspace.ac-studio .ws-navigation:not(:where([class^="rg-"],[class^="rg-"] *)){
     gap: 23px !important;
@@ -239,7 +239,7 @@
     border-color: var(--color-border-strong) !important;
   }
   html body .app-shell.ac-workspace.ac-studio .main :is(button.primary, .button.primary):not(:where([class^="rg-"],[class^="rg-"] *)){
-    background: var(--color-primary) !important;
+    background: var(--color-button) !important;
     border-color: var(--color-border-strong) !important;
     color: var(--color-on-primary) !important;
     box-shadow: 0 5px 16px color-mix(in srgb, var(--color-primary) 11%, transparent) !important;
@@ -270,7 +270,7 @@
     :is(.main, .dialog)
     :is(input, textarea):not(:where([class^="rg-"],[class^="rg-"] *))::placeholder {
     color: var(--color-muted) !important;
-    -webkit-text-fill-color: #A5B8AF !important;
+    -webkit-text-fill-color: #A8BFB5 !important;
   }
   html
     body
@@ -1249,7 +1249,7 @@
     min-height: 48px !important;
     margin-top: auto !important;
     font-size: 15px !important;
-    background: var(--color-primary) !important;
+    background: var(--color-button) !important;
     border-color: var(--color-border-strong) !important;
     color: var(--color-on-primary) !important;
   }
@@ -1355,7 +1355,7 @@
     border-radius: 9px !important;
   }
   html body .app-shell.ac-workspace.ac-studio .dialog button.primary:not(:where([class^="rg-"],[class^="rg-"] *)){
-    background: var(--color-primary) !important;
+    background: var(--color-button) !important;
     border-color: var(--color-border-strong) !important;
     color: var(--color-on-primary) !important;
   }
@@ -1425,7 +1425,7 @@
     .record-category-grid
     > button[aria-pressed='true']:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-primary-deep) !important;
-    border-color: var(--color-primary) !important;
+    border-color: var(--color-button) !important;
   }
   html body .app-shell.ac-workspace.ac-studio .main :is(.notice, .error, .ws-offline):not(:where([class^="rg-"],[class^="rg-"] *)){
     font-size: 15px !important;
@@ -1520,7 +1520,7 @@
       display: none !important;
     }
     html body .app-shell.ac-workspace.ac-studio > .main:not(:where([class^="rg-"],[class^="rg-"] *)){
-      padding: 128px 16px 108px !important;
+      padding: calc(76px + env(safe-area-inset-top,0px)) 16px calc(88px + env(safe-area-inset-bottom,0px)) !important;
       margin: 0 !important;
       width: 100% !important;
       overflow-x: clip !important;

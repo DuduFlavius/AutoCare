@@ -32,11 +32,12 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: appName, statusBarStyle: 'black-translucent', startupImage: startupImages },
   icons: {
     icon: [
+      { url: '/favicon-96.png', sizes: '96x96', type: 'image/png' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
       { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
     ],
-    apple: '/icon-192.png',
+    apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.webmanifest',
   twitter: { card: 'summary_large_image', images: ['/opengraph-image'] },
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
     ],
   },
 };
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#0B1210' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#050E0B' };
 export default function SiteDocument({ children, language }: { children: React.ReactNode; language:'ro'|'en' }) {
   return (
     <html lang={language}>

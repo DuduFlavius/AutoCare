@@ -129,7 +129,7 @@ html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo:not(
   margin-top: 14px;
   padding: 14px;
   border-radius: 13px;
-  background: linear-gradient(115deg, #17241F, #17241F);
+  background: linear-gradient(115deg, #10251E, #10251E);
 }
 .ac-service-vehicle p:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-muted); margin-block: 6px; }
 html body .ac-workspace.ac-studio .ac-service-vehicle .studio-vehicle-photo:not(:where([class^="rg-"],[class^="rg-"] *)){
@@ -153,7 +153,7 @@ html body .ac-workspace.ac-studio .ac-drive-cockpit .ac-smartdrive-map:not(:wher
 .ac-workspace .ac-trip-history-map .ac-road-map:not(:where([class^="rg-"],[class^="rg-"] *)){
   border: 0 !important;
   border-radius: 15px 15px 0 0 !important;
-  background: #17241F !important;
+  background: #10251E !important;
 }
 .ac-workspace .ac-road-map .ac-road-map-message:not(:where([class^="rg-"],[class^="rg-"] *)){
   background: var(--cockpit-night) !important;
@@ -211,7 +211,7 @@ html body .ac-workspace .ac-trip-history-list button:not(:where([class^="rg-"],[
   gap: 8px;
   padding: 18px;
   text-align: center;
-  background: radial-gradient(ellipse at 50% 10%, #304B40, var(--cockpit-night));
+  background: radial-gradient(ellipse at 50% 10%, #1C8062, var(--cockpit-night));
   border: 1px solid var(--cockpit-edge);
   border-radius: 14px;
 }
@@ -279,7 +279,7 @@ html body .ac-workspace .ac-smartdrive-views button:not(:where([class^="rg-"],[c
 }
 html body .ac-workspace .ac-smartdrive-views button[aria-pressed='true']:not(:where([class^="rg-"],[class^="rg-"] *)){
   border-color: var(--cockpit-blue);
-  background: #304B40;
+  background: #1C8062;
   color: #e5ebff;
 }
 
@@ -294,7 +294,7 @@ html body .ac-workspace.ac-studio .studio-home:not(:where([class^="rg-"],[class^
   border-radius: 14px;
   background:
     radial-gradient(ellipse at 82% 0%, color-mix(in srgb, var(--electric-blue) 20%, transparent), transparent 65%),
-    repeating-linear-gradient(90deg, transparent 0 47px, #A5B8AF0a 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, #A8BFB50a 47px 48px),
     var(--midnight-navy);
 }
 .studio-telemetry:not(:where([class^="rg-"],[class^="rg-"] *)){
@@ -349,7 +349,7 @@ html body .app-shell.ac-workspace.ac-studio .studio-telemetry .studio-dashboard-
 html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-mini-chart:not(:where([class^="rg-"],[class^="rg-"] *)){
   padding-inline: 10px;
   margin-top: 8px;
-  background: repeating-linear-gradient(to top, transparent 0 27px, #A5B8AF19 27px 28px);
+  background: repeating-linear-gradient(to top, transparent 0 27px, #A8BFB519 27px 28px);
   border-radius: 9px;
 }
 html body .ac-workspace.ac-studio .studio-telemetry-chart .studio-chart-track:not(:where([class^="rg-"],[class^="rg-"] *)){
@@ -365,7 +365,7 @@ html body .ac-workspace.ac-studio .studio-telemetry-chart button[aria-pressed='t
 html body .ac-lux-public.ac-studio-public .studio-landing-hero:not(:where([class^="rg-"],[class^="rg-"] *)){
   background:
     radial-gradient(ellipse at 84% 6%, var(--color-primary-deep), transparent 60%),
-    repeating-linear-gradient(90deg, transparent 0 71px, #A5B8AF09 71px 72px),
+    repeating-linear-gradient(90deg, transparent 0 71px, #A8BFB509 71px 72px),
     var(--obsidian-black);
 }
 html body .ac-lux-public.ac-studio-public .studio-landing-photography:not(:where([class^="rg-"],[class^="rg-"] *)){

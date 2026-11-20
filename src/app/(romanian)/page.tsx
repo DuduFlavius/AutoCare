@@ -34,11 +34,11 @@ export async function generateMetadata() {
   return {
     ...(verification ? { verification: { google: verification } } : {}),
     ...publicMetadata(
-      'AutoCare – Aplicație pentru Întreținerea și Gestionarea Mașinii',
+      'AutoCare Premium – Garaj digital, documente și revizii auto',
       siteDescription,
       '/',
     ),
-    title: { absolute: 'AutoCare – Aplicație pentru Întreținerea și Gestionarea Mașinii' },
+    title: { absolute: 'AutoCare Premium – Garaj digital, documente și revizii auto' },
   };
 }
 export default async function Home() {
@@ -54,7 +54,7 @@ export default async function Home() {
             <div className="studio-landing-copy">
               <p className="lux-eyebrow"><ShieldCheck size={16} /> GARAJUL TĂU DIGITAL</p>
               <h1>Mai mult control.<br /><span>La fiecare drum.</span></h1>
-              <p>Organizează întreținerea, documentele și costurile mașinii. Înregistrează călătoriile prin SmartDrive GPS și vezi ce urmează, dintr-un singur loc.</p>
+              <p>Organizează întreținerea, documentele și costurile mașinii. Vezi istoricul și următoarele termene dintr-un singur loc.</p>
               <ul className="ac-landing-checks">
                 {['Garaj digital', 'Mentenanță automată', 'SmartDrive GPS', 'Documente la îndemână'].map(label => (
                   <li key={label}><CircleCheck size={18} /> {label}</li>
@@ -249,7 +249,7 @@ export default async function Home() {
                   'Sesiuni SmartDrive',
                 ],
                 inLanguage: 'ro-RO',
-                image: origin() + '/images/autocare-app-premium.webp',
+                image: origin() + '/images/autocare-racing-green-preview.png',
                 installUrl: origin() + '/aplicatie-auto',
                 offers: {
                   '@type': 'Offer',
@@ -262,13 +262,13 @@ export default async function Home() {
               {
                 '@type': 'WebPage',
                 url: origin(),
-                name: 'AutoCare – Aplicație pentru Întreținerea și Gestionarea Mașinii',
+                name: 'AutoCare Premium – Garaj digital, documente și revizii auto',
                 '@id': origin() + '/#webpage',
                 isPartOf: { '@id': origin() + '/#website' },
                 about: { '@id': origin() + '/#application' },
                 primaryImageOfPage: {
                   '@type': 'ImageObject',
-                  url: origin() + '/images/autocare-app-premium.webp',
+                  url: origin() + '/images/autocare-racing-green-preview.png',
                   caption: 'AutoCare — aplicație pentru documente, întreținere și cheltuieli auto',
                 },
               },

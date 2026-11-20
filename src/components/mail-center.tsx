@@ -430,7 +430,7 @@ export default function MailCenter() {
           <button
             type="button"
             className="mail-send-action"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', minHeight: 60, padding: '16px 20px', border: '2px solid #304B40', borderRadius: 10, fontSize: 16, fontWeight: 800, backgroundColor: '#1E4538', color: '#ffffff', WebkitTextFillColor: '#ffffff', opacity: 1, cursor: busy || security || !recipients.length || !subject.trim() || !message.trim() ? 'not-allowed' : 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', minHeight: 60, padding: '16px 20px', border: '2px solid #1C8062', borderRadius: 10, fontSize: 16, fontWeight: 800, backgroundColor: '#0B1C16', color: '#ffffff', WebkitTextFillColor: '#ffffff', opacity: 1, cursor: busy || security || !recipients.length || !subject.trim() || !message.trim() ? 'not-allowed' : 'pointer' }}
             aria-disabled={busy || security || !recipients.length || !subject.trim() || !message.trim()}
             onClick={() => {
               if (busy || security || !recipients.length || !subject.trim() || !message.trim()) return;

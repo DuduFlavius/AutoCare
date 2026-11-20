@@ -345,6 +345,8 @@ Object.assign(dictionary, {
   "Cum funcționează": "How it works",
   "Funcționalități AutoCare": "AutoCare features",
   "De la primul drum până la următoarea revizie.": "From your first drive to your next service.",
+  "Organizează întreținerea, documentele și costurile mașinii. Vezi istoricul și următoarele termene dintr-un singur loc.": "Organize vehicle maintenance, documents and costs. View your history and upcoming deadlines in one place.",
+  "Garajul tău digital · AutoCare Premium": "Your digital garage · AutoCare Premium",
   "Organizează întreținerea, documentele și costurile mașinii. Înregistrează călătoriile prin SmartDrive GPS și vezi ce urmează, dintr-un singur loc.": "Organize vehicle maintenance, documents and costs. Record trips with SmartDrive GPS and see what’s next, all in one place.",
   "Garaj digital": "Digital garage",
   "Mentenanță automată": "Smart maintenance",

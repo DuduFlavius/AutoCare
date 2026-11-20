@@ -24,6 +24,7 @@ import './app-workspace.css';
 import './studio-workspace.css';
 import { DocumentVault } from './application/document-vault';
 import './application/mobile-reference.css';
+import './application/workspace-frame.css';
 import './application/maintenance-timeline.css';
 import { FinanceCenter } from './application/finance-center';
 import { TitaniumWave } from './titanium-wave';
@@ -921,7 +922,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
           </div>
         ) : (
           <>
-            {!['Feedback','Feedback utilizatori','Dashboard','Cont'].includes(tab) && <WorkspaceModuleHeader tab={tab} language={language}>
+            {!['Feedback','Feedback utilizatori','Dashboard','Cont','AutoCare AI'].includes(tab) && <WorkspaceModuleHeader tab={tab} language={language}>
               {['Cheltuieli'].includes(tab) ? (
                 <button
                   className="primary"
@@ -954,7 +955,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             {tab==='Feedback'&&<FeedbackWorkspace onExit={()=>navigate('Cont','push',null,true)} onSupport={()=>navigate('Centru de suport','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>}
             {tab==='Feedback utilizatori'&&(['admin','superadmin','founder'].includes(data.profile.role)?<FeedbackWorkspace admin onExit={()=>navigate('Cont','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>:<p role="alert">{language==='en'?'Administrator access required.':'Acces rezervat administratorilor.'}</p>)}
             <FeedbackInvitation enabled={tab==='Dashboard'&&!busy&&!modal&&!recordDirty&&!recordSaving} userId={data.profile.userId} preview={!!previewData} onOpen={()=>navigate('Feedback')}/>
-            {!['Dashboard','Garaj','Documente','Întreținere','Rapoarte','Calendar','RCA & Rovinietă','Cont','Centru de suport'].includes(tab)&&<WorkspaceContext tab={tab} language={language} navigate={navigate}/>}
+            {!['Dashboard','Garaj','Documente','Întreținere','Rapoarte','Calendar','RCA & Rovinietă','Cont','Centru de suport','AutoCare AI'].includes(tab)&&<WorkspaceContext tab={tab} language={language} navigate={navigate}/>}
             {drill && <div className="card between"><strong>{drill.label}</strong><button type="button" onClick={()=>setDrill(null)}>{language==='en'?'Show all':'Vezi toate'}</button></div>}
             {tab==='Întreținere'&&<RacingMaintenance data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} today={nowDate} onOpen={record=>setModal({kind:'service',record})} onCreate={()=>setModal({kind:'service'})}/>}
             {tab === 'Dashboard' && <ApplicationHome onDrill={(next,vehicleId,ids,label)=>{if(!navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}

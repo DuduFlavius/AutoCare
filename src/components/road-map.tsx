@@ -115,12 +115,12 @@ export default function RoadMapView({
             view.addSource('directions', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
             view.addLayer({
               id: 'directions-outline', type: 'line', source: 'directions',
-              paint: { 'line-color': '#101A16', 'line-width': 11 },
+              paint: { 'line-color': '#091611', 'line-width': 11 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addLayer({
               id: 'directions-line', type: 'line', source: 'directions',
-              paint: { 'line-color': '#71E5BB', 'line-width': 7 },
+              paint: { 'line-color': '#5AFFC4', 'line-width': 7 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addSource('trip', { type: 'geojson', data: routeGeometry(latest.current) });
@@ -128,14 +128,14 @@ export default function RoadMapView({
               id: 'trip-outline',
               type: 'line',
               source: 'trip',
-              paint: { 'line-color': '#101A16', 'line-width': 9 },
+              paint: { 'line-color': '#091611', 'line-width': 9 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addLayer({
               id: 'trip-line',
               type: 'line',
               source: 'trip',
-              paint: { 'line-color': history ? '#71E5BB' : '#71E5BB', 'line-width': 4 },
+              paint: { 'line-color': history ? '#5AFFC4' : '#5AFFC4', 'line-width': 4 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             const position = latestPosition.current;
@@ -147,7 +147,7 @@ export default function RoadMapView({
             // has a usable map. Apply the latest fix when loading completes.
             if (history && latest.current.length > 1) {
               const first = latest.current[0], last = latest.current.at(-1)!;
-              for (const [point, color] of [[first, '#34C997'], [last, '#71E5BB']] as const) {
+              for (const [point, color] of [[first, '#20E6A2'], [last, '#5AFFC4']] as const) {
                 new lib.Marker({ color, scale: 0.72 }).setLngLat([point.longitude, point.latitude]).addTo(view);
               }
               view.fitBounds(tripBounds(latest.current), { padding: 52, maxZoom: 16, duration: 0 });
@@ -256,7 +256,7 @@ export default function RoadMapView({
     const pins: Marker[] = [];
     void import('maplibre-gl').then(({ Marker }) => {
       if (disposed || map.current !== view) return;
-      const finish = new Marker({ color: '#71E5BB', scale: 0.9 }).setLngLat([destination.longitude, destination.latitude]).addTo(view);
+      const finish = new Marker({ color: '#5AFFC4', scale: 0.9 }).setLngLat([destination.longitude, destination.latitude]).addTo(view);
       finish.getElement().setAttribute('aria-label', english ? 'Destination' : 'Sosire');
       pins.push(finish);
       if (routeStart) {

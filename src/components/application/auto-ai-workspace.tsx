@@ -4,7 +4,7 @@ import {ActionMenu} from '../action-menu';
 import {PremiumDateInput} from '@/components/premium-date-input';
 
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, ArrowUpRight, FileScan, MapPin, Sparkles, Trash2, ShieldCheck, Copy, ChevronDown, MessageSquareText, Wrench, CalendarDays, BarChart3, CheckCheck, Square, RotateCcw, ThumbsUp, ThumbsDown, Paperclip, History, CarFront, X, ArrowUp } from 'lucide-react';
+import {  ArrowUpRight, FileScan, MapPin, Sparkles, Trash2, ShieldCheck, Copy, ChevronDown, MessageSquareText, Wrench, CalendarDays, BarChart3, CheckCheck, Square, RotateCcw, ThumbsUp, ThumbsDown, Paperclip, History, CarFront, X, ArrowUp } from 'lucide-react';
 import { conversationGroups, conversationKey, type AiTurn } from '@/lib/ai-conversations';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
@@ -49,7 +49,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, prici
       frame = 0;
       const viewport = window.visualViewport;
       const bottom = (viewport?.height ?? window.innerHeight) + (viewport?.offsetTop ?? 0);
-      const navigation = document.querySelector<HTMLElement>('.autocare-mobile-dock');
+      const navigation = document.querySelector<HTMLElement>('.rg-mobile-dock');
       const navRect = navigation?.getBoundingClientRect();
       const reserved = navRect && navRect.height && navRect.top < bottom && getComputedStyle(navigation!).position === 'fixed' ? bottom - navRect.top : 0;
       const height = Math.max(0, Math.floor(bottom - element.getBoundingClientRect().top - reserved - 12));
@@ -62,7 +62,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, prici
     const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
     const observer = new ResizeObserver(schedule);
     observer.observe(document.querySelector('.app-topbar') ?? element);
-    const dock = document.querySelector('.autocare-mobile-dock');
+    const dock = document.querySelector('.rg-mobile-dock');
     if (dock) observer.observe(dock);
     window.addEventListener('resize', schedule);
     window.visualViewport?.addEventListener('resize', schedule);
@@ -70,24 +70,24 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, prici
     return () => { observer.disconnect(); window.cancelAnimationFrame(frame); window.removeEventListener('resize', schedule); window.visualViewport?.removeEventListener('resize', schedule); window.visualViewport?.removeEventListener('scroll', schedule); };
   }, [hasChat]);
   return (
-    <div ref={page} className="ac-ai-page" data-chat={hasChat || undefined} data-workspace-ui>
+    <div ref={page} className="rg-ai-page" data-chat={hasChat || undefined} data-workspace-ui>
 
       <header className="ac-ai-hero"><TitaniumWave /><span className="ac-ai-icon"><Sparkles size={25} /></span><div><small>AUTOCARE PREMIUM</small><h2>AutoCare AI</h2><p>{en ? 'Your personal automotive AI. Ask anything, naturally.' : 'Discută natural despre orice problemă auto. AI-ul cunoaște și istoricul mașinii tale.'}</p></div></header>
       {!premium ? <section className="card ac-ai-membership-gate" aria-labelledby="ai-membership-title"><span className="ac-ai-icon"><Sparkles size={30}/></span><h2 id="ai-membership-title">{en?'AutoCare AI — Your intelligent car assistant':'AutoCare AI — Asistentul tău auto inteligent'}</h2><p>{en?'AutoCare AI is exclusively available to Premium members. Activate Premium to understand your vehicle information and receive helpful recommendations.':'AutoCare AI este o funcție exclusivă pentru membrii Premium. Activează Premium pentru a înțelege mai ușor informațiile despre mașina ta și pentru recomandări utile.'}</p><ul><li>{en?'Understand recorded vehicle costs':'Înțelege costurile înregistrate ale mașinii'}</li><li>{en?'Prepare maintenance using your saved history':'Pregătește întreținerea folosind istoricul salvat'}</li><li>{en?'Extract document details and confirm before saving':'Extrage date din documente și confirmă înainte de salvare'}</li></ul><div className="ac-ai-gate-actions"><a className="button primary" href="/cont?tab=Premium">{en?'Activate Premium':'Activează Premium'} <ArrowUpRight size={15}/></a><a className="button" href="/cont?tab=Dashboard">{en?'Back to Dashboard':'Înapoi la Dashboard'}</a></div>{pricing&&<p className="small">{new Intl.NumberFormat(en?'en-GB':'ro-RO',{style:'currency',currency:pricing.currency}).format(pricing.monthlyBani/100)} {en?'/ month':'/ lună'}</p>}<p className="small muted">{en?'Already had Premium? Reactivate it to continue. Expiry does not automatically delete your chat history.':'Ai avut Premium? Reactivează-l pentru a continua. Expirarea nu șterge automat istoricul conversațiilor.'}</p></section>
         : !vehicles.length ? <section className="card"><p>{en ? 'Add a vehicle first.' : 'Adaugă întâi un vehicul.'}</p><a className="button" href="/cont?tab=Garaj">{en ? 'My garage' : 'Garajul meu'}</a></section>
         : <>
-          <div className="ac-ai-vehicle-header">{onExit&&<div className="ac-ai-mobile-exit"><button type="button" onClick={onExit}><ArrowLeft size={19}/>{en?'Back':'Înapoi'}</button><span>AutoCare AI</span></div>}<label className="ac-ai-vehicle">{en ? 'Vehicle' : 'Vehicul'}
+          <div className="ac-ai-vehicle-header"><label className="ac-ai-vehicle">{en ? 'Vehicle' : 'Vehicul'}
             <FilterSelect aria-label={en?'Vehicle for AutoCare AI':'Mașina pentru AutoCare AI'} value={vehicleId} onChange={event => onVehicle(event.target.value)}>
               {vehicles.map(vehicle => <option value={vehicle.id} key={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}
             </FilterSelect>
           </label></div>
-          <AiConversation key={vehicleId} vehicleName={vehicles.find(vehicle => vehicle.id === vehicleId)?.brand + ' ' + vehicles.find(vehicle => vehicle.id === vehicleId)?.model} vehicleId={vehicleId} available={available} preview={preview} onSaved={onSaved} />
+          <AiConversation key={vehicleId} vehicleName={vehicles.find(vehicle => vehicle.id === vehicleId)?.brand + ' ' + vehicles.find(vehicle => vehicle.id === vehicleId)?.model} vehicleId={vehicleId} available={available} preview={preview} onSaved={onSaved} onExit={onExit} />
         </>}
     </div>
   );
 }
 
-function AiConversation({ vehicleId, vehicleName, available, preview, onSaved }: { vehicleId: string; vehicleName: string; available: boolean; preview: boolean; onSaved: () => Promise<void> }) {
+function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, onExit }: { vehicleId: string; vehicleName: string; available: boolean; preview: boolean; onSaved: () => Promise<void>; onExit?:()=>void }) {
   const language = useApplicationLanguage();
   const locale = useApplicationLocale();
   const en = language === 'en';
@@ -225,7 +225,7 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved }:
           <div className="ac-ai-header-actions">
             <button type="button" className="ac-ai-history-trigger" title={t('Istoric conversații', 'Conversation history')} aria-label={t('Istoric conversații', 'Conversation history')} aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)}><History size={19}/></button>
             <button className="ac-ai-new-chat" type="button" aria-label={t('Conversație nouă', 'New chat')} disabled={pending || loading} onClick={newConversation}><MessageSquareText size={17}/><span>{t('Chat nou', 'New chat')}</span></button>
-            <a className="ac-ai-close" href="/cont?tab=Dashboard" aria-label={t('Închide chatul', 'Close chat')}><X size={18}/></a>
+            {onExit?<button type="button" className="ac-ai-close" onClick={onExit} aria-label={t('Închide chatul','Close chat')}><X size={18}/></button>:<a className="ac-ai-close" href="/cont?tab=Dashboard" aria-label={t('Închide chatul','Close chat')}><X size={18}/></a>}
             <ActionMenu label={t('Opțiuni conversație', 'Conversation options')}>{''}
               <button type="button" onClick={event => { event.currentTarget.closest('details')?.removeAttribute('open'); setToolsOpen(open => !open); }}><FileScan size={17}/>{t('Documente și rapoarte', 'Documents and reports')}</button>
               <button type="button" disabled={pending || loading || !visibleTurns.length} onClick={event => { event.currentTarget.closest('details')?.removeAttribute('open'); removeConversation(); }}><Trash2 size={17}/>{t('Șterge conversația', 'Delete conversation')}</button>

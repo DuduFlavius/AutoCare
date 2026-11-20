@@ -2,8 +2,8 @@
 <resources>
  <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
  <item name="windowActionBar">false</item><item name="windowNoTitle">true</item>
- <item name="android:background">#0B1210</item><item name="android:windowLightStatusBar">false</item>
- <item name="android:statusBarColor">#0B1210</item><item name="android:navigationBarColor">#0B1210</item>
+ <item name="android:background">#050E0B</item><item name="android:windowLightStatusBar">false</item>
+ <item name="android:statusBarColor">#050E0B</item><item name="android:navigationBarColor">#050E0B</item>
  <item name="android:windowLightNavigationBar">false</item>
  </style>
 </resources>

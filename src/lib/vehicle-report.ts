@@ -2,15 +2,16 @@ import { financeGroup, isFinancialEntry } from './finance-overview';
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import assets from './report-assets.json';
+import {reportBrandLogo} from './report-brand';
 export type ReportVehicle={id:string;brand:string;model:string;plate:string;odometer:number};
 export type ReportRecord={id?:string;vehicleId:string;kind:string;title:string;category:string;date:string|null;expiresAt:string|null;nextKm:number|null;odometer:number|null;amountBani:number;amountKnown:boolean;provider:string|null;notes:string|null;parts:string|null;cancelled?:boolean};
 export async function vehicleReport({vehicles,records,generatedAt,language='ro',title,period,asOf=new Date().toISOString().slice(0,10)}:{vehicles:ReportVehicle[];records:ReportRecord[];generatedAt:string;language?:'ro'|'en';title?:string;period?:string;asOf?:string}){
  const en=language==='en',t=(ro:string,english:string)=>en?english:ro,locale=en?'en-GB':'ro-RO';
  const doc=await PDFDocument.create();doc.registerFontkit(fontkit);
  const regular=await doc.embedFont(Buffer.from(assets.regular,'base64'),{subset:true}),bold=await doc.embedFont(Buffer.from(assets.bold,'base64'),{subset:true});
- const logo=await doc.embedPng(Buffer.from(assets.logo,'base64'));
+ const logo=await doc.embedPng(Buffer.from(reportBrandLogo,'base64'));
  const heading=title||t('Raport auto','Vehicle report');doc.setTitle('AutoCare Premium - '+heading);doc.setAuthor('AutoCare Premium');doc.setSubject(t('Datele înregistrate în cont','Recorded account data'));
- const navy=rgb(.07,.11,.20),blue=rgb(.23,.43,.8),muted=rgb(.39,.44,.53),line=rgb(.87,.89,.93),white=rgb(1,1,1);
+ const navy=rgb(5/255,14/255,11/255),blue=rgb(28/255,128/255,98/255),muted=rgb(.26,.36,.31),line=rgb(.80,.88,.84),white=rgb(1,1,1);
  const W=595.28,H=841.89,L=40,R=555.28;let page!:PDFPage,y=0;
  // Strip unsafe control bytes from user-entered report copy.
  // eslint-disable-next-line no-control-regex
@@ -28,7 +29,7 @@ export async function vehicleReport({vehicles,records,generatedAt,language='ro',
  paragraph(period||t('Perioadă: toate înregistrările selectate','Period: all selected records'));
  section(t('01  Sinteză','01  Summary'));
  const metrics=[[t('Vehicule','Vehicles'),String(vehicles.length)],[t('Înregistrări','Records'),String(unique.length)],[t('Cheltuieli cunoscute','Known expenses'),known.length?money(total):t('Necompletat','Not recorded')],[t('Kilometraj confirmat cumulat','Combined confirmed odometers'),vehicles.reduce((sum,row)=>sum+row.odometer,0).toLocaleString(locale)+' km']];
- for(let i=0;i<metrics.length;i+=2){need(62);for(let j=0;j<2;j++){const metric=metrics[i+j];if(!metric)continue;const x=L+j*264;page.drawRectangle({x,y:y-42,width:249,height:58,color:rgb(.96,.97,.99),borderColor:line,borderWidth:.5});page.drawText(metric[0],{x:x+12,y:y-1,size:8,font:regular,color:muted});let size=15;while(bold.widthOfTextAtSize(metric[1],size)>222&&size>10)size--;page.drawText(metric[1],{x:x+12,y:y-24,size,font:bold,color:navy});}y-=72;}
+ for(let i=0;i<metrics.length;i+=2){need(62);for(let j=0;j<2;j++){const metric=metrics[i+j];if(!metric)continue;const x=L+j*264;page.drawRectangle({x,y:y-42,width:249,height:58,color:rgb(.95,.98,.96),borderColor:line,borderWidth:.5});page.drawText(metric[0],{x:x+12,y:y-1,size:8,font:regular,color:muted});let size=15;while(bold.widthOfTextAtSize(metric[1],size)>222&&size>10)size--;page.drawText(metric[1],{x:x+12,y:y-24,size,font:bold,color:navy});}y-=72;}
  paragraph(t('Kilometrajul cumulat este suma valorilor de pe bord, nu distanța parcursă în perioada raportului. Costurile planificate și cele necunoscute nu sunt inventate.','Combined odometers are not the distance driven in the selected period. Planned and unknown costs are not fabricated.'),false,9);
  if(total>0){section(t('02  Distribuția costurilor','02  Cost distribution'));const groups=new Map<string,number>();for(const row of known){const group=financeGroup(row);groups.set(group,(groups.get(group)||0)+row.amountBani);}for(const [group,amount]of [...groups].sort((a,b)=>b[1]-a[1])){need(39);page.drawText(group,{x:L,y,size:10,font:bold,color:navy});const value=money(amount);page.drawText(value,{x:R-bold.widthOfTextAtSize(value,10),y,size:10,font:bold,color:navy});y-=14;page.drawRectangle({x:L,y,width:R-L,height:5,color:line});page.drawRectangle({x:L,y,width:(R-L)*amount/total,height:5,color:blue});y-=22;}}
  const widths=[64,78,205,70,98.28],labels=[t('Data','Date'),t('Categorie','Category'),t('Descriere','Description'),t('Kilometraj','Odometer'),t('Cost','Cost')];
