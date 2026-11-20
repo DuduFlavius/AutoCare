@@ -7,7 +7,6 @@ import {isPlannedService,calendarRecordDate} from '@/lib/planned-service';
 import {useApplicationLanguage,useApplicationLocale} from '../application-locale';
 import {FilterSelect} from '../filter-select';
 import {PremiumDateInput} from '../premium-date-input';
-import './maintenance-timeline.css';
 type Data=Awaited<ReturnType<typeof dashboard>>;type Row=Data['records'][number];
 export function RacingMenu({name,premium,navigate,onSignOut,preview,active,onClose}:{name:string;premium:boolean;active:string;onClose:()=>void;navigate:(tab:string)=>void;onSignOut:()=>void;preview:boolean}){
  const en=useApplicationLanguage()==='en',touch=useRef<{x:number;y:number}|null>(null);

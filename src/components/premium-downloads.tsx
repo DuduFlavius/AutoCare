@@ -23,9 +23,7 @@ export default function PremiumDownloads({
     [reportView,setReportView]=useState('general'),
     [kind, setKind] = useState(''),
     [from, setFrom] = useState(''),
-    [to, setTo] = useState(''),
-    [busy, setBusy] = useState(''),
-    [error, setError] = useState('');
+    [to, setTo] = useState('');
   if (!data.premium) return null;
   const invalidRange = !!from && !!to && from > to;
   const includedCars=data.vehicles.filter(car=>!car.archived&&(!vehicle||car.id===vehicle));
@@ -100,11 +98,6 @@ export default function PremiumDownloads({
         {!preview&&!invalidRange&&<a className="button" href={'/api/v1/export?'+previewQuery} target="_blank" rel="noopener noreferrer">{en?'Preview / Print PDF':'Previzualizează / Imprimă PDF'}</a>}
         {!preview&&!invalidRange?<><a className="button" href={exportLink('pdf')} download="autocare-raport.pdf"><FileText size={18}/>{en?'Download vehicle PDF':'Descarcă raport auto PDF'}</a><a className="button" href={exportLink('csv')} download="autocare-istoric.csv"><Table2 size={18}/>{en?'Export CSV data':'Exportă datele CSV'}</a></>:<><button type="button" disabled>{en?'Download PDF':'Descarcă PDF'}</button><button type="button" disabled>{en?'Export CSV':'Exportă CSV'}</button></>}
       </div>
-      {error && (
-        <p className="error" role="alert">
-          {error}
-        </p>
-      )}
       <p className="micro">
         {en
           ? 'Account data is synchronized on the server. This export contains records, not a full attachment backup.'

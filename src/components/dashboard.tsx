@@ -24,6 +24,7 @@ import './app-workspace.css';
 import './studio-workspace.css';
 import { DocumentVault } from './application/document-vault';
 import './application/mobile-reference.css';
+import './application/maintenance-timeline.css';
 import { FinanceCenter } from './application/finance-center';
 import { TitaniumWave } from './titanium-wave';
 import { calendarRecordDate, isPlannedService } from '@/lib/planned-service';
@@ -332,11 +333,10 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   );
 }
 
-export default function Dashboard({ name: initialName, previewData, initialTab='Dashboard', initialDrive, initialVehicle }: { name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
+export default function Dashboard({ name: initialName, previewData, initialTab='Dashboard', initialVehicle }: { name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
   const [name,setName]=useState(initialName);
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
-    [openedSmartDrive, setOpenedSmartDrive] = useState(normalizeWorkspaceTab(initialTab) === 'Plan întreținere'),
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [supportUnread, setSupportUnread] = useState(0),
@@ -576,7 +576,6 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     setDrill(null);
     setTab(t);
     setVehicleDetail(t === 'Garaj' || t === 'AutoCare AI' ? vehicle : null);
-    if (t === 'Plan întreținere') setOpenedSmartDrive(true);
     setFilter(view?.filter||'');
     setQuery(view?.query||'');
     setRecordState(view?.recordState||'');
