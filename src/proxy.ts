@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { canonicalDocumentURL } from '@/lib/canonical';
 import { origin } from '@/lib/config';
+import {isMaintenancePublicAsset} from '@/lib/maintenance-public-assets';
 
 const open = ['/api/auth/', '/api/maintenance-access', '/autentificare', '/inregistrare', '/recuperare-parola', '/en/sign-in', '/en/sign-up', '/en/forgot-password', '/mentenanta', '/favicon.ico', '/robots.txt', '/sitemap.xml'];
 function exempt(path: string) {
-  return open.some(p => path === p || (p.endsWith('/') && path.startsWith(p))) ||
+  return isMaintenancePublicAsset(path) || open.some(p => path === p || (p.endsWith('/') && path.startsWith(p))) ||
     path.startsWith('/api/webhooks/') || path.startsWith('/api/webhook/') ||
     path.startsWith('/api/cron/') || path.startsWith('/api/stripe/webhook');
 }

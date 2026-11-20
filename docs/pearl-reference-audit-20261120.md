@@ -99,3 +99,7 @@ CSS parse check: 53 stylesheets parsed successfully. Computed palette contrast: 
 - Updated PWA manifest/theme, versioned icon and Apple launch URLs, offline cache/theme, favicon and native launcher/splash resources for Android/iOS.
 - Android 1.7.1 (22) source includes explicit light WebView and window backgrounds to remove the old startup flash. A production-compatible installed-app update still requires the existing signing key. The earlier CI release failed explicitly because AUTOCARE_UPLOAD_KEYSTORE_BASE64 was missing in the android-release environment. No replacement certificate was generated.
 - New branch enables existing isolated Android QA workflow only; the protected production-signing job remains restricted to its original release branch.
+
+## Production verification fix
+
+The first consolidated release reached READY, but anonymous HTTP checks showed that maintenance also blocked public email images and PWA metadata with 503. Added an exact public-asset allowlist shared with the email asset manifest. Account pages, file APIs and arbitrary image/PDF paths remain gated. Two regression tests check both valid public resources and rejection of private/arbitrary paths.
