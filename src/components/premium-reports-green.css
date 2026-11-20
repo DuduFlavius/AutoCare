@@ -1,20 +1,20 @@
 /* Scoped Racing Green report styling; no dashboard or subscription theme changes. */
-.rg-premium-downloads .ac-garage-report-library{padding:clamp(18px,3vw,30px);margin-bottom:22px;border:1px solid var(--color-border);border-radius:22px;background:linear-gradient(145deg,#10251E,#050E0B 72%);color:#FFFFFF;box-shadow:0 16px 38px #0003}
-.rg-premium-downloads .ac-garage-report-library h3{font-size:clamp(22px,2.5vw,30px);color:#FFFFFF;margin:8px 0}
-.rg-premium-downloads .ac-garage-report-library p{color:#A8BFB5;line-height:1.6;margin:0 0 22px}
-.rg-premium-downloads .ac-garage-report-kicker{font-size:11px;letter-spacing:.16em;color:#5affc4;font-weight:800}
+.rg-premium-downloads .ac-garage-report-library{padding:clamp(18px,3vw,30px);margin-bottom:22px;border:1px solid var(--color-border);border-radius:22px;background:linear-gradient(145deg,var(--color-surface),var(--color-bg) 72%);color:var(--color-text);box-shadow:0 16px 38px #0003}
+.rg-premium-downloads .ac-garage-report-library h3{font-size:clamp(22px,2.5vw,30px);color:var(--color-text);margin:8px 0}
+.rg-premium-downloads .ac-garage-report-library p{color:var(--color-muted);line-height:1.6;margin:0 0 22px}
+.rg-premium-downloads .ac-garage-report-kicker{font-size:11px;letter-spacing:.16em;color:var(--color-primary);font-weight:800}
 .rg-premium-downloads .ac-garage-report-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.rg-premium-downloads .ac-garage-report-links>a{display:flex;flex-direction:column;gap:10px;min-width:0;padding:19px;border:1px solid var(--color-border);border-radius:15px;background:#10251E;text-decoration:none;color:#fff;transition:border-color .18s,transform .18s,background .18s}
-.rg-premium-downloads .ac-garage-report-links>a:is(:hover,:focus-visible){border-color:#5affc4;background:#0B1C16;transform:translateY(-2px);outline-offset:3px}
+.rg-premium-downloads .ac-garage-report-links>a{display:flex;flex-direction:column;gap:10px;min-width:0;padding:19px;border:1px solid var(--color-border);border-radius:15px;background:var(--color-surface);text-decoration:none;color:var(--color-text);transition:border-color .18s,transform .18s,background .18s}
+.rg-premium-downloads .ac-garage-report-links>a:is(:hover,:focus-visible){border-color:var(--color-primary);background:var(--color-surface-muted);transform:translateY(-2px);outline-offset:3px}
 .rg-premium-downloads .ac-garage-report-links>a span{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--color-primary)}
-.rg-premium-downloads .ac-garage-report-links>a strong{font-size:16px;line-height:1.4;color:#fff}
-.rg-premium-downloads .ac-garage-report-links>a small{color:#5affc4;font-weight:700}
-.rg-premium-downloads .rg-report-tabs button[aria-pressed=true]{background:#0B1C16!important;color:#f8fff9!important;border-color:var(--color-primary)!important}
-.rg-premium-downloads .rg-report-details,.rg-premium-downloads .ac-report-filters{color:#FFFFFF}
+.rg-premium-downloads .ac-garage-report-links>a strong{font-size:16px;line-height:1.4;color:var(--color-text)}
+.rg-premium-downloads .ac-garage-report-links>a small{color:var(--color-primary);font-weight:700}
+.rg-premium-downloads .rg-report-tabs button[aria-pressed=true]{background:var(--color-surface-muted)!important;color:#f8fff9!important;border-color:var(--color-primary)!important}
+.rg-premium-downloads .rg-report-details,.rg-premium-downloads .ac-report-filters{color:var(--color-text)}
 .rg-premium-downloads .ac-report-filters label{color:#d4e9dd!important;min-width:0}
 .rg-premium-downloads .ac-report-filters .ac-filter-select{display:block;min-width:0;width:100%}
-.rg-premium-downloads .ac-report-filters .ac-filter-select-trigger{width:100%!important;min-height:46px!important;background:#0B1C16!important;color:#fff!important;border:1px solid var(--color-border)!important;border-radius:12px!important;padding:11px 14px!important}
-.rg-premium-downloads .ac-report-filters .ac-filter-select-trigger:focus-visible{outline:2px solid #5affc4!important}
+.rg-premium-downloads .ac-report-filters .ac-filter-select-trigger{width:100%!important;min-height:46px!important;background:var(--color-surface-muted)!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;border-radius:12px!important;padding:11px 14px!important}
+.rg-premium-downloads .ac-report-filters .ac-filter-select-trigger:focus-visible{outline:2px solid var(--color-primary)!important}
 .rg-premium-downloads .ac-premium-download-actions :is(a,button){border-radius:12px}
 @media(max-width:720px){.rg-premium-downloads .ac-garage-report-links{grid-template-columns:1fr}.rg-premium-downloads .ac-garage-report-links>a{padding:16px}}
 
@@ -22,4 +22,4 @@
 .rg-premium-downloads .ac-garage-report-links>a:disabled{opacity:.6;cursor:wait;transform:none}
 
 
-.rg-premium-downloads .ac-premium-download-actions>a.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:#20D99A;color:#050E0B;border:1px solid #20E6A2;border-radius:12px;text-decoration:none;min-height:44px;padding:10px 16px}
+.rg-premium-downloads .ac-premium-download-actions>a.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:#20D99A;color:var(--color-bg);border:1px solid #20E6A2;border-radius:12px;text-decoration:none;min-height:44px;padding:10px 16px}

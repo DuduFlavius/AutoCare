@@ -3119,7 +3119,7 @@ a:hover:not(:where([class^="rg-"],[class^="rg-"] *)){
 }
 .sidebar .membership-promo:not(:where([class^="rg-"],[class^="rg-"] *)){
   background:
-    linear-gradient(180deg, #10251Ecc, #10251Ef5);
+    linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 80.0%, transparent), color-mix(in srgb, var(--color-surface) 96.08%, transparent));
   border-color: color-mix(in srgb, var(--color-warning) 30%, transparent);
 }
 .sidebar-bottom p:not(:where([class^="rg-"],[class^="rg-"] *)){

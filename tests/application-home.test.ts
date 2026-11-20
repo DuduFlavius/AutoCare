@@ -80,3 +80,13 @@ test('home never presents a complete health percentage when core evidence is mis
  assert.equal(homeCareAssessment(documents,[{...oil[0],status:{state:'overdue'}}],84000).percent,67);
  assert.equal(homeCareAssessment([{category:'ITP',status:{days:null}},documents[0]],oil,84000).percent,null);
 });
+
+test('Home document summary stays vehicle-scoped and keeps current cover ahead of future renewals',async()=>{
+ const {homeDocument}=await import('../src/lib/application-home');
+ const doc={id:'current',vehicleId:'my-car',kind:'document',category:'RCA',cancelled:false,date:'2030-01-01',expiresAt:'2030-12-31'};
+ const rows=[doc,{...doc,id:'future',date:'2031-01-01',expiresAt:'2031-12-31'},{...doc,id:'cancelled',cancelled:true,expiresAt:'2035-12-31'},{...doc,id:'other',vehicleId:'another-car',expiresAt:'2035-12-31'}];
+ assert.equal(homeDocument(rows,'my-car','RCA','2030-06-01')?.id,'current');
+ assert.equal(homeDocument(rows,'unknown','RCA','2030-06-01'),null);
+ assert.equal(homeDocument(rows,'my-car','ITP','2030-06-01'),null);
+ assert.equal(homeDocument(rows.filter(r=>r.id==='future'),'my-car','RCA','2030-06-01')?.id,'future');
+});

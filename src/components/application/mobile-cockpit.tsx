@@ -1,12 +1,15 @@
 'use client';
+import {useState} from 'react';
+import {MobileFinanceOverview} from './mobile-finance-overview';
+import {homeDocument} from '@/lib/application-home';
 import {FilterSelect} from '../filter-select';
-import { CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Coins, ChartNoAxesCombined, Wrench, ShieldCheck } from 'lucide-react';
+import { CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Coins, ChartNoAxesCombined, Wrench, ShieldCheck, Check, Clock3, Route } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { selectActiveVehicle, upcomingMaintenance } from '@/lib/application-home';
 import { financeOverview } from '@/lib/finance-overview';
 import {isPlannedService} from '@/lib/planned-service';
-import { localDate } from '@/lib/config';
+import { documentStatus, localDate } from '@/lib/config';
 
 type Data=Awaited<ReturnType<typeof dashboard>>;
 type RecordRow=Data['records'][number];
@@ -14,6 +17,7 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
  data:Data;selectedVehicle:string;onSelectVehicle:(id:string)=>void;onDrill?:(tab:string,vehicleId:string,ids:string[],label:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;
  onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:RecordRow)=>void;onNextService:()=>void;currency:'RON'|'EUR';
 }){
+ const [chartPeriod,setChartPeriod]=useState('6');
  const en=useApplicationLanguage()==='en',locale=useApplicationLocale();
  const t=(ro:string,enText:string)=>en?enText:ro;
  const car=selectActiveVehicle(data.vehicles,selectedVehicle);
@@ -24,7 +28,7 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
  const recent=finance.entries.filter(row=>!row.cancelled&&row.date&&row.date<=today).sort((a,b)=>(b.date??'').localeCompare(a.date??'')).slice(0,3);
  const source=next?rows.find(r=>r.id===next.service.id||next.service.id.startsWith(r.id+':')):null;
  const progress=source?.odometer!=null&&source.nextKm!=null&&source.nextKm>source.odometer&&car&&car.odometer>=source.odometer?Math.min(100,Math.max(0,(car.odometer-source.odometer)/(source.nextKm-source.odometer)*100)):null;
- const itp=rows.filter(row=>row.kind==='document'&&row.category==='ITP'&&row.expiresAt).sort((a,b)=>(b.expiresAt??'').localeCompare(a.expiresAt??''))[0];
+ const itp=car?homeDocument(rows,car.id,'ITP',today):null;
  const money=(bani:number)=>new Intl.NumberFormat(locale,{style:'currency',currency,maximumFractionDigits:0}).format(bani/(currency==='EUR'?500:100));
  const date=(value:string)=>new Date(value+'T12:00:00Z').toLocaleDateString(locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
  const active=data.vehicles.filter(row=>!row.archived);
@@ -35,7 +39,17 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
     <div className="rg-m-vehicle-bottom"><span><Gauge size={19}/><span>{car.odometer.toLocaleString(locale)} km<small>{t('Kilometraj actual','Current mileage')}</small></span></span><button onClick={()=>onDrill('Documente',car.id,itp?[itp.id]:[],t('Inspecție tehnică','Vehicle inspection'))}><CalendarDays size={18}/><span>{itp?.expiresAt?date(itp.expiresAt):t('Necompletat','Not recorded')}<small>ITP</small></span></button></div>
     {active.length>1&&<label className="rg-m-car-switch"><span>{t('Mașina selectată','Selected vehicle')}</span><FilterSelect value={car.id} onChange={e=>onSelectVehicle(e.target.value)}>{active.map(vehicle=><option key={vehicle.id} value={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}</FilterSelect></label>}
    </section>
+   <section className="ac-home-documents" aria-labelledby="home-documents-title">
+    <header><h2 id="home-documents-title"><Files size={22}/>{t('Documente auto','Vehicle documents')}</h2><button onClick={()=>onDrill('Documente',car.id,rows.filter(r=>r.kind==='document').map(r=>r.id),t('Documentele mașinii','Vehicle documents'))}>{t('Vezi toate','View all')}<ChevronRight size={15}/></button></header>
+    <div>{[{category:'ITP',Icon:ShieldCheck},{category:'RCA',Icon:ShieldCheck},{category:'Rovinietă',Icon:Route},{category:'CASCO',Icon:ShieldCheck}].map(({category,Icon})=>{
+     const record=homeDocument(rows,car.id,category,today),status=documentStatus(record?.expiresAt??null,new Date(),data.profile.timezone);
+     const label=!record?t('Lipsește','Missing'):record.date&&record.date>today?t('Începe în viitor','Starts later'):status.days==null?t('Fără termen','No expiry'):status.days<0?t('Expirat','Expired'):status.days<=30?t('Expiră curând','Expires soon'):t('Valabil','Valid');
+     const state=!record||record.date&&record.date>today?'incomplete':status.state;
+     return <button key={category} data-state={state} onClick={()=>onDrill('Documente',car.id,record?[record.id]:[],category)} aria-label={category+' · '+label}><Icon size={28}/><strong>{category==='Rovinietă'?t('Rovinietă','Vignette'):category}</strong><small>{record?.expiresAt?date(record.expiresAt):'—'}</small><span className="ac-home-document-state">{state==='valid'?<Check size={13}/>:<Clock3 size={13}/>}<span>{label}</span></span></button>;
+    })}</div>
+   </section>
    <button className="rg-m-next-service" onClick={onNextService}><span className="rg-m-icon"><Wrench size={27}/></span><span><small>{t('Următoarea intervenție','Next maintenance')}</small><strong>{next?.service.title??t('Adaugă un termen','Add a service deadline')}</strong><small>{next?.status.remainingKm!=null?(next.status.remainingKm<=0?t('Prag atins','Threshold reached'):t('în ','in ')+next.status.remainingKm.toLocaleString(locale)+' km'):next?.raw?date(next.raw):t('Planifică întreținerea mașinii','Plan your vehicle maintenance')}</small></span>{progress!=null?<span className="rg-service-progress" aria-label={t("Progres interval kilometraj","Mileage interval progress")+" "+Math.round(progress)+"%"}><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18"/><circle cx="22" cy="22" r="18" strokeDasharray="113.1" strokeDashoffset={113.1*(1-progress/100)}/></svg><b>{Math.round(progress)}%</b></span>:<ChevronRight size={20}/>}</button>
+   <section className="ac-home-finance" aria-labelledby="home-finance-title"><header><h2 id="home-finance-title"><Coins size={22}/>{t('Cheltuieli','Expenses')}</h2><button aria-label={t('Deschide cheltuielile','Open expenses')} onClick={()=>onDrill('Cheltuieli',car.id,finance.entries.map(r=>r.id),t('Cheltuielile mașinii','Vehicle expenses'))}><ChevronRight size={17}/></button></header><MobileFinanceOverview rows={rows} today={today} money={money} period={chartPeriod} onPeriod={setChartPeriod} onFilters={()=>navigate('Cheltuieli')} filtersOpen={false}/></section>
    <div className="rg-m-shortcuts">{[
     {Icon:Wrench,title:t('Întreținere','Maintenance'),note:t('Plan și istoric','Plan & history'),tab:'Întreținere'},
     {Icon:Files,title:t('Documente','Documents'),note:'ITP, RCA, CASCO',tab:'Documente'},

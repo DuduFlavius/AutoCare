@@ -3,24 +3,24 @@ html body .app-shell.ac-workspace .record-form-footer button:not(.primary),
 html body .app-shell.ac-workspace .record-editor-shell button:not(.primary):is(:hover,:focus-visible),
 html body .ac-document-overlay .ac-upload-existing button:not(.primary),
 html body .ac-document-overlay .ac-attachment-dialog-actions button:not(.primary){
- background:#172b22!important;color:#f2fff8!important;-webkit-text-fill-color:#f2fff8!important;
- border:1px solid #397e5b!important;border-radius:12px!important;box-shadow:none!important;
+ background:var(--color-surface-muted)!important;color:var(--color-text)!important;-webkit-text-fill-color:currentColor!important;
+ border:1px solid var(--color-border)!important;border-radius:12px!important;box-shadow:none!important;
 }
 html body .app-shell.ac-workspace .record-form-footer button:not(.primary):is(:hover,:focus-visible),
 html body .ac-document-overlay .ac-upload-existing button:not(.primary):is(:hover,:focus-visible){
- background:#24513a!important;border-color:#66e9ae!important;outline-color:#66e9ae!important;
+ background:var(--color-primary-soft)!important;border-color:var(--color-primary)!important;outline-color:var(--color-primary)!important;
 }
-html body .ac-document-overlay .ac-upload-existing{background:#101e17!important;color:#f2fff8!important;border:1px solid #367957!important;border-radius:20px!important;box-shadow:0 22px 80px #0009!important}
-html body .ac-document-overlay .ac-upload-existing :is(h2,p,label){color:#f2fff8!important}
-html body .ac-document-overlay .ac-upload-existing button.primary{background:#217e53!important;color:#fff!important;border:1px solid #55c88e!important}
+html body .ac-document-overlay .ac-upload-existing{background:var(--color-surface)!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;border-radius:20px!important;box-shadow:0 22px 80px #0009!important}
+html body .ac-document-overlay .ac-upload-existing :is(h2,p,label){color:var(--color-text)!important}
+html body .ac-document-overlay .ac-upload-existing button.primary{background:var(--color-primary)!important;color:var(--color-on-primary)!important;border:1px solid var(--color-primary)!important}
 @media(max-width:760px){
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-ai-page[data-chat]){padding-left:0!important;padding-right:0!important;padding-bottom:0!important;overflow:hidden!important}
- html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat]{width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0 4px env(safe-area-inset-bottom,0px)!important;overflow:hidden!important;border-radius:0!important;background:#0d1b14!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page[data-chat]{width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0 4px env(safe-area-inset-bottom,0px)!important;overflow:hidden!important;border-radius:0!important;background:var(--color-bg)!important}
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-layout{min-height:0!important;flex:1 1 0!important;overflow:hidden!important}
- html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-chat{min-height:0!important;width:100%!important;border:1px solid #2c6548!important;background:#10241a!important;border-radius:16px!important;box-shadow:none!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-chat{min-height:0!important;width:100%!important;border:1px solid var(--color-border)!important;background:var(--color-surface)!important;border-radius:16px!important;box-shadow:none!important}
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-message-scroll{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important}
- html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-composer{flex-shrink:0!important;margin:4px 7px!important;border:1px solid #3b805b!important;background:#142c20!important;border-radius:16px!important}
- html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-composer textarea{color:#f6fff9!important;background:transparent!important;font-size:16px!important}
- html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-heading{background:#12291e!important;border-bottom:1px solid #2e6249!important}
- html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page :is(.ac-ai-quick-prompts button,.ac-ai-suggestions button){background:#1b3b2a!important;border-color:#387a55!important;color:#f1fff7!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-composer{flex-shrink:0!important;margin:4px 7px!important;border:1px solid var(--color-border)!important;background:var(--color-surface-muted)!important;border-radius:16px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-composer textarea{color:var(--color-text)!important;background:transparent!important;font-size:16px!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page .ac-ai-heading{background:var(--color-surface-muted)!important;border-bottom:1px solid var(--color-border)!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-page :is(.ac-ai-quick-prompts button,.ac-ai-suggestions button){background:var(--color-surface-muted)!important;border-color:var(--color-border)!important;color:var(--color-text)!important}
 }

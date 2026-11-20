@@ -204,7 +204,7 @@ html body .app-shell.ac-workspace .ac-premium-faq summary{font-weight:600!import
 }
 /* Graphite account theme: restrained technical surfaces, no car photographs. */
 @layer autocare-workspace {
-html body .app-shell.ac-workspace{--app-bg:var(--color-bg);--app-surface:var(--color-surface);--app-ink:var(--color-text);--app-muted:var(--color-muted);--app-line:var(--color-border);--app-blue:var(--color-primary);--app-blue-soft:var(--color-primary-soft);color-scheme:dark!important}
+html body .app-shell.ac-workspace{--app-bg:var(--color-bg);--app-surface:var(--color-surface);--app-ink:var(--color-text);--app-muted:var(--color-muted);--app-line:var(--color-border);--app-blue:var(--color-primary);--app-blue-soft:var(--color-primary-soft);color-scheme:light!important}
 html body .app-shell.ac-workspace > .app-header.app-topbar{background:color-mix(in srgb, var(--color-nav) 93%, transparent)!important;border-color:#ffffff0d!important;color:var(--color-text)!important}
 html body .app-shell.ac-workspace .app-topbar-title{color:var(--color-muted)!important}
 html body .app-shell.ac-workspace .app-topbar-title strong{color:var(--color-text)!important}
@@ -218,7 +218,7 @@ html body .app-shell.ac-workspace .main :is(button,.button){background:var(--col
 html body .app-shell.ac-workspace .main :is(button.primary,.button.primary){background:var(--color-primary)!important;color:var(--color-on-primary)!important;border-color:var(--color-border-strong)!important}
 html body .app-shell.ac-workspace .main button.danger{background:var(--color-danger-soft)!important;color:var(--color-danger-ink)!important;border-color:var(--color-danger)!important}
 html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,select,textarea){background:var(--color-nav)!important;border-color:var(--color-border)!important;color:var(--color-text)!important;caret-color:var(--color-primary-ink)!important}
-html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,textarea)::placeholder{color:var(--color-muted)!important;-webkit-text-fill-color:#A8BFB5!important}
+html body .app-shell.ac-workspace :is(.main,.dialog) :is(input,textarea)::placeholder{color:var(--color-muted)!important;-webkit-text-fill-color:var(--color-muted)!important}
 html body .app-shell.ac-workspace :is(.main,.dialog) label{color:var(--color-text)!important}
 html body .app-shell.ac-workspace .preview-note{background:var(--color-surface)!important;border-color:var(--color-border)!important;color:var(--color-muted)!important}
 html body .app-shell.ac-workspace .page-head{border-color:#ffffff12!important}

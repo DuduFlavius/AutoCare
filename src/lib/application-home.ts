@@ -44,3 +44,10 @@ export function homeCareAssessment(
  const complete=Number.isFinite(currentKm)&&currentKm>0&&['RCA','ITP'].every(kind=>documents.some(doc=>doc.category===kind&&doc.status.days!=null))&&maintenance.some(item=>isOilMaintenance({category:item.service.category??'',title:item.service.title})&&item.status.state!=='unscheduled');
  return {...score,complete,percent:complete?score.percent:null};
 }
+
+/** The Home summary is scoped to one vehicle and does not replace an active document with a future renewal. */
+export function homeDocument<T extends {id:string;vehicleId:string;kind:string;category:string;cancelled:boolean;date:string|null;expiresAt:string|null}>(records:ReadonlyArray<T>,vehicleId:string,category:string,today:string):T|null {
+ const matching=records.filter(row=>row.vehicleId===vehicleId&&row.kind==='document'&&row.category===category&&!row.cancelled);
+ const current=matching.filter(row=>!row.date||row.date<=today);
+ return [...(current.length?current:matching)].sort((a,b)=>(b.expiresAt??'').localeCompare(a.expiresAt??'')||(b.date??'').localeCompare(a.date??''))[0]??null;
+}

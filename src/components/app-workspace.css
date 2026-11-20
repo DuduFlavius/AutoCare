@@ -21,7 +21,7 @@
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 14px !important;
     line-height: 1.55 !important;
-    color-scheme: dark !important;
+    color-scheme:light !important;
   }
   .ac-workspace *:not(:where([class^="rg-"],[class^="rg-"] *)), .ac-workspace *:not(:where([class^="rg-"],[class^="rg-"] *))::before, .ac-workspace *:not(:where([class^="rg-"],[class^="rg-"] *))::after { box-sizing: border-box !important; }
   .ac-workspace :is(button,a,input,select,textarea,summary):focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)){ outline: 3px solid var(--color-primary) !important; outline-offset: 3px !important; }
@@ -60,7 +60,7 @@
   .ac-workspace :is(.main,.dialog) button.primary :is(span,svg,strong):not(:where([class^="rg-"],[class^="rg-"] *)){ color: inherit !important; }
   .ac-workspace .main button.danger:not(:where([class^="rg-"],[class^="rg-"] *)){ background: var(--color-surface-muted) !important; color: var(--color-danger-ink) !important; border-color: var(--color-danger) !important; }
   .ac-workspace :is(.main,.dialog) :is(input,select,textarea):not(:where([class^="rg-"],[class^="rg-"] *)){ min-height: 44px !important; background: var(--surface-card) !important; background-image: none !important; color: var(--app-ink) !important; -webkit-text-fill-color: currentColor !important; border: 1px solid var(--color-border) !important; border-radius: 10px !important; padding: 10px 12px !important; font-size: 15px !important; line-height: 1.5 !important; min-width: 0 !important; max-width: 100% !important; box-shadow: none !important; }
-  .ac-workspace :is(.main,.dialog) :is(input,textarea):not(:where([class^="rg-"],[class^="rg-"] *))::placeholder { color: var(--color-muted) !important; -webkit-text-fill-color: #A8BFB5 !important; }
+  .ac-workspace :is(.main,.dialog) :is(input,textarea):not(:where([class^="rg-"],[class^="rg-"] *))::placeholder { color: var(--color-muted) !important; -webkit-text-fill-color: var(--color-muted) !important; }
   .ac-workspace :is(.main,.dialog) :is(input[type=checkbox],input[type=radio]):not(:where([class^="rg-"],[class^="rg-"] *)){ width: 18px !important; height: 18px !important; min-height: 18px !important; padding: 0 !important; accent-color: var(--app-blue) !important; }
   .ac-workspace :is(.main,.dialog) label:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: 13px !important; color: var(--color-text) !important; font-weight: 550 !important; line-height: 1.5 !important; }
   .ac-workspace .main :is(.notice,.error,.ws-offline):not(:where([class^="rg-"],[class^="rg-"] *)){ padding: 14px 16px !important; margin-bottom: 16px !important; border-radius: 12px !important; font-size: 14px !important; line-height: 1.5 !important; }
@@ -342,7 +342,7 @@
   html body .app-shell.ac-workspace .app-topbar-brand strong:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-text) !important; -webkit-text-fill-color: currentColor !important; }
   html body .app-shell.ac-workspace .main .ac-premium-overview-dashboard > header:not(:where([class^="rg-"],[class^="rg-"] *)){ background: var(--color-surface) !important; }
   html body .app-shell.ac-workspace .main .ac-premium-overview-dashboard > header :is(h2,p,span):not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-text) !important; }
-  html body .app-shell.ac-workspace .main .ac-premium-sales:not(:where([class^="rg-"],[class^="rg-"] *)){ background: linear-gradient(90deg,#10251Ef8 35%,#10251Ec9 70%,#10251E80) !important; }
+  html body .app-shell.ac-workspace .main .ac-premium-sales:not(:where([class^="rg-"],[class^="rg-"] *)){ background: linear-gradient(90deg,color-mix(in srgb, var(--color-surface) 97.25%, transparent) 35%,color-mix(in srgb, var(--color-surface) 78.82%, transparent) 70%,color-mix(in srgb, var(--color-surface) 50.2%, transparent)) !important; }
   html body .app-shell.ac-workspace .main .ac-premium-sales h2:not(:where([class^="rg-"],[class^="rg-"] *)){ font-size: clamp(25px,3vw,38px) !important; line-height: 1.2 !important; letter-spacing: -1px !important; max-width: 650px !important; }
   html body .app-shell.ac-workspace .main .ac-premium-sales :is(p,small):not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-muted) !important; max-width: 650px !important; margin: 0 !important; }
   html body .app-shell.ac-workspace .main .ac-premium-sales > p:first-child:not(:where([class^="rg-"],[class^="rg-"] *)){ color: var(--color-primary-ink) !important; font-size: 10px !important; letter-spacing: 2px !important; }

@@ -1,7 +1,7 @@
 /* Opt-in only: authentication screens retain their existing styling. */
 @layer autocare-membership {
   html body .ac-public-dark {
-    color-scheme: dark;
+    color-scheme:light;
     min-height: 100dvh;
     background: var(--color-nav) !important;
     color: var(--color-text) !important;
@@ -19,7 +19,7 @@
   }
   html body .ac-public-dark .public-nav {
     background: var(--color-nav) !important;
-    border-color: #ffffff20 !important;
+    border-color: var(--color-border-strong) !important;
   }
   html body .ac-public-dark :is(.brand, .navlinks a, .footer a) {
     color: var(--color-text) !important;
@@ -53,7 +53,7 @@
     .ac-public-dark
     :is(.card, .subscription-option, .ac-install-banner, .content-page section, details) {
     background: var(--surface-card) !important;
-    border: 1px solid #ffffff20 !important;
+    border: 1px solid var(--color-border-strong) !important;
     border-radius: 15px !important;
     box-shadow: 0 14px 36px #0002 !important;
     color: var(--color-text) !important;
@@ -90,7 +90,7 @@
   }
   html body .ac-public-dark :is(th, td) {
     background: var(--color-surface) !important;
-    border-color: #ffffff20 !important;
+    border-color: var(--color-border-strong) !important;
     color: var(--color-text) !important;
   }
   html body .ac-public-dark summary {
@@ -102,7 +102,7 @@
   html body .ac-public-dark .footer {
     background: transparent !important;
     color: var(--color-text) !important;
-    border-color: #ffffff20 !important;
+    border-color: var(--color-border-strong) !important;
   }
   html body .ac-public-dark .ac-install-banner {
     margin-block: 32px !important;
@@ -141,4 +141,4 @@
     }
   }
 }
-.ac-landing-cockpit-preview{min-height:340px;padding:32px;box-sizing:border-box;border-radius:24px;background:radial-gradient(ellipse at 85% 0%,#20E6A20b,transparent 65%),linear-gradient(145deg,#0B1C16,#050E0B);border:1px solid #ffffff09;box-shadow:0 22px 70px #0003;color:#fff;text-align:left}.ac-landing-cockpit-brand{display:flex;align-items:center;gap:10px;font-size:16px}.ac-landing-cockpit-brand svg,.ac-landing-cockpit-brand span{color:#71E5BB}.ac-landing-cockpit-brand span{font-size:12px;margin-left:5px}.ac-landing-cockpit-preview h2{font-size:clamp(27px,3vw,40px);line-height:1.16;letter-spacing:-.035em;margin:36px 0 16px}.ac-landing-cockpit-preview h2 span{color:#71E5BB}.ac-landing-cockpit-preview p{font-size:14px;line-height:1.8;color:#A8BFB5}.ac-landing-cockpit-items{display:flex;flex-wrap:wrap;gap:20px;margin-top:32px}.ac-landing-cockpit-items>span{display:flex;gap:8px;align-items:center;font-size:12px;color:#F3F8F5}.ac-landing-cockpit-items svg{color:#71E5BB}@media(max-width:600px){.ac-landing-cockpit-preview{padding:24px;min-height:300px}.ac-landing-cockpit-items{gap:14px}}
+.ac-landing-cockpit-preview{min-height:340px;padding:32px;box-sizing:border-box;border-radius:24px;background:radial-gradient(ellipse at 85% 0%,color-mix(in srgb, var(--color-primary) 4.31%, transparent),transparent 65%),linear-gradient(145deg,var(--color-surface-muted),var(--color-bg));border:1px solid #ffffff09;box-shadow:0 22px 70px #0003;color:var(--color-text);text-align:left}.ac-landing-cockpit-brand{display:flex;align-items:center;gap:10px;font-size:16px}.ac-landing-cockpit-brand svg,.ac-landing-cockpit-brand span{color:#71E5BB}.ac-landing-cockpit-brand span{font-size:12px;margin-left:5px}.ac-landing-cockpit-preview h2{font-size:clamp(27px,3vw,40px);line-height:1.16;letter-spacing:-.035em;margin:36px 0 16px}.ac-landing-cockpit-preview h2 span{color:#71E5BB}.ac-landing-cockpit-preview p{font-size:14px;line-height:1.8;color:var(--color-muted)}.ac-landing-cockpit-items{display:flex;flex-wrap:wrap;gap:20px;margin-top:32px}.ac-landing-cockpit-items>span{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--color-text)}.ac-landing-cockpit-items svg{color:#71E5BB}@media(max-width:600px){.ac-landing-cockpit-preview{padding:24px;min-height:300px}.ac-landing-cockpit-items{gap:14px}}

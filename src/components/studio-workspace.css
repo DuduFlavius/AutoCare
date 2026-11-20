@@ -13,7 +13,7 @@
     --app-gap: 22px;
     background: var(--app-bg) !important;
     color: var(--app-ink) !important;
-    color-scheme: dark !important;
+    color-scheme:light !important;
     font-size: 16px !important;
     line-height: 1.6 !important;
   }
@@ -47,7 +47,7 @@
   }
   html body .app-shell.ac-workspace.ac-studio .ws-sidebar-sections:not(:where([class^="rg-"],[class^="rg-"] *)){
     scrollbar-width: thin !important;
-    scrollbar-color: #1C8062 transparent !important;
+    scrollbar-color: var(--color-primary-soft) transparent !important;
   }
   html body .app-shell.ac-workspace.ac-studio .ws-navigation:not(:where([class^="rg-"],[class^="rg-"] *)){
     gap: 23px !important;
@@ -270,7 +270,7 @@
     :is(.main, .dialog)
     :is(input, textarea):not(:where([class^="rg-"],[class^="rg-"] *))::placeholder {
     color: var(--color-muted) !important;
-    -webkit-text-fill-color: #A8BFB5 !important;
+    -webkit-text-fill-color: var(--color-muted) !important;
   }
   html
     body
@@ -1912,7 +1912,7 @@
   }
   html body .app-shell.ac-workspace.ac-studio .car-metrics:not(:where([class^="rg-"],[class^="rg-"] *)){
     background: var(--color-surface) !important;
-    border: 1px solid #ffffff20 !important;
+    border: 1px solid var(--color-border-strong) !important;
     padding: 15px !important;
   }
   html body .app-shell.ac-workspace.ac-studio .car-metrics :is(span, small):not(:where([class^="rg-"],[class^="rg-"] *)){
@@ -1940,7 +1940,7 @@
  html body .app-shell.ac-workspace.ac-studio .record-category-grid svg:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted) !important; color:var(--color-text) !important;}
 }
 @layer autocare-workspace {
- html body .app-shell.ac-workspace.ac-studio :is(.document-gallery,.maintenance-timeline) tbody tr:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid #ffffff20 !important; box-shadow:0 12px 30px #0002 !important;}
+ html body .app-shell.ac-workspace.ac-studio :is(.document-gallery,.maintenance-timeline) tbody tr:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid var(--color-border-strong) !important; box-shadow:0 12px 30px #0002 !important;}
  html body .app-shell.ac-workspace.ac-studio .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px dashed var(--color-border-strong) !important; color:var(--color-text) !important; padding:36px !important; border-radius:16px !important;}
  html body .app-shell.ac-workspace.ac-studio .empty p:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important; font-size:16px !important;}
  html body .app-shell.ac-workspace.ac-studio :is(.drive-session-status,.drive-session-caption,.drive-session-details span,.ac-smartdrive-trip .ac-premium-kicker):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted) !important; font-size:14px !important;}
@@ -1954,14 +1954,14 @@
 @layer autocare-workspace {
  html body .app-shell.ac-workspace.ac-studio .studio-benefit-chips span:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important; font-size:14px !important; opacity:1 !important;}
  html body .app-shell.ac-workspace.ac-studio .studio-offer-price > span:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important; font-size:13px !important; opacity:1 !important; display:block !important;}
- html body .app-shell.ac-workspace.ac-studio .membership-access:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid #ffffff20 !important; border-radius:12px !important; padding:18px !important; gap:20px !important;}
+ html body .app-shell.ac-workspace.ac-studio .membership-access:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid var(--color-border-strong) !important; border-radius:12px !important; padding:18px !important; gap:20px !important;}
  html body .app-shell.ac-workspace.ac-studio .membership-access :is(span,p):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important;}
  html body .app-shell.ac-workspace.ac-studio .membership-access strong:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text) !important;}
  html body .app-shell.ac-workspace.ac-studio .app-account-section button:not(:where([class^="rg-"],[class^="rg-"] *)){margin-bottom:8px !important;}
 }
 @layer autocare-workspace {
  html body .app-shell.ac-workspace.ac-studio .main .settings-workspace.grid2:not(:where([class^="rg-"],[class^="rg-"] *)){grid-template-columns:minmax(0,1fr) !important; width:100% !important; max-width:none !important;}
- html body .app-shell.ac-workspace.ac-studio .ws-settings-nav:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid #ffffff20 !important; padding:10px !important; border-radius:14px !important;}
+ html body .app-shell.ac-workspace.ac-studio .ws-settings-nav:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid var(--color-border-strong) !important; padding:10px !important; border-radius:14px !important;}
  html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button:not(:where([class^="rg-"],[class^="rg-"] *)){margin-bottom:6px !important;}
  html body .app-shell.ac-workspace.ac-studio .ws-settings-nav button[aria-current=page]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-primary-deep) !important; border-color:var(--color-border-strong) !important;}
  html body .app-shell.ac-workspace.ac-studio .settings-workspace details:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface) !important; border:1px solid #ffffff25 !important; color:var(--color-text) !important;}
@@ -1971,7 +1971,7 @@
 /* Complete graphite surfaces, including nested widgets that carry legacy light styles. */
 @layer autocare-workspace{
  html body .app-shell.ac-workspace.ac-studio:not(:where([class^="rg-"],[class^="rg-"] *)){
-  color-scheme: dark;
+  color-scheme:light;
   --bg:var(--color-bg); --panel:var(--color-surface); --panel2:var(--color-surface-muted); --border:var(--color-border); --muted:var(--color-muted); --text:var(--color-text);
  }
  html body .app-shell.ac-workspace.ac-studio :is(.ac-forecast-list,.mileage-planner-card,.ac-smartdrive-history,.support-workspace,.support-chat-panel):not(:where([class^="rg-"],[class^="rg-"] *)){
