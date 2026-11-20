@@ -27,11 +27,12 @@ test('home prioritizes overdue work and does not invent deadlines',()=>{
 });
 test('mobile navigation has five clear destinations and retains secondary modules',()=>{
   assert.equal(mobileWorkspaceSections.length,5);
-  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Documente'));
+  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Garaj'));
+  assert.ok(mobileWorkspaceSections.some(s=>s.id==='Acțiuni'));
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Rapoarte'));
   assert.ok(mobileWorkspaceSections.some(s=>s.id==='Cont'));
-  for(const section of mobileWorkspaceSections)assert.ok(workspaceSections.some(s=>s.id===section.id));
-  for(const id of ['Notificări','Setări','Plan întreținere','Premium','Abonament','Centru de suport','Istoric auto','Cheltuieli','Calendar','Kilometraj'])assert.ok(workspaceSections.some(s=>s.id===id));
+  for(const section of mobileWorkspaceSections)assert.ok(section.id==='Acțiuni'||workspaceSections.some(s=>s.id===section.id));
+  for(const id of ['Notificări','Setări','Plan întreținere','Premium','Abonament','Centru de suport','Istoric auto','Cheltuieli','Calendar','Kilometraj','Documente'])assert.ok(workspaceSections.some(s=>s.id===id));
 });
 
 test('home retains legacy free oil tracking and retires older oil and timing forecasts only on Home',()=>{
