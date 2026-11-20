@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createElement} from 'react';
+import {readFileSync} from 'node:fs';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {MobileCockpit} from '../src/components/application/mobile-cockpit';
 import {DocumentVault} from '../src/components/application/document-vault';
@@ -20,4 +21,20 @@ test('mobile home and document vault show owner data, no stock BMW or pretend va
 });
 test('approved mobile reference exposes home, garage, add, reports and account',()=>{
  assert.deepEqual(mobileWorkspaceSections.map(section=>section.id),['Dashboard','Garaj','Acțiuni','Rapoarte','Cont']);
+});
+
+test('mobile Add action opens the real launcher and does not navigate to a fake tab',()=>{
+ const nav=readFileSync(new URL('../src/components/application/mobile-navigation.tsx',import.meta.url),'utf8');
+ const dashboard=readFileSync(new URL('../src/components/dashboard.tsx',import.meta.url),'utf8');
+ assert.match(nav,/isAdd \? <button/);
+ assert.match(nav,/type="button"/);
+ assert.match(nav,/onClick=\{onAdd\}/);
+ assert.match(dashboard,/onAdd=\{\(\)=>setLauncherOpen\(true\)\}/);
+ assert.doesNotMatch(nav,/navigate\('Acțiuni'\)/);
+});
+test('mobile reference navigation keeps five unique functional destinations',()=>{
+ assert.equal(new Set(mobileWorkspaceSections.map(s=>s.id)).size,5);
+ for(const section of mobileWorkspaceSections){
+  assert.ok(section.ro && section.en);
+ }
 });
