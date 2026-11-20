@@ -883,7 +883,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       {data&&!previewData&&<NativeTripSync ownerId={data.profile.userId} vehicles={data.vehicles.filter(v=>!v.archived)} onUpdated={refresh} onReview={()=>navigate('Plan întreținere')} english={language==='en'}/>}
       <SiteLanguage language={language} />
       <ApplicationHeader onMenu={()=>setRacingMenu(true)} reference onLanguage={changeLanguage} title={tab==='Plan întreținere'&&!androidNative?(language==='en'?'Trip history':'Istoric călătorii'):tab === 'Dashboard' ? (language==='en'?'Home':'Acasă') : (tab==='Feedback utilizatori'?(language==='en'?'User feedback':'Feedback utilizatori'):(workspaceSections.find(s=>s.id===tab)?.[language] ?? tab))} name={name} unread={data?.notifications.filter(n=>!n.readAt).length ?? 0} premium={!!data?.premium} onSearch={()=>setLauncherOpen(true)} onNotifications={()=>navigate('Notificări')} onAccount={()=>navigate('Cont')} onPremium={()=>navigate('Premium')} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>
-      <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'}/>
+      <MobileNavigation tab={tab} navigate={navigate} path={previewData?'/previzualizare':'/cont'} onAdd={()=>setLauncherOpen(true)}/>
       <main id="workspace-main" tabIndex={-1} aria-busy={busy||!data}
         className={
           'main workspace-' +
