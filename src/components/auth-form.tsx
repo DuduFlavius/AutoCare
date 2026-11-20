@@ -1,4 +1,6 @@
 'use client';
+import {FilterSelect} from '@/components/filter-select';
+
 import {EmailVerification} from './email-verification';
 import {publicConversion} from '@/lib/analytics';
 import {saveBrowserLanguage} from '@/lib/language-preference';
@@ -157,7 +159,7 @@ export function AuthForm({ mode, next = '/cont', initialLanguage, verificationPr
         >
           <label>
             {language === 'en' ? 'Language' : 'Limbă'}{' '}
-            <select
+            <FilterSelect
               aria-label={language === 'en' ? 'Language' : 'Limbă'}
               value={language}
               onChange={(event) => {
@@ -172,7 +174,7 @@ export function AuthForm({ mode, next = '/cont', initialLanguage, verificationPr
             >
               <option value="ro">{en?'Romanian':'Română'}</option>
               <option value="en">English</option>
-            </select>
+            </FilterSelect>
           </label>
         </div>
         </div>{pendingEmail?<EmailVerification preview={verificationPreview} email={pendingEmail} language={language} onBack={()=>{setPendingEmail('');setError('');}} onVerified={()=>{publicConversion(signup?'sign_up':'login');window.location.assign(next);}}/>:<><p className="eyebrow">{t("GARAJUL TĂU DIGITAL", "YOUR DIGITAL GARAGE")}</p>

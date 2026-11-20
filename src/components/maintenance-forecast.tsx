@@ -1,4 +1,6 @@
 'use client';
+import {FilterSelect} from '@/components/filter-select';
+
 import { useState } from 'react';
 import ServiceForecastCards from './service-forecast-cards';
 import { maintenanceTargets } from '@/lib/maintenance-schedule';
@@ -59,13 +61,13 @@ export default function MaintenanceForecast({
       {cars.length > 1 && !vehicleId && (
         <label>
           {en ? 'Vehicle' : 'Mașină'}
-          <select value={car.id} onChange={(event) => setSelected(event.target.value)}>
+          <FilterSelect value={car.id} onChange={(event) => setSelected(event.target.value)}>
             {cars.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.brand} {v.model} · {v.plate}
               </option>
             ))}
-          </select>
+          </FilterSelect>
         </label>
       )}
       {services.length ? (

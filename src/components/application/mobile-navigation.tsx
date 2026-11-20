@@ -3,7 +3,7 @@ import { House, Settings2, Files, ChartNoAxesCombined, CalendarDays } from 'luci
 import { useApplicationLanguage } from '../application-locale';
 import { mobileWorkspaceSections, workspaceHref } from '@/lib/workspace';
 const icons = [House, Files, ChartNoAxesCombined, CalendarDays, Settings2];
-export default function MobileNavigation({ tab, navigate, path }: { tab: string; navigate: (tab: string) => boolean; path: string }) {
+export default function MobileNavigation({ tab, navigate, path }: { tab: string; navigate: (tab: string) => Promise<boolean>; path: string }) {
   const language = useApplicationLanguage();
   return <nav className="rg-mobile-dock" aria-label={language === 'en' ? 'Main navigation' : 'Navigare principală'} data-workspace-ui>{mobileWorkspaceSections.map((section,index) => {
     const Icon = icons[index], active = section.id === tab || (section.id === 'Cont' && tab === 'Setări');

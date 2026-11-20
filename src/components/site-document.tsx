@@ -1,5 +1,9 @@
 import './document-controls.css';
 import { startupImages } from '@/lib/pwa-launch';
+import './filter-select.css';
+import './document-controls.css';
+import './premium-controls.css';
+import {PremiumDialogHost} from './premium-dialogs';
 import AutoUpdate from '@/components/auto-update';
 import type { Metadata, Viewport } from 'next';
 import '@/app/design-system.css';
@@ -61,7 +65,7 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, view
 export default function SiteDocument({ children, language }: { children: React.ReactNode; language:'ro'|'en' }) {
   return (
     <html lang={language}>
-      <body>{children}<AutoUpdate /></body>
+      <body>{children}<PremiumDialogHost/><AutoUpdate /></body>
     </html>
   );
 }

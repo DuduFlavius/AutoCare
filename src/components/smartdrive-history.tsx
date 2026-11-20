@@ -1,4 +1,6 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
 import {FilterSelect} from './filter-select';
 import './application/maintenance-timeline.css';
 import {PremiumDateInput} from './premium-date-input';
@@ -95,7 +97,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
   }, [ownerId, tripId, preview, revision]);
   const route = routeResult?.id === tripId ? routeResult?.points : undefined;
   async function clearRoutes() {
-    if (!window.confirm(t('Ștergi toate traseele păstrate pe acest dispozitiv?', 'Delete all routes stored on this device?'))) return;
+    if (!await requestConfirmation(t('Ștergi toate traseele păstrate pe acest dispozitiv?', 'Delete all routes stored on this device?'))) return;
     setClearingRoutes(true);
     try { await clearTripRoutes(ownerId); setRouteResult(null); setRevision(value => value + 1); }
     catch { setError(t('Traseele locale nu au putut fi șterse.', 'The local routes could not be deleted.')); }

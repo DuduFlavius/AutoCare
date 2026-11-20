@@ -3,6 +3,7 @@ import {useEffect,useRef,useState,type InputHTMLAttributes,type ChangeEvent} fro
 import {createPortal} from 'react-dom';
 import {CalendarDays,ChevronLeft,ChevronRight,X} from 'lucide-react';
 import {useApplicationLanguage} from './application-locale';
+import {validDateValue} from '@/lib/control-validation';
 import {calendarCells} from '@/lib/document-presentation';
 type Props=Omit<InputHTMLAttributes<HTMLInputElement>,'type'> & {type?:'date'|'month'|'datetime-local'};
 export function PremiumDateInput({type='date',value,defaultValue,onChange,...props}:Props){
@@ -17,12 +18,14 @@ export function PremiumDateInput({type='date',value,defaultValue,onChange,...pro
   const place=()=>{const r=input.current!.getBoundingClientRect(),height=window.visualViewport?.height??window.innerHeight,width=Math.min(336,window.innerWidth-16);const panelHeight=panel.current?.getBoundingClientRect().height??405;setPosition({top:Math.max(8,Math.min(r.bottom+6,height-panelHeight-8)),left:Math.max(8,Math.min(r.left,window.innerWidth-width-8)),maxHeight:Math.max(150,height-16)});};
   place();const frame=requestAnimationFrame(()=>panel.current?.querySelector<HTMLButtonElement>('button[aria-pressed=true],button')?.focus());
   const close=(e:PointerEvent)=>{if(!panel.current?.contains(e.target as Node)&&!trigger.current?.contains(e.target as Node))setOpen(false);};
-  document.addEventListener('pointerdown',close,true);window.addEventListener('resize',place);window.addEventListener('scroll',place,true);
-  return()=>{cancelAnimationFrame(frame);document.removeEventListener('pointerdown',close,true);window.removeEventListener('resize',place);window.removeEventListener('scroll',place,true);};
+  document.addEventListener('pointerdown',close,true);window.visualViewport?.addEventListener('resize',place);window.addEventListener('resize',place);window.addEventListener('scroll',place,true);
+  return()=>{cancelAnimationFrame(frame);document.removeEventListener('pointerdown',close,true);window.visualViewport?.removeEventListener('resize',place);window.removeEventListener('resize',place);window.removeEventListener('scroll',place,true);};
  },[open]);
+ useEffect(()=>{input.current?.setCustomValidity(validDateValue(current,type,props.min?String(props.min):undefined,props.max?String(props.max):undefined)?'':t('Introdu o dată validă în intervalul permis.','Enter a valid date within the allowed range.'));},[current,type,props.min,props.max,en]);
  const close=()=>{setOpen(false);trigger.current?.focus();};
  const select=(iso:string)=>{
   const next=type==='month'?iso.slice(0,7):type==='datetime-local'?iso+'T'+(current.split('T')[1]||'09:00'):iso;
+  if(!validDateValue(next,type,props.min?String(props.min):undefined,props.max?String(props.max):undefined))return;
   if(input.current){Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set?.call(input.current,next);input.current.dispatchEvent(new Event('input',{bubbles:true}));}
   close();
  };

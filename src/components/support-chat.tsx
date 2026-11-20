@@ -1,4 +1,8 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
+import {FilterSelect} from '@/components/filter-select';
+
 import { SupportCustomerPanel, SupportStatistics } from './support-operations';
 import './support-center.css';
 import {translateApplicationCopy} from '@/lib/application-language';
@@ -511,12 +515,12 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           <div className="support-inbox-tools">
             <label><input type="checkbox" checked={unreadOnly} onChange={event => setUnreadOnly(event.target.checked)} /> Doar necitite</label>
             <details><summary><MoreHorizontal size={16}/>{t('Filtre','Filters')}</summary>
-              <label>Prioritate<select value={priorityFilter} onChange={event => setPriorityFilter(event.target.value)}>
+              <label>Prioritate<FilterSelect value={priorityFilter} onChange={event => setPriorityFilter(event.target.value)}>
                 <option value="">Toate</option><option value="normal">Normală</option><option value="high">Ridicată</option><option value="urgent">Urgentă</option>
-              </select></label>
-              <label>Responsabil<select value={assigneeFilter} onChange={event => setAssigneeFilter(event.target.value)}>
+              </FilterSelect></label>
+              <label>Responsabil<FilterSelect value={assigneeFilter} onChange={event => setAssigneeFilter(event.target.value)}>
                 <option value="">Toți</option><option value="mine">Atribuite mie</option><option value="unassigned">Neatribuite</option>
-              </select></label>
+              </FilterSelect></label>
             </details>
             <button type="button" className="support-stats-trigger" onClick={()=>setView('statistics')}><BarChart3 size={15}/>{t('Statistici','Statistics')}</button>
           </div>
@@ -566,12 +570,12 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       <div className="support-chat-panel">
         {!staff && threads.length > 1 && (
           <label className="support-own-history">Istoric conversații
-            <select value={selected ?? ''} onChange={event => {
+            <FilterSelect value={selected ?? ''} onChange={event => {
               const thread = threads.find(item => item.id === event.target.value);
               if (thread) void openThread(thread, false);
             }}>
               {threads.map(thread => <option key={thread.id} value={thread.id}>{new Date(thread.createdAt).toLocaleDateString(locale)} · {thread.title}</option>)}
-            </select>
+            </FilterSelect>
           </label>
         )}
         <header className="support-chat-header">
@@ -648,11 +652,11 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               {current.status === 'open' && (role !== 'assistant' || !current.assignedTo || current.assignedTo === selfId) && (
                 <button type="button" className="support-session-finish" disabled={busy} onClick={() => void change(current, 'complete')}><CheckCheck size={17}/> Finalizează</button>
               )}
-              {current.status === 'open' && (role !== 'assistant' || !current.assignedTo || current.assignedTo === selfId) && <button type="button" className="support-session-delete" disabled={busy || preview} onClick={() => { if (window.confirm(t('Ștergi conversația? Aceasta se închide și se mută în coș, de unde poate fi restaurată.', 'Delete this conversation? It will be closed and moved to trash, where it can be restored.'))) void change(current, 'trash'); }}><Trash2 size={17}/>{t('Șterge','Delete')}</button>}
+              {current.status === 'open' && (role !== 'assistant' || !current.assignedTo || current.assignedTo === selfId) && <button type="button" className="support-session-delete" disabled={busy || preview} onClick={async () => { if (await requestConfirmation(t('Ștergi conversația? Aceasta se închide și se mută în coș, de unde poate fi restaurată.', 'Delete this conversation? It will be closed and moved to trash, where it can be restored.'))) void change(current, 'trash'); }}><Trash2 size={17}/>{t('Șterge','Delete')}</button>}
               {current.status === 'completed' && (
                 <>
                   <button type="button" className="support-session-enter" disabled={busy} onClick={() => void change(current, 'reopen')}><RotateCcw size={17}/> Redeschide</button>
-                  <button type="button" className="support-session-delete" disabled={busy} onClick={() => { if (window.confirm(translateApplicationCopy('Muți conversația în coș? Va putea fi restaurată.',locale==='ro-RO'?'ro':'en'))) void change(current, 'trash'); }}><Trash2 size={17}/> Șterge</button>
+                  <button type="button" className="support-session-delete" disabled={busy} onClick={async () => { if (await requestConfirmation(translateApplicationCopy('Muți conversația în coș? Va putea fi restaurată.',locale==='ro-RO'?'ro':'en'))) void change(current, 'trash'); }}><Trash2 size={17}/> Șterge</button>
                 </>
               )}
               {current.status === 'trashed' && (
@@ -668,8 +672,8 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               <span>{current.status === 'open' ? t('Tu decizi când închei conversația.', 'You choose when to end the conversation.') : t('Istoricul rămâne disponibil aici.', 'Your history remains available here.')}</span>
             </div>
             <div className="support-session-actions">
-              {current.status === 'open' && <button type="button" className="support-session-finish" disabled={busy || preview} onClick={() => { if (window.confirm(t('Închei conversația? Mesajele rămân în istoric.', 'End this conversation? Messages stay in your history.'))) void change(current, 'complete'); }}><CheckCheck size={17}/>{t('Încheie', 'End chat')}</button>}
-              {current.status !== 'trashed' && <button type="button" className="support-session-delete" disabled={busy || preview} onClick={() => { if (window.confirm(t('Ștergi conversația? Aceasta se închide și se mută în coș, de unde poate fi restaurată.', 'Delete this conversation? It will be closed and moved to trash, where it can be restored.'))) void change(current, 'trash'); }}><Trash2 size={17}/>{t('Șterge', 'Delete')}</button>}
+              {current.status === 'open' && <button type="button" className="support-session-finish" disabled={busy || preview} onClick={async () => { if (await requestConfirmation(t('Închei conversația? Mesajele rămân în istoric.', 'End this conversation? Messages stay in your history.'))) void change(current, 'complete'); }}><CheckCheck size={17}/>{t('Încheie', 'End chat')}</button>}
+              {current.status !== 'trashed' && <button type="button" className="support-session-delete" disabled={busy || preview} onClick={async () => { if (await requestConfirmation(t('Ștergi conversația? Aceasta se închide și se mută în coș, de unde poate fi restaurată.', 'Delete this conversation? It will be closed and moved to trash, where it can be restored.'))) void change(current, 'trash'); }}><Trash2 size={17}/>{t('Șterge', 'Delete')}</button>}
               {current.status === 'trashed' && <button type="button" className="support-session-enter" disabled={busy || preview} onClick={() => void change(current, 'restore')}><RotateCcw size={17}/>{t('Restaurează', 'Restore')}</button>}
             </div>
           </div>
@@ -831,12 +835,12 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               </label>
             )}
             {staff && <details className="support-quick-reply-menu"><summary>{t('Răspuns rapid','Quick reply')}</summary><label className="support-quick-reply"><span className="sr-only">Răspuns rapid</span>
-              <select value="" onChange={event => { if (event.target.value) setText(previous => previous ? previous + '\n' + event.target.value : event.target.value); }}>
+              <FilterSelect value="" onChange={event => { if (event.target.value) setText(previous => previous ? previous + '\n' + event.target.value : event.target.value); }}>
                 <option value="">Alege un răspuns</option>
                 <option value="Bună ziua! Îți mulțumim pentru mesaj. Cum te putem ajuta?">Salut și preluare</option>
                 <option value="Ne poți spune în ce secțiune apare problema și ce mesaj vezi pe ecran?">Cere detalii</option>
                 <option value="Dacă mai ai nevoie de ajutor, scrie-ne aici. Îți mulțumim!">Încheiere</option>
-              </select>
+              </FilterSelect>
             </label></details>}
             <div>
               <textarea ref={composerInput}

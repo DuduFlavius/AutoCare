@@ -1,4 +1,6 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
 import FeedbackWorkspace from './feedback-workspace';
 import SmartDriveMaintenance from './smartdrive-maintenance';
 import {FeedbackNotice,FeedbackInvitation} from './feedback-entry';
@@ -258,7 +260,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
     finally { setSaving(false); }
   }
   return (
-    <section className="mileage-planner">
+    <section className="mileage-planner" data-live-map={!mileageOnly&&driveView==='live'}>
       <div className="mileage-planner-heading">
         <div><span className="eyebrow">AUTOCARE · PLANIFICARE</span><h2>{mileageOnly ? 'Kilometrajul mașinilor' : 'SmartDrive GPS'}</h2>
           <p>{mileageOnly ? 'Calcule bazate pe kilometrajul introdus și termenele salvate în istoricul mașinii.' : 'Înregistrează traseul și sincronizează distanța cu întreținerea la salvare.'}</p></div>
@@ -267,7 +269,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
       {!cars.length && <div className="card"><p>Adaugă prima mașină în Garaj pentru a urmări întreținerea.</p></div>}
       {!mileageOnly && (
         <>
-          <div className="ac-smartdrive-views" role="group" aria-label="SmartDrive">
+          <details className="ac-smartdrive-view-menu"><summary>SmartDrive · {locale.startsWith('en')?'Menu':'Meniu'}</summary><div className="ac-smartdrive-views" role="group" aria-label="SmartDrive">
             <button type="button" aria-pressed={driveView === 'live'} onClick={() => setDriveView('live')}>
               <Route size={17}/> {locale.startsWith('en') ? 'Live Drive Map' : 'Hartă în timp real'}
             </button>
@@ -278,7 +280,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
               <Bluetooth size={17}/> Bluetooth
             </button>
           </div>
-          <div hidden={driveView !== 'live' && driveView !== 'bluetooth'}>
+          </details><div hidden={driveView !== 'live' && driveView !== 'bluetooth'}>
             <SmartDriveTrip key={data.profile.userId} ownerId={data.profile.userId} preview={preview} onSaved={onUpdated} vehicles={cars} bluetoothOnly={driveView === 'bluetooth'} bluetoothVisible={driveView === 'bluetooth' && driveVisible} liveVisible={driveView === 'live' && driveVisible}/>
           </div>
 
@@ -539,11 +541,14 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     }, '');
   }
 
-  async function act(fn: () => Promise<unknown>, message = 'Modificările au fost salvate.') {
+  const actionInFlight=useRef(false);
+  async function act(fn: () => Promise<unknown>, message = 'Modificările au fost salvate.', propagateError=false) {
     if (previewData) {
       setNotice('Previzualizare de design: date fictive, modificările nu se salvează.');
       return false;
     }
+    if(actionInFlight.current)return false;
+    actionInFlight.current=true;
     setBusy(true);
     setError('');
     setNotice('');
@@ -554,18 +559,20 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       return true;
     } catch (e) {
       setError((e as Error).message);
+      if(propagateError)throw e;
       return false;
     } finally {
+      actionInFlight.current=false;
       setBusy(false);
     }
   }
   const [drill,setDrill]=useState<{ids:string[];label:string}|null>(null);
   const workspaceViews = useRef(new Map<string,{filter:string;query:string;recordState:string;categoryFilter:string;period:string;showArchived:boolean;scroll:number}>());
-  function navigate(t: string, historyMode: 'push' | 'none' = 'push', vehicle: string | null = null, discardConfirmed=false) {
+  async function navigate(t: string, historyMode: 'push' | 'none' = 'push', vehicle: string | null = null, discardConfirmed=false) {
     t=normalizeWorkspaceTab(t);
 
     if (recordSaving || busy) return false;
-    if (recordDirty && !discardConfirmed && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?',locale==='ro-RO'?'ro':'en')))
+    if (recordDirty && !discardConfirmed && !await requestConfirmation(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?',locale==='ro-RO'?'ro':'en')))
       return false;
     workspaceViews.current.set(tab,{filter,query,recordState,categoryFilter,period,showArchived,scroll:window.scrollY});
     const view=workspaceViews.current.get(t);
@@ -598,10 +605,10 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
   const navigationRef = useRef(navigate);
   navigationRef.current = navigate;
   useEffect(() => {
-    const back = () => {
+    const back = async () => {
       const params = new URLSearchParams(window.location.search);
       const next = params.get('tab') || 'Dashboard';
-      if (navigationRef.current(next, 'none', params.get('vehicle')) === false) {
+      if (await navigationRef.current(next, 'none', params.get('vehicle')) === false) {
         const { tab: current, vehicleDetail: vehicle } = displayedViewRef.current;
         window.history.pushState(null, '', workspaceHref(window.location.pathname + window.location.search, current, vehicle));
       }
@@ -707,11 +714,11 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
         ([, v]) => v !== undefined && v !== '',
       ) as [string, string][],
     ).toString();
-  function closeRecord() {
+  async function closeRecord() {
     if (recordSaving || busy) return;
     if (
       recordDirty &&
-      !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Închizi formularul și renunți la ele?',locale==='ro-RO'?'ro':'en'))
+      !await requestConfirmation(translateApplicationCopy('Ai modificări nesalvate. Închizi formularul și renunți la ele?',locale==='ro-RO'?'ro':'en'))
     )
       return;
     setRecordDirty(false);
@@ -848,7 +855,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
   }
   async function signOut() {
     if (previewData || signingOut) return;
-    if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
+    if (recordDirty && !await requestConfirmation(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
     setSigningOut(true); setError('');
     try { await disconnectNativePush(); if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
@@ -858,7 +865,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       <WorkspaceViewport service={tab==='Întreținere'}/>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
       {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>navigate('Garaj', 'push', id)} /></Dialog>}
-      {racingMenu&&<Dialog className="rg-menu-dialog" title={language==='en'?'Menu':'Meniu'} onClose={()=>setRacingMenu(false)}><RacingMenu active={tab} onClose={()=>setRacingMenu(false)} name={name} premium={!!data?.premium} navigate={next=>{if(navigate(next))setRacingMenu(false);}} onSignOut={()=>void signOut()} preview={!!previewData}/></Dialog>}
+      {racingMenu&&<Dialog className="rg-menu-dialog" title={language==='en'?'Menu':'Meniu'} onClose={()=>setRacingMenu(false)}><RacingMenu active={tab} onClose={()=>setRacingMenu(false)} name={name} premium={!!data?.premium} navigate={async next=>{if(await navigate(next))setRacingMenu(false);}} onSignOut={()=>void signOut()} preview={!!previewData}/></Dialog>}
       <aside className="rg-sidebar sidebar">
         <Brand racing href={previewData?'/previzualizare':'/cont'} onClick={e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();navigate('Dashboard');}}/>
         <div className="rg-sidebar-scroll"><WorkspaceNavigation tab={tab} language={language} navigate={navigate} notifications={data?.notifications.filter(n=>!n.readAt).length} support={supportUnread} premium={!!data?.premium} path={previewData?'/previzualizare':'/cont'}/>
@@ -956,15 +963,15 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             {!['Dashboard','Garaj','Documente','Întreținere','Rapoarte','Calendar','RCA & Rovinietă','Cont','Centru de suport','AutoCare AI'].includes(tab)&&<WorkspaceContext tab={tab} language={language} navigate={navigate}/>}
             {drill && <div className="card between"><strong>{drill.label}</strong><button type="button" onClick={()=>setDrill(null)}>{language==='en'?'Show all':'Vezi toate'}</button></div>}
             {tab==='Întreținere'&&<RacingMaintenance data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} today={nowDate} onOpen={record=>setModal({kind:'service',record})} onCreate={()=>setModal({kind:'service'})}/>}
-            {tab === 'Dashboard' && <ApplicationHome onDrill={(next,vehicleId,ids,label)=>{if(!navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
-            {tab === 'RCA & Rovinietă' && <RenewalCenter key={data.profile.offsets.join(',')+String(data.profile.emailEnabled)+String(data.profile.pushEnabled)} data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} onDocument={(category,record)=>{setRenewalCategory(category);setModal({kind:'document',record});}} onNavigate={next=>{if(navigate(next)&&next==='Setări')setSettingsPanel('alerts');}} onPreferences={async profile=>{await act(()=>api('profile','PUT',{timezone:profile.timezone,emailEnabled:profile.emailEnabled,pushEnabled:profile.pushEnabled,afterExpiry:profile.afterExpiry,offsets:profile.offsets,hour:profile.hour}));}} busy={busy} preview={!!previewData}/>}
+            {tab === 'Dashboard' && <ApplicationHome onDrill={async (next,vehicleId,ids,label)=>{if(!await navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
+            {tab === 'RCA & Rovinietă' && <RenewalCenter key={data.profile.offsets.join(',')+String(data.profile.emailEnabled)+String(data.profile.pushEnabled)} data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} onDocument={(category,record)=>{setRenewalCategory(category);setModal({kind:'document',record});}} onNavigate={async next=>{if(await navigate(next)&&next==='Setări')setSettingsPanel('alerts');}} onPreferences={async profile=>{await act(()=>api('profile','PUT',{timezone:profile.timezone,emailEnabled:profile.emailEnabled,pushEnabled:profile.pushEnabled,afterExpiry:profile.afterExpiry,offsets:profile.offsets,hour:profile.hour}));}} busy={busy} preview={!!previewData}/>}
             {tab === 'AutoCare AI' && <AutoAiWorkspace onExit={()=>navigate('Dashboard')}
               vehicles={activeCars}
               vehicleId={selectActiveVehicle(activeCars, vehicleDetail ?? primaryVehicleId)?.id ?? ''}
               onVehicle={id => navigate('AutoCare AI', 'push', id)}
               pricing={data.pricing} premium={data.premium} available={data.autoAssistantAvailable} preview={!!previewData} onSaved={refresh}
             />}
-            {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onLanguage={changeLanguage} onSettings={panel=>{if(navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
+            {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onLanguage={changeLanguage} onSettings={async panel=>{if(await navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
             {tab === 'Istoric auto' && <VehicleJournal data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
         {tab === 'Garaj' && vehicleDetail && (
           <section className="ac-vehicle-profile" aria-label={language === 'en' ? 'Vehicle profile' : 'Profilul vehiculului'}>
@@ -981,11 +988,11 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               data={data}
               id={vehicleDetail}
               busy={busy}
-              removeService={(record) => {
+              removeService={async (record) => {
                 const question = locale === 'ro-RO'
                   ? 'Arhivezi intervenția și oprești alertele ei?'
                   : 'Archive this service entry and stop its reminders?';
-                if (confirm(question)) void act(() => api('records/' + record.id, 'DELETE'));
+                await requestConfirmation(question,async()=>{await act(() => api('records/' + record.id, 'DELETE'),undefined,true);});
               }}
               edit={() => {
                 const v = data.vehicles.find((v) => v.id === vehicleDetail);
@@ -1006,8 +1013,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                 onDetails={id => navigate('Garaj', 'push', id)}
               onAi={id => navigate('AutoCare AI', 'push', id)}
                 onEdit={vehicle => setModal({ kind: 'vehicle', vehicle })}
-                onDocuments={id => {
-                  if (!navigate('Documente')) return;
+                onDocuments={async id => {
+                  if (!await navigate('Documente')) return;
                   setFilter(id);
                   setQuery('');
                   setCategoryFilter('');
@@ -1021,19 +1028,18 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             {tab === 'Cheltuieli' && <FinanceCenter
               onDelete={setDeleteRecordTarget} data={data} today={nowDate} primaryId={primaryVehicleId} preview={!!previewData} money={moneyDisplay}
               onEdit={record => setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })}
-              onArchive={record => {
-                if (window.confirm(language === 'en' ? 'Archive this record and stop its reminders?' : 'Arhivezi înregistrarea și oprești alertele asociate?'))
-                  void act(() => api('records/' + record.id, 'DELETE'));
+              onArchive={async record => {
+                await requestConfirmation(language === 'en' ? 'Archive this record and stop its reminders?' : 'Arhivezi înregistrarea și oprești alertele asociate?',async()=>{await act(() => api('records/' + record.id, 'DELETE'),undefined,true);});
               }}
               onRestore={record => { void act(() => api('records/' + record.id + '/restore', 'POST')); }}
               onAi={id => navigate('AutoCare AI', 'push', id)} onRefresh={refresh}
             />}
             {tab === 'Documente' && <DocumentVault onDelete={setDeleteRecordTarget} onRenewals={()=>navigate('RCA & Rovinietă')} data={drill?{...data,records:data.records.filter(r=>drill.ids.includes(r.id))}:data} vehicleId={filter} onVehicle={setFilter} preview={!!previewData} busy={busy}
               onEdit={record=>setModal({kind:'document',record})} onCreate={()=>setModal(activeCars.length?{kind:'document'}:{kind:'vehicle'})}
-              onArchive={record=>{if(window.confirm(language==='en'?'Archive this document?':'Arhivezi acest document?'))void act(()=>api('records/'+record.id,'DELETE'));}}
+              onArchive={async record=>{await requestConfirmation(language==='en'?'Archive this document?':'Arhivezi acest document?',async()=>{await act(()=>api('records/'+record.id,'DELETE'),undefined,true);});}}
               onRestore={record=>{void act(()=>api('records/'+record.id+'/restore','POST'));}}
               onHistory={record=>{void act(async()=>{setHistory(await api('records/'+record.id+'/history'));},'');}}
-              onDeleteFile={file=>{if(window.confirm(language==='en'?'Permanently delete this attachment?':'Ștergi definitiv acest atașament?'))void act(()=>api('files/'+file.id,'DELETE'));}}
+              onDeleteFile={async file=>{await requestConfirmation(language==='en'?'Permanently delete this attachment?':'Ștergi definitiv acest atașament?',async()=>{await act(()=>api('files/'+file.id,'DELETE'),undefined,true);});}}
               onUpload={async(record,file)=>{if(file.size>2097152)throw Error(language==='en'?'Choose a file up to 2 MB.':'Alege un fișier de maximum 2 MB.');const form=new FormData();form.set('file',file);form.set('recordId',record.id);const res=await fetch('/api/v1/files',{method:'POST',body:form});const out=await res.json().catch(()=>({}));if(!res.ok)throw new Error(out.error||(language==='en'?'Upload failed.':'Încărcarea a eșuat.'));await refresh();setNotice(language==='en'?'Document attached.':'Documentul a fost atașat.');}}
             />}
             {['Întreținere'].includes(tab) && (
@@ -1084,7 +1090,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                           <strong>{vehicle.odometer.toLocaleString(locale)} km</strong>
                           <div className="ac-service-actions" data-workspace-ui>
                             <button type="button" onClick={() => navigate('AutoCare AI', 'push', vehicle.id)}>AI Maintenance <ArrowUpRight size={15}/></button>
-                            <button type="button" onClick={() => { if (navigate('Calendar')) setFilter(vehicle.id); }}>{language === 'en' ? 'View calendar' : 'Vezi calendarul'}</button>
+                            <button type="button" onClick={async () => { if (await navigate('Calendar')) setFilter(vehicle.id); }}>{language === 'en' ? 'View calendar' : 'Vezi calendarul'}</button>
                           </div>
                         </div>
                         <TitaniumWave />
@@ -1357,8 +1363,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                                       <button
                                         className="close danger"
                                         aria-label={'Șterge ' + f.name}
-                                        onClick={() => {
-                                          if (confirm(translateApplicationCopy('Ștergi definitiv atașamentul?',locale==='ro-RO'?'ro':'en')))
+                                        onClick={async () => {
+                                          if (await requestConfirmation(translateApplicationCopy('Ștergi definitiv atașamentul?',locale==='ro-RO'?'ro':'en')))
                                             act(() => api('files/' + f.id, 'DELETE'));
                                         }}
                                       >
@@ -1467,9 +1473,9 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                                       </button>
                                       <button
                                         className="danger"
-                                        onClick={() => {
+                                        onClick={async () => {
                                           if (
-                                            confirm(
+                                            await requestConfirmation(
                                               translateApplicationCopy('Arhivezi această înregistrare și oprești alertele?',locale==='ro-RO'?'ro':'en'),
                                             )
                                           )
@@ -1518,7 +1524,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                 <section className="card autocare-notifications">
                   <div className="autocare-notifications-header">
                     <div><h3>{language === 'en' ? 'Your alerts' : 'Alertele tale'}</h3><p>{language === 'en' ? 'Review, mark as read or dismiss.' : 'Consultă, marchează ca citite sau elimină alertele.'}</p></div>
-                    <button type="button" className="autocare-notifications-settings" onClick={() => { if (navigate('Setări')) setSettingsPanel('alerts'); }}>
+                    <button type="button" className="autocare-notifications-settings" onClick={async () => { if (await navigate('Setări')) setSettingsPanel('alerts'); }}>
                       {language === 'en' ? 'Preferences' : 'Preferințe'}
                     </button>
                   </div>
@@ -1848,9 +1854,9 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
             onClose={closeRecord}
           >
             {modal.kind === 'service' && modal.record && !modal.completionOf && !modal.record.cancelled && data.premium && isPlannedService(modal.record, nowDate) && calendarRecordDate(modal.record, nowDate) && (
-              <button type="button" className="primary" onClick={() => {
+              <button type="button" className="primary" onClick={async () => {
                 const record = modal.record!;
-                if (recordDirty && !window.confirm(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?', language))) return;
+                if (recordDirty && !await requestConfirmation(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?', language))) return;
                 setRecordDirty(false);
                 setModal({ kind: 'service', completionOf: record.id, record: completedServiceSeed(record, data.vehicles.find(v => v.id === record.vehicleId)?.odometer ?? record.odometer ?? 0, nowDate) });
               }} data-workspace-ui>{language === 'en' ? 'Mark as completed' : 'Marchează ca efectuată'}</button>
@@ -1960,11 +1966,11 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                   </label>
                   <label>
                     Combustibil
-                    <select name="fuel" defaultValue={modal.vehicle?.fuel || 'Benzină'}>
+                    <FilterSelect name="fuel" defaultValue={modal.vehicle?.fuel || 'Benzină'}>
                       {['Benzină', 'Diesel', 'Hibrid', 'Electric', 'GPL', 'Altul'].map((f) => (
                         <option key={f} value={f}>{f}</option>
                       ))}
-                    </select>
+                    </FilterSelect>
                   </label>
                   <details className="app-vehicle-extra full"><summary>{language==='en'?'Technical details · optional':'Detalii tehnice · opțional'}</summary><div className="form-grid">
                   <label>

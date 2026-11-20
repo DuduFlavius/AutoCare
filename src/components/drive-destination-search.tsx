@@ -59,9 +59,9 @@ export default function DriveDestinationSearch({ area, nearPosition, disabled, e
   return (
     <section className="ac-destination-search" aria-label={t('Caută destinația', 'Search destination')}>
       <form onSubmit={search}>
-        <label htmlFor="ac-destination-address">{t('Unde mergi?', 'Where are you going?')}</label>
+        <label htmlFor="ac-destination-address">{t('Unde mergem?', 'Where to?')}</label>
         <div className="ac-destination-search-row">
-          <input id="ac-destination-address" type="search" placeholder={t('Ex. Auchan, gară sau o adresă', 'E.g. Auchan, station or an address')} value={query}
+          <input id="ac-destination-address" type="search" placeholder={t('Unde mergem?', 'Where to?')} value={query}
             maxLength={160} disabled={disabled} autoComplete="off" aria-autocomplete="list" aria-controls="ac-destination-matches"
             onChange={event => { pending.current?.abort(); setQuery(event.target.value); setMatches(null); setLoading(false); setError(''); }}/>
           <button type="submit" className="primary" disabled={disabled || loading || query.trim().length < 3}><Search size={17}/>{t('Caută', 'Search')}</button>

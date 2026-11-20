@@ -1,4 +1,6 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
 import {FilterSelect} from '../filter-select';
 import {ActionMenu} from '../action-menu';
 import {PremiumDateInput} from '@/components/premium-date-input';
@@ -171,8 +173,8 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, o
     } catch { setError(t('Feedbackul nu a putut fi salvat. Reîncearcă.', 'Could not save feedback. Please try again.')); }
   }
 
-  function removeConversation() {
-    if (!visibleTurns.length || !window.confirm(t('Ștergi această conversație? Acțiunea nu poate fi anulată.', 'Delete this conversation? This cannot be undone.'))) return;
+  async function removeConversation() {
+    if (!visibleTurns.length || !await requestConfirmation(t('Ștergi această conversație? Acțiunea nu poate fi anulată.', 'Delete this conversation? This cannot be undone.'))) return;
     const ids = visibleTurns.map(turn => turn.id);
     void run(async signal => {
       await request('auto-assistant/history', { ...json('DELETE', { vehicleId, turnIds: ids }), signal });

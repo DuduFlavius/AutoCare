@@ -1,4 +1,8 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
+import {FilterSelect} from '@/components/filter-select';
+
 import FeedbackWorkspace from './feedback-workspace';
 import './feedback.css';
 import './filter-select.css';
@@ -165,8 +169,8 @@ const [tab, setTab] = useState('Utilizatori'),
     }
   }
   const feedbackDirty=useRef(false),feedbackSaving=useRef(false);
-  function navigate(t: string) {
-    if(feedbackSaving.current||feedbackDirty.current&&!window.confirm(locale==='en-GB'?'Discard unsaved feedback changes?':'Renunți la modificările nesalvate din feedback?'))return;
+  async function navigate(t: string) {
+    if(feedbackSaving.current||feedbackDirty.current&&!await requestConfirmation(locale==='en-GB'?'Discard unsaved feedback changes?':'Renunți la modificările nesalvate din feedback?'))return;
     setTab(t);
     setPage(1);
     setQ('');
@@ -204,7 +208,7 @@ const [tab, setTab] = useState('Utilizatori'),
     setPage(1);
   }
   return (
-    <div className="founder-shell">
+    <div className="founder-shell" data-language={locale.startsWith('en')?'en':'ro'}>
       <aside className="founder-sidebar">
         <a href="/cont" className="founder-brand">
           <span>
@@ -371,13 +375,13 @@ const [tab, setTab] = useState('Utilizatori'),
                 </p>
                 <form
                   className="founder-team-form"
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
                     const form = e.currentTarget;
                     const values = new FormData(form);
                     const email = String(values.get('email'));
                     const nextRole = String(values.get('teamRole'));
-                    if (!window.confirm(translateApplicationCopy(`Acorzi rolul ${labels[nextRole]} contului ${email}?`,locale==='ro-RO'?'ro':'en')))
+                    if (!await requestConfirmation(translateApplicationCopy(`Acorzi rolul ${labels[nextRole]} contului ${email}?`,locale==='ro-RO'?'ro':'en')))
                       return;
                     void act(async () => {
                       await api('team', 'POST', { email, role: nextRole, confirm: true });
@@ -401,11 +405,11 @@ const [tab, setTab] = useState('Utilizatori'),
                   </label>
                   <label>
                     Acces
-                    <select name="teamRole">
+                    <FilterSelect name="teamRole">
                       <option value="assistant">Asistent</option>
                           <option value="superadmin">Super Admin</option>
                       <option value="admin">Administrator</option>
-                    </select>
+                    </FilterSelect>
                   </label>
                   <button className="primary" disabled={busy}>
                     {busy ? 'Se salvează…' : 'Acordă acces'}
@@ -424,7 +428,7 @@ const [tab, setTab] = useState('Utilizatori'),
                   onChange={(e) => setQ(e.target.value)}
                 />
               </label>
-              <select
+              <FilterSelect
                 aria-label="Filtru rol"
                 value={role}
                 onChange={(e) => {
@@ -438,8 +442,8 @@ const [tab, setTab] = useState('Utilizatori'),
                     {label}
                   </option>
                 ))}
-              </select>
-              <select
+              </FilterSelect>
+              <FilterSelect
                 aria-label="Filtru Premium"
                 value={premiumFilter}
                 onChange={(e) => {
@@ -452,7 +456,7 @@ const [tab, setTab] = useState('Utilizatori'),
                 <option value="free">Fără Premium</option>
                 <option value="manual">Premium manual</option>
                 <option value="paid">Premium plătit</option>
-              </select>
+              </FilterSelect>
               <button className="primary">Caută</button>
             </form>
             <div className={'founder-user-grid ' + (selected ? 'has-selection' : '')}>
@@ -614,12 +618,12 @@ const [tab, setTab] = useState('Utilizatori'),
                   {selected.role !== 'founder' && tab !== 'Abonamente' && (
                     <form
                       className="stack founder-action-form"
-                      onSubmit={(e) => {
+                      onSubmit={async (e) => {
                         e.preventDefault();
                         const f = new FormData(e.currentTarget);
                         const next = String(f.get('role'));
                         if (
-                          window.confirm(translateApplicationCopy(`Schimbi rolul lui ${selected.name} în ${labels[next]}?`,locale==='ro-RO'?'ro':'en'))
+                          await requestConfirmation(translateApplicationCopy(`Schimbi rolul lui ${selected.name} în ${labels[next]}?`,locale==='ro-RO'?'ro':'en'))
                         )
                           void act(
                             () =>
@@ -633,7 +637,7 @@ const [tab, setTab] = useState('Utilizatori'),
                     >
                       <label>
                         Rol verificat pe server
-                        <select
+                        <FilterSelect
                           name="role"
                           defaultValue={selected.role}
                           key={selected.id + selected.role}
@@ -642,7 +646,7 @@ const [tab, setTab] = useState('Utilizatori'),
                           <option value="assistant">Asistent</option>
                           <option value="superadmin">Super Admin</option>
                           <option value="admin">Administrator</option>
-                        </select>
+                        </FilterSelect>
                       </label>
                       <button className="primary" disabled={busy}>
                         Salvează rolul
@@ -652,9 +656,9 @@ const [tab, setTab] = useState('Utilizatori'),
                           type="button"
                           className="danger"
                           disabled={busy}
-                          onClick={() => {
+                          onClick={async () => {
                             if (
-                              window.confirm(
+                              await requestConfirmation(
                                 translateApplicationCopy(`Revoci accesul de ${labels[selected.role]} pentru ${selected.name}? Contul va rămâne Client.`,locale==='ro-RO'?'ro':'en'),
                               )
                             )
@@ -675,7 +679,7 @@ const [tab, setTab] = useState('Utilizatori'),
                   )}
                   <form
                     className="stack founder-action-form"
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
                       const f = new FormData(e.currentTarget);
                       const grant =
@@ -686,7 +690,7 @@ const [tab, setTab] = useState('Utilizatori'),
                             : { months: Number(duration) };
                       if (
                         duration === 'forever' &&
-                        !window.confirm(translateApplicationCopy('Acorzi explicit Premium fără dată de expirare?',locale==='ro-RO'?'ro':'en'))
+                        !await requestConfirmation(translateApplicationCopy('Acorzi explicit Premium fără dată de expirare?',locale==='ro-RO'?'ro':'en'))
                       )
                         return;
                       void act(
@@ -707,14 +711,14 @@ const [tab, setTab] = useState('Utilizatori'),
                     <p className="small muted">Oferi acces gratuit, fără să declanșezi o plată.</p>
                     <label>
                       Durată
-                      <select value={duration} onChange={(e) => setDuration(e.target.value)}>
+                      <FilterSelect value={duration} onChange={(e) => setDuration(e.target.value)}>
                         <option value="1">1 lună</option>
                         <option value="3">3 luni</option>
                         <option value="6">6 luni</option>
                         <option value="12">1 an</option>
                         <option value="custom">Dată personalizată</option>
                         <option value="forever">Fără dată de expirare</option>
-                      </select>
+                      </FilterSelect>
                     </label>
                     {duration === 'custom' && (
                       <label>
@@ -747,9 +751,9 @@ const [tab, setTab] = useState('Utilizatori'),
                         (g) => !g.revokedAt && (!g.expiresAt || new Date(g.expiresAt) > new Date()),
                       )
                     }
-                    onClick={() => {
+                    onClick={async () => {
                       if (
-                        window.confirm(
+                        await requestConfirmation(
                           translateApplicationCopy('Revoci tot accesul Premium acordat manual? Abonamentul plătit, dacă există, rămâne neschimbat.',locale==='ro-RO'?'ro':'en'),
                         )
                       )
@@ -808,9 +812,9 @@ const [tab, setTab] = useState('Utilizatori'),
                     <button
                       className={selected.suspendedAt ? 'button' : 'danger'}
                       disabled={busy}
-                      onClick={() => {
+                      onClick={async () => {
                         if (
-                          window.confirm(
+                          await requestConfirmation(
                             translateApplicationCopy(selected.suspendedAt
                               ? 'Reactivezi contul?'
                               : 'Suspendarea deconectează utilizatorul și îi oprește accesul. Continui?',locale==='ro-RO'?'ro':'en'),
@@ -843,11 +847,11 @@ const [tab, setTab] = useState('Utilizatori'),
             <form
               key={price.version}
               className="stack"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
                 const f = new FormData(e.currentTarget);
                 if (
-                  !window.confirm(
+                  !await requestConfirmation(
                     translateApplicationCopy('Actualizezi prețurile pentru abonamentele noi? Abonamentele existente nu vor fi modificate automat.',locale==='ro-RO'?'ro':'en'),
                   )
                 )

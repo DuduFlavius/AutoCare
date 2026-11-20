@@ -1,4 +1,6 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
 import { useEffect, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { nativeTracking, nativeAutomation, nativeMethodMissing } from '@/lib/native-tracking';
@@ -110,7 +112,7 @@ export default function AutoUpdate() {
     <p style={{ color: '#FFFFFF', margin: '8px 0 12px' }}>{androidRelease ? (en ? 'Android will ask you to confirm installation. Save your trip first.' : 'Android îți va cere confirmarea instalării. Salvează întâi traseul.') : (en ? 'The interface refreshes automatically when idle, after trips sync and without unsaved edits.' : 'Interfața se actualizează automat în repaus, după sincronizarea traseelor și fără modificări nesalvate.')}</p>
     <button type="button" disabled={installing} style={{ background: '#5AFFC4', color: '#fff', border: 0, padding: '12px 18px', borderRadius: 10, fontWeight: 700 }} onClick={async () => {
       if (document.documentElement.dataset.autocareGpsActive === 'true') { setGpsBlocked(true); return; }
-      if (dirty.current && !window.confirm(en ? 'Install the update? Unsaved form changes may be lost.' : 'Instalezi actualizarea? Modificările nesalvate din formular se pot pierde.')) return;
+      if (dirty.current && !await requestConfirmation(en ? 'Install the update? Unsaved form changes may be lost.' : 'Instalezi actualizarea? Modificările nesalvate din formular se pot pierde.')) return;
       setInstallError(false);
       setInstalling(true);
       if (androidRelease) {

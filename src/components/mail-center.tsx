@@ -1,4 +1,6 @@
 'use client';
+import {FilterSelect} from '@/components/filter-select';
+
 import {PremiumDateInput} from './premium-date-input';
 import './mail-studio.css';
 import {englishEmailCopy} from '@/lib/email-copy-en';
@@ -216,7 +218,7 @@ export default function MailCenter() {
           <p className="small muted">Șabloanele proprii se salvează în contul echipei și pot fi refolosite oricând.</p>
           <details className="mail-library"><summary>Șabloanele și tipurile mele</summary>
           <label>Biblioteca ta
-            <select value="" disabled={busy || saved} onChange={e => {
+            <FilterSelect value="" disabled={busy || saved} onChange={e => {
               const entry = data.library.find(x => x.id === e.target.value);
               if (!entry) return;
               if (entry.kind === 'template') {
@@ -228,7 +230,7 @@ export default function MailCenter() {
             }}>
               <option value="">Alege un șablon sau tip propriu</option>
               {data.library.filter(x => templateCategory(template) !== 'promotional' || x.category === 'promotional').map(x => <option key={x.id} value={x.id}>{x.kind === 'template' ? 'Șablon' : 'Tip'}: {x.label} · {x.category === 'promotional' ? 'Promoțional' : 'Administrativ'}</option>)}
-            </select>
+            </FilterSelect>
           </label>
           <label>Nume șablon / tip nou<input maxLength={100} value={libraryName} onChange={e => setLibraryName(e.target.value)} /></label>
           <div className="inline">
@@ -241,7 +243,7 @@ export default function MailCenter() {
           </details>
           <label>
             Șablon
-            <select
+            <FilterSelect
               value={template}
               disabled={saved || busy}
               onChange={(e) => choose(e.target.value as EmailTemplate)}
@@ -251,7 +253,7 @@ export default function MailCenter() {
                   {t.label}
                 </option>
               ))}
-            </select>
+            </FilterSelect>
           </label>
           {template === 'release_news' && <div className="form-grid">
             <label>{locale === 'ro-RO' ? 'Versiunea lansării' : 'Release version'}<input value={releaseVersion} maxLength={40} onChange={e => setReleaseVersion(e.target.value)} placeholder="2.4.0" /></label>
@@ -264,7 +266,7 @@ export default function MailCenter() {
           </label>
           <label>
             Categoria de comunicare
-            <select
+            <FilterSelect
               value={category}
               disabled={saved || busy || templateCategory(template) === 'promotional'}
               onChange={(e) => {
@@ -274,7 +276,7 @@ export default function MailCenter() {
             >
               <option value="transactional">Tranzacțional / administrativ necesar</option>
               <option value="promotional">Promoțional — doar cu acord</option>
-            </select>
+            </FilterSelect>
           </label>
           <p className="small muted">
             Ofertele și comunicările de marketing trebuie marcate promoționale. Oamenii fără acord
@@ -497,7 +499,7 @@ export default function MailCenter() {
         <section className="card mail-preview">
           <div className="inline">
             <h2>Previzualizare</h2>
-            <select aria-label={t('Limba previzualizării','Preview language')} value={previewLanguage} onChange={e=>{setPreviewLanguage(e.target.value as 'ro'|'en');setPreview(null);}}><option value="ro">RO</option><option value="en">EN</option></select>
+            <FilterSelect aria-label={t('Limba previzualizării','Preview language')} value={previewLanguage} onChange={e=>{setPreviewLanguage(e.target.value as 'ro'|'en');setPreview(null);}}><option value="ro">RO</option><option value="en">EN</option></FilterSelect>
             <button aria-pressed={width === 'desktop'} onClick={() => setWidth('desktop')}>
               Desktop
             </button>

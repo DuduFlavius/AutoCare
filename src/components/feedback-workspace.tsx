@@ -1,4 +1,6 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {MessageSquare,Plus,ArrowLeft,Star,Send,Paperclip,CheckCircle2,ShieldCheck,Mail} from 'lucide-react';
 import {useApplicationLanguage,useApplicationLocale} from './application-locale';
@@ -41,14 +43,14 @@ export default function FeedbackWorkspace({admin=false,preview=false,onDirty,onS
  useEffect(()=>{void load();return()=>{sequence.current++;};},[admin,filters,preview]);
  useEffect(()=>{heading.current?.focus();},[creating,detail?.item.id]);
  async function open(id:string){setLoading(true);setError('');setCreating(false);try{const out=await request('/'+id);setDetail(out);setStatus(out.item.status);setPriority(out.item.priority);setReply('');replyId.current=crypto.randomUUID();await request('/'+id+'/read','POST',{});announce();}catch(e){setError(errorText(e));}finally{setLoading(false);}}
- function start(){if(dirty&&!window.confirm(t('Renunți la modificările nesalvate?','Discard unsaved changes?')))return;setReply('');setCreating(true);setDetail(null);setNotice('');setError('');if(!clientId.current)clientId.current=crypto.randomUUID();}
+ async function start(){if(dirty&&!await requestConfirmation(t('Renunți la modificările nesalvate?','Discard unsaved changes?')))return;setReply('');setCreating(true);setDetail(null);setNotice('');setError('');if(!clientId.current)clientId.current=crypto.randomUUID();}
  function changeFilter(key:keyof typeof filters,value:string){setFilters(previous=>({...previous,[key]:value,page:0}));}
  async function submit(event:FormEvent){
   event.preventDefault();if(submitting.current||preview)return;submitting.current=true;setBusy(true);setError('');if(!clientId.current)clientId.current=crypto.randomUUID();
   try{const form=new FormData();form.set('payload',JSON.stringify({clientId:clientId.current,category,area,rating,message:message.trim()}));files.forEach(file=>form.append('screenshots',file));const out=await request('','POST',form);setNotice(t('Mulțumim! Feedbackul tău a fost salvat. Poți urmări aici răspunsurile și statusul.','Thank you! Your feedback was saved. Track replies and its status here.'));setMessage('');setFiles([]);setRating(null);clientId.current='';setCreating(false);await load();await open(out.id);announce();}
   catch(e){setError(errorText(e));}finally{submitting.current=false;setBusy(false);}
  }
- const back=()=>{if(busy||dirty&&!window.confirm(t('Ai modificări nesalvate. Vrei să le abandonezi?','You have unsaved changes. Discard them?')))return;setDetail(null);setCreating(false);setReply('');setMessage('');setFiles([]);setRating(null);setError('');void load();};
+ const back=async ()=>{if(busy||dirty&&!await requestConfirmation(t('Ai modificări nesalvate. Vrei să le abandonezi?','You have unsaved changes. Discard them?')))return;setDetail(null);setCreating(false);setReply('');setMessage('');setFiles([]);setRating(null);setError('');void load();};
  return <section className="ac-feedback" data-workspace-ui aria-busy={loading||busy}>
   <header className="ac-feedback-heading">
    <div><h1 ref={heading} tabIndex={-1}>{admin?t('Feedback utilizatori','User feedback'):creating?t('Trimite feedback','Send feedback'):detail?t('Detalii feedback','Feedback details'):t('Părerile mele','My feedback')}</h1>
@@ -86,7 +88,7 @@ export default function FeedbackWorkspace({admin=false,preview=false,onDirty,onS
    <div className="ac-feedback-list">{list?.rows.map(row=><button type="button" className="ac-feedback-card ac-feedback-list-item" key={row.id} onClick={()=>void open(row.id)}><div className="ac-feedback-tags"><span>{label('category',row.category)}</span><span>{label('status',row.status)}</span>{admin&&<span data-priority={row.priority}>{label('priority',row.priority)}</span>}</div><p data-user-content>{row.message.length>180?row.message.slice(0,180)+'…':row.message}</p><footer><span>{day(row.updatedAt)}{row.ownerName&&' · '+row.ownerName}</span>{row.rating&&<span>★ {row.rating}/5</span>}</footer></button>)}</div>
    {!!list?.total&&<nav className="ac-feedback-pagination" aria-label={t('Paginare feedback','Feedback pagination')}><button disabled={!filters.page||loading} onClick={()=>setFilters(previous=>({...previous,page:previous.page-1}))}>{t('Anterior','Previous')}</button><span>{filters.page+1}/{Math.max(1,Math.ceil(list.total/20))} · {list.total}</span><button disabled={(filters.page+1)*20>=list.total||loading} onClick={()=>setFilters(previous=>({...previous,page:previous.page+1}))}>{t('Următor','Next')}</button></nav>}
   </>}
-  {!admin&&<aside className="ac-feedback-support-note"><MessageSquare size={19}/><div><strong>{t('Ai nevoie de ajutor?','Need help?')}</strong><p>{t('Pentru erori sau probleme cu contul, scrie în Centrul de suport. Aici ne lași părerea despre aplicație.','For bugs or account issues, contact the Support Center. This space is for your opinion about the app.')}</p></div><button type="button" disabled={busy} onClick={()=>{if(dirty&&!window.confirm(t('Renunți la modificările nesalvate?','Discard unsaved changes?')))return;onSupport?.();}}>{t('Deschide suportul','Open support')}</button></aside>}
+  {!admin&&<aside className="ac-feedback-support-note"><MessageSquare size={19}/><div><strong>{t('Ai nevoie de ajutor?','Need help?')}</strong><p>{t('Pentru erori sau probleme cu contul, scrie în Centrul de suport. Aici ne lași părerea despre aplicație.','For bugs or account issues, contact the Support Center. This space is for your opinion about the app.')}</p></div><button type="button" disabled={busy} onClick={async ()=>{if(dirty&&!await requestConfirmation(t('Renunți la modificările nesalvate?','Discard unsaved changes?')))return;onSupport?.();}}>{t('Deschide suportul','Open support')}</button></aside>}
  </section>;
 }
 

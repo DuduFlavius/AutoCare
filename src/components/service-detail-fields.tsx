@@ -1,4 +1,6 @@
 'use client';
+import {FilterSelect} from '@/components/filter-select';
+
 import {repairCategories} from '@/lib/record-categories';
 import { useState } from 'react';
 type Field = { key: string; label: string; type?: 'number'|'date'|'select'|'textarea'; options?: string[]; unit?: string; placeholder?: string };
@@ -27,7 +29,7 @@ export default function ServiceDetailFields({category,parts}:{category:string;pa
  const [filters,setFilters]=useState(()=>Math.max(1,...Object.keys(saved).filter(x=>/^filtru\d+Tip$/.test(x)).map(x=>Number(x.match(/\d+/)?.[0]||0)+1)));
  if(!config)return null;
  const render=(f:Field)=> <label key={f.key}>{f.label}{f.unit?' · '+f.unit:''}
- {f.type==='select'?<select name={'ac_'+f.key} defaultValue={saved[f.key]||''}><option value="">Alege (opțional)</option>{f.options?.map(x=><option key={x} value={x}>{x}</option>)}</select>
+ {f.type==='select'?<FilterSelect name={'ac_'+f.key} defaultValue={saved[f.key]||''}><option value="">Alege (opțional)</option>{f.options?.map(x=><option key={x} value={x}>{x}</option>)}</FilterSelect>
  :f.type==='textarea'?<textarea name={'ac_'+f.key} defaultValue={saved[f.key]||''} maxLength={800} rows={2}/>
  :<input name={'ac_'+f.key} type={f.type||'text'} step={f.type==='number'?'0.01':undefined} min={f.type==='number'?0:undefined} defaultValue={saved[f.key]||''} placeholder={f.placeholder||'Opțional'}/>}</label>;
  return <section className="ac-service-details" aria-label={config.heading}>

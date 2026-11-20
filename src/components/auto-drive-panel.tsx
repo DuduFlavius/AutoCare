@@ -1,4 +1,8 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
+import {FilterSelect} from '@/components/filter-select';
+
 
 import { Bluetooth, BluetoothConnected, CarFront, Radio, Settings2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -181,7 +185,7 @@ export default function AutoDrivePanel({
           {vehicles.length > 0 && (
             <label>
               {t('Mașină', 'Vehicle')}
-              <select
+              <FilterSelect
                 value={carId || ''}
                 disabled={busy}
                 onChange={(event) => chooseVehicle(event.target.value)}
@@ -191,7 +195,7 @@ export default function AutoDrivePanel({
                     {vehicle.brand} {vehicle.model}
                   </option>
                 ))}
-              </select>
+              </FilterSelect>
             </label>
           )}
           {!supported ? (
@@ -227,7 +231,7 @@ export default function AutoDrivePanel({
               {!!devices?.length && (
                 <label>
                   {t('Dispozitiv auto', 'Car device')}
-                  <select
+                  <FilterSelect
                     value={device}
                     disabled={busy}
                     onChange={(event) => setDevice(event.target.value)}
@@ -238,7 +242,7 @@ export default function AutoDrivePanel({
                         {item.name} · {item.address}
                       </option>
                     ))}
-                  </select>
+                  </FilterSelect>
                 </label>
               )}
               <button
@@ -360,9 +364,9 @@ export default function AutoDrivePanel({
             <button
               type="button"
               disabled={busy}
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
+                  await requestConfirmation(
                     t(
                       'Salvezi aceste trasee fără să adaugi kilometri?',
                       'Save these trips without adding mileage?',

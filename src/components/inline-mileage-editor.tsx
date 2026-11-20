@@ -1,4 +1,6 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
 import {PremiumDateInput} from './premium-date-input';
 import { useState } from 'react';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
@@ -16,7 +18,7 @@ export default function InlineMileageEditor({ vehicleId, currentKm, preview, onS
     if (invalid || busy) return;
     if (preview) { setError(en ? 'Preview only. No mileage is saved.' : 'În previzualizare nu se salvează kilometrajul.'); return; }
     if (delta >= 1500 && confirmed !== target) { setConfirmed(target); return; }
-    if(!window.confirm(en?'Save this confirmed odometer reading?':'Salvezi această citire confirmată a kilometrajului?'))return;
+    if(!await requestConfirmation(en?'Save this confirmed odometer reading?':'Salvezi această citire confirmată a kilometrajului?'))return;
     setBusy(true); setError(''); setSaved(false);
     try {
       const response = await fetch('/api/v1/smartdrive/vehicles/' + encodeURIComponent(vehicleId) + '/readings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ odometer: target, date, notes }) });

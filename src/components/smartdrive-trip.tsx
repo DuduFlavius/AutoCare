@@ -1,4 +1,6 @@
 'use client';
+import {requestConfirmation} from '@/components/premium-dialogs';
+
 import {FilterSelect} from './filter-select';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useRef, useState } from 'react';
@@ -236,7 +238,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     <AutoPointsMap preview={preview} visible={liveVisible} ownerId={ownerId} session={{position:currentPosition,points:routePoints,meters:distance,active,locate:idleLocation.locate,start,stop,
       vehicle:vehicles.length>0?<label>{t('Vehicul','Vehicle')}<FilterSelect value={currentCar?.id||''} disabled={active||distance>0&&!saved} onChange={e=>setVehicleId(e.target.value)}>{vehicles.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model}{v.plate?' · '+v.plate:''}</option>)}</FilterSelect></label>:null,
       messages:<>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}</>,
-      controls:<>{!active?driveButton:<button type="button" onClick={stop}>{t('Oprește înregistrarea','Stop recording')}</button>}{!active&&distance>0&&!automatic&&<button type="button" disabled={saving||preview||saved} onClick={()=>void saveTrip()}>{saved?t('Cursă salvată','Trip saved'):saving?t('Se salvează…','Saving…'):t('Salvează cursa','Save trip')}</button>}</>
+      controls:<>{!active?driveButton:<button type="button" onClick={async ()=>{if(await requestConfirmation(t('Oprești înregistrarea? Distanța validă va fi salvată și sincronizată conform opțiunii alese.','Stop recording? Valid distance will be saved and synchronized according to your selected setting.')))stop();}}>{t('Oprește înregistrarea','Stop recording')}</button>}{!active&&distance>0&&!automatic&&<button type="button" disabled={saving||preview||saved} onClick={()=>void saveTrip()}>{saved?t('Cursă salvată','Trip saved'):saving?t('Se salvează…','Saving…'):t('Salvează cursa','Save trip')}</button>}</>
     }}/>
     <details className="rg-drive-details"><summary>{t('Sesiune, sincronizare și permisiuni','Session, sync and permissions')}</summary>
     <div className="ac-drive-console">
@@ -245,7 +247,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     <div className="ac-smartdrive-trip-controls">
       {driveButton}
       {!active && !automatic && distance > 0 && <button type="button" disabled={saving || preview || saved} onClick={() => void saveTrip()}>{saved ? t("Călătorie salvată", "Trip saved") : saving ? 'Se salvează…' : syncMileage ? t("Salvează și sincronizează", "Save and sync mileage") : t("Salvează călătoria GPS", "Save GPS trip")}</button>}
-      {!active && !automatic && (distance>0 || (native&&startedAt!==null)) && !saved && <button type="button" disabled={saving} onClick={()=>{if(!window.confirm(t("Renunți la traseul nesalvat?", "Discard the unsaved trip?")))return;if(nativeMode.current){void nativeTracking.clear(ownerId).then(()=>{distanceRef.current=0;started.current=null;setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');}).catch(e=>setError(e instanceof Error?e.message:'GPS indisponibil.'));return;}distanceRef.current=0;started.current=null;previous.current=null;setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');try{localStorage.removeItem(draftKey);}catch{/* Storage unavailable. */}}}>{t('Renunță la traseu', 'Discard trip')}</button>}
+      {!active && !automatic && (distance>0 || (native&&startedAt!==null)) && !saved && <button type="button" disabled={saving} onClick={async ()=>{if(!await requestConfirmation(t("Renunți la traseul nesalvat?", "Discard the unsaved trip?")))return;if(nativeMode.current){void nativeTracking.clear(ownerId).then(()=>{distanceRef.current=0;started.current=null;setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');}).catch(e=>setError(e instanceof Error?e.message:'GPS indisponibil.'));return;}distanceRef.current=0;started.current=null;previous.current=null;setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');try{localStorage.removeItem(draftKey);}catch{/* Storage unavailable. */}}}>{t('Renunță la traseu', 'Discard trip')}</button>}
       <span><MapPin size={15}/> {active ? t('Înregistrare pornită', 'Recording enabled') : t('Înregistrare oprită', 'Recording off')}</span>
     </div>
     {!automatic&&<label className="ac-smartdrive-sync"><input type="checkbox" checked={syncMileage} disabled={saving||saved} onChange={e=>setSyncMileage(e.target.checked)}/> {t('Adaugă distanța validă la kilometraj și actualizează planul de întreținere la salvare.', 'Sync recorded distance with vehicle mileage and maintenance when saving.')}</label>}

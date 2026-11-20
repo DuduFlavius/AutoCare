@@ -1,4 +1,6 @@
 'use client';
+import {FilterSelect} from '@/components/filter-select';
+
 import { useState } from 'react';
 import MaintenanceForecast from './maintenance-forecast';
 import { maintenanceTargets } from '@/lib/maintenance-schedule';
@@ -76,13 +78,13 @@ export default function PremiumOverview({
         <>
           <label>
             {en ? 'Vehicle summary' : 'Rezumat mașină'}
-            <select value={car.id} onChange={(e) => setSelected(e.target.value)}>
+            <FilterSelect value={car.id} onChange={(e) => setSelected(e.target.value)}>
               {cars.map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.brand} {v.model} · {v.plate}
                 </option>
               ))}
-            </select>
+            </FilterSelect>
           </label>
           <p className="micro" data-user-content>
             {car.brand} {car.model} · {car.odometer.toLocaleString(locale)} km

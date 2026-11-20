@@ -1,4 +1,6 @@
 'use client';
+import {FilterSelect} from '@/components/filter-select';
+
 import { useEffect, useState } from 'react';
 import { parseServiceDetails } from '@/lib/service-details';
 import type { dashboard } from '@/lib/service';
@@ -169,7 +171,7 @@ export default function PremiumCareTools({
         >
           <label>
             {en ? 'Vehicle' : 'Mașină'}
-            <select
+            <FilterSelect
               value={vehicle}
               onChange={(e) => {
                 setVehicle(e.target.value);
@@ -181,7 +183,7 @@ export default function PremiumCareTools({
                   {v.brand} {v.model} · {v.plate}
                 </option>
               ))}
-            </select>
+            </FilterSelect>
           </label>
           <fieldset
             style={{
@@ -214,11 +216,11 @@ export default function PremiumCareTools({
           </fieldset>
           <label>
             {en ? 'Access expires after' : 'Accesul expiră după'}
-            <select value={days} onChange={(e) => setDays(Number(e.target.value))}>
+            <FilterSelect value={days} onChange={(e) => setDays(Number(e.target.value))}>
               <option value={1}>{en ? '24 hours' : '24 de ore'}</option>
               <option value={3}>{en ? '3 days' : '3 zile'}</option>
               <option value={7}>{en ? '7 days' : '7 zile'}</option>
-            </select>
+            </FilterSelect>
           </label>
           <label className="check">
             <input type="checkbox" checked={files} onChange={(e) => setFiles(e.target.checked)} />

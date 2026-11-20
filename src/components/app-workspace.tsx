@@ -1,4 +1,6 @@
 'use client';
+import {FilterSelect} from '@/components/filter-select';
+
 import { useState, useDeferredValue, type ReactNode } from 'react';
 import ReferenceArtwork,{type ReferenceArtworkName} from './reference-artwork';
 import {
@@ -57,7 +59,7 @@ export function WorkspaceNavigation({
 }: {
   tab: string;
   language: Language;
-  navigate: (tab: string) => boolean;
+  navigate: (tab: string) => Promise<boolean>;
   notifications?: number;
   support?: number;
   premium?: boolean;
@@ -286,7 +288,7 @@ export function WorkspaceContext({
 }: {
   tab: string;
   language: Language;
-  navigate: (tab: string) => boolean;
+  navigate: (tab: string) => Promise<boolean>;
 }) {
   const section = workspaceSections.find((s) => s.id === tab);
   if (!section || ['Dashboard', 'Cont'].includes(tab)) return null;
@@ -320,7 +322,7 @@ export function WorkspaceOverview({
   data: Data;
   language: Language;
   currency: 'RON' | 'EUR';
-  navigate: (tab: string) => boolean;
+  navigate: (tab: string) => Promise<boolean>;
 }) {
   const active = data.vehicles.filter((v) => !v.archived);
   const docs = data.records.filter(
@@ -399,23 +401,23 @@ export function WorkspacePreferences({
       <h3>{language === 'en' ? 'Language & display' : 'Limbă și afișare'}</h3>
       <label>
         {language === 'en' ? 'Application language' : 'Limba aplicației'}
-        <select
+        <FilterSelect
           value={language}
           onChange={(e) => onLanguage(e.target.value === 'en' ? 'en' : 'ro')}
         >
           <option value="ro">Română</option>
           <option value="en">English</option>
-        </select>
+        </FilterSelect>
       </label>
       <label>
         {language === 'en' ? 'Display currency' : 'Moneda de afișare'}
-        <select
+        <FilterSelect
           value={currency}
           onChange={(e) => onCurrency(e.target.value === 'EUR' ? 'EUR' : 'RON')}
         >
           <option>RON</option>
           <option>EUR</option>
-        </select>
+        </FilterSelect>
       </label>
       <p>
         {language === 'en'
