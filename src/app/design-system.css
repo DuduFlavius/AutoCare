@@ -15,7 +15,7 @@
   --color-shadow-color: #0005;
   --color-platinum: var(--titanium-silver);
   --color-nav: var(--midnight-navy);
-  --color-nav-raised: var(--graphite);
+  --color-nav-raised: var(--color-card);
   --color-primary: var(--electric-blue);
   --color-button: #20D99A;
   --color-primary-hover: color-mix(in srgb, var(--electric-blue) 83%, var(--titanium-white));
@@ -23,10 +23,14 @@
   --color-primary-ink: #5AFFC4;
   --color-bg: var(--obsidian-black);
   --color-secondary: var(--midnight-navy);
-  --color-card: var(--graphite);
+  --color-card: color-mix(in srgb, var(--graphite) 40%, var(--obsidian-black));
   --color-surface: var(--color-card);
-  --color-surface-muted: var(--graphite);
-  --color-border: var(--steel);
+  --color-surface-muted: color-mix(in srgb, var(--graphite) 55%, var(--obsidian-black));
+  --color-border: color-mix(in srgb, var(--steel) 38%, transparent);
+  --surface-card: radial-gradient(ellipse at top left, #20E6A209, transparent 65%), linear-gradient(140deg, #0B1C16, #050E0B);
+  --surface-raised: linear-gradient(145deg, #10251E, #050E0B);
+  --brand-ribbon: url('/emerald-reference/home-ribbons.svg');
+  --workspace-canvas: var(--brand-ribbon) right top / min(1200px, 100%) 190px no-repeat, var(--color-bg);
   --color-border-strong: color-mix(in srgb, var(--steel) 78%, var(--titanium-silver));
   --color-text: var(--titanium-white);
   --color-muted: var(--titanium-silver);

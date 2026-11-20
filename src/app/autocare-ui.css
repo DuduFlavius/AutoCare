@@ -3446,7 +3446,7 @@ a:hover:not(:where([class^="rg-"],[class^="rg-"] *)){
 /* Removed obsolete dark premium v2 rules; light theme is authoritative. */
 /* AutoCare reference-aligned UI v3: dark navigation, luminous workspace */
 .app-shell:not(:where([class^="rg-"],[class^="rg-"] *)){ background:var(--color-surface-muted);color:var(--color-text); }
-.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){ background:linear-gradient(155deg,var(--color-surface-muted) 0%,var(--color-surface-muted) 42%,var(--color-surface-muted) 100%);color:var(--color-text); }
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){ background:var(--workspace-canvas);color:var(--color-text); }
 .app-shell .app-header:not(:where([class^="rg-"],[class^="rg-"] *)){ background:var(--color-surface-muted);color:var(--color-text);border-bottom:1px solid var(--color-border); }
 .app-shell .main h1:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main h2:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main h3:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main strong:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text);}
 .app-shell .main .small:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main small:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .eyebrow:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted);}
@@ -3479,7 +3479,7 @@ a:hover:not(:where([class^="rg-"],[class^="rg-"] *)){
 
 /* Unified secondary-workspace surfaces; overrides dark legacy tiles at source. */
 .app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership):not(:where([class^="rg-"],[class^="rg-"] *)){
- background:var(--color-surface-muted)!important;color:var(--color-text)!important;
+ background:var(--workspace-canvas)!important;color:var(--color-text)!important;
 }
 .app-shell .main:is(.workspace-documents,.workspace-service,.workspace-expenses,.workspace-general,.workspace-garage,.workspace-settings,.workspace-membership) :is(.page-head,.toolbar,.card,.empty,.table-scroll,.record-search,.record-filter-panel>summary,.record-filter-fields,.document-gallery tbody tr,.calendar,.calendar-day,.calendar-event,.maintenance-overview,.record-aside,.record-tools,.section-title,.filter-pills,.list-item,.notice,.stat):not(:where([class^="rg-"],[class^="rg-"] *)){
  background-color:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-text)!important;border-color:var(--color-border)!important;

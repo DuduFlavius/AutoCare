@@ -1,7 +1,7 @@
 .rg-garage-page {
-  --garage-edge: #1C8062;
+  --garage-edge: var(--color-border);
   --garage-blue: #5AFFC4;
-  --garage-panel: linear-gradient(150deg,#10251E,#091611 74%);
+  --garage-panel: var(--surface-card);
   display: grid;
   min-width: 0;
   gap: clamp(18px, 2vw, 26px);

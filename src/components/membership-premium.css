@@ -16,7 +16,7 @@
     padding: 24px !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 18px !important;
-    background: var(--color-surface) !important;
+    background: var(--surface-card) !important;
     box-shadow: 0 6px 22px color-mix(in srgb, var(--color-primary) 3%, transparent) !important;
     position: relative !important;
   }
@@ -418,7 +418,7 @@
     padding: 18px;
     border: 1px solid var(--color-border);
     border-radius: 13px;
-    background: var(--color-surface);
+    background: var(--surface-card);
     display: grid;
     gap: 9px;
     min-width: 0;
@@ -709,7 +709,7 @@ html body .subscription-options.ac-plan-grid {
 }
 html body .subscription-options.ac-plan-grid > article.ac-plan-card {
  display:flex!important;flex-direction:column!important;min-width:0!important;min-height:0!important;height:auto!important;
- padding:22px!important;border-radius:16px!important;background:linear-gradient(150deg,#10251E,#091611)!important;border:1px solid #1C8062!important;
+ padding:22px!important;border-radius:16px!important;background:var(--surface-card)!important;border:1px solid var(--color-border)!important;
 }
 html body .subscription-options.ac-plan-grid > article.ac-plan-card h2 {
  margin:0 0 14px!important;font-size:19px!important;font-weight:650!important;line-height:1.35!important;letter-spacing:-.3px!important;
@@ -744,7 +744,7 @@ html body .subscription-options.ac-plan-grid > article.ac-plan-card > ul > li > 
 }
 html body .subscription-options.ac-plan-grid > article.ac-plan-card > ul > li:nth-child(-n+2) {color:#5AFFC4!important}
 html body .subscription-options.ac-plan-grid > article.ac-plan-card > .ac-plan-report {
- margin-top:auto!important;margin-bottom:12px!important;padding:10px 12px!important;background:#10251E!important;border:1px solid #1C8062!important;border-radius:10px!important;
+ margin-top:auto!important;margin-bottom:12px!important;padding:10px 12px!important;background:var(--surface-card)!important;border:1px solid var(--color-border)!important;border-radius:10px!important;
 }
 html body .subscription-options.ac-plan-grid > article.ac-plan-card > .ac-plan-report :is(a,strong) {font-size:12px!important;line-height:1.5!important}
 html body .subscription-options.ac-plan-grid > article.ac-plan-card > :is(a,button) {

@@ -91,7 +91,7 @@
     flex-direction: column !important;
     justify-content: center !important;
     padding: 36px 42px !important;
-    background: var(--color-surface) !important;
+    background: var(--surface-card) !important;
     min-width: 0 !important;
     max-width: none !important;
     border: 0 !important;
@@ -137,7 +137,7 @@
     padding: 12px 14px !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 10px !important;
-    background: var(--color-surface) !important;
+    background: var(--surface-card) !important;
     color: var(--color-text) !important;
     font-size: 14px !important;
     font-weight: 400 !important;
@@ -275,10 +275,10 @@
 @layer autocare-auth-refinement {
 /* The same navy surfaces and compact controls as the application. */
 html body .auth-layout.ac-auth-premium{background:#091611!important;border:1px solid #ffffff18!important;box-shadow:0 24px 90px #0003!important}
-html body .auth-layout.ac-auth-premium>.auth-editorial{background:radial-gradient(ellipse at 20% 15%,#1C806270,transparent 60%),linear-gradient(145deg,#091611,#091611)!important;min-height:640px!important}
+html body .auth-layout.ac-auth-premium>.auth-editorial{background:var(--brand-ribbon) right top/900px 260px no-repeat,#050E0B!important;min-height:640px!important}
 html body .auth-layout.ac-auth-premium>.auth-editorial>svg{position:absolute;top:60px;left:12%;width:76%;height:220px;color:#5AFFC4;opacity:.9}
-html body .auth-layout.ac-auth-premium>.auth-box{background:linear-gradient(145deg,#10251E,#091611)!important;padding:44px!important}
-html body .auth-layout.ac-auth-premium .auth-box form input:not([type=checkbox]){background:#091611!important;border:1px solid #ffffff20!important;border-radius:12px!important;min-height:50px!important;color:#edf2ff!important;font-size:16px!important}
+html body .auth-layout.ac-auth-premium>.auth-box{background:var(--surface-card)!important;padding:44px!important}
+html body .auth-layout.ac-auth-premium .auth-box form input:not([type=checkbox]){background:var(--surface-card)!important;border:1px solid #ffffff20!important;border-radius:12px!important;min-height:50px!important;color:#edf2ff!important;font-size:16px!important}
 html body .auth-layout.ac-auth-premium .auth-box form input:focus-visible{border-color:#5AFFC4!important;outline:3px solid #5AFFC420!important}
 html body .auth-layout.ac-auth-premium .auth-box form>button[type=submit]{border-radius:12px!important;min-height:50px!important;background:var(--color-primary)!important;color:var(--color-on-primary)!important}
 html body .auth-layout.ac-auth-premium .auth-editorial-content>p{font-size:15px!important;line-height:1.7!important}
@@ -318,7 +318,7 @@ html body .auth-layout.ac-auth-premium .ac-auth-ai-details .ac-public-ai{margin:
  html body .auth-layout.ac-auth-premium .auth-box>h1{font-size:25px!important;text-align:center!important;margin:0 0 8px!important;letter-spacing:-.025em!important}
  html body .auth-layout.ac-auth-premium .auth-box>p.muted{text-align:center!important;font-size:13px!important;margin:0 0 30px!important;color:#FFFFFF!important}
  html body .auth-layout.ac-auth-premium .auth-box form{gap:18px!important}
- html body .auth-layout.ac-auth-premium .auth-box form input:not([type=checkbox]){min-height:50px!important;padding:13px 15px!important;border:1px solid #20E6A23b!important;border-radius:13px!important;background:#091611!important;font-size:15px!important}
+ html body .auth-layout.ac-auth-premium .auth-box form input:not([type=checkbox]){min-height:50px!important;padding:13px 15px!important;border:1px solid #20E6A23b!important;border-radius:13px!important;background:var(--surface-card)!important;font-size:15px!important}
  html body .auth-layout.ac-auth-premium .auth-box form>button[type=submit]{min-height:50px!important;border-radius:13px!important;margin-top:8px!important;background:linear-gradient(115deg,#5AFFC4,#0B1C16)!important;border:1px solid #5AFFC46e!important;color:white!important;font-size:14px!important}
  html body .auth-layout.ac-auth-premium .auth-password-toggle{background:transparent!important;font-size:0!important;min-width:36px!important;min-height:36px!important;color:#FFFFFF!important}
  html body .auth-layout.ac-auth-premium .auth-box form label{font-size:12px!important;color:#A8BFB5!important}

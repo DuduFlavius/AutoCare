@@ -86,12 +86,12 @@
 .rg-ai-page .ac-ai-inline-error,.rg-ai-page .ac-ai-notice,.rg-ai-page .ac-ai-state {margin:5px 22px 10px;border:1px solid #20E6A24f;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5;background:#10251E;color:#FFFFFF;max-height:80px;overflow:auto}
 .rg-ai-page .ac-ai-history-overlay {position:absolute;inset:0;z-index:70;display:block}
 .rg-ai-page .ac-ai-history-backdrop {position:absolute;inset:0;background:#050E0Baa;border:0;width:100%;height:100%}
-.rg-ai-page .ac-ai-history-panel {position:absolute;inset:0 auto 0 0;width:min(360px,90%);box-sizing:border-box;padding:20px 12px;overflow:auto;background:#091611;border-right:1px solid #20E6A240}
+.rg-ai-page .ac-ai-history-panel {position:absolute;inset:0 auto 0 0;width:min(360px,90%);box-sizing:border-box;padding:20px 12px;overflow:auto;background:var(--surface-card);border-right:1px solid #20E6A240}
 .rg-ai-page .ac-ai-history-title {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 6px 10px}
 .rg-ai-page .ac-ai-history-title button,.rg-ai-page .ac-ai-tools-heading button {display:grid;place-items:center;min-height:40px;width:40px;padding:8px;background:#10251E;border:1px solid #20E6A240;border-radius:10px}
 .rg-ai-page .ac-ai-history-panel > p {font-size:11px;color:#A8BFB5;padding:0 8px;line-height:1.6}
 .rg-ai-page .ac-ai-history-panel > button {display:flex;align-items:flex-start;gap:10px;width:100%;padding:13px;min-height:64px;margin-top:7px;text-align:left;border:1px solid transparent;border-radius:12px;background:transparent;color:#FFFFFF;white-space:normal}
-.rg-ai-page .ac-ai-history-panel > button.active {border-color:#20E6A255;background:#10251E}
+.rg-ai-page .ac-ai-history-panel > button.active {border-color:#20E6A255;background:var(--surface-card)}
 .rg-ai-page .ac-ai-history-panel strong {display:block;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
 .rg-ai-page .ac-ai-history-panel small {display:block;font-size:10px;color:#A8BFB5;margin-top:6px}
 .rg-ai-page .ac-ai-tools-toggle {display:flex;align-items:center;justify-content:center;gap:8px;min-height:34px;margin:0;padding:5px;font-size:11px;border:0;background:transparent;color:#A8BFB5}

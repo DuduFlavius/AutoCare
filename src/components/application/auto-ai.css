@@ -293,7 +293,7 @@
 .ac-ai-chatgpt-layout .ac-ai-tools>.card{min-width:0;width:100%;max-width:100%}
 .ac-ai-history-overlay{position:absolute;z-index:30;inset:0;display:flex;overflow:hidden;border-radius:20px}
 .ac-ai-history-backdrop{position:absolute;inset:0;border:0;background:#050E0B9c}
-.ac-ai-history-panel{position:relative;z-index:1;display:flex;flex-direction:column;align-items:stretch;gap:5px;width:min(320px,85%);height:100%;max-height:100%;padding:18px 12px;overflow-y:auto;background:#10251E;border-right:1px solid #1C8062;box-shadow:15px 0 45px #0007}
+.ac-ai-history-panel{position:relative;z-index:1;display:flex;flex-direction:column;align-items:stretch;gap:5px;width:min(320px,85%);height:100%;max-height:100%;padding:18px 12px;overflow-y:auto;background:var(--surface-card);border-right:1px solid var(--color-border);box-shadow:15px 0 45px #0007}
 .ac-ai-history-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px;padding:0 7px;color:#f0f6ff;font-size:14px}
 .ac-ai-history-title button{padding:7px;border:1px solid #1C8062;border-radius:8px;background:#10251E;color:#FFFFFF}
 .ac-ai-history-panel>button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:39px;padding:10px 12px;border:0;border-radius:9px;background:transparent;color:#FFFFFF;text-align:left;font-size:12px}

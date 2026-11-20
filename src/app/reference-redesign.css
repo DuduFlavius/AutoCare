@@ -17,7 +17,7 @@
 .app-shell>.sidebar .sidebar-account:not(:where([class^="rg-"],[class^="rg-"] *)){border-top:1px solid var(--color-border)!important;margin-top:16px!important;padding-top:14px!important}
 .app-shell>.sidebar .profile-avatar:not(:where([class^="rg-"],[class^="rg-"] *)){background:linear-gradient(135deg,var(--color-surface-muted),var(--color-surface-muted))!important;border:1px solid var(--color-border-strong)!important}
 .app-shell .app-header:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;border-bottom:1px solid var(--color-border)!important;min-height:70px!important;padding-inline:32px!important;box-shadow:0 2px 14px color-mix(in srgb, var(--color-nav) 4%, transparent)}
-.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important}
 .app-shell .main .page-head:not(:where([class^="rg-"],[class^="rg-"] *)){margin:25px 0 24px!important}
 .app-shell .main .page-head h1:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:clamp(30px,3vw,43px)!important;font-weight:800!important;letter-spacing:-.055em!important;color:var(--color-text)!important}
 .app-shell .main .page-head .eyebrow:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:11px!important;letter-spacing:.13em!important;color:var(--color-muted)!important}
@@ -52,7 +52,7 @@
 
 
 /* Dashboard reference layout: dark cinematic upper workspace */
-.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
+.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}
 .app-shell .main .autocare-dashboard-feature:not(:where([class^="rg-"],[class^="rg-"] *)){display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,1fr);gap:16px;align-items:stretch}
 .app-shell .main .autocare-dashboard-feature .automotive-stage:not(:where([class^="rg-"],[class^="rg-"] *)){margin:0!important;min-width:0}
 .app-shell .main .autocare-car-showcase:not(:where([class^="rg-"],[class^="rg-"] *)){height:100%;min-height:350px!important;position:relative;isolation:isolate;background:var(--color-surface-muted)!important;display:flex;align-items:stretch;padding:0!important;overflow:hidden}
@@ -105,7 +105,7 @@
 
 
 /* Screenshot-accurate dashboard visual layer */
-.app-shell .main.workspace-dashboard:not(:where([class^="rg-"],[class^="rg-"] *)){background:radial-gradient(ellipse at 64% 0%,var(--color-surface) 0%,var(--color-nav) 40%,var(--color-nav) 100%)!important;color:var(--color-text)!important;min-height:calc(100vh - 70px)}
+.app-shell .main.workspace-dashboard:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important;min-height:calc(100vh - 70px)}
 .app-shell .workspace-dashboard .page-head h1:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important;font-size:clamp(29px,2.7vw,43px)!important}
 .app-shell .workspace-dashboard .page-head .eyebrow:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important;font-size:18px!important;letter-spacing:0!important;text-transform:none!important;font-weight:450}
 .app-shell .workspace-dashboard .page-head .muted:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
@@ -194,7 +194,7 @@
 .app-shell:has(.workspace-dashboard) .app-header .autocare-header-user>svg:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
 .app-shell:has(.workspace-dashboard) .app-header .autocare-header-signout:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;border:1px solid var(--color-border)!important;color:var(--color-muted)!important}
 .app-shell:has(.workspace-dashboard) .app-header .autocare-header-signout:hover:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
-.app-shell .main.workspace-dashboard:not(:where([class^="rg-"],[class^="rg-"] *)){background:radial-gradient(ellipse at 70% 0%,var(--color-surface) 0%,var(--color-nav) 45%,var(--color-nav) 100%)!important}
+.app-shell .main.workspace-dashboard:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}
 .app-shell .main.workspace-dashboard .card:not(:where([class^="rg-"],[class^="rg-"] *)),
 .app-shell .main.workspace-dashboard .stat:not(:where([class^="rg-"],[class^="rg-"] *)),
 .app-shell .main.workspace-dashboard .for-you-card:not(:where([class^="rg-"],[class^="rg-"] *)),
@@ -247,7 +247,7 @@
 
 
 /* Garage: entirely photo-free, premium and compact */
-.app-shell .main.workspace-garage:not(:where([class^="rg-"],[class^="rg-"] *)){background:radial-gradient(ellipse at 70% 0%,var(--color-surface),var(--color-nav) 60%,var(--color-nav))!important;color:var(--color-text)!important;min-height:calc(100vh - 70px)}
+.app-shell .main.workspace-garage:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important;min-height:calc(100vh - 70px)}
 .app-shell:has(.workspace-garage) .app-header:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;border-bottom:1px solid var(--color-border)!important;color:var(--color-text)!important}
 .app-shell:has(.workspace-garage) .app-header>.muted:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell:has(.workspace-garage) .app-header .autocare-header-identity small:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
 .app-shell:has(.workspace-garage) .app-header>.muted span:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell:has(.workspace-garage) .app-header .autocare-header-identity strong:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
@@ -279,7 +279,7 @@
 
 /* AutoCare unified premium navy theme — all authenticated workspaces */
 .app-shell:not(:where([class^="rg-"],[class^="rg-"] *)){--text:var(--color-text);--muted:var(--color-muted);--line:var(--color-border);--surface:var(--color-surface);--surface-2:var(--color-surface);--bg:var(--color-bg);color:var(--color-text)!important;background:var(--color-surface-muted)!important}
-.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main[class*="workspace-"]:not(:where([class^="rg-"],[class^="rg-"] *)){background:radial-gradient(ellipse at 75% -10%,var(--color-surface) 0%,var(--color-surface) 48%,var(--color-nav) 100%)!important;color:var(--color-text)!important;min-height:calc(100vh - 66px)}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main[class*="workspace-"]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important;min-height:calc(100vh - 66px)}
 .app-shell .app-header:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-nav)!important;border-bottom:1px solid var(--color-border)!important;color:var(--color-text)!important;box-shadow:none!important}
 .app-shell .app-header .muted:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .app-header .muted span:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
 .app-shell .app-header .autocare-header-user:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;border:1px solid var(--color-border)!important;color:var(--color-text)!important;border-radius:12px!important}
@@ -412,7 +412,7 @@ body:has(a[href="/admin"]) .founder-admin:not(:where([class^="rg-"],[class^="rg-
 
 /* Founder control center — same navy premium design, independent of garage app */
 .founder-shell:not(:where([class^="rg-"],[class^="rg-"] *)){--bg:var(--color-bg);--panel:var(--color-surface);--panel2:var(--color-surface-muted);--border:var(--color-border);--text:var(--color-text);--muted:var(--color-muted);--accent:var(--color-primary);background:var(--color-surface-muted)!important;color:var(--color-text)!important;color-scheme:dark}
-.founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important}
 .founder-shell .founder-sidebar:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-nav)!important;border-right:1px solid var(--color-border)!important;color:var(--color-text)!important}
 .founder-shell .founder-sidebar a:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
 .founder-shell .founder-sidebar a:hover:not(:where([class^="rg-"],[class^="rg-"] *)),.founder-shell .founder-sidebar a[aria-current="page"]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
@@ -562,7 +562,7 @@ body:has(a[href="/admin"]) .founder-admin:not(:where([class^="rg-"],[class^="rg-
 .app-shell .autocare-header-user:not(:where([class^="rg-"],[class^="rg-"] *)){padding:5px!important;border-radius:50%!important;min-width:40px!important;min-height:40px!important}
 .app-shell .autocare-header-user>svg:not(:where([class^="rg-"],[class^="rg-"] *)){display:none!important}
 .app-shell .autocare-header-signout:not(:where([class^="rg-"],[class^="rg-"] *)){display:none!important}
-.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){padding:20px 14px 110px!important;max-width:100vw!important;overflow-x:hidden!important;background:var(--color-surface-muted)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){padding:20px 14px 110px!important;max-width:100vw!important;overflow-x:hidden!important;background:var(--workspace-canvas)!important}
 .app-shell .main .page-head:not(:where([class^="rg-"],[class^="rg-"] *)){gap:14px!important;flex-wrap:wrap!important}
 .app-shell .main .page-head h1:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:clamp(25px,7vw,33px)!important;line-height:1.12!important;letter-spacing:-.035em!important}
 .app-shell .main .page-head p:not(:where([class^="rg-"],[class^="rg-"] *)){line-height:1.55!important}
@@ -626,7 +626,7 @@ body:has(a[href="/admin"]) .founder-admin:not(:where([class^="rg-"],[class^="rg-
 
 /* Refined mobile finish — calmer surfaces, hierarchy and readable content */
 @media(max-width:760px){
-.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;padding:18px 14px calc(104px + env(safe-area-inset-bottom,0px))!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important;padding:18px 14px calc(104px + env(safe-area-inset-bottom,0px))!important}
 .app-shell .app-header:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;border-bottom:1px solid var(--color-border)!important}
 .app-shell .app-header .muted:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .app-header .muted span:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
 .app-shell .main .page-head h1:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important;font-size:clamp(24px,6.5vw,31px)!important;line-height:1.18!important;font-weight:800!important}
@@ -693,7 +693,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 /* Support chat on phones: purpose-built single-column messenger layout */
 @media(max-width:760px){
-.app-shell .main:has(.support-workspace):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;padding:14px 12px calc(98px + env(safe-area-inset-bottom,0px))!important;color:var(--color-text)!important}
+.app-shell .main:has(.support-workspace):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;padding:14px 12px calc(98px + env(safe-area-inset-bottom,0px))!important;color:var(--color-text)!important}
 .app-shell .main:has(.support-workspace) .page-head:not(:where([class^="rg-"],[class^="rg-"] *)){margin-bottom:14px!important}
 .app-shell .main:has(.support-workspace) .page-head h1:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:25px!important;color:var(--color-text)!important;line-height:1.15!important}
 .app-shell .main:has(.support-workspace) .page-head p:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:13px!important;color:var(--color-muted)!important}
@@ -775,7 +775,7 @@ html,body{max-width:100%;overflow-x:hidden}
    Keep dark support chat and form fields untouched for contrast/accessibility. */
 @media (max-width:760px){
   .app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){
-    background:linear-gradient(165deg,var(--color-surface-muted) 0%,var(--color-surface-muted) 46%,var(--color-surface-muted) 100%)!important;
+    background:var(--workspace-canvas)!important;
     min-height:calc(100dvh - 120px)!important;
   }
   .app-shell .main .page-head:not(:where([class^="rg-"],[class^="rg-"] *)){
@@ -826,10 +826,13 @@ html,body{max-width:100%;overflow-x:hidden}
 
 /* AutoCare mobile dark surfaces — consistent across all authenticated sections. */
 @media (max-width:760px){
-  .app-shell:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .app-header:not(:where([class^="rg-"],[class^="rg-"] *)){
+  .app-shell:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .app-header:not(:where([class^="rg-"],[class^="rg-"] *)){
     background:var(--color-nav)!important;color:var(--color-text)!important;
   }
-  .app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
+  .app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){
+    background:var(--workspace-canvas)!important;color:var(--color-text)!important;
+  }
+  .app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}
   .app-shell .main .page-head h1:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main h1:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main h2:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main h3:not(:where([class^="rg-"],[class^="rg-"] *)),
   .app-shell .main .card h2:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .card h3:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
   .app-shell .main .page-head .eyebrow:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .muted:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .small.muted:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
@@ -927,7 +930,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell>.sidebar .sidebar-bottom button:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-warning-soft)!important;color:var(--color-text)!important}
 .app-shell>.sidebar .profile-avatar:not(:where([class^="rg-"],[class^="rg-"] *)){background:linear-gradient(135deg,var(--color-warning-soft),var(--color-warning-soft))!important;border-color:var(--color-warning)!important}
 .app-shell .app-header:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;border-bottom:1px solid var(--color-border)!important}
-.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important}
 .app-shell .main .page-head h1:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .section-title h2:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
 .app-shell .main .page-head .eyebrow:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-danger-ink)!important}
 .app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .for-you-card:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;box-shadow:0 9px 25px color-mix(in srgb, var(--color-nav) 6%, transparent)!important}
@@ -950,7 +953,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .app-shell .main .autocare-advanced-settings summary:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-advanced-settings label:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-primary-ink)!important}
 .app-shell .main :focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)){outline:3px solid var(--color-warning)!important;outline-offset:3px}
 @media(max-width:760px){
-.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}
 .app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
 .app-shell .main input:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main textarea:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
 .app-shell .main .autocare-simple-home select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
@@ -960,7 +963,8 @@ html,body{max-width:100%;overflow-x:hidden}
 /* AutoCare dark surfaces. */
 :root{--ac-ink:var(--color-text);--ac-blue:var(--color-surface-muted);--ac-line:var(--color-border);color-scheme:dark}
 html,body{background:var(--color-nav)}
-.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important}
 .app-shell>.sidebar:not(:where([class^="rg-"],[class^="rg-"] *)){background:linear-gradient(180deg,var(--color-nav),var(--color-nav))!important;border-color:var(--color-border)!important}
 .app-shell>.sidebar nav button:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell>.sidebar nav a:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
 .app-shell>.sidebar nav button svg:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell>.sidebar nav a svg:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
@@ -998,12 +1002,13 @@ html,body{background:var(--color-nav)}
 .app-shell .main .autocare-car-showcase:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
 .app-shell .main .autocare-car-open:not(:where([class^="rg-"],[class^="rg-"] *)){background:#e3ebf6cc!important;border-color:var(--color-border-strong)!important}
 .app-shell .main :focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)){outline:3px solid var(--color-primary)!important;outline-offset:3px}
-@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}.app-shell .main input:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main textarea:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}}
+@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}.app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}.app-shell .main input:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main textarea:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}}
 
 /* AutoCare / Titanium Studio — refined monochrome with cool emerald accents. */
 :root{--ac-ink:var(--color-text);--ac-blue:var(--color-success-soft);--ac-line:var(--color-border);color-scheme:dark}
 html,body{background:var(--color-surface-muted)}
-.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important}
 .app-shell>.sidebar:not(:where([class^="rg-"],[class^="rg-"] *)){background:linear-gradient(175deg,var(--color-surface),var(--color-nav))!important;border-color:var(--color-border)!important}
 .app-shell>.sidebar nav button:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell>.sidebar nav a:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
 .app-shell>.sidebar nav button svg:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell>.sidebar nav a svg:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
@@ -1041,12 +1046,13 @@ html,body{background:var(--color-surface-muted)}
 .app-shell .main .autocare-car-showcase:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
 .app-shell .main .autocare-car-open:not(:where([class^="rg-"],[class^="rg-"] *)){background:#e3ebf6cc!important;border-color:var(--color-success)!important}
 .app-shell .main :focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)){outline:3px solid var(--color-success)!important;outline-offset:3px}
-@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important}.app-shell .main input:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main textarea:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border-strong)!important}}
+@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}.app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important}.app-shell .main input:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main textarea:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border-strong)!important}}
 
 /* AutoCare MONO / ultra-premium architectural monochrome — no colored accents. */
 :root{--ac-ink:var(--color-text);--ac-blue:var(--color-surface);--ac-line:var(--color-border);color-scheme:dark}
 html,body{background:var(--color-surface-muted)!important}
-.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important}
 .app-shell>.sidebar:not(:where([class^="rg-"],[class^="rg-"] *)){background:linear-gradient(170deg,var(--color-nav),var(--color-nav))!important;border-right:1px solid var(--color-border)!important}
 .app-shell>.sidebar nav button:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell>.sidebar nav a:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
 .app-shell>.sidebar nav button svg:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell>.sidebar nav a svg:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
@@ -1084,7 +1090,7 @@ html,body{background:var(--color-surface-muted)!important}
 .app-shell .main .autocare-car-showcase:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
 .app-shell .main .autocare-car-open:not(:where([class^="rg-"],[class^="rg-"] *)){background:#e3ebf6cc!important;border-color:var(--color-border-strong)!important}
 .app-shell .main :focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)){outline:3px solid var(--color-primary)!important;outline-offset:3px}
-@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important}.app-shell .main input:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main textarea:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}}
+@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}.app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important}.app-shell .main input:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main textarea:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}}
 
 /* Global neutral polish: native links and focus treatments */
 .app-shell a:not(.primary):not(:where([class^="rg-"],[class^="rg-"] *)){text-decoration-color:var(--color-muted)}
@@ -1095,7 +1101,8 @@ html,body{background:var(--color-surface-muted)!important}
 /* AutoCare | Arctic White x Sapphire: unified premium white-blue identity */
 :root{--ac-ink:var(--color-text);--ac-blue:var(--color-primary-deep);--ac-line:var(--color-border);color-scheme:dark}
 html,body{background:var(--color-surface-muted)!important}
-.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-dashboard-feature):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important}
 .app-shell>.sidebar:not(:where([class^="rg-"],[class^="rg-"] *)){background:linear-gradient(175deg,var(--color-surface),var(--color-surface))!important;border-color:var(--color-border)!important}
 .app-shell>.sidebar nav button:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell>.sidebar nav a:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
 .app-shell>.sidebar nav button svg:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell>.sidebar nav a svg:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
@@ -1136,7 +1143,7 @@ html,body{background:var(--color-surface-muted)!important}
 .app-shell .main .autocare-car-showcase:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
 .app-shell .main .autocare-car-open:not(:where([class^="rg-"],[class^="rg-"] *)){background:color-mix(in srgb, var(--color-nav) 87%, transparent)!important;border-color:var(--color-border-strong)!important}
 .app-shell .main button:focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main a:focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main :focus-visible:not(:where([class^="rg-"],[class^="rg-"] *)){outline:3px solid var(--color-primary)!important;outline-offset:3px}
-@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-primary-deep)!important}.app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important}.app-shell .main input:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main textarea:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}}
+@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}.app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-primary-deep)!important}.app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important}.app-shell .main input:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main textarea:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main select:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}}
 
 /* FINAL POLISH / white-first sapphire, readable typography throughout the product */
 :root{--bg:var(--color-bg);--panel:var(--color-surface);--panel2:var(--color-surface-muted);--text:var(--color-text);--muted:var(--color-muted);--border:var(--color-border);--accent:var(--color-primary);--cyan:var(--color-primary);--font-ui:Inter,'Segoe UI',Arial,sans-serif}
@@ -1170,7 +1177,8 @@ body{background:var(--color-surface-muted)!important;color:var(--color-text)!imp
 @media(max-width:760px){body{font-size:16px}.app-shell .main h1:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:clamp(26px,6vw,34px)!important}.app-shell .main h2:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:clamp(21px,5vw,28px)!important}.app-shell .main h3:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:18px!important}.app-shell .main p:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main li:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:15px;line-height:1.6}.app-shell .main button:not(:where([class^="rg-"],[class^="rg-"] *)){font-size:15px;min-height:44px}.app-shell .main .autocare-simple-home h2:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}.app-shell .main .autocare-simple-hero:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-actions:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .autocare-simple-due:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-primary-deep)!important}.app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important}}
 
 /* Eye-comfort + calendar / all-workspace contrast repair */
-html,body,.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
+html,body,.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}
 .app-shell .app-header:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
 .app-shell .main .card:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .stat:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty-state:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .for-you-card:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
 .app-shell .main .empty:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .empty-state:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .notification-empty:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main .deadlines-empty:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-muted)!important;border:1px dashed var(--color-border)!important}
@@ -1189,10 +1197,10 @@ html,body,.app-shell:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .ma
 .app-shell .main :is(.toolbar,.filters,.filter-bar) :is(span,label,p,small):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
 .app-shell .main :is(input,select,textarea):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
 .app-shell .main :is(input[type=date],select):not(:where([class^="rg-"],[class^="rg-"] *)){color-scheme:dark}
-@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}.app-shell .main :is(.empty,.empty-state):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-muted)!important}.app-shell .main .calendar-day:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}}
+@media(max-width:760px){.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main:has(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}.app-shell .main :is(.empty,.empty-state):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-muted)!important}.app-shell .main .calendar-day:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}}
 
 /* Remove remaining near-black workspace bands; preserve dark sapphire navigation. */
-.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
+.app-shell .main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}
 .app-shell .main>header:not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main>section:first-child:not(.autocare-simple-home):not(:where([class^="rg-"],[class^="rg-"] *)),.app-shell .main :is(.workspace-heading,.workspace-title,.workspace-banner,.hero-banner,.hero-header,.page-heading,.page-title-banner,.section-banner,.calendar-header,.calendar-hero):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
 .app-shell .main :is(.workspace-heading,.workspace-title,.workspace-banner,.hero-banner,.hero-header,.page-heading,.page-title-banner,.section-banner,.calendar-header,.calendar-hero) :is(h1,h2,h3,p,span,small,strong):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
 .app-shell .main>header :is(h1,h2,h3,p,span,small,strong):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important}
@@ -1267,7 +1275,7 @@ html body .app-shell .main.workspace-general:not(:where([class^="rg-"],[class^="
 html body .app-shell .main.workspace-membership:not(:where([class^="rg-"],[class^="rg-"] *)),
 html body .app-shell .main.workspace-settings:not(:where([class^="rg-"],[class^="rg-"] *)),
 html body .app-shell .main.workspace-dashboard:not(:where([class^="rg-"],[class^="rg-"] *)){
- background:var(--color-surface-muted)!important;background-color:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-primary-ink)!important;
+ background:var(--workspace-canvas)!important;background-color:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-primary-ink)!important;
 }
 html body .app-shell .main .record-search:not(:where([class^="rg-"],[class^="rg-"] *)),
 html body .app-shell .main .record-search input:not(:where([class^="rg-"],[class^="rg-"] *)),
@@ -1291,7 +1299,7 @@ html body .app-shell .main :is(.eyebrow,.muted,.small):not(:where([class^="rg-"]
 
 /* Calm sapphire design tokens, shared by every content workspace. */
 html body .app-shell main.main:not(:where([class^="rg-"],[class^="rg-"] *)){
- background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-text)!important;
+ background:var(--workspace-canvas)!important;background-image:none!important;color:var(--color-text)!important;
 }
 html body .app-shell main.main :is(.page-head,.card,.stat,.empty,.support-workspace,.support-sidebar,.support-chat-panel,.support-chat-header,.support-messages,.support-composer,.support-thread,.support-message,.support-client,.support-team,.support-search,.support-thread-list,.support-chat,.support-chat-body,.support-chat-footer,.support-conversation,.support-toolbar,.support-filters,.support-header-actions,.support-readonly,.support-notice,.support-error):not(:where([class^="rg-"],[class^="rg-"] *)){
  background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-text)!important;border-color:var(--color-border)!important;
@@ -1318,7 +1326,7 @@ html body .app-shell main.main :is(.record-search,.record-search input,.record-t
 
 /* CANONICAL CONTENT THEME — legacy dark rules no longer win. */
 html body .app-shell:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
-html body .app-shell main.main:not(:where([class^="rg-"],[class^="rg-"] *)),html body .app-shell .main[class*="workspace-"]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-text)!important;min-height:calc(100vh - 70px)}
+html body .app-shell main.main:not(:where([class^="rg-"],[class^="rg-"] *)),html body .app-shell .main[class*="workspace-"]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;background-image:none!important;color:var(--color-text)!important;min-height:calc(100vh - 70px)}
 html body .app-shell main.main :is(.page-head,.card,.stat,.empty,.toolbar,.record-tools,.record-filter-panel,.record-search,.calendar-toolbar,.calendar-grid,.calendar-day,.calendar-list,.calendar-event,.maintenance-overview,.expense-overview,.history-filters,.history-list,.notifications-panel,.notification-panel,.subscription-summary,.subscription-details,.membership-summary,.plan-card,.pricing-card,.premium-card,.support-area,.support-workspace,.support-client,.support-thread-list,.support-thread,.support-chat-panel,.support-chat-header,.support-messages,.support-message,.support-composer,.support-readonly,.support-system-message):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
 html body .app-shell main.main :is(.support-messages,.support-thread-list,.calendar-grid,.history-list):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}
 html body .app-shell main.main :is(.support-workspace,.support-client,.support-thread,.support-chat-panel,.support-chat-header,.support-messages,.support-message,.support-composer,.support-thread-list) :is(div,section,article,header,footer):not(:where([class^="rg-"],[class^="rg-"] *)){border-color:var(--color-border)}
@@ -1341,7 +1349,7 @@ html body .app-shell main.main :is(.subscription-summary,.subscription-details,.
 html body .app-shell main.main :is(.subscription-summary,.subscription-details,.membership-summary,.plan-card,.pricing-card,.premium-card) .primary:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
 html body .app-shell .app-header :is(button,.autocare-header-user,.autocare-header-signout):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;border-color:var(--color-border)!important}
 html body .app-shell .app-header :is(button,.autocare-header-user,.autocare-header-signout) :is(span,small,strong,svg):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-primary-ink)!important}
-@media(max-width:760px){html body .app-shell main.main:not(:where([class^="rg-"],[class^="rg-"] *)),html body .app-shell .main[class*="workspace-"]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}html body .app-shell main.main :is(.support-workspace,.support-client,.support-chat-panel,.support-composer):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}}
+@media(max-width:760px){html body .app-shell main.main:not(:where([class^="rg-"],[class^="rg-"] *)),html body .app-shell .main[class*="workspace-"]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important}html body .app-shell main.main :is(.support-workspace,.support-client,.support-chat-panel,.support-composer):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important}}
 
 /* Screenshot-verified fixes: exact selectors previously painted charcoal. */
 html body .app-shell main.main .support-workspace:not(:where([class^="rg-"],[class^="rg-"] *)),
@@ -1448,7 +1456,7 @@ html body .app-shell main.main .autocare-simple-home .autocare-simple-hero :is(b
 html body .app-shell main.main .autocare-simple-home .autocare-simple-hero :is(button,.button) :is(span,strong,svg):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-primary-ink)!important}
 
 /* Premium refinement 2026-10-23: subscriptions and shared workspaces. */
-html body .app-shell main.main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+html body .app-shell main.main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important}
 html body .app-shell main.main :is(.membership-workspace,.workspace-membership,.subscription-workspace):not(:where([class^="rg-"],[class^="rg-"] *)){max-width:1440px;margin-inline:auto}
 html body .app-shell main.main :is(.subscription-option,.membership-current,.membership-summary,.subscription-summary,.pricing-card,.plan-card,.premium-card):not(:where([class^="rg-"],[class^="rg-"] *)){
  background:var(--color-surface)!important;background-image:none!important;color:var(--color-text)!important;
@@ -1548,7 +1556,7 @@ html body .app-shell>.sidebar .sidebar-profile:hover:not(:where([class^="rg-"],[
 
 /* Founder panel: light premium workspace, retaining navy navigation. */
 html body .founder-shell:not(:where([class^="rg-"],[class^="rg-"] *)){--bg:var(--color-bg);--panel:var(--color-surface);--panel2:var(--color-surface-muted);--border:var(--color-border);--text:var(--color-text);--muted:var(--color-muted);--accent:var(--color-primary);background:var(--color-surface-muted)!important;color:var(--color-primary-ink)!important;color-scheme:dark!important}
-html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-primary-ink)!important;color-scheme:dark!important}
+html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;background-image:none!important;color:var(--color-primary-ink)!important;color-scheme:dark!important}
 html body .founder-shell .founder-sidebar:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border-color:var(--color-border)!important}
 html body .founder-shell .founder-sidebar a:not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)!important}
 html body .founder-shell .founder-sidebar a:hover:not(:where([class^="rg-"],[class^="rg-"] *)),html body .founder-shell .founder-sidebar a[aria-current="page"]:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-primary-deep)!important;color:var(--color-text)!important}
@@ -1607,7 +1615,8 @@ html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-
 }
 
 /* Final exact selectors: founder, account badge, garage icon. */
-html body .founder-shell:not(:where([class^="rg-"],[class^="rg-"] *)),html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-text)!important;color-scheme:dark!important}
+html body .founder-shell:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;background-image:none!important;color:var(--color-text)!important;color-scheme:dark!important}
+html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;background-image:none!important;color:var(--color-text)!important;color-scheme:dark!important}
 html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.founder-user-list,.founder-table-wrap,.founder-user-details,.founder-team-entry,.founder-dashboard-card,.founder-section):not(:where([class^="rg-"],[class^="rg-"] *)){
  background:var(--color-surface)!important;background-image:none!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;border-radius:17px!important;box-shadow:0 6px 22px color-mix(in srgb, var(--color-primary) 6%, transparent)!important
 }
@@ -1630,7 +1639,7 @@ html body .app-shell>.sidebar .sidebar-profile:not(:where([class^="rg-"],[class^
 html body .app-shell>.sidebar .sidebar-profile .profile-avatar:not(:where([class^="rg-"],[class^="rg-"] *)){display:grid!important;place-items:center!important;width:43px!important;height:43px!important;min-width:43px!important;border-radius:50%!important;background:var(--color-primary-deep)!important;background-image:none!important;border:2px solid var(--color-border-strong)!important;color:var(--color-text)!important;font-weight:800!important;box-shadow:0 3px 12px color-mix(in srgb, var(--color-primary) 25%, transparent)!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon:not(:where([class^="rg-"],[class^="rg-"] *)){display:grid!important;place-items:center!important;width:56px!important;height:56px!important;margin:14px 0!important;border-radius:50%!important;background:var(--color-surface-muted)!important;border:1px solid var(--color-border)!important;box-shadow:none!important}
 html body .app-shell main.main.workspace-garage .car-card .autocare-garage-card-icon svg:not(:where([class^="rg-"],[class^="rg-"] *)){width:30px!important;height:30px!important;color:var(--color-primary-ink)!important;stroke:var(--color-border)!important}
-html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;color-scheme:dark!important}
+html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important;color-scheme:dark!important}
 html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.table-scroll,section,article):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-text)}
 html body .founder-shell .founder-main :is(.card,.panel,.stat,.tile,.table-scroll):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;background-image:none!important;border-color:var(--color-border)!important;box-shadow:0 5px 20px color-mix(in srgb, var(--color-primary) 6%, transparent)!important}
 html body .founder-shell .founder-main :is(h1,h2,h3,h4,p,li,label,td,th,small,strong,span):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important;opacity:1!important}
@@ -1708,7 +1717,7 @@ html body .founder-shell :is(.founder-main,.founder-content,.founder-workspace) 
 
 /* Founder dashboard: readable light premium workspace, navy navigation only. */
 html body .founder-shell:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;color-scheme:dark!important}
-html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important}
+html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important}
 html body .founder-shell .founder-main :is(.card,.stat,.founder-user-list,.founder-table-wrap,.founder-user-details,.founder-team-entry,.founder-response,.founder-config,.founder-pricing,.founder-overview-note):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;background-image:none!important;border:1px solid var(--color-border)!important;border-radius:16px!important;color:var(--color-text)!important;box-shadow:0 7px 22px color-mix(in srgb, var(--color-primary) 6%, transparent)!important}
 html body .founder-shell .founder-main :is(h1,h2,h3,h4,p,td,th,span,strong,small,label,li):not(:where([class^="rg-"],[class^="rg-"] *)){color:var(--color-muted)!important;opacity:1!important}
 html body .founder-shell .founder-main :is(input,select,textarea):not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface)!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important}
@@ -1943,7 +1952,8 @@ html body .quick-record-form .ac-service-advice :is(strong,p):not(:where([class^
 @media(max-width:760px){html body .quick-record-form :is(.ac-service-details,.ac-cost-breakdown,.ac-service-summary,.record-extra,.service-reminder-box,.ac-filter-item):not(:where([class^="rg-"],[class^="rg-"] *)){padding:13px!important}html body .quick-record-form .form-grid:not(:where([class^="rg-"],[class^="rg-"] *)){grid-template-columns:minmax(0,1fr)!important}html body .quick-record-form .operation-picker>div:not(:where([class^="rg-"],[class^="rg-"] *)){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}html body .quick-record-form .operation-picker button:not(:where([class^="rg-"],[class^="rg-"] *)){min-width:0!important;white-space:normal!important}}
 
 /* Founder panel and service modal — explicit standalone roots, no inherited charcoal. */
-html body .founder-shell:not(:where([class^="rg-"],[class^="rg-"] *)),html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;color-scheme:dark!important}
+html body .founder-shell:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--color-surface-muted)!important;color:var(--color-text)!important;color-scheme:dark!important}
+html body .founder-shell .founder-main:not(:where([class^="rg-"],[class^="rg-"] *)){background:var(--workspace-canvas)!important;color:var(--color-text)!important;color-scheme:dark!important}
 html body .founder-shell .founder-main :is(.card,.stat,.founder-response,.founder-user-list,.founder-user-details,.founder-team-entry,.founder-table-wrap,.founder-search,.founder-overview-note):not(:where([class^="rg-"],[class^="rg-"] *)){
  background:var(--color-surface)!important;background-image:none!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;border-radius:16px!important;box-shadow:0 6px 22px color-mix(in srgb, var(--color-primary) 7%, transparent)!important;
 }

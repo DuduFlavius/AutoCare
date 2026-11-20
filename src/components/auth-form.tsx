@@ -9,7 +9,7 @@ import Link from 'next/link';
 import SiteLanguage from './site-language';
 import {translateApplicationCopy} from '@/lib/application-language';
 import './auth-premium.css';
-import { ShieldCheck, Files, Wrench, Eye, EyeOff } from 'lucide-react';
+import { CarFront, ShieldCheck, Files, Wrench, Eye, EyeOff } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { authErrorMessage } from '@/lib/auth-messages';
 export function AuthForm({ mode, next = '/cont', initialLanguage, verificationPreview=false }: { mode: string; next?: string; initialLanguage?:'ro'|'en';verificationPreview?:boolean }) {
@@ -150,7 +150,7 @@ export function AuthForm({ mode, next = '/cont', initialLanguage, verificationPr
           </div>
         </div>
       </aside>
-      <div className="auth-box"><div className="ac-auth-toolbar"><Link href="/start" className="ac-auth-brand"><ShieldCheck size={25}/><strong>AutoCare <span>Premium</span></strong></Link>
+      <div className="auth-box"><div className="ac-auth-toolbar"><Link href="/start" className="ac-auth-brand"><CarFront size={25}/><strong>AutoCare <span>Premium</span></strong></Link>
         <div
           className="ac-auth-language"
           data-workspace-ui
