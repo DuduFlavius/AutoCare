@@ -4,7 +4,6 @@ import {FilterSelect} from '@/components/filter-select';
 import {EmailVerification} from './email-verification';
 import {publicConversion} from '@/lib/analytics';
 import {saveBrowserLanguage} from '@/lib/language-preference';
-import VehicleSymbol from './vehicle-symbol';
 import { useEffect, useState, type FormEvent } from 'react';
 import { PublicAiIntro } from './public-ai-intro';
 import Link from 'next/link';
@@ -122,12 +121,11 @@ export function AuthForm({ mode, next = '/cont', initialLanguage, verificationPr
     }
   }
   return (
-    <main className="auth-layout ac-auth-premium" data-verification={!!pendingEmail||undefined}>
+    <main className="auth-layout ac-auth-premium" data-language={language} data-verification={!!pendingEmail||undefined}>
       <SiteLanguage language={language} />
       <aside className="auth-editorial">
-        <VehicleSymbol/>
         <div className="auth-editorial-content">
-          <span className="section-kicker">AUTOCARE · GARAGE ACCESS</span>
+          <span className="section-kicker">{t('AUTOCARE · GARAJUL TĂU DIGITAL','AUTOCARE · YOUR DIGITAL GARAGE')}</span>
           <h2>
             {t("Grijă pentru mașină.", "Care for your vehicle.")}
             <br />
