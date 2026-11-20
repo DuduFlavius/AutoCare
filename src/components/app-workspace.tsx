@@ -78,8 +78,8 @@ export function WorkspaceNavigation({
         {ro:'',en:'',ids:['Dashboard','Garaj','Documente','Întreținere','Cheltuieli','Kilometraj','Plan întreținere','Calendar','AutoCare AI','Centru de suport','Setări']},
         {ro:'MAI MULTE',en:'MORE',ids:['RCA & Rovinietă','Rapoarte','Istoric auto','Notificări','Premium','Abonament','Cont']},
       ].map(group => {const Group=group.ro?'details':'div';return <Group className="ws-nav-group" key={group.en}>{group.ro&&<summary>{group[language]}</summary>}{group.ids.map(id => {
-        const section=workspaceSections.find(section=>section.id===id) ?? {id,ro:'Administrare',en:'Administration',icon:'settings'};
-        const Icon=icons[section.icon] ?? icons.settings;
+        const section=workspaceSections.find(section=>section.id===id)!;
+        const Icon=icons[section.icon];
         const count=id==='Notificări'?notifications:id==='Centru de suport'?support:0;
         const label = id==='Plan întreținere'&&!androidNavigation?(language==='en'?'Trip history':'Istoric călătorii'):id==='Dashboard' ? (language==='en'?'Home':'Acasă') : id==='Garaj'?(language==='en'?'Garage':'Garaj'):id==='Cont'?(language==='en'?'Settings':'Setări'):id==='Rapoarte'?(language==='en'?'Reports':'Rapoarte'):id==='Setări'?(language==='en'?'Settings':'Setări'):section[language];
         return <a href={workspaceHref(path,id)} key={id} aria-current={tab===id?'page':undefined} className={tab===id?'active':''} onClick={event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate(id);}}>{referenceIcons[id]?<ReferenceArtwork name={referenceIcons[id]} width={32} height={32}/>:<Icon size={18}/>}<span>{label}</span>{count>0&&<span className="ws-nav-count">{count}</span>}{id==='Premium'&&premium&&<small className="ws-premium-state">{language==='en'?'Active':'Activ'}</small>}</a>;
