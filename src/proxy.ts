@@ -10,7 +10,7 @@ function exempt(path: string) {
 }
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  if (!exempt(path)) {
+  if (process.env.VERCEL_ENV !== 'preview' && !exempt(path)) {
     let allowed = false;
     try {
       const result = await fetch(new URL('/api/maintenance-access', request.url), {
