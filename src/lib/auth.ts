@@ -21,7 +21,7 @@ let cached: ReturnType<typeof makeAuth> | undefined;
 function makeAuth() {
   if (!process.env.BETTER_AUTH_SECRET || process.env.BETTER_AUTH_SECRET.length < 32)
     throw new Error('BETTER_AUTH_SECRET trebuie să aibă minimum 32 caractere.');
-  const requireVerification=process.env.NODE_ENV==='production'||process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION!=='false';
+  const requireVerification=process.env.VERCEL_ENV==='preview' && process.env.AUTOCARE_PREVIEW_DEMO==='true' ? false : (process.env.NODE_ENV==='production'||process.env.AUTOCARE_REQUIRE_EMAIL_VERIFICATION!=='false');
   return betterAuth({
     appName: 'AutoCare',
     baseURL: origin(),
