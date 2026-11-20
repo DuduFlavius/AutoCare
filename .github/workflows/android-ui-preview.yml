@@ -1,7 +1,7 @@
 name: Android UI preview validation
 on:
   push:
-    branches: [fix/global-controls-gps-fullscreen-20261120]
+    branches: [fix/global-controls-gps-fullscreen-20261120, fix/pearl-brand-assets-20261120]
     paths: ["mobile/**", ".github/workflows/android-ui-preview.yml"]
   workflow_dispatch:
 permissions:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      AUTOCARE_PREVIEW_URL: https://auto-care-git-fix-global-controls-gps-fullscr-66c69c-auto-care4.vercel.app/cont
+      AUTOCARE_PREVIEW_URL: ${{ github.ref_name == 'fix/pearl-brand-assets-20261120' && 'https://www.autocareapp.ro/cont' || 'https://auto-care-git-fix-global-controls-gps-fullscr-66c69c-auto-care4.vercel.app/cont' }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:

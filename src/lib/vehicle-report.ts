@@ -11,7 +11,7 @@ export async function vehicleReport({vehicles,records,generatedAt,language='ro',
  const regular=await doc.embedFont(Buffer.from(assets.regular,'base64'),{subset:true}),bold=await doc.embedFont(Buffer.from(assets.bold,'base64'),{subset:true});
  const logo=await doc.embedPng(Buffer.from(reportBrandLogo,'base64'));
  const heading=title||t('Raport auto','Vehicle report');doc.setTitle('AutoCare Premium - '+heading);doc.setAuthor('AutoCare Premium');doc.setSubject(t('Datele înregistrate în cont','Recorded account data'));
- const navy=rgb(5/255,14/255,11/255),emerald=rgb(28/255,128/255,98/255),bright=rgb(32/255,230/255,162/255),muted=rgb(.26,.36,.31),line=rgb(.80,.88,.84),white=rgb(1,1,1);
+ const navy=rgb(8/255,59/255,74/255),emerald=rgb(7/255,83/255,101/255),bright=rgb(32/255,166/255,166/255),muted=rgb(101/255,117/255,132/255),line=rgb(227/255,235/255,240/255),white=rgb(1,1,1);
  const W=595.28,H=841.89,L=40,R=555.28;let page!:PDFPage,y=0;
  // Strip unsafe control bytes from user-entered report copy.
  // eslint-disable-next-line no-control-regex
@@ -44,7 +44,7 @@ export async function vehicleReport({vehicles,records,generatedAt,language='ro',
  const metrics=[[t('Vehicule','Vehicles'),String(vehicles.length)],[t('Înregistrări','Records'),String(unique.length)],[t('Cheltuieli cunoscute','Known expenses'),known.length?money(total):t('Necompletat','Not recorded')],[t('Kilometraj confirmat cumulat','Combined confirmed odometers'),vehicles.reduce((sum,row)=>sum+row.odometer,0).toLocaleString(locale)+' km']];
  for(let i=0;i<metrics.length;i+=2){need(78);for(let j=0;j<2;j++){
   const metric=metrics[i+j];if(!metric)continue;const x=L+j*264;
-  page.drawRectangle({x,y:y-47,width:249,height:63,color:rgb(.965,.985,.976),borderColor:line,borderWidth:.6});
+  page.drawRectangle({x,y:y-47,width:249,height:63,color:rgb(237/255,244/255,247/255),borderColor:line,borderWidth:.6});
   page.drawRectangle({x,y:y-47,width:2.5,height:63,color:emerald});
   page.drawText(metric[0],{x:x+14,y:y-3,size:8,font:regular,color:muted});
   let size=17;while(bold.widthOfTextAtSize(metric[1],size)>220&&size>10)size--;

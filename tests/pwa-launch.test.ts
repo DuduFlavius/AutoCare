@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 test('PWA manifest launches the existing signed-in application with real PNG icons',async()=>{
  const value=manifest();
  assert.equal(value.display,'standalone');assert.equal(value.scope,'/');assert.equal(value.start_url,'/cont');
- for(const icon of value.icons!){const bytes=await readFile('public'+icon.src);assert.equal(bytes.toString('hex',0,8),'89504e470d0a1a0a');}
+ for(const icon of value.icons!){const bytes=await readFile('public'+new URL(icon.src,'https://example.invalid').pathname);assert.equal(bytes.toString('hex',0,8),'89504e470d0a1a0a');}
 });
 test('Apple launch image generates valid PNG dimensions and rejects unbounded image sizes',async()=>{
  assert.equal((await GET(new Request('https://example.invalid/apple-splash?w=99999&h=99999'))).status,400);

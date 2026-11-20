@@ -7,6 +7,7 @@ public class MainActivity extends BridgeActivity {
   if (BuildConfig.PLAY_DISTRIBUTION) registerPlugin(AutoCareBillingPlugin.class);
   super.onCreate(savedInstanceState);
   if(getBridge()!=null&&getBridge().getWebView()!=null){
+   getBridge().getWebView().setBackgroundColor(android.graphics.Color.rgb(246,249,251));
    android.webkit.WebSettings settings=getBridge().getWebView().getSettings();
    settings.setTextZoom(100);settings.setSupportZoom(false);settings.setBuiltInZoomControls(false);settings.setDisplayZoomControls(false);
   }

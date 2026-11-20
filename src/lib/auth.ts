@@ -51,7 +51,7 @@ function makeAuth() {
         if(person.emailVerified)throw new APIError('BAD_REQUEST',{code:'EMAIL_ALREADY_VERIFIED',message:'Adresa este deja verificată. Autentifică-te cu parola.'});
         const language=languageCookie(ctx?.headers?.get('cookie'))??await userLanguage(person.id),en=language==='en';
         const content=renderEmail('verification',{name:person?.name,language,subject:en?'Your AutoCare verification code':'Codul tău de verificare AutoCare',message:en?`Your verification code is: ${otp}\n\nEnter it in AutoCare to confirm your email. It expires in 10 minutes. Never share this code. If you did not request it, ignore this email.`:`Codul tău de verificare este: ${otp}\n\nIntrodu-l în AutoCare pentru a confirma adresa de email. Expiră în 10 minute. Nu comunica acest cod altor persoane. Dacă nu l-ai solicitat, ignoră mesajul.`,actionUrl:origin()+(en?'/en/sign-in':'/autentificare'),ctaLabel:en?'Open AutoCare':'Deschide AutoCare'});
-        content.html=content.html.replaceAll(otp,`<strong style="display:block;font-size:32px;letter-spacing:8px;color:#6952bd;padding:18px 0">${otp}</strong>`);
+        content.html=content.html.replaceAll(otp,`<strong style="display:block;font-size:32px;letter-spacing:8px;color:#075365;padding:18px 0">${otp}</strong>`);
         await sendMail(email,content.subject,content.text,crypto.randomUUID(),content,{userId:person.id,template:'verification'});
       },rateLimit:{window:60,max:3}})],
     emailAndPassword: {

@@ -44,7 +44,7 @@ test('registration language uses weighted browser preferences without inferring 
 });
 test('email canvas is light, compact and escapes custom subjects and messages',()=>{
  const mail=renderEmail('administrative',{subject:'Service <update>',message:'Own <script>message</script>\n\nSecond paragraph'});
- assert.ok(mail.html.includes('background:#edf1f7'));
+ assert.ok(mail.html.includes('background:#F6F9FB'));
  assert.ok(mail.html.includes('Service &lt;update&gt;</h1>'));
  assert.ok(!mail.html.includes('background:#090D14'));
  assert.ok(!mail.html.includes('<script>message'));

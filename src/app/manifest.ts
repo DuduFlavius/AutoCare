@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['utilities', 'productivity'],
     display_override: ['standalone'],
     display: 'standalone',
-    background_color: '#050E0B',
-    theme_color: '#050E0B',
+    background_color: '#F6F9FB',
+    theme_color: '#F6F9FB',
     lang: 'ro',
     shortcuts: [
       { name: 'Garaj', url: '/cont?tab=Garaj' },
@@ -20,8 +20,8 @@ export default function manifest(): MetadataRoute.Manifest {
       { name: 'Notificări', url: '/cont?tab=Notific%C4%83ri' },
     ],
     icons: [
-      { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/icon-192.png?v=pearl5', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/icon-512.png?v=pearl5', sizes: '512x512', type: 'image/png', purpose: 'any' },
     ],
   };
 }
