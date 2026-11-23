@@ -22,3 +22,16 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-ref
  .ac-support-desktop-label,.ac-support-tabs .ac-support-desktop-tab{display:none}.ac-support-mobile-label,.ac-support-tabs .ac-support-mobile-tab{display:inline}
  .ac-support-mobile-help:not([hidden]){display:block;align-self:center;min-height:40px;padding:8px 12px;border:0;background:transparent;color:#075365;font-size:12px}
 }
+
+@layer autocare-workspace {
+ .ac-reference-support .ac-support-tabs button[aria-pressed=true] {
+  background:linear-gradient(160deg,#087183,#083b4a)!important;
+  color:#fff!important;
+ }
+ @media(min-width:901px) {
+  .ac-reference-support .ac-support-tabs .ac-support-mobile-tab {display:none!important}
+ }
+ @media(max-width:900px) {
+  .ac-reference-support .ac-support-tabs .ac-support-desktop-tab {display:none!important}
+ }
+}

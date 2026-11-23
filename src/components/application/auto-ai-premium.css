@@ -176,3 +176,17 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-memb
 
 .rg-ai-page .ac-ai-chat>.ac-ai-vehicle-header{padding:8px 18px;border-bottom:1px solid #e3ebf0;background:#f6f9fb;flex:none}.rg-ai-page .ac-ai-chat>.ac-ai-vehicle-header .ac-ai-vehicle{max-width:520px;margin:0}
 @media(max-width:900px){.rg-ai-page .ac-ai-chat>.ac-ai-vehicle-header{padding:5px 12px}.rg-ai-page .ac-ai-chat>.ac-ai-vehicle-header .ac-filter-select-trigger{min-height:36px}}
+
+@media(max-width:900px){
+ .rg-ai-page .ac-ai-quick-prompts{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:6px;padding:3px 10px 8px}
+ .rg-ai-page .ac-ai-quick-prompts button{flex:none;white-space:nowrap;min-height:36px;border-radius:13px}
+ .rg-ai-page .ac-ai-heading{flex-wrap:nowrap}
+ .rg-ai-page .ac-ai-brand>div{min-width:0}
+ .rg-ai-page .ac-ai-brand h3{font-size:clamp(15px,4.3vw,18px);white-space:nowrap}
+ .rg-ai-page .ac-ai-back,.rg-ai-page .ac-ai-header-actions>button,.rg-ai-page .ac-ai-header-actions .ac-action-trigger{width:40px;min-width:40px;height:44px;min-height:44px;padding:8px}
+}
+@media(max-width:430px){
+ .rg-ai-page .ac-ai-header-actions>.ac-ai-new-chat{display:none}
+ .rg-ai-page .ac-ai-menu-new{display:flex}
+ .rg-ai-page .ac-ai-header-actions{width:auto}
+}

@@ -573,7 +573,24 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         </aside>
       )}
       <div className="support-chat-panel" data-history={!staff&&historyView || undefined}>
-        {!staff && historyView && <section className="support-request-list" aria-label={t('Cererile mele','My requests')}><h3>{t('Conversațiile tale','Your conversations')}</h3>{loading?<p role="status">{t('Se încarcă…','Loading…')}</p>:threads.length?threads.map(thread=><button type="button" key={thread.id} onClick={()=>{void openThread(thread,false);onOpenConversation?.();}}><span className="support-request-icon"><CarFront size={22}/></span><span className="support-request-content"><strong data-user-content>{thread.title}</strong>{thread.lastMessage&&<span className="support-request-excerpt" data-user-content>{thread.lastMessage.body}</span>}<small><time dateTime={thread.updatedAt}>{new Date(thread.updatedAt).toLocaleString(locale,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</time><span className="support-request-state" data-status={thread.status}>{thread.status==='completed'?t('Finalizată','Completed'):thread.status==='trashed'?t('În coș','In trash'):t('Deschisă','Open')}</span></small></span>{!!thread.unreadCount&&thread.unreadCount>0&&<span className="support-request-unread" aria-label={t(thread.unreadCount+' mesaje necitite',thread.unreadCount+' unread messages')}>{thread.unreadCount}</span>}</button>):<p>{t('Nu ai încă solicitări. Scrie-ne în fila Conversație.','No requests yet. Send us a message in Conversation.')}</p>}</section>}
+        {!staff && historyView && <section className="support-request-list" aria-label={t('Cererile mele', 'My requests')}>
+          {loading ? <p role="status">{t('Se încarcă…', 'Loading…')}</p> : threads.length ? threads.map(thread => (
+            <button type="button" key={thread.id} onClick={() => { void openThread(thread, false); onOpenConversation?.(); }}>
+              <span className="support-request-icon"><CarFront size={22} aria-hidden="true"/></span>
+              <span className="support-request-content">
+                <strong data-user-content>{thread.title}</strong>
+                {thread.lastMessage && <span className="support-request-excerpt" data-user-content>{thread.lastMessage.body}</span>}
+              </span>
+              <span className="support-request-meta">
+                <time dateTime={thread.updatedAt}>{new Date(thread.updatedAt).toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time>
+                <span className="support-request-indicators">
+                  <span className="support-request-state" data-status={thread.status}>{thread.status === 'completed' ? t('Finalizată', 'Completed') : thread.status === 'trashed' ? t('În coș', 'In trash') : t('Deschisă', 'Open')}</span>
+                  {!!thread.unreadCount && <span className="support-request-unread" aria-label={t(thread.unreadCount + ' mesaje necitite', thread.unreadCount + ' unread messages')}>{thread.unreadCount}</span>}
+                </span>
+              </span>
+            </button>
+          )) : <p>{t('Nu ai încă solicitări. Scrie-ne în fila Conversație.', 'No requests yet. Send us a message in Conversation.')}</p>}
+        </section>}
 
         {!staff && threads.length > 1 && (
           <label className="support-own-history">Istoric conversații
