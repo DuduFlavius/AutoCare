@@ -4,15 +4,15 @@ html {accent-color:var(--color-primary);color-scheme:light}
 :where(button,a,input,textarea,select):focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}
 :where(button):disabled{cursor:not-allowed;opacity:.5}
 :where(button):not(:disabled):active{filter:brightness(.9)}
-.ac-confirm-overlay{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:#000a;isolation:isolate}
-html body .ac-premium-dialog{width:min(460px,100%);max-height:calc(100dvh - 40px);overflow:auto;box-sizing:border-box;background:var(--color-surface-muted);color:var(--color-text);border:1px solid var(--color-border);border-radius:22px;box-shadow:0 24px 80px #0009;padding:24px;overflow-wrap:anywhere;font:400 15px/1.6 Inter,'Segoe UI',sans-serif}
+.ac-confirm-overlay{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:#14233355;backdrop-filter:blur(7px);isolation:isolate}
+html body .ac-premium-dialog{width:min(460px,100%);max-height:calc(100dvh - 40px);overflow:auto;box-sizing:border-box;position:relative;background:linear-gradient(145deg,#fff,#f5f8fb);color:var(--color-text);border:1px solid #ffffffba;border-radius:24px;box-shadow:0 24px 80px #083b4a30;padding:30px;overflow-wrap:anywhere;font:400 15px/1.6 Inter,'Segoe UI',sans-serif}
 html body .ac-premium-dialog h2{font-size:21px;margin:14px 0 8px;color:var(--color-text)}
 html body .ac-premium-dialog p{color:var(--color-muted);margin:0 0 24px}
 .ac-dialog-symbol{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:color-mix(in srgb, var(--color-primary) 8.24%, transparent);color:var(--color-primary)}.ac-dialog-symbol[data-danger=true]{color:var(--color-danger-ink);background:var(--color-danger-soft)}
 .ac-premium-dialog footer{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
 html body .ac-premium-dialog button{min-height:46px;padding:10px 17px;border:1px solid var(--color-border);border-radius:12px;background:var(--color-surface);color:var(--color-text);font:600 14px/1.4 Inter,'Segoe UI',sans-serif;cursor:pointer}
 html body .ac-premium-dialog .ac-dialog-confirm{background:var(--color-button);color:var(--color-on-primary);border-color:var(--color-button)}
-html body .ac-premium-dialog .ac-dialog-danger{background:var(--color-danger-ink);color:var(--color-on-primary);border-color:#d56154}
+html body .ac-premium-dialog .ac-dialog-danger{background:linear-gradient(155deg,#076879,#083b4a);color:var(--color-on-primary);border-color:var(--color-primary-deep)}
 html body .ac-filter-select{display:block;min-width:0;max-width:100%}html body .ac-filter-select>select[hidden]{display:none!important}
 html body .ac-filter-select-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--color-border);border-radius:12px;background:var(--color-surface-muted);color:var(--color-text);font:inherit;text-align:start}
 html body .ac-filter-select-trigger>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.ac-filter-select-trigger>svg{flex:none}
@@ -27,3 +27,11 @@ html body .ac-premium-dialog button[aria-busy=true]{display:flex;gap:8px;align-i
 html body .ac-premium-dialog button[aria-busy=true] svg{animation:ac-dialog-spin 1s linear infinite}
 @keyframes ac-dialog-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){html body .ac-premium-dialog button[aria-busy=true] svg{animation:none}}
+
+html body .ac-premium-dialog .ac-dialog-close{position:absolute;right:12px;top:12px;display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:7px;border:0;background:transparent;box-shadow:none}
+html body .ac-premium-dialog .ac-dialog-symbol{width:62px;height:62px;border-radius:50%}
+@media(max-width:600px){html body .ac-premium-dialog{text-align:center;padding:28px 22px}.ac-premium-dialog .ac-dialog-symbol{margin:0 auto}.ac-premium-dialog footer{display:flex;flex-direction:column}.ac-premium-dialog footer button{flex:none;width:100%}.ac-premium-dialog footer button:last-child{order:-1}}
+@layer autocare-workspace{
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main :is(button.primary,a.primary,.rg-vault-upload){background:linear-gradient(155deg,#087183,#083b4a)!important;color:#fff!important;border:1px solid #084858!important;border-radius:12px!important;box-shadow:0 3px 8px #083b4a12!important}
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main :is(button.primary,a.primary,.rg-vault-upload):disabled{opacity:.45!important}
+}

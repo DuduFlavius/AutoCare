@@ -1,10 +1,21 @@
 'use client';
 import {useState} from 'react';
-import {Headset,Mail,HelpCircle,MessageSquare,History,ChevronLeft} from 'lucide-react';
+import {HelpCircle, Mail, ChevronLeft} from 'lucide-react';
 import {useApplicationLanguage} from '../application-locale';
 import SupportChat from '../support-chat';
+import './reference-support.css';
 export function RacingSupport({role,preview,onFeedback}:{role:string;preview:boolean;onFeedback:()=>void}){
- const en=useApplicationLanguage()==='en',[chat,setChat]=useState(false);
- if(chat)return <div className="ac-support-page"><button onClick={()=>setChat(false)}><ChevronLeft size={18}/>{en?'Support center':'Centrul de suport'}</button><SupportChat role={role} preview={preview} onFeedback={onFeedback}/></div>;
- return <section className="rg-support-home"><article className="rg-support-hero"><Headset size={52}/><h2>{en?'AutoCare assistance':'Asistență AutoCare'}</h2><p>{en?'Send our team a message and follow your conversation here.':'Scrie echipei și urmărește conversația aici.'}</p><button className="primary" onClick={()=>setChat(true)}><MessageSquare size={19}/>{en?'Open support chat':'Deschide chatul'}</button></article><div className="rg-support-links"><details><summary><HelpCircle size={20}/> FAQ</summary><h3>{en?'How do I add a document?':'Cum adaug un document?'}</h3><p>{en?'Open Documents, choose your vehicle and select Upload document.':'Deschide Documente, alege mașina și apasă Încarcă document.'}</p><h3>{en?'Where are my reports?':'Unde sunt rapoartele?'}</h3><p>{en?'Open Reports to filter your records and export PDF or CSV with Premium.':'Deschide Raport pentru a filtra înregistrările și a exporta PDF sau CSV cu Premium.'}</p></details><button onClick={()=>setChat(true)}><History size={22}/>{en?'Conversation history':'Istoric conversații'}</button><button onClick={onFeedback}><Mail size={22}/>{en?'Contact & feedback':'Contact și feedback'}</button></div></section>;
+ const en=useApplicationLanguage()==='en';
+ const [tab,setTab]=useState<'chat'|'requests'|'faq'>('chat');
+ const staff=['assistant','admin','founder','superadmin'].includes(role);
+ return <section className="ac-support-page ac-reference-support">
+  <header className="ac-support-title"><a href="/cont?tab=Dashboard" aria-label={en?'Back to Home':'Înapoi la Acasă'}><ChevronLeft size={22}/></a><div><h2>{en?'Support':'Suport'}</h2><p>{en?'Help center':'Centrul de asistență'}</p></div></header>
+  <nav className="ac-support-tabs" aria-label={en?'Support sections':'Secțiuni suport'}>
+   <button type="button" aria-pressed={tab==='chat'} onClick={()=>setTab('chat')}>{en?'Conversation':'Conversație'}</button>
+   {!staff&&<button type="button" aria-pressed={tab==='requests'} onClick={()=>setTab('requests')}>{en?'My requests':'Cererile mele'}</button>}
+   <button type="button" aria-pressed={tab==='faq'} onClick={()=>setTab('faq')}>{en?'FAQ':'Întrebări frecvente'}</button>
+  </nav>
+  <div hidden={tab==='faq'} className="ac-support-conversation"><SupportChat role={role} preview={preview} onFeedback={onFeedback} historyView={tab==='requests'} onOpenConversation={()=>setTab('chat')}/></div>
+  {tab==='faq'&&<div className="ac-support-faq"><details><summary><HelpCircle size={20}/>{en?'How do I add a document?':'Cum adaug un document?'}</summary><p>{en?'Open Documents, select your vehicle and choose Add document.':'Deschide Documente, selectează mașina și apasă Adaugă document.'}</p></details><details><summary><HelpCircle size={20}/>{en?'Where are my reports?':'Unde sunt rapoartele?'}</summary><p>{en?'Open Reports to filter your records and export PDF or CSV with Premium.':'Deschide Rapoarte pentru a filtra înregistrările și a exporta PDF sau CSV cu Premium.'}</p></details><button type="button" onClick={onFeedback}><Mail size={19}/>{en?'Contact and feedback':'Contact și feedback'}</button></div>}
+ </section>;
 }

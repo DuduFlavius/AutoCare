@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useId,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {AlertTriangle,Info,LoaderCircle} from 'lucide-react';
+import {Trash2,Info,LoaderCircle,X} from 'lucide-react';
 
 import {ConfirmationQueue,type ConfirmationRequest as Request} from '@/lib/confirmation-queue';
 const queue=new ConfirmationQueue();
@@ -30,5 +30,5 @@ export function PremiumDialogHost(){
  const label=/șterg|delete/i.test(message)?(en?'Delete':'Șterge'):/arhiv|archive/i.test(message)?(en?'Archive':'Arhivează'):/renunț|discard|abandon/i.test(message)?(en?'Discard changes':'Renunță la modificări'):/deconect|sign out/i.test(message)?(en?'Sign out':'Deconectează'):/salvez|salvezi|save/i.test(message)?(en?'Save':'Salvează'):/închei|end this/i.test(message)?(en?'End conversation':'Încheie conversația'):(en?'Confirm':'Confirmă');
  return createPortal(<div className="ac-confirm-overlay"><div className="ac-premium-dialog" role="alertdialog" aria-modal="true" aria-labelledby={id+'-title'} aria-describedby={id+'-body'} ref={root} onKeyDown={event=>{
   event.stopPropagation();if(event.key==='Escape'){event.preventDefault();if(!actionLock.current)settle(false);}if(event.key==='Tab'){const nodes=Array.from(root.current!.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')),first=nodes[0],last=nodes.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
- }}><span className="ac-dialog-symbol" data-danger={destructive}>{destructive?<AlertTriangle size={24}/>:<Info size={24}/>}</span><h2 id={id+'-title'}>{message.includes('?')?message.slice(0,message.indexOf('?')+1):(en?'Confirm action':'Confirmă acțiunea')}</h2><p id={id+'-body'}>{message}</p>{error&&<p role="alert">{error}</p>}<footer><button type="button" disabled={working} onClick={()=>{setError('');settle(false);}}>{en?'Cancel':'Anulează'}</button><button type="button" className={destructive?'ac-dialog-danger':'ac-dialog-confirm'} disabled={working} aria-busy={working} onClick={()=>void confirm()}>{working?<><LoaderCircle size={17}/>{en?'Processing…':'Se procesează…'}</>:label}</button></footer></div></div>,document.body);
+ }}><button type="button" className="ac-dialog-close" disabled={working} aria-label={en?'Close':'Închide'} onClick={()=>settle(false)}><X size={19}/></button><span className="ac-dialog-symbol" data-danger={destructive}>{destructive?<Trash2 size={28}/>:<Info size={24}/>}</span><h2 id={id+'-title'}>{message.includes('?')?message.slice(0,message.indexOf('?')+1):(en?'Confirm action':'Confirmă acțiunea')}</h2><p id={id+'-body'}>{message}</p>{error&&<p role="alert">{error}</p>}<footer><button type="button" disabled={working} onClick={()=>{setError('');settle(false);}}>{en?'Cancel':'Anulează'}</button><button type="button" className={destructive?'ac-dialog-danger':'ac-dialog-confirm'} disabled={working} aria-busy={working} onClick={()=>void confirm()}>{working?<><LoaderCircle size={17}/>{en?'Processing…':'Se procesează…'}</>:label}</button></footer></div></div>,document.body);
 }

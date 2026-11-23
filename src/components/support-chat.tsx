@@ -10,6 +10,7 @@ import {useApplicationLocale} from './application-locale';
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import {
   Star,
+  CarFront,
   Headset,
   Bell,
   BarChart3,
@@ -96,10 +97,14 @@ export default function SupportChat({
   role,
   preview = false,
   onFeedback,
+  historyView = false,
+  onOpenConversation,
 }: {
   role: string;
   preview?: boolean;
   onFeedback?:()=>void;
+  historyView?:boolean;
+  onOpenConversation?:()=>void;
 }) {
 
   const locale=useApplicationLocale();
@@ -152,7 +157,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     notificationEnabled = useRef(false);
   useLayoutEffect(()=>{
     const element=workspace.current;if(!element)return;let frame=0,lastHeight=-1;
-    const update=()=>{frame=0;const viewport=window.visualViewport,bottom=(viewport?.height??window.innerHeight)+(viewport?.offsetTop??0);const dock=document.querySelector<HTMLElement>('.rg-mobile-dock, .autocare-mobile-dock');const rect=dock?.getBoundingClientRect();const reserved=rect&&rect.height&&rect.top<bottom&&getComputedStyle(dock!).position==='fixed'?bottom-rect.top:0;const height=Math.max(0,bottom-Math.max(0,element.getBoundingClientRect().top)-reserved-12);if(Math.abs(lastHeight-height)<1)return;lastHeight=height;element.style.setProperty('--support-height',height+'px');element.toggleAttribute('data-compact',height<440);};
+    const update=()=>{frame=0;const viewport=window.visualViewport,bottom=(viewport?.height??window.innerHeight)+(viewport?.offsetTop??0);element.dataset.keyboardOpen=String(!!viewport&&window.innerHeight-viewport.height>140);const dock=document.querySelector<HTMLElement>('.rg-mobile-dock, .autocare-mobile-dock');const rect=dock?.getBoundingClientRect();const reserved=rect&&rect.height&&rect.top<bottom&&getComputedStyle(dock!).position==='fixed'?bottom-rect.top:0;const height=Math.max(0,bottom-Math.max(0,element.getBoundingClientRect().top)-reserved-12);if(Math.abs(lastHeight-height)<1)return;lastHeight=height;element.style.setProperty('--support-height',height+'px');element.toggleAttribute('data-compact',height<440);};
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};update();window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);window.visualViewport?.addEventListener('scroll',schedule);
     return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('scroll',schedule);};
   },[view,staff]);
@@ -567,7 +572,9 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           </div>
         </aside>
       )}
-      <div className="support-chat-panel">
+      <div className="support-chat-panel" data-history={historyView || undefined}>
+        {!staff && historyView && <section className="support-request-list" aria-label={t('Cererile mele','My requests')}><h3>{t('Cererile mele','My requests')}</h3>{loading?<p role="status">{t('Se încarcă…','Loading…')}</p>:threads.length?threads.map(thread=><button type="button" key={thread.id} onClick={()=>{void openThread(thread,false);onOpenConversation?.();}}><span className="support-request-icon"><CarFront size={22}/></span><span><strong data-user-content>{thread.title}</strong><small>{new Date(thread.updatedAt).toLocaleDateString(locale)} · {thread.status==='completed'?t('Finalizată','Completed'):t('Deschisă','Open')}</small>{thread.lastMessage&&<span data-user-content>{thread.lastMessage.body}</span>}</span></button>):<p>{t('Nu ai încă solicitări. Scrie-ne în fila Conversație.','No requests yet. Send us a message in Conversation.')}</p>}</section>}
+
         {!staff && threads.length > 1 && (
           <label className="support-own-history">Istoric conversații
             <FilterSelect value={selected ?? ''} onChange={event => {
@@ -589,7 +596,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             </button>
           )}
           <span className="support-avatar strong">
-            {staff ? <UserRound size={22} /> : <Headset size={24} />}
+            {staff ? <UserRound size={22} /> : <CarFront size={24} />}
           </span>
           <div className="support-header-title">
             <h3>{staff ? current?.name || 'Conversație client' : t('Asistență AutoCare','AutoCare Support')}</h3>
@@ -747,6 +754,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                   }
                   key={message.id}
                 >
+                  {message.authorRole !== 'user' && <span className="support-message-avatar" aria-hidden="true"><CarFront size={22}/></span>}
                   <div className="support-message-meta">
                     <strong>{message.authorName}</strong>
                     <span className={'support-rank rank-' + message.authorRole}>
@@ -781,15 +789,15 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               ),
             )
           ) : (
-            <div className="support-empty">
+            <div className={"support-empty" + (!staff ? " support-welcome-bubble" : "")}>
               <div>
-                <MessageSquare size={31} strokeWidth={1.3} />
+                <CarFront size={25} strokeWidth={1.6} />
               </div>
-              <h3>{staff ? 'Nu există mesaje de afișat' : 'Cu ce te putem ajuta?'}</h3>
+              <h3>{staff ? 'Nu există mesaje de afișat' : 'AutoCare Suport'}</h3>
               <p>
                 {staff
                   ? 'Când un client scrie, conversația apare aici.'
-                  : 'Trimite primul mesaj. Răspunsurile echipei vor apărea în această conversație.'}
+                  : 'Salut! Cu ce te putem ajuta? Scrie-ne aici, iar răspunsurile echipei vor apărea în conversație.'}
               </p>
             </div>
           )}

@@ -32,7 +32,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const english = locale.startsWith('en');
   const t = (ro: string, en: string) => english ? en : ro;
   const [clock, setTelemetryClock] = useState(() => Date.now());
-  useEffect(() => { const timer = setInterval(() => setTelemetryClock(Date.now()), 4000); return () => clearInterval(timer); }, []);
+  useEffect(() => { const timer = setInterval(() => setTelemetryClock(Date.now()), 1000); return () => clearInterval(timer); }, []);
   const idleLocation = useMapLocation(liveVisible && !active && !preview, english);
   useEffect(() => {
     document.documentElement.dataset.autocareGpsActive = active ? 'true' : 'false';
@@ -51,6 +51,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const tripId=useRef('');
   const baseline=useRef(0);
   const endedAt=useRef<number|null>(null);
+  const nativeElapsed=useRef<{seconds:number;at:number;running:boolean}|null>(null);
   const [signal, setSignal] = useState<'requesting'|'waiting'|'ok'|'lost'>('waiting');
   const lastFix = useRef<number>(0);
   const [routePoints, setRoutePoints] = useState<Sample[]>([]);
@@ -66,6 +67,8 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     if(tripId.current!==value.id)setSaved(false);
     setAutomatic(!!value.automatic&&(value.active||value.distance>0));setWaitingCar(!!value.stopAt);setAwaitingMotion(!!value.awaitingMotion);
     if(value.automatic&&!value.active&&value.distance===0)setSaved(true);
+    const nativeEnd=value.disconnectedAt??value.endedAt??Date.now();
+    nativeElapsed.current={seconds:value.awaitingMotion?0:Math.max(0,Math.floor((nativeEnd-value.startedAt)/1000)),at:Date.now(),running:value.active&&!value.awaitingMotion&&!value.disconnectedAt&&!value.endedAt};
     const shownDistance=value.stopAt?(value.disconnectDistance??value.distance):value.distance;
     const shownPoints=value.disconnectedAt?value.points.filter(p=>p.timestamp<=value.disconnectedAt!):value.points;
     tripId.current=value.id;baseline.current=value.baseline;started.current=value.startedAt;endedAt.current=value.endedAt??null;
@@ -83,6 +86,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     // Navigating away must detach UI polling, never stop the native location service.
     return()=>{disposed=true;clearInterval(timer);document.removeEventListener('visibilitychange',refresh);};
   },[ownerId,preview]);
+  useEffect(()=>{const elapsed=nativeElapsed.current;if(native&&elapsed)setTrackingSeconds(elapsed.seconds+(elapsed.running?Math.max(0,Math.floor((clock-elapsed.at)/1000)):0));},[clock,native]);
   useEffect(()=>{const synced=(event:Event)=>{if((event as CustomEvent<{ids:string[]}>).detail?.ids.includes(tripId.current)){setSaved(true);setNotice(locale.startsWith('en')?'Automatic trip saved and mileage updated.':'Traseul automat a fost salvat și kilometrajul actualizat.');}};window.addEventListener('autocare-native-synced',synced);return()=>window.removeEventListener('autocare-native-synced',synced);},[locale]);
   useEffect(() => { if (!active) return; const check = setInterval(() => { if (lastFix.current && Date.now() - lastFix.current > 25000) setSignal('lost'); }, 4000); return () => clearInterval(check); }, [active]);
   useEffect(()=>{
