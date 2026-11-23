@@ -465,7 +465,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   if (view==='statistics' && staff) return <section id="autocare-support" ref={workspace} className="support-workspace ac-support-center support-statistics-mode"><SupportStatistics preview={preview} onClose={()=>setView('inbox')}/></section>;
   return (
     <>
-      {onFeedback&&<button type="button" className="ac-feedback-entry" onClick={onFeedback}><Star size={18}/>{t('Trimite feedback','Send feedback')}</button>}
+
     <section id="autocare-support" ref={workspace}
       className={
         'support-workspace ac-support-center ' +
@@ -642,7 +642,10 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               <span className="support-header-role">Conversație privată</span>
             </div>
           )}
-          <details className="support-conversation-menu"><summary aria-label={t('Opțiuni conversație','Conversation options')}><MoreHorizontal size={21}/></summary><div className="support-conversation-menu-content">        {!staff && (
+          <details className="support-conversation-menu"><summary aria-label={t('Opțiuni conversație','Conversation options')}><MoreHorizontal size={21}/></summary><div className="support-conversation-menu-content">{onFeedback && <button type="button" onClick={event => {
+            event.currentTarget.closest('details')?.removeAttribute('open');
+            onFeedback();
+          }}><Star size={16}/>{t('Trimite feedback', 'Send feedback')}</button>}        {!staff && (
           <nav className="support-client-folders" aria-label="Arhiva conversațiilor">
             <button type="button" aria-pressed={status !== 'trashed'} onClick={() => { setStatus('open'); setSelected(null); selectedRef.current = null; setDetail(null); }}>
               <MessageSquare size={16}/> Conversație

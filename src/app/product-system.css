@@ -91,7 +91,8 @@ html body .founder-shell .founder-page-header h1:not(:where([class^="rg-"],[clas
  html body .app-shell.ac-workspace.ac-studio main#workspace-main :is(.table-wrap,.finance-table-wrap,.ac-ai-table-scroll):not(:where([class^="rg-"],[class^="rg-"] *)){min-width:0;max-width:100%;overflow-x:auto}
  html body .app-shell.ac-workspace.ac-studio main#workspace-main :is(p,h1,h2,h3,button,a):not(:where([class^="rg-"],[class^="rg-"] *)){overflow-wrap:break-word}
  @media(max-width:900px){
-  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:not(:where([class^="rg-"],[class^="rg-"] *)){width:100%!important;max-width:100%!important;margin-left:0!important;padding-top:calc(128px + env(safe-area-inset-top,0px))!important;padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:not(:where([class^="rg-"],[class^="rg-"] *)):not(:has(.rg-ai-page[data-chat],.ac-support-page)){width:100%!important;max-width:100%!important;margin-left:0!important;padding-top:calc(128px + env(safe-area-inset-top,0px))!important;padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.rg-ai-page[data-chat],.ac-support-page){padding-top:max(8px,env(safe-area-inset-top))!important}
   html body .app-shell.ac-workspace.ac-studio main#workspace-main :is(.page-head,.ws-module-header,.ws-module-heading,.ac-module-header):not(:where([class^="rg-"],[class^="rg-"] *)){align-items:flex-start}
  }
  html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-ai-page[data-chat]):not(:where([class^="rg-"],[class^="rg-"] *)){padding-bottom:0!important}

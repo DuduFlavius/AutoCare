@@ -190,3 +190,25 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-memb
  .rg-ai-page .ac-ai-menu-new{display:flex}
  .rg-ai-page .ac-ai-header-actions{width:auto}
 }
+
+@layer autocare-workspace {
+ .rg-ai-page .ac-ai-chat .ac-ai-answer {
+  background:linear-gradient(145deg,#f4f6f8,#e4ebf0)!important;
+  border:1px solid #d9e4eb!important;
+  border-radius:5px 16px 16px!important;
+ }
+ .rg-ai-page .ac-ai-composer .ac-ai-send {
+  border-radius:50%!important;
+  width:44px!important;
+  min-width:44px!important;
+ }
+}
+.rg-ai-page .ac-ai-welcome {max-width:none;width:100%}
+@media(max-width:900px){
+ .rg-ai-page .ac-ai-tools-toggle {display:none}
+ .rg-ai-page .ac-ai-heading .ac-ai-brand-icon{height:32px}
+ .rg-ai-page .ac-ai-brand .ac-ai-online i{display:none}
+ .rg-ai-page .ac-ai-turns{gap:14px}
+ .rg-ai-page .ac-ai-user-row{margin-bottom:12px}
+ .rg-ai-page .ac-ai-markdown :is(p,li){line-height:1.5}
+}

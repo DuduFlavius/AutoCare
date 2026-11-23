@@ -24,7 +24,7 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main:has(.ac-ref
 }
 
 @layer autocare-workspace {
- .ac-reference-support .ac-support-tabs button[aria-pressed=true] {
+ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-reference-support .ac-support-tabs button[aria-pressed=true] {
   background:linear-gradient(160deg,#087183,#083b4a)!important;
   color:#fff!important;
  }
