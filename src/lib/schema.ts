@@ -114,6 +114,15 @@ export const mileageReadings = pgTable('mileage_readings', {
   foreignKey({ name: 'mileage_reading_owner_vehicle_fk', columns: [t.vehicleId, t.userId], foreignColumns: [vehicles.id, vehicles.userId] }).onDelete('cascade'),
 ]);
 
+export const mileageReadingCorrections = pgTable('mileage_reading_corrections', {
+  id: text().primaryKey(),
+  readingId: text().notNull().references(() => mileageReadings.id,{onDelete:'cascade'}),
+  previousOdometer: integer().notNull(),
+  correctedOdometer: integer().notNull(),
+  reason: text().notNull(),
+  createdAt: timestamp({withTimezone:true}).notNull().defaultNow(),
+});
+
 export const gpsTrips = pgTable('gps_trips', {
   id: text().primaryKey(),
   userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),

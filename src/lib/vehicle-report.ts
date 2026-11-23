@@ -47,8 +47,26 @@ export async function vehicleReport({vehicles,records,generatedAt,language='ro',
  fresh();
  paragraph(period||t('Perioadă: toate înregistrările selectate','Period: all selected records'));
  section(t('01  Sinteză','01  Summary'));
- const metrics=[[t('Vehicule','Vehicles'),String(vehicles.length)],[t('Înregistrări','Records'),String(unique.length)],[t('Cheltuieli cunoscute','Known expenses'),known.length?money(total):t('Necompletat','Not recorded')],[t('Kilometraj confirmat cumulat','Combined confirmed odometers'),vehicles.reduce((sum,row)=>sum+row.odometer,0).toLocaleString(locale)+' km']];
- for(let i=0;i<metrics.length;i+=2){need(78);for(let j=0;j<2;j++){
+ if(finance){
+  page.drawRectangle({x:L,y:y-54,width:R-L,height:67,color:navy});
+  page.drawText(t('TOTAL CHELTUIELI ÎNREGISTRATE','TOTAL RECORDED EXPENSES'),{x:L+16,y:y-7,size:9,font:bold,color:white});
+  page.drawText(known.length?money(total):'—',{x:L+16,y:y-36,size:24,font:bold,color:white});
+  y-=76;
+ }
+ const monthly=new Map<string,number>();
+ if(finance)for(const row of known){if(row.date){const month=row.date.slice(0,7);monthly.set(month,(monthly.get(month)??0)+row.amountBani);}}
+ const peak=known.reduce<number|null>((value,row)=>value==null?row.amountBani:Math.max(value,row.amountBani),null);
+ const metrics=finance?[[t('Vehicule','Vehicles'),String(vehicles.length)],[t('Tranzacții','Transactions'),String(financial.length)],[t('Media lunilor cu costuri','Average across recorded months'),monthly.size?money(Math.round(total/monthly.size)):'—'],[t('Cea mai mare cheltuială','Largest expense'),peak==null?'—':money(peak)]]:[[t('Vehicule','Vehicles'),String(vehicles.length)],[t('Înregistrări','Records'),String(unique.length)],[t('Cheltuieli cunoscute','Known expenses'),known.length?money(total):t('Necompletat','Not recorded')],[t('Kilometraj confirmat cumulat','Combined confirmed odometers'),vehicles.reduce((sum,row)=>sum+row.odometer,0).toLocaleString(locale)+' km']];
+ if(finance){
+  metrics.forEach(([label,value],index)=>{
+   const x=L+130*index;
+   page.drawRectangle({x,y:y-35,width:122,height:48,color:rgb(.93,.96,.97)});
+   page.drawText(label,{x:x+8,y:y-3,size:7,font:regular,color:muted});
+   let size=14;while(bold.widthOfTextAtSize(value,size)>106&&size>8)size--;
+   page.drawText(value,{x:x+8,y:y-24,size,font:bold,color:navy});
+  });
+  y-=52;
+ }else for(let i=0;i<metrics.length;i+=2){need(78);for(let j=0;j<2;j++){
   const metric=metrics[i+j];if(!metric)continue;const x=L+j*264;
   page.drawRectangle({x,y:y-47,width:249,height:63,color:rgb(237/255,244/255,247/255),borderColor:line,borderWidth:.6});
   page.drawRectangle({x,y:y-47,width:2.5,height:63,color:emerald});
@@ -56,11 +74,20 @@ export async function vehicleReport({vehicles,records,generatedAt,language='ro',
   let size=17;while(bold.widthOfTextAtSize(metric[1],size)>220&&size>10)size--;
   page.drawText(metric[1],{x:x+14,y:y-29,size,font:bold,color:i+j===2?emerald:navy});
  }y-=78;}
- if(finance){
-  const max=known.reduce<number|null>((value,row)=>value==null?row.amountBani:Math.max(value,row.amountBani),null);
-  paragraph(t('Tranzacții: ','Transactions: ')+financial.length+' · '+t('Cea mai mare cheltuială: ','Largest expense: ')+(max==null?'—':money(max)),true);
+ if(finance&&monthly.size){
+  const bars=[...monthly.entries()].sort(([a],[b])=>a.localeCompare(b)).slice(-6);
+  need(128);
+  section(t('Evoluția costurilor · luni cu înregistrări','Expense trend · months with entries'));
+  const bound=Math.max(1,...bars.map(([,value])=>value)),width=(R-L)/bars.length,base=y-52;
+  for(const [index,[month,amount]] of bars.entries()){
+   const h=amount/bound*46,x=L+index*width+8;
+   page.drawRectangle({x,y:base,width:Math.min(width-16,90),height:h,color:emerald});
+   page.drawText(month,{x,y:base-14,size:8,font:regular,color:muted});
+   page.drawText(money(amount),{x,y:base+h+5,size:7,font:bold,color:navy});
+  }
+  y=base-27;
  }
- paragraph(t('Kilometrajul reprezintă suma valorilor de bord confirmate, nu distanța parcursă în perioadă. Totalul include numai cheltuielile cunoscute și realizate.','Mileage is the sum of confirmed odometer readings, not distance travelled during the period. The total includes only known, completed expenses.'),false,9);
+ paragraph(finance?t('Sumele includ costurile cunoscute, înregistrate în RON.','Amounts include known expenses recorded in RON.'):t('Kilometrajul reprezintă suma valorilor de bord confirmate, nu distanța parcursă în perioadă. Totalul include numai cheltuielile cunoscute și realizate.','Mileage is the sum of confirmed odometer readings, not distance travelled during the period. The total includes only known, completed expenses.'),false,9);
  if(total>0){section(t('02  Distribuția costurilor','02  Cost distribution'));const groups=new Map<string,number>();for(const row of known){const group=financeGroup(row);groups.set(group,(groups.get(group)||0)+row.amountBani);}for(const [group,amount]of [...groups].sort((a,b)=>b[1]-a[1])){need(39);page.drawText(group,{x:L,y,size:10,font:bold,color:navy});const value=money(amount);page.drawText(value,{x:R-bold.widthOfTextAtSize(value,10),y,size:10,font:bold,color:navy});y-=14;page.drawRectangle({x:L,y,width:R-L,height:5,color:line});page.drawRectangle({x:L,y,width:(R-L)*amount/total,height:5,color:emerald});y-=22;}}
  const widths=finance?[28,64,100,225,98.28]:[64,78,205,70,98.28],labels=finance?[t('Nr.','No.'),t('Data','Date'),t('Categorie','Category'),t('Descriere','Description'),t('Suma','Amount')]:[t('Data','Date'),t('Categorie','Category'),t('Descriere','Description'),t('Kilometraj','Odometer'),t('Cost','Cost')];
  function tableHead(){need(55);let x=L;page.drawRectangle({x:L,y:y-11,width:R-L,height:25,color:navy});labels.forEach((label,i)=>{page.drawText(label,{x:x+6,y:y-2,size:8,font:bold,color:white});x+=widths[i];});y-=31;}

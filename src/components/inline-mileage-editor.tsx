@@ -4,7 +4,7 @@ import {requestConfirmation} from '@/components/premium-dialogs';
 import {PremiumDateInput} from './premium-date-input';
 import { useState } from 'react';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
-export default function InlineMileageEditor({ vehicleId, currentKm, preview, onSaved }: { vehicleId: string; currentKm: number; preview: boolean; onSaved: () => Promise<void> }) {
+export default function InlineMileageEditor({ vehicleId, currentKm, preview, onSaved, triggerLabel }: { vehicleId: string; currentKm: number; preview: boolean; onSaved: () => Promise<void>;triggerLabel?:string }) {
   const en = useApplicationLanguage() === 'en', locale = useApplicationLocale();
   const [open, setOpen] = useState(false), [value, setValue] = useState(String(currentKm));
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [saved, setSaved] = useState(false);
@@ -30,7 +30,7 @@ export default function InlineMileageEditor({ vehicleId, currentKm, preview, onS
     finally { setBusy(false); }
   }
   return <div className="ac-inline-mileage" data-workspace-ui>
-    {!open && <button type="button" disabled={busy} onClick={() => { setValue(String(currentKm)); setConfirmed(null); setError(''); setSaved(false); setOpen(true); }}>{en ? 'Enter mileage manually' : 'Introdu kilometraj manual'}</button>}
+    {!open && <button type="button" disabled={busy} onClick={() => { setValue(String(currentKm)); setConfirmed(null); setError(''); setSaved(false); setOpen(true); }}>{triggerLabel ?? (en ? 'Enter mileage manually' : 'Introdu kilometraj manual')}</button>}
     {open && <form onSubmit={save}>
       <label>{en ? 'Current odometer reading (km)' : 'Kilometrajul actual de pe bord (km)'}
         <input type="number" inputMode="numeric" min={currentKm} max={99999999} step="1" value={value} disabled={busy} onChange={e => { setValue(e.target.value); setConfirmed(null); setError(''); }} autoFocus required aria-invalid={invalid || undefined}/>

@@ -1,0 +1,48 @@
+.ac-mileage-board{display:grid;gap:1.15rem;min-width:0;color:#163440}
+.ac-mileage-header,.ac-mileage-panel,.ac-mileage-stats article{background:#fdfefe;border:1px solid #dce8eb;border-radius:18px;padding:clamp(14px,2vw,24px);box-shadow:0 5px 20px #083b4a0a}
+.ac-mileage-header{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:flex-start}
+.ac-mileage-header h2,.ac-mileage-panel h3{margin:0 0 .6rem}
+.ac-mileage-header p{margin:0;color:#4d6872}
+.ac-mileage-header-actions,.ac-mileage-controls{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.ac-mileage-header-actions button,.ac-mileage-controls button{min-height:44px}
+.ac-mileage-header-actions>button,.ac-mileage-controls button[aria-pressed=true]{display:inline-flex;align-items:center;gap:.4rem;background:#075565;color:#fff;border-color:#075565}
+.ac-mileage-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
+.ac-mileage-stats article{display:grid;align-content:start;gap:.55rem;overflow-wrap:anywhere}
+.ac-mileage-stats article:first-child{background:#eaf5f7;border-color:#bbdce0}
+.ac-mileage-stats svg{width:19px;height:19px;color:#075565}
+.ac-mileage-stats strong{color:#073d4d;font-size:clamp(1.05rem,2vw,1.65rem)}
+.ac-mileage-stats small{color:#496670}
+.ac-mileage-chart{margin:1rem 0 0}
+.ac-mileage-chart figcaption{width:fit-content;max-width:100%;margin:.5rem 0 .75rem auto;padding:.5rem .75rem;background:#eaf5f7;border-radius:10px;font-size:.85rem}
+.ac-mileage-chart-grid{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem}
+.ac-mileage-y{display:flex;flex-direction:column;justify-content:space-between;padding:1.3rem 0;color:#496670;font-size:.75rem}
+.ac-mileage-y:has(span:only-child){justify-content:center}
+.ac-mileage-plot{position:relative;height:clamp(155px,28vw,280px);background:#f8fbfc;border-radius:12px}
+.ac-mileage-plot svg{display:block;width:100%;height:100%}
+.ac-mileage-board .ac-mileage-plot button{display:grid;place-items:center;position:absolute;transform:translate(-50%,-50%);padding:0;border:0;background:transparent;box-shadow:none;width:30px;height:30px;min-width:0;min-height:0}
+.ac-mileage-plot button::after{content:'';display:block;width:8px;height:8px;border-radius:50%;background:#075565;border:1px solid white;transition:transform .16s}
+.ac-mileage-plot button[aria-pressed=true]{z-index:1;pointer-events:none}
+.ac-mileage-plot button[aria-pressed=true]::after{transform:scale(1.6);outline:2px solid #075565}
+@media(prefers-reduced-motion:reduce){.ac-mileage-plot button::after{transition:none}}
+.ac-mileage-x{display:flex;justify-content:space-between;margin:.5rem 8% 0 18%;color:#496670;font-size:.75rem}
+.ac-mileage-table{width:100%;border-collapse:separate;border-spacing:0 5px;margin-top:.55rem}
+.ac-mileage-table :is(th,td){text-align:start;padding:.6rem;overflow-wrap:anywhere}
+.ac-mileage-table thead{color:#365c68}
+.ac-mileage-table tbody tr{background:#f0f6f8}
+.ac-mileage-table tbody tr:nth-child(even){background:#f8fafb}
+.ac-mileage-badge{background:#deedf0;color:#075565;padding:.22rem .5rem;border-radius:999px;font-weight:650}
+.ac-mileage-correction{display:grid;gap:.6rem;margin-top:1rem;padding:1rem;background:#eef6f8;border-radius:14px}
+.ac-mileage-archive{margin-block:1rem}
+@media(max-width:760px){
+ .ac-mileage-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ac-mileage-header-actions{width:100%}
+ .ac-mileage-header-actions>*{max-width:100%}
+ .ac-mileage-table thead{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+ .ac-mileage-table,.ac-mileage-table tbody{display:block}
+ .ac-mileage-table tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.25rem;border-radius:13px;margin:.5rem 0;padding:.45rem}
+ .ac-mileage-table td{display:block;padding:.35rem;min-width:0}
+ .ac-mileage-table td[data-label]::before{content:attr(data-label);display:block;color:#496670;font-size:.7rem}
+ .ac-mileage-table td:nth-child(2){grid-column:1;grid-row:1;font-size:1.15rem}
+ .ac-mileage-table td:nth-child(1){grid-column:2;grid-row:1}
+}
+@media(max-width:380px){.ac-mileage-stats{grid-template-columns:1fr}}

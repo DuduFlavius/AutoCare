@@ -1,3 +1,6 @@
+import {mileageOrder,mileageSeries} from '@/lib/mileage-history';
+import {mileageReport} from '@/lib/mileage-report';
+import {date as verifiedDate} from '@/lib/validation';
 import {validTripTiming} from '@/lib/drive-session';
 import {loadDrivingRoutes,loadRoadDestinations,roadCoordinate} from '@/lib/road-navigation-server';
 import * as feedback from '@/lib/feedback';
@@ -433,11 +436,47 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     }
     if (path[0] === 'smartdrive' && path[1] === 'vehicles' && path[2] && path.length === 4) {
       const vehicleId = uuid.parse(path[2]);
-      await svc.ownedVehicle(uid, vehicleId);
+      const ownedCar=await svc.ownedVehicle(uid, vehicleId);
       if (path[3] === 'readings') {
-        if (method === 'GET') return json(await db().select().from(s.mileageReadings)
-          .where(and(eq(s.mileageReadings.userId, uid), eq(s.mileageReadings.vehicleId, vehicleId)))
-          .orderBy(desc(s.mileageReadings.recordedAt)).limit(200));
+        const scope=and(eq(s.mileageReadings.userId,uid),eq(s.mileageReadings.vehicleId,vehicleId));
+        if (method === 'GET') {
+          const params=new URL(req.url).searchParams;
+          const query=z.object({from:verifiedDate.optional(),to:verifiedDate.optional()}).parse(Object.fromEntries(params));
+          if(query.from&&query.to&&query.from>query.to)throw new svc.AppError(400,'Interval invalid.');
+          const entries=await db().select().from(s.mileageReadings).where(scope);
+          if(params.get('format')==='pdf'){
+            const timezone=(await svc.profile(uid)).timezone;
+            const report=await mileageReport(ownedCar,mileageSeries(entries,timezone,query.from,query.to),timezone,query.from,query.to,languageCookie(req.headers.get('cookie'))==='en');
+            return new Response(report,{headers:{'Content-Type':'application/pdf','Content-Disposition':'inline; filename="autocare-kilometraj.pdf"','Cache-Control':'private, no-store'}});
+          }
+          if(params.get('history')==='full'){
+            const corrections=await db().select({readingId:s.mileageReadingCorrections.readingId}).from(s.mileageReadingCorrections)
+              .innerJoin(s.mileageReadings,eq(s.mileageReadingCorrections.readingId,s.mileageReadings.id)).where(scope);
+            const corrected=new Set(corrections.map(row=>row.readingId));
+            return json(entries.sort((a,b)=>mileageOrder(b,a)).map(row=>({...row,corrected:corrected.has(row.id)})));
+          }
+          return json(entries.sort((a,b)=>mileageOrder(b,a)).slice(0,200));
+        }
+        if(method==='PATCH'){
+          const value=z.object({id:uuid,odometer:z.number().int().min(0).max(99999999),previous:z.number().int(),reason:z.string().trim().min(3).max(500)}).parse(await body(req));
+          await db().transaction(async tx=>{
+            const [car]=await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid))).for('update');
+            if(!car||car.archived)throw new svc.AppError(404,'Vehiculul activ nu este disponibil.');
+            const readings=(await tx.select().from(s.mileageReadings).where(scope)).sort(mileageOrder);
+            const index=readings.findIndex(row=>row.id===value.id),reading=readings[index];
+            if(!reading||reading.source!=='manual')throw new svc.AppError(400,'Se pot corecta doar citirile manuale.');
+            if(reading.odometer!==value.previous)throw new svc.AppError(409,'Citirea a fost modificată. Reîncarcă istoricul.');
+            const before=readings[index-1],after=readings[index+1];
+            if(value.odometer<(before?.odometer??0)||value.odometer>(after?.odometer??99999999))
+              throw new svc.AppError(400,'Valoarea trebuie să se încadreze între citirile vecine.');
+            if(!after&&car.odometer!==reading.odometer)throw new svc.AppError(409,'Kilometrajul actual diferă de ultima citire.');
+            if(value.odometer===reading.odometer)return;
+            await tx.insert(s.mileageReadingCorrections).values({id:crypto.randomUUID(),readingId:reading.id,previousOdometer:reading.odometer,correctedOdometer:value.odometer,reason:value.reason});
+            await tx.update(s.mileageReadings).set({odometer:value.odometer}).where(and(scope,eq(s.mileageReadings.id,reading.id)));
+            if(!after)await tx.update(s.vehicles).set({odometer:value.odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
+          });
+          return json({ok:true});
+        }
         if (method === 'POST') {
           const value = z.object({ odometer: z.number().int().min(0).max(99999999), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), notes:z.string().trim().max(500).optional() }).parse(await body(req));
           const timezone=(await svc.profile(uid)).timezone;
@@ -451,7 +490,10 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             if(value.date && previous && value.date<localDate(previous.recordedAt,timezone))throw new svc.AppError(400,'Data nu poate preceda ultima citire validată.');
             if(previous && previous.odometer===value.odometer && localDate(previous.recordedAt,timezone)===(value.date||today))return {vehicle:current,reading:previous};
             const updated = (await tx.update(s.vehicles).set({ odometer: value.odometer }).where(and(eq(s.vehicles.id, vehicleId), eq(s.vehicles.userId, uid))).returning())[0];
-            const reading = (await tx.insert(s.mileageReadings).values({ id: crypto.randomUUID(), userId: uid, vehicleId, odometer: value.odometer, source: 'manual',notes:value.notes||null,...(value.date?{recordedAt:new Date(value.date+'T12:00:00Z')}:{}) }).returning())[0];
+            const recordedAt=value.date&&value.date!==today
+              ? new Date(Math.max(Date.parse(value.date+'T12:00:00Z'),previous&&localDate(previous.recordedAt,timezone)===value.date?previous.recordedAt.getTime()+1:0))
+              : new Date();
+            const reading = (await tx.insert(s.mileageReadings).values({ id: crypto.randomUUID(), userId: uid, vehicleId, odometer: value.odometer, source: 'manual',notes:value.notes||null,recordedAt }).returning())[0];
             return { vehicle: updated, reading };
           });
           return json(result, 201);

@@ -953,6 +953,18 @@ test('SmartDrive: manual readings persist, reject regressions, and isolate owner
   assert.equal(r.status, 200);
   const rows = await r.json();
   assert.equal(rows.filter((row: {odometer:number})=>row.odometer===start+100).length, 1, 'same-day retries must not duplicate readings');
+  const corrected=await call('smartdrive/vehicles/'+id+'/readings','PATCH',{
+    id:saved.reading.id,previous:start+100,odometer:start+99,reason:'Citire verificată pe bord',
+  });
+  assert.equal(corrected.status,200);
+  const history=await (await call('smartdrive/vehicles/'+id+'/readings?history=full')).json();
+  assert.equal(history[0].odometer,start+99);
+  assert.equal(history[0].corrected,true);
+  const correction=(await db().select().from(s.mileageReadingCorrections).where(eq(s.mileageReadingCorrections.readingId,saved.reading.id)))[0];
+  assert.equal(correction.previousOdometer,start+100);
+  const mileagePdf=await call('smartdrive/vehicles/'+id+'/readings?format=pdf');
+  assert.equal(mileagePdf.status,200);
+  assert.equal(mileagePdf.headers.get('content-type'),'application/pdf');
   assert.ok(
     rows.every(
       (x: { userId: string; vehicleId: string }) => x.userId === uid && x.vehicleId === id,
@@ -960,7 +972,7 @@ test('SmartDrive: manual readings persist, reject regressions, and isolate owner
   );
   assert.equal(
     (await db().select().from(s.vehicles).where(eq(s.vehicles.id, id)))[0].odometer,
-    start + 100,
+    start + 99,
   );
   const foreignId = crypto.randomUUID();
   await db().insert(s.vehicles).values({
