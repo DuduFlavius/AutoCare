@@ -95,13 +95,14 @@ export const realTransport: Transport = async (n, email) => {
 export async function sendPushNotification(
   uid: string,
   payload: { id: string; title: string; body: string },
+  nativeTransport = sendNativePush,
 ) {
-  // A failing Android provider must not prevent delivery to subscribed browsers.
+  // Prefer native delivery so Android users do not also get the alert from Chrome.
   let nativeSent = 0;
   let nativeError: unknown;
-  try { nativeSent = await sendNativePush(uid, payload); } catch (error) { nativeError = error; }
+  try { nativeSent = await nativeTransport(uid, payload); } catch (error) { nativeError = error; }
+  if (nativeSent) return 'push-accepted';
   if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT) {
-    if (nativeSent) return 'push-accepted';
     if (nativeError) throw nativeError;
     throw new Error('PUSH_NOT_CONFIGURED');
   }
@@ -111,8 +112,8 @@ export async function sendPushNotification(
     process.env.VAPID_PRIVATE_KEY,
   );
   const list = await db().select().from(s.pushes).where(eq(s.pushes.userId, uid));
-  if (!list.length && !nativeSent) { if(nativeError) throw nativeError; throw new Error('PUSH_NO_SUBSCRIPTION'); }
-  let sent = nativeSent;
+  if (!list.length) { if(nativeError) throw nativeError; throw new Error('PUSH_NO_SUBSCRIPTION'); }
+  let sent = 0;
   let providerFailed = false;
   for (const p of list) {
     try {

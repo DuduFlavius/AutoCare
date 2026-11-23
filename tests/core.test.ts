@@ -571,6 +571,18 @@ test('15 Account data cascade removes files and records from active database', a
   assert.equal((await db().select().from(s.files).where(eq(s.files.userId, id))).length, 0);
   assert.equal((await db().select().from(s.records).where(eq(s.records.userId, id))).length, 0);
 });
+test('vehicle onboarding stores optional documents and rejects duplicate identifiers', async () => {
+  const id = crypto.randomUUID();
+  await db().insert(s.user).values({id,name:'Garage fixture',email:'garage-onboarding@example.invalid',emailVerified:true});
+  const input={brand:'Dacia',model:'Logan',year:2022,plate:'TM 43 TEST',vin:'UU1LSDABH12345678',fuel:'Benzină',odometer:100};
+  const vehicle=await svc.createVehicle(id,{...input,documents:[{category:'ITP',expiresAt:'2027-09-01'}]});
+  const documents=await db().select().from(s.records).where(eq(s.records.vehicleId,vehicle.id));
+  assert.deepEqual(documents.map(({userId,kind,category,expiresAt})=>({userId,kind,category,expiresAt})),[
+    {userId:id,kind:'document',category:'ITP',expiresAt:'2027-09-01'},
+  ]);
+  await assert.rejects(()=>svc.createVehicle(id,{...input,plate:'tm43test',vin:null}),{status:409});
+  await assert.rejects(()=>svc.createVehicle(id,{...input,plate:'TM44TEST'}),{status:409});
+});
 test('16 Vehicle photos stay private and reject document files', async () => {
   const png = Buffer.concat([
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),

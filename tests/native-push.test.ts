@@ -38,7 +38,7 @@ test('Missing provider configuration is explicit and an account with no Android 
 
 test('feedback pushes open the private feedback inbox and the administrator queue',async()=>{
  process.env.AUTOCARE_FIREBASE_SERVICE_ACCOUNT='test-only-injected-sender';
- for(const [id,url] of [['feedback-item-1','/cont?tab=Feedback'],['feedback-team-item-1','/cont?tab=Feedback%20utilizatori']]){
+ for(const [id,url] of [['support-item-1','/cont?tab=Centru%20de%20suport'],['feedback-item-1','/cont?tab=Feedback'],['feedback-team-item-1','/cont?tab=Feedback%20utilizatori']]){
   const count=await sendNativePush(other,{id,title:'AutoCare · Feedback',body:'An update is available.'},async message=>{assert.equal(message.data?.url,url);return 'accepted';});
   assert.equal(count,1);
  }

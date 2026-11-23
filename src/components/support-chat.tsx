@@ -1,4 +1,6 @@
 'use client';
+import {Capacitor} from '@capacitor/core';
+import {activateNativePush} from '@/lib/native-push-client';
 import {requestConfirmation} from '@/components/premium-dialogs';
 
 import {FilterSelect} from '@/components/filter-select';
@@ -218,7 +220,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           const previous = notifiedMessages.current.get(thread.id);
           if (notificationBaseline.current && previous !== thread.lastMessage.id && thread.lastMessage.authorId !== selfId && Number(thread.unreadCount || 0) > 0) {
 
-            if (notificationEnabled.current && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            if (!Capacitor.isNativePlatform() && notificationEnabled.current && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
               try {
                 const title=t('Mesaj nou · AutoCare Suport', 'New message · AutoCare Support');
                 const options={body:t('Deschide centrul de suport pentru a citi mesajul.', 'Open the support center to read the message.'),tag:'autocare-support-'+thread.id,icon:'/icon-192.png',data:{url:'/cont?tab=Centru%20de%20suport'}};
@@ -708,6 +710,15 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         {
           <div className="support-notification-optin">
             <button type="button" onClick={async () => {
+              if (Capacitor.isNativePlatform()) {
+                try {
+                  await activateNativePush();
+                  setNotice(t('Notificările AutoCare sunt activate pe telefon.', 'AutoCare notifications are enabled on this phone.'));
+                } catch (error) {
+                  setNotice(error instanceof Error ? error.message : t('Notificările AutoCare nu au putut fi activate.', 'AutoCare notifications could not be enabled.'));
+                }
+                return;
+              }
               if (typeof Notification === 'undefined') { setNotice('Browserul nu permite notificări desktop.'); return; }
               let permission: NotificationPermission;
               try { permission = await Notification.requestPermission(); } catch { setNotice(t('Verifică permisiunile pentru notificări ale dispozitivului.', 'Check your device notification permissions.')); return; }
@@ -769,11 +780,11 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                 <article
                   className={
                     'support-message ' +
-                    (message.authorRole === 'user' ? 'from-client' : 'from-team')
+                    (message.authorId && message.authorId === selfId ? 'is-own' : 'is-received')
                   }
                   key={message.id}
                 >
-                  {message.authorRole !== 'user' && <span className="support-message-avatar" aria-hidden="true"><CarFront size={22}/></span>}
+                  {(!message.authorId || message.authorId !== selfId) && <span className="support-message-avatar" aria-hidden="true"><CarFront size={22}/></span>}
                   <div className="support-message-meta">
                     <strong>{message.authorName}</strong>
                     <span className={'support-rank rank-' + message.authorRole}>

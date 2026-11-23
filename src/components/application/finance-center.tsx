@@ -1,4 +1,6 @@
 'use client';
+import {DocumentPreview} from '../document-preview';
+import {downloadDocument} from '@/lib/document-download-client';
 import {ActionMenu} from '../action-menu';
 import {FilterSelect} from '../filter-select';
 import {DocumentActions} from '../document-actions';
@@ -39,6 +41,9 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
   const [archived, setArchived] = useState(false);
   const [sort, setSort] = useState('recent');
   const [page, setPage] = useState(0);
+  const [reportPreview,setReportPreview]=useState<import('../document-preview').PreviewSource|null>(null);
+  const [reportSaving,setReportSaving]=useState(false);
+  const [reportError,setReportError]=useState('');
   const [point, setPoint] = useState<number | null>(null);
   const report = useMemo(() => financeOverview(data.records, today, vehicle), [data.records, today, vehicle]);
   const signals = useMemo(()=>financeSignals(data.records,today,vehicle),[data.records,today,vehicle]);
@@ -93,12 +98,22 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
     ...(group ? { financeCategory: group } : {}), ...(filters.q ? { q: filters.q } : {}),
     ...(from ? { from, to: today } : {}),
   });
+  async function saveExpenseReport(){
+    if(reportSaving||preview)return;
+    setReportError('');
+    setReportSaving(true);
+    try{await downloadDocument(exportUrl('pdf'),'autocare-situatia-cheltuielilor.pdf');}
+    catch{setReportError(t('Raportul nu a putut fi descărcat. Încearcă din nou.','The report could not be downloaded. Try again.'));}
+    finally{setReportSaving(false);}
+  }
   const historyKnown = rows.filter(row => !row.cancelled && row.amountKnown !== false && row.date && row.date <= today);
   const historyTotal = historyKnown.reduce((sum,row)=>sum+row.amountBani,0);
   const categoryIcons = { Combustibil: Fuel, Service: Wrench, Frâne: CircleDot, RCA: ShieldCheck, ITP: Files, Anvelope: CircleDot, Distribuție: Settings2, 'Alte cheltuieli': Wallet };
   const date = (value: string | null) => value ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value + 'T12:00:00Z')) : '—';
 
   return <div className="ac-finance" data-workspace-ui data-mobile-details={mobileDetails||undefined} data-mobile-filters={mobileFilters||undefined}>
+    {reportError&&<p role="alert">{reportError}</p>}
+    {reportPreview&&<DocumentPreview source={reportPreview} onClose={()=>setReportPreview(null)}/>}
     <div className="ac-m-finance-filter ac-finance-filter-toggle"><span>{t('Cheltuielile tale, pe scurt','Your expenses at a glance')}</span><button type="button" className="ac-m-round" onClick={()=>setMobileFilters(value=>!value)} aria-expanded={mobileFilters} aria-controls="ac-finance-ledger-filters" aria-label={t('Filtre cheltuieli','Expense filters')}><SlidersHorizontal size={21}/></button></div>
       <div className="ac-finance-filters ac-finance-filter-panel" id="ac-finance-ledger-filters" aria-label={t('Filtre cheltuieli','Expense filters')}>
         <header><div><strong>{t('Filtre cheltuieli','Expense filters')}</strong><small>{t('Alege categoria, perioada și ordinea.','Choose the category, period and order.')}</small></div><button type="button" onClick={()=>{setQuery('');setGroup('');setRange('year');setView('year');setPoint(null);setSort('recent');setArchived(false);setPage(0);}}>{t('Resetează','Reset')}</button><button type="button" className="ac-finance-filter-close" onClick={()=>setMobileFilters(false)} aria-label={t('Închide filtrele','Close filters')}>×</button></header>
@@ -170,7 +185,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
     </section>}
     <section className="ac-finance-card ac-finance-history" aria-labelledby="ac-finance-history">
       <header><div><span className="studio-kicker">AUTOCARE · LEDGER</span><h3 id="ac-finance-history">{t('Istoric cheltuieli', 'Expense history')}</h3><p>{t('Toate tranzacțiile, documentele și acțiunile într-un singur loc.', 'Transactions, documents and actions in one place.')}</p></div>
-        <div className="ac-finance-toggle">{data.premium ? ['csv', 'pdf'].map(format => <a className="button" href={exportUrl(format)} key={format}><Download size={15} /> {format.toUpperCase()}</a>) : <a className="button" href="/cont?tab=Premium">{t('Export Premium', 'Premium export')}</a>}</div>
+        <div className="ac-finance-toggle">{data.premium ? <><button type="button" disabled={preview} onClick={()=>setReportPreview({url:exportUrl('pdf')+'&view=1',name:t('Situația cheltuielilor','Expense report'),mime:'application/pdf',downloadName:'autocare-situatia-cheltuielilor.pdf'})}>{t('Previzualizează raportul','Preview report')}</button><button type="button" disabled={preview||reportSaving} onClick={()=>void saveExpenseReport()}><Download size={15}/>{t('Descarcă PDF','Download PDF')}</button>{!preview&&<a className="button" href={exportUrl('csv')}>CSV</a>}</> : <a className="button" href="/cont?tab=Premium">{t('Export Premium', 'Premium export')}</a>}</div>
       </header>
       <div className="ac-ledger-summary">{[
         [t('Total selecție','Selection total'), money(historyTotal)],

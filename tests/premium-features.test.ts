@@ -287,3 +287,22 @@ test('a scheduled future service can be completed early without rewriting its hi
  const done=await svc.saveRecord(accounts.paid.id,{kind:'service',vehicleId,category:'Revizie',title:'Revizie efectuată',date:today,odometer:200000,nextKm:215000,expiresAt:null,amountBani:30000,amountKnown:true},undefined,source.id);
  assert.equal(done.date,today);assert.equal((await svc.ownedRecord(accounts.paid.id,source.id)).date,future);
 });
+
+test('financial PDF supports empty, single and multi-page Romanian reports', async () => {
+  const {vehicleReport}=await import('../src/lib/vehicle-report');
+  for(const count of [0,1,110]){
+    const records=Array.from({length:count},(_,index)=>({
+      id:String(index),vehicleId,kind:'expense',title:'Întreținere și reparații',category:'Service',
+      date:'2026-11-12',expiresAt:null,nextKm:null,odometer:null,amountBani:5999,amountKnown:true,
+      provider:null,notes:null,parts:null,
+    }));
+    const bytes=await vehicleReport({
+      finance:true, title:'SITUAȚIA CHELTUIELILOR', asOf:'2026-11-23', generatedAt:'23.11.2026',
+      vehicles:[{id:vehicleId,brand:'Dacia',model:'Logan',plate:'TM01TST',odometer:23500}], records,
+    });
+    const pdf=await PDFDocument.load(bytes);
+    assert.match(pdf.getTitle()??'',/SITUAȚIA CHELTUIELILOR/);
+    assert.equal(pdf.getPageCount()>1,count===110);
+    for(const page of pdf.getPages())assert.deepEqual(page.getSize(),{width:595.28,height:841.89});
+  }
+});

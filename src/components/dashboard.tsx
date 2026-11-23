@@ -1,4 +1,6 @@
 'use client';
+import {vehicleDocumentCategories} from '@/lib/validation';
+import {VehicleCreateForm} from './application/vehicle-create-form';
 import {Capacitor} from '@capacitor/core';
 import {requestConfirmation} from '@/components/premium-dialogs';
 
@@ -475,7 +477,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       void api('support/unread')
         .then(async (x) => {
           const count = Number(x.unread || 0);
-          if (lastUnread !== null && count > lastUnread && typeof Notification !== 'undefined' && Notification.permission === 'granted' && !document.hidden) {
+          if (!Capacitor.isNativePlatform() && lastUnread !== null && count > lastUnread && typeof Notification !== 'undefined' && Notification.permission === 'granted' && !document.hidden) {
             const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration('/sw.js').catch(() => undefined) : undefined;
             if (reg) {
               await reg.showNotification('AutoCare · Mesaje noi', {
@@ -755,13 +757,17 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
         model: str('model'),
         year: number('year'),
         plate: str('plate'),
-        vin: str('vin') || null,
+        vin: (modal.vehicle ? str('vin') : str('vin').trim().toUpperCase()) || null,
         engine: str('engine'),
         fuel: str('fuel'),
         capacity: number('capacity'),
         odometer: number('odometer') || 0,
         purchasedAt: str('purchasedAt') || null,
         notes: str('notes'),
+        ...(!modal.vehicle&&{documents:vehicleDocumentCategories.flatMap(category=>{
+          const expiresAt=str('document-'+category);
+          return expiresAt?[{category,expiresAt}]:[];
+        })}),
       };
       path = 'vehicles' + (modal.vehicle ? '/' + modal.vehicle.id : '');
       method = modal.vehicle ? 'PATCH' : 'POST';
@@ -790,7 +796,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     }
   }
   async function registerPush() {
-      if(hasNativePush()) {await activateNativePush(); await refresh(true); return;}
+      if(Capacitor.isNativePlatform()) {await activateNativePush(); await refresh(true); return;}
       if (!window.isSecureContext)
         throw new Error('Deschide AutoCare prin HTTPS pentru notificări.');
       if (
@@ -1920,6 +1926,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                   }
                 }}
               />
+            ) : !modal.vehicle ? (
+              <VehicleCreateForm vehicles={data.vehicles} busy={busy} onDirty={()=>setRecordDirty(true)} onCancel={closeRecord} onSave={saveForm}/>
             ) : (
               <form className="form-grid ac-premium-vehicle-form" onChange={() => setRecordDirty(true)} onSubmit={saveForm}>
                 <div className="ac-premium-form-intro full">

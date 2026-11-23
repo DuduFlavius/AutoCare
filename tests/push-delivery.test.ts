@@ -25,3 +25,14 @@ test('Total browser provider failure stays retryable instead of being marked acc
  webpush.sendNotification=async()=>{throw Object.assign(Error('unavailable'),{statusCode:503});};
  await assert.rejects(sendPushNotification(uid,{id:'test-retry',title:'Test',body:'Synthetic fixture'}),/PUSH_PROVIDER_ERROR/);
 });
+
+test('successful Android delivery skips Chrome subscriptions',async()=>{
+ let browserCalls=0;
+ webpush.sendNotification=async()=>{browserCalls++;return {statusCode:201,body:'',headers:{}};};
+ let nativeCalls=0;
+ assert.equal(await sendPushNotification(uid,{id:'android-first',title:'AutoCare',body:'Test'},async(owner,payload)=>{
+  assert.equal(owner,uid);assert.equal(payload.id,'android-first');nativeCalls++;return 1;
+ }),'push-accepted');
+ assert.equal(nativeCalls,1);
+ assert.equal(browserCalls,0);
+});

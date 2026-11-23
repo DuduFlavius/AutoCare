@@ -1,5 +1,6 @@
 'use client';
-import {hasNativePush,nativePushPermission} from '@/lib/native-push-client';
+import {Capacitor} from '@capacitor/core';
+import {nativePushPermission} from '@/lib/native-push-client';
 import { useEffect, useState } from 'react';
 import { BellRing, Send, ShieldCheck } from 'lucide-react';
 export default function PushSettings({
@@ -21,7 +22,7 @@ export default function PushSettings({
     [busy, setBusy] = useState(false),
     [needsInstall, setNeedsInstall] = useState(false);
   useEffect(() => {
-    if(hasNativePush()){
+    if(Capacitor.isNativePlatform()){
       setNative(true);
       let disposed = false;
       const update = () => { void nativePushPermission().then(value => { if (!disposed) setPermission(value); }).catch(() => { if (!disposed) setPermission('default'); }); };
@@ -44,6 +45,7 @@ export default function PushSettings({
   }, []);
   async function localTest() {
     setFeedback('');
+    if (Capacitor.isNativePlatform()) { setFeedback('Activează notificările AutoCare în aplicație.'); return; }
     if (!('Notification' in window)) { setFeedback('Browserul nu suportă notificările.'); return; }
     try {
       const allowed = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();

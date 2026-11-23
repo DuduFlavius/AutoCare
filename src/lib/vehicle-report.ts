@@ -1,3 +1,4 @@
+import {randomUUID} from 'node:crypto';
 import { financeGroup, isFinancialEntry } from './finance-overview';
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
@@ -5,11 +6,12 @@ import assets from './report-assets.json';
 import {reportBrandLogo} from './report-brand';
 export type ReportVehicle={id:string;brand:string;model:string;plate:string;odometer:number};
 export type ReportRecord={id?:string;vehicleId:string;kind:string;title:string;category:string;date:string|null;expiresAt:string|null;nextKm:number|null;odometer:number|null;amountBani:number;amountKnown:boolean;provider:string|null;notes:string|null;parts:string|null;cancelled?:boolean};
-export async function vehicleReport({vehicles,records,generatedAt,language='ro',title,period,asOf=new Date().toISOString().slice(0,10)}:{vehicles:ReportVehicle[];records:ReportRecord[];generatedAt:string;language?:'ro'|'en';title?:string;period?:string;asOf?:string}){
+export async function vehicleReport({vehicles,records,generatedAt,language='ro',title,period,finance=false,asOf=new Date().toISOString().slice(0,10)}:{vehicles:ReportVehicle[];records:ReportRecord[];generatedAt:string;language?:'ro'|'en';title?:string;period?:string;finance?:boolean;asOf?:string}){
  const en=language==='en',t=(ro:string,english:string)=>en?english:ro,locale=en?'en-GB':'ro-RO';
  const doc=await PDFDocument.create();doc.registerFontkit(fontkit);
  const regular=await doc.embedFont(Buffer.from(assets.regular,'base64'),{subset:true}),bold=await doc.embedFont(Buffer.from(assets.bold,'base64'),{subset:true});
  const logo=await doc.embedPng(Buffer.from(reportBrandLogo,'base64'));
+ const reportId=finance?randomUUID():null;
  const heading=title||t('Raport auto','Vehicle report');doc.setTitle('AutoCare Premium - '+heading);doc.setAuthor('AutoCare Premium');doc.setSubject(t('Datele înregistrate în cont','Recorded account data'));
  const navy=rgb(8/255,59/255,74/255),emerald=rgb(7/255,83/255,101/255),bright=rgb(32/255,166/255,166/255),muted=rgb(101/255,117/255,132/255),line=rgb(227/255,235/255,240/255),white=rgb(1,1,1);
  const W=595.28,H=841.89,L=40,R=555.28;let page!:PDFPage,y=0;
@@ -30,6 +32,10 @@ export async function vehicleReport({vehicles,records,generatedAt,language='ro',
   let size=19;while(bold.widthOfTextAtSize(heading,size)>R-L&&size>10)size--;
   const titleLines=wrap(heading,R-L,size,bold);
   y=H-128;for(const text of titleLines){page.drawText(text,{x:L,y,size,font:bold,color:navy});y-=size+5;}y-=2;
+  if(reportId){
+   page.drawText(t('Raport financiar auto','Vehicle financial report'),{x:L,y,size:10,font:bold,color:navy});y-=15;
+   page.drawText(t('Nr. raport: ','Report ID: ')+reportId,{x:L,y,size:8,font:regular,color:muted});y-=16;
+  }
  }
  function need(height:number){if(y-height<58)fresh();}
  function paragraph(value:string,strong=false,size=10){const font=strong?bold:regular;for(const valueLine of wrap(value,R-L,size,font)){need(16);page.drawText(valueLine,{x:L,y,size,font,color:strong?navy:muted});y-=15;}y-=4;}
@@ -50,18 +56,23 @@ export async function vehicleReport({vehicles,records,generatedAt,language='ro',
   let size=17;while(bold.widthOfTextAtSize(metric[1],size)>220&&size>10)size--;
   page.drawText(metric[1],{x:x+14,y:y-29,size,font:bold,color:i+j===2?emerald:navy});
  }y-=78;}
+ if(finance){
+  const max=known.reduce<number|null>((value,row)=>value==null?row.amountBani:Math.max(value,row.amountBani),null);
+  paragraph(t('Tranzacții: ','Transactions: ')+financial.length+' · '+t('Cea mai mare cheltuială: ','Largest expense: ')+(max==null?'—':money(max)),true);
+ }
  paragraph(t('Kilometrajul reprezintă suma valorilor de bord confirmate, nu distanța parcursă în perioadă. Totalul include numai cheltuielile cunoscute și realizate.','Mileage is the sum of confirmed odometer readings, not distance travelled during the period. The total includes only known, completed expenses.'),false,9);
  if(total>0){section(t('02  Distribuția costurilor','02  Cost distribution'));const groups=new Map<string,number>();for(const row of known){const group=financeGroup(row);groups.set(group,(groups.get(group)||0)+row.amountBani);}for(const [group,amount]of [...groups].sort((a,b)=>b[1]-a[1])){need(39);page.drawText(group,{x:L,y,size:10,font:bold,color:navy});const value=money(amount);page.drawText(value,{x:R-bold.widthOfTextAtSize(value,10),y,size:10,font:bold,color:navy});y-=14;page.drawRectangle({x:L,y,width:R-L,height:5,color:line});page.drawRectangle({x:L,y,width:(R-L)*amount/total,height:5,color:emerald});y-=22;}}
- const widths=[64,78,205,70,98.28],labels=[t('Data','Date'),t('Categorie','Category'),t('Descriere','Description'),t('Kilometraj','Odometer'),t('Cost','Cost')];
+ const widths=finance?[28,64,100,225,98.28]:[64,78,205,70,98.28],labels=finance?[t('Nr.','No.'),t('Data','Date'),t('Categorie','Category'),t('Descriere','Description'),t('Suma','Amount')]:[t('Data','Date'),t('Categorie','Category'),t('Descriere','Description'),t('Kilometraj','Odometer'),t('Cost','Cost')];
  function tableHead(){need(55);let x=L;page.drawRectangle({x:L,y:y-11,width:R-L,height:25,color:navy});labels.forEach((label,i)=>{page.drawText(label,{x:x+6,y:y-2,size:8,font:bold,color:white});x+=widths[i];});y-=31;}
- for(const car of vehicles){section(car.brand+' '+car.model+' · '+car.plate);paragraph(t('Kilometraj confirmat: ','Confirmed odometer: ')+car.odometer.toLocaleString(locale)+' km');const rows=unique.filter(row=>row.vehicleId===car.id).sort((a,b)=>(a.date||'').localeCompare(b.date||''));if(!rows.length){paragraph(t('Nu există înregistrări în selecție.','No records in the selection.'));continue;}tableHead();
- for(const [rowIndex,row] of rows.entries()){const cells=[(row.date?row.date.split('-').reverse().join('.'):null)||'—',row.category,row.title+(row.provider?'\n'+row.provider:''),row.odometer==null?'—':row.odometer.toLocaleString(locale)+' km',row.amountKnown?money(row.amountBani):t('Necunoscut','Unknown')];const lines=cells.map((value,i)=>wrap(value,widths[i]-12,9,i===4?bold:regular));let cursor=0;const count=Math.max(...lines.map(row=>row.length));while(cursor<count){if(y<100){fresh();tableHead();}const take=Math.max(1,Math.min(count-cursor,Math.floor((y-65)/14)-1));const height=take*14+16;if(rowIndex%2===1)page.drawRectangle({x:L,y:y-height+8,width:R-L,height:height,color:rgb(.975,.986,.98)});let x=L;for(let col=0;col<lines.length;col++){for(let k=0;k<take;k++){const text=lines[col][cursor+k];if(text)page.drawText(text,{x:x+6,y:y-4-k*14,size:9,font:col===4?bold:regular,color:navy});}x+=widths[col];}page.drawLine({start:{x:L,y:y-height+8},end:{x:R,y:y-height+8},thickness:.5,color:line});y-=height;cursor+=take;}
- if(row.nextKm!=null||row.expiresAt)paragraph([row.nextKm==null?'':t('Prag următor: ','Next threshold: ')+row.nextKm.toLocaleString(locale)+' km',row.expiresAt?t('Expiră: ','Expires: ')+row.expiresAt:''].filter(Boolean).join(' · '),false,9);
- if(row.parts)paragraph(t('Lucrări / piese: ','Work / parts: ')+row.parts.split('\n').filter(line=>!line.startsWith('AutoCare · ')).join('\n'),false,9);
- if(row.notes)paragraph(t('Observații: ','Notes: ')+row.notes,false,9);
+ let transactionNumber=0;
+ for(const car of vehicles){section(car.brand+' '+car.model+' · '+car.plate);paragraph(t('Kilometraj confirmat: ','Confirmed odometer: ')+car.odometer.toLocaleString(locale)+' km');const rows=(finance?financial:unique).filter(row=>row.vehicleId===car.id).sort((a,b)=>(a.date||'').localeCompare(b.date||''));if(!rows.length){paragraph(t('Nu există înregistrări în selecție.','No records in the selection.'));continue;}tableHead();
+ for(const [rowIndex,row] of rows.entries()){const baseCells=[(row.date?row.date.split('-').reverse().join('.'):null)||'—',row.category,row.title+(row.provider?'\n'+row.provider:''),row.odometer==null?'—':row.odometer.toLocaleString(locale)+' km',row.amountKnown?money(row.amountBani):t('Necunoscut','Unknown')];const cells=finance?[String(++transactionNumber),baseCells[0],baseCells[1],baseCells[2],baseCells[4]]:baseCells;const lines=cells.map((value,i)=>wrap(value,widths[i]-12,9,i===4?bold:regular));let cursor=0;const count=Math.max(...lines.map(row=>row.length));while(cursor<count){if(y<100){fresh();tableHead();}const take=Math.max(1,Math.min(count-cursor,Math.floor((y-65)/14)-1));const height=take*14+16;if(rowIndex%2===1)page.drawRectangle({x:L,y:y-height+8,width:R-L,height:height,color:rgb(.975,.986,.98)});let x=L;for(let col=0;col<lines.length;col++){for(let k=0;k<take;k++){const text=lines[col][cursor+k];if(text)page.drawText(text,{x:x+6,y:y-4-k*14,size:9,font:col===4?bold:regular,color:navy});}x+=widths[col];}page.drawLine({start:{x:L,y:y-height+8},end:{x:R,y:y-height+8},thickness:.5,color:line});y-=height;cursor+=take;}
+ if(!finance&&(row.nextKm!=null||row.expiresAt))paragraph([row.nextKm==null?'':t('Prag următor: ','Next threshold: ')+row.nextKm.toLocaleString(locale)+' km',row.expiresAt?t('Expiră: ','Expires: ')+row.expiresAt:''].filter(Boolean).join(' · '),false,9);
+ if(row.parts&&!finance)paragraph(t('Lucrări / piese: ','Work / parts: ')+row.parts.split('\n').filter(line=>!line.startsWith('AutoCare · ')).join('\n'),false,9);
+ if(row.notes&&!finance)paragraph(t('Observații: ','Notes: ')+row.notes,false,9);
  }
  }
  if(!vehicles.length)paragraph(t('Nicio înregistrare pentru filtrele selectate.','No records match these filters.'));
- const pages=doc.getPages();pages.forEach((sheet,i)=>{sheet.drawLine({start:{x:L,y:44},end:{x:R,y:44},thickness:.5,color:line});sheet.drawText('AutoCare Premium · autocareapp.ro',{x:L,y:29,size:8,font:regular,color:muted});const count=(i+1)+' / '+pages.length;sheet.drawText(count,{x:R-regular.widthOfTextAtSize(count,8),y:29,size:8,font:regular,color:muted});});
+ const pages=doc.getPages();pages.forEach((sheet,i)=>{sheet.drawLine({start:{x:L,y:44},end:{x:R,y:44},thickness:.5,color:line});sheet.drawText(finance?t('Generat cu AutoCare Premium','Generated with AutoCare Premium')+' · '+generatedAt:'AutoCare Premium · autocareapp.ro',{x:L,y:29,size:8,font:regular,color:muted});if(finance)sheet.drawText(t('Document informativ — nu reprezintă factură fiscală','Informational document — not a tax invoice'),{x:L,y:16,size:7,font:regular,color:muted});const count=(i+1)+' / '+pages.length;sheet.drawText(count,{x:R-regular.widthOfTextAtSize(count,8),y:29,size:8,font:regular,color:muted});});
  return Buffer.from(await doc.save());
 }

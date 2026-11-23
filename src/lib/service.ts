@@ -13,7 +13,7 @@ import * as s from './schema';
 import { isPremium, documentStatus, localDate } from './config';
 import { effectiveRole } from './permissions';
 import { pricing, savings } from './pricing';
-import { vehicleInput, recordInput, profileInput } from './validation';
+import { vehicleCreateInput, vehicleInput, recordInput, profileInput } from './validation';
 export class AppError extends Error {
   constructor(
     public status: number,
@@ -85,14 +85,19 @@ export async function ownedRecord(uid: string, id: string) {
   return r;
 }
 export async function createVehicle(uid: string, input: unknown) {
-  const data = vehicleInput.parse(input);
+  const {documents,...data} = vehicleCreateInput.parse(input);
   return db().transaction(async (tx) => {
     await tx.select().from(s.user).where(eq(s.user.id, uid)).for('update');
     const sub = (await tx.select().from(s.subscriptions).where(eq(s.subscriptions.userId, uid)))[0];
     const cars = await tx
-      .select({ id: s.vehicles.id })
+      .select({plate:s.vehicles.plate,vin:s.vehicles.vin,archived:s.vehicles.archived})
       .from(s.vehicles)
-      .where(and(eq(s.vehicles.userId, uid), eq(s.vehicles.archived, false)));
+      .where(eq(s.vehicles.userId,uid));
+    const normalizeIdentifier = (value: string | null | undefined) => value?.replace(/\s/g,'').toUpperCase();
+    const plate = normalizeIdentifier(data.plate);
+    const vin = normalizeIdentifier(data.vin);
+    if (cars.some(car => normalizeIdentifier(car.plate) === plate || (vin && normalizeIdentifier(car.vin) === vin)))
+      throw new AppError(409, 'Există deja o mașină cu acest număr sau VIN.');
     const grants = await tx
       .select()
       .from(s.premiumGrants)
@@ -104,14 +109,17 @@ export async function createVehicle(uid: string, input: unknown) {
       );
     const play=await tx.select().from(s.playSubscriptions).where(and(eq(s.playSubscriptions.userId,uid),eq(s.playSubscriptions.active,true),sql`${s.playSubscriptions.expiresAt}>now()`));
     const hasPremium = (sub?.subscriptionId && isPremium(sub)) || grants.length > 0 || play.length>0;
-    if (!hasPremium && cars.length >= 1)
+    if (!hasPremium && cars.some(car=>!car.archived))
       throw new AppError(403, 'Planul gratuit permite o singură mașină activă. Activează Premium pentru mașini nelimitate.');
-    return (
-      await tx
-        .insert(s.vehicles)
-        .values({ ...data, id: crypto.randomUUID(), userId: uid })
-        .returning()
-    )[0];
+    const [vehicle] = await tx.insert(s.vehicles)
+      .values({...data,id:crypto.randomUUID(),userId:uid}).returning();
+    if(documents.length){
+      await tx.insert(s.records).values(documents.map(({category,expiresAt})=>({
+        id:crypto.randomUUID(),userId:uid,vehicleId:vehicle.id,kind:'document',
+        category,title:category,expiresAt,amountKnown:false,
+      })));
+    }
+    return vehicle;
   });
 }
 export async function editVehicle(uid: string, id: string, input: unknown) {

@@ -1,4 +1,6 @@
 'use client';
+import {useState} from 'react';
+import {FilterSelect} from '../filter-select';
 import VehicleSymbol from '../vehicle-symbol';
 import { translateApplicationCopy } from '@/lib/application-language';
 
@@ -47,6 +49,22 @@ export function ApplicationGarage({
   const number = new Intl.NumberFormat(locale);
   const date = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' });
   const { records, totals } = garageOverview(data, today);
+  const [make,setMake]=useState('');
+  const [model,setModel]=useState('');
+  const [status,setStatus]=useState('');
+  const [document,setDocument]=useState('');
+  const [sort,setSort]=useState('');
+  const makes=[...new Set(data.vehicles.map(vehicle=>vehicle.brand))].sort((a,b)=>a.localeCompare(b,locale));
+  const models=[...new Set(data.vehicles.filter(vehicle=>!make||vehicle.brand===make).map(vehicle=>vehicle.model))].sort((a,b)=>a.localeCompare(b,locale));
+  const visible=vehicles.filter(vehicle=>
+    (!make||vehicle.brand===make)&&(!model||vehicle.model===model)&&
+    (!status||vehicle.archived===(status==='archived'))&&
+    (!document||(records.get(vehicle.id)??[]).some(row=>row.kind==='document'&&row.category===document))
+  );
+  if(sort==='name')visible.sort((a,b)=>(a.brand+' '+a.model).localeCompare(b.brand+' '+b.model,locale));
+  if(sort==='year')visible.sort((a,b)=>b.year-a.year);
+  if(sort==='mileage')visible.sort((a,b)=>b.odometer-a.odometer);
+  const reset=()=>{setMake('');setModel('');setStatus('');setDocument('');setSort('');onQuery('');onShowArchived(false);};
   const maintenanceLabels: Record<string, string> = {
     valid: t('În termen', 'Within interval'),
     soon: t('Se apropie', 'Due soon'),
@@ -70,12 +88,20 @@ export function ApplicationGarage({
               </label>
             )}
             {data.vehicles.some(vehicle => vehicle.archived) && (
-              <label className="check"><input type="checkbox" checked={showArchived} onChange={event => onShowArchived(event.target.checked)} />{t('Arată și vehiculele arhivate', 'Include archived vehicles')}</label>
+              <label className="check"><input type="checkbox" checked={showArchived} onChange={event => {onShowArchived(event.target.checked);if(!event.target.checked&&status==='archived')setStatus('');}} />{t('Arată și vehiculele arhivate', 'Include archived vehicles')}</label>
             )}
           </div>
         </header>
+        {data.vehicles.length>0&&<div className="rg-garage-refinements">
+          <label>{t('Marcă','Make')}<FilterSelect value={make} onChange={e=>{setMake(e.target.value);setModel('');}}><option value="">{t('Toate mărcile','All makes')}</option>{makes.map(value=><option key={value} value={value}>{value}</option>)}</FilterSelect></label>
+          <label>{t('Model','Model')}<FilterSelect value={model} onChange={e=>setModel(e.target.value)}><option value="">{t('Toate modelele','All models')}</option>{models.map(value=><option key={value} value={value}>{value}</option>)}</FilterSelect></label>
+          <label>{t('Stare','Status')}<FilterSelect value={status} onChange={e=>{setStatus(e.target.value);if(e.target.value==='archived')onShowArchived(true);}}><option value="">{t('Toate stările afișate','All shown statuses')}</option><option value="active">{t('Active','Active')}</option><option value="archived" disabled={!data.vehicles.some(vehicle=>vehicle.archived)}>{t('Arhivate','Archived')}</option></FilterSelect></label>
+          <label>{t('Document înregistrat','Recorded document')}<FilterSelect value={document} onChange={e=>setDocument(e.target.value)}><option value="">{t('Orice document','Any document')}</option>{['ITP','RCA','CASCO','Rovinietă'].map(value=><option key={value} value={value}>{value}</option>)}</FilterSelect></label>
+          <label>{t('Sortare','Sort by')}<FilterSelect value={sort} onChange={e=>setSort(e.target.value)}><option value="">{t('Ordine implicită','Default order')}</option><option value="name">{t('Marcă și model','Make and model')}</option><option value="year">{t('An descrescător','Newest year')}</option><option value="mileage">{t('Kilometraj descrescător','Highest mileage')}</option></FilterSelect></label>
+          <button type="button" onClick={reset}>{t('Resetează filtrele','Reset filters')}</button>
+        </div>}
         <div className="rg-garage-vehicles">
-          {vehicles.map(vehicle => {
+          {visible.map(vehicle => {
             const primary = !vehicle.archived && primaryId === vehicle.id;
             const { activeDocuments, maintenance, deadline } = garageVehicleSummary(records.get(vehicle.id) ?? [], vehicle.odometer, data.profile.timezone);
             const deadlineText = deadline
@@ -123,7 +149,7 @@ export function ApplicationGarage({
               </article>
             );
           })}
-          {!vehicles.length && data.vehicles.length > 0 && <p className="rg-garage-no-results" role="status">{t('Niciun vehicul nu corespunde filtrelor active.', 'No vehicles match the current filters.')}</p>}
+          {!visible.length && data.vehicles.length > 0 && <p className="rg-garage-no-results" role="status">{t('Niciun vehicul nu corespunde filtrelor active.', 'No vehicles match the current filters.')}</p>}
           <article className="rg-garage-add">
             <span className="rg-garage-icon"><CarFront size={25} aria-hidden="true" /></span>
             <div><h3>{t('Adaugă un vehicul', 'Add a vehicle')}</h3><p>{t('Extinde-ți garajul digital', 'Expand your digital garage')}</p></div>

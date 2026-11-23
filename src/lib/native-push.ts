@@ -18,18 +18,20 @@ export async function sendNativePush(uid: string, payload: {id:string;title:stri
   if (!tokens.length) return 0;
   if (!nativePushConfigured()) throw new Error('NATIVE_PUSH_NOT_CONFIGURED');
   let accepted = 0;
+  let providerError: unknown;
   for (const row of tokens) {
     try {
       await send({token:row.token,notification:{title:payload.title,body:payload.body},
-        data:{notificationId:payload.id,url:payload.id.startsWith('feedback-team-')?'/cont?tab=Feedback%20utilizatori':payload.id.startsWith('feedback-')?'/cont?tab=Feedback':'/cont?tab=Notific%C4%83ri'},
+        data:{notificationId:payload.id,url:payload.id.startsWith('support-')?'/cont?tab=Centru%20de%20suport':payload.id.startsWith('feedback-team-')?'/cont?tab=Feedback%20utilizatori':payload.id.startsWith('feedback-')?'/cont?tab=Feedback':'/cont?tab=Notific%C4%83ri'},
         android:{priority:'high',ttl:3600000,notification:{channelId:'autocare-updates',tag:payload.id}}});
       accepted++;
     } catch (error) {
       const code = (error as {code?:string}).code;
       if (code === 'messaging/registration-token-not-registered' || code === 'messaging/invalid-registration-token') {
         await db().delete(nativePushTokens).where(and(eq(nativePushTokens.token,row.token),eq(nativePushTokens.userId,uid)));
-      } else throw new Error('NATIVE_PUSH_PROVIDER_ERROR', {cause:error});
+      } else providerError ??= error;
     }
   }
+  if(!accepted && providerError) throw new Error('NATIVE_PUSH_PROVIDER_ERROR', {cause:providerError});
   return accepted;
 }

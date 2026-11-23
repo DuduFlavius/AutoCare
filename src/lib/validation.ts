@@ -28,6 +28,12 @@ export const vehicleInput = z.object({
   purchasedAt: date.optional().nullable(),
   notes: note,
 });
+export const vehicleDocumentCategories = ['ITP','RCA','CASCO','Rovinietă'] as const;
+export const vehicleCreateInput = vehicleInput.extend({
+  documents:z.array(z.object({category:z.enum(vehicleDocumentCategories),expiresAt:date})).max(vehicleDocumentCategories.length)
+    .refine(documents=>new Set(documents.map(document=>document.category)).size===documents.length,'Tip de document duplicat.')
+    .default([]),
+});
 export const recordInput = z
   .object({
     vehicleId: z.string().uuid(),
