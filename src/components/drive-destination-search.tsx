@@ -1,7 +1,7 @@
 'use client';
 import {driveRouting} from '@/lib/drive-routing';
 
-import { MapPin, Search, X } from 'lucide-react';
+import { ArrowLeft, MapPin, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Coordinate } from '@/lib/road-navigation';
 
@@ -63,17 +63,17 @@ export default function DriveDestinationSearch({ area, nearPosition, disabled, e
 
   return (
     <section className="ac-destination-search" aria-label={t('Caută destinația', 'Search destination')}>
+      {focused&&<button type="button" className="sd-close-destinations" onClick={close}><ArrowLeft size={17} aria-hidden="true"/>{t('Înapoi la hartă','Back to map')}</button>}
       <form onSubmit={search}>
         <label htmlFor="ac-destination-address">{t('Unde mergem?', 'Where to?')}</label>
         <div className="ac-destination-search-row"><button type="submit" className="primary sd-search-submit" aria-label={t('Caută', 'Search')} disabled={disabled || loading || query.trim().length < 3}><Search size={19}/></button>
           <input ref={input} id="ac-destination-address" type="search" placeholder={t('Unde mergem?', 'Where to?')} value={query}
-            maxLength={160} onFocus={()=>focus(true)} onKeyDown={event=>{if(event.key==='Escape'){reset();focus(false);event.currentTarget.blur();}}} disabled={disabled} autoComplete="off" aria-autocomplete="list" aria-controls="ac-destination-matches"
+            maxLength={160} onFocus={()=>focus(true)} onKeyDown={event=>{if(event.key==='Escape'){event.preventDefault();close();}}} disabled={disabled} autoComplete="off" aria-autocomplete="list" aria-controls="ac-destination-matches"
             onChange={event => { pending.current?.abort(); setQuery(event.target.value); setMatches(null); setLoading(false); setError(''); }}/>
           {!!query&&<button type="button" aria-label={t('Șterge căutarea','Clear search')} onClick={reset}><X size={16}/></button>}
         </div>
       </form>
       {focused&&!query.trim()&&recent.length>0&&<ul id="ac-destination-matches" aria-label={t('Destinații recente','Recent destinations')}>{recent.map((point,index)=><li key={index}><button type="button" onClick={()=>choose(point)}><MapPin size={17}/>{point.name}</button></li>)}</ul>}
-      {focused&&<button type="button" className="sd-close-destinations" onClick={close}>{t('Înapoi la hartă','Back to map')}</button>}
       {loading && <p role="status">{t('Caut destinația…', 'Finding your destination…')}</p>}
       {error && <p role="alert">{error}</p>}
       {matches?.length === 0 && <p role="status">{t('Nicio adresă găsită. Adaugă orașul sau alege pe hartă.', 'No address found. Add the city or select a point on the map.')}</p>}

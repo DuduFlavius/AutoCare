@@ -39,6 +39,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const [native,setNative]=useState(false);
   const nativeMode=useRef(false);
   const nativeStarting=useRef(false);
+  const changingPause=useRef(false);
   const [active, setActive] = useState(false);
   const [paused,setPaused]=useState(false),[maxSpeed,setMaxSpeed]=useState<number|null>(null),[measuredKmh,setMeasuredKmh]=useState<number|null>(null),[controlBusy,setControlBusy]=useState(false);
   const timing=useRef<DriveClock|null>(null),maxSpeedRef=useRef<number|null>(null),lastLiveFix=useRef<Sample|null>(null),draftSnapshot=useRef('');
@@ -110,7 +111,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   useEffect(()=>{
     if(preview||!hasNativeTracking())return;
     nativeMode.current=true;setNative(true);let disposed=false,busy=false;
-    const refresh=async()=>{if(busy||disposed||document.visibilityState!=='visible')return;busy=true;const generation=snapshotGeneration.current;try{const value=await nativeTracking.snapshot(ownerId);if(!disposed&&generation===snapshotGeneration.current&&!saveInFlight.current&&!nativeStarting.current&&value&&vehicles.some(v=>v.id===value.vehicleId))applyNative(value);}catch{if(!disposed)setError('Nu se poate citi starea GPS. Redeschide aplicația.');}finally{busy=false;}};
+    const refresh=async()=>{if(busy||disposed||changingPause.current||document.visibilityState!=='visible')return;busy=true;const generation=snapshotGeneration.current;try{const value=await nativeTracking.snapshot(ownerId);if(!disposed&&generation===snapshotGeneration.current&&!saveInFlight.current&&!nativeStarting.current&&!changingPause.current&&value&&vehicles.some(v=>v.id===value.vehicleId))applyNative(value);}catch{if(!disposed&&generation===snapshotGeneration.current&&!changingPause.current)setError('Nu se poate citi starea GPS. Redeschide aplicația.');}finally{busy=false;}};
     void refresh();const timer=setInterval(()=>void refresh(),1000);document.addEventListener('visibilitychange',refresh);
     // Navigating away must detach UI polling, never stop the native location service.
     return()=>{disposed=true;clearInterval(timer);document.removeEventListener('visibilitychange',refresh);};
@@ -146,14 +147,34 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     if(preview || nativeMode.current || !started.current || !timing.current)return;
     try{if(saved){localStorage.removeItem(draftKey);return;}draftSnapshot.current=JSON.stringify({id:tripId.current,vehicleId:vehicleId||vehicles[0]?.id,baseline:baseline.current,startedAt:started.current,updatedAt:endedAt.current??Date.now(),distance,points:routePoints,timing:timing.current,maxSpeed:maxSpeedRef.current});localStorage.setItem(draftKey,draftSnapshot.current);}catch{/* Preserve the live trip if storage is full. */}
   },[distance,routePoints,saved,draftKey,preview,vehicleId,vehicles,active,paused,startedAt]);
+  const changeNativePause = async (nextPaused: boolean) => {
+    if(changingPause.current)return;
+    changingPause.current=true;
+    ++snapshotGeneration.current;
+    setControlBusy(true);
+    setError('');
+    try {
+      const trip=await (nextPaused?nativeTracking.pause(ownerId):nativeTracking.resume(ownerId));
+      if(!trip.active||!!trip.paused!==nextPaused)throw Error(t('Starea sesiunii GPS s-a schimbat.','The GPS session state changed.'));
+      applyNative(trip);
+      lastLiveFix.current=null;
+      setMeasuredKmh(null);
+    } catch(reason) {
+      setError(reason instanceof Error?reason.message:nextPaused?t('Nu s-a putut pune pauză.','Could not pause.'):t('Nu s-a putut relua GPS-ul.','Could not resume GPS.'));
+    } finally {
+      changingPause.current=false;
+      setControlBusy(false);
+    }
+  };
   const pause = async () => {
     if(controlBusy||saving||automatic)return;
-    setControlBusy(true);
-    try{if(nativeMode.current){applyNative(await nativeTracking.pause(ownerId));return;}
-      watcher.current?.();watcher.current=null;previous.current=null;
-      if(timing.current)timing.current=pauseDriveClock(timing.current,Date.now());
-      setActive(false);setPaused(true);setMeasuredKmh(null);
-    }catch(e){setError(e instanceof Error?e.message:t('Nu s-a putut pune pauză.','Could not pause.'));}finally{setControlBusy(false);}
+    if(nativeMode.current){await changeNativePause(true);return;}
+    watcher.current?.();watcher.current=null;previous.current=null;lastLiveFix.current=null;
+    if(timing.current){
+      timing.current=pauseDriveClock(timing.current,Date.now());
+      setTrackingSeconds(Math.floor(timing.current.elapsedMs/1000));
+    }
+    setActive(false);setPaused(true);setMeasuredKmh(null);
   };
   useEffect(()=>()=>{if(nativeMode.current||!draftSnapshot.current)return;try{const value=JSON.parse(draftSnapshot.current);if(timing.current&&!timing.current.endedAt){value.timing=pauseDriveClock(timing.current,Date.now());value.updatedAt=Date.now();localStorage.setItem(draftKey,JSON.stringify(value));}}catch{/* Device storage may be unavailable. */}},[draftKey]);
   const stop = async () => {
@@ -180,7 +201,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   useEffect(() => () => { if (watcher.current !== null) watcher.current(); if (tick.current) clearInterval(tick.current); }, []);
   const start = () => {
     if(controlBusy||saving||saveInFlight.current||queueFlight.current||(active&&!paused))return;
-    if(paused&&nativeMode.current){setControlBusy(true);void nativeTracking.resume(ownerId).then(applyNative).catch(e=>setError(e instanceof Error?e.message:'Nu s-a putut relua GPS-ul.')).finally(()=>setControlBusy(false));return;}
+    if(paused&&nativeMode.current){void changeNativePause(false);return;}
     if(Capacitor.getPlatform()==='android'&&!hasNativeTracking()){setError(t('Actualizează aplicația AutoCare pentru a folosi GPS în fundal.','Update the AutoCare app to use background GPS.'));return;}
     if(hasNativeTracking()&&!preview){
       if(nativeStarting.current || saveInFlight.current)return;
@@ -379,7 +400,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     finally { setControlBusy(false); }
   };
   const finishControl=<> {(active||paused||!!startedAt&&!saved&&!endedAt.current)&&<button type="button" className="sd-finish" disabled={controlBusy||saving||preview} onClick={()=>void finish()}>{saving?<LoaderCircle size={23}/>:<Square size={22}/>} {t('Finalizează','Finish')}</button>} </>;
-  const sessionControls=<>{(!active&&!paused&&(!endedAt.current||native))||paused||saved?driveButton:active?<button type="button" className="sd-pause" disabled={controlBusy||saving||preview||automatic} onClick={()=>void pause()}><Pause size={23}/>{t('Pauză','Pause')}</button>:null}{saved&&distance>0&&<span className="sd-saved"><CheckCheck size={22}/>{t('Sesiune salvată','Session saved')}</span>}{!active&&!paused&&!!endedAt.current&&distance>0&&!saved&&!automatic&&<button className="sd-start primary" type="button" disabled={saving||preview||queueBusy} onClick={()=>void saveTrip()}>{saving?<LoaderCircle size={18}/>:<CheckCheck size={20}/>} {saving?t('Se salvează…','Saving…'):saveAttempted?t('Reîncearcă salvarea','Retry saving'):t('Salvează sesiunea','Save session')}</button>}</>;
+  const sessionControls=<>{(!active&&!paused&&(!endedAt.current||native))||paused||saved?driveButton:active&&!automatic?<button type="button" className="sd-pause" disabled={controlBusy||saving||preview} onClick={()=>void pause()}><Pause size={23}/>{t('Pauză','Pause')}</button>:null}{saved&&distance>0&&<span className="sd-saved"><CheckCheck size={22}/>{t('Sesiune salvată','Session saved')}</span>}{!active&&!paused&&!!endedAt.current&&distance>0&&!saved&&!automatic&&<button className="sd-start primary" type="button" disabled={saving||preview||queueBusy} onClick={()=>void saveTrip()}>{saving?<LoaderCircle size={18}/>:<CheckCheck size={20}/>} {saving?t('Se salvează…','Saving…'):saveAttempted?t('Reîncearcă salvarea','Retry saving'):t('Salvează sesiunea','Save session')}</button>}</>;
   const discardOption=!active && !paused && !!endedAt.current && !automatic && (distance>0 || (native&&startedAt!==null)) && !saved && <button type="button" disabled={saving||preview||controlBusy} onClick={async ()=>{if(!await requestConfirmation(t("Renunți la sesiune? Traseul local și kilometrii nesalvați se vor pierde.", "Discard this session? The local route and unsaved mileage will be lost.")))return;if(nativeMode.current){const discardedId=tripId.current;void nativeTracking.clear(ownerId).then(()=>{
       if(pendingDrives.some(trip=>trip.id===discardedId))setPendingDrives(removePendingDrive(ownerId,discardedId));
       distanceRef.current=0;started.current=null;timing.current=null;nativeElapsed.current=null;endedAt.current=null;draftSnapshot.current='';setPaused(false);maxSpeedRef.current=null;setMaxSpeed(null);setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');}).catch(e=>setError(e instanceof Error?e.message:'GPS indisponibil.'));return;}distanceRef.current=0;started.current=null;previous.current=null;timing.current=null;nativeElapsed.current=null;endedAt.current=null;draftSnapshot.current='';setPaused(false);maxSpeedRef.current=null;setMaxSpeed(null);setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');try{localStorage.removeItem(draftKey);}catch{/* Storage unavailable. */}}}>{t('Renunță la traseu', 'Discard trip')}</button>;

@@ -313,3 +313,23 @@
  padding-top:14px;border:1px solid #d4e4eb;
 }
 .sd-live-cockpit[data-native-fullscreen=true][data-typing=true] :is(.rg-navigation-audio,.rg-navigation-speed,.rg-map-modes,.ac-road-map-center,.maplibregl-ctrl-top-right,.leaflet-top.leaflet-right) {visibility:hidden}
+
+.sd-live-cockpit.rg-smartdrive-map .sd-destination-settings[hidden],
+.sd-live-cockpit.rg-smartdrive-map .sd-permanent-bottom[hidden]{display:none}
+.sd-live-cockpit.rg-smartdrive-map[data-typing=true] .rg-navigation-layout{grid-template-rows:minmax(0,1fr)}
+.sd-live-cockpit.rg-smartdrive-map[data-typing=true] .sd-destination-toolbar{
+ inset-inline:max(10px,env(safe-area-inset-left)) max(10px,env(safe-area-inset-right));
+ max-width:500px;
+}
+.sd-live-cockpit[data-typing=true] .sd-destination-toolbar>.ac-destination-search{
+ max-height:calc(100dvh - 80px - env(safe-area-inset-top));
+ padding:8px;overscroll-behavior:contain;border-color:#d4e4eb;background:#f9fcfd;
+ box-shadow:0 8px 24px #083b4a36;
+}
+.sd-live-cockpit[data-typing=true] .sd-close-destinations{
+ justify-content:flex-start;gap:7px;margin:0 0 4px;padding:8px 10px;border:0;background:transparent;
+ font-size:13px;font-weight:650;color:#075365;
+}
+.sd-live-cockpit[data-typing=true] .sd-destination-toolbar .ac-destination-search ul{
+ max-height:none;overflow:visible;padding:6px 0 0;border:0;background:transparent;
+}
