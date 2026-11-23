@@ -1,13 +1,14 @@
 'use client';
+import { Capacitor } from '@capacitor/core';
 import {DriveSessionPanel,type DrivePanelData} from './drive-session-panel';
 import {FilterSelect} from './filter-select';
 
 import dynamic from 'next/dynamic';
-import { ArrowUp, MapPin, Navigation,Volume2,VolumeX,ChevronDown,RotateCw,X,SlidersHorizontal,ArrowLeft,MoreHorizontal,History,Bluetooth } from 'lucide-react';
+import { ArrowUp, MapPin, Navigation,Volume2,VolumeX,ChevronDown,RotateCw,X,SlidersHorizontal,ArrowLeft,MoreHorizontal,History,Bluetooth,Flag } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState,type ReactNode } from 'react';
 import { defaultAutoPointsArea, type MapArea } from '@/lib/auto-points';
 import { browserGPSFix, latestGPSFix, type GPSFix } from '@/lib/gps-tracking';
-import { navigationProgress, type Coordinate, type DrivingRoute, type Turn } from '@/lib/road-navigation';
+import { navigationProgress, routeDisplayFix, type Coordinate, type DrivingRoute, type Turn } from '@/lib/road-navigation';
 import {parseSavedDestinations,rememberDestination,destinationIdentity,type SavedDestination} from '@/lib/drive-destinations';
 import {gpsTelemetry} from '@/lib/gps-status';
 import './smartdrive-navigation.css';
@@ -40,8 +41,12 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const locale = useApplicationLocale();
   const english = locale.startsWith('en');
   const t = (ro: string, en: string) => english ? en : ro;
+  const [androidApk, setAndroidApk] = useState(false);
+  useEffect(() => {
+    setAndroidApk(Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android');
+  }, []);
   const [nativeScreen,setNativeScreen]=useState(false);
-  useEffect(()=>{const active=visible&&nativeNavigation.available();setNativeScreen(active);if(!active)return;document.documentElement.dataset.autocareSmartdriveScreen='true';return()=>{delete document.documentElement.dataset.autocareSmartdriveScreen;};},[visible]);
+  useEffect(()=>{const active=visible&&(androidApk||nativeNavigation.available());setNativeScreen(active);if(!active)return;document.documentElement.dataset.autocareSmartdriveScreen='true';return()=>{delete document.documentElement.dataset.autocareSmartdriveScreen;};},[androidApk,visible]);
   const [recent,setRecent]=useState<SavedDestination[]>([]);
   const [favorites,setFavorites]=useState<SavedDestination[]>([]);
   const placesKey='autocare-destinations:'+ownerId;
@@ -237,6 +242,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
     // Only a new GPS reading can confirm a deviation.
   }, [position, navigating, route, destination]);
 
+  const displayPosition=useMemo(()=>progress&&precisePosition?routeDisplayFix(precisePosition,progress,stepIndex):position,[progress,precisePosition,position,stepIndex]);
   const ManeuverIcon=progress?.next?.maneuver.exit?RotateCw:ArrowUp;
   const arrived = !!progress && progress.distance < 35 && progress.gap < 30;
   const telemetry=gpsTelemetry(position,now);
@@ -250,10 +256,11 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   useEffect(()=>{if((muted||!navigating)&&'speechSynthesis' in window)window.speechSynthesis.cancel();return()=>{if('speechSynthesis' in window)window.speechSynthesis.cancel()}},[muted,navigating]);
   const minutes=progress?Math.ceil(progress.seconds/60):!navigating&&route?Math.ceil(route.duration/60):null;
   const remaining=navigating?progress?.distance:route?.distance;
-  return <section ref={root} className="rg-smartdrive-map sd-live-cockpit" data-native-fullscreen={nativeScreen} data-guiding={navigating} data-search-open={searchOpen} aria-label="SmartDrive GPS">
+  const eta=progress&&navigating?new Date(Date.now()+progress.seconds*1000).toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit'}):null;
+  return <section ref={root} className="rg-smartdrive-map sd-live-cockpit" data-native-fullscreen={nativeScreen} data-android-apk={androidApk} data-guiding={navigating} data-search-open={searchOpen} aria-label="SmartDrive GPS">
     <div className="rg-navigation-layout" data-sidebar-open={searchOpen||details}>
       <div className="rg-navigation-canvas">
-        <RoadMap points={session?.points||noRoute} position={position} active={navigating||session?.state==='active'} english={english}
+        <RoadMap points={session?.points||noRoute} position={displayPosition} active={navigating||session?.state==='active'} english={english}
           initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview?undefined:requestLocate}
           locating={findingLocation||location.waiting} locationError={locationError||location.error}
           untilTurn={progress?.untilTurn} plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting?choose:undefined}/>
@@ -261,12 +268,17 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
         {!navigating&&<div className="sd-destination-toolbar"><DriveDestinationSearch area={searchPosition??area} nearPosition={!!searchPosition} disabled={preview} english={english} onChoose={point=>choose(point)}/><button type="button" className="sd-destination-settings" aria-label={t('Destinații și vehicul','Destinations and vehicle')} aria-expanded={searchOpen} onClick={()=>setSearchOpen(v=>!v)}><SlidersHorizontal size={23}/></button></div>}
         {navigating&&<button type="button" className="rg-navigation-exit" aria-label={t('Încheie navigația, păstrează înregistrarea','End navigation, keep recording')} onClick={()=>{setNavigating(false);setStepIndex(0);}}><X size={21}/></button>}
         {navigating&&<div className="rg-guidance-turn" role="status"><ManeuverIcon size={30} style={{rotate:progress?.next?.maneuver.modifier?.includes('left')?'-90deg':progress?.next?.maneuver.modifier?.includes('right')?'90deg':undefined}}/><div><strong>{arrived?t('Ai ajuns','You arrived'):progress?distance(progress.untilTurn):t('Se caută semnal GPS precis…','Waiting for accurate GPS…')}</strong><span>{progress?.next?turnText(progress.next.maneuver,english):t('Urmează traseul','Follow the route')}</span><small>{progress?.next?.name}</small></div><button type="button" aria-expanded={details} onClick={()=>setDetails(v=>!v)}><ChevronDown size={20}/></button></div>}
-        <div className="rg-navigation-speed" aria-label={t('Viteza GPS','GPS speed')}><strong>{session?session.speed??'—':telemetry.speed??'—'}</strong><span>km/h</span></div>
+        {androidApk && <div className="rg-navigation-speed" aria-label={t('Viteza GPS','GPS speed')}>
+          <strong>{session ? session.speed ?? '—' : telemetry.speed ?? '—'}</strong><span>km/h</span>
+        </div>}
         <button className="rg-navigation-audio" type="button" aria-label={t('Indicații vocale','Voice guidance')} aria-pressed={!muted} title={muted?t('Sunet oprit','Sound off'):t('Sunet pornit','Sound on')} onClick={()=>{setMuted(v=>!v);spoken.current=''}}>{muted?<VolumeX size={24}/>:<Volume2 size={24}/>}</button>
       </div>
       <section ref={bottomPanel} className="sd-permanent-bottom">
-        {session&&<DriveSessionPanel session={session} english={english}>{navigating&&<span className="sd-route-remaining">{remaining!=null?distance(remaining):'—'} · {minutes!=null?minutes+' min':'—'}</span>}</DriveSessionPanel>}
-        {(!session||route)&&<div className="sd-route-actions">{!navigating&&route&&<button className="primary" type="button" disabled={preview||routing} onClick={()=>{if(recordWithNavigation&&!session?.active)session?.start();setNavigating(true);requestLocate();lastReroute.current=Date.now()}}><Navigation size={22}/>{t('Pornește navigația','Start navigation')}</button>}{navigating&&<button type="button" onClick={()=>{setNavigating(false);setStepIndex(0);}}>{t('Încheie navigația','End navigation')}</button>}</div>}
+        {session&&<DriveSessionPanel session={session} english={english} compact={androidApk && navigating}>{navigating && progress && <span className="sd-route-remaining">
+          <Flag size={15} aria-hidden="true"/> {t('Rămas pe traseu', 'Route remaining')} · {remaining != null ? distance(remaining) : '—'} · {minutes} min
+          {eta && (' · ' + t('Sos. ', 'ETA ') + eta)}
+        </span>}</DriveSessionPanel>}
+        {(!session||route)&&<div className="sd-route-actions">{!navigating&&route&&<button className="primary" type="button" disabled={preview||routing} onClick={()=>{if(recordWithNavigation&&!session?.active)session?.start();setNavigating(true);requestLocate();lastReroute.current=Date.now()}}><Navigation size={22}/>{t('Pornește navigația','Start navigation')}</button>}{navigating&&!androidApk&&<button type="button" className="sd-end-guidance" onClick={()=>{setNavigating(false);setStepIndex(0);}}><Flag size={19} aria-hidden="true"/>{t('Încheie navigația','End navigation')}</button>}</div>}
         {(routeError||locationError)&&<p role="alert">{routeError||locationError}</p>}{routing&&<p role="status">{t('Se calculează traseul…','Calculating route…')}</p>}
       </section>
       <aside className="rg-navigation-sidebar" data-open={searchOpen||details} ref={routeCard}>

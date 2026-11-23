@@ -17,8 +17,15 @@
 .sd-live-cockpit.rg-smartdrive-map[data-native-fullscreen=true] .rg-navigation-search-toggle{left:64px;top:max(12px,env(safe-area-inset-top));max-width:none}
 .sd-live-cockpit.rg-smartdrive-map .rg-guidance-turn{top:max(12px,env(safe-area-inset-top));left:12px;right:72px;max-width:500px;min-height:80px;padding:14px 16px;background:#083b4a;color:#fff;border:1px solid #075365;box-shadow:0 5px 18px #083b4a33;border-radius:16px}
 .sd-live-cockpit .rg-guidance-turn>svg{color:#fff}.sd-live-cockpit .rg-guidance-turn :is(span,small){color:#fff}.sd-live-cockpit .rg-guidance-turn strong{font-size:25px}.sd-live-cockpit .rg-guidance-turn span{font-size:16px}.sd-live-cockpit .rg-guidance-turn>button{color:#fff;min-width:44px}
-.sd-live-cockpit.rg-smartdrive-map .rg-navigation-speed{position:absolute;left:16px;bottom:16px;width:126px;height:112px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;border:1px solid #0b6475;border-radius:20px;background:#083b4a;color:#fff;box-shadow:0 5px 18px #083b4a40;z-index:4;box-sizing:border-box}
-.sd-live-cockpit.rg-smartdrive-map .rg-navigation-speed strong{font-size:52px;line-height:1;font-weight:750;letter-spacing:-2px;color:#fff}.sd-live-cockpit.rg-smartdrive-map .rg-navigation-speed span{font-size:16px;color:#fff;margin:0}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-speed {
+ position:absolute;
+ inset-inline-start:max(12px,env(safe-area-inset-left));
+ inset-block-end:max(12px,env(safe-area-inset-bottom));
+ width:74px;height:66px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+ gap:2px;border:1px solid #0b6475;border-radius:15px;background:#083b4a;color:#fff;box-shadow:0 3px 10px #083b4a35;z-index:4;box-sizing:border-box;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-speed strong{font-size:33px;line-height:1;font-weight:750;letter-spacing:-1px;color:#fff}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-speed span{font-size:12px;line-height:1;color:#fff;margin:0}
 .sd-live-cockpit.rg-smartdrive-map .rg-navigation-audio{position:absolute;top:124px;right:16px;bottom:auto;width:48px;height:48px;display:grid;place-items:center;padding:10px;background:#fff;color:#075365;border:1px solid #c7dbe5;border-radius:14px;box-shadow:0 3px 9px #083b4a18;z-index:5}
 .sd-live-cockpit.rg-smartdrive-map .rg-navigation-audio[aria-pressed=true]{background:#075365;color:#fff;border-color:#075365}
 .sd-live-cockpit.rg-smartdrive-map .rg-map-modes{right:16px;top:182px;bottom:auto;gap:8px}
@@ -28,7 +35,7 @@
 .sd-live-cockpit .ac-road-map-center span{display:none}.sd-live-cockpit.rg-smartdrive-map .maplibregl-ctrl-top-right{top:16px;right:16px}
 .sd-live-cockpit.rg-smartdrive-map .maplibregl-ctrl-group{box-shadow:0 3px 9px #083b4a18;border:1px solid #c7dbe5;border-radius:14px;overflow:hidden;background:#fff}
 .sd-live-cockpit.rg-smartdrive-map .maplibregl-ctrl-group button{width:48px;height:48px;min-height:48px;border-radius:0}.sd-live-cockpit.rg-smartdrive-map .maplibregl-ctrl-compass{display:none}
-.sd-live-cockpit.rg-smartdrive-map .ac-map-location-state{left:155px;right:80px;bottom:12px;max-width:none;color:#243e50;background:#fff;border:1px solid #dbe6ed;padding:7px 10px;font-size:12px;line-height:1.4}
+.sd-live-cockpit.rg-smartdrive-map .ac-map-location-state{left:16px;right:80px;bottom:12px;max-width:none;color:#243e50;background:#fff;border:1px solid #dbe6ed;padding:7px 10px;font-size:12px;line-height:1.4}
 .sd-live-cockpit.rg-smartdrive-map .ac-road-map-status,.sd-live-cockpit.rg-smartdrive-map .ac-road-map-overview{display:none}
 .sd-session-panel{background:#fff;padding:14px 18px 16px;border-top:1px solid #dbe6ed;box-sizing:border-box;color:#142333;min-width:0}
 .sd-session-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;min-height:20px;font-size:12px;font-weight:650;color:#334f60}
@@ -45,17 +52,17 @@
 @media(max-width:1100px){.sd-session-metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.sd-session-metrics>div:nth-child(3n){border:0}.sd-session-metrics dd{font-size:21px}}
 @media(max-width:900px){
  .sd-live-cockpit.rg-smartdrive-map{min-height:440px;border-radius:0;border:0}.sd-live-cockpit .rg-navigation-layout{grid-template-rows:minmax(150px,1fr) auto}
- .sd-live-cockpit.rg-smartdrive-map .rg-navigation-speed{width:110px;height:100px;left:12px;bottom:12px;border-radius:18px}.sd-live-cockpit.rg-smartdrive-map .rg-navigation-speed strong{font-size:48px}.sd-live-cockpit.rg-smartdrive-map .rg-navigation-speed span{font-size:15px}
+
  .sd-live-cockpit .sd-permanent-bottom{padding-bottom:env(safe-area-inset-bottom)}
  .sd-session-panel{padding:10px 12px 12px}.sd-session-heading{font-size:11px;margin-bottom:8px}.sd-session-metrics{gap:9px 8px}.sd-session-metrics>div{padding-right:5px}.sd-session-metrics dt{font-size:11px;gap:4px}.sd-session-metrics dt svg{display:none}.sd-session-metrics dd{font-size:20px;letter-spacing:-.6px;margin-top:4px}.sd-session-metrics [data-metric=signal] dd{font-size:13px}
  .sd-session-actions{gap:8px;margin-top:12px}.sd-live-cockpit.rg-smartdrive-map .sd-session-actions>button{flex:1;min-width:0;min-height:48px;font-size:15px;padding:11px 9px}.sd-live-cockpit.rg-smartdrive-map .sd-session-actions>button.sd-start{min-width:0}.sd-saved{font-size:11px}
- .sd-live-cockpit.rg-smartdrive-map .rg-navigation-speed{box-shadow:0 4px 14px #083b4a35}.sd-live-cockpit.rg-smartdrive-map .ac-map-location-state{display:none}
+ .sd-live-cockpit.rg-smartdrive-map .ac-map-location-state{display:none}
  .sd-live-cockpit.rg-smartdrive-map .rg-navigation-sidebar{max-height:calc(100% - 16px);left:8px;right:8px;top:8px;width:auto;padding:14px}
  .sd-live-cockpit.rg-smartdrive-map .rg-navigation-search-toggle{left:12px;top:12px;right:76px;min-height:48px;font-size:15px;padding:11px 13px}
  .sd-live-cockpit.rg-smartdrive-map .rg-guidance-turn{min-height:72px;padding:12px;gap:8px;max-width:none;right:72px}.sd-live-cockpit .rg-guidance-turn strong{font-size:22px}.sd-live-cockpit .rg-guidance-turn span{font-size:14px}.sd-live-cockpit .rg-guidance-turn small{font-size:11px}.sd-live-cockpit .rg-guidance-turn>button{display:none}
  .sd-route-actions{padding:0 12px 10px}.sd-session-notices p{font-size:11px!important;line-height:1.35!important}
 }
-@media(max-width:350px){.sd-session-metrics dd{font-size:18px}.sd-session-metrics dt{font-size:10px}.sd-live-cockpit.rg-smartdrive-map .rg-navigation-speed strong{font-size:44px}.sd-live-cockpit.rg-smartdrive-map .rg-navigation-speed{width:98px;height:92px}.sd-session-panel{padding:9px 10px 10px}.sd-session-actions{gap:6px}.sd-live-cockpit.rg-smartdrive-map .sd-session-actions>button{font-size:14px}}
+@media(max-width:350px){.sd-session-metrics dd{font-size:18px}.sd-session-metrics dt{font-size:10px}.sd-session-panel{padding:9px 10px 10px}.sd-session-actions{gap:6px}.sd-live-cockpit.rg-smartdrive-map .sd-session-actions>button{font-size:14px}}
 @media(max-height:640px) and (max-width:900px){.sd-live-cockpit.rg-smartdrive-map{min-height:360px}.sd-session-metrics{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.sd-session-metrics dt{font-size:9px}.sd-session-metrics dd{font-size:14px}.sd-session-metrics [data-metric=signal] dd{font-size:10px}.sd-session-panel{padding:7px 10px}.sd-session-actions{margin-top:8px}.sd-live-cockpit.rg-smartdrive-map .rg-map-modes{top:122px}.sd-live-cockpit.rg-smartdrive-map .rg-navigation-audio{right:74px;top:12px}.sd-session-heading{margin-bottom:6px}}
 
 .sd-live-cockpit.rg-smartdrive-map .sd-destination-toolbar{position:absolute;top:14px;left:14px;right:78px;max-width:500px;display:flex;align-items:flex-start;gap:6px;z-index:6}
@@ -71,3 +78,105 @@
 .sd-destination-toolbar .ac-destination-search li span{display:grid;min-width:0;gap:4px;overflow-wrap:anywhere}.sd-destination-toolbar .ac-destination-search small{font-size:11px;color:#526777}.sd-destination-toolbar .ac-destination-search p{font-size:12px;color:#526777;padding:0 10px}
 .sd-live-cockpit[data-native-fullscreen=true] .sd-destination-toolbar{left:64px;top:max(12px,env(safe-area-inset-top))}
 @media(max-width:350px){.sd-live-cockpit.rg-smartdrive-map .sd-destination-toolbar{left:10px;right:74px;gap:4px}.sd-live-cockpit.rg-smartdrive-map .sd-destination-toolbar input{padding-left:8px}.sd-live-cockpit.rg-smartdrive-map .sd-destination-settings{min-width:44px}}
+
+.sd-session-heading .sd-details-toggle {
+  margin-inline-start:auto;
+  display:grid;
+  place-items:center;
+  width:44px;
+  min-height:44px;
+  padding:0;
+  border:1px solid #dbe6ed;
+  border-radius:50%;
+  color:#075365;
+  background:#f6f9fb;
+}
+.sd-details-toggle[aria-expanded=false] svg {transform:rotate(180deg)}
+.sd-session-metrics.sd-session-summary,.sd-session-metrics.sd-session-detail {grid-template-columns:repeat(4,minmax(0,1fr))}
+.sd-session-metrics.sd-session-detail {margin-top:10px}
+.sd-session-metrics.sd-session-detail[hidden] {display:none}
+.sd-live-cockpit .sd-session-panel {background:#fff;border-radius:18px}
+.sd-session-summary dd {font-variant-numeric:tabular-nums}
+@media(max-width:440px){
+ .sd-session-metrics.sd-session-summary,.sd-session-metrics.sd-session-detail {grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@layer autocare-workspace {
+ html body .app-shell.ac-workspace.ac-studio main#workspace-main .sd-live-cockpit .rg-guidance-turn strong {color:#fff!important}
+}
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .maplibregl-ctrl-top-right {
+ top:238px;
+ right:16px;
+ z-index:5;
+}
+@media(max-height:640px) and (max-width:900px){
+ .sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .maplibregl-ctrl-top-right {top:175px}
+}
+
+
+.sd-live-cockpit[data-android-apk=true] .ac-map-location-state {left:98px}
+.sd-route-remaining {display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;color:#345665}
+.sd-live-cockpit.rg-smartdrive-map .sd-route-actions .sd-end-guidance {
+ display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;
+ border:1px solid #bed3df;border-radius:13px;background:#fff;color:#075365;
+}
+.sd-live-cockpit.rg-smartdrive-map .sd-end-guidance:hover {background:#edf4f7}
+.sd-session-summary [data-metric]:not(:last-child) {border-inline-end:1px solid #e3ebf0}
+@media(max-width:440px){
+ .sd-session-heading {flex-wrap:wrap}
+ .sd-session-heading .sd-route-remaining {order:3;flex-basis:100%;text-align:start}
+ .sd-session-summary [data-metric]:nth-child(2n) {border-inline-end:0}
+}
+
+.sd-session-sheet[hidden] {display:none}
+.sd-session-sheet {
+ padding:14px;
+ border:1px solid #c8dbe3;
+ border-radius:16px;
+ background:#fff;
+ box-shadow:0 -8px 25px #083b4a28;
+}
+.sd-session-sheet>header {position:relative;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px;touch-action:none}
+.sd-sheet-grip {position:absolute;top:-7px;left:calc(50% - 18px);width:36px;height:4px;background:#a5bbc6;border-radius:8px}
+.sd-live-cockpit.rg-smartdrive-map .sd-sheet-close {border:1px solid #dbe6ed;background:#f6f9fb;color:#075365}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true][data-guiding=true] .sd-permanent-bottom {
+ position:absolute;inset:auto 8px max(8px,env(safe-area-inset-bottom)) 8px;
+ border-radius:18px;padding:0;background:transparent;box-shadow:0 5px 22px #083b4a30;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true][data-guiding=true] .rg-navigation-layout {
+ display:block;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true][data-guiding=true] .rg-navigation-canvas {height:100%}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true][data-guiding=true] :is(.rg-navigation-speed,.ac-road-map-center) {
+ bottom:calc(var(--nav-bottom-height,105px) + max(16px,env(safe-area-inset-bottom)));
+}
+.sd-session-panel[data-compact=true] {padding:6px 10px 9px}
+.sd-session-panel[data-compact=true] .sd-session-heading {margin:0;min-height:32px}
+.sd-session-panel[data-compact=true] .sd-route-remaining {display:none}
+.sd-session-panel[data-compact=true] .sd-summary-body {display:flex;align-items:center;gap:10px}
+.sd-session-panel[data-compact=true] .sd-session-summary {flex:1;grid-template-columns:repeat(2,minmax(0,1fr))}
+.sd-session-panel[data-compact=true] .sd-summary-body .sd-session-actions {margin:0;flex:none}
+.sd-live-cockpit.rg-smartdrive-map .sd-session-panel[data-compact=true] .sd-summary-body .sd-session-actions button {min-width:44px;padding:8px;font-size:13px}
+.sd-session-panel[data-compact=true] .sd-session-sheet {position:absolute;inset:auto 0 calc(100% + 6px);max-height:62dvh;overflow:auto}
+.sd-session-panel[data-compact=true] .sd-session-detail {grid-template-columns:repeat(2,minmax(0,1fr))}
+
+.sd-sheet-route:not(:empty) {margin-top:10px}
+.sd-live-cockpit.rg-smartdrive-map .rg-navigation-canvas {z-index:0}
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] :is(.rg-map-modes,.maplibregl-ctrl-top-right) {display:flex}
+
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-speed {
+ width:70px;height:70px;border-radius:50%;border:2px solid #d4eff3;
+ background:linear-gradient(150deg,#087183,#063d4d);box-shadow:0 5px 15px #052a4570;gap:2px;
+}
+.sd-session-panel[data-compact=true] {
+ position:relative;border-radius:22px;padding:8px 15px 12px;
+ background:#f8fbfc;box-shadow:0 8px 28px #122d4b36;
+}
+.sd-session-panel[data-compact=true] .sd-session-metrics dd{font-size:clamp(18px,5.6vw,26px);font-variant-numeric:tabular-nums}
+.sd-session-panel[data-compact=true] .sd-session-metrics dt{font-size:11px}
+.sd-session-panel[data-compact=true] .sd-session-summary>div+div{border-left:1px solid #d9e6ea;padding-left:14px}
+.sd-compact-signal{margin-inline-start:auto;color:#375761;white-space:nowrap;font-size:10px}
+.sd-session-panel[data-compact=true] .sd-summary-body .sd-floating-session-action{
+ position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);z-index:1;
+}
+.sd-live-cockpit.rg-smartdrive-map .sd-floating-session-action>button{white-space:nowrap;border-radius:999px;min-height:44px;background:#07505e;color:white}
+.sd-session-panel[data-compact=true] .sd-session-sheet{z-index:2}

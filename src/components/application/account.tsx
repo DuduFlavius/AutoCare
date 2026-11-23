@@ -1,5 +1,5 @@
 'use client';
-import { MessageSquare, Star, CreditCard, Bell, Settings, HelpCircle, LogOut, ChevronRight, CarFront as CarFrontIcon, Gauge, Wallet, CalendarDays, History, Route, Shield, Files, Wrench } from 'lucide-react';
+import { MessageSquare, Star, CreditCard, Bell, Settings, HelpCircle, LogOut, ChevronRight, CarFront as CarFrontIcon, Gauge, Wallet, CalendarDays, History, Shield, Files, Wrench } from 'lucide-react';
 import { useApplicationLanguage } from '../application-locale';
 import MobileInstall from '../mobile-install';
 import { AppSection, AppStatus } from './ui';
@@ -9,7 +9,7 @@ export default function AccountHub({ data, name, navigate, onSettings, onLanguag
   const language = useApplicationLanguage(), en = language === 'en';
   const links = [
     {title: en ? 'My garage tools' : 'Instrumentele garajului', rows: [
-      ['Documente','Documente','Documents',Files],['RCA & Rovinietă','RCA & Rovinietă','RCA & Road vignette',Shield],['Întreținere','Întreținere','Maintenance',Wrench],['Rapoarte','Rapoarte','Reports',Files],['Kilometraj','Kilometraj și istoric','Mileage & readings',Gauge],['Cheltuieli','Cheltuieli','Expenses',Wallet],['Calendar','Calendar','Calendar',CalendarDays],['Istoric auto','Istoric complet','Vehicle history',History],['Plan întreținere','SmartDrive GPS','SmartDrive GPS',Route],
+      ['Documente','Documente','Documents',Files],['RCA & Rovinietă','RCA & Rovinietă','RCA & Road vignette',Shield],['Întreținere','Întreținere','Maintenance',Wrench],['Rapoarte','Rapoarte','Reports',Files],['Kilometraj','Kilometraj și istoric','Mileage & readings',Gauge],['Cheltuieli','Cheltuieli','Expenses',Wallet],['Calendar','Calendar','Calendar',CalendarDays],['Istoric auto','Istoric complet','Vehicle history',History],
     ]},
     {title: en ? 'Membership' : 'Abonament și beneficii', rows: [['Premium','Instrumente Premium','Premium tools',Star],['Abonament','Gestionează abonamentul','Manage subscription',CreditCard]]},
     {title: en ? 'Preferences & help' : 'Preferințe și ajutor', rows: [['Feedback','Trimite feedback','Send feedback',HelpCircle],['Notificări','Centrul de notificări','Notifications',Bell],['Setări','Setări cont','Account Settings',Settings],['Centru de suport','Ajutor și suport','Help & support',HelpCircle]]},

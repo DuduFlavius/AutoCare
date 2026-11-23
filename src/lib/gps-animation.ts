@@ -3,12 +3,14 @@ import {segmentMeters} from './gps-tracking';
 
 /** Presentation only: interpolate between measured fixes, never extrapolate a route. */
 export function measuredTransition(from:GPSFix|null,to:GPSFix,reducedMotion=false){
- if(!from||reducedMotion)return 0;
+ if(!from)return 0;
  const elapsed=to.timestamp-from.timestamp;
- if(elapsed<=0||elapsed>15000)return 0;
+ if(elapsed===0)return 0;
+ if(elapsed<0)return null;
+ if(elapsed>15000)return reducedMotion?0:600;
  // Do not animate a GPS jump as if it were a real movement.
  if(segmentMeters(from,to)/(elapsed/1000)>80)return null;
- return Math.min(1500,Math.max(250,elapsed));
+ return reducedMotion?0:Math.min(3000,Math.max(250,elapsed));
 }
 export function interpolateAngle(from:number,to:number,progress:number){
  const delta=((to-from+540)%360)-180;

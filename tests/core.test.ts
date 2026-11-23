@@ -1124,6 +1124,36 @@ test('SmartDrive: reminder preferences validate frequency and persist', async ()
  assert.equal((await call(route,'POST',{...payload,id:crypto.randomUUID(),expectedOdometer:updated,pausedSeconds:900})).status,400);
  });
 
+test('SmartDrive persists three consecutive sessions and safely retries a lost response', async () => {
+  await db().delete(s.requestLimits).where(eq(s.requestLimits.key, `api:${uid}:${Math.floor(Date.now() / 60000)}`));
+  const id = crypto.randomUUID();
+  await db().insert(s.vehicles).values({ id, userId: uid, brand: 'Dacia', model: 'Logan test', year: 2022, fuel: 'Benzină', plate: 'GPS QA', odometer: 100000 });
+  const route = 'smartdrive/vehicles/' + id + '/trips';
+  let odometer = 100000;
+  const ids = [];
+  for (const [index, distanceMeters] of [5000, 2000, 1500].entries()) {
+    const id = crypto.randomUUID();
+    ids.push(id);
+    const startedAt = Date.UTC(2020, 3, 3, index + 10);
+    const pausedSeconds = index === 2 ? 60 : 0;
+    const trip = {id, syncMileage: true, expectedOdometer: odometer, distanceMeters, durationSeconds: 300, pausedSeconds,
+      startedAt: new Date(startedAt).toISOString(), endedAt: new Date(startedAt + (300 + pausedSeconds) * 1000).toISOString()};
+    const response = await call(route, 'POST', trip);
+    assert.equal(response.status, 201);
+    const actual = index === 1 ? await call(route, 'POST', trip) : response;
+    assert.equal(actual.status, 201);
+    const receipt = await actual.json();
+    assert.equal(receipt.id, id);
+    odometer += Math.floor(distanceMeters / 1000);
+    assert.equal(receipt.odometer, odometer);
+  }
+  const history = await (await call(route)).json();
+  assert.deepEqual(history.map((item: {id: string}) => item.id).sort(), ids.sort());
+  const [vehicle] = await db().select().from(s.vehicles).where(eq(s.vehicles.id, id));
+  assert.equal(vehicle.odometer, 100008);
+  assert.equal((await db().select().from(s.mileageReadings).where(eq(s.mileageReadings.vehicleId, id))).length, 3);
+});
+
 test('SmartDrive: expired authenticated session cannot read or write readings', async () => {
   const sessions = await db().select().from(s.session).where(eq(s.session.userId, uid));
   assert.ok(sessions.length > 0);

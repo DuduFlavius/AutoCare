@@ -52,6 +52,12 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const [saved,setSaved]=useState(false);
   const tripId=useRef('');
   const baseline=useRef(0);
+  const confirmedMileage=useRef(new Map<string, { previous: number; current: number }>());
+  const snapshotGeneration=useRef(0);
+  function startMileage(car: {id: string; odometer: number}) {
+    const confirmed=confirmedMileage.current.get(car.id);
+    return confirmed && car.odometer===confirmed.previous ? confirmed.current : car.odometer;
+  }
   const endedAt=useRef<number|null>(null);
   const nativeElapsed=useRef<{seconds:number;at:number;running:boolean}|null>(null);
   const [signal, setSignal] = useState<'requesting'|'waiting'|'ok'|'lost'>('waiting');
@@ -81,14 +87,14 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     distanceRef.current=shownDistance;setDistance(shownDistance);setVehicleId(value.vehicleId);setStartedAt(value.startedAt);setActive(value.active);setRoutePoints(shownPoints);
     setClock(new Date().toLocaleTimeString(locale));setTrackingSeconds(value.awaitingMotion?0:Math.max(0,Math.floor((nativeEnd-value.startedAt-nativePaused)/1000)));
     const position=value.lastPosition??shownPoints.at(-1);
-    if(position){if(position.timestamp!==lastLiveFix.current?.timestamp){setMeasuredKmh(measuredSpeed(position,lastLiveFix.current));lastLiveFix.current=position;}setMapPosition(current=>!current||position.timestamp>=current.timestamp?position:current);}
+    if(position){if(position.timestamp!==lastLiveFix.current?.timestamp){setMeasuredKmh(measuredSpeed(position,lastLiveFix.current));lastLiveFix.current=position;}setMapPosition(current=>!current||position.timestamp>current.timestamp?position:current);}
     const last=position;if(last){lastFix.current=value.lastFixAt||last.timestamp;setSignal(value.active&&Date.now()-lastFix.current>25000?'lost':'ok');}
   }
   useEffect(()=>{
     if(preview||!hasNativeTracking())return;
     nativeMode.current=true;setNative(true);let disposed=false,busy=false;
-    const refresh=async()=>{if(busy||disposed||document.visibilityState!=='visible')return;busy=true;try{const value=await nativeTracking.snapshot(ownerId);if(!disposed&&value&&vehicles.some(v=>v.id===value.vehicleId))applyNative(value);}catch{if(!disposed)setError('Nu se poate citi starea GPS. Redeschide aplicația.');}finally{busy=false;}};
-    void refresh();const timer=setInterval(()=>void refresh(),2000);document.addEventListener('visibilitychange',refresh);
+    const refresh=async()=>{if(busy||disposed||document.visibilityState!=='visible')return;busy=true;const generation=snapshotGeneration.current;try{const value=await nativeTracking.snapshot(ownerId);if(!disposed&&generation===snapshotGeneration.current&&!saveInFlight.current&&!nativeStarting.current&&value&&vehicles.some(v=>v.id===value.vehicleId))applyNative(value);}catch{if(!disposed)setError('Nu se poate citi starea GPS. Redeschide aplicația.');}finally{busy=false;}};
+    void refresh();const timer=setInterval(()=>void refresh(),1000);document.addEventListener('visibilitychange',refresh);
     // Navigating away must detach UI polling, never stop the native location service.
     return()=>{disposed=true;clearInterval(timer);document.removeEventListener('visibilitychange',refresh);};
   },[ownerId,preview]);
@@ -166,7 +172,8 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
       nativeStarting.current=true;setError('');
       void (async()=>{try{
         if(saved)await nativeTracking.clear(ownerId);
-        const value=await nativeTracking.start({id:tripId.current&&!saved?tripId.current:crypto.randomUUID(),ownerId,vehicleId:car.id,baseline:car.odometer});
+        ++snapshotGeneration.current;
+        const value=await nativeTracking.start({id:crypto.randomUUID(),ownerId,vehicleId:car.id,baseline:startMileage(car)});
         setSaved(false);setNotice('');applyNative(value);
       }catch(e){setError(e instanceof Error?e.message:t("Nu s-a putut porni urmărirea GPS.", "GPS tracking could not start."));}finally{nativeStarting.current=false;}})();return;
     }
@@ -177,7 +184,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     if (watcher.current !== null) return;
     const car=vehicles.find(v=>v.id===vehicleId)||vehicles[0];
     if(!car){setError(t("Selectează o mașină înainte de pornire.", "Select a vehicle before starting."));return;}
-    if(!resume){baseline.current=car.odometer; tripId.current=crypto.randomUUID();} endedAt.current=null; setSaved(false);
+    if(!resume){setVehicleId(car.id);baseline.current=startMileage(car);tripId.current=crypto.randomUUID();} endedAt.current=null; setSaved(false);
     setClock(new Date().toLocaleTimeString(locale));
     if(!resume){const now=Date.now();timing.current=startDriveClock(now);started.current=now;setStartedAt(now);setDistance(0);distanceRef.current=0;setRoutePoints([]);setTrackingSeconds(0);maxSpeedRef.current=null;setMaxSpeed(null);lastLiveFix.current=null;}else if(timing.current){timing.current=resumeDriveClock(timing.current,Date.now());}setPaused(false);
     setFinalizeOnStop(false);
@@ -208,19 +215,20 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   };
   const saveTrip = async () => {
     if(saved || saveInFlight.current)return;
-    const id = vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0]?.id;
+    const id = vehicles.some(v => v.id === vehicleId) ? vehicleId : undefined;
     if (active) { setError(t("Oprește urmărirea înainte de salvare.", "Stop tracking before saving.")); return; }
     if (!id || !started.current || distanceRef.current <= 0 || preview) { setError(t("Selectează o mașină și înregistrează o distanță validă.", "Select a vehicle and record a valid distance.")); return; }
     const ended = endedAt.current ?? Date.now();
     let activeSeconds=timing.current?Math.floor(driveElapsedMs(timing.current,ended)/1000):trackingSeconds;
     saveInFlight.current=true;
+    ++snapshotGeneration.current;
     setSaving(true);
     try {
       let finalPoints = routePoints;
       // Read the durable final snapshot, not a potentially stale two-second UI poll.
       if(nativeMode.current){
         const finalTrip=await nativeTracking.snapshot(ownerId);
-        if(!finalTrip || finalTrip.active || finalTrip.id!==tripId.current)throw Error('Traseul GPS nu este încă finalizat. Reîncearcă salvarea.');
+        if(!finalTrip || finalTrip.active || finalTrip.id!==tripId.current || finalTrip.vehicleId!==id)throw Error('Traseul GPS nu este încă finalizat. Reîncearcă salvarea.');
         finalPoints = finalTrip.points;
         distanceRef.current=finalTrip.distance;
         endedAt.current=finalTrip.endedAt??finalTrip.updatedAt;
@@ -233,13 +241,13 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
       if(body.id!==tripId.current||body.vehicleId!==id)throw Error(t('Serverul nu a confirmat cursa corectă. Reîncearcă salvarea.','The server did not confirm this trip. Retry saving.'));
       if(syncMileage){
         if(body.source!=='browser-gps-synced')throw Error(t('Cursa există fără sincronizare. Verifică kilometrajul înainte de o nouă salvare.','The trip exists without mileage sync. Check the odometer before saving again.'));
-        const check=await fetch('/api/v1/smartdrive/vehicles/'+id+'/readings',{cache:'no-store'});
-        const readings=await check.json();
-        const expected=baseline.current+Math.floor(Math.round(distanceRef.current)/1000);
-        if(!check.ok||!Array.isArray(readings)||!readings.some(r=>Number.isFinite(r.odometer)&&r.odometer>=expected))throw Error(t('Cursa a fost primită, dar kilometrajul nu a putut fi verificat. Reîncearcă sincronizarea.','Trip received, but mileage could not be verified. Retry synchronization.'));
+        if (!Number.isInteger(body.odometer) || body.odometer < 0) throw Error(t('Serverul nu a confirmat kilometrajul. Reîncearcă salvarea.', 'The server did not confirm mileage. Retry saving.'));
+        const previous = confirmedMileage.current.get(id);
+        confirmedMileage.current.set(id, {previous: previous?.current === baseline.current ? previous.previous : baseline.current, current: body.odometer});
       }
-      await storeTripRoutes(ownerId, [{ id: body.id, points: finalPoints }]);
-      if(nativeMode.current){try{await nativeTracking.clear(ownerId);}catch{throw Error('Călătoria a fost salvată, dar arhiva locală nu a putut fi curățată. Reîncearcă salvarea.');}}
+      try { await storeTripRoutes(ownerId, [{ id: body.id, points: finalPoints }]); }
+      catch { /* The route cache is optional; the backend has already committed the trip. */ }
+      if(nativeMode.current) await nativeTracking.clear(ownerId).catch(() => {});
       setSaved(true); setNotice(syncMileage ? 'Călătorie salvată. Distanța GPS a fost adăugată kilometrajului și planului de întreținere. Verifică periodic valoarea cu bordul mașinii.' : 'Călătoria GPS a fost salvată separat.'); setError('');
       window.dispatchEvent(new Event('autocare-trips-updated'));
       try{await onSaved();}catch{setNotice('Călătoria a fost salvată. Reîncarcă pagina pentru kilometrajul actualizat.');}
@@ -271,13 +279,14 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     if(controlBusy||saving||preview)return;
     await requestConfirmation(t('Finalizezi sesiunea? Distanța validă va fi salvată, iar kilometrajul va fi sincronizat o singură dată conform opțiunii alese.','Finish session? Valid distance will be saved and mileage synchronized once according to your setting.'),async()=>{await stop();if(distanceRef.current<=0){setSaved(true);setNotice(t('Sesiune finalizată fără deplasare GPS validă. Kilometrajul nu a fost modificat.','Session finished without valid GPS movement. Mileage was unchanged.'));try{localStorage.removeItem(draftKey);}catch{/* Device storage may be unavailable. */}}});
   };
-  const sessionControls=<>{(!active&&!paused&&!endedAt.current)||paused||saved?driveButton:active?<button type="button" className="sd-pause" disabled={controlBusy||saving||preview||automatic} onClick={()=>void pause()}><Pause size={23}/>{t('Pauză','Pause')}</button>:null}{(active||paused||!!startedAt&&!saved&&!endedAt.current)&&<button type="button" className="sd-finish" disabled={controlBusy||saving||preview} onClick={()=>void finish()}>{saving?<LoaderCircle size={23}/>:<Square size={22}/>} {t('Finalizează','Finish')}</button>}{saved&&<span className="sd-saved"><CheckCheck size={22}/>{t('Sesiune finalizată','Session finished')}</span>}{!active&&!paused&&distance>0&&!saved&&<button type="button" disabled={saving||preview} onClick={()=>void saveTrip()}>{t('Reîncearcă salvarea','Retry saving')}</button>}</>;
+  const finishControl=<> {(active||paused||!!startedAt&&!saved&&!endedAt.current)&&<button type="button" className="sd-finish" disabled={controlBusy||saving||preview} onClick={()=>void finish()}>{saving?<LoaderCircle size={23}/>:<Square size={22}/>} {t('Finalizează','Finish')}</button>} </>;
+  const sessionControls=<>{(!active&&!paused&&!endedAt.current)||paused||saved?driveButton:active?<button type="button" className="sd-pause" disabled={controlBusy||saving||preview||automatic} onClick={()=>void pause()}><Pause size={23}/>{t('Pauză','Pause')}</button>:null}{saved&&<span className="sd-saved"><CheckCheck size={22}/>{t('Sesiune finalizată','Session finished')}</span>}{!active&&!paused&&distance>0&&!saved&&<button type="button" disabled={saving||preview} onClick={()=>void saveTrip()}>{t('Reîncearcă salvarea','Retry saving')}</button>}</>;
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-drive-live-content" hidden={bluetoothOnly}>
-    <AutoPointsMap onExit={onExit} onView={onView} preview={preview} visible={liveVisible} ownerId={ownerId} session={{position:currentPosition,points:routePoints,meters:distance,seconds:trackingSeconds,speed,average:stats.averageKmh,maximum:stats.maximumKmh,signal:status,state:saving?'saving':saved||!!endedAt.current?'finished':paused?'paused':active?'active':'idle',active,locate:idleLocation.locate,start,stop,
+    <AutoPointsMap onExit={onExit} onView={onView} preview={preview} visible={liveVisible} ownerId={ownerId} session={{position:currentPosition,points:routePoints,meters:distance,seconds:trackingSeconds,speed,average:stats.averageKmh,maximum:stats.maximumKmh,signal:status,accuracy:telemetry.accuracy,startedAt,state:saving?'saving':saved?'finished':endedAt.current?'unsaved':paused?'paused':active?'active':'idle',active,locate:idleLocation.locate,start,stop,
       vehicle:vehicles.length>0?<label>{t('Vehicul','Vehicle')}<FilterSelect value={currentCar?.id||''} disabled={active||!!startedAt&&!saved} onChange={e=>setVehicleId(e.target.value)}>{vehicles.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model}{v.plate?' · '+v.plate:''}</option>)}</FilterSelect></label>:null,
       messages:<>{awaitingMotion&&<p role="status">{t('Așteaptă deplasarea mașinii.','Waiting for the vehicle to move.')}</p>}{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}</>,
-      controls:sessionControls
+      controls:sessionControls, finishControl
     }}/>
     <details className="rg-drive-details"><summary>{t('Sesiune, sincronizare și permisiuni','Session, sync and permissions')}</summary>
     <div className="ac-drive-console">

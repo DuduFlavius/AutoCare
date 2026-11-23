@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { navigationProgress, type DrivingRoute, type RoadStep } from '../src/lib/road-navigation';
+import { navigationProgress, routeDisplayFix, type DrivingRoute, type RoadStep } from '../src/lib/road-navigation';
 import { findRoadDestinations } from '../src/lib/road-geocoding';
 import { parseAutoPoints } from '../src/lib/auto-points';
 
@@ -55,4 +55,17 @@ test('destination search preserves branch names and addresses and removes duplic
   assert.equal(options[0].distanceKm, 0);
   assert.ok(options[1].distanceKm > 1);
   assert.equal(fetch.mock.callCount(), 1);
+});
+
+test('route matching only adjusts a close, aligned fix for display', () => {
+  const fix = { longitude: 21.01, latitude: 45.00007, accuracy: 10, speed: 12, heading: 90 };
+  const match = navigationProgress(route, fix);
+  assert.equal(routeDisplayFix(fix, match, 0).latitude, 45);
+  assert.equal(fix.latitude, 45.00007);
+
+  for (const reading of [{...fix, heading: 270}, {...fix, accuracy: 40}, {...fix, speed: 0}]) {
+    assert.equal(routeDisplayFix(reading, match, 0), reading);
+  }
+  assert.equal(routeDisplayFix(fix, {...match, index: 3}, 0), fix);
+  assert.equal(routeDisplayFix(fix, {...match, gap: 14}, 0), fix);
 });

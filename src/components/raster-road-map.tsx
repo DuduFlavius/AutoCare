@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Crosshair } from 'lucide-react';
 import type { Map as LeafletMap, Marker, Polyline } from 'leaflet';
+import { interpolateFix, measuredTransition } from '@/lib/gps-animation';
 import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
@@ -145,6 +146,8 @@ export default function RasterRoadMap({
       planned.current = null;
     };
   }, [english, history, initialArea, onAreaChange]);
+  const acceptedFix = useRef<GPSFix | null>(null);
+  const renderedFix = useRef<GPSFix | null>(null);
   useEffect(() => {
     const view = map.current,
       last = position;
@@ -154,8 +157,11 @@ export default function RasterRoadMap({
       marker.current = null;
       return;
     }
-    if (marker.current) marker.current.setLatLng([last.latitude, last.longitude]);
-    else
+    if (active && (last.accuracy > 50 || (acceptedFix.current && last.timestamp < acceptedFix.current.timestamp))) return;
+    const duration = active ? measuredTransition(acceptedFix.current, last, window.matchMedia('(prefers-reduced-motion: reduce)').matches) : 0;
+    if (duration === null) return;
+    acceptedFix.current = last;
+    if (!marker.current)
       void import('leaflet').then((L) => {
         if (map.current !== view || latestPosition.current !== last)
           return;
@@ -164,7 +170,7 @@ export default function RasterRoadMap({
           return;
         }
         const element = createRoadPositionMarker(english);
-        updateRoadPositionMarker(element, active, last, points);
+        updateRoadPositionMarker(element, active, last, latest.current);
         marker.current = L.marker([last.latitude, last.longitude], {
           icon: L.divIcon({
             className: 'ac-road-marker-host',
@@ -182,10 +188,23 @@ export default function RasterRoadMap({
     if (follow.current)
       view.setView([last.latitude, last.longitude], Math.max(15, view.getZoom()), {
         animate: true,
-        duration: 0.7,
+        duration: (duration || 700) / 1000,
       });
-    updateRoadPositionMarker(marker.current?.getElement()?.querySelector<HTMLElement>('.ac-road-position'), active, last, points);
-  }, [points, position, english, history, active, ready]);
+    updateRoadPositionMarker(marker.current?.getElement()?.querySelector<HTMLElement>('.ac-road-position'), active, last, latest.current);
+    const from = renderedFix.current ?? last;
+    const began = performance.now();
+    let frame = 0;
+    function draw(now: number) {
+      if (map.current !== view) return;
+      const progress = duration ? Math.min(1, (now - began) / duration) : 1;
+      const point = interpolateFix(from, last!, progress);
+      renderedFix.current = point;
+      marker.current?.setLatLng([point.latitude, point.longitude]);
+      if (progress < 1) frame = requestAnimationFrame(draw);
+    }
+    frame = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(frame);
+  }, [position, english, history, active, ready]);
   useEffect(() => {
     line.current?.setLatLngs(
       routeGeometry(points).features.map((f) =>
@@ -251,6 +270,7 @@ export default function RasterRoadMap({
         type="button"
         className="ac-road-map-center"
         aria-pressed={following}
+        aria-label={english ? 'My location' : 'Poziția mea'}
         onClick={() => {
           follow.current = true;
           setFollowing(true);
@@ -259,9 +279,9 @@ export default function RasterRoadMap({
           if (p) map.current?.setView([p.latitude, p.longitude], 16, { animate: true });
         }}
       >
-        <Crosshair size={17}/>{locating && !position
+        <Crosshair size={17}/><span>{locating && !position
           ? (english ? 'Finding position…' : 'Se caută poziția…')
-          : (english ? 'My location' : 'Poziția mea')}
+          : (english ? 'My location' : 'Poziția mea')}</span>
       </button>}
       {!!plannedRoute?.length && <button type="button" className="ac-road-map-overview" onClick={showRoute}>
         {english ? 'Show full route' : 'Vezi traseul complet'}

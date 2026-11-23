@@ -42,3 +42,15 @@
  .ac-home-finance{grid-column:1;grid-row:5;padding:14px}
  .rg-m-shortcuts{grid-row:4}
 }
+
+.ac-home-smartdrive {
+ display:grid;gap:12px;margin:0 0 16px;padding:16px;border:1px solid #d5e3e7;border-radius:18px;
+ background:#f8fbfc;color:#102d38;box-shadow:0 8px 26px #12374a13;
+}
+.ac-home-smartdrive header{display:flex;align-items:center;gap:12px}
+.ac-home-smartdrive h2,.ac-home-smartdrive p{margin:0}
+.ac-home-smartdrive p{color:#3a5662;font-size:.9rem}
+.ac-home-smartdrive-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#daeff1;color:#064b58}
+.ac-home-smartdrive-map{height:94px;border-radius:12px;background:linear-gradient(135deg,#164e62,#09343e);overflow:hidden}
+.ac-home-smartdrive-map svg{width:100%;height:100%;display:block}
+.ac-home-smartdrive :is(a.primary,button.primary){display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;color:white;background:#07505e;border-radius:12px;padding:10px 16px;text-decoration:none}

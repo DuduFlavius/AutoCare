@@ -521,17 +521,27 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             // Serialize saves on this vehicle, then deduplicate retries before changing mileage.
             const vehicle=(await tx.select().from(s.vehicles).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid))).for('update'))[0];
             if(!vehicle) throw new svc.AppError(404,'Mașina nu există.');
-            if(value.id){const existing=(await tx.select().from(s.gpsTrips).where(eq(s.gpsTrips.id,value.id)))[0];if(existing){if(existing.userId!==uid || existing.vehicleId!==vehicleId)throw new svc.AppError(409,'Identificator de călătorie invalid.');return existing;}}
+            if (value.id) {
+              const [existing] = await tx.select().from(s.gpsTrips).where(eq(s.gpsTrips.id, value.id));
+              if (existing) {
+                if (existing.userId !== uid || existing.vehicleId !== vehicleId || existing.distanceMeters !== value.distanceMeters || existing.startedAt.getTime() !== startedAt.getTime())
+                  throw new svc.AppError(409, 'Identificator de călătorie invalid.');
+                return { ...existing, odometer: vehicle.odometer };
+              }
+            }
+            let confirmedOdometer = vehicle.odometer;
             if(value.syncMileage){
               if(value.expectedOdometer===undefined || value.expectedOdometer!==vehicle.odometer)throw new svc.AppError(409,'Kilometrajul a fost modificat între timp. Debifează sincronizarea pentru a salva separat călătoria și verifică bordul.');
               const previous=(await tx.select({meters:sql<string>`coalesce(sum(${s.gpsTrips.distanceMeters}),0)`}).from(s.gpsTrips).where(and(eq(s.gpsTrips.vehicleId,vehicleId),eq(s.gpsTrips.userId,uid),eq(s.gpsTrips.source,'browser-gps-synced'))))[0];
               const carry=Number(previous.meters)%1000;
               const odometer=vehicle.odometer+Math.floor((carry+value.distanceMeters)/1000);
+              confirmedOdometer = odometer;
               if(odometer>99999999)throw new svc.AppError(400,'Kilometraj invalid.');
               await tx.update(s.vehicles).set({odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
             await tx.insert(s.mileageReadings).values({id:crypto.randomUUID(),userId:uid,vehicleId,odometer,source:'gps'});
             }
-            return (await tx.insert(s.gpsTrips).values({id:value.id??crypto.randomUUID(),userId:uid,vehicleId,distanceMeters:value.distanceMeters,durationSeconds:value.durationSeconds,startedAt,endedAt,source:value.syncMileage?'browser-gps-synced':'browser-gps'}).returning())[0];
+            const trip = (await tx.insert(s.gpsTrips).values({id:value.id??crypto.randomUUID(),userId:uid,vehicleId,distanceMeters:value.distanceMeters,durationSeconds:value.durationSeconds,startedAt,endedAt,source:value.syncMileage?'browser-gps-synced':'browser-gps'}).returning())[0];
+            return { ...trip, odometer: confirmedOdometer };
           });
           return json(result,201);
         }
