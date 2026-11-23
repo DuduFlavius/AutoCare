@@ -97,12 +97,12 @@ export default function RasterRoadMap({
         layer.on('load', () => {
           if (!disposed) setTileError(false);
         });
-        planned.current = L.polyline([], { color: '#5AFFC4', weight: 7, interactive: false }).addTo(view);
+        planned.current = L.polyline([], { color: '#087183', weight: 7, interactive: false }).addTo(view);
         line.current = L.polyline(
           routeGeometry(latest.current).features.map((f) =>
             f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
           ),
-          { color: history ? '#5AFFC4' : '#5AFFC4', weight: 4, lineCap: 'round', lineJoin: 'round' },
+          { color: history ? '#5AFFC4' : '#168a9d', weight: 4, lineCap: 'round', lineJoin: 'round' },
         ).addTo(view);
         if (history && last && latest.current.length > 1) {
           const first = latest.current[0];

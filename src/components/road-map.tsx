@@ -7,7 +7,7 @@ import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-p
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import {drivingBearing,drivingZoom,daylightMap} from '@/lib/driving-camera';
 import {segmentMeters} from '@/lib/gps-tracking';
-import {measuredTransition,interpolateFix,interpolateAngle} from '@/lib/gps-animation';
+import {measuredTransition,interpolateFix,interpolateAngle,cameraTurnProgress} from '@/lib/gps-animation';
 import type { GPSFix } from '@/lib/gps-tracking';
 import { roadMapStyle, plannedRouteBounds, routeGeometry, streetOnlyStyle, tripBounds } from '@/lib/road-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -138,12 +138,12 @@ export default function RoadMapView({
             view.addSource('directions' , { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
             view.addLayer({
               id: 'directions-outline', type: 'line', source: 'directions',
-              paint: { 'line-color': '#091611', 'line-width': 11 },
+              paint: { 'line-color': '#c5eef4', 'line-width': 11 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addLayer({
               id: 'directions-line', type: 'line', source: 'directions',
-              paint: { 'line-color': '#5AFFC4', 'line-width': 7 },
+              paint: { 'line-color': '#087183', 'line-width': 7 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addSource('trip', { type: 'geojson', data: routeGeometry(latest.current) });
@@ -158,7 +158,7 @@ export default function RoadMapView({
               id: 'trip-line',
               type: 'line',
               source: 'trip',
-              paint: { 'line-color': history ? '#5AFFC4' : '#5AFFC4', 'line-width': 4 },
+              paint: { 'line-color': history ? '#5AFFC4' : '#168a9d', 'line-width': 4 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             const position = latestPosition.current;
@@ -267,16 +267,17 @@ export default function RoadMapView({
     const startZoom=view.getZoom(),startPitch=view.getPitch();
     const pitch=active&&perspective?52:0;
     const begun=performance.now();
+    const lookAhead=active?Math.min(240,view.getContainer().clientHeight*.3):0;
     const draw=(now:number)=>{
       if(map.current!==view)return;
       const progress=duration?Math.min(1,(now-begun)/duration):1;
-      const point=interpolateFix(from,target,progress),heading=interpolateAngle(fromBearing,bearing,progress);
+      const point=interpolateFix(from,target,progress),heading=interpolateAngle(fromBearing,bearing,cameraTurnProgress(progress));
       displayPosition.current=point;displayBearing.current=heading;
       marker.current?.setLngLat([point.longitude,point.latitude]).setRotation(heading);
       // One animation owns the camera. Manual dragging disables following immediately.
       if(follow.current)view.jumpTo({center:[point.longitude,point.latitude],bearing:heading,
         pitch:startPitch+(pitch-startPitch)*progress,zoom:startZoom+(zoom-startZoom)*progress,
-        padding:active?{top:Math.min(240,view.getContainer().clientHeight*.3),bottom:0,left:0,right:0}:{top:0,bottom:0,left:0,right:0}});
+        padding:{top:lookAhead,bottom:0,left:0,right:0}});
       if(progress<1)animationFrame.current=window.requestAnimationFrame(draw);
     };
     animationFrame.current=window.requestAnimationFrame(draw);

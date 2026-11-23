@@ -131,7 +131,7 @@ export const nativeTracking = {
 
 export const nativeNavigation = {
   available: () => hasNativeTracking() && Capacitor.getPlatform() === 'android',
-  async search(query:string,latitude:number,longitude:number){if(!nativeNavigation.available())throw Error('SmartDrive GPS este disponibil exclusiv în aplicația Android.');const response=await plugin.navigationRequest({kind:'search',query,latitude,longitude});return parseRoadDestinations(response.data,latitude,longitude);},
+  async search(query:string,latitude:number,longitude:number){if(!nativeNavigation.available())throw Error('SmartDrive GPS este disponibil exclusiv în aplicația Android.');const response=await plugin.navigationRequest({kind:'search',query,latitude,longitude});return parseRoadDestinations(response.data,latitude,longitude,query);},
   async directions(start:{latitude:number;longitude:number},end:{latitude:number;longitude:number},accuracy:number){if(!nativeNavigation.available())throw Error('SmartDrive GPS este disponibil exclusiv în aplicația Android.');const response=await plugin.navigationRequest({kind:'route',start,end,accuracy});return parseDrivingRoutes(response.data);},
   async start(ownerId: string, destination: string, english: boolean, steps: NativeNavigationStep[]) {
     await plugin.navigationStart({ ownerId, destination: destination.slice(0, 200), english, steps });

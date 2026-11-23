@@ -243,12 +243,12 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     if(route==='smartdrive/destinations'&&method==='POST'){
       await rate(uid,'drive-search',12);
       const input=roadCoordinate.extend({query:z.string().trim().min(3).max(160)}).parse(await body(req));
-      return json(await loadRoadDestinations(input.query,input.latitude,input.longitude));
+      return json(await loadRoadDestinations(input.query,input.latitude,input.longitude,req.signal));
     }
     if(route==='smartdrive/directions'&&method==='POST'){
       await rate(uid,'drive-route',8);
       const input=z.object({start:roadCoordinate,end:roadCoordinate,accuracy:z.number().min(0).max(500).default(0)}).parse(await body(req));
-      return json(await loadDrivingRoutes(input.start,input.end,input.accuracy));
+      return json(await loadDrivingRoutes(input.start,input.end,input.accuracy,req.signal));
     }
     if (route === 'smartdrive/auto-points' && method === 'POST') {
       await rate(uid, 'auto-points', 10);

@@ -61,7 +61,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const [muted,setMuted]=useState(true);
   const [details,setDetails]=useState(false);
   const [searchOpen,setSearchOpen]=useState(false);
-  const [recordWithNavigation,setRecordWithNavigation]=useState(false);
+  const [searchFocused,setSearchFocused]=useState(false);
   const [now,setNow]=useState(()=>Date.now());
   const spoken=useRef('');
   useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),4000);return()=>clearInterval(timer)},[]);
@@ -144,7 +144,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
     setRouting(true);
     setRouteError('');
     try {
-      const value=await driveRouting.directions(start,end,Math.round(start.accuracy));
+      const value=await driveRouting.directions(start,end,Math.round(start.accuracy),controller.signal);
       if (controller.signal.aborted) return;
       setRoutes(value);
       setAlternative(0);
@@ -265,7 +265,8 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
           locating={findingLocation||location.waiting} locationError={locationError||location.error}
           untilTurn={progress?.untilTurn} plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting?choose:undefined}/>
         {!navigating&&nativeScreen&&<><button type="button" className="rg-navigation-back" aria-label={t('Înapoi în AutoCare','Back to AutoCare')} onClick={onExit}><ArrowLeft size={20}/></button><details className="rg-navigation-tools"><summary aria-label={t('Meniu SmartDrive','SmartDrive menu')}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={()=>onView?.('history')}><History size={17}/>{t('Istoric trasee','Trip history')}</button><button type="button" onClick={()=>onView?.('bluetooth')}><Bluetooth size={17}/>Bluetooth</button></div></details></>}
-        {!navigating&&<div className="sd-destination-toolbar"><DriveDestinationSearch area={searchPosition??area} nearPosition={!!searchPosition} disabled={preview} english={english} onChoose={point=>choose(point)}/><button type="button" className="sd-destination-settings" aria-label={t('Destinații și vehicul','Destinations and vehicle')} aria-expanded={searchOpen} onClick={()=>setSearchOpen(v=>!v)}><SlidersHorizontal size={23}/></button></div>}
+        {!navigating&&nativeScreen&&<div className="sd-android-title"><MapPin size={17}/>SmartDrive GPS</div>}
+        {!navigating&&<div className="sd-destination-toolbar"><DriveDestinationSearch area={searchPosition??area} nearPosition={!!searchPosition} disabled={preview} english={english} recent={recent} onFocusChange={setSearchFocused} onChoose={point=>choose(point)}/><button type="button" className="sd-destination-settings" aria-label={t('Destinații și vehicul','Destinations and vehicle')} aria-expanded={searchOpen} onClick={()=>setSearchOpen(v=>!v)}><SlidersHorizontal size={23}/></button></div>}
         {navigating&&<button type="button" className="rg-navigation-exit" aria-label={t('Încheie navigația, păstrează înregistrarea','End navigation, keep recording')} onClick={()=>{setNavigating(false);setStepIndex(0);}}><X size={21}/></button>}
         {navigating&&<div className="rg-guidance-turn" role="status"><ManeuverIcon size={30} style={{rotate:progress?.next?.maneuver.modifier?.includes('left')?'-90deg':progress?.next?.maneuver.modifier?.includes('right')?'90deg':undefined}}/><div><strong>{arrived?t('Ai ajuns','You arrived'):progress?distance(progress.untilTurn):t('Se caută semnal GPS precis…','Waiting for accurate GPS…')}</strong><span>{progress?.next?turnText(progress.next.maneuver,english):t('Urmează traseul','Follow the route')}</span><small>{progress?.next?.name}</small></div><button type="button" aria-expanded={details} onClick={()=>setDetails(v=>!v)}><ChevronDown size={20}/></button></div>}
         {androidApk && <div className="rg-navigation-speed" aria-label={t('Viteza GPS','GPS speed')}>
@@ -274,16 +275,16 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
         <button className="rg-navigation-audio" type="button" aria-label={t('Indicații vocale','Voice guidance')} aria-pressed={!muted} title={muted?t('Sunet oprit','Sound off'):t('Sunet pornit','Sound on')} onClick={()=>{setMuted(v=>!v);spoken.current=''}}>{muted?<VolumeX size={24}/>:<Volume2 size={24}/>}</button>
       </div>
       <section ref={bottomPanel} className="sd-permanent-bottom">
-        {session&&<DriveSessionPanel session={session} english={english} compact={androidApk && navigating}>{navigating && progress && <span className="sd-route-remaining">
+        {session&&<DriveSessionPanel session={session} english={english} compact={androidApk} suspendDetails={searchFocused&&!navigating} vehicleSelector={androidApk?session.vehicle:undefined}>{navigating && progress && <span className="sd-route-remaining">
           <Flag size={15} aria-hidden="true"/> {t('Rămas pe traseu', 'Route remaining')} · {remaining != null ? distance(remaining) : '—'} · {minutes} min
           {eta && (' · ' + t('Sos. ', 'ETA ') + eta)}
         </span>}</DriveSessionPanel>}
-        {(!session||route)&&<div className="sd-route-actions">{!navigating&&route&&<button className="primary" type="button" disabled={preview||routing} onClick={()=>{if(recordWithNavigation&&!session?.active)session?.start();setNavigating(true);requestLocate();lastReroute.current=Date.now()}}><Navigation size={22}/>{t('Pornește navigația','Start navigation')}</button>}{navigating&&!androidApk&&<button type="button" className="sd-end-guidance" onClick={()=>{setNavigating(false);setStepIndex(0);}}><Flag size={19} aria-hidden="true"/>{t('Încheie navigația','End navigation')}</button>}</div>}
+        {(!session||route)&&<div className="sd-route-actions">{!navigating&&route&&<button className="primary" type="button" disabled={preview||routing} onClick={()=>{setNavigating(true);requestLocate();lastReroute.current=Date.now()}}><Navigation size={22}/>{t('Pornește navigația','Start navigation')}</button>}{navigating&&!androidApk&&<button type="button" className="sd-end-guidance" onClick={()=>{setNavigating(false);setStepIndex(0);}}><Flag size={19} aria-hidden="true"/>{t('Încheie navigația','End navigation')}</button>}</div>}
         {(routeError||locationError)&&<p role="alert">{routeError||locationError}</p>}{routing&&<p role="status">{t('Se calculează traseul…','Calculating route…')}</p>}
       </section>
       <aside className="rg-navigation-sidebar" data-open={searchOpen||details} ref={routeCard}>
         <header><span>SMARTDRIVE</span><h2>{t('Unde mergem?','Where to?')}</h2><button type="button" aria-label={t('Închide căutarea','Close search')} onClick={()=>{setSearchOpen(false);setDetails(false);}}><X size={20}/></button></header>
-        {session?.vehicle}{!navigating&&<label className="rg-record-choice"><input type="checkbox" checked={recordWithNavigation} onChange={event=>setRecordWithNavigation(event.target.checked)}/>{t('Înregistrează și kilometrii când pornesc navigația','Also record mileage when starting navigation')}</label>}
+        {!androidApk&&session?.vehicle}
         {!navigating&&favorites.length>0&&<div className="rg-saved-places"><small>{t('Favorite · pe acest dispozitiv','Favorites · on this device')}</small>{favorites.map(point=><div key={point.kind||destinationIdentity(point)}><button type="button" onClick={()=>choose(point)}>{point.kind==='home'?t('Acasă','Home'):point.kind==='work'?t('Serviciu','Work'):point.name}</button><button type="button" aria-label={t('Elimină favorita','Remove favorite')} onClick={()=>setFavorites(previous=>{const next=previous.filter(p=>p!==point);persistPlaces(recent,next);return next})}>×</button></div>)}</div>}
         {!navigating&&recent.length>0&&<details className="rg-recent-places"><summary>{t('Destinații recente','Recent destinations')}</summary>{recent.map(point=><button type="button" key={destinationIdentity(point)} onClick={()=>choose(point)}>{point.name}</button>)}</details>}
         <button type="button" disabled={preview||navigating} aria-pressed={selecting} onClick={()=>setSelecting(v=>!v)}><MapPin size={16}/>{t('Alege pe hartă','Pick on map')}</button>

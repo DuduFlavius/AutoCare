@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {interpolateAngle,interpolateFix,measuredTransition} from '../src/lib/gps-animation';
+import {cameraTurnProgress,interpolateAngle,interpolateFix,measuredTransition} from '../src/lib/gps-animation';
 const first={latitude:45,longitude:21,accuracy:5,timestamp:1000};
 test('animation ends at measured fixes without extrapolating or changing recorded timestamps',()=>{
  const next={...first,latitude:45.0001,longitude:21.0001,timestamp:2000};
@@ -24,4 +24,12 @@ test('bearings and longitude cross north and the date line by the short arc',()=
 test('two second fix cadence uses the full interval and old fixes are rejected',()=>{
  assert.equal(measuredTransition(first,{...first,timestamp:3000}),2000);
  assert.equal(measuredTransition(first,{...first,timestamp:999}),null);
+});
+
+test('reacquisition never animates across long gaps or accepts impossible and duplicated fixes',()=>{
+ assert.equal(measuredTransition(first,{...first,latitude:45.003,timestamp:17000}),0);
+ assert.equal(measuredTransition(first,{...first,latitude:46,timestamp:17000}),null);
+ assert.equal(measuredTransition(first,{...first,latitude:45.001}),null);
+ assert.equal(cameraTurnProgress(0.25),0.15625);
+ assert.equal(cameraTurnProgress(1),1);
 });
