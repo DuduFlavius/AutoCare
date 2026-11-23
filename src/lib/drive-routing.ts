@@ -8,7 +8,8 @@ class NavigationHttpError extends Error {
 async function request<T>(path:string,input:unknown,native:()=>Promise<T>,signal?:AbortSignal):Promise<T>{
  try{
   const response=await fetch('/api/v1/smartdrive/'+path,{
-   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),cache:'no-store',signal,
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),cache:'no-store',
+   signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(14000)]) : AbortSignal.timeout(14000),
   });
   const data=await response.json().catch(()=>null);
   if(!response.ok||!Array.isArray(data))throw new NavigationHttpError(data?.error||'Serviciul de navigație este indisponibil.',response.status);
@@ -18,6 +19,7 @@ async function request<T>(path:string,input:unknown,native:()=>Promise<T>,signal
   // The Android bridge is a fallback for an unavailable endpoint, not a way around request limits.
   if(!nativeNavigation.available()||(error instanceof NavigationHttpError&&error.status>=400&&error.status<500&&error.status!==404))throw error;
   const result=await native();
+  if (!Array.isArray(result)) throw new Error('Serviciul de navigație este indisponibil.', {cause:error});
   signal?.throwIfAborted();
   return result;
  }

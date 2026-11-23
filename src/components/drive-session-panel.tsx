@@ -14,6 +14,7 @@ export function DriveSessionPanel({session,english=false,children,compact=false,
  const speed=(value:number|null)=>value===null?'—':Math.round(value)+' km/h';
  const rows=[{key:'speed',Icon:Gauge,label:t('Viteză','Speed'),value:speed(session.speed)},{key:'distance',Icon:Route,label:t('Distanță parcursă','Recorded distance'),value:(session.meters/1000).toLocaleString(english?'en-GB':'ro-RO',{minimumFractionDigits:2,maximumFractionDigits:2})+' km'},{key:'time',Icon:Timer,label:t('Durată sesiune','Session time'),value:driveDuration(session.seconds)},{key:'average',Icon:TrendingUp,label:t('Viteză medie','Average speed'),value:speed(session.average)},{key:'maximum',Icon:Activity,label:t('Viteză maximă','Maximum speed'),value:speed(session.maximum)},{key:'signal',Icon:Radio,label:t('Stare GPS','GPS status'),value:signals[session.signal]}];
  const metrics=(items:typeof rows)=>items.map(({key,Icon,label,value})=><div key={key} data-metric={key}><dt><Icon size={20} aria-hidden="true"/>{label}</dt><dd>{value}</dd></div>);
+ const dragged=useRef(false);
  const ready=session.state==='idle';
  const review=session.state==='unsaved'||session.state==='saving'||session.state==='finished';
  const state=session.state==='paused'?t('Sesiune în pauză','Session paused'):session.state==='finished'?t('Sesiune finalizată','Session finished'):session.state==='active'?t('Înregistrare activă','Recording active'):session.state==='saving'?t('Se salvează sesiunea…','Saving session…'):session.state==='unsaved'?t('Sesiune nesalvată','Unsaved session'):t('Pregătit de drum','Ready to drive');
@@ -22,11 +23,16 @@ export function DriveSessionPanel({session,english=false,children,compact=false,
    {!!session.pendingCount&&<button type="button" className="sd-pending-count" aria-expanded={expanded} aria-controls={detailsId} onClick={()=>setExpanded(value=>!value)}>{t('Nesalvate','Unsaved')} · {session.pendingCount}</button>}
    <button className="sd-details-toggle" type="button" aria-expanded={expanded} aria-controls={detailsId} aria-label={t('Detalii sesiune','Session details')} onClick={()=>setExpanded(value=>!value)}><ChevronUp size={22} aria-hidden="true"/></button>
   </div>
+  {compact&&<button type="button" className="sd-dock-grip" aria-label={t('Extinde statisticile','Expand statistics')} aria-expanded={expanded} aria-controls={detailsId}
+   onPointerDown={event=>{dragged.current=false;touchStart.current=event.clientY;event.currentTarget.setPointerCapture(event.pointerId);}}
+   onPointerCancel={()=>{touchStart.current=null;}}
+   onPointerUp={event=>{if(touchStart.current!=null&&touchStart.current-event.clientY>36){dragged.current=true;setExpanded(true);}touchStart.current=null;}}
+   onClick={event=>{if(!event.detail||!dragged.current)setExpanded(value=>!value);}}><span className="sd-sheet-grip" aria-hidden="true"/></button>}
   {compact&&children&&<div className="sd-route-glance">{children}</div>}
   {ready&&vehicleSelector&&<div className="sd-primary-vehicle">{vehicleSelector}</div>}
   {review&&session.startedAt&&<div className="sd-final-context"><strong>{session.vehicleLabel}</strong><time dateTime={new Date(session.startedAt).toISOString()}>{new Intl.DateTimeFormat(english?'en-GB':'ro-RO',{dateStyle:'medium',timeStyle:'short'}).format(session.startedAt)}</time></div>}
   <div className="sd-summary-body">
-   {!(compact&&ready)&&<dl className="sd-session-metrics sd-session-summary">{metrics(rows.filter(row=>compact?(review?['distance','time','average']:['distance','time']).includes(row.key):['speed','distance','time','signal'].includes(row.key)))}</dl>}
+   <dl className="sd-session-metrics sd-session-summary">{metrics(rows.filter(row=>compact?(review?['distance','time','average']:['distance','time']).includes(row.key):['speed','distance','time','signal'].includes(row.key)))}</dl>
    <div className="sd-session-actions">{session.controls}{session.finishControl}</div>
   </div>
   <section id={detailsId} className="sd-session-sheet" hidden={!expanded||suspendDetails} aria-label={t('Detalii sesiune','Session details')}>

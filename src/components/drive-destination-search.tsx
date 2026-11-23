@@ -16,6 +16,7 @@ export default function DriveDestinationSearch({ area, nearPosition, disabled, e
   onFocusChange?: (focused:boolean)=>void;
   onChoose: (point: DriveDestination) => void;
 }) {
+  const input=useRef<HTMLInputElement|null>(null);
   const [focused,setFocused]=useState(false);
   const [query, setQuery] = useState('');
   const [matches, setMatches] = useState<DriveDestination[] | null>(null);
@@ -57,22 +58,22 @@ export default function DriveDestinationSearch({ area, nearPosition, disabled, e
 
   function reset(){pending.current?.abort();setQuery('');setMatches(null);setLoading(false);setError('');}
   function focus(value:boolean){setFocused(value);onFocusChange?.(value);}
-  function choose(point:DriveDestination){reset();focus(false);onChoose(point);}
+  function close(){reset();focus(false);input.current?.blur();}
+  function choose(point:DriveDestination){close();onChoose(point);}
 
   return (
     <section className="ac-destination-search" aria-label={t('Caută destinația', 'Search destination')}>
       <form onSubmit={search}>
         <label htmlFor="ac-destination-address">{t('Unde mergem?', 'Where to?')}</label>
-        <div className="ac-destination-search-row"><Search className="sd-search-icon" size={19} aria-hidden="true"/>
-          <input id="ac-destination-address" type="search" placeholder={t('Unde mergem?', 'Where to?')} value={query}
+        <div className="ac-destination-search-row"><button type="submit" className="primary sd-search-submit" aria-label={t('Caută', 'Search')} disabled={disabled || loading || query.trim().length < 3}><Search size={19}/></button>
+          <input ref={input} id="ac-destination-address" type="search" placeholder={t('Unde mergem?', 'Where to?')} value={query}
             maxLength={160} onFocus={()=>focus(true)} onKeyDown={event=>{if(event.key==='Escape'){reset();focus(false);event.currentTarget.blur();}}} disabled={disabled} autoComplete="off" aria-autocomplete="list" aria-controls="ac-destination-matches"
             onChange={event => { pending.current?.abort(); setQuery(event.target.value); setMatches(null); setLoading(false); setError(''); }}/>
           {!!query&&<button type="button" aria-label={t('Șterge căutarea','Clear search')} onClick={reset}><X size={16}/></button>}
-          <button type="submit" className="primary" disabled={disabled || loading || query.trim().length < 3}><Search size={17}/>{t('Caută', 'Search')}</button>
         </div>
       </form>
       {focused&&!query.trim()&&recent.length>0&&<ul id="ac-destination-matches" aria-label={t('Destinații recente','Recent destinations')}>{recent.map((point,index)=><li key={index}><button type="button" onClick={()=>choose(point)}><MapPin size={17}/>{point.name}</button></li>)}</ul>}
-      {focused&&<button type="button" className="sd-close-destinations" onClick={()=>{reset();focus(false);}}>{t('Înapoi la hartă','Back to map')}</button>}
+      {focused&&<button type="button" className="sd-close-destinations" onClick={close}>{t('Înapoi la hartă','Back to map')}</button>}
       {loading && <p role="status">{t('Caut destinația…', 'Finding your destination…')}</p>}
       {error && <p role="alert">{error}</p>}
       {matches?.length === 0 && <p role="status">{t('Nicio adresă găsită. Adaugă orașul sau alege pe hartă.', 'No address found. Add the city or select a point on the map.')}</p>}

@@ -277,3 +277,39 @@
  background:#142e3c!important;color:#e4f6fa!important;border-color:#577485!important;
 }
 .sd-live-cockpit.rg-smartdrive-map[data-native-fullscreen=true] .rg-navigation-canvas .maplibregl-ctrl-icon{filter:invert(1)}
+
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-speed {
+ width:68px;height:68px;border-radius:50%;border:2px solid #a3d8df;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-speed[data-over-limit=true] {
+ border-color:#ff9d8b;box-shadow:0 0 0 3px #fb72594d,0 5px 14px #102c3f70;
+}
+.sd-speed-sign {
+ position:absolute;inset-inline-start:calc(100% + 9px);top:50%;transform:translateY(-50%);
+ width:48px;height:48px;display:grid;place-items:center;box-sizing:border-box;
+ background:#fff;color:#142331;border:5px solid #d62f36;border-radius:50%;
+ font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;box-shadow:0 3px 10px #092b3f65;
+}
+.sd-speed-preference {display:grid;gap:5px;padding:8px 10px;color:var(--color-text);font-size:12px}
+.sd-speed-preference select {width:100%;min-height:38px;border-radius:9px}
+.sd-live-cockpit.rg-smartdrive-map[data-native-fullscreen=true][data-guiding=true] .rg-navigation-tools {
+ top:calc(max(10px,env(safe-area-inset-top)) + 63px);
+}
+.sd-live-cockpit.rg-smartdrive-map[data-native-fullscreen=true] .sd-destination-toolbar .sd-search-submit {
+ margin-inline-start:5px;opacity:1;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-native-fullscreen=true] .sd-destination-settings {
+ width:42px;height:42px;min-height:42px;flex:none;padding:8px;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-native-fullscreen=true] .rg-navigation-audio {
+ right:max(12px,env(safe-area-inset-right));width:42px;height:42px;border-radius:50%;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-native-fullscreen=true][data-guiding=true] .rg-navigation-audio {
+ top:calc(max(10px,env(safe-area-inset-top)) + 112px);
+}
+.sd-dock-grip {position:absolute;top:0;left:50%;transform:translateX(-50%);width:64px;height:22px;display:grid;place-items:center;padding:0;border:0;background:transparent;touch-action:none}
+.sd-dock-grip .sd-sheet-grip {margin:0;background:#9fbac5}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .sd-session-panel[data-compact=true] {
+ padding-top:14px;border:1px solid #d4e4eb;
+}
+.sd-live-cockpit[data-native-fullscreen=true][data-typing=true] :is(.rg-navigation-audio,.rg-navigation-speed,.rg-map-modes,.ac-road-map-center,.maplibregl-ctrl-top-right,.leaflet-top.leaflet-right) {visibility:hidden}

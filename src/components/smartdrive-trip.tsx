@@ -362,7 +362,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   },[speed]);
   const stats=driveStats(distance,trackingSeconds,maxSpeed);
 
-  const driveButton = <button type="button" className="sd-start primary" disabled={saving||controlBusy||preview||!currentCar||queueBusy} onClick={start}><Play size={23}/>{paused?t('Continuă','Continue'):t('Pornește sesiunea','Start session')}</button>;
+  const driveButton = <button type="button" className="sd-start primary" disabled={saving||controlBusy||preview||!currentCar||queueBusy} onClick={start}><Play size={23}/>{paused?t('Continuă','Continue'):saved?t('Pornește sesiune nouă','Start a new session'):t('Pornește sesiunea','Start session')}</button>;
   const finish=async()=>{
     if(controlBusy||saving||preview)return;
     setControlBusy(true);

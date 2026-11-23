@@ -1,3 +1,4 @@
+import { loadSpeedRoads } from '@/lib/road-speed-server';
 import {mileageOrder,mileageSeries} from '@/lib/mileage-history';
 import {mileageReport} from '@/lib/mileage-report';
 import {date as verifiedDate} from '@/lib/validation';
@@ -244,6 +245,15 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       await rate(uid,'drive-search',12);
       const input=roadCoordinate.extend({query:z.string().trim().min(3).max(160)}).parse(await body(req));
       return json(await loadRoadDestinations(input.query,input.latitude,input.longitude,req.signal));
+    }
+    if (route === 'smartdrive/speed-roads' && method === 'POST') {
+      await rate(uid, 'drive-speed-roads', 24);
+      const input = roadCoordinate.parse(await body(req));
+      try {
+        return json(await loadSpeedRoads({ latitude: Number(input.latitude.toFixed(4)), longitude: Number(input.longitude.toFixed(4)) }, req.signal));
+      } catch {
+        throw new svc.AppError(503, 'Limitele de viteză sunt temporar indisponibile.');
+      }
     }
     if(route==='smartdrive/directions'&&method==='POST'){
       await rate(uid,'drive-route',8);

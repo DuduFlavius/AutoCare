@@ -10,6 +10,7 @@ import { defaultAutoPointsArea, type MapArea } from '@/lib/auto-points';
 import { browserGPSFix, latestGPSFix, type GPSFix } from '@/lib/gps-tracking';
 import { navigationProgress, routeDisplayFix, type Coordinate, type DrivingRoute, type Turn } from '@/lib/road-navigation';
 import {parseSavedDestinations,rememberDestination,destinationIdentity,type SavedDestination} from '@/lib/drive-destinations';
+import {useRoadSpeed} from './use-road-speed';
 import {gpsTelemetry} from '@/lib/gps-status';
 import './smartdrive-navigation.css';
 import './smartdrive-session.css';
@@ -246,6 +247,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const ManeuverIcon=progress?.next?.maneuver.exit?RotateCw:ArrowUp;
   const arrived = !!progress && progress.distance < 35 && progress.gap < 30;
   const telemetry=gpsTelemetry(position,now);
+  const roadSpeed=useRoadSpeed(telemetry.fresh && position && now-position.timestamp<8000 ? position : null,telemetry.speed,androidApk&&visible&&!preview&&(navigating||session?.state==='active'));
   const voiceText=progress?.next?[turnText(progress.next.maneuver,english),progress.next.name].filter(Boolean).join(' · '):'';
   useEffect(()=>{
     if(muted||!navigating||!progress||progress.untilTurn>300||!voiceText||!('speechSynthesis' in window))return;
@@ -257,20 +259,24 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const minutes=progress?Math.ceil(progress.seconds/60):!navigating&&route?Math.ceil(route.duration/60):null;
   const remaining=navigating?progress?.distance:route?.distance;
   const eta=progress&&navigating?new Date(Date.now()+progress.seconds*1000).toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit'}):null;
-  return <section ref={root} className="rg-smartdrive-map sd-live-cockpit" data-native-fullscreen={nativeScreen} data-android-apk={androidApk} data-guiding={navigating} data-search-open={searchOpen} aria-label="SmartDrive GPS">
+  return <section ref={root} className="rg-smartdrive-map sd-live-cockpit" data-native-fullscreen={nativeScreen} data-android-apk={androidApk} data-guiding={navigating} data-search-open={searchOpen} data-typing={searchFocused} aria-label="SmartDrive GPS">
     <div className="rg-navigation-layout" data-sidebar-open={searchOpen||details}>
       <div className="rg-navigation-canvas">
         <RoadMap points={session?.points||noRoute} position={displayPosition} active={navigating||session?.state==='active'} english={english}
           initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview?undefined:requestLocate}
           locating={findingLocation||location.waiting} locationError={locationError||location.error}
           untilTurn={progress?.untilTurn} plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting?choose:undefined}/>
-        {!navigating&&nativeScreen&&<><button type="button" className="rg-navigation-back" aria-label={t('Înapoi în AutoCare','Back to AutoCare')} onClick={onExit}><ArrowLeft size={20}/></button><details className="rg-navigation-tools"><summary aria-label={t('Meniu SmartDrive','SmartDrive menu')}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={()=>onView?.('history')}><History size={17}/>{t('Istoric trasee','Trip history')}</button><button type="button" onClick={()=>onView?.('bluetooth')}><Bluetooth size={17}/>Bluetooth</button></div></details></>}
+        {nativeScreen&&<>{!navigating&&<button type="button" className="rg-navigation-back" aria-label={t('Înapoi în AutoCare','Back to AutoCare')} onClick={onExit}><ArrowLeft size={20}/></button>}<details className="rg-navigation-tools"><summary aria-label={t('Meniu SmartDrive','SmartDrive menu')}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={()=>onView?.('history')}><History size={17}/>{t('Istoric trasee','Trip history')}</button><button type="button" onClick={()=>onView?.('bluetooth')}><Bluetooth size={17}/>Bluetooth</button><label className="sd-speed-preference">{t('Avertizare limită de viteză','Speed limit warning')}
+          <select value={roadSpeed.mode} onChange={event=>void roadSpeed.changeMode(event.target.value as typeof roadSpeed.mode)}>
+            <option value="off">{t('Dezactivată','Off')}</option><option value="visual">{t('Vizuală','Visual')}</option><option value="sound">{t('Vizuală și sonoră','Visual and sound')}</option>
+          </select></label></div></details></>}
         {!navigating&&nativeScreen&&<div className="sd-android-title"><MapPin size={17}/>SmartDrive GPS</div>}
         {!navigating&&<div className="sd-destination-toolbar"><DriveDestinationSearch area={searchPosition??area} nearPosition={!!searchPosition} disabled={preview} english={english} recent={recent} onFocusChange={setSearchFocused} onChoose={point=>choose(point)}/><button type="button" className="sd-destination-settings" aria-label={t('Destinații și vehicul','Destinations and vehicle')} aria-expanded={searchOpen} onClick={()=>setSearchOpen(v=>!v)}><SlidersHorizontal size={23}/></button></div>}
         {navigating&&<button type="button" className="rg-navigation-exit" aria-label={t('Încheie navigația, păstrează înregistrarea','End navigation, keep recording')} onClick={()=>{setNavigating(false);setStepIndex(0);}}><X size={21}/></button>}
         {navigating&&<div className="rg-guidance-turn" role="status"><ManeuverIcon size={30} style={{rotate:progress?.next?.maneuver.modifier?.includes('left')?'-90deg':progress?.next?.maneuver.modifier?.includes('right')?'90deg':undefined}}/><div><strong>{arrived?t('Ai ajuns','You arrived'):progress?distance(progress.untilTurn):t('Se caută semnal GPS precis…','Waiting for accurate GPS…')}</strong><span>{progress?.next?turnText(progress.next.maneuver,english):t('Urmează traseul','Follow the route')}</span><small>{progress?.next?.name}</small></div><button type="button" aria-expanded={details} onClick={()=>setDetails(v=>!v)}><ChevronDown size={20}/></button></div>}
-        {androidApk && <div className="rg-navigation-speed" aria-label={t('Viteza GPS','GPS speed')}>
-          <strong>{session ? session.speed ?? '—' : telemetry.speed ?? '—'}</strong><span>km/h</span>
+        {androidApk && <div className="rg-navigation-speed" data-over-limit={roadSpeed.over} aria-label={t('Viteza GPS','GPS speed')}>
+          <strong>{(telemetry.fresh ? session?.speed ?? telemetry.speed : null) ?? '—'}</strong><span>km/h</span>
+          {roadSpeed.limit!==null&&<div className="sd-speed-sign" aria-label={t(`Limită informativă: ${roadSpeed.limit} km/h. Respectă indicatoarele rutiere.`,`Advisory limit: ${roadSpeed.limit} km/h. Follow road signs.`)}>{roadSpeed.limit}</div>}
         </div>}
         <button className="rg-navigation-audio" type="button" aria-label={t('Indicații vocale','Voice guidance')} aria-pressed={!muted} title={muted?t('Sunet oprit','Sound off'):t('Sunet pornit','Sound on')} onClick={()=>{setMuted(v=>!v);spoken.current=''}}>{muted?<VolumeX size={24}/>:<Volume2 size={24}/>}</button>
       </div>
@@ -279,6 +285,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
           <Flag size={15} aria-hidden="true"/> {t('Rămas pe traseu', 'Route remaining')} · {remaining != null ? distance(remaining) : '—'} · {minutes} min
           {eta && (' · ' + t('Sos. ', 'ETA ') + eta)}
         </span>}</DriveSessionPanel>}
+        {androidApk&&session?.state==='finished'&&onView&&<div className="sd-route-actions"><button type="button" onClick={()=>onView('history')}><History size={16}/>{t('Vezi istoricul','Open history')}</button></div>}
         {(!session||route)&&<div className="sd-route-actions">{!navigating&&route&&<button className="primary" type="button" disabled={preview||routing} onClick={()=>{setNavigating(true);requestLocate();lastReroute.current=Date.now()}}><Navigation size={22}/>{t('Pornește navigația','Start navigation')}</button>}{navigating&&!androidApk&&<button type="button" className="sd-end-guidance" onClick={()=>{setNavigating(false);setStepIndex(0);}}><Flag size={19} aria-hidden="true"/>{t('Încheie navigația','End navigation')}</button>}</div>}
         {(routeError||locationError)&&<p role="alert">{routeError||locationError}</p>}{routing&&<p role="status">{t('Se calculează traseul…','Calculating route…')}</p>}
       </section>
