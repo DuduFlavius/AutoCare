@@ -145,15 +145,14 @@ test('01 Registration, email verification, login, session and wrong password', a
   });
   assert.equal(r.status, 401);
 });
-test('browser navigation endpoints are retired even for authenticated clients; anonymous remains unauthorized',async()=>{
-  requestRadius=null;
-  for(const route of ['smartdrive/destinations','smartdrive/directions']){
-    assert.equal((await call(route,'POST',{},'')).status,401);
-    const response=await call(route,'POST',{query:'Timișoara',start:{latitude:45.7,longitude:21.2},end:{latitude:45.71,longitude:21.21}});
-    assert.equal(response.status,410);
-    assert.equal(response.headers.get('cache-control'),'private, no-store');
-  }
-  assert.equal(requestRadius,null,'Retired web routes must never contact the routing provider');
+test('browser navigation endpoints require authentication, validate input and return actual provider results',async()=>{
+ requestRadius=null;
+ for(const route of ['smartdrive/destinations','smartdrive/directions'])assert.equal((await call(route,'POST',{},'')).status,401);
+ assert.equal((await call('smartdrive/destinations','POST',{query:'Calea Șagului 100',latitude:45.72,longitude:21.2})).status,200);
+ const response=await call('smartdrive/directions','POST',{start:{latitude:45.7,longitude:21.2},end:{latitude:45.71,longitude:21.21},accuracy:300});
+ assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'private, no-store');
+ assert.equal((await response.json())[0].distance,1200);assert.equal(requestRadius,'300;250');
+ assert.equal((await call('smartdrive/directions','POST',{start:{latitude:200,longitude:21},end:{latitude:45,longitude:21}})).status,400);
 });
 
 test('02 Password recovery token is required and can reset a password', async () => {
@@ -1113,6 +1112,17 @@ test('SmartDrive: reminder preferences validate frequency and persist', async ()
   r = await call('smartdrive/preferences');
   assert.deepEqual({ frequencyDays: (await r.json()).frequencyDays }, { frequencyDays: 7 });
 });
+
+ test('SmartDrive paused session saves active time and synchronizes mileage exactly once',async()=>{
+ const before=(await db().select().from(s.vehicles).where(eq(s.vehicles.id,car.id)))[0].odometer;
+ const route='smartdrive/vehicles/'+car.id+'/trips';
+ const payload={id:crypto.randomUUID(),syncMileage:true,expectedOdometer:before,distanceMeters:1500,durationSeconds:300,pausedSeconds:300,startedAt:'2020-03-15T10:00:00.000Z',endedAt:'2020-03-15T10:10:00.000Z'};
+ const first=await call(route,'POST',payload);assert.equal(first.status,201);const trip=await first.json();assert.equal(trip.durationSeconds,300);
+ const updated=(await db().select().from(s.vehicles).where(eq(s.vehicles.id,car.id)))[0].odometer;
+ assert.ok(updated>before);const again=await call(route,'POST',payload);assert.equal(again.status,201);assert.equal((await again.json()).id,trip.id);
+ assert.equal((await db().select().from(s.vehicles).where(eq(s.vehicles.id,car.id)))[0].odometer,updated);
+ assert.equal((await call(route,'POST',{...payload,id:crypto.randomUUID(),expectedOdometer:updated,pausedSeconds:900})).status,400);
+ });
 
 test('SmartDrive: expired authenticated session cannot read or write readings', async () => {
   const sessions = await db().select().from(s.session).where(eq(s.session.userId, uid));

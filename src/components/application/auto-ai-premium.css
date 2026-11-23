@@ -139,3 +139,40 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-memb
 
 .rg-ai-page .ac-ai-menu-new{display:none}
 @media(max-width:430px){.rg-ai-page .ac-ai-header-actions>.ac-ai-new-chat{display:none}.rg-ai-page .ac-ai-menu-new{display:flex}}
+
+/* AutoCare Premium 5 reference composition. This is scoped to the AI workspace. */
+.rg-ai-page .ac-ai-back{display:grid;place-items:center;flex:none;width:44px;height:44px;min-height:44px;border:0;border-radius:12px;background:transparent;color:var(--color-text);padding:10px}
+.rg-ai-page .ac-ai-brand{flex:1}.rg-ai-page .ac-ai-heading{padding:12px 18px;gap:10px;background:#fff;border-bottom:1px solid #e3ebf0}
+.rg-ai-page .ac-ai-brand-icon{width:40px;height:44px}.rg-ai-page .ac-ai-brand-icon svg{width:32px;height:32px}
+.rg-ai-page .ac-ai-header-actions>button,.rg-ai-page .ac-ai-header-actions .ac-action-trigger{width:44px;min-width:44px;height:44px;min-height:44px;background:#f1f5f8;border:1px solid #e3ebf0;border-radius:12px;color:#163c4a;padding:10px}
+.rg-ai-page .ac-ai-header-actions>.ac-ai-new-chat{width:auto;padding:10px 14px;display:flex}.rg-ai-page .ac-ai-new-chat span{display:inline}
+.rg-ai-page .ac-ai-welcome{position:relative;isolation:isolate;overflow:hidden;min-height:100%;padding:30px;gap:13px;justify-content:center}
+.rg-ai-page .ac-ai-welcome-art{position:absolute;right:0;top:0;bottom:0;width:45%;display:flex;align-items:center;justify-content:center;z-index:-1;clip-path:polygon(26% 0,100% 0,100% 100%,0 100%);background:radial-gradient(ellipse at 75% 15%,#357b8c,#083b4a 76%);color:#98dce5}
+.rg-ai-page .ac-ai-welcome-art svg{width:112%;max-width:none;height:auto;flex:none;margin-top:30px}
+.rg-ai-page .ac-ai-greeting{max-width:50%;width:fit-content;border-radius:15px;background:linear-gradient(145deg,#edf4f8,#e1ebf2);padding:15px 18px;font-size:14px;line-height:1.6;box-sizing:border-box}
+.rg-ai-page .ac-ai-context{font-size:11px;color:#526777}
+.rg-ai-page .ac-ai-suggestions{display:grid;grid-template-columns:1fr;width:50%;max-width:420px;gap:8px}
+.rg-ai-page .ac-ai-suggestions button{min-height:44px;padding:8px 12px;border-radius:22px;background:linear-gradient(160deg,#fff,#f1f5f8);box-shadow:0 2px 6px #083b4a0d}
+.rg-ai-page .ac-ai-suggestion-icon{width:24px;height:24px}.rg-ai-page .ac-ai-suggestions small{display:none}.rg-ai-page .ac-ai-suggestions strong{font-size:13px;font-weight:500}
+.rg-ai-page .ac-ai-user-row>div{padding:12px 16px;border:1px solid #075365;border-radius:16px 16px 5px 16px;background:linear-gradient(155deg,#076879,#083b4a);box-sizing:border-box}
+.rg-ai-page .ac-ai-question{padding:0;border:0;border-radius:0;background:transparent;color:#fff}.rg-ai-page .ac-ai-user-row small{color:#dceef1;margin-top:5px}
+.rg-ai-page .ac-ai-composer{position:relative;gap:9px;margin:0 18px 8px;border:0;background:transparent;box-shadow:none;padding:0;align-items:flex-end}
+.rg-ai-page .ac-ai-input-shell{display:flex;align-items:flex-end;flex:1;min-width:0;padding:5px 7px;background:#fff;border:1px solid #cfdde6;border-radius:24px;box-shadow:0 3px 8px #083b4a12}
+.rg-ai-page .ac-ai-input-shell:focus-within{outline:2px solid #0d788a;outline-offset:1px}.rg-ai-page .ac-ai-composer:focus-within{box-shadow:none}
+.rg-ai-page .ac-ai-composer textarea{padding:9px 5px;min-height:34px;border:0;outline:0;background:transparent;font-size:16px}
+.rg-ai-page .ac-ai-composer button{width:44px;min-width:44px;height:44px;min-height:44px;border-radius:50%}
+.rg-ai-page .ac-ai-composer .ac-ai-attach{width:36px;min-width:36px;height:36px;min-height:36px;padding:8px;order:2;color:#075365}.rg-ai-page .ac-ai-composer .ac-ai-send{margin-bottom:2px}
+.rg-ai-page .ac-ai-response-actions{gap:5px;flex-wrap:wrap}.rg-ai-page .ac-ai-response-actions button{width:36px;min-height:36px}
+@media(max-width:900px){
+ .rg-ai-page .ac-ai-heading{min-height:64px;padding:8px 10px;gap:6px;flex-wrap:wrap}.rg-ai-page .ac-ai-brand h3{font-size:18px}.rg-ai-page .ac-ai-online{font-size:11px}.rg-ai-page .ac-ai-brand{gap:6px}.rg-ai-page .ac-ai-brand-icon{width:32px}
+ .rg-ai-page .ac-ai-header-actions{gap:5px}.rg-ai-page .ac-ai-header-actions>.ac-ai-new-chat{width:44px;display:flex;padding:10px}.rg-ai-page .ac-ai-header-actions>.ac-ai-new-chat span{display:none}.rg-ai-page .ac-ai-menu-new{display:none}
+ .rg-ai-page .ac-ai-welcome{padding:16px 14px;justify-content:flex-start;gap:12px}.rg-ai-page .ac-ai-welcome-art{display:none}.rg-ai-page .ac-ai-greeting{max-width:90%;font-size:14px;padding:13px 14px;background:linear-gradient(145deg,#f4f6f8,#eaf0f4);border-radius:13px}
+ .rg-ai-page .ac-ai-suggestions{width:100%;max-width:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.rg-ai-page .ac-ai-suggestions button{padding:8px;gap:6px;min-height:44px;border-radius:12px}.rg-ai-page .ac-ai-suggestions strong{font-size:11px}.rg-ai-page .ac-ai-suggestions button>svg{display:none}.rg-ai-page .ac-ai-suggestions button:last-child{grid-column:1/-1}
+ .rg-ai-page .ac-ai-composer{margin:0 10px 7px;padding:0;gap:7px}.rg-ai-page .ac-ai-composer textarea{font-size:16px}.rg-ai-page .ac-ai-composer .ac-ai-send{width:44px;min-width:44px;height:44px;min-height:44px}
+ .rg-ai-page .ac-ai-user-row>div{max-width:86%;padding:11px 13px}.rg-ai-page .ac-ai-turns{padding:16px 12px}.rg-ai-page .ac-ai-user-row{margin-bottom:16px}.rg-ai-page .ac-ai-turns{gap:20px}
+ .rg-ai-page .ac-ai-disclosure{margin:0 12px 5px;font-size:10px}.rg-ai-page .ac-ai-tools-toggle{min-height:36px}
+}
+@media(max-width:350px){.rg-ai-page .ac-ai-header-actions{width:100%;justify-content:flex-end}.rg-ai-page .ac-ai-heading{row-gap:3px}.rg-ai-page .ac-ai-greeting{max-width:100%}}
+
+.rg-ai-page .ac-ai-chat>.ac-ai-vehicle-header{padding:8px 18px;border-bottom:1px solid #e3ebf0;background:#f6f9fb;flex:none}.rg-ai-page .ac-ai-chat>.ac-ai-vehicle-header .ac-ai-vehicle{max-width:520px;margin:0}
+@media(max-width:900px){.rg-ai-page .ac-ai-chat>.ac-ai-vehicle-header{padding:5px 12px}.rg-ai-page .ac-ai-chat>.ac-ai-vehicle-header .ac-filter-select-trigger{min-height:36px}}

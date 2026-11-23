@@ -13,3 +13,12 @@ test('live native position updates independently of filtered route and validates
   assert.equal(snapshot?.distance,trip.distance);
   assert.equal(readNativeTrip({...trip,lastPosition:{...lastPosition,latitude:91}},'alice'),null);
 });
+
+test('native telemetry retains real speed and bearing and durable paused timing',()=>{
+ const lastPosition={latitude:45.001,longitude:21.001,accuracy:8,timestamp:3000,speed:20,heading:355};
+ const result=readNativeTrip({...trip,lastPosition,paused:true,pausedAt:2500,pausedMillis:100,maxSpeedKmh:91},'alice');
+ assert.equal(result?.lastPosition?.speed,20);assert.equal(result?.lastPosition?.heading,355);
+ assert.equal(result?.paused,true);assert.equal(result?.pausedMillis,100);assert.equal(result?.maxSpeedKmh,91);
+ assert.equal(readNativeTrip({...trip,pausedMillis:-1},'alice'),null);
+ assert.equal(readNativeTrip({...trip,lastPosition:{...lastPosition,speed:56}},'alice'),null);
+});

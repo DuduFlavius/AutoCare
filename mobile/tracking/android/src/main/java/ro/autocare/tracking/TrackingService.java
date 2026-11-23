@@ -13,10 +13,10 @@ public class TrackingService extends Service implements LocationListener {
     private void refreshStatus(){
         if(notification==null)return;
         org.json.JSONObject state=TrackingStore.read(this);
-        String phase=state.has("disconnectedAt")?"reconnecting":state.optBoolean("awaitingMotion")?"waiting":"driving";
+        String phase=state.optBoolean("paused")?"paused":state.has("disconnectedAt")?"reconnecting":state.optBoolean("awaitingMotion")?"waiting":"driving";
         if(phase.equals(notificationPhase))return;notificationPhase=phase;
-        notification.setContentTitle(phase.equals("waiting")?"AutoCare · Mașină conectată":phase.equals("reconnecting")?"AutoCare · Reconectare":"AutoCare · GPS activ");
-        notification.setContentText(phase.equals("waiting")?"Așteaptă deplasarea. Nu se adaugă kilometri.":phase.equals("reconnecting")?"Kilometrii sunt opriți până la reconectare.":"Înregistrare traseu · Oprește GPS la final");
+        notification.setContentTitle(phase.equals("paused")?"AutoCare · GPS în pauză":phase.equals("waiting")?"AutoCare · Mașină conectată":phase.equals("reconnecting")?"AutoCare · Reconectare":"AutoCare · GPS activ");
+        notification.setContentText(phase.equals("paused")?"Timpul activ și kilometrii sunt opriți. Reia din aplicație.":phase.equals("waiting")?"Așteaptă deplasarea. Nu se adaugă kilometri.":phase.equals("reconnecting")?"Kilometrii sunt opriți până la reconectare.":"Înregistrare traseu · Oprește GPS la final");
         getSystemService(NotificationManager.class).notify(317,notification.build());
     }
     private long lastBluetoothCheck=0;

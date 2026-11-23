@@ -1,0 +1,24 @@
+/** Render real components without a browser or a real account; validate controls and safe markdown. */
+import {mkdtemp,writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {build} from 'esbuild';
+import {execFileSync} from 'node:child_process';
+const root=process.cwd(),out=await mkdtemp(path.join(tmpdir(),'autocare-chat-markup-'));
+const entry=`import React from 'react';import {renderToStaticMarkup} from 'react-dom/server';import assert from 'node:assert/strict';
+import {AutoAiWorkspace} from '${root}/src/components/application/auto-ai-workspace';
+import {RacingSupport} from '${root}/src/components/application/racing-support';
+import {AiMarkdown} from '${root}/src/components/application/ai-markdown';
+const ai=renderToStaticMarkup(<AutoAiWorkspace displayName="Vizitator Test" vehicles={[{id:'visual-only',brand:'Vehicul',model:'Test',plate:'FICTIV',odometer:1000}]} vehicleId="visual-only" onVehicle={()=>{}} premium available preview onSaved={async()=>{}} onExit={()=>{}}/>);
+for(const label of ['AutoCare','Asistentul tău auto','Istoric conversații','Conversație nouă','Întrebarea ta','Trimite mesajul','Scanează un document sau o imagine'])assert.ok(ai.includes(label),label);
+assert.ok(ai.includes('Salut, Vizitator!'));assert.ok(ai.includes('ac-ai-welcome-art'));assert.ok(ai.includes('ac-ai-input-shell'));
+const support=renderToStaticMarkup(<RacingSupport role="user" preview onFeedback={()=>{}}/>);
+for(const label of ['Conversații','Trimite solicitare','Întrebări frecvente','Conversație','Cererile mele','Mesaj către suport','Atașează document','Trimite mesajul'])assert.ok(support.includes(label),label);
+assert.ok(support.includes('support-input-shell'));assert.ok(support.includes('data-history="true"'));
+const staff=renderToStaticMarkup(<RacingSupport role="admin" preview onFeedback={()=>{}}/>);assert.ok(staff.includes('support-team'));assert.ok(!staff.includes('data-history="true"'));
+const restricted=renderToStaticMarkup(<AutoAiWorkspace vehicles={[]} vehicleId="" onVehicle={()=>{}} premium={false} available preview onSaved={async()=>{}}/>);assert.ok(restricted.includes('Activează Premium'));assert.ok(!restricted.includes('ac-ai-composer'));
+const md=renderToStaticMarkup(<AiMarkdown text={'## Detalii\\n\\n- Element unu\\n- Element doi\\n\\n| Lucru | Cost |\\n| --- | --- |\\n| Revizie | 10 |\\n\\n<script>alert(1)</script>'}/>);assert.ok(md.includes('<li>'));assert.ok(md.includes('<table'));assert.ok(!md.includes('<script>'));
+console.log('AI and Support: rendered controls, responsive labels, staff inbox, Premium gate and markdown passed. No browser or live-account claim.');`;
+await writeFile(out+'/entry.tsx',entry);
+await build({entryPoints:[out+'/entry.tsx'],outfile:out+'/check.cjs',bundle:true,platform:'node',format:'cjs',jsx:'automatic',absWorkingDir:root,tsconfig:root+'/tsconfig.json',nodePaths:[root+'/node_modules'],loader:{'.css':'empty'},logLevel:'error'});
+process.stdout.write(execFileSync(process.execPath,[out+'/check.cjs'],{encoding:'utf8'}));

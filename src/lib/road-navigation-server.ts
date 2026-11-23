@@ -22,3 +22,11 @@ export async function loadDrivingRoutes(origin: Coordinate, destination: Coordin
     throw new AppError(503, 'Planificarea traseelor este indisponibilă momentan.');
   }
 }
+
+export async function loadRoadDestinations(query:string,latitude:number,longitude:number){
+ const {parseRoadDestinations}=await import('./road-provider-data');
+ const url=new URL('https://photon.komoot.io/api/');
+ url.search=new URLSearchParams({q:query.trim(),limit:'12',lat:latitude.toFixed(2),lon:longitude.toFixed(2)}).toString();
+ try{const response=await fetch(url,{cache:'no-store',redirect:'error',signal:AbortSignal.timeout(12000)});if(!response.ok)throw Error('Search provider unavailable');return parseRoadDestinations(await response.json(),latitude,longitude);}
+ catch{throw new AppError(503,'Căutarea destinațiilor este indisponibilă momentan.');}
+}

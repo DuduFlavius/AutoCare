@@ -42,7 +42,8 @@ export async function syncAutomaticTrips(
             trips: rows.map((t) => ({
               id: t.id,
               distanceMeters: Math.round(t.distance),
-              durationSeconds: Math.max(1, Math.round((t.endedAt! - t.startedAt) / 1000)),
+              durationSeconds: Math.max(1, Math.round((t.endedAt! - t.startedAt-(t.pausedMillis??0)) / 1000)),
+              pausedSeconds:Math.floor((t.pausedMillis??0)/1000),
               startedAt: new Date(t.startedAt).toISOString(),
               endedAt: new Date(t.endedAt!).toISOString(),
             })),

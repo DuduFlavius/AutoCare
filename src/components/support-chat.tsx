@@ -7,7 +7,7 @@ import { SupportCustomerPanel, SupportStatistics } from './support-operations';
 import './support-center.css';
 import {translateApplicationCopy} from '@/lib/application-language';
 import {useApplicationLocale} from './application-locale';
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, Fragment } from 'react';
 import {
   Star,
   CarFront,
@@ -158,9 +158,9 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   useLayoutEffect(()=>{
     const element=workspace.current;if(!element)return;let frame=0,lastHeight=-1;
     const update=()=>{frame=0;const viewport=window.visualViewport,bottom=(viewport?.height??window.innerHeight)+(viewport?.offsetTop??0);element.dataset.keyboardOpen=String(!!viewport&&window.innerHeight-viewport.height>140);const dock=document.querySelector<HTMLElement>('.rg-mobile-dock, .autocare-mobile-dock');const rect=dock?.getBoundingClientRect();const reserved=rect&&rect.height&&rect.top<bottom&&getComputedStyle(dock!).position==='fixed'?bottom-rect.top:0;const height=Math.max(0,bottom-Math.max(0,element.getBoundingClientRect().top)-reserved-12);if(Math.abs(lastHeight-height)<1)return;lastHeight=height;element.style.setProperty('--support-height',height+'px');element.toggleAttribute('data-compact',height<440);};
-    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};update();window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);window.visualViewport?.addEventListener('scroll',schedule);
-    return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('scroll',schedule);};
-  },[view,staff]);
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};const observer=new ResizeObserver(schedule);observer.observe(element);const wrapper=element.closest('.ac-support-conversation');if(wrapper)observer.observe(wrapper);update();window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);window.visualViewport?.addEventListener('scroll',schedule);
+    return()=>{observer.disconnect();cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('scroll',schedule);};
+  },[view,staff,historyView]);
   useLayoutEffect(()=>{const input=composerInput.current;if(!input)return;input.style.height='auto';input.style.height=Math.min(110,input.scrollHeight)+'px';},[text,selected]);
   statusRef.current = status;
   queryRef.current = serverQuery;
@@ -572,8 +572,8 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
           </div>
         </aside>
       )}
-      <div className="support-chat-panel" data-history={historyView || undefined}>
-        {!staff && historyView && <section className="support-request-list" aria-label={t('Cererile mele','My requests')}><h3>{t('Cererile mele','My requests')}</h3>{loading?<p role="status">{t('Se încarcă…','Loading…')}</p>:threads.length?threads.map(thread=><button type="button" key={thread.id} onClick={()=>{void openThread(thread,false);onOpenConversation?.();}}><span className="support-request-icon"><CarFront size={22}/></span><span><strong data-user-content>{thread.title}</strong><small>{new Date(thread.updatedAt).toLocaleDateString(locale)} · {thread.status==='completed'?t('Finalizată','Completed'):t('Deschisă','Open')}</small>{thread.lastMessage&&<span data-user-content>{thread.lastMessage.body}</span>}</span></button>):<p>{t('Nu ai încă solicitări. Scrie-ne în fila Conversație.','No requests yet. Send us a message in Conversation.')}</p>}</section>}
+      <div className="support-chat-panel" data-history={!staff&&historyView || undefined}>
+        {!staff && historyView && <section className="support-request-list" aria-label={t('Cererile mele','My requests')}><h3>{t('Conversațiile tale','Your conversations')}</h3>{loading?<p role="status">{t('Se încarcă…','Loading…')}</p>:threads.length?threads.map(thread=><button type="button" key={thread.id} onClick={()=>{void openThread(thread,false);onOpenConversation?.();}}><span className="support-request-icon"><CarFront size={22}/></span><span className="support-request-content"><strong data-user-content>{thread.title}</strong>{thread.lastMessage&&<span className="support-request-excerpt" data-user-content>{thread.lastMessage.body}</span>}<small><time dateTime={thread.updatedAt}>{new Date(thread.updatedAt).toLocaleString(locale,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</time><span className="support-request-state" data-status={thread.status}>{thread.status==='completed'?t('Finalizată','Completed'):thread.status==='trashed'?t('În coș','In trash'):t('Deschisă','Open')}</span></small></span>{!!thread.unreadCount&&thread.unreadCount>0&&<span className="support-request-unread" aria-label={t(thread.unreadCount+' mesaje necitite',thread.unreadCount+' unread messages')}>{thread.unreadCount}</span>}</button>):<p>{t('Nu ai încă solicitări. Scrie-ne în fila Conversație.','No requests yet. Send us a message in Conversation.')}</p>}</section>}
 
         {!staff && threads.length > 1 && (
           <label className="support-own-history">Istoric conversații
@@ -734,8 +734,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             </button>
           )}
           {detail?.messages.length ? (
-            detail.messages.map((message) =>
-              message.authorRole === 'system' ? (
+            detail.messages.map((message,index) => <Fragment key={message.id}>{(index===0||new Date(detail.messages[index-1].createdAt).toLocaleDateString(locale)!==new Date(message.createdAt).toLocaleDateString(locale))&&<div className="support-day-divider"><time dateTime={message.createdAt}>{new Date(message.createdAt).toLocaleDateString(locale)===new Date().toLocaleDateString(locale)?t('Azi','Today'):new Date(message.createdAt).toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric'})}</time></div>}{message.authorRole === 'system' ? (
                 <div className="support-system-message" key={message.id}>
                   <ShieldCheck size={14} />
                   <span data-user-content>{message.body}</span>
@@ -786,7 +785,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                     })}
                   </time>
                 </article>
-              ),
+              )}</Fragment>,
             )
           ) : (
             <div className={"support-empty" + (!staff ? " support-welcome-bubble" : "")}>
@@ -827,21 +826,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                 Solicitarea anterioară a fost finalizată. Un mesaj nou deschide o conversație nouă.
               </p>
             )}
-            {selected && detail?.thread.status === 'open' && (
-              <label className="support-upload">
-                <span className="support-upload-trigger" title={t('Atașează PDF sau imagine · max. 2 MB','Attach PDF or image · max. 2 MB')}><Paperclip size={18} /><span>{t('Atașează','Attach')}</span></span>
-                <input
-                  ref={attachmentInput} type="file"
-                  accept="application/pdf,image/png,image/jpeg"
-                  disabled={busy || preview}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) void upload(file);
-                    e.target.value = '';
-                  }}
-                />
-              </label>
-            )}
             {staff && <details className="support-quick-reply-menu"><summary>{t('Răspuns rapid','Quick reply')}</summary><label className="support-quick-reply"><span className="sr-only">Răspuns rapid</span>
               <FilterSelect value="" onChange={event => { if (event.target.value) setText(previous => previous ? previous + '\n' + event.target.value : event.target.value); }}>
                 <option value="">Alege un răspuns</option>
@@ -851,17 +835,30 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               </FilterSelect>
             </label></details>}
             <div>
-              <textarea ref={composerInput}
+              <div className="support-input-shell"><textarea ref={composerInput}
                 disabled={busy || preview}
                 aria-label="Mesaj către suport"
-                placeholder={staff ? t('Scrie un răspuns clientului…','Write a reply…') : t('Scrie mesajul tău…','Write your message…')}
+                placeholder={staff ? t('Scrie un răspuns clientului…','Write a reply…') : t('Scrie un mesaj…','Write a message…')}
                 value={text}
                 onChange={e => updateText(e.target.value)}
                 onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }}
                 maxLength={4000}
-                rows={2}
+                rows={1}
                 required
-              />
+              />            {<label className="support-upload" title={!selected?t('Trimite întâi un mesaj pentru a atașa documentul.','Send a message first to attach a document.'):undefined}>
+                <span className="support-upload-trigger" title={t('Atașează PDF sau imagine · max. 2 MB','Attach PDF or image · max. 2 MB')}><Paperclip size={18} /><span>{t('Atașează','Attach')}</span></span>
+                <input
+                  ref={attachmentInput} type="file" aria-label={t('Atașează document','Attach document')}
+                  accept="application/pdf,image/png,image/jpeg"
+                  disabled={busy || preview || !selected || detail?.thread.status!=='open'}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void upload(file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>}
+</div>
               <button
                 className="primary"
                 aria-label="Trimite mesajul"

@@ -1,3 +1,5 @@
+import {validTripTiming} from '@/lib/drive-session';
+import {loadDrivingRoutes,loadRoadDestinations,roadCoordinate} from '@/lib/road-navigation-server';
 import * as feedback from '@/lib/feedback';
 import {documentDownloadName,documentDisposition} from '@/lib/document-presentation';
 import {accountPreferences,accountPreferencesKey,accountPreferencesSchema} from '@/lib/account-preferences';
@@ -235,7 +237,16 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         return json(await scanAutoDocument(uid, uuid.parse(data.get('vehicleId')), Buffer.from(await file.arrayBuffer())));
       }
     }
-    if (['smartdrive/destinations','smartdrive/directions'].includes(route))throw new svc.AppError(410,'Navigația SmartDrive este disponibilă exclusiv în aplicația Android actualizată.');
+    if(route==='smartdrive/destinations'&&method==='POST'){
+      await rate(uid,'drive-search',12);
+      const input=roadCoordinate.extend({query:z.string().trim().min(3).max(160)}).parse(await body(req));
+      return json(await loadRoadDestinations(input.query,input.latitude,input.longitude));
+    }
+    if(route==='smartdrive/directions'&&method==='POST'){
+      await rate(uid,'drive-route',8);
+      const input=z.object({start:roadCoordinate,end:roadCoordinate,accuracy:z.number().min(0).max(500).default(0)}).parse(await body(req));
+      return json(await loadDrivingRoutes(input.start,input.end,input.accuracy));
+    }
     if (route === 'smartdrive/auto-points' && method === 'POST') {
       await rate(uid, 'auto-points', 10);
       const { latitude, longitude, category } = z.object({
@@ -465,7 +476,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             await tx.update(s.vehicles).set({odometer}).where(and(eq(s.vehicles.id,vehicleId),eq(s.vehicles.userId,uid)));
             await tx.insert(s.mileageReadings).values({id:crypto.randomUUID(),userId:uid,vehicleId,odometer,source:'gps'});
           }
-          await tx.insert(s.gpsTrips).values(fresh.map(t=>({...t,userId:uid,vehicleId,startedAt:new Date(t.startedAt),endedAt:new Date(t.endedAt),source:input.syncMileage?'browser-gps-synced':'browser-gps'})));
+          await tx.insert(s.gpsTrips).values(fresh.map(t=>({id:t.id,distanceMeters:t.distanceMeters,durationSeconds:t.durationSeconds,userId:uid,vehicleId,startedAt:new Date(t.startedAt),endedAt:new Date(t.endedAt),source:input.syncMileage?'browser-gps-synced':'browser-gps'})));
           return {ids,odometer};
         });
         return json(result,201);
@@ -497,11 +508,12 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             expectedOdometer: z.number().int().min(0).max(99999999).optional(),
             distanceMeters: z.number().int().min(0).max(2000000),
             durationSeconds: z.number().int().min(1).max(604800),
+            pausedSeconds:z.number().int().min(0).max(604800).default(0),
             startedAt: z.string().datetime(),
             endedAt: z.string().datetime(),
           }).parse(await body(req));
           const startedAt = new Date(value.startedAt), endedAt = new Date(value.endedAt);
-          if (endedAt < startedAt || Math.abs((endedAt.getTime() - startedAt.getTime()) / 1000 - value.durationSeconds) > 60 || value.distanceMeters / value.durationSeconds > 65)
+          if (!validTripTiming(startedAt.getTime(),endedAt.getTime(),value.durationSeconds,value.pausedSeconds) || value.distanceMeters / value.durationSeconds > 65)
             throw new svc.AppError(400, 'Durata sau distanța călătoriei este invalidă.');
           if(value.syncMileage && !value.id)throw new svc.AppError(400,'Identificatorul călătoriei este necesar pentru sincronizare.');
           if (endedAt.getTime() > Date.now()+60000) throw new svc.AppError(400, 'Data călătoriei nu poate fi în viitor.');

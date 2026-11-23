@@ -14,6 +14,10 @@ export type NativeTrip = {
   lastFixAt?: number;
   distance: number;
   active: boolean;
+  paused?: boolean;
+  pausedAt?: number;
+  pausedMillis?: number;
+  maxSpeedKmh?: number;
   automatic?: boolean;
   awaitingMotion?: boolean;
   disconnectedAt?: number;
@@ -38,6 +42,8 @@ interface TrackingPlugin {
   }): Promise<unknown>;
   snapshot(input: { ownerId: string }): Promise<unknown>;
   stop(input: { ownerId: string }): Promise<unknown>;
+  pause(input: { ownerId: string }): Promise<unknown>;
+  resume(input: { ownerId: string }): Promise<unknown>;
   clear(input: { ownerId: string }): Promise<void>;
   automationStatus(input: { ownerId: string }): Promise<unknown>;
   pairedDevices(input: {
@@ -69,6 +75,8 @@ const point = z.object({
   accuracy: z.number().nonnegative(),
   timestamp: z.number().positive(),
   breakBefore: z.boolean().optional(),
+  speed:z.number().min(0).max(55).nullable().optional(),
+  heading:z.number().min(0).lt(360).nullable().optional(),
 });
 const trip = z.object({
   id: z.string().uuid(),
@@ -81,6 +89,10 @@ const trip = z.object({
   lastFixAt: z.number().nonnegative().optional(),
   distance: z.number().nonnegative(),
   active: z.boolean(),
+  paused:z.boolean().optional(),
+  pausedAt:z.number().positive().optional(),
+  pausedMillis:z.number().nonnegative().optional(),
+  maxSpeedKmh:z.number().min(0).max(198).optional(),
   automatic: z.boolean().optional(),
   awaitingMotion: z.boolean().optional(),
   disconnectedAt: z.number().positive().optional(),
@@ -107,6 +119,8 @@ export const nativeTracking = {
     if (!value) throw Error('Nu s-a putut porni urmărirea GPS.');
     return value;
   },
+  async pause(ownerId:string){const value=readNativeTrip(await plugin.pause({ownerId}),ownerId);if(!value)throw Error('Actualizează aplicația Android pentru pauza GPS.');return value;},
+  async resume(ownerId:string){const value=readNativeTrip(await plugin.resume({ownerId}),ownerId);if(!value)throw Error('Nu s-a putut relua sesiunea GPS.');return value;},
   async stop(ownerId: string) {
     return readNativeTrip(await plugin.stop({ ownerId }), ownerId);
   },

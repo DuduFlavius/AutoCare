@@ -31,10 +31,15 @@ final class TrackingStore {
             if(!state.optBoolean("bluetoothConnected")||state.has("disconnectedAt"))return;
             if(android.os.Build.VERSION.SDK_INT>=31&&context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)!=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
         }
-        if(!state.optBoolean("active") || !location.hasAccuracy() || location.getAccuracy()<0 || location.getTime()>now+5000 || now-location.getTime()>15000)return;
+        if(!state.optBoolean("active") || state.optBoolean("paused") || !location.hasAccuracy() || location.getAccuracy()<0 || location.getTime()>now+5000 || now-location.getTime()>15000)return;
         if(location.getAccuracy()<=50)context.getSharedPreferences("autocare-gps",Context.MODE_PRIVATE).edit().putLong("fix-at",now).apply();
         // Live location is independent from the distance/movement filter.
         JSONObject live=new JSONObject().put("latitude",location.getLatitude()).put("longitude",location.getLongitude()).put("accuracy",location.getAccuracy()).put("timestamp",location.getTime());
+        if(location.hasSpeed()&&Float.isFinite(location.getSpeed())&&location.getSpeed()>=0&&location.getSpeed()<=55){
+            live.put("speed",location.getSpeed());
+            if(location.getAccuracy()<=50)state.put("maxSpeedKmh",Math.max(state.optDouble("maxSpeedKmh",0),location.getSpeed()*3.6));
+        }
+        if(location.hasBearing()&&Float.isFinite(location.getBearing())&&location.getBearing()>=0&&location.getBearing()<360)live.put("heading",location.getBearing());
         JSONObject old=state.optJSONObject("lastPosition");
         if(old!=null && location.getTime()<=old.optLong("timestamp"))return;
         state.put("lastPosition",live).put("updatedAt",now);
@@ -56,6 +61,9 @@ final class TrackingStore {
             }
         }
         JSONObject point=new JSONObject().put("latitude",location.getLatitude()).put("longitude",location.getLongitude()).put("accuracy",location.getAccuracy()).put("timestamp",location.getTime()).put("breakBefore",gap);
+        if(live.has("speed"))point.put("speed",live.getDouble("speed"));
+        if(live.has("heading"))point.put("heading",live.getDouble("heading"));
+        if(previous!=null&&!gap){double seconds=(location.getTime()-previous.getLong("timestamp"))/1000.0;if(seconds>0&&meters/seconds<=55)state.put("maxSpeedKmh",Math.max(state.optDouble("maxSpeedKmh",0),meters/seconds*3.6));}
         if(points.length()>=1500){JSONArray recent=new JSONArray();for(int i=1;i<points.length();i++)recent.put(points.get(i));points=recent;}
         state.remove("forceBreak");
         points.put(point);
@@ -69,9 +77,17 @@ final class TrackingStore {
         state.put("points",points).put("updatedAt",now);
         write(context,state);
     }
+    static synchronized JSONObject setPaused(Context context,boolean paused) throws JSONException {
+        JSONObject value=read(context);if(!value.optBoolean("active")||value.optBoolean("automatic"))throw new IllegalStateException("Only a manual active trip can be paused");
+        long now=System.currentTimeMillis();
+        if(paused&&!value.optBoolean("paused"))value.put("paused",true).put("pausedAt",now).put("forceBreak",true);
+        if(!paused&&value.optBoolean("paused")){value.put("pausedMillis",value.optLong("pausedMillis")+Math.max(0,now-value.optLong("pausedAt",now))).put("paused",false).put("forceBreak",true);value.remove("pausedAt");}
+        value.put("updatedAt",now);write(context,value);return value;
+    }
     static synchronized JSONObject stop(Context context) throws JSONException {
         JSONObject value=read(context);
         if(value.has("id")){
+            if(value.optBoolean("paused")){value.put("pausedMillis",value.optLong("pausedMillis")+Math.max(0,System.currentTimeMillis()-value.optLong("pausedAt",System.currentTimeMillis()))).put("paused",false);value.remove("pausedAt");}
             if(value.optBoolean("automatic")&&value.has("disconnectedAt")){value.put("distance",value.optDouble("disconnectDistance")).put("points",value.optJSONArray("disconnectPoints")).put("endedAt",value.optLong("disconnectedAt"));}
             else if(value.optBoolean("active"))value.put("endedAt",System.currentTimeMillis());
             value.remove("stopAt");value.remove("disconnectedAt");value.remove("disconnectDistance");value.remove("disconnectPoints");
