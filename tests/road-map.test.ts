@@ -54,8 +54,8 @@ test('the street palette gives roads, water and labels distinct dark-map contras
   {id:'road_label',type:'symbol',source:'streets',layout:{'text-field':'{name}'}},
  ]});
  assert.equal(style.layers[0].paint?.['background-color' as keyof typeof style.layers[0]['paint']], '#132329');
- assert.notDeepEqual(style.layers[2].paint,style.layers[3].paint);
- assert.ok(JSON.stringify(style.layers[4].paint).includes('#d8e6e8'));
+ assert.notDeepEqual(style.layers.find(layer=>layer.id==='highway_primary')?.paint,style.layers.find(layer=>layer.id==='highway_minor')?.paint);
+ assert.ok(JSON.stringify(style.layers.find(layer=>layer.id==='road_label')?.paint).includes('#d8e6e8'));
 });
 
 test('matched GPS fixes use the real mapped curve, not the diagonal chord',()=>{

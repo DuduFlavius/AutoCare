@@ -8,7 +8,7 @@ const before='http://127.0.0.1:4171', after='http://127.0.0.1:4172';
 try {
  const page=await browser.newPage({viewport:{width:390,height:844}});
  await page.goto(before+'/home.html');
- await page.getByRole('heading',{name:'SmartDrive GPS'}).waitFor();
+ await page.getByText('QA 62 SD',{exact:false}).first().waitFor();
  await page.screenshot({path:destination+'/01-dashboard-before.png',fullPage:true});
  for(const width of [320,390,768,1024,1440]){
   await page.setViewportSize({width,height:844});
