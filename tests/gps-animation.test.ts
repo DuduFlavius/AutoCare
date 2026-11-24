@@ -10,9 +10,10 @@ test('animation ends at measured fixes without extrapolating or changing recorde
  assert.deepEqual(interpolateFix(first,next,2),next);
  assert.equal(interpolateFix(first,next,-1).latitude,first.latitude);
 });
-test('lost-signal gaps resume with a short correction between measured positions; impossible jumps are rejected',()=>{
- assert.equal(measuredTransition(first,{...first,timestamp:17000}),600);
+test('reacquisition resumes at a confirmed fix without animating over the gap',()=>{
+ assert.equal(measuredTransition(first,{...first,timestamp:17000}),0);
  assert.equal(measuredTransition(first,{...first,latitude:46,timestamp:2000}),null);
+ assert.equal(measuredTransition(first,{...first,latitude:45.0001,timestamp:2000,breakBefore:true}),0);
  assert.equal(measuredTransition(first,{...first,timestamp:2000},true),0);
 });
 test('bearings and longitude cross north and the date line by the short arc',()=>{

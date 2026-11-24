@@ -10,8 +10,8 @@ export function measuredTransition(from:GPSFix|null,to:GPSFix,reducedMotion=fals
  const distance=segmentMeters(from,to);
  // Discard physically impossible fixes even when the GPS returns after an outage.
  if(distance/(elapsed/1000)>80)return null;
- // A large but plausible reacquisition should relocate, not animate through an unobserved route.
- if(elapsed>15000)return reducedMotion||distance>100?0:600;
+ // Reacquisition relocates to a confirmed fix without animating across the unobserved gap.
+ if(elapsed>15000||to.breakBefore)return 0;
  return reducedMotion?0:Math.min(3000,Math.max(250,elapsed));
 }
 export function interpolateAngle(from:number,to:number,progress:number){

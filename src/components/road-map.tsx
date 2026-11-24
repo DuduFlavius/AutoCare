@@ -6,7 +6,7 @@ import { Crosshair,Layers,Sun,Moon } from 'lucide-react';
 import type { Map as RoadMap, Marker, GeoJSONSource, AllPaintProperties } from 'maplibre-gl';
 import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
-import {drivingBearing,drivingZoom,daylightMap,drivingInsets} from '@/lib/driving-camera';
+import {drivingBearing,drivingView,daylightMap,drivingInsets,cameraSettlingTime} from '@/lib/driving-camera';
 import {segmentMeters} from '@/lib/gps-tracking';
 import {measuredTransition,interpolateFix,interpolateAngle,cameraTurnProgress} from '@/lib/gps-animation';
 import type { GPSFix } from '@/lib/gps-tracking';
@@ -56,6 +56,7 @@ export default function RoadMapView({
     map = useRef<RoadMap | null>(null),
     marker = useRef<Marker | null>(null);
   const [perspective,setPerspective]=useState(true);
+  const [cameraRevision,reframeCamera]=useState(0);
   const [theme,setTheme]=useState<'auto'|'day'|'night'>('auto');
   const [hour,setHour]=useState(()=>new Date().getHours());
   const daylight=theme==='day'||theme==='auto'&&daylightMap(hour);
@@ -116,6 +117,7 @@ export default function RoadMapView({
             zoom: initialArea?.zoom ?? (p ? 15.8 : 5.2),
             maxZoom: 19,
             pitch: 0,
+            maxPitch: 65,
             attributionControl: { compact: true },
             renderWorldCopies: false,
           });
@@ -237,6 +239,7 @@ export default function RoadMapView({
     if (!view || history) return;
     if (!p) {
       window.cancelAnimationFrame(animationFrame.current);
+      if(active)return;
       marker.current?.remove();
       marker.current = null;
       return;
@@ -261,19 +264,20 @@ export default function RoadMapView({
     if(active&&!alreadyTracking){follow.current=true;setFollowing(true);}
     wasActive.current=active;
     const previousFix=cameraPosition.current;
-    const initialHeading=!previousFix&&p.speed!=null&&p.speed>=1.5&&p.heading!=null&&Number.isFinite(p.heading)&&p.heading>=0&&p.heading<360;
+    const initialHeading=(!alreadyTracking||!previousFix)&&p.speed!=null&&p.speed>=1.5&&p.heading!=null&&Number.isFinite(p.heading)&&p.heading>=0&&p.heading<360;
     const bearing=active?(initialHeading?p.heading!:drivingBearing(previousFix,p,cameraBearing.current)):0;
     cameraPosition.current=p;cameraBearing.current=bearing;
-    const from=displayPosition.current??p,fromBearing=displayBearing.current;
+    const from=displayPosition.current??p,fromBearing=alreadyTracking?displayBearing.current:view.getBearing();
     // Explicit low GPS speed holds the visible marker against stationary drift.
-    const target=active&&p.speed!=null&&p.speed<0.7&&previousFix&&
+    const target=active&&previousFix&&((p.speed!=null&&p.speed<0.7)||(p.speed==null&&segmentMeters(previousFix,p)<Math.max(3,Math.min(12,p.accuracy*.6))))&&
       segmentMeters(from,p)<Math.min(18,p.accuracy+previousFix.accuracy)
       ? {...p,latitude:from.latitude,longitude:from.longitude}:p;
     const startZoom=view.getZoom(),startPitch=view.getPitch();
-    const desiredZoom=drivingZoom(p.speed,turnDistance.current);
+    const lens=drivingView(p.speed,turnDistance.current);
+    const desiredZoom=lens.zoom;
     const zoom=active?(manualZoom.current??(alreadyTracking&&previousFix
-      ? startZoom+Math.max(-.32,Math.min(.32,desiredZoom-startZoom)) : desiredZoom)):16;
-    const pitch=active&&perspective?52:0;
+      ? startZoom+Math.max(-.4,Math.min(.4,desiredZoom-startZoom)) : desiredZoom)):16;
+    const pitch=active&&perspective?lens.pitch:0;
     const begun=performance.now();
     const mapBox=view.getContainer().getBoundingClientRect();
     const cockpit=view.getContainer().closest('.sd-live-cockpit');
@@ -282,22 +286,37 @@ export default function RoadMapView({
     const top=header ? Math.max(0,header.bottom-mapBox.top) : 0;
     const bottom=dock && dock.top>mapBox.top ? Math.max(0,mapBox.bottom-dock.top) : 0;
     const padding=active?drivingInsets(mapBox.height,top,bottom):drivingInsets(0,0,0);
+    const {top:initialTop=0,bottom:initialBottom=0,left:initialLeft=0,right:initialRight=0}=view.getPadding();
+    const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const angle=Math.abs(((bearing-fromBearing+540)%360)-180);
+    const lensChanged=Math.abs(zoom-startZoom)>.005||Math.abs(pitch-startPitch)>.05||
+      Math.abs(padding.top-initialTop)+Math.abs(padding.bottom-initialBottom)>1;
+    const positionDuration=segmentMeters(from,target)>.04?(duration||(!reducedMotion&&previousFix?.timestamp===p.timestamp?400:0)):0;
+    const cameraDuration=cameraSettlingTime(positionDuration,angle,lensChanged,reducedMotion);
     const draw=(now:number)=>{
       if(map.current!==view)return;
-      const progress=duration?Math.min(1,(now-begun)/duration):1;
-      const point=interpolateFix(from,target,progress),heading=interpolateAngle(fromBearing,bearing,cameraTurnProgress(progress));
+      const elapsed=now-begun;
+      const positionProgress=positionDuration?Math.min(1,elapsed/positionDuration):1;
+      const cameraProgress=cameraDuration?Math.min(1,elapsed/cameraDuration):1;
+      const ease=cameraTurnProgress(cameraProgress);
+      const point=interpolateFix(from,target,positionProgress);
+      const heading=interpolateAngle(fromBearing,bearing,ease);
       displayPosition.current=point;displayBearing.current=heading;
       marker.current?.setLngLat([point.longitude,point.latitude]).setRotation(heading);
-      // One animation owns the camera. Manual dragging disables following immediately.
+      // Lens and direction ease independently of GPS cadence; the marker never extrapolates.
       if(follow.current)view.jumpTo({center:[point.longitude,point.latitude],bearing:heading,
-        pitch:startPitch+(pitch-startPitch)*cameraTurnProgress(progress),zoom:startZoom+(zoom-startZoom)*cameraTurnProgress(progress),
-        padding});
-      if(progress<1)animationFrame.current=window.requestAnimationFrame(draw);
+        pitch:startPitch+(pitch-startPitch)*ease,zoom:startZoom+(zoom-startZoom)*ease,
+        padding:{
+          top:initialTop+(padding.top-initialTop)*ease,
+          bottom:initialBottom+(padding.bottom-initialBottom)*ease,
+          left:initialLeft*(1-ease),right:initialRight*(1-ease),
+        }});
+      if(positionProgress<1||cameraProgress<1)animationFrame.current=window.requestAnimationFrame(draw);
     };
     animationFrame.current=window.requestAnimationFrame(draw);
     updateRoadPositionMarker(marker.current?.getElement(),active,p,latest.current);
     marker.current?.getElement().style.setProperty('--gps-bearing','0deg');
-      }, [position, english, history, active, loading, perspective]);
+      }, [position, english, history, active, loading, perspective, cameraRevision]);
   useEffect(() => {
     const source = map.current?.getSource('trip') as GeoJSONSource | undefined;
     source?.setData(routeGeometry(points,mappedRoads));
@@ -388,12 +407,7 @@ export default function RoadMapView({
           setFollowing(true);
           manualZoom.current=null;
           onLocate?.();
-          const p = position;
-          if (p && (!active || p.accuracy<=50)) {
-            window.cancelAnimationFrame(animationFrame.current);
-            const shown = displayPosition.current ?? p;
-            map.current?.easeTo({ center: [shown.longitude, shown.latitude], duration: 500 });
-          }
+          reframeCamera(revision=>revision+1);
         }}
       >
         <Crosshair size={19}/><span>{locating && !position

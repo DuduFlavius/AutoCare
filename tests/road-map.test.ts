@@ -79,7 +79,7 @@ test('the tracking camera reserves space for the header and bottom controls',()=
   for(const [height,header,dock] of [[720,110,155],[530,80,210],[360,65,230]]){
     const inset=drivingInsets(height,header,dock);
     const point=(height+inset.top-inset.bottom)/2;
-    assert.ok(Math.abs((point-header)/(height-header-dock)-.70)<.0001);
+    assert.ok(Math.abs((point-header)/(height-header-dock)-.76)<.0001);
   }
 });
 

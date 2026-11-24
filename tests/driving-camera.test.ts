@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {drivingBearing,drivingZoom,daylightMap} from '../src/lib/driving-camera';
+import {drivingBearing,drivingZoom,daylightMap,drivingView,cameraSettlingTime} from '../src/lib/driving-camera';
 import {parseSavedDestinations,rememberDestination} from '../src/lib/drive-destinations';
 const fix={latitude:45,longitude:21,accuracy:5,timestamp:1000,speed:10,heading:0};
 test('camera crosses north on the short arc without rotating backwards through 180 degrees',()=>{const heading=drivingBearing(fix,{...fix,timestamp:2000,heading:1},359);assert.ok(heading>359||heading<2);});
@@ -20,4 +20,13 @@ test('saved destinations reject malformed storage and deduplicate only actual co
  assert.deepEqual(parseSavedDestinations([home,{...home,latitude:Infinity},{...home,longitude:999},null]),[home]);
  assert.equal(rememberDestination([home],{...home,name:'Home'}).length,1);
  assert.equal(rememberDestination([home],{...home,latitude:46}).length,2);
+});
+
+test('close view widens at speed and previews turns with a bounded lens transition',()=>{
+ const town=drivingView(12,500), highway=drivingView(36,500), turn=drivingView(12,50);
+ assert.ok(turn.zoom>town.zoom&&town.zoom>highway.zoom);
+ assert.ok(turn.pitch>town.pitch&&town.pitch>highway.pitch&&turn.pitch<=65);
+ assert.ok(cameraSettlingTime(0,90,true,false)>700);
+ assert.equal(cameraSettlingTime(0,90,true,true),0);
+ assert.equal(drivingBearing(fix,{...fix,longitude:21.001,timestamp:3000,speed:0,heading:180},23),23);
 });
