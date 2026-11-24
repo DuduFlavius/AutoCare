@@ -30,7 +30,6 @@
 .sd-live-cockpit.rg-smartdrive-map .rg-navigation-audio[aria-pressed=true]{background:#075365;color:#fff;border-color:#075365}
 .sd-live-cockpit.rg-smartdrive-map .rg-map-modes{right:16px;top:182px;bottom:auto;gap:8px}
 .sd-live-cockpit.rg-smartdrive-map .rg-map-modes button{width:48px;height:48px;min-height:48px;padding:6px;background:#fff;color:#075365;border:1px solid #c7dbe5;border-radius:14px;box-shadow:0 3px 9px #083b4a18;display:flex;align-items:center;justify-content:center;gap:2px;font-size:11px}
-.sd-live-cockpit.rg-smartdrive-map .rg-map-modes{flex-direction:column}
 .sd-live-cockpit.rg-smartdrive-map .ac-road-map-center{position:absolute;right:16px;bottom:16px;top:auto;width:48px!important;max-width:48px;min-height:48px;height:48px!important;padding:11px!important;background:#fff!important;color:#075365!important;border:1px solid #c7dbe5!important;border-radius:14px;box-shadow:0 3px 9px #083b4a18;z-index:5}
 .sd-live-cockpit .ac-road-map-center span{display:none}.sd-live-cockpit.rg-smartdrive-map .maplibregl-ctrl-top-right{top:16px;right:16px}
 .sd-live-cockpit.rg-smartdrive-map .maplibregl-ctrl-group{box-shadow:0 3px 9px #083b4a18;border:1px solid #c7dbe5;border-radius:14px;overflow:hidden;background:#fff}
@@ -215,7 +214,12 @@
 
 .sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-canvas .leaflet-top.leaflet-right,
 .sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-canvas .maplibregl-ctrl-top-right {
- top:calc(max(10px,env(safe-area-inset-top)) + 168px);
+ top:calc(max(10px,env(safe-area-inset-top)) + 228px);
+}
+@media(max-height:640px) and (max-width:900px){
+ .sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-canvas :is(.leaflet-top.leaflet-right,.maplibregl-ctrl-top-right) {
+  top:calc(max(10px,env(safe-area-inset-top)) + 165px);
+ }
 }
 .sd-session-panel[data-compact=true] .sd-route-glance .sd-route-remaining {
  display:flex;align-items:center;gap:6px;margin:0 0 7px;color:#255a66;font-size:11px;text-align:start;
