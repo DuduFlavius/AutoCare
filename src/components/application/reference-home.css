@@ -58,6 +58,7 @@
 /* Compact home layout with a single native SmartDrive shortcut. */
 .rg-home-reference{gap:16px;max-width:1200px}
 .rg-home-welcome{padding:5px 0;min-height:0}
+.rg-home-welcome::before{inset-inline:0}
 .rg-home-welcome h1{font-size:clamp(20px,3vw,30px);font-weight:750;letter-spacing:-.035em}
 .rg-mobile-home{gap:14px}
 .rg-home-reference .rg-mobile-home .rg-m-vehicle{
