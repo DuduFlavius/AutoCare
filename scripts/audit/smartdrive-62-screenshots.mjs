@@ -7,7 +7,10 @@ const destination=process.env.AUTOCARE_QA_SCREENSHOTS;
 const before='http://127.0.0.1:4171', after='http://127.0.0.1:4172';
 try {
  const page=await browser.newPage({viewport:{width:390,height:844}});
+ page.on('pageerror',error=>console.error(error));
+ page.on('console',message=>{if(message.type()==='error')console.error(message.text());});
  await page.goto(before+'/home.html');
+ await page.screenshot({path:destination+'/00-baseline-diagnostic.png',fullPage:true});
  await page.getByText('QA 62 SD',{exact:false}).first().waitFor();
  await page.screenshot({path:destination+'/01-dashboard-before.png',fullPage:true});
  for(const width of [320,390,768,1024,1440]){
