@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { streamLines } from './ai-stream';
 import { AppError } from './service';
 import { autoAssistantConfigured } from './auto-assistant-config';
 
@@ -27,9 +28,9 @@ function geminiParts(input: string | { role: 'user'; content: InputPart[] }[]): 
   }));
 }
 
-async function availableGeminiModels(key: string, preferred: string): Promise<string[]> {
+async function availableGeminiModels(key: string, preferred: string, signal = AbortSignal.timeout(12000)): Promise<string[]> {
   const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', {
-    headers: { 'x-goog-api-key': key }, cache: 'no-store', signal: AbortSignal.timeout(12000),
+    headers: { 'x-goog-api-key': key }, cache: 'no-store', signal,
   });
   if (!response.ok) throw new AppError(502, 'Nu pot verifica modelele Gemini disponibile pentru cheia API.');
   const data: unknown = await response.json();
@@ -121,4 +122,70 @@ export async function generateAi(instructions: string, input: string | { role: '
     if (error instanceof AppError) throw error;
     throw new AppError(502, 'Furnizorul AI nu a putut răspunde. Reîncearcă mai târziu.');
   }
+}
+
+export type AiStream = { signal: AbortSignal; delta: (text: string) => void };
+
+async function readProviderStream(response: Response, gemini: boolean, stream: AiStream) {
+  if (!response.ok || !response.body) {
+    await response.body?.cancel();
+    if (response.status === 429) throw new AppError(429, 'Limita furnizorului AI a fost atinsă. Încearcă mai târziu.');
+    throw new AppError(502, 'Furnizorul AI nu a putut răspunde.');
+  }
+  let answer = '', completed = false, data: string[] = [];
+  for await (const line of streamLines(response.body)) {
+    stream.signal.throwIfAborted();
+    if (line.startsWith('data:')) { data.push(line.slice(5).trimStart()); continue; }
+    if (line || !data.length) continue;
+    const payload = data.join('\n');
+    data = [];
+    if (payload === '[DONE]') continue;
+    const event = JSON.parse(payload);
+    const candidate = event.candidates?.[0];
+    const delta = gemini
+      ? (candidate?.content?.parts ?? []).filter((part: { thought?: boolean }) => !part.thought).map((part: { text?: string }) => part.text ?? '').join('')
+      : event.type === 'response.output_text.delta' ? event.delta : '';
+    if (typeof delta === 'string' && delta) { answer += delta; stream.delta(delta); }
+    if (gemini ? candidate?.finishReason === 'STOP' : event.type === 'response.completed') completed = true;
+    if (event.error || (gemini ? candidate?.finishReason && candidate.finishReason !== 'STOP' : ['error','response.failed','response.incomplete'].includes(event.type))) break;
+    if (completed) break;
+  }
+  if (!completed || !answer.trim()) throw new AppError(502, 'Furnizorul AI a întrerupt răspunsul. Poți reîncerca.');
+  return answer.trim();
+}
+
+export async function streamAi(instructions: string, input: string, stream: AiStream, maxTokens = 2600) {
+  if (!autoAssistantConfigured()) throw new AppError(503, 'Furnizorul AI nu este configurat.');
+  const signal = AbortSignal.any([stream.signal, AbortSignal.timeout(55000)]);
+  const key = process.env.GEMINI_API_KEY?.trim();
+  if (key) {
+    const preferred = process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash-lite';
+    const payload = JSON.stringify({
+      systemInstruction: { parts: [{ text: instructions }] },
+      contents: [{ role: 'user', parts: geminiParts(input) }],
+      generationConfig: { maxOutputTokens: maxTokens, temperature: 0.5 },
+    });
+    async function send(model: string) {
+      return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':streamGenerateContent?alt=sse', {
+        method: 'POST', cache: 'no-store', signal,
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key! }, body: payload,
+      });
+    }
+    let response = await send(preferred);
+    if (response.status === 404 || response.status === 400) {
+      await response.body?.cancel();
+      for (const model of (await availableGeminiModels(key, preferred, signal)).filter(model => model !== preferred)) {
+        response = await send(model);
+        if (response.status !== 404 && response.status !== 400) break;
+        await response.body?.cancel();
+      }
+    }
+    return readProviderStream(response, true, stream);
+  }
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST', cache: 'no-store', signal,
+    headers: { Authorization: 'Bearer ' + process.env.OPENAI_API_KEY!.trim(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: process.env.AUTOCARE_AI_MODEL!.trim(), store: false, max_output_tokens: maxTokens, instructions, input, stream: true }),
+  });
+  return readProviderStream(response, false, stream);
 }

@@ -222,3 +222,42 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-memb
   opacity:.56;
  }
 }
+
+.rg-ai-page .ac-ai-stream-retry,.rg-ai-page .ac-ai-jump-bottom{
+ display:flex;align-items:center;justify-content:center;gap:6px;align-self:center;
+ min-height:38px;padding:5px 12px;background:var(--brand-ice);color:var(--brand-petrol-dark);
+ border:1px solid var(--color-border);border-radius:99px;font-size:12px;
+}
+.rg-ai-page .ac-ai-stream-retry{margin:8px 0}
+.rg-ai-page .ac-ai-history-panel input[type=search]{box-sizing:border-box;width:100%;padding:10px 12px;margin:6px 0;border-radius:12px;border:1px solid var(--color-border);background:var(--color-card);color:var(--color-text)}
+.ac-ai-insight{border:1px solid var(--color-border);background:linear-gradient(135deg,var(--color-card),var(--brand-ice));border-radius:14px;padding:12px;margin:10px 0;min-width:0}
+.ac-ai-insight h4,.ac-ai-insight dl{margin:0 0 8px}
+.ac-ai-insight dl>div{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)}
+.ac-ai-insight dd{margin:0;text-align:right}
+.ac-ai-insight meter{width:clamp(26px,8vw,100px);margin-inline-end:5px}
+.ac-ai-insight button{border:1px solid var(--color-border);background:var(--brand-petrol);color:white;border-radius:12px;padding:7px 11px;margin:4px 5px 0 0;font-size:12px}
+@media(min-width:1100px){
+ .rg-ai-page .ac-ai-layout[data-history=true] .ac-ai-main{margin-inline-start:250px;min-width:0}
+ .rg-ai-page .ac-ai-layout[data-history=true] .ac-ai-history-overlay{width:244px}
+ .rg-ai-page .ac-ai-layout[data-history=true] .ac-ai-history-backdrop{display:none}
+ .rg-ai-page .ac-ai-layout[data-history=true] .ac-ai-history-panel{width:100%;background:linear-gradient(160deg,var(--color-card),var(--brand-ice));border:1px solid var(--color-border);border-radius:17px}
+}
+.rg-ai-page .ac-ai-history-panel>.ac-ai-history-new{
+ min-height:44px;align-items:center;justify-content:center;
+ background:linear-gradient(135deg,var(--brand-petrol-accent),var(--brand-petrol-dark));color:white;
+}
+@media(max-width:900px){
+ .rg-ai-page .ac-ai-heading::before{
+  position:absolute;inset:0 0 0 auto;width:34%;pointer-events:none;content:"";
+  background:url('/images/autocare-studio-coupe.webp') right 45% / cover;
+  opacity:.15;mask-image:linear-gradient(to right,transparent,#000);
+ }
+}
+.rg-ai-page .ac-ai-history-panel>.ac-ai-history-rename{min-height:36px;padding:7px 9px;font-size:12px}
+.ac-ai-rename{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0}
+.ac-ai-rename input{box-sizing:border-box;width:100%;min-width:0;border:1px solid var(--color-border);border-radius:9px;padding:8px}
+.rg-ai-page .ac-ai-heading{position:relative;isolation:isolate}
+.rg-ai-page .ac-ai-heading::before{z-index:-1}
+.rg-ai-page .ac-ai-turns{min-height:0}
+.rg-ai-page .ac-ai-answer .ac-ai-markdown{gap:7px}
+.rg-ai-page .ac-ai-answer .ac-ai-md-heading{margin:6px 0 2px}

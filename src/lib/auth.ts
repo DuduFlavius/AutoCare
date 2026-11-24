@@ -1,3 +1,4 @@
+import { aiTitlesKey } from './ai-conversations';
 import {accountPreferencesKey} from './account-preferences';
 import {registrationLanguage} from './mail-language';
 import {languageCookie} from './language-preference';
@@ -121,7 +122,7 @@ function makeAuth() {
         },
         afterDelete: async u => {
           await db().delete(schema.settings).where(like(schema.settings.key,'security-email-change:'+u.id+':%'));
-          await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(u.id), financeBudgetKey(u.id), languagePreferenceKey(u.id),accountPreferencesKey(u.id),'security-email-change:'+u.id]));
+          await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(u.id), financeBudgetKey(u.id), languagePreferenceKey(u.id),accountPreferencesKey(u.id),aiTitlesKey(u.id),'security-email-change:'+u.id]));
         },
         beforeDelete: async (u) => {
           await db().delete(schema.verification).where(or(eq(schema.verification.value,u.id),inArray(schema.verification.identifier,['email-verification','sign-in','forget-password'].map(type=>type+'-otp-'+u.email.toLowerCase()))));

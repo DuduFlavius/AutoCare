@@ -8,13 +8,16 @@ import {PremiumDateInput} from '@/components/premium-date-input';
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import {  ArrowUpRight, FileScan, MapPin, Sparkles, Trash2, ShieldCheck, Copy, ChevronDown, MessageSquareText, Wrench, CalendarDays, BarChart3, CheckCheck, Square, RotateCcw, ThumbsUp, ThumbsDown, Paperclip, History, CarFront, X, ChevronLeft, Send } from 'lucide-react';
 import { conversationGroups, conversationKey, type AiTurn } from '@/lib/ai-conversations';
+import { streamLines } from '@/lib/ai-stream';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
 import { TitaniumWave } from '../titanium-wave';
+import { AiVehicleInsights } from './ai-vehicle-insights';
 import { AiMarkdown } from './ai-markdown';
 import './auto-ai.css';
 import './auto-ai-premium.css';
 
+type DashboardData = Awaited<ReturnType<typeof dashboard>>;
 type Vehicle = Awaited<ReturnType<typeof dashboard>>['vehicles'][number];
 type Turn = AiTurn;
 type Mode = 'chat' | 'analysis' | 'monthly' | 'annual' | 'finance' | 'maintenance';
@@ -35,7 +38,8 @@ function requestErrorEnglish(message: string) {
 }
 const json = (method: string, body: unknown) => ({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
-export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, pricing, available, preview, onSaved, onExit, displayName }: {
+export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, pricing, available, preview, onSaved, onExit, displayName, records, timezone, onNavigate }: {
+  records?:DashboardData['records']; timezone?:string; onNavigate?:(tab:string)=>void;
   displayName?:string; vehicles: Vehicle[]; vehicleId: string; onVehicle: (id: string) => void; premium: boolean;
   pricing?: Awaited<ReturnType<typeof dashboard>>['pricing']; available: boolean; preview: boolean; onSaved: () => Promise<void>; onExit?:()=>void;
 }) {
@@ -79,7 +83,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, prici
       {!premium ? <section className="card ac-ai-membership-gate" aria-labelledby="ai-membership-title"><span className="ac-ai-icon"><Sparkles size={30}/></span><h2 id="ai-membership-title">{en?'AutoCare AI — Your intelligent car assistant':'AutoCare AI — Asistentul tău auto inteligent'}</h2><p>{en?'AutoCare AI is exclusively available to Premium members. Activate Premium to understand your vehicle information and receive helpful recommendations.':'AutoCare AI este o funcție exclusivă pentru membrii Premium. Activează Premium pentru a înțelege mai ușor informațiile despre mașina ta și pentru recomandări utile.'}</p><ul><li>{en?'Understand recorded vehicle costs':'Înțelege costurile înregistrate ale mașinii'}</li><li>{en?'Prepare maintenance using your saved history':'Pregătește întreținerea folosind istoricul salvat'}</li><li>{en?'Extract document details and confirm before saving':'Extrage date din documente și confirmă înainte de salvare'}</li></ul><div className="ac-ai-gate-actions"><a className="button primary" href="/cont?tab=Premium">{en?'Activate Premium':'Activează Premium'} <ArrowUpRight size={15}/></a><a className="button" href="/cont?tab=Dashboard">{en?'Back to Dashboard':'Înapoi la Dashboard'}</a></div>{pricing&&<p className="small">{new Intl.NumberFormat(en?'en-GB':'ro-RO',{style:'currency',currency:pricing.currency}).format(pricing.monthlyBani/100)} {en?'/ month':'/ lună'}</p>}<p className="small muted">{en?'Already had Premium? Reactivate it to continue. Expiry does not automatically delete your chat history.':'Ai avut Premium? Reactivează-l pentru a continua. Expirarea nu șterge automat istoricul conversațiilor.'}</p></section>
         : !vehicles.length ? <section className="card"><p>{en ? 'Add a vehicle first.' : 'Adaugă întâi un vehicul.'}</p><a className="button" href="/cont?tab=Garaj">{en ? 'My garage' : 'Garajul meu'}</a></section>
         : <>
-          <AiConversation vehiclePicker={<div className="ac-ai-vehicle-header"><label className="ac-ai-vehicle">{en ? 'Vehicle' : 'Vehicul'}
+          <AiConversation insights={records&&timezone&&onNavigate?(question=><AiVehicleInsights question={question} vehicle={vehicles.find(item=>item.id===vehicleId)} records={records} timezone={timezone} onNavigate={onNavigate}/>):undefined} vehiclePicker={<div className="ac-ai-vehicle-header"><label className="ac-ai-vehicle">{en ? 'Vehicle' : 'Vehicul'}
             <FilterSelect aria-label={en?'Vehicle for AutoCare AI':'Mașina pentru AutoCare AI'} value={vehicleId} onChange={event => onVehicle(event.target.value)}>
               {vehicles.map(vehicle => <option value={vehicle.id} key={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}
             </FilterSelect>
@@ -89,7 +93,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, prici
   );
 }
 
-function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, onExit, displayName, vehiclePicker }: { vehiclePicker?:ReactNode; displayName?:string; vehicleId: string; vehicleName: string; available: boolean; preview: boolean; onSaved: () => Promise<void>; onExit?:()=>void }) {
+function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, onExit, displayName, vehiclePicker, insights }: { insights?:(question:string)=>ReactNode; vehiclePicker?:ReactNode; displayName?:string; vehicleId: string; vehicleName: string; available: boolean; preview: boolean; onSaved: () => Promise<void>; onExit?:()=>void }) {
   const language = useApplicationLanguage();
   const locale = useApplicationLocale();
   const en = language === 'en';
@@ -99,10 +103,16 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, o
   const [historyOpen, setHistoryOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
-  const groups = conversationGroups(turns);
+  const [titles,setTitles]=useState<Record<string,string>>({});
+  const [titleDraft,setTitleDraft]=useState<string|null>(null);
+  const groups = conversationGroups(turns,titles);
   const selectedGroup = groups.find(group => group.id === activeConversation);
   const visibleTurns = selectedGroup?.turns ?? [];
   const [pendingQuestion, setPendingQuestion] = useState('');
+  const [partialAnswer, setPartialAnswer] = useState('');
+  const [atBottom, setAtBottom] = useState(true);
+  const [historyQuery,setHistoryQuery]=useState('');
+  const retry = useRef<{ id: string; question: string; mode: Mode; replace?: Turn } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -123,14 +133,18 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, o
   useLayoutEffect(()=>{const field=input.current;if(!field)return;field.style.setProperty('height','auto','important');field.style.setProperty('height',Math.min(120,field.scrollHeight)+'px','important');field.style.setProperty('overflow-y',field.scrollHeight>120?'auto':'hidden','important');},[question]);
   const messageScroll = useRef<HTMLDivElement>(null);
   const autoScroll = useRef(true);
-  useEffect(() => { if (autoScroll.current && messageScroll.current) messageScroll.current.scrollTo({ top: turns.length || pending ? messageScroll.current.scrollHeight : 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }, [turns.length, pending, activeConversation]);
+  useLayoutEffect(() => {
+    const element=messageScroll.current;
+    if(autoScroll.current && element)element.scrollTop=element.scrollHeight;
+  },[turns.length,pendingQuestion,partialAnswer,activeConversation]);
 
   useEffect(() => {
     try { const draft = sessionStorage.getItem('autocare-ai-draft:' + vehicleId); if (draft) { setQuestion(draft.slice(0,600)); sessionStorage.removeItem('autocare-ai-draft:' + vehicleId); } } catch { /* Storage is optional. */ }
+    setHistoryOpen(window.matchMedia('(min-width:1100px)').matches);
     if (preview) return;
     const controller = new AbortController();
     request('auto-assistant/history?vehicleId=' + encodeURIComponent(vehicleId), { signal: controller.signal })
-      .then(data => { setTurns(data.turns); setActiveConversation(conversationGroups(data.turns)[0]?.id ?? crypto.randomUUID()); }).catch(e => { if (!controller.signal.aborted) setError(en ? requestErrorEnglish(e.message) : e.message); })
+      .then(data => { setTurns(data.turns); setTitles(data.titles??{}); setActiveConversation(conversationGroups(data.turns)[0]?.id ?? crypto.randomUUID()); }).catch(e => { if (!controller.signal.aborted) setError(en ? requestErrorEnglish(e.message) : e.message); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => { controller.abort(); action.current?.abort(); };
   }, [vehicleId, preview]);
@@ -146,20 +160,47 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, o
   }
 
   function newConversation() {
-    setActiveConversation(crypto.randomUUID()); setHistoryOpen(false); setQuestion(''); setError(''); setNotice(''); autoScroll.current = true; input.current?.focus();
+    retry.current=null; setTitleDraft(null); setPartialAnswer(''); setPendingQuestion(''); setAtBottom(true);
+    setActiveConversation(crypto.randomUUID()); if(!window.matchMedia('(min-width:1100px)').matches)setHistoryOpen(false); setQuestion(''); setError(''); setNotice(''); autoScroll.current = true; input.current?.focus();
   }
 
-  function ask(value: string, mode: Mode = 'chat', regenerate?: Turn) {
-    if (preview || !available || loading || action.current || value.trim().length < 1) return;
-    const conversationId = activeConversation && !activeConversation.startsWith('legacy:') ? activeConversation : undefined;
-    autoScroll.current = true;
-    setPendingQuestion(value.trim());
+  function ask(value: string, mode: Mode = 'chat', regenerate?: Turn, requestId = crypto.randomUUID()) {
+    if (preview || !available || loading || action.current || !value.trim()) return;
+    const text = value.trim();
+    const conversationId = activeConversation && !activeConversation.startsWith('legacy:') ? activeConversation : regenerate ? undefined : crypto.randomUUID();
+    if (conversationId) setActiveConversation(conversationId);
+    autoScroll.current=true;
+    setAtBottom(true);
+    setPendingQuestion(text);
+    setPartialAnswer('');
+    retry.current={id:requestId,question:text,mode,replace:regenerate};
+    setQuestion('');
     void run(async signal => {
-      try {
-        const data = await request('auto-assistant', { ...json('POST', { vehicleId, question: value.trim(), language, mode, localFallback: false, conversationId, contextTurns: Math.min(4, visibleTurns.length), contextIds: visibleTurns.filter(turn => turn.id !== regenerate?.id).slice(-4).map(turn => turn.id), ...(regenerate ? { excludeTurnId: regenerate.id } : {}) }), signal });
-        setTurns(previous => [...previous, data.turn].slice(-150));
-        setActiveConversation(conversationKey(data.turn)); setQuestion('');
-      } finally { setPendingQuestion(''); }
+      const payload=json('POST',{vehicleId,question:text,language,mode,conversationId,requestId,contextTurns:Math.min(4,visibleTurns.length),contextIds:visibleTurns.filter(turn=>turn.id!==regenerate?.id).slice(-4).map(turn=>turn.id),excludeTurnId:regenerate?.id});
+      const response=await fetch('/api/v1/auto-assistant/stream',{...payload,headers:{...payload.headers,Accept:'application/x-ndjson'},signal,cache:'no-store'});
+      if(!response.ok){
+        const error=await response.json().catch(()=>({}));
+        throw Error(error.error||'Nu s-a putut porni răspunsul.');
+      }
+      if(!response.body)throw Error('Răspunsul AI a fost întrerupt. Poți reîncerca.');
+      for await(const line of streamLines(response.body)){
+        if(!line)continue;
+        const event=JSON.parse(line);
+        if(event.type==='error')throw Error(event.message);
+        if(event.type==='delta'&&typeof event.text==='string')setPartialAnswer(previous=>previous+event.text);
+        if(event.type==='done'){
+          const saved:Turn=event.turn;
+          setTurns(previous=>{
+            if(previous.some(turn=>turn.id===saved.id))return previous;
+            return regenerate ? previous.map(turn=>turn.id===regenerate.id?saved:turn) : [...previous,saved].slice(-150);
+          });
+          setActiveConversation(conversationKey(saved));
+          retry.current=null;
+          setPendingQuestion('');setPartialAnswer('');
+          return;
+        }
+      }
+      throw Error('Conexiunea s-a întrerupt. Poți reîncerca trimiterea.');
     });
   }
 
@@ -171,6 +212,18 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, o
       setTurns(previous => previous.map(item => item.id === turn.id ? { ...item, feedback: next } : item));
       setNotice(t('Feedback salvat. Mulțumim!', 'Feedback saved. Thank you!'));
     } catch { setError(t('Feedbackul nu a putut fi salvat. Reîncearcă.', 'Could not save feedback. Please try again.')); }
+  }
+
+  function saveTitle(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const title=titleDraft?.trim();
+    if(!activeConversation||!title)return;
+    const id=activeConversation;
+    void run(async signal=>{
+      await request('auto-assistant/history',{...json('PATCH',{vehicleId,conversationId:id,title}),signal});
+      setTitles(previous=>({...previous,[id]:title}));
+      setTitleDraft(null);
+    });
   }
 
   async function removeConversation() {
@@ -219,7 +272,7 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, o
     { icon: History, label: t('Istoricul service', 'Service history'), detail: t('Lucrări și întreținere', 'Work and maintenance'), question: t('Analizează istoricul service salvat pentru mașina mea.', 'Analyze my saved vehicle service history.'), mode: 'analysis' as Mode },
   ];
   return (
-    <div className="ac-ai-layout ac-ai-chatgpt-layout">
+    <div className="ac-ai-layout ac-ai-chatgpt-layout" data-history={historyOpen}>
       <div className="ac-ai-main">
       <section className="card ac-ai-chat" aria-label={t('Conversație AutoCare AI', 'AutoCare AI conversation')}>
         <div className="ac-ai-heading"><button type="button" className="ac-ai-back" aria-label={t('Înapoi la Acasă','Back to Home')} onClick={()=>onExit?onExit():window.location.assign('/cont?tab=Dashboard')}><ChevronLeft size={22}/></button>
@@ -236,13 +289,13 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, o
           </div>
         </div>
         {vehiclePicker}
-        {historyOpen && <div className="ac-ai-history-overlay"><button type="button" className="ac-ai-history-backdrop" aria-label={t('Închide istoricul', 'Close history')} onClick={() => setHistoryOpen(false)}/><nav className="ac-ai-history-panel" aria-label={t('Istoricul conversațiilor', 'Conversation history')}><div className="ac-ai-history-title"><strong>{t('Conversațiile tale', 'Your conversations')}</strong><button type="button" onClick={() => setHistoryOpen(false)} aria-label={t('Închide', 'Close')}><X size={18}/></button></div><p>{t('Salvate pentru această mașină', 'Saved for this vehicle')}</p>{groups.map(group => <button type="button" className={activeConversation === group.id ? 'active' : ''} key={group.id} disabled={pending} onClick={() => { setActiveConversation(group.id); setHistoryOpen(false); setError(''); }}><MessageSquareText size={16}/><span><strong>{group.title}</strong><small>{new Date(group.updatedAt).toLocaleDateString(locale)} · {group.turns.length} {t('răspunsuri', 'replies')}</small></span></button>)}{!groups.length && <p>{t('Conversațiile vor apărea aici după primul răspuns.', 'Your conversations will appear here after the first reply.')}</p>}</nav></div>}
+
         {!available && <p className="ac-ai-state" role="status">{t('AI-ul nu este disponibil momentan. Încearcă mai târziu sau contactează suportul.', 'AI is currently unavailable. Try later or contact support.')}</p>}
-        <div ref={messageScroll} className="ac-ai-message-scroll" role="log" aria-label={t('Mesaje', 'Messages')} aria-busy={pending || loading} onScroll={event => { const el = event.currentTarget; autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 140; }}>
+        <div ref={messageScroll} className="ac-ai-message-scroll" role="log" aria-label={t('Mesaje', 'Messages')} aria-busy={pending || loading} onScroll={event => { const el = event.currentTarget; autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 100; setAtBottom(autoScroll.current); }}>
           {loading ? <div className="ac-ai-loading" role="status"><Sparkles size={24}/>{t('Se încarcă conversațiile…', 'Loading conversations…')}</div> : visibleTurns.length || pendingQuestion ? <ol className="ac-ai-turns" aria-live="polite">
-            {visibleTurns.map((turn, index) => <li key={turn.id}>
+            {visibleTurns.map((turn, index) => pendingQuestion && retry.current?.replace?.id===turn.id ? null : <li key={turn.id}>
               <div className="ac-ai-user-row"><div><p className="ac-ai-question" data-user-content>{turn.question}</p><small><time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</time><CheckCheck size={13}/></small></div></div>
-              <div className="ac-ai-bot-row"><span className="ac-ai-avatar"><Sparkles size={17}/></span><div className="ac-ai-answer"><strong className="ac-ai-assistant-name">AutoCare AI</strong><AiMarkdown text={turn.answer}/><div className="ac-ai-response-actions">
+              <div className="ac-ai-bot-row"><span className="ac-ai-avatar"><Sparkles size={17}/></span><div className="ac-ai-answer"><strong className="ac-ai-assistant-name">AutoCare AI</strong><AiMarkdown text={turn.answer}/>{index===visibleTurns.length-1&&insights?.(turn.question)}<div className="ac-ai-response-actions">
                 <button type="button" title={t('Copiază răspunsul', 'Copy answer')} aria-label={t('Copiază răspunsul', 'Copy answer')} onClick={() => void navigator.clipboard.writeText(turn.answer).then(() => setNotice(t('Răspuns copiat.', 'Answer copied.'))).catch(() => setError(t('Nu s-a putut copia răspunsul.', 'Could not copy answer.')))}><Copy size={15}/></button>
                 {index === visibleTurns.length - 1 && <button type="button" disabled={pending || !available} title={t('Regenerează răspunsul', 'Regenerate answer')} aria-label={t('Regenerează răspunsul', 'Regenerate answer')} onClick={() => ask(turn.question, 'chat', turn)}><RotateCcw size={15}/></button>}
                 <button type="button" disabled={pending} aria-pressed={turn.feedback === 1} title={t('Răspuns util', 'Helpful answer')} aria-label={t('Răspuns util', 'Helpful answer')} onClick={() => void feedback(turn, 1)}><ThumbsUp size={15}/></button>
@@ -250,22 +303,32 @@ function AiConversation({ vehicleId, vehicleName, available, preview, onSaved, o
                 <time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</time>
               </div></div></div>
             </li>)}
-            {pendingQuestion && <li className="ac-ai-pending-turn"><div className="ac-ai-user-row"><div><p className="ac-ai-question">{pendingQuestion}</p></div></div><div className="ac-ai-typing" role="status"><span className="ac-ai-avatar"><Sparkles size={17}/></span><span className="ac-ai-typing-dots"><i/><i/><i/></span>{t('AutoCare AI pregătește răspunsul…', 'AutoCare AI is thinking…')}<button type="button" className="ac-ai-stop" aria-label={t('Oprește așteptarea', 'Stop waiting')} onClick={() => { action.current?.abort(); action.current = null; setPending(false); setPendingQuestion(''); setNotice(t('Așteptarea a fost oprită. Cererea poate fi finalizată de server și poate apărea în istoric.', 'Stopped waiting. The server may finish the request and save it in history.')); }}><Square size={12}/></button></div></li>}
+            {pendingQuestion && <li className="ac-ai-pending-turn"><div className="ac-ai-user-row"><div><p className="ac-ai-question">{pendingQuestion}</p></div></div>
+              {partialAnswer&&<div className="ac-ai-bot-row"><span className="ac-ai-avatar"><Sparkles size={17}/></span><div className="ac-ai-answer" aria-live="off"><AiMarkdown text={partialAnswer}/></div></div>}
+              {pending?<div className="ac-ai-typing" role="status"><span className="ac-ai-typing-dots"><i/><i/><i/></span>{partialAnswer?t('Se generează…','Generating…'):t('AutoCare AI pregătește răspunsul…','AutoCare AI is preparing a reply…')}</div>:
+                retry.current&&<button type="button" className="ac-ai-stream-retry" onClick={()=>{const saved=retry.current;if(saved)ask(saved.question,saved.mode,saved.replace,saved.id);}}><RotateCcw size={15}/>{t('Reîncearcă','Retry')}</button>}
+            </li>}
+
           </ol> : <div className="ac-ai-welcome"><div className="ac-ai-welcome-art" aria-hidden="true"><svg viewBox="0 0 480 340" fill="none"><path d="M-30 260Q160 150 500 210M-30 280Q180 190 500 230M-30 305Q160 225 500 250M-30 330Q150 260 500 275" stroke="currentColor" opacity=".25"/><path d="M74 218l18-56 71-19 57-48 119 6 56 46 33 35-4 58-27 8H93z" fill="#0b4e60" stroke="currentColor" strokeWidth="2"/><path d="M172 143l52-39 106 7 42 37zM224 105l-4 40M260 151l-5 72M375 154l27 34-56-8M92 168l71-12 28 24-107 8M196 191l127-2-8 40-119-3zM108 229l51-1M340 228l47-3" stroke="currentColor" strokeWidth="2"/><ellipse cx="170" cy="241" rx="30" ry="40" fill="#083b4a" stroke="currentColor" strokeWidth="3"/><ellipse cx="370" cy="237" rx="27" ry="37" fill="#083b4a" stroke="currentColor" strokeWidth="3"/><ellipse cx="170" cy="241" rx="17" ry="24" stroke="currentColor"/><ellipse cx="370" cy="237" rx="15" ry="22" stroke="currentColor"/><path d="M80 248l40 8M212 253l121-4M111 181l40-4M351 178l30 2" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M60 73Q230 10 447 88M30 91Q250 26 470 108M12 111Q210 52 500 125" stroke="currentColor" opacity=".3"/></svg></div><div className="ac-ai-greeting"><strong>{displayName?t('Salut, '+displayName.trim().split(/\s+/)[0]+'! 👋','Hello, '+displayName.trim().split(/\s+/)[0]+'! 👋'):t('Salut! 👋', 'Hello! 👋')}</strong><p>{t('Sunt AutoCare AI. Te pot ajuta cu întreținerea mașinii, documente, costuri, consum sau recomandări.', 'I’m AutoCare AI. I can help with maintenance, documents, costs, consumption and recommendations.')}</p><p>{t('Cu ce te pot ajuta astăzi?', 'How can I help you today?')}</p></div><span className="ac-ai-context"><CarFront size={15}/>{vehicleName}</span><div className="ac-ai-suggestions">{suggestions.map(({ icon: Icon, ...item }) => <button key={item.label} type="button" disabled={preview || pending || !available} onClick={() => ask(item.question, item.mode)}><span className="ac-ai-suggestion-icon"><Icon size={18}/></span><span><strong>{item.label}</strong><small>{item.detail}</small></span><ArrowUpRight size={15}/></button>)}</div></div>}
         </div>
         {visibleTurns.length > 0 && <div className="ac-ai-quick-prompts"><button type="button" onClick={() => ask(suggestions[0].question, 'finance')} disabled={pending || loading || preview || !available}><BarChart3 size={14}/>{t('Costuri', 'Costs')}</button><button type="button" onClick={() => ask(suggestions[1].question, 'maintenance')} disabled={pending || loading || preview || !available}><CalendarDays size={14}/>{t('Revizii', 'Maintenance')}</button><button type="button" onClick={() => ask(suggestions[2].question)} disabled={pending || loading || preview || !available}><FileScan size={14}/>{t('Documente', 'Documents')}</button></div>}
+        {!atBottom&&<button type="button" className="ac-ai-jump-bottom" onClick={()=>{autoScroll.current=true;setAtBottom(true);const el=messageScroll.current;if(el)el.scrollTo({top:el.scrollHeight,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}}><ChevronDown size={16}/>{t('Ultimul mesaj','Latest message')}</button>}
         {notice && <p className="ac-ai-notice" role="status">{notice}</p>}
         {error && <p className="ac-ai-inline-error" role="alert">{error}</p>}
         <form className="ac-ai-composer" onSubmit={event => { event.preventDefault(); ask(question); }}>
           <input ref={fileInput} type="file" className="ac-ai-file-input" accept="application/pdf,image/png,image/jpeg" aria-label={t('Scanează un document', 'Scan a document')} onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) extract(file); }}/>
           <div className="ac-ai-input-shell"><button className="ac-ai-attach" type="button" title={t('Scanează PDF sau imagine · maximum 2 MB', 'Scan PDF or image · maximum 2 MB')} aria-label={t('Scanează un document sau o imagine', 'Scan a document or image')} disabled={preview || pending || !available} onClick={() => fileInput.current?.click()}><Paperclip size={19}/></button>
           <textarea ref={input} aria-label={t('Întrebarea ta', 'Your question')} placeholder={t('Scrie un mesaj…', 'Write a message…')} rows={1} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); ask(question); } }} minLength={1} maxLength={600} value={question} onChange={event => setQuestion(event.target.value)} required disabled={preview || pending || !available}/></div>
-          <button className="ac-ai-send" type="submit" aria-label={t('Trimite mesajul', 'Send message')} disabled={preview || pending || loading || !available || !question.trim()}><Send size={21}/></button>
+          {pending&&pendingQuestion?<button className="ac-ai-send" type="button" aria-label={t('Oprește generarea','Stop generating')} onClick={()=>{action.current?.abort();setNotice(t('Generarea a fost oprită. Poți reîncerca.','Generation stopped. You can retry.'));}}><Square size={19}/></button>:<button className="ac-ai-send" type="submit"  aria-label={t('Trimite mesajul', 'Send message')} disabled={preview || pending || loading || !available || !question.trim()}><Send size={21}/></button>}
         </form>
 
         <details className="ac-ai-disclosure"><summary><ShieldCheck size={13}/>{t('Date și recomandări AI', 'AI data and advice')}<ChevronDown size={13}/></summary><p>{t('Întrebarea, istoricul recent și datele relevante ale mașinii sunt trimise furnizorului AI. Fișierele sunt folosite pentru extragerea datelor, nu ca atașamente în conversație. Recomandările nu înlocuiesc un diagnostic în service.', 'Your question, recent history and relevant vehicle data are sent to the AI provider. Files are used for data extraction, not as conversation attachments. Advice does not replace a professional inspection.')}</p></details>
       </section>
       </div>
+        {historyOpen && <div className="ac-ai-history-overlay"><button type="button" className="ac-ai-history-backdrop" aria-label={t('Închide istoricul', 'Close history')} onClick={() => setHistoryOpen(false)}/><nav className="ac-ai-history-panel" aria-label={t('Istoricul conversațiilor', 'Conversation history')}><div className="ac-ai-history-title"><strong>{t('Conversațiile tale', 'Your conversations')}</strong><button type="button" onClick={() => setHistoryOpen(false)} aria-label={t('Închide', 'Close')}><X size={18}/></button></div><button type="button" className="ac-ai-history-new" disabled={pending||loading} onClick={newConversation}><MessageSquareText size={18}/>{t('Chat nou','New chat')}</button>{selectedGroup&&(titleDraft===null?
+            <button type="button" className="ac-ai-history-rename" disabled={pending} onClick={()=>setTitleDraft(selectedGroup.title)}>{t('Redenumește conversația','Rename conversation')}</button>:
+            <form className="ac-ai-rename" onSubmit={saveTitle}><input aria-label={t('Titlul conversației','Conversation title')} value={titleDraft} maxLength={72} onChange={event=>setTitleDraft(event.target.value)} required/><button type="submit" disabled={pending}>{t('Salvează','Save')}</button><button type="button" onClick={()=>setTitleDraft(null)}>{t('Anulează','Cancel')}</button></form>
+          )}<input type="search" value={historyQuery} onChange={event=>setHistoryQuery(event.target.value)} aria-label={t('Caută în istoric','Search history')} placeholder={t('Caută în istoric','Search history')}/>{groups.filter(group=>group.title.toLocaleLowerCase(locale).includes(historyQuery.toLocaleLowerCase(locale).trim())).map(group => <button type="button" className={activeConversation === group.id ? 'active' : ''} key={group.id} disabled={pending} onClick={() => { setActiveConversation(group.id); setTitleDraft(null); setPendingQuestion(''); setPartialAnswer(''); retry.current=null; autoScroll.current=true; setAtBottom(true); if(!window.matchMedia('(min-width:1100px)').matches)setHistoryOpen(false); setError(''); }}><MessageSquareText size={16}/><span><strong>{group.title}</strong><small>{new Date(group.updatedAt).toLocaleDateString(locale)} · {group.turns.length} {t('răspunsuri', 'replies')}</small></span></button>)}{!groups.length && <p>{t('Conversațiile vor apărea aici după primul răspuns.', 'Your conversations will appear here after the first reply.')}</p>}</nav></div>}
       <button type="button" className="ac-ai-tools-toggle" aria-expanded={toolsOpen} onClick={() => setToolsOpen(open => !open)}><FileScan size={16}/>{t("Instrumente avansate și documente", "Advanced tools and documents")} <ChevronDown size={16}/></button>
       {toolsOpen && <aside className="ac-ai-tools"><div className="ac-ai-tools-heading"><strong>{t('Documente și rapoarte', 'Documents and reports')}</strong><button type="button" aria-label={t('Închide instrumentele', 'Close tools')} onClick={() => setToolsOpen(false)}><X size={20}/></button></div>
         <section className="card"><h3><Sparkles size={18} /> {t('Analiză și rapoarte', 'Analysis and reports')}</h3>

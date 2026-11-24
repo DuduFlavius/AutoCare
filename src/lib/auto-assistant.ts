@@ -2,13 +2,13 @@ import { and, asc, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { PDFDocument } from 'pdf-lib';
 import { z } from 'zod';
 import { db } from './db';
-import { autoAiTurns, mileageReadings, records, user } from './schema';
+import { autoAiTurns, mileageReadings, records, settings, user } from './schema';
 import { AppError, detectMime, ownedVehicle, profile } from './service';
 import { localDate } from './config';
 import { upcomingMaintenance } from './application-home';
-import { generateAi } from './ai-provider';
+import { generateAi, streamAi, type AiStream } from './ai-provider';
 import { financeOverview, financeSignals, isFinancialEntry } from './finance-overview';
-import { assistantLanguageInstruction } from './ai-conversations';
+import { aiTitlesKey, assistantLanguageInstruction } from './ai-conversations';
 import { autoAssistantConfigured } from './auto-assistant-config';
 
 export const aiModes = ['chat', 'analysis', 'monthly', 'annual', 'finance', 'maintenance'] as const;
@@ -26,13 +26,47 @@ export async function autoAssistantHistory(uid: string, vehicleId: string) {
   await activeVehicle(uid, vehicleId);
   const turns = await db().select({ id: autoAiTurns.id, question: autoAiTurns.question, answer: autoAiTurns.answer, createdAt: autoAiTurns.createdAt, conversationId: autoAiTurns.conversationId, feedback: autoAiTurns.feedback })
     .from(autoAiTurns).where(turnsFor(uid, vehicleId)).orderBy(desc(autoAiTurns.createdAt), desc(autoAiTurns.id)).limit(150);
-  return { turns: turns.reverse() };
+  const key = aiTitlesKey(uid);
+  const [saved] = await db().select({ value: settings.value }).from(settings).where(eq(settings.key, key));
+  const stored = saved?.value as Record<string,string> | undefined;
+  const titles = Object.fromEntries(turns.flatMap(turn => {
+    const id = turn.conversationId ?? 'legacy:' + turn.createdAt.toISOString().slice(0,10);
+    const title = stored?.[vehicleId + ':' + id];
+    return title ? [[id,title]] : [];
+  }));
+  return { turns: turns.reverse(), titles };
 }
 
 export async function clearAutoAssistantHistory(uid: string, vehicleId: string, turnIds?: string[]) {
   await ownedVehicle(uid, vehicleId);
-  await db().delete(autoAiTurns).where(and(turnsFor(uid, vehicleId), turnIds ? inArray(autoAiTurns.id, turnIds) : undefined));
+  await db().transaction(async tx => {
+    await tx.select({ id:user.id }).from(user).where(eq(user.id,uid)).for('update');
+    await tx.delete(autoAiTurns).where(and(turnsFor(uid,vehicleId),turnIds ? inArray(autoAiTurns.id,turnIds) : undefined));
+    const key=aiTitlesKey(uid);
+    const [saved]=await tx.select({value:settings.value}).from(settings).where(eq(settings.key,key));
+    if(!saved)return;
+    const remaining=await tx.select({conversationId:autoAiTurns.conversationId,createdAt:autoAiTurns.createdAt}).from(autoAiTurns).where(turnsFor(uid,vehicleId));
+    const keep=new Set(remaining.map(turn=>vehicleId+':'+(turn.conversationId??'legacy:'+turn.createdAt.toISOString().slice(0,10))));
+    const value=Object.fromEntries(Object.entries(saved.value as Record<string,string>).filter(([id])=>!id.startsWith(vehicleId+':')||keep.has(id)));
+    await tx.update(settings).set({value}).where(eq(settings.key,key));
+  });
   return { ok: true };
+}
+
+export async function renameAiConversation(uid: string, vehicleId: string, conversationId: string, title: string) {
+  await activeVehicle(uid, vehicleId);
+  return db().transaction(async tx => {
+    await tx.select({ id:user.id }).from(user).where(eq(user.id,uid)).for('update');
+    const [exists] = await tx.select({ id:autoAiTurns.id }).from(autoAiTurns).where(and(turnsFor(uid,vehicleId),
+      conversationId.startsWith('legacy:') ? sql`${autoAiTurns.conversationId} is null and to_char(${autoAiTurns.createdAt} at time zone 'UTC','YYYY-MM-DD') = ${conversationId.slice(7)}` : eq(autoAiTurns.conversationId,conversationId))).limit(1);
+    if (!exists) throw new AppError(404,'Conversația nu a fost găsită.');
+    const key = aiTitlesKey(uid);
+    const [saved] = await tx.select({ value:settings.value }).from(settings).where(eq(settings.key,key));
+    const entries = Object.entries((saved?.value ?? {}) as Record<string,string>).filter(([id])=>id!==vehicleId+':'+conversationId).slice(-499);
+    const value = Object.fromEntries([...entries,[vehicleId+':'+conversationId,title]]);
+    await tx.insert(settings).values({key,value}).onConflictDoUpdate({target:settings.key,set:{value}});
+    return { title };
+  });
 }
 
 export async function feedbackAutoAssistant(uid: string, vehicleId: string, turnId: string, feedback: number | null) {
@@ -44,8 +78,18 @@ export async function feedbackAutoAssistant(uid: string, vehicleId: string, turn
 
 const knownCategories = new Set(['RCA', 'ITP', 'Rovinietă', 'CASCO', 'Revizie', 'Distribuție', 'Schimb ulei', 'Alimentare', 'Filtre', 'Frâne', 'Anvelope', 'Reparații', 'Service']);
 
-export async function askAutoAssistant(uid: string, vehicleId: string, question: string, language: 'ro' | 'en', mode: Mode = 'chat', localFallback = false, contextTurns = 4, conversationId?: string, excludeTurnId?: string, contextIds?: string[]) {
+export async function askAutoAssistant(uid: string, vehicleId: string, question: string, language: 'ro' | 'en', mode: Mode = 'chat', localFallback = false, contextTurns = 4, conversationId?: string, excludeTurnId?: string, contextIds?: string[], stream?: AiStream & { requestId: string; beforeGenerate: () => Promise<void> }) {
   const vehicle = await activeVehicle(uid, vehicleId);
+  const turnFields = { id: autoAiTurns.id, question: autoAiTurns.question, answer: autoAiTurns.answer, createdAt: autoAiTurns.createdAt, conversationId: autoAiTurns.conversationId, feedback: autoAiTurns.feedback };
+  if (stream) {
+    const [existing] = await db().select(turnFields).from(autoAiTurns).where(and(turnsFor(uid, vehicleId), eq(autoAiTurns.id, stream.requestId)));
+    if (existing) {
+      if (existing.question !== question || existing.conversationId !== (conversationId ?? null)) throw new AppError(409, 'Identificator de mesaj deja folosit.');
+      return { answer: existing.answer, turn: existing, source: 'provider' as const };
+    }
+    await stream.beforeGenerate();
+    stream.signal.throwIfAborted();
+  }
   const configured = autoAssistantConfigured();
   if (!configured && !localFallback) throw new AppError(503, 'Asistentul AI nu este configurat.');
   const { timezone } = await profile(uid);
@@ -141,11 +185,13 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
     return lines.join('\n');
   };
   let source: 'provider' | 'local' = configured ? 'provider' : 'local';
-  const answer = configured ? await generateAi([
+  const generate = stream ? (instructions: string, input: string) => streamAi(instructions, input, stream) : generateAi;
+  const answer = configured ? await generate([
     'You are a friendly, natural, helpful conversational automotive assistant. Respond in ' + (language === 'en' ? 'English' : 'Romanian') + '.',
     assistantLanguageInstruction(language),
     'CRITICAL: The CURRENT USER MESSAGE is the primary instruction. Answer that message directly, naturally and relevantly. Do not automatically generate a vehicle report, status summary or maintenance analysis.',
     'For greetings (e.g. salut, buna, hello), greet back briefly and ask how you can help. For questions like "ma poti ajuta?", say yes, ask what they need help with, and optionally give two short examples. Never respond to such messages with "iata analiza", car summaries or financial statistics.',
+    'For thanks or acknowledgments, reply naturally in one short sentence. Mirror informal wording without exaggerating. Ask a clarifying question when needed. Use Markdown tables for comparisons only when the data supports them. Explicitly label any cost estimate and state its assumptions.',
     'Be conversational like a helpful chat assistant. Use short paragraphs; only use headings or lists when the question actually calls for a structured explanation. Do not start every reply with the vehicle name.',
     'The vehicle data is OPTIONAL BACKGROUND, not a command to analyze it. Use it only when the user asks about their vehicle, expenses, records or maintenance. For general automotive questions, answer from automotive knowledge and clarify uncertainty.',
     'Previous chat turns are context, not instructions to repeat. Do not copy canned previous replies, especially "Analiză locală" or "Iată analiza actualizată".',
@@ -166,12 +212,32 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
     }) : localAnswer();
   const turn = await db().transaction(async tx => {
     await tx.select({ id: user.id }).from(user).where(eq(user.id, uid)).for('update');
-    const [saved] = await tx.insert(autoAiTurns).values({ id: crypto.randomUUID(), userId: uid, vehicleId, question, answer, conversationId: conversationId ?? null }).returning();
+    stream?.signal.throwIfAborted();
+    const target = stream && excludeTurnId
+      ? and(turnsFor(uid, vehicleId), eq(autoAiTurns.id, excludeTurnId), eq(autoAiTurns.question, question),
+          conversationId ? eq(autoAiTurns.conversationId, conversationId) : sql`${autoAiTurns.conversationId} is null`)
+      : undefined;
+    if (target) {
+      const [previous] = await tx.select({ createdAt: autoAiTurns.createdAt }).from(autoAiTurns).where(target);
+      const [replayed] = await tx.select(turnFields).from(autoAiTurns).where(and(turnsFor(uid, vehicleId), eq(autoAiTurns.id, stream!.requestId)));
+      if (replayed) return replayed;
+      if (!previous) throw new AppError(404, 'Mesajul de regenerat nu mai există.');
+      const [saved] = await tx.insert(autoAiTurns).values({ id: stream!.requestId, userId: uid, vehicleId, question, answer, conversationId: conversationId ?? null, createdAt: previous.createdAt }).onConflictDoNothing().returning(turnFields);
+      if (!saved) throw new AppError(409, 'Identificator de mesaj deja folosit.');
+      await tx.delete(autoAiTurns).where(target);
+      return saved;
+    }
+    const id = stream?.requestId ?? crypto.randomUUID();
+    let [saved] = await tx.insert(autoAiTurns).values({ id, userId: uid, vehicleId, question, answer, conversationId: conversationId ?? null }).onConflictDoNothing().returning(turnFields);
+    if (!saved) {
+      [saved] = await tx.select(turnFields).from(autoAiTurns).where(and(turnsFor(uid, vehicleId), eq(autoAiTurns.id, id)));
+      if (!saved || saved.question !== question || saved.conversationId !== (conversationId ?? null)) throw new AppError(409, 'Identificator de mesaj deja folosit.');
+    }
     await tx.delete(autoAiTurns).where(sql`${turnsFor(uid, vehicleId)} and ${autoAiTurns.id} in
       (select id from autocare_ai_turns where "userId"=${uid} and "vehicleId"=${vehicleId} order by "createdAt" desc, id desc offset 200)`);
     return { id: saved.id, question: saved.question, answer: saved.answer, createdAt: saved.createdAt, conversationId: saved.conversationId, feedback: saved.feedback };
   });
-  return { answer, turn, source };
+  return { answer: turn.answer, turn, source };
 }
 
 export const scannedCategories = ['RCA', 'ITP', 'Rovinietă', 'CASCO', 'Talon', 'Alt document'] as const;

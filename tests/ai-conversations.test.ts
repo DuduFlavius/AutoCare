@@ -4,7 +4,7 @@ import { eq, sql } from 'drizzle-orm';
 import { migrate } from '../scripts/migrate';
 import { db, closeLocalDb } from '../src/lib/db';
 import { user, vehicles, autoAiTurns } from '../src/lib/schema';
-import { askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant } from '../src/lib/auto-assistant';
+import { askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, renameAiConversation } from '../src/lib/auto-assistant';
 import { conversationGroups, assistantLanguageInstruction } from '../src/lib/ai-conversations';
 import { readFile } from 'node:fs/promises';
 delete process.env.DATABASE_URL;
@@ -76,4 +76,63 @@ test('provider failure never saves a fabricated answer or overwrites history',as
  t.mock.method(globalThis,'fetch',async()=>new Response(null,{status:503}));
  await assert.rejects(()=>askAutoAssistant(uid,car,'A failed request','en','chat',false,0,crypto.randomUUID()));
  assert.equal((await autoAssistantHistory(uid,car)).turns.length,before);
+});
+
+test('provider deltas arrive before completion and retries persist one turn', async t => {
+ const encoder=new TextEncoder();
+ let finish!:()=>void, started!:()=>void, calls=0;
+ const firstDelta=new Promise<void>(resolve=>{started=resolve;});
+ t.mock.method(globalThis,'fetch',async (_url:unknown,init:RequestInit)=>{
+  calls++;
+  assert.equal(JSON.parse(String(init.body)).stream,true);
+  return new Response(new ReadableStream<Uint8Array>({start(output){
+   const firstFrame=encoder.encode('data: {"type":"response.output_text.delta","delta":"Mulțumesc"}\r\n\r\n');
+   const split=firstFrame.indexOf(0xc8)+1;
+   output.enqueue(firstFrame.slice(0,split));output.enqueue(firstFrame.slice(split));
+   finish=()=>{output.enqueue(encoder.encode('data: {"type":"response.output_text.delta","delta":"! Drumuri bune."}\n\ndata: {"type":"response.completed"}\n\n'));output.close();};
+  }}));
+ });
+ const conversationId=crypto.randomUUID(),requestId=crypto.randomUUID(),signal=new AbortController().signal;
+ const chunks:string[]=[];
+ const stream={signal,requestId,delta:(value:string)=>{chunks.push(value);started();},beforeGenerate:async()=>{}};
+ const call=()=>askAutoAssistant(uid,car,'Mersi','ro','chat',false,0,conversationId,undefined,[],stream);
+ const result=call();
+ await firstDelta;
+ assert.deepEqual(chunks,['Mulțumesc']);
+ assert.ok(!(await autoAssistantHistory(uid,car)).turns.some(turn=>turn.id===requestId));
+ finish();
+ assert.equal((await result).turn.answer,'Mulțumesc! Drumuri bune.');
+ assert.equal((await call()).turn.id,requestId);
+ assert.equal(calls,1);
+ assert.equal((await autoAssistantHistory(uid,car)).turns.filter(turn=>turn.id===requestId).length,1);
+});
+
+test('an interrupted Gemini stream drops provider reasoning and never saves a partial answer', async t=>{
+ const previousKey=process.env.GEMINI_API_KEY;
+ process.env.GEMINI_API_KEY='isolated-gemini-key';
+ try{
+  t.mock.method(globalThis,'fetch',async (url:unknown)=>{
+   assert.match(String(url),/streamGenerateContent\?alt=sse$/);
+   return new Response('data: {"candidates":[{"content":{"parts":[{"text":"Hidden","thought":true},{"text":"Parțial"}]}}]}\n\n');
+  });
+  const requestId=crypto.randomUUID(),chunks:string[]=[];
+  await assert.rejects(()=>askAutoAssistant(uid,car,'Cum funcționează?','ro','chat',false,0,first,undefined,[],{requestId,signal:new AbortController().signal,delta:text=>chunks.push(text),beforeGenerate:async()=>{}}));
+  assert.deepEqual(chunks,['Parțial']);
+  assert.ok(!(await autoAssistantHistory(uid,car)).turns.some(turn=>turn.id===requestId));
+ }finally{
+  if(previousKey===undefined)delete process.env.GEMINI_API_KEY;
+  else process.env.GEMINI_API_KEY=previousKey;
+ }
+});
+
+
+test('conversation titles survive reload and are scoped to the owner and vehicle',async()=>{
+ const conversationId=crypto.randomUUID(), id=crypto.randomUUID();
+ await db().insert(autoAiTurns).values({id,userId:uid,vehicleId:car,question:'Prima întrebare',answer:'Text',conversationId});
+ await assert.rejects(()=>renameAiConversation(other,car,conversationId,'Alt cont'));
+ await assert.rejects(()=>renameAiConversation(other,foreign,conversationId,'Alt vehicul'));
+ await renameAiConversation(uid,car,conversationId,'Revizie și documente');
+ assert.equal((await autoAssistantHistory(uid,car)).titles[conversationId],'Revizie și documente');
+ await clearAutoAssistantHistory(uid,car,[id]);
+ assert.equal((await autoAssistantHistory(uid,car)).titles[conversationId],undefined);
 });

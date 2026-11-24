@@ -17,7 +17,7 @@ import {languagePreferenceKey, userLanguage} from '@/lib/user-language';
 import { financeGroup, financeGroups, isFinancialEntry } from '@/lib/finance-overview';
 import { isPlannedService } from '@/lib/planned-service';
 import { localDate } from '@/lib/config';
-import { aiModes, askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, scanAutoDocument } from '@/lib/auto-assistant';
+import { aiModes, askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, renameAiConversation, scanAutoDocument } from '@/lib/auto-assistant';
 import { autoPointCategories } from '@/lib/auto-points';
 import { loadAutoPoints } from '@/lib/auto-points-server';
 import {automaticTripBatch} from '@/lib/automatic-trips';
@@ -201,6 +201,11 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
 
     if (path[0] === 'auto-assistant') {
       if (!await svc.premium(uid)) throw new svc.AppError(403, 'Asistentul AI este disponibil în Premium.');
+      if (route === 'auto-assistant/history' && method === 'PATCH') {
+        await rate(uid,'auto-assistant-history-title',30);
+        const { vehicleId, conversationId, title } = z.object({vehicleId:uuid,conversationId:z.union([uuid,z.string().regex(/^legacy:\d{4}-\d{2}-\d{2}$/)]), title:z.string().trim().min(1).max(72)}).parse(await body(req));
+        return json(await renameAiConversation(uid, vehicleId, conversationId, title));
+      }
       if (route === 'auto-assistant/history' && method === 'DELETE') {
         const { vehicleId, turnIds } = z.object({ vehicleId: uuid, turnIds: z.array(uuid).min(1).max(150).optional() }).parse(await body(req));
         return json(await clearAutoAssistantHistory(uid, vehicleId, turnIds));
@@ -213,7 +218,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (route === 'auto-assistant/history' && method === 'GET')
         return json(await autoAssistantHistory(uid, uuid.parse(new URL(req.url).searchParams.get('vehicleId'))));
       if (route === 'auto-assistant' && method === 'POST') {
-        const { vehicleId, question, language, mode, localFallback, contextTurns, conversationId, excludeTurnId, contextIds } = z.object({
+        const { vehicleId, question, language, mode, localFallback, contextTurns, conversationId, excludeTurnId, contextIds, requestId } = z.object({
           vehicleId: uuid,
           question: z.string().trim().min(1).max(600),
           language: z.enum(['ro', 'en']).default('ro'),
@@ -223,9 +228,40 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           conversationId: uuid.optional(),
           excludeTurnId: uuid.optional(),
           contextIds: z.array(uuid).max(4).optional(),
+          requestId: uuid.optional(),
         }).parse(await body(req));
-        // Keep a short-window abuse guard, but only count successful AI replies toward daily usage.
+        // Guard bursts and reserve provider capacity before opening streamed generation.
         await rate(uid, 'auto-assistant-minute-v3', 12);
+        if (requestId && req.headers.get('Accept') === 'application/x-ndjson') {
+          const controller = new AbortController();
+          const signal = AbortSignal.any([req.signal, controller.signal]);
+          const encoder = new TextEncoder();
+          const stream = new ReadableStream<Uint8Array>({
+            start(output) {
+              void (async () => {
+                const send = (payload: object) => {
+                  if (!signal.aborted) output.enqueue(encoder.encode(JSON.stringify(payload) + '\n'));
+                };
+                try {
+                  const result = await askAutoAssistant(uid, vehicleId, question, language, mode, false, contextTurns, conversationId, excludeTurnId, contextIds, {
+                    requestId, signal, delta: text => send({ type: 'delta', text }),
+                    beforeGenerate: async () => {
+                      await rate(uid, 'auto-assistant-success-day-v3', 120, 86400000);
+                      await rate('all', 'ai-provider-success-day-v3', 3000, 86400000);
+                    },
+                  });
+                  send({ type: 'done', turn: result.turn });
+                } catch (error) {
+                  send({ type: 'error', message: error instanceof svc.AppError ? error.message : 'Răspunsul AI a fost întrerupt. Poți reîncerca.' });
+                } finally {
+                  if (!controller.signal.aborted) output.close();
+                }
+              })();
+            },
+            cancel() { controller.abort(); },
+          });
+          return new Response(stream, { headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'private, no-store, no-transform', 'X-Robots-Tag': 'noindex, nofollow', 'X-Accel-Buffering': 'no' } });
+        }
         const answer = await askAutoAssistant(uid, vehicleId, question, language, mode, localFallback, contextTurns, conversationId, excludeTurnId, contextIds);
         await rate(uid, 'auto-assistant-success-day-v3', 120, 86400000);
         await rate('all', 'ai-provider-success-day-v3', 3000, 86400000);
