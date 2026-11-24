@@ -102,7 +102,7 @@ export default function RasterRoadMap({
         layer.on('load', () => {
           if (!disposed) setTileError(false);
         });
-        planned.current = L.polyline([], { color: '#245bd5', weight: 7, interactive: false }).addTo(view);
+        planned.current = L.polyline([], { color: '#087287', weight: 7, interactive: false }).addTo(view);
         line.current = L.polyline(
           routeGeometry(latest.current,latestRoads.current).features.map((f) =>
             f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),

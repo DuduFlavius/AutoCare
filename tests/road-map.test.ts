@@ -53,9 +53,9 @@ test('the street palette gives roads, water and labels distinct dark-map contras
   {id:'highway_minor',type:'line',source:'streets'},
   {id:'road_label',type:'symbol',source:'streets',layout:{'text-field':'{name}'}},
  ]});
- assert.equal(style.layers[0].paint?.['background-color' as keyof typeof style.layers[0]['paint']], '#151d2b');
+ assert.equal(style.layers[0].paint?.['background-color' as keyof typeof style.layers[0]['paint']], '#132329');
  assert.notDeepEqual(style.layers[2].paint,style.layers[3].paint);
- assert.ok(JSON.stringify(style.layers[4].paint).includes('#cad8e9'));
+ assert.ok(JSON.stringify(style.layers[4].paint).includes('#d8e6e8'));
 });
 
 test('matched GPS fixes use the real mapped curve, not the diagonal chord',()=>{
@@ -101,4 +101,19 @@ test('uses the one-way arc across a roundabout closing node',()=>{
   const exit={...p(21.00005,false,5000),speed:5,heading:90};
   const coordinates=routeGeometry([enter,exit],[road]).features[0]?.geometry.coordinates;
   assert.deepEqual(coordinates,[[21,45.00005],[21,45],[21.00005,45]]);
+});
+
+test('navigation map adds an idempotent local-road casing and quiet buildings',()=>{
+ const source={version:8 as const,sources:{},layers:[
+  {id:'highway_minor',type:'line' as const,source:'roads','source-layer':'transportation'},
+  {id:'highway_path',type:'line' as const,source:'roads'},
+  {id:'building',type:'fill' as const,source:'roads'},
+ ]};
+ const day=streetOnlyStyle(source,true);
+ const night=streetOnlyStyle(day,false);
+ assert.deepEqual(day.layers.map(layer=>layer.id),['autocare-local-casing','highway_minor','building']);
+ assert.deepEqual(night.layers.map(layer=>layer.id),day.layers.map(layer=>layer.id));
+ assert.equal(day.layers[2].minzoom,15);
+ assert.notDeepEqual(day.layers[0].paint,night.layers[0].paint);
+ assert.match(JSON.stringify(day.layers[0].paint),/interpolate/);
 });

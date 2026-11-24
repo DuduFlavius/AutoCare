@@ -1,0 +1,44 @@
+name: SmartDrive 6.2 visual comparison
+on:
+  push:
+    branches: [smartdrive-62-visual-qa]
+permissions:
+  contents: read
+jobs:
+  screenshots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: npm ci
+      - name: Install browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/sd62-browser" --no-package-lock --no-save playwright@1.58.2
+          "$RUNNER_TEMP/sd62-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Render the previous and updated components with synthetic data
+        run: |
+          set -euo pipefail
+          before="$RUNNER_TEMP/sd62-before"
+          after="$RUNNER_TEMP/sd62-after"
+          git worktree add --detach "$before" 48db1cc308c5d77e28cfb96cb1d70864745f65c2
+          ln -s "$PWD/node_modules" "$before/node_modules"
+          cp scripts/audit/home-comparison-preview.mjs "$before/scripts/audit/"
+          (cd "$before" && AUTOCARE_SMARTDRIVE_QA_DIR="$before/render" node scripts/audit/home-comparison-preview.mjs && AUTOCARE_SMARTDRIVE_QA_DIR="$before/render" node scripts/audit/smartdrive-visual-preview.mjs)
+          AUTOCARE_SMARTDRIVE_QA_DIR="$after" node scripts/audit/home-comparison-preview.mjs
+          AUTOCARE_SMARTDRIVE_QA_DIR="$after" node scripts/audit/smartdrive-visual-preview.mjs
+          # Emulate the Capacitor platform only in the fixture, with no native GPS or account access.
+          sed -i 's|<script src="app.js">|<script>window.androidBridge={};</script><script src="app.js">|' "$before/render/frame.html" "$after/frame.html"
+          python3 -m http.server 4171 --bind 127.0.0.1 --directory "$before/render" &
+          python3 -m http.server 4172 --bind 127.0.0.1 --directory "$after" &
+          trap 'kill $(jobs -p) 2>/dev/null || true' EXIT
+          mkdir screenshots
+          AUTOCARE_QA_PLAYWRIGHT="$RUNNER_TEMP/sd62-browser/package.json" AUTOCARE_QA_SCREENSHOTS="$PWD/screenshots" node scripts/audit/smartdrive-62-screenshots.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: SmartDrive-6.2-visual-comparison
+          path: screenshots/
+          retention-days: 14

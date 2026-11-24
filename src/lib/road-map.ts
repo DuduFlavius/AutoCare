@@ -1,4 +1,4 @@
-import type {StyleSpecification} from 'maplibre-gl';
+import type {LineLayerSpecification,StyleSpecification} from 'maplibre-gl';
 import type { FeatureCollection, LineString } from 'geojson';
 import {matchRecordedRoadLink} from './recorded-road-match';
 import type {SpeedRoad} from './road-speed-limit';
@@ -83,34 +83,49 @@ export function routeGeometry(points: GPSFix[], mappedRoads?: readonly SpeedRoad
 }
 export const roadMapStyle = 'https://tiles.openfreemap.org/styles/fiord';
 
-/** Keep street and place labels while hiding basemap icons and railway ties. */
+/** Keep OSM's topology, source filters and labels. Rebuild the navigation hierarchy around stroked roads. */
 export function streetOnlyStyle(style: StyleSpecification, day = false): StyleSpecification {
-  return {
-    ...style,
-    layers: style.layers
-      .filter(layer => layer.type !== 'raster' && layer.type !== 'hillshade' && !/^railway.*_dashline$/.test(layer.id))
-      .map(layer => {
-        // Retain the provider's road geometry and zoom expressions; only tune its palette.
-        if (layer.type === 'background') return { ...layer, paint: { ...layer.paint, 'background-color': day ? '#eef2f6' : '#151d2b' } };
-        if (layer.type === 'fill') {
-          const color = /water/.test(layer.id) ? (day ? '#badfed' : '#1d3a54') : /building/.test(layer.id) ? (day ? '#e0e6ed' : '#252f40') : /park|wood|grass/.test(layer.id) ? (day ? '#d4eadf' : '#203d38') : null;
-          if (color) return { ...layer, paint: { ...layer.paint, 'fill-color': color } };
-        }
-        if (layer.type === 'line' && /road|highway/.test(layer.id) && !/rail|tunnel|bridge|casing/.test(layer.id)) {
-          const color = /motorway|trunk|primary/.test(layer.id) ? (day ? '#e9b25e' : '#e3bc79') : /secondary|tertiary/.test(layer.id) ? (day ? '#b7c4d6' : '#8298b7') : (day ? '#fdfefe' : '#586a83');
-          return { ...layer, paint: { ...layer.paint, 'line-color': color } };
-        }
-        if (layer.type === 'symbol' && layer.layout?.['text-field']) return { ...layer, paint: { ...layer.paint, 'text-color': /place|country/.test(layer.id) ? (day ? '#152c21' : '#f3f8f5') : (day ? '#3e5549' : '#cad8e9'), 'text-halo-color': day ? '#f9fcf9' : '#151d2b', 'text-halo-width': 1.3 } };
-        return layer;
-      })
-      .flatMap(layer => {
-        if (layer.type !== 'symbol' || !layer.layout?.['icon-image']) return [layer];
-        if (!layer.layout['text-field']) return [];
-        const layout = { ...layer.layout };
-        delete layout['icon-image'];
-        return [{ ...layer, layout }];
-      }),
-  };
+  const background=day?'#f3f5f2':'#132329';
+  const roadEdge=day?'#becbd1':'#162c38';
+  const street=day?'#ffffff':'#405a68';
+  const major=day?'#fffbec':'#6f8590';
+  const motorway=day?'#f4d69a':'#aa9367';
+  const isStreet=(id:string)=>id==='highway_minor'||id==='autocare-local-casing';
+  const width=(low:number,mid:number,high:number):LineLayerSpecification['paint']=>({
+    'line-width':['interpolate',['linear'],['zoom'],10,low,15,mid,19,high],
+  });
+  const layers=style.layers.flatMap<StyleSpecification['layers'][number]>(layer=>{
+    if(layer.type==='raster'||layer.type==='hillshade'||/^railway.*_dashline$/.test(layer.id)||layer.id==='highway_path')return [];
+    if(layer.type==='background')return [{...layer,paint:{...layer.paint,'background-color':background}}];
+    if(layer.type==='fill'){
+      if(/building/.test(layer.id))return [{...layer,minzoom:15,paint:{...layer.paint,
+        'fill-color':day?'#dae2e1':'#26383f','fill-opacity':day?.65:.55}}];
+      const color=/water/.test(layer.id)?(day?'#bcdbe7':'#224653'):/park|wood|grass/.test(layer.id)?(day?'#dcead8':'#233d36'):/landuse_residential/.test(layer.id)?(day?'#e9eef0':'#1c2e36'):null;
+      return [color?{...layer,paint:{...layer.paint,'fill-color':color}}:layer];
+    }
+    if(layer.type==='line'&&(/road|highway|^autocare-local-casing$/.test(layer.id))&&!/rail|tunnel|bridge|pier/.test(layer.id)){
+      const casing=layer.id.endsWith('casing');
+      const express=/motorway|trunk|primary/.test(layer.id);
+      const local=isStreet(layer.id);
+      const color=casing?(express?(day?'#c3a367':'#4b4434'):roadEdge):express?motorway:local?street:major;
+      const w=local?(casing?width(.35,3.8,15):width(.25,2.5,12)):casing?width(1.7,7,26):width(1.1,5.4,23);
+      const updated={...layer,layout:{...layer.layout,'line-cap':'round' as const,'line-join':'round' as const},
+        paint:{...layer.paint,...w,'line-color':color}};
+      if(layer.id==='highway_minor'&&!style.layers.some(l=>l.id==='autocare-local-casing')){
+        const outline={...updated,id:'autocare-local-casing',paint:{...updated.paint,...width(.35,3.8,15),'line-color':roadEdge}};
+        return [outline,updated];
+      }
+      return [updated];
+    }
+    if(layer.type!=='symbol')return [layer];
+    const layout={...layer.layout};
+    delete layout['icon-image'];
+    if(!layout['text-field'])return [];
+    if(layer.id.startsWith('highway_name'))layout['text-size']=['interpolate',['linear'],['zoom'],12,10,16,12,19,14];
+    return [{...layer,layout,paint:{...layer.paint,
+      'text-color':day?'#233d45':'#d8e6e8','text-halo-color':background,'text-halo-width':1.55}}];
+  });
+  return {...style,layers};
 }
 
 export function tripBounds(points: GPSFix[]): [[number, number], [number, number]] {

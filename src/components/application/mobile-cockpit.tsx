@@ -1,5 +1,5 @@
 'use client';
-import {useState} from 'react';
+import {useState,type ReactNode} from 'react';
 import {MobileFinanceOverview} from './mobile-finance-overview';
 import {homeDocument} from '@/lib/application-home';
 import {FilterSelect} from '../filter-select';
@@ -13,9 +13,9 @@ import { documentStatus, localDate } from '@/lib/config';
 
 type Data=Awaited<ReturnType<typeof dashboard>>;
 type RecordRow=Data['records'][number];
-export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onDrill=(tab)=>navigate(tab),onVehicle,onCreate,onRecord,onNextService,currency}:{
+export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onDrill=(tab)=>navigate(tab),onVehicle,onCreate,onRecord,onNextService,currency,smartDrive}:{
  data:Data;selectedVehicle:string;onSelectVehicle:(id:string)=>void;onDrill?:(tab:string,vehicleId:string,ids:string[],label:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;
- onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:RecordRow)=>void;onNextService:()=>void;currency:'RON'|'EUR';
+ onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:RecordRow)=>void;onNextService:()=>void;currency:'RON'|'EUR';smartDrive?:ReactNode;
 }){
  const [chartPeriod,setChartPeriod]=useState('6');
  const en=useApplicationLanguage()==='en',locale=useApplicationLocale();
@@ -51,11 +51,14 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
    <button className="rg-m-next-service" onClick={onNextService}><span className="rg-m-icon"><Wrench size={27}/></span><span><small>{t('Următoarea intervenție','Next maintenance')}</small><strong>{next?.service.title??t('Adaugă un termen','Add a service deadline')}</strong><small>{next?.status.remainingKm!=null?(next.status.remainingKm<=0?t('Prag atins','Threshold reached'):t('în ','in ')+next.status.remainingKm.toLocaleString(locale)+' km'):next?.raw?date(next.raw):t('Planifică întreținerea mașinii','Plan your vehicle maintenance')}</small></span>{progress!=null?<span className="rg-service-progress" aria-label={t("Progres interval kilometraj","Mileage interval progress")+" "+Math.round(progress)+"%"}><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18"/><circle cx="22" cy="22" r="18" strokeDasharray="113.1" strokeDashoffset={113.1*(1-progress/100)}/></svg><b>{Math.round(progress)}%</b></span>:<ChevronRight size={20}/>}</button>
    <section className="ac-home-finance" aria-labelledby="home-finance-title"><header><h2 id="home-finance-title"><Coins size={22}/>{t('Cheltuieli','Expenses')}</h2><button aria-label={t('Deschide cheltuielile','Open expenses')} onClick={()=>onDrill('Cheltuieli',car.id,finance.entries.map(r=>r.id),t('Cheltuielile mașinii','Vehicle expenses'))}><ChevronRight size={17}/></button></header><MobileFinanceOverview rows={rows} today={today} money={money} period={chartPeriod} onPeriod={setChartPeriod} onFilters={()=>navigate('Cheltuieli')} filtersOpen={false}/></section>
    <div className="rg-m-shortcuts">{[
-    {Icon:Wrench,title:t('Întreținere','Maintenance'),note:t('Plan și istoric','Plan & history'),tab:'Întreținere'},
     {Icon:Files,title:t('Documente','Documents'),note:'ITP, RCA, CASCO',tab:'Documente'},
+    {Icon:Wrench,title:t('Service','Service'),note:t('Plan și istoric','Plan & history'),tab:'Întreținere'},
+    {Icon:Coins,title:t('Cheltuieli','Expenses'),note:t('Costuri și rapoarte','Costs and reports'),tab:'Cheltuieli'},
+    {Icon:Gauge,title:t('Kilometraj','Mileage'),note:t('Istoric și statistici','History & statistics'),tab:'Kilometraj'},
     {Icon:ShieldCheck,title:t('RCA & Rovinietă','RCA & Road vignette'),note:t('Expirări și reînnoiri','Expiry & renewals'),tab:'RCA & Rovinietă'},
     {Icon:Sparkles,title:'AutoCare AI',note:t('Asistentul tău auto','Your car assistant'),tab:data.premium?'AutoCare AI':'Premium'},
-   ].map(({Icon,title,note,tab})=><button type="button" key={title} onClick={()=>navigate(tab)}><Icon size={29}/><strong>{title}</strong><small>{note}</small></button>)}</div>
+   ].map(({Icon,title,note,tab})=><button type="button" key={title} onClick={()=>navigate(tab)}><Icon size={23} aria-hidden="true"/><span><strong>{title}</strong><small>{note}</small></span><ChevronRight size={15} aria-hidden="true"/></button>)}</div>
+   {smartDrive}
    <div className="rg-m-overview">{[
     {Icon:Coins,label:t('Costuri totale','Total costs'),value:finance.yearKnown?money(finance.yearBani):'—',note:t('Anul curent','Current year'),tab:'Cheltuieli'},
     {Icon:ChartNoAxesCombined,label:t('Intervenții','Service entries'),value:String(rows.filter(r=>r.kind==='service'&&r.date&&r.date<=today&&!isPlannedService(r,today)).length),note:t('Istoric înregistrat','Recorded history'),tab:'Întreținere'},
@@ -64,5 +67,6 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
    {currency==='EUR'&&<small className="rg-currency-note">{t('Afișare orientativă: 1 EUR = 5 RON.','Indicative display: 1 EUR = 5 RON.')}</small>}
    <section className="rg-m-recent"><header><h2>{t('Cheltuieli recente','Recent expenses')}</h2><button onClick={()=>navigate('Cheltuieli')}>{t('Vezi toate','View all')}<ChevronRight size={15}/></button></header>{recent.length?<ul>{recent.map(row=><li key={row.id}><button onClick={()=>onRecord(row)}><span className="rg-m-icon"><Wrench size={22}/></span><span><strong data-user-content>{row.title}</strong><small>{row.date&&date(row.date)}</small></span><b>{row.amountKnown===false?'—':money(row.amountBani)}</b></button></li>)}</ul>:<p>{t('Cheltuielile înregistrate vor apărea aici.','Your recorded expenses will appear here.')}</p>}</section>
   </>}
+  {!car&&smartDrive}
  </div>;
 }

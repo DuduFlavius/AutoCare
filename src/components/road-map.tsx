@@ -139,16 +139,16 @@ export default function RoadMapView({
             window.clearTimeout(fallbackTimer);
       window.cancelAnimationFrame(animationFrame.current);
             const building=view.getStyle().layers.find(layer=>layer.type==='fill'&&layer['source-layer']==='building');
-            if(building&&'source' in building){view.addLayer({id:'autocare-buildings',type:'fill-extrusion',source:building.source,'source-layer':'building',minzoom:15,paint:{'fill-extrusion-color':'#8492a7','fill-extrusion-height':['coalesce',['get','render_height'],0],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':.22}},view.getStyle().layers.find(layer=>layer.type==='symbol')?.id);}
+            if(building&&'source' in building){view.addLayer({id:'autocare-buildings',type:'fill-extrusion',source:building.source,'source-layer':'building',minzoom:17.5,paint:{'fill-extrusion-color':'#8492a7','fill-extrusion-height':['coalesce',['get','render_height'],0],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':.22}},view.getStyle().layers.find(layer=>layer.type==='symbol')?.id);}
             view.addSource('directions' , { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
             view.addLayer({
               id: 'directions-outline', type: 'line', source: 'directions',
-              paint: { 'line-color': '#c5eef4', 'line-width': 11 },
+              paint: { 'line-color': '#d9f6f7', 'line-width': 11 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addLayer({
               id: 'directions-line', type: 'line', source: 'directions',
-              paint: { 'line-color': '#245bd5', 'line-width': 7 },
+              paint: { 'line-color': '#087287', 'line-width': 7 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
             view.addSource('trip', { type: 'geojson', data: routeGeometry(latest.current,latestRoads.current) });
