@@ -73,6 +73,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const nativeElapsed=useRef<{seconds:number;at:number;running:boolean}|null>(null);
   const [signal, setSignal] = useState<'requesting'|'waiting'|'ok'|'lost'>('waiting');
   const lastFix = useRef<number>(0);
+  const lastPreciseBrowserFix=useRef<number|null>(null);
   const [routePoints, setRoutePoints] = useState<Sample[]>([]);
   const [trackingSeconds, setTrackingSeconds] = useState(0);
   const [, setClock] = useState('');
@@ -82,8 +83,23 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const started = useRef<number | null>(null);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
   const distanceRef = useRef(0);
+  function updateMeasuredSpeed(position:Sample) {
+    const previousFix=lastLiveFix.current;
+    if(position.timestamp<=(previousFix?.timestamp??0))return;
+    const speed=measuredSpeed(position,previousFix);
+    // When Android omits speed, let several good fixes accumulate enough movement
+    // to distinguish it from accuracy noise. Never carry a previous speed forward.
+    if(speed!==null||!previousFix||previousFix.accuracy>25||position.accuracy>25||
+      position.breakBefore||position.timestamp-previousFix.timestamp>=7000){
+      lastLiveFix.current=position;
+    }
+    setMeasuredKmh(speed);
+    return speed;
+  }
   function applyNative(value:NativeTrip){
     if(tripId.current!==value.id){
+      lastLiveFix.current=null;
+      setMeasuredKmh(null);
       let confirmed=false;
       try{confirmed=!value.active&&wasDriveConfirmed(ownerId,value.id);}catch{/* Native state remains recoverable. */}
       setSaved(confirmed);setSaveAttempted(false);
@@ -105,7 +121,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
         ? previousPoints : shownPoints);
     setClock(new Date().toLocaleTimeString(locale));setTrackingSeconds(value.awaitingMotion?0:Math.max(0,Math.floor((nativeEnd-value.startedAt-nativePaused)/1000)));
     const position=value.lastPosition??shownPoints.at(-1);
-    if(position){if(position.timestamp!==lastLiveFix.current?.timestamp){setMeasuredKmh(measuredSpeed(position,lastLiveFix.current));lastLiveFix.current=position;}setMapPosition(current=>!current||position.timestamp>current.timestamp?position:current);}
+    if(position){updateMeasuredSpeed(position);setMapPosition(current=>!current||position.timestamp>current.timestamp?position:current);}
     const last=position;if(last){lastFix.current=value.lastFixAt||last.timestamp;setSignal(value.active&&Date.now()-lastFix.current>25000?'lost':'ok');}
   }
   useEffect(()=>{
@@ -169,7 +185,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const pause = async () => {
     if(controlBusy||saving||automatic)return;
     if(nativeMode.current){await changeNativePause(true);return;}
-    watcher.current?.();watcher.current=null;previous.current=null;lastLiveFix.current=null;
+    watcher.current?.();watcher.current=null;previous.current=null;lastLiveFix.current=null;lastPreciseBrowserFix.current=null;
     if(timing.current){
       timing.current=pauseDriveClock(timing.current,Date.now());
       setTrackingSeconds(Math.floor(timing.current.elapsedMs/1000));
@@ -252,7 +268,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     if (watcher.current !== null) return;
     const car=vehicles.find(v=>v.id===vehicleId)||vehicles[0];
     if(!car){setError(t("Selectează o mașină înainte de pornire.", "Select a vehicle before starting."));return;}
-    if(!resume){setVehicleId(car.id);baseline.current=startMileage(car);tripId.current=crypto.randomUUID();} endedAt.current=null; setSaved(false);
+    if(!resume){lastPreciseBrowserFix.current=null;setVehicleId(car.id);baseline.current=startMileage(car);tripId.current=crypto.randomUUID();} endedAt.current=null; setSaved(false);
     setClock(new Date().toLocaleTimeString(locale));
     if(!resume){const now=Date.now();timing.current=startDriveClock(now);started.current=now;setStartedAt(now);setDistance(0);distanceRef.current=0;setRoutePoints([]);setTrackingSeconds(0);maxSpeedRef.current=null;setMaxSpeed(null);lastLiveFix.current=null;}else if(timing.current){timing.current=resumeDriveClock(timing.current,Date.now());}setPaused(false);
     setSaveAttempted(false);
@@ -264,12 +280,16 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
         const next = browserGPSFix(value);
         if (!next || next.timestamp > Date.now() + 5000 || Date.now() - next.timestamp > 15000) return;
         setError('');
-        const kmh=measuredSpeed(next,lastLiveFix.current);lastLiveFix.current=next;setMeasuredKmh(kmh);
+        const kmh=updateMeasuredSpeed(next)??null;
         if(kmh!==null){maxSpeedRef.current=Math.max(maxSpeedRef.current??0,kmh);setMaxSpeed(maxSpeedRef.current);}
         setMapPosition(previous => latestGPSFix(previous, next));
         if (next.accuracy > 50) { setSignal('waiting'); return; }
         lastFix.current=Date.now(); setSignal('ok');
-        const accepted=acceptGPSFix(previous.current,next);
+        const preciseAt=lastPreciseBrowserFix.current;
+        if(preciseAt!==null&&next.timestamp<=preciseAt)return;
+        lastPreciseBrowserFix.current=next.timestamp;
+        const gap=preciseAt!==null&&next.timestamp-preciseAt>12000;
+        const accepted=acceptGPSFix(gap?null:previous.current,next);
         if(!accepted) return;
         if (!started.current) { started.current = next.timestamp; setStartedAt(next.timestamp); }
         distanceRef.current+=accepted.meters; setDistance(distanceRef.current);

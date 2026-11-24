@@ -15,8 +15,15 @@ export function drivingBearing(previous:GPSFix|null,next:GPSFix,current=0){
  return (current+delta*.4+360)%360;
 }
 export function drivingZoom(speed:number|null|undefined,untilTurn?:number){
- if(untilTurn!=null&&untilTurn>=0&&untilTurn<180)return 17.5;
- const kmh=Math.max(0,speed??0)*3.6;
- return kmh>90?15.4:kmh>50?16:16.8;
+ const kmh=Math.max(0,Number.isFinite(speed)?speed!:0)*3.6;
+ const cruise=17.15-Math.min(1,kmh/120)*1.75;
+ const proximity=untilTurn!=null&&untilTurn>=0?Math.max(0,1-untilTurn/220):0;
+ return cruise+(17.5-cruise)*proximity;
 }
 export function daylightMap(hour:number){return hour>=7&&hour<19;}
+
+export function drivingInsets(height:number, header:number, dock:number) {
+ const available=Math.max(0,height-header-dock);
+ const shift=available>40 ? 2*(header+available*.70)-height : 0;
+ return {top:Math.max(0,shift),bottom:Math.max(0,-shift),left:0,right:0};
+}

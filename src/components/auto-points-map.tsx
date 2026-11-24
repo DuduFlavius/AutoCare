@@ -93,6 +93,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const locationRevision = useRef(0);
   const lastReroute = useRef(0);
   const deviation = useRef(0);
+  const lastDeviationFix = useRef(0);
   const distance = (meters: number) => meters >= 1000 ? `${(meters / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} km` : `${Math.round(meters)} m`;
 
   useEffect(() => () => {
@@ -232,6 +233,8 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const progress = useMemo(() => navigating && route && precisePosition ? navigationProgress(route, precisePosition, stepIndex) : null, [navigating, route, precisePosition, stepIndex]);
   useEffect(() => {
     if (!progress || !precisePosition || !destination) return;
+    if (precisePosition.timestamp<=lastDeviationFix.current) return;
+    lastDeviationFix.current=precisePosition.timestamp;
     const next = progress;
     if (next.gap < 40 && next.index > stepIndex) setStepIndex(next.index);
     deviation.current = next.gap > Math.max(65, precisePosition.accuracy * 2) ? deviation.current + 1 : 0;
@@ -247,14 +250,14 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const ManeuverIcon=progress?.next?.maneuver.exit?RotateCw:ArrowUp;
   const arrived = !!progress && progress.distance < 35 && progress.gap < 30;
   const telemetry=gpsTelemetry(position,now);
-  const roadSpeed=useRoadSpeed(telemetry.fresh && position && now-position.timestamp<8000 ? position : null,telemetry.speed,androidApk&&visible&&!preview&&(navigating||session?.state==='active'));
+  const roadSpeed=useRoadSpeed(telemetry.fresh && position && now-position.timestamp<8000 ? position : null,telemetry.speed??session?.speed??null,androidApk&&visible&&!preview&&(navigating||session?.state==='active'));
   const voiceText=progress?.next?[turnText(progress.next.maneuver,english),progress.next.name].filter(Boolean).join(' · '):'';
   useEffect(()=>{
-    if(muted||!navigating||!progress||progress.untilTurn>300||!voiceText||!('speechSynthesis' in window))return;
+    if(muted||!navigating||!progress||progress.untilTurn>300||progress.gap>45||!voiceText||!('speechSynthesis' in window))return;
     const key=progress.index+':'+voiceText;if(spoken.current===key)return;
     spoken.current=key;const utterance=new SpeechSynthesisUtterance(voiceText);utterance.lang=english?'en-GB':'ro-RO';window.speechSynthesis.speak(utterance);
 
-  },[muted,navigating,progress?.index,progress?.untilTurn,voiceText,english]);
+  },[muted,navigating,progress?.index,progress?.untilTurn,progress?.gap,voiceText,english]);
   useEffect(()=>{if((muted||!navigating)&&'speechSynthesis' in window)window.speechSynthesis.cancel();return()=>{if('speechSynthesis' in window)window.speechSynthesis.cancel()}},[muted,navigating]);
   const minutes=progress?Math.ceil(progress.seconds/60):!navigating&&route?Math.ceil(route.duration/60):null;
   const remaining=navigating?progress?.distance:route?.distance;
@@ -265,7 +268,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
         <RoadMap points={session?.points||noRoute} position={displayPosition} active={navigating||session?.state==='active'} english={english}
           initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview?undefined:requestLocate}
           locating={findingLocation||location.waiting} locationError={locationError||location.error}
-          untilTurn={progress?.untilTurn} plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting?choose:undefined}/>
+          mappedRoads={preview?undefined:roadSpeed.roads} untilTurn={progress?.untilTurn} plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting?choose:undefined}/>
         {nativeScreen&&<>{!navigating&&<button type="button" className="rg-navigation-back" aria-label={t('Înapoi în AutoCare','Back to AutoCare')} onClick={onExit}><ArrowLeft size={20}/></button>}<details className="rg-navigation-tools"><summary aria-label={t('Meniu SmartDrive','SmartDrive menu')}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={()=>onView?.('history')}><History size={17}/>{t('Istoric trasee','Trip history')}</button><button type="button" onClick={()=>onView?.('bluetooth')}><Bluetooth size={17}/>Bluetooth</button><label className="sd-speed-preference">{t('Avertizare limită de viteză','Speed limit warning')}
           <select value={roadSpeed.mode} onChange={event=>void roadSpeed.changeMode(event.target.value as typeof roadSpeed.mode)}>
             <option value="off">{t('Dezactivată','Off')}</option><option value="visual">{t('Vizuală','Visual')}</option><option value="sound">{t('Vizuală și sonoră','Visual and sound')}</option>
@@ -276,11 +279,15 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
         {navigating&&<div className="rg-guidance-turn" role="status"><ManeuverIcon size={30} style={{rotate:progress?.next?.maneuver.modifier?.includes('left')?'-90deg':progress?.next?.maneuver.modifier?.includes('right')?'90deg':undefined}}/><div><strong>{arrived?t('Ai ajuns','You arrived'):progress?distance(progress.untilTurn):t('Se caută semnal GPS precis…','Waiting for accurate GPS…')}</strong><span>{progress?.next?turnText(progress.next.maneuver,english):t('Urmează traseul','Follow the route')}</span><small>{progress?.next?.name}</small></div><button type="button" aria-expanded={details} onClick={()=>setDetails(v=>!v)}><ChevronDown size={20}/></button></div>}
         {androidApk && <div className="rg-navigation-speed" data-over-limit={roadSpeed.over} aria-label={t('Viteza GPS','GPS speed')}>
           <strong>{(telemetry.fresh ? session?.speed ?? telemetry.speed : null) ?? '—'}</strong><span>km/h</span>
-          {roadSpeed.limit!==null&&<div className="sd-speed-sign" aria-label={t(`Limită informativă: ${roadSpeed.limit} km/h. Respectă indicatoarele rutiere.`,`Advisory limit: ${roadSpeed.limit} km/h. Follow road signs.`)}>{roadSpeed.limit}</div>}
+          <div className="sd-speed-sign" data-unknown={roadSpeed.limit===null} aria-label={roadSpeed.limit===null?t('Limită de viteză necunoscută','Unknown speed limit'):t(`Limită informativă: ${roadSpeed.limit} km/h. Respectă indicatoarele rutiere.`,`Advisory limit: ${roadSpeed.limit} km/h. Follow road signs.`)}>{roadSpeed.limit??'—'}</div>
         </div>}
         <button className="rg-navigation-audio" type="button" aria-label={t('Indicații vocale','Voice guidance')} aria-pressed={!muted} title={muted?t('Sunet oprit','Sound off'):t('Sunet pornit','Sound on')} onClick={()=>{setMuted(v=>!v);spoken.current=''}}>{muted?<VolumeX size={24}/>:<Volume2 size={24}/>}</button>
       </div>
       <section ref={bottomPanel} className="sd-permanent-bottom" hidden={searchFocused}>
+        {!navigating&&route&&<div className="sd-planned-summary" role="status">
+          <span>{t('Traseu estimat','Estimated route')}</span>
+          <strong>{distance(route.distance)} · {Math.ceil(route.duration/60)} min</strong>
+        </div>}
         {session&&<DriveSessionPanel session={session} english={english} compact={androidApk} suspendDetails={searchFocused&&!navigating} vehicleSelector={androidApk?session.vehicle:undefined}>{navigating && progress && <span className="sd-route-remaining">
           <Flag size={15} aria-hidden="true"/> {t('Rămas pe traseu', 'Route remaining')} · {remaining != null ? distance(remaining) : '—'} · {minutes} min
           {eta && (' · ' + t('Sos. ', 'ETA ') + eta)}

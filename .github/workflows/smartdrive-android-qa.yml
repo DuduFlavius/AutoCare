@@ -1,0 +1,52 @@
+name: SmartDrive Android QA APK
+
+on:
+  push:
+    branches: [smartdrive-61-qa]
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: HTTPS Vercel alias for branch smartdrive-61-qa with isolated test data
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  android-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify Android build prerequisites
+        run: |
+          set -euo pipefail
+          echo "JAVA_HOME=$JAVA_HOME_21_X64" >> "$GITHUB_ENV"
+          echo "$JAVA_HOME_21_X64/bin" >> "$GITHUB_PATH"
+          "$JAVA_HOME_21_X64/bin/javac" -version
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Target the isolated AutoCare preview
+        env:
+          AUTOCARE_QA_PREVIEW_URL: ${{ inputs.preview_url || vars.AUTOCARE_SMARTDRIVE_QA_URL }}
+        run: node scripts/configure-smartdrive-android-qa.mjs
+      - run: npm ci --prefix mobile
+      - run: cd mobile && npx cap sync android
+      - name: Build and test the debug APK
+        working-directory: mobile/android
+        run: |
+          set -euo pipefail
+          ./gradlew :app:assembleDebug :app:testDebugUnitTest :autocare-native-tracking:testDebugUnitTest :app:lintDebug --console=plain
+          apk=app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$apk"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$apk" | grep -F "package: name='ro.autocare.garage.preview'"
+          mkdir -p "$RUNNER_TEMP/smartdrive-qa"
+          cp "$apk" "$RUNNER_TEMP/smartdrive-qa/AutoCare-SmartDrive-6.1-QA.apk"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-SmartDrive-6.1-QA
+          path: ${{ runner.temp }}/smartdrive-qa/AutoCare-SmartDrive-6.1-QA.apk
+          if-no-files-found: error
+          retention-days: 14

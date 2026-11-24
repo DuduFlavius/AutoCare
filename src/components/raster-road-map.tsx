@@ -1,4 +1,5 @@
 'use client';
+import type { SpeedRoad } from '@/lib/road-speed-limit';
 import { useEffect, useRef, useState } from 'react';
 import { Crosshair } from 'lucide-react';
 import type { Map as LeafletMap, Marker, Polyline } from 'leaflet';
@@ -11,6 +12,7 @@ import 'leaflet/dist/leaflet.css';
 /** Flat street tiles are the compatibility path for devices without WebGL. */
 export default function RasterRoadMap({
   points,
+  mappedRoads,
   position,
   active,
   english,
@@ -28,6 +30,7 @@ export default function RasterRoadMap({
   onDestination,
 }: {
   points: GPSFix[];
+  mappedRoads?: readonly SpeedRoad[];
   position?: GPSFix | null;
   active: boolean;
   english: boolean;
@@ -51,6 +54,8 @@ export default function RasterRoadMap({
     planned = useRef<Polyline | null>(null),
     latest = useRef(points);
   latest.current = points;
+  const latestRoads=useRef(mappedRoads);
+  latestRoads.current=mappedRoads;
   const latestPosition = useRef(position);
   latestPosition.current = position;
   const autoPointAction = useRef(onAutoPoint);
@@ -97,9 +102,9 @@ export default function RasterRoadMap({
         layer.on('load', () => {
           if (!disposed) setTileError(false);
         });
-        planned.current = L.polyline([], { color: '#087183', weight: 7, interactive: false }).addTo(view);
+        planned.current = L.polyline([], { color: '#245bd5', weight: 7, interactive: false }).addTo(view);
         line.current = L.polyline(
-          routeGeometry(latest.current).features.map((f) =>
+          routeGeometry(latest.current,latestRoads.current).features.map((f) =>
             f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
           ),
           { color: history ? '#5AFFC4' : '#168a9d', weight: 4, lineCap: 'round', lineJoin: 'round' },
@@ -207,11 +212,11 @@ export default function RasterRoadMap({
   }, [position, english, history, active, ready]);
   useEffect(() => {
     line.current?.setLatLngs(
-      routeGeometry(points).features.map((f) =>
+      routeGeometry(points,mappedRoads).features.map((f) =>
         f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
       ),
     );
-  }, [points, ready]);
+  }, [points, mappedRoads, ready]);
   useEffect(() => {
     planned.current?.setLatLngs(plannedRoute?.map(([lon, lat]) => [lat, lon]) ?? []);
     if (ready && plannedRoute?.length && !active && !shownRoute.current) showRoute();

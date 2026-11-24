@@ -7,6 +7,7 @@ const preferenceKey = 'autocare.smartdrive.speed-warning';
 
 export function useRoadSpeed(fix: GPSFix | null, speed: number | null, enabled: boolean) {
   const [sample,setSample] = useState<{center:GPSFix;roads:SpeedRoad[];expires:number}|null>(null);
+  const [roads,setRoads] = useState<SpeedRoad[]>([]);
   const lastRequest = useRef<{center:GPSFix;at:number}|null>(null);
   const pending = useRef<AbortController | null>(null);
   const [warning,setWarning] = useState<ReturnType<typeof speedWarning>>(initialWarning);
@@ -63,7 +64,18 @@ export function useRoadSpeed(fix: GPSFix | null, speed: number | null, enabled: 
     }).then(async result=>{
       if (!result.ok) return;
       const roads=await result.json();
-      if (!controller.signal.aborted && Array.isArray(roads)) setSample({center:fix,roads,expires:Date.now()+120000});
+      if (!controller.signal.aborted && Array.isArray(roads)) {
+        setSample({center:fix,roads,expires:Date.now()+120000});
+        setRoads(previous=>{
+          const byWay=new Map<number|string,SpeedRoad>();
+          for(const road of [...previous,...roads] as SpeedRoad[]){
+            const key=road.id??JSON.stringify(road.geometry);
+            byWay.delete(key);
+            byWay.set(key,road);
+          }
+          return Array.from(byWay.values()).slice(-160);
+        });
+      }
     }).catch(()=>{}).finally(()=>{if (pending.current===controller) pending.current=null;});
   },[valid,fix,coverage,sample]);
 
@@ -96,5 +108,5 @@ export function useRoadSpeed(fix: GPSFix | null, speed: number | null, enabled: 
     try {localStorage.setItem(preferenceKey,next);} catch { /* Storage may be unavailable in this WebView. */ }
   }
 
-  return {limit, over, mode, changeMode};
+  return {limit, over, mode, changeMode, roads};
 }

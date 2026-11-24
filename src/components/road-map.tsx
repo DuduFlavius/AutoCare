@@ -1,11 +1,12 @@
 'use client';
+import type { SpeedRoad } from '@/lib/road-speed-limit';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { Crosshair,Layers,Sun,Moon } from 'lucide-react';
 import type { Map as RoadMap, Marker, GeoJSONSource, AllPaintProperties } from 'maplibre-gl';
 import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
-import {drivingBearing,drivingZoom,daylightMap} from '@/lib/driving-camera';
+import {drivingBearing,drivingZoom,daylightMap,drivingInsets} from '@/lib/driving-camera';
 import {segmentMeters} from '@/lib/gps-tracking';
 import {measuredTransition,interpolateFix,interpolateAngle,cameraTurnProgress} from '@/lib/gps-animation';
 import type { GPSFix } from '@/lib/gps-tracking';
@@ -14,6 +15,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 const RasterRoadMap = dynamic(() => import('./raster-road-map'), { ssr: false });
 export default function RoadMapView({
   points,
+  mappedRoads,
   position,
   active,
   english = false,
@@ -33,6 +35,7 @@ export default function RoadMapView({
 }: {
   untilTurn?: number;
   points: GPSFix[];
+  mappedRoads?: readonly SpeedRoad[];
   position?: GPSFix | null;
   active: boolean;
   english?: boolean;
@@ -62,6 +65,8 @@ export default function RoadMapView({
   useEffect(()=>{const timer=setInterval(()=>setHour(new Date().getHours()),60000);return()=>clearInterval(timer)},[]);
   const latest = useRef(points);
   latest.current = points;
+  const latestRoads=useRef(mappedRoads);
+  latestRoads.current=mappedRoads;
   const latestPosition = useRef(position);
   latestPosition.current = position;
   const autoPointAction = useRef(onAutoPoint);
@@ -134,7 +139,7 @@ export default function RoadMapView({
             window.clearTimeout(fallbackTimer);
       window.cancelAnimationFrame(animationFrame.current);
             const building=view.getStyle().layers.find(layer=>layer.type==='fill'&&layer['source-layer']==='building');
-            if(building&&'source' in building){view.addLayer({id:'autocare-buildings',type:'fill-extrusion',source:building.source,'source-layer':'building',minzoom:15,paint:{'fill-extrusion-color':'#456357','fill-extrusion-height':['coalesce',['get','render_height'],0],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':.5}},view.getStyle().layers.find(layer=>layer.type==='symbol')?.id);}
+            if(building&&'source' in building){view.addLayer({id:'autocare-buildings',type:'fill-extrusion',source:building.source,'source-layer':'building',minzoom:15,paint:{'fill-extrusion-color':'#8492a7','fill-extrusion-height':['coalesce',['get','render_height'],0],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':.22}},view.getStyle().layers.find(layer=>layer.type==='symbol')?.id);}
             view.addSource('directions' , { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
             view.addLayer({
               id: 'directions-outline', type: 'line', source: 'directions',
@@ -143,10 +148,10 @@ export default function RoadMapView({
             });
             view.addLayer({
               id: 'directions-line', type: 'line', source: 'directions',
-              paint: { 'line-color': '#087183', 'line-width': 7 },
+              paint: { 'line-color': '#245bd5', 'line-width': 7 },
               layout: { 'line-cap': 'round', 'line-join': 'round' },
             });
-            view.addSource('trip', { type: 'geojson', data: routeGeometry(latest.current) });
+            view.addSource('trip', { type: 'geojson', data: routeGeometry(latest.current,latestRoads.current) });
             view.addLayer({
               id: 'trip-outline',
               type: 'line',
@@ -252,7 +257,8 @@ export default function RoadMapView({
         marker.current.getElement().style.setProperty('--gps-bearing','0deg');
       });
     }
-    if(active&&!wasActive.current){follow.current=true;setFollowing(true);}
+    const alreadyTracking=wasActive.current;
+    if(active&&!alreadyTracking){follow.current=true;setFollowing(true);}
     wasActive.current=active;
     const previousFix=cameraPosition.current;
     const initialHeading=!previousFix&&p.speed!=null&&p.speed>=1.5&&p.heading!=null&&Number.isFinite(p.heading)&&p.heading>=0&&p.heading<360;
@@ -263,11 +269,19 @@ export default function RoadMapView({
     const target=active&&p.speed!=null&&p.speed<0.7&&previousFix&&
       segmentMeters(from,p)<Math.min(18,p.accuracy+previousFix.accuracy)
       ? {...p,latitude:from.latitude,longitude:from.longitude}:p;
-    const zoom=active?(manualZoom.current??drivingZoom(p.speed,turnDistance.current)):16;
     const startZoom=view.getZoom(),startPitch=view.getPitch();
+    const desiredZoom=drivingZoom(p.speed,turnDistance.current);
+    const zoom=active?(manualZoom.current??(alreadyTracking&&previousFix
+      ? startZoom+Math.max(-.32,Math.min(.32,desiredZoom-startZoom)) : desiredZoom)):16;
     const pitch=active&&perspective?52:0;
     const begun=performance.now();
-    const lookAhead=active?Math.min(240,view.getContainer().clientHeight*.3):0;
+    const mapBox=view.getContainer().getBoundingClientRect();
+    const cockpit=view.getContainer().closest('.sd-live-cockpit');
+    const header=cockpit?.querySelector('.rg-guidance-turn, .sd-destination-toolbar')?.getBoundingClientRect();
+    const dock=cockpit?.querySelector('.sd-permanent-bottom:not([hidden])')?.getBoundingClientRect();
+    const top=header ? Math.max(0,header.bottom-mapBox.top) : 0;
+    const bottom=dock && dock.top>mapBox.top ? Math.max(0,mapBox.bottom-dock.top) : 0;
+    const padding=active?drivingInsets(mapBox.height,top,bottom):drivingInsets(0,0,0);
     const draw=(now:number)=>{
       if(map.current!==view)return;
       const progress=duration?Math.min(1,(now-begun)/duration):1;
@@ -276,8 +290,8 @@ export default function RoadMapView({
       marker.current?.setLngLat([point.longitude,point.latitude]).setRotation(heading);
       // One animation owns the camera. Manual dragging disables following immediately.
       if(follow.current)view.jumpTo({center:[point.longitude,point.latitude],bearing:heading,
-        pitch:startPitch+(pitch-startPitch)*progress,zoom:startZoom+(zoom-startZoom)*progress,
-        padding:{top:lookAhead,bottom:0,left:0,right:0}});
+        pitch:startPitch+(pitch-startPitch)*cameraTurnProgress(progress),zoom:startZoom+(zoom-startZoom)*cameraTurnProgress(progress),
+        padding});
       if(progress<1)animationFrame.current=window.requestAnimationFrame(draw);
     };
     animationFrame.current=window.requestAnimationFrame(draw);
@@ -286,8 +300,8 @@ export default function RoadMapView({
       }, [position, english, history, active, loading, perspective]);
   useEffect(() => {
     const source = map.current?.getSource('trip') as GeoJSONSource | undefined;
-    source?.setData(routeGeometry(points));
-  }, [points, loading]);
+    source?.setData(routeGeometry(points,mappedRoads));
+  }, [points, mappedRoads, loading]);
   useEffect(() => {
     const view = map.current;
     const source = view?.getSource('directions') as GeoJSONSource | undefined;
@@ -345,7 +359,7 @@ export default function RoadMapView({
     }
   },[daylight,loading,failed]);
   if (failed)
-    return <div className="rg-map-fallback"><RasterRoadMap points={points} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart} /><p className="rg-map-fallback-note" role="status">{english?'2D fallback map · 3D unavailable on this device.':'Hartă de rezervă 2D · 3D indisponibil pe acest dispozitiv.'}</p></div>;
+    return <div className="rg-map-fallback"><RasterRoadMap points={points} mappedRoads={mappedRoads} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart} /><p className="rg-map-fallback-note" role="status">{english?'2D fallback map · 3D unavailable on this device.':'Hartă de rezervă 2D · 3D indisponibil pe acest dispozitiv.'}</p></div>;
   return (
     <div className="ac-road-map" data-workspace-ui data-map-theme={daylight?'day':'night'}>
       <div

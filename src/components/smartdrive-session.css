@@ -333,3 +333,26 @@
 .sd-live-cockpit[data-typing=true] .sd-destination-toolbar .ac-destination-search ul{
  max-height:none;overflow:visible;padding:6px 0 0;border:0;background:transparent;
 }
+.sd-speed-sign[data-unknown=true] {
+ border-color:#66788c;color:#425468;background:#f4f7fa;
+}
+.sd-live-cockpit[data-native-fullscreen=true] .rg-guidance-turn{
+ background:#102140;border-color:#33568e;color:#f6f8ff;box-shadow:0 6px 20px #142c5538;
+}
+.sd-live-cockpit[data-native-fullscreen=true] .sd-permanent-bottom{
+ box-shadow:0 4px 22px #152a4e30;
+}
+.sd-live-cockpit[data-native-fullscreen=true] .rg-navigation-speed{
+ background:#12274a;border-color:#b9cdf2;
+}
+
+@media (max-width: 420px) {
+ .sd-live-cockpit[data-native-fullscreen=true][data-guiding=true] .rg-guidance-turn{padding:10px 12px;gap:8px}
+ .sd-live-cockpit[data-native-fullscreen=true] .rg-guidance-turn strong{font-size:clamp(19px,5.8vw,24px)}
+ .sd-live-cockpit[data-native-fullscreen=true] .rg-guidance-turn small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .sd-live-cockpit[data-native-fullscreen=true] .rg-guidance-turn>div{min-width:0}
+}
+.sd-planned-summary {
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:8px 12px;color:#163356;font-size:.84rem;
+}

@@ -42,6 +42,11 @@ final class TrackingStore {
         if(location.hasBearing()&&Float.isFinite(location.getBearing())&&location.getBearing()>=0&&location.getBearing()<360)live.put("heading",location.getBearing());
         JSONObject old=state.optJSONObject("lastPosition");
         if(old!=null && location.getTime()<=old.optLong("timestamp"))return;
+        if(location.getAccuracy()<=50){
+            long lastPreciseAt=state.optLong("lastPreciseAt",0);
+            if(lastPreciseAt>0&&location.getTime()-lastPreciseAt>12000)state.put("forceBreak",true);
+            state.put("lastPreciseAt",location.getTime());
+        }
         state.put("lastPosition",live).put("updatedAt",now);
         write(context,state);
         if(location.getAccuracy()>50)return;

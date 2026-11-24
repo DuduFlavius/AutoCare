@@ -1,7 +1,7 @@
 import type { GPSFix } from './gps-tracking';
 import type { Coordinate } from './road-navigation';
 
-export type SpeedRoad = { tags: Record<string, string>; geometry: {lat:number;lon:number}[] };
+export type SpeedRoad = { id?:number; nodes?:number[]; tags: Record<string, string>; geometry: {lat:number;lon:number}[] };
 export const speedRoadRadius = 160;
 
 export function localOffset(origin: Coordinate, lat: number, lon: number) {

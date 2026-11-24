@@ -9,7 +9,7 @@ export async function loadSpeedRoads({latitude,longitude}:Coordinate, signal:Abo
   const cached=cache.get(key);
   if (cached && cached.expires>Date.now()) return cached.roads;
   const endpoint = new URL(process.env.AUTOCARE_SPEED_ROADS_URL || process.env.AUTOCARE_OVERPASS_URL || 'https://ovp.dresel.systems/api/interpreter');
-  endpoint.searchParams.set('data',`[out:json][timeout:6];way(around:${speedRoadRadius},${latitude},${longitude})["highway"~"^(${highway})$"];out tags geom;`);
+  endpoint.searchParams.set('data',`[out:json][timeout:6];way(around:${speedRoadRadius},${latitude},${longitude})["highway"~"^(${highway})$"];out body geom;`);
   const response=await fetch(endpoint,{
     headers:{Accept:'application/json','User-Agent':'AutoCare/5.2 (+https://www.autocareapp.ro)'},
     signal:AbortSignal.any([signal,AbortSignal.timeout(8500)]),

@@ -44,7 +44,7 @@ export default function DriveDestinationSearch({ area, nearPosition, disabled, e
       const results=await driveRouting.search(text,area.latitude,area.longitude,controller.signal);
       if(!controller.signal.aborted)setMatches(results);
     } catch (reason) {
-      if (!controller.signal.aborted) setError(!navigator.onLine?t('Fără internet. Căutarea se reia după reconectare.','You are offline. Retry after reconnecting.'):reason instanceof Error&&reason.message.includes('Prea multe')?reason.message:t('Nu am putut căuta adresa. Reîncearcă sau alege un punct pe hartă.', 'Could not search the address. Retry or choose a point on the map.'));
+      if (!controller.signal.aborted) setError(!navigator.onLine?t('Fără internet. Reconectează-te și apasă Caută.','You are offline. Retry after reconnecting.'):reason instanceof Error&&reason.message.includes('Prea multe')?reason.message:t('Nu am putut căuta adresa. Reîncearcă sau alege un punct pe hartă.', 'Could not search the address. Retry or choose a point on the map.'));
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
@@ -68,7 +68,7 @@ export default function DriveDestinationSearch({ area, nearPosition, disabled, e
         <label htmlFor="ac-destination-address">{t('Unde mergem?', 'Where to?')}</label>
         <div className="ac-destination-search-row"><button type="submit" className="primary sd-search-submit" aria-label={t('Caută', 'Search')} disabled={disabled || loading || query.trim().length < 3}><Search size={19}/></button>
           <input ref={input} id="ac-destination-address" type="search" placeholder={t('Unde mergem?', 'Where to?')} value={query}
-            maxLength={160} onFocus={()=>focus(true)} onKeyDown={event=>{if(event.key==='Escape'){event.preventDefault();close();}}} disabled={disabled} autoComplete="off" aria-autocomplete="list" aria-controls="ac-destination-matches"
+            maxLength={160} onFocus={()=>focus(true)} onKeyDown={event=>{if(event.key==='Escape'){event.preventDefault();close();}}} disabled={disabled} autoComplete="off" enterKeyHint="search" aria-autocomplete="list" aria-controls="ac-destination-matches"
             onChange={event => { pending.current?.abort(); setQuery(event.target.value); setMatches(null); setLoading(false); setError(''); }}/>
           {!!query&&<button type="button" aria-label={t('Șterge căutarea','Clear search')} onClick={reset}><X size={16}/></button>}
         </div>
