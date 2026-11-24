@@ -212,3 +212,13 @@ html body .app-shell.ac-workspace.ac-studio main.main#workspace-main .ac-ai-memb
  .rg-ai-page .ac-ai-user-row{margin-bottom:12px}
  .rg-ai-page .ac-ai-markdown :is(p,li){line-height:1.5}
 }
+
+@media(min-width:901px){
+ .rg-ai-page .ac-ai-heading{position:relative;isolation:isolate}
+ .rg-ai-page .ac-ai-heading::before{
+  content:"";position:absolute;inset:0 0 0 auto;width:min(46%,390px);z-index:-1;pointer-events:none;
+  background:linear-gradient(0deg,#b9e0e8aa,#82bfc547),url('/images/autocare-studio-coupe.webp') right 46% / cover no-repeat;
+  mask-image:linear-gradient(to right,transparent,#000 63%);
+  opacity:.56;
+ }
+}
