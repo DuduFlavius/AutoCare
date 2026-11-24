@@ -33,6 +33,8 @@ try {
  }
  await page.goto(after+'/home.html?web=1');
  assert.equal(await page.getByRole('button',{name:'Deschide SmartDrive'}).count(),0);
+ await page.getByRole('button',{name:'Istoric și statistici SmartDrive',exact:true}).click();
+ assert.equal(await page.locator('html').getAttribute('data-last-destination'),'Kilometraj');
  await page.setViewportSize({width:390,height:844});
  for(const [label,url] of [['before',before],['after',after]]){
   await page.goto(url+'/frame.html?state=guiding');

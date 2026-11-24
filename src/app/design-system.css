@@ -2,22 +2,29 @@
 :root {
   color-scheme: light;
   /* Pearl White + Petrol — canonical brand tokens, including body portals. */
-  --obsidian-black: #F6F9FB;
-  --midnight-navy: #EDF4F7;
+  --brand-petrol-dark: #03343e;
+  --brand-petrol: #005365;
+  --brand-petrol-accent: #087b8d;
+  --brand-pearl: #f4f7f9;
+  --brand-ice: #e5f0f4;
+  --brand-ink: #101d2b;
+  --brand-muted: #536b78;
+  --obsidian-black: var(--brand-pearl);
+  --midnight-navy: var(--brand-ice);
   --graphite: #FFFFFF;
   --steel: #E3EBF0;
-  --electric-blue: #075365;
+  --electric-blue: var(--brand-petrol);
   --ice-cyan: #20A6A6;
-  --titanium-silver: #657584;
+  --titanium-silver: var(--brand-muted);
   --titanium-white: #FFFFFF;
   --color-on-primary: #FFFFFF;
-  --color-primary-deep: #083B4A;
+  --color-primary-deep: var(--brand-petrol-dark);
   --color-shadow-color: #083b4a14;
   --color-platinum: var(--titanium-silver);
   --color-nav: var(--midnight-navy);
   --color-nav-raised: var(--color-card);
   --color-primary: var(--electric-blue);
-  --color-button: #075365;
+  --color-button: var(--brand-petrol);
   --color-primary-hover: color-mix(in srgb, var(--electric-blue) 83%, var(--titanium-white));
   --color-primary-soft: #DCEEF1;
   --color-primary-ink: #075365;
@@ -32,7 +39,7 @@
   --brand-ribbon: none;
   --workspace-canvas: var(--color-bg);
   --color-border-strong: #C3D3DD;
-  --color-text: #142333;
+  --color-text: var(--brand-ink);
   --color-muted: var(--titanium-silver);
   --color-subtle: color-mix(in srgb, var(--titanium-silver) 86%, var(--steel));
   --color-success: #16866E;
