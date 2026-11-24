@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   android-qa:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -27,7 +27,9 @@ jobs:
           echo "JAVA_HOME=$JAVA_HOME_21_X64" >> "$GITHUB_ENV"
           echo "$JAVA_HOME_21_X64/bin" >> "$GITHUB_PATH"
           "$JAVA_HOME_21_X64/bin/javac" -version
-          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+          if [ ! -f "$ANDROID_HOME/platforms/android-36/android.jar" ] || [ ! -x "$ANDROID_HOME/build-tools/36.0.0/apksigner" ]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0'
+          fi
       - name: Target the isolated AutoCare preview
         env:
           AUTOCARE_QA_PREVIEW_URL: ${{ inputs.preview_url || vars.AUTOCARE_SMARTDRIVE_QA_URL || 'https://auto-care-git-smartdrive-61-qa-auto-care4.vercel.app' }}
