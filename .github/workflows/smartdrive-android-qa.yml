@@ -30,7 +30,7 @@ jobs:
           sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - name: Target the isolated AutoCare preview
         env:
-          AUTOCARE_QA_PREVIEW_URL: ${{ inputs.preview_url || vars.AUTOCARE_SMARTDRIVE_QA_URL }}
+          AUTOCARE_QA_PREVIEW_URL: ${{ inputs.preview_url || vars.AUTOCARE_SMARTDRIVE_QA_URL || 'https://auto-care-git-smartdrive-61-qa-auto-care4.vercel.app' }}
         run: node scripts/configure-smartdrive-android-qa.mjs
       - run: npm ci --prefix mobile
       - run: cd mobile && npx cap sync android
