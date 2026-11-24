@@ -25,6 +25,6 @@ createRoot(document.getElementById('root')).render(<ApplicationLanguageProvider 
 </ApplicationLanguageProvider>);`;
 await writeFile(out+'/home-entry.tsx',entry);
 await build({entryPoints:[out+'/home-entry.tsx'],bundle:true,outfile:out+'/home.js',absWorkingDir:root,tsconfig:root+'/tsconfig.json',jsx:'automatic',
- nodePaths:[root+'/node_modules'],define:{'process.env.NODE_ENV':'"production"'},external:['/emerald-reference/*','/images/*','/mobile-reference/*','/dashboard-reference/*'],
+ nodePaths:[root+'/node_modules'],define:{'process.env':'{}','process.env.NODE_ENV':'"production"'},external:['/emerald-reference/*','/images/*','/mobile-reference/*','/dashboard-reference/*'],
  loader:{'.woff2':'dataurl','.woff':'dataurl','.png':'dataurl','.svg':'dataurl'}});
 await writeFile(out+'/home.html','<!doctype html><html lang="ro"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="home.css"><style>body{margin:0}html body .app-shell.ac-workspace.ac-studio main.main#workspace-main{margin:0!important;width:100%!important;max-width:none!important;padding:16px!important}</style><div id="root"></div><script src="home.js"></script></html>');

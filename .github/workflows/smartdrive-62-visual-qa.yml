@@ -25,7 +25,7 @@ jobs:
           after="$RUNNER_TEMP/sd62-after"
           git worktree add --detach "$before" 48db1cc308c5d77e28cfb96cb1d70864745f65c2
           ln -s "$PWD/node_modules" "$before/node_modules"
-          cp scripts/audit/home-comparison-preview.mjs "$before/scripts/audit/"
+          cp scripts/audit/{home-comparison-preview,smartdrive-visual-preview}.mjs "$before/scripts/audit/"
           (cd "$before" && AUTOCARE_SMARTDRIVE_QA_DIR="$before/render" node scripts/audit/home-comparison-preview.mjs && AUTOCARE_SMARTDRIVE_QA_DIR="$before/render" node scripts/audit/smartdrive-visual-preview.mjs)
           AUTOCARE_SMARTDRIVE_QA_DIR="$after" node scripts/audit/home-comparison-preview.mjs
           AUTOCARE_SMARTDRIVE_QA_DIR="$after" node scripts/audit/smartdrive-visual-preview.mjs
