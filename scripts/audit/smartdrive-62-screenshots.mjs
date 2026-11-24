@@ -38,13 +38,18 @@ try {
   await page.goto(url+'/frame.html?state=guiding');
   const map=page.locator('.ac-road-map canvas.maplibregl-canvas');
   await map.waitFor({timeout:25000});
-  await page.waitForFunction(()=>!document.querySelector('.ac-road-map [role=status]')?.textContent?.includes('Se încarcă'),{},{timeout:20000});
-  const theme=page.getByRole('button',{name:'Tema hărții'});
-  await theme.click();
+  await page.waitForFunction(()=>!document.querySelector('.ac-road-map .ac-road-map-message'),{},{timeout:20000});
+  const theme=page.locator('button[aria-label="Tema hărții"]');
+  const switchTheme=()=>label==='before'?theme.evaluate(button=>button.click()):theme.click();
+  await switchTheme();
   await page.locator('[data-map-theme="day"]').waitFor();
+  await page.waitForTimeout(600);
+  await map.waitFor();
   await page.screenshot({path:`${destination}/map-${label}-day.png`});
-  await theme.click();
+  await switchTheme();
   await page.locator('[data-map-theme="night"]').waitFor();
+  await page.waitForTimeout(600);
+  await map.waitFor();
   await page.screenshot({path:`${destination}/map-${label}-night.png`});
  }
  console.log('Home, Android-only shortcut, four navigation actions, five viewport widths and the map theme switches passed.');
