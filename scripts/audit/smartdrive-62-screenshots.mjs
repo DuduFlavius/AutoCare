@@ -10,7 +10,6 @@ try {
  page.on('pageerror',error=>console.error(error));
  page.on('console',message=>{if(message.type()==='error')console.error(message.text());});
  await page.goto(before+'/home.html');
- await page.screenshot({path:destination+'/00-baseline-diagnostic.png',fullPage:true});
  await page.getByText('QA 62 SD',{exact:false}).first().waitFor();
  await page.screenshot({path:destination+'/01-dashboard-before.png',fullPage:true});
  for(const width of [320,390,768,1024,1440]){
@@ -21,7 +20,9 @@ try {
   const box=await card.boundingBox();
   assert.ok(box&&box.height>=90&&box.height<=120);
   assert.ok(await page.getByRole('button',{name:'Deschide fișa mașinii'}).evaluate((vehicle,y)=>vehicle.getBoundingClientRect().top+scrollY<y,box.y));
-  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),`Horizontal overflow at ${width}px`);
+  assert.match(await page.locator('.rg-m-vehicle').evaluate(vehicle=>getComputedStyle(vehicle).backgroundImage),/linear-gradient/);
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+  assert.ok(overflow<=0,`Horizontal overflow of ${overflow}px at ${width}px`);
   if(width===390||width===1440)await page.screenshot({path:`${destination}/dashboard-after-${width}.png`,fullPage:true});
   await card.click();
   assert.equal(await page.locator('html').getAttribute('data-last-destination'),'Plan întreținere');

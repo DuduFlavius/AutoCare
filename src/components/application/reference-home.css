@@ -60,13 +60,13 @@
 .rg-home-welcome{padding:5px 0;min-height:0}
 .rg-home-welcome h1{font-size:clamp(20px,3vw,30px);font-weight:750;letter-spacing:-.035em}
 .rg-mobile-home{gap:14px}
-.rg-home-reference .rg-m-vehicle{
+.rg-home-reference .rg-mobile-home .rg-m-vehicle{
  background:linear-gradient(115deg,#064c5c 0%,#083845 66%,#062b36 100%);border-color:#144e5a;color:#f6fbfc
 }
 .rg-home-reference .rg-m-vehicle-open{min-height:72px;padding:13px 16px;gap:12px}
 .rg-home-reference .rg-m-vehicle-art{width:47px;height:47px;background:#ffffff12;border-color:#ffffff32;color:#e9f9fa}
 .rg-home-reference .rg-m-vehicle-art svg{width:28px;height:28px}
-.rg-home-reference .rg-m-vehicle :is(strong,small,.rg-m-vehicle-open>svg,.rg-m-vehicle-bottom svg){color:inherit}
+.rg-home-reference .rg-m-vehicle .rg-m-vehicle-open{color:#f6fbfc}.rg-home-reference .rg-m-vehicle :is(strong,.rg-m-vehicle-open>svg,.rg-m-vehicle-bottom svg){color:#f6fbfc}
 .rg-home-reference .rg-m-vehicle small{color:#d1e6eb}
 .rg-home-reference .rg-m-vehicle-bottom{padding:10px 16px;border-color:#ffffff2d}
 .rg-home-reference .rg-m-vehicle-bottom>button{color:#f6fbfc}
