@@ -21,8 +21,7 @@ permissions:
   contents: read
 jobs:
   android:
-    if: github.ref != 'refs/heads/release/smartdrive-61'
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.ref == 'refs/heads/release/smartdrive-61' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -75,7 +74,7 @@ jobs:
   android-release:
     permissions:
       contents: write
-    if: (github.event_name == 'push' && (github.ref == 'refs/heads/feature/autocare-ai-integrated' || github.ref == 'refs/heads/release/smartdrive-61')) || (github.event_name == 'workflow_dispatch' && inputs.signed_android_release)
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/feature/autocare-ai-integrated') || (github.event_name == 'workflow_dispatch' && inputs.signed_android_release)
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     environment: android-release
@@ -120,28 +119,8 @@ jobs:
           name: AutoCare-Google-Play-signed-AAB
           path: mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 7
-      - name: Verify official APK compatibility
-        if: github.ref == 'refs/heads/release/smartdrive-61'
-        run: |
-          set -euo pipefail
-          tools="$ANDROID_HOME/build-tools/36.0.0"
-          old="$(node -p "'public'+require('./public/downloads/android-release.json').url")"
-          new=mobile/android/app/build/outputs/apk/release/app-release.apk
-          old_cert="$("$tools/apksigner" verify --print-certs "$old" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
-          new_cert="$("$tools/apksigner" verify --print-certs "$new" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
-          test -n "$old_cert" && test "$old_cert" = "$new_cert"
-          "$tools/aapt" dump badging "$new" | grep -F "package: name='ro.autocare.garage' versionCode='24'"
-          mkdir -p "$RUNNER_TEMP/smartdrive-release"
-          cp "$new" "$RUNNER_TEMP/smartdrive-release/AutoCare-1.7.3.apk"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: github.ref == 'refs/heads/release/smartdrive-61'
-        with:
-          name: AutoCare-1.7.3-signed-APK
-          path: ${{ runner.temp }}/smartdrive-release/AutoCare-1.7.3.apk
-          if-no-files-found: error
-          retention-days: 14
       - name: Publish signed Android installer for in-app updates
-        if: inputs.distribution != 'play' && github.ref != 'refs/heads/release/smartdrive-61'
+        if: inputs.distribution != 'play'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
