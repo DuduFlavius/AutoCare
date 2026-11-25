@@ -92,6 +92,7 @@
 .ac-home-smartdrive-content{display:grid;gap:3px;min-width:0;flex:1}
 .ac-home-smartdrive-content>strong{font-size:1rem;line-height:1.2}
 .ac-home-smartdrive-content>span{font-size:12px;line-height:1.3}
+.ac-home-smartdrive-content .ac-home-smartdrive-history{font-weight:700;margin-top:2px}
 .ac-home-smartdrive-content .ac-home-smartdrive-metrics{display:flex;align-items:center;flex-wrap:wrap;gap:3px 8px;font-variant-numeric:tabular-nums;font-size:11px}
 .ac-home-smartdrive-metrics b{color:#17634e}.ac-home-smartdrive-metrics[data-paused=true] b{color:#88531b}
 .ac-home-smartdrive-metrics>span{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
@@ -202,14 +203,35 @@
 }
 .ac-home-empty-garage h2{margin:0;font-size:clamp(19px,3vw,24px);line-height:1.25}
 .ac-home-empty-garage p{max-width:38ch;margin:0;color:var(--color-muted);font-size:14px;line-height:1.5}
+.rg-mobile-home[data-first-vehicle]{grid-template-columns:minmax(0,1fr)}
+.rg-mobile-home[data-first-vehicle]>.ac-home-smartdrive-compact{grid-area:auto}
+.rg-home-reference .ac-home-first-vehicle{
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);
+ min-height:290px;gap:0;padding:0;overflow:hidden;
+}
+.ac-home-empty-garage-content{
+ display:grid;justify-items:start;align-content:center;gap:12px;
+ min-width:0;padding:clamp(24px,4.5vw,56px);
+}
+.ac-home-first-vehicle h2{font-size:clamp(24px,3.1vw,40px);line-height:1.12;letter-spacing:-.035em;text-wrap:balance}
+.ac-home-first-vehicle p{max-width:34ch;font-size:15px;line-height:1.55}
 .ac-home-empty-garage .rg-m-primary{
  display:inline-flex;align-items:center;justify-content:center;gap:8px;
  min-height:44px;margin-top:6px;padding:8px 16px;
 }
 .ac-home-empty-garage .rg-m-primary svg{color:currentColor;flex:none}
+.ac-home-empty-garage-image{
+ display:block;width:100%;height:100%;max-height:370px;object-fit:cover;
+ background:var(--color-surface-muted);
+}
 @media(max-width:900px){
  .rg-mobile-home[data-empty-garage]{grid-template-columns:minmax(0,1fr)}
  .rg-mobile-home[data-empty-garage]>.ac-home-smartdrive-compact{grid-area:auto}
+}
+@media(max-width:700px){
+ .rg-home-reference .ac-home-first-vehicle{grid-template-columns:minmax(0,1fr);min-height:0}
+ .ac-home-empty-garage-content{gap:9px}
+ .ac-home-empty-garage-image{height:clamp(110px,33vw,205px)}
 }
 .rg-m-vehicle-open,.rg-m-vehicle-bottom,.rg-m-car-switch{position:relative;z-index:0}
 @media(min-width:1100px){

@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useState} from 'react';
+import {useEffect,useId,useState} from 'react';
 import {ChevronRight,Clock3,Navigation} from 'lucide-react';
 import {driveDistance,driveDuration} from '@/lib/drive-display';
 import {hasNativeTracking,nativeTracking} from '@/lib/native-tracking';
@@ -7,8 +7,9 @@ import {useApplicationLanguage,useApplicationLocale} from '../application-locale
 
 type SessionSummary={meters:number;seconds:number;paused:boolean};
 
-export default function SmartDriveHomeCard({ownerId,preview,onOpen,android}:{ownerId:string;preview:boolean;onOpen:()=>void;android:boolean}){
+export default function SmartDriveHomeCard({ownerId,preview,onOpen,android,showAndroidAvailability=false}:{ownerId:string;preview:boolean;onOpen:()=>void;android:boolean;showAndroidAvailability?:boolean}){
  const [session,setSession]=useState<SessionSummary|null>(null);
+ const descriptionId=useId();
  const english=useApplicationLanguage()==='en',locale=useApplicationLocale();
  useEffect(()=>{
   if(!android||preview||!ownerId||!hasNativeTracking())return;
@@ -32,19 +33,23 @@ export default function SmartDriveHomeCard({ownerId,preview,onOpen,android}:{own
   document.addEventListener('visibilitychange',refresh);
   return()=>{disposed=true;window.clearInterval(timer);document.removeEventListener('visibilitychange',refresh);};
  },[android,ownerId,preview]);
+ const showWebNotice=!android&&showAndroidAvailability;
  const openLabel=android?(english?'Open SmartDrive':'Deschide SmartDrive'):(english?'Trip history and statistics':'Istoric și statistici SmartDrive');
+ const description=android ? (english?'Navigation and intelligent tracking':'Navigație și monitorizare inteligentă')
+  : showWebNotice ? (english?'GPS navigation is available only in the Android app.':'Navigația GPS este disponibilă doar în aplicația Android.') : openLabel;
  const distance=session&&driveDistance(session.meters,locale);
  const status=session?.paused?(english?'Session paused':'Sesiune în pauză'):(english?'Session active':'Sesiune activă');
  return <section className="ac-home-smartdrive-compact" aria-label="SmartDrive GPS">
-  <button type="button" onClick={onOpen} aria-label={session?(english?'Return to SmartDrive session':'Revino la sesiunea SmartDrive'):openLabel}>
+  <button type="button" onClick={onOpen} aria-label={session?(english?'Return to SmartDrive session':'Revino la sesiunea SmartDrive'):openLabel} aria-describedby={showWebNotice?descriptionId:undefined}>
    <span className="ac-home-smartdrive-symbol"><Navigation size={21} aria-hidden="true"/></span>
    <span className="ac-home-smartdrive-content">
     <strong>SmartDrive GPS</strong>
-    <span>{android?(english?'Navigation and intelligent tracking':'Navigație și monitorizare inteligentă'):openLabel}</span>
+    <span id={showWebNotice?descriptionId:undefined}>{description}</span>
+    {showWebNotice&&<span className="ac-home-smartdrive-history">{english?'View trip history':'Vezi istoricul traseelor'}</span>}
     {android&&!session&&<span className="ac-home-smartdrive-mobile-label">{english?'Open SmartDrive':'Deschide SmartDrive'}</span>}
     {session&&distance&&<span className="ac-home-smartdrive-metrics" data-paused={session.paused}><b>{status}</b><span>{distance.value} {distance.unit}</span><span><Clock3 size={12} aria-hidden="true"/>{driveDuration(session.seconds)}</span></span>}
    </span>
-   <span className="ac-home-smartdrive-action"><span>{session?(english?'Return to session':'Revino la sesiune'):openLabel}</span><ChevronRight size={19} aria-hidden="true"/></span>
+   <span className="ac-home-smartdrive-action">{!showWebNotice&&<span>{session?(english?'Return to session':'Revino la sesiune'):openLabel}</span>}<ChevronRight size={19} aria-hidden="true"/></span>
   </button>
  </section>;
 }
