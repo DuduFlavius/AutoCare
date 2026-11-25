@@ -460,7 +460,20 @@ export const communicationPreferences = pgTable('communication_preferences', {
   userId: text().primaryKey().references(() => user.id, { onDelete: 'cascade' }),
   transactional: boolean().notNull().default(true),
   promotional: boolean().notNull().default(false),
+  categories: jsonb().$type<Record<string, boolean>>().notNull().default({}),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+export const mailConsents = pgTable('mail_consents', {
+  id: text().primaryKey(),
+  userId: text().notNull().references(() => user.id, { onDelete: 'cascade' }),
+  preferences: jsonb().notNull(),
+  source: text().notNull(),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+}, t => [index('mail_consents_user').on(t.userId, t.createdAt)]);
+export const mailSuppressions = pgTable('mail_suppressions', {
+  addressHash: text().primaryKey(),
+  reason: text().notNull(),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 export const mailCampaigns = pgTable('mail_campaigns', {
   id: text().primaryKey(),
@@ -474,8 +487,9 @@ export const mailCampaigns = pgTable('mail_campaigns', {
   ctaPath: text().notNull(),
   fingerprint: text().notNull(),
   status: text().notNull().default('draft'),
+  scheduledAt: timestamp({ withTimezone: true }),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-}, t => [index('mail_campaigns_created').on(t.createdAt)]);
+}, t => [index('mail_campaigns_created').on(t.createdAt), index('mail_campaigns_schedule').on(t.status,t.scheduledAt)]);
 export const mailDeliveries = pgTable('mail_deliveries', {
   id: text().primaryKey(),
   campaignId: text().notNull().references(() => mailCampaigns.id, { onDelete: 'cascade' }),
@@ -485,7 +499,7 @@ export const mailDeliveries = pgTable('mail_deliveries', {
   status: text().notNull().default('draft'),
   error: text(),
   providerId: text(),
-  context: jsonb().$type<{ subscriptionId?: string; periodEnd?: string; invoiceId?: string; grantId?: string; retryCount?: number }>().notNull().default({}),
+  context: jsonb().$type<{ subscriptionId?: string; periodEnd?: string; invoiceId?: string; grantId?: string; retryCount?: number; month?: string }>().notNull().default({}),
   attemptedAt: timestamp({ withTimezone: true }),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 }, t => [index('mail_delivery_campaign_status').on(t.campaignId,t.status), index('mail_delivery_provider').on(t.providerId)]);

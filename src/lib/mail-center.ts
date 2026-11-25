@@ -2,6 +2,10 @@ import {accountPreferences} from './account-preferences';
 import {campaignEnglish,englishMailSchema} from './mail-localization';
 import {userLanguage} from './user-language';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { emailCategorySchema, emailCategories, emailCategory } from './mail-preference-categories';
+import { emailAddressHash, unsubscribeLink } from './mail-consent';
+import { monthlyVehicleReport } from './mail-monthly-report';
+import { releaseProofSchema, verifyPublishedRelease, type ReleaseProof } from './mail-release-proof';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { db } from './db';
@@ -19,7 +23,7 @@ import {
 } from './email-templates';
 import { gmailReady, GoogleDeliveryError, sendGoogleMail, verifyGoogleMailAuthorization } from './google-mail';
 import { billingMailValid, communicationPreference, recipientAllowed } from './mail-policy';
-import { automationState } from './mail-automation';
+import { automationState, queueAutomatedMail } from './mail-automation';
 export async function requireMailStaff(uid: string) {
   await assertActiveAccount(uid);
   const actor = await profile(uid);
@@ -94,25 +98,34 @@ const inputSchema = z
       }),
     recipients: z
       .array(z.string().min(1).max(128))
-      .min(1)
       .max(50)
+      .default([])
       .transform((x) => [...new Set(x)].sort()),
+    segment: z.enum(['all','garage','no_garage']).optional(),
   })
   .strict();
 export async function saveCommunicationPreference(uid: string, input: unknown) {
   await assertActiveAccount(uid);
   const prefs = z
-    .object({ transactional: z.boolean(), promotional: z.boolean() })
+    .object({ transactional: z.boolean(), promotional: z.boolean(), categories: emailCategorySchema.optional() })
     .strict()
     .parse(input);
-  await db()
-    .insert(s.communicationPreferences)
-    .values({ userId: uid, ...prefs })
-    .onConflictDoUpdate({
-      target: s.communicationPreferences.userId,
-      set: { ...prefs, updatedAt: new Date() },
-    });
-  return prefs;
+  return db().transaction(async tx => {
+    const [owner] = await tx.select({createdAt:s.user.createdAt}).from(s.user).where(eq(s.user.id,uid)).for('update');
+    const [before] = await tx.select().from(s.communicationPreferences).where(eq(s.communicationPreferences.userId, uid));
+    const categories = prefs.categories ?? { ...emailCategories(before?.categories, prefs.promotional), offers: prefs.promotional };
+    const updated = { transactional: prefs.transactional, promotional: categories.offers, categories };
+    await tx.insert(s.communicationPreferences).values({ userId: uid, ...updated })
+      .onConflictDoUpdate({ target: s.communicationPreferences.userId, set: { ...updated, updatedAt: new Date() } });
+    if (!before || JSON.stringify([before.transactional, before.promotional, emailCategories(before.categories, before.promotional)]) !==
+        JSON.stringify([updated.transactional, updated.promotional, emailCategories(updated.categories, updated.promotional)])) {
+      await tx.insert(s.mailConsents).values({ id: crypto.randomUUID(), userId: uid, preferences: updated, source: 'account' });
+      if (categories.news && !emailCategories(before?.categories,before?.promotional??false).news && owner &&
+          Date.now()-owner.createdAt.getTime() < 14*86400000)
+        await queueAutomatedMail(uid,'onboarding_guide','onboarding-guide:'+uid,{},tx);
+    }
+    return updated;
+  });
 }
 export async function getCommunicationPreference(uid: string) {
   await assertActiveAccount(uid);
@@ -132,7 +145,7 @@ const libraryEntrySchema = z.object({
 export async function saveMailLibraryEntry(uid: string, input: unknown) {
   await requireMailStaff(uid);
   const entry = libraryEntrySchema.parse(input);
-  if (['verification', 'password_reset', 'gmail_test'].includes(entry.template))
+  if (['verification', 'password_reset', 'gmail_test', 'monthly_report', 'account_security'].includes(entry.template))
     throw new AppError(400, 'Șabloanele de securitate nu pot fi reutilizate manual.');
   if (templateCategory(entry.template) === 'promotional' && entry.category !== 'promotional')
     throw new AppError(400, 'Șablonul promoțional necesită acord promoțional.');
@@ -162,11 +175,14 @@ export async function mailCenterOverview(uid: string) {
         emailVerified: s.user.emailVerified,
         emailEnabled: s.profiles.emailEnabled,
         promotional: s.communicationPreferences.promotional,
+        categories: s.communicationPreferences.categories,
+        suspendedAt: s.accountRestrictions.suspendedAt,
         transactional: s.communicationPreferences.transactional,
       })
       .from(s.user)
       .leftJoin(s.profiles, eq(s.user.id, s.profiles.userId))
       .leftJoin(s.communicationPreferences, eq(s.user.id, s.communicationPreferences.userId))
+      .leftJoin(s.accountRestrictions, eq(s.user.id, s.accountRestrictions.userId))
       .orderBy(s.user.email)
       .limit(500),
     automationState(),
@@ -187,7 +203,18 @@ export async function mailCenterOverview(uid: string) {
         )
         .groupBy(s.mailDeliveries.campaignId, s.mailDeliveries.status)
     : [];
+  const [deliverySummary, optOuts] = await Promise.all([
+    db().select({status: s.mailDeliveries.status, error:s.mailDeliveries.error, count:sql<number>`count(*)::int`})
+      .from(s.mailDeliveries).groupBy(s.mailDeliveries.status,s.mailDeliveries.error),
+    db().select({ count:sql<number>`count(*)::int` }).from(s.mailConsents).where(eq(s.mailConsents.source,'unsubscribe')),
+  ]);
+  const total = (...statuses: string[]) => deliverySummary.filter(row=>statuses.includes(row.status)).reduce((sum,row)=>sum+row.count,0);
   return {
+    stats: {
+      accepted:total('accepted','delivered'), delivered:total('delivered'), failed:total('failed','unknown'),
+      bounces:deliverySummary.filter(row=>row.error==='EMAIL_BOUNCED').reduce((sum,row)=>sum+row.count,0),
+      unsubscribed:optOuts[0]?.count ?? 0,
+    },
     permissions: await requireMailStaff(uid),
     reviews: await reviews(),
     automationRequests: (await db().select().from(s.settings).where(sql`${s.settings.key} LIKE 'mail-automation-request:%'`)).map(x => x.value as { requestedBy: string; requestedAt: string }),
@@ -224,16 +251,45 @@ export async function previewMail(uid: string, input: unknown) {
     throw new AppError(400, 'Linkul CTA trebuie să fie o adresă din AutoCare.');
   }
 }
+const segments = z.enum(['all','garage','no_garage']);
+async function segmentRecipients(segment: z.infer<typeof segments>, template: EmailTemplate, category: string, store: Pick<ReturnType<typeof db>,'select'> = db()) {
+  const [accounts,suppressed] = await Promise.all([
+    store.select({id:s.user.id,email:s.user.email,transactional:s.communicationPreferences.transactional,
+      promotional:s.communicationPreferences.promotional,categories:s.communicationPreferences.categories})
+      .from(s.user).leftJoin(s.profiles,eq(s.profiles.userId,s.user.id))
+      .leftJoin(s.accountRestrictions,eq(s.accountRestrictions.userId,s.user.id))
+      .leftJoin(s.communicationPreferences,eq(s.communicationPreferences.userId,s.user.id))
+      .where(and(eq(s.user.emailVerified,true),sql`${s.profiles.emailEnabled} is distinct from false`,
+        sql`${s.accountRestrictions.suspendedAt} is null`,
+        segment==='all' ? undefined : sql`
+          (exists (select 1 from ${s.vehicles} where ${s.vehicles.userId}=${s.user.id} and not ${s.vehicles.archived}))
+            = ${segment==='garage'}`)).orderBy(s.user.id),
+    store.select({hash:s.mailSuppressions.addressHash}).from(s.mailSuppressions),
+  ]);
+  const blocked = new Set(suppressed.map(row=>row.hash));
+  const pref = emailCategory(template,category==='promotional');
+  return accounts.filter(row=>z.email().max(254).safeParse(row.email).success && !blocked.has(emailAddressHash(row.email)) &&
+    (pref ? emailCategories(row.categories,row.promotional ?? false)[pref] : row.transactional !== false)).map(row=>row.id);
+}
+
+export async function countSegment(uid:string, input:unknown) {
+  await requireMailStaff(uid);
+  const {segment,template,category} = z.object({segment:segments,template:z.enum(templateIds),
+    category:z.enum(['transactional','promotional'])}).strict().parse(input);
+  return {count:(await segmentRecipients(segment,template,category)).length};
+}
+
 export async function saveCampaign(uid: string, input: unknown) {
   await requireMailStaff(uid);
   const data = inputSchema.parse(input);
-  if (['verification', 'password_reset', 'gmail_test'].includes(data.template))
+  if (['verification', 'password_reset', 'gmail_test', 'monthly_report', 'account_security'].includes(data.template))
     throw new AppError(
       400,
       'Acest șablon se trimite exclusiv din fluxul securizat dedicat. Poți vedea previzualizarea aici.',
     );
   if (templateCategory(data.template) === 'promotional' && data.category !== 'promotional')
     throw new AppError(400, 'Șablonul promoțional necesită categoria promoțională.');
+  if (!!data.segment === !!data.recipients.length) throw new AppError(400,'Alege un segment sau selectează destinatari individual.');
   const fingerprint = createHash('sha256').update(JSON.stringify(data)).digest('hex');
   return db().transaction(async (tx) => {
     await tx.select().from(s.user).where(eq(s.user.id, uid)).for('update');
@@ -248,11 +304,13 @@ export async function saveCampaign(uid: string, input: unknown) {
         );
       return { id: existing.id, duplicate: true };
     }
-    const users = await tx
+    const audience = data.segment ? await segmentRecipients(data.segment,data.template,data.category,tx) : data.recipients;
+    if (!audience.length) throw new AppError(400,'Segmentul nu are destinatari eligibili.');
+    const users = data.segment ? audience : await tx
       .select({ id: s.user.id })
       .from(s.user)
       .where(inArray(s.user.id, data.recipients));
-    if (users.length !== data.recipients.length)
+    if (users.length !== audience.length)
       throw new AppError(400, 'Un destinatar nu mai există. Reîncarcă lista.');
     await tx.insert(s.mailCampaigns).values({
       id: data.id,
@@ -269,8 +327,8 @@ export async function saveCampaign(uid: string, input: unknown) {
     });
     if(data.englishContent)await tx.insert(s.settings).values({key:'mail-english:'+data.id,value:data.englishContent});
     await tx.insert(s.settings).values({ key: 'mail-kind:' + data.id, value: { label: data.communicationType,templateLabel:data.templateLabel,categoryLabel:data.categoryLabel } });
-    await tx.insert(s.mailDeliveries).values(
-      data.recipients.map((userId) => ({
+    for (let index=0; index<audience.length; index+=250) await tx.insert(s.mailDeliveries).values(
+      audience.slice(index,index+250).map((userId) => ({
         id: crypto.randomUUID(),
         campaignId: data.id,
         userId,
@@ -284,7 +342,7 @@ export async function saveCampaign(uid: string, input: unknown) {
       action: 'mail.draft.created',
       target: data.id,
     });
-    return { id: data.id, duplicate: false };
+    return { id: data.id, duplicate: false, count:audience.length };
   });
 }
 export async function campaignDetail(uid: string, id: string) {
@@ -315,8 +373,9 @@ export async function deliverCampaign(
   now = new Date(),
 ) {
   const campaign = (await db().select().from(s.mailCampaigns).where(eq(s.mailCampaigns.id, id)))[0];
-  if (!campaign) return { accepted: 0 };
-  if (campaign.source === 'manual' && campaign.actorId) {
+  if (!campaign || ['cancelled','completed'].includes(campaign.status) ||
+      (campaign.scheduledAt && campaign.scheduledAt > now)) return { accepted: 0 };
+  if (campaign.source === 'manual' && !campaign.scheduledAt && campaign.actorId) {
     const author = await requireMailStaff(campaign.actorId);
     if (!author.directSend && !(await campaignApproved(id, campaign.fingerprint))) return { accepted: 0, held: true };
   }
@@ -342,7 +401,7 @@ export async function deliverCampaign(
           s.mailDeliveries.status,
           campaign.source === 'automation' ? ['held', 'pending'] : ['pending'],
         ),
-        sql`(${s.mailDeliveries.error} is distinct from 'GMAIL_HTTP_429' or ${s.mailDeliveries.attemptedAt} <= ${new Date(now.getTime() - 15 * 60000).toISOString()}::timestamptz)`,
+        sql`(${s.mailDeliveries.error} is distinct from 'GMAIL_HTTP_429' or ${s.mailDeliveries.attemptedAt} + (interval '15 minutes' * power(2, greatest(0, coalesce((${s.mailDeliveries.context}->>'retryCount')::int,1)-1))) <= ${now.toISOString()}::timestamptz)`,
       ),
     )
     .limit(2);
@@ -353,7 +412,9 @@ export async function deliverCampaign(
         .update(s.mailDeliveries)
         .set({ status: 'sending', attemptedAt: now })
         .where(
-          and(eq(s.mailDeliveries.id, candidate.id), eq(s.mailDeliveries.status, candidate.status)),
+          and(eq(s.mailDeliveries.id, candidate.id), eq(s.mailDeliveries.status, candidate.status),
+            sql`exists (select 1 from ${s.mailCampaigns} where ${s.mailCampaigns.id} = ${id}
+              and ${s.mailCampaigns.status} <> 'cancelled')`),
         )
         .returning();
       if (!claimed.length) return;
@@ -362,9 +423,9 @@ export async function deliverCampaign(
       if (
         !categoryEnabled ||
         (campaign.source === 'automation' &&
-          campaign.template === 'welcome' &&
-          now.getTime() - campaign.createdAt.getTime() > 86400000) ||
-        !(await recipientAllowed(candidate.userId, campaign.category, campaign.source === 'manual'||(campaign.source==='automation'&&campaign.template==='welcome'&&candidate.dedupeKey==='welcome:'+candidate.userId))) ||
+          ((campaign.template === 'welcome' && now.getTime() - campaign.createdAt.getTime() > 86400000) ||
+           (campaign.template === 'onboarding_guide' && now.getTime() - campaign.createdAt.getTime() > 14*86400000))) ||
+        !(await recipientAllowed(candidate.userId, campaign.category, campaign.source === 'manual'||(campaign.source==='automation'&&campaign.template==='welcome'&&candidate.dedupeKey==='welcome:'+candidate.userId), campaign.template)) ||
         !(await billingMailValid(candidate.userId, campaign.template, candidate.context, now))
       ) {
         await db()
@@ -381,6 +442,15 @@ export async function deliverCampaign(
           .where(eq(s.mailDeliveries.id, candidate.id));
         const language=await userLanguage(candidate.userId);
         const english=language==='en'?await campaignEnglish(campaign.id):null;
+        const report = campaign.template === 'monthly_report' && candidate.context.month
+          ? await monthlyVehicleReport(candidate.userId, candidate.context.month, language, now) : null;
+        if (campaign.template === 'monthly_report' && !report) {
+          await db().update(s.mailDeliveries).set({ status:'suppressed', error:'NO_CURRENT_VEHICLE_DATA' })
+            .where(eq(s.mailDeliveries.id,candidate.id));
+          return;
+        }
+        const release = campaign.template === 'release_news' ? (await db().select({value:s.settings.value}).from(s.settings)
+          .where(sql`${s.settings.key} like 'mail-release:%' AND ${s.settings.value}->>'campaignId' = ${id}`).limit(1))[0]?.value as {proof?:ReleaseProof} | undefined : undefined;
         const content = renderEmail(campaign.template as EmailTemplate, {
           name: user.name,
           language,
@@ -390,6 +460,17 @@ export async function deliverCampaign(
           ctaPath: campaign.ctaPath,
           promotional: campaign.category === 'promotional',
           ...(english??{}),
+          ...(report ?? {}),
+          ...(campaign.template==='onboarding_guide' ? {links:[
+            {label:language==='en'?'Explore SmartDrive GPS':'Descoperă SmartDrive GPS',path:language==='en'?'/en/smartdrive-gps':'/smartdrive-gps'},
+            {label:'AutoCare AI',path:language==='en'?'/en/automotive-ai':'/autocare-ai'},
+            {label:language==='en'?'Download Android app':'Descarcă aplicația Android',path:language==='en'?'/en/download':'/descarca'},
+          ]} : {}),
+          ...(release ? { ctaLabel:language==='en'?'Open AutoCare':'Deschide AutoCare', links:[
+            { label:language==='en'?'Read the release notes':'Vezi istoricul versiunilor',path:language==='en'?'/en/releases':'/noutati' },
+            ...(release.proof?.android ? [{ label:language==='en'?'Update the app':'Actualizează aplicația',path:language==='en'?'/en/download':'/descarca' }] : []),
+          ] } : {}),
+          ...(campaign.category === 'promotional' ? { unsubscribeUrl: unsubscribeLink(candidate.userId, user.email, language === 'en') } : {}),
         });
         const providerId = await transport(user.email, content, candidate.id);
         await db()
@@ -399,7 +480,7 @@ export async function deliverCampaign(
         accepted++;
       } catch (e) {
         const retryCount = candidate.context.retryCount ?? 0;
-        const retry = campaign.source === 'automation' && e instanceof GoogleDeliveryError
+        const retry = (campaign.source === 'automation' || campaign.scheduledAt !== null) && e instanceof GoogleDeliveryError
           && e.code === 'GMAIL_HTTP_429' && retryCount < 3;
         await db()
           .update(s.mailDeliveries)
@@ -425,9 +506,38 @@ export async function deliverCampaign(
   await db()
     .update(s.mailCampaigns)
     .set({ status: remaining.length ? 'sending' : 'completed' })
-    .where(eq(s.mailCampaigns.id, id));
+    .where(and(eq(s.mailCampaigns.id, id),sql`${s.mailCampaigns.status} <> 'cancelled'`));
   return { accepted, remaining: !!remaining.length };
 }
+export async function scheduleCampaign(uid: string, id: string, input: unknown) {
+  await requireFounder(uid);
+  const { at } = z.object({at:z.iso.datetime({offset:true})}).strict().parse(input);
+  const scheduledAt = new Date(at);
+  if (scheduledAt.getTime() <= Date.now()) throw new AppError(400,'Alege o dată viitoare.');
+  await db().transaction(async tx=>{
+    const [campaign] = await tx.select().from(s.mailCampaigns).where(eq(s.mailCampaigns.id,id)).for('update');
+    if (!campaign || campaign.source!=='manual' || campaign.status!=='draft' || campaign.template==='release_news')
+      throw new AppError(409,'Doar ciornele obișnuite se pot programa aici.');
+    await tx.update(s.mailCampaigns).set({status:'scheduled',scheduledAt}).where(eq(s.mailCampaigns.id,id));
+    await tx.insert(s.audit).values({id:crypto.randomUUID(),actorId:uid,action:'mail.campaign.scheduled',target:id});
+  });
+  return {scheduled:true};
+}
+
+export async function cancelCampaign(uid: string, id: string) {
+  await requireFounder(uid);
+  await db().transaction(async tx=>{
+    const [campaign] = await tx.select().from(s.mailCampaigns).where(eq(s.mailCampaigns.id,id)).for('update');
+    if (!campaign || !['draft','scheduled','held','sending'].includes(campaign.status) ||
+        (campaign.source!=='manual' && campaign.template!=='release_news')) throw new AppError(409,'Campania nu mai poate fi anulată.');
+    await tx.update(s.mailCampaigns).set({status:'cancelled'}).where(eq(s.mailCampaigns.id,id));
+    await tx.update(s.mailDeliveries).set({status:'suppressed',error:'CAMPAIGN_CANCELLED'})
+      .where(and(eq(s.mailDeliveries.campaignId,id),inArray(s.mailDeliveries.status,['pending','held'])));
+    await tx.insert(s.audit).values({id:crypto.randomUUID(),actorId:uid,action:'mail.campaign.cancelled',target:id});
+  });
+  return {cancelled:true};
+}
+
 export async function sendCampaign(uid: string, id: string) {
   await requireMailStaff(uid);
   const { campaign } = await campaignDetail(uid, id);
@@ -435,10 +545,12 @@ export async function sendCampaign(uid: string, id: string) {
   if (campaign.source !== 'manual')
     throw new AppError(403, 'Automatizările necesită aprobarea și activarea separată.');
   const actor = await requireMailStaff(uid);
-  if (!actor.directSend && !(await campaignApproved(id, campaign.fingerprint))) {
+  if (!actor.canApprove && !(await campaignApproved(id, campaign.fingerprint))) {
     await requestCampaignApproval(uid, id);
     throw new AppError(403, 'Comunicarea a fost trimisă Fondatorului pentru aprobare.');
   }
+  if (campaign.status === 'cancelled' || campaign.scheduledAt && campaign.scheduledAt > new Date())
+    throw new AppError(409,'Campania este anulată sau programată pentru mai târziu.');
   if (!(await gmailReady()))
     throw new AppError(409, 'Reconectează Gmail și finalizează testul înainte de trimitere.');
   await verifyGoogleMailAuthorization();
@@ -457,6 +569,8 @@ export async function sendCampaign(uid: string, id: string) {
   )[0];
   if (count.count > 15)
     throw new AppError(429, 'Limita de trimitere a fost atinsă. Reîncearcă într-un minut.');
+  await db().update(s.mailCampaigns).set({scheduledAt:new Date(),status:'sending'})
+    .where(and(eq(s.mailCampaigns.id,id),inArray(s.mailCampaigns.status,['draft','sending'])));
   const result = await deliverCampaign(id);
   await db()
     .insert(s.audit)
@@ -467,21 +581,25 @@ export async function retryFailedCampaign(uid: string, id: string) {
   const actor = await requireMailStaff(uid);
   const { campaign } = await campaignDetail(uid, id);
   if (campaign.source !== 'manual') throw new AppError(403, 'Doar comunicările manuale pot fi reîncercate aici.');
-  if (!actor.directSend && !(await campaignApproved(id, campaign.fingerprint))) throw new AppError(403, 'Este necesară aprobarea Fondatorului.');
+  if (campaign.status==='cancelled') throw new AppError(409,'Campania este anulată.');
+  if (!actor.canApprove && !(await campaignApproved(id, campaign.fingerprint))) throw new AppError(403, 'Este necesară aprobarea Fondatorului.');
   const requeued = await db().update(s.mailDeliveries).set({status:'pending',error:null,attemptedAt:null})
     .where(and(eq(s.mailDeliveries.campaignId,id),eq(s.mailDeliveries.status,'failed'),sql`${s.mailDeliveries.providerId} IS NULL`)).returning({id:s.mailDeliveries.id});
-  if (requeued.length) await db().update(s.mailCampaigns).set({status:'draft'}).where(eq(s.mailCampaigns.id,id));
+  if (requeued.length) await db().update(s.mailCampaigns).set({status:'draft',scheduledAt:null}).where(eq(s.mailCampaigns.id,id));
   await db().insert(s.audit).values({id:crypto.randomUUID(),actorId:uid,action:'mail.failed.requeued',target:id});
   return { requeued: requeued.length };
 }
 export async function publishReleaseNews(uid: string, id: string, input: unknown) {
   await requireFounder(uid);
-  const { version, releaseDate } = z.object({
+  const { version, releaseDate, proof } = z.object({
     version: z.string().trim().regex(/^[0-9][A-Za-z0-9.+-]{0,39}$/),
     releaseDate: z.iso.date(),
+    proof: releaseProofSchema.optional(),
   }).strict().parse(input);
   if (!(await automationState()).enabled || !(await gmailReady()))
     throw new AppError(409, 'Activează automatizările și verifică expeditorul înainte de publicare.');
+  if (!proof) throw new AppError(400,'Confirmă testele și introduce commitul publicat. Pentru Android este necesară verificarea APK-ului semnat.');
+  await verifyPublishedRelease(proof);
   const key = 'mail-release:' + version.toLowerCase();
   return db().transaction(async tx => {
     const [campaign] = await tx.select().from(s.mailCampaigns).where(eq(s.mailCampaigns.id, id)).for('update');
@@ -495,16 +613,16 @@ export async function publishReleaseNews(uid: string, id: string, input: unknown
     if (campaign.status !== 'draft') throw new AppError(409, 'Anunțul nu mai este o ciornă.');
     if (campaign.message === emailTemplates.release_news.body)
       throw new AppError(400, 'Completează funcțiile și schimbările reale ale versiunii.');
-    const reserved = await tx.insert(s.settings).values({ key, value: { version, releaseDate, campaignId: id } })
+    const reserved = await tx.insert(s.settings).values({ key, value: { version, releaseDate, campaignId: id, proof } })
       .onConflictDoNothing().returning({ key: s.settings.key });
     if (!reserved.length) throw new AppError(409, 'Versiunea are deja un anunț publicat.');
     await tx.update(s.mailCampaigns).set({
-      source: 'automation', actorId: uid, status: 'held',
+      source: 'automation', actorId: uid, status: 'held', ctaPath:'/cont', ctaLabel:'Deschide AutoCare',
       message: `Versiunea ${version} · ${releaseDate}\n\n${campaign.message}`,
     }).where(eq(s.mailCampaigns.id, id));
     const englishRow=(await tx.select().from(s.settings).where(eq(s.settings.key,'mail-english:'+id)))[0];
     const english=englishMailSchema.safeParse(englishRow?.value);
-    if(english.success)await tx.update(s.settings).set({value:{...english.data,message:`Version ${version} · ${releaseDate}\n\n${english.data.message}`}}).where(eq(s.settings.key,'mail-english:'+id));
+    if(english.success)await tx.update(s.settings).set({value:{...english.data,message:`Version ${version} · ${releaseDate}\n\n${english.data.message}`,ctaLabel:'Open AutoCare'}}).where(eq(s.settings.key,'mail-english:'+id));
     await tx.insert(s.audit).values({ id: crypto.randomUUID(), actorId: uid, action: 'mail.release.scheduled', target: id });
     return { scheduled: true };
   });
@@ -522,15 +640,19 @@ export async function deliverAutomatedMail() {
         sql`(${s.mailCampaigns.template} <> 'release_news' or exists (
           select 1 from ${s.settings} where ${s.settings.key} like 'mail-release:%'
           and ${s.settings.value}->>'campaignId' = ${s.mailCampaigns.id}
+          and ${s.settings.value}->'proof' is not null
           and ${s.settings.value}->>'releaseDate' <= to_char(now() at time zone 'Europe/Bucharest', 'YYYY-MM-DD')
         ))`,
       ),
     )
     .orderBy(s.mailCampaigns.createdAt)
-    .limit(1);
+    .limit(4);
   if(!campaigns.length)return {enabled:true,accepted:0};
   await verifyGoogleMailAuthorization();
-  return deliverCampaign(campaigns[0].id);
+  const results = await Promise.all(campaigns.map(campaign=>deliverCampaign(campaign.id)));
+  return {enabled:true, accepted:results.reduce((sum,r)=>sum+r.accepted,0),
+    remaining:results.some(result=>'remaining' in result && result.remaining)};
+
 }
 
 export async function approveMailAutomation(uid: string, input: unknown) {

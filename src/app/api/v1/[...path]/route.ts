@@ -357,15 +357,16 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (route === 'founder/mail/library' && method === 'POST') return json(await mailCenter.saveMailLibraryEntry(uid, await body(req)));
       if (path.length === 4 && path[1] === 'mail' && path[2] === 'library' && method === 'DELETE') return json(await mailCenter.deleteMailLibraryEntry(uid, path[3]));
       if (route === 'founder/mail/approve' && method === 'POST') return json(await mailCenter.approveMailAutomation(uid, await body(req)));
+      if (route === 'founder/mail/audience' && method === 'POST') return json(await mailCenter.countSegment(uid,await body(req)));
       if (route === 'founder/mail/preview' && method === 'POST') return json(await mailCenter.previewMail(uid, await body(req)));
       if (route === 'founder/mail/campaigns' && method === 'POST') return json(await mailCenter.saveCampaign(uid, await body(req)));
       if (path[1] === 'mail' && path[2] === 'campaigns' && path[3]) {
         if (path.length === 4 && method === 'GET') return json(await mailCenter.campaignDetail(uid, path[3]));
+        if (path.length === 5 && path[4] === 'schedule' && method === 'POST') return json(await mailCenter.scheduleCampaign(uid,path[3],await body(req)));
+        if (path.length === 5 && path[4] === 'cancel' && method === 'POST') return json(await mailCenter.cancelCampaign(uid,path[3]));
         if (path.length === 5 && path[4] === 'retry-failed' && method === 'POST') return json(await mailCenter.retryFailedCampaign(uid, path[3]));
         if (path.length === 5 && path[4] === 'publish-release' && method === 'POST') {
-          const result=await mailCenter.publishReleaseNews(uid,path[3],await body(req));
-          after(async()=>{await dispatchMailSafely();});
-          return json(result);
+          return json(await mailCenter.publishReleaseNews(uid,path[3],await body(req)));
         }
         if (path.length === 5 && path[4] === 'send' && method === 'POST') return json(await mailCenter.sendCampaign(uid, path[3]));
       }

@@ -25,9 +25,9 @@ export async function recordSystemMail(
         .select()
         .from(s.emailEvents)
         .where(eq(s.emailEvents.providerId, providerId));
-      if (events.some((e) => ['email.failed', 'email.bounced'].includes(e.status))) {
+      if (events.some((e) => ['email.failed', 'email.bounced','email.complained'].includes(e.status))) {
         status = 'failed';
-        error = 'EMAIL_DELIVERY_FAILED';
+        error = events.some(e=>e.status==='email.bounced') ? 'EMAIL_BOUNCED' : events.some(e=>e.status==='email.complained') ? 'EMAIL_COMPLAINT' : 'EMAIL_FAILED';
       } else if (events.some((e) => e.status === 'email.delivered')) {
         status = 'delivered';
         error = undefined;

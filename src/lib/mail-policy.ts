@@ -1,6 +1,8 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from './db';
 import * as s from './schema';
+import { emailCategory, emailCategories } from './mail-preference-categories';
+import { emailSuppressed } from './mail-consent';
 export type DeliveryContext = typeof s.mailDeliveries.$inferSelect.context;
 export async function communicationPreference(uid: string) {
   const row = (
@@ -9,20 +11,22 @@ export async function communicationPreference(uid: string) {
       .from(s.communicationPreferences)
       .where(eq(s.communicationPreferences.userId, uid))
   )[0];
-  return { transactional: row?.transactional ?? true, promotional: row?.promotional ?? false };
+  return { transactional: row?.transactional ?? true, promotional: row?.promotional ?? false, categories: emailCategories(row?.categories, row?.promotional ?? false) };
 }
-export async function recipientAllowed(uid: string, category: string, manual = false) {
+export async function recipientAllowed(uid: string, category: string, manual = false, template = '') {
   const [user, profile, restrictions, preferences] = await Promise.all([
     db().select().from(s.user).where(eq(s.user.id, uid)),
     db().select().from(s.profiles).where(eq(s.profiles.userId, uid)),
     db().select().from(s.accountRestrictions).where(eq(s.accountRestrictions.userId, uid)),
     communicationPreference(uid),
   ]);
+  const preference = emailCategory(template, category === 'promotional');
   return (
     !!user[0] && (user[0].emailVerified || (manual && category === 'transactional')) &&
     !restrictions[0]?.suspendedAt &&
     profile[0]?.emailEnabled !== false &&
-    (category === 'promotional' ? preferences.promotional : preferences.transactional)
+    (preference ? preferences.categories[preference] : preferences.transactional) &&
+    !(await emailSuppressed(user[0].email))
   );
 }
 export async function billingMailValid(

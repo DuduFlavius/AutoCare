@@ -57,6 +57,8 @@ const tables = {
   communicationPreferences: s.communicationPreferences,
   mailCampaigns: s.mailCampaigns,
   mailDeliveries: s.mailDeliveries,
+  mailConsents: s.mailConsents,
+  mailSuppressions: s.mailSuppressions,
 };
 export async function encryptedBackup(key: Buffer) {
   if (key.length !== 32) throw new Error('BACKUP_KEY must be 32 bytes');
@@ -121,7 +123,7 @@ export async function restoreEncrypted(bytes: Buffer, key: Buffer) {
     ])
       if (!(key in backup.tables)) backup.tables[key] = [];
   if (backup.version === 2 && backup.tables) for(const key of ['nativePushTokens','playSubscriptions']) if(!(key in backup.tables))backup.tables[key]=[];
-  for(const key of ['mileageReadingCorrections','feedbackItems','feedbackReplies','feedbackFiles','feedbackEvents','feedbackPreferences','feedbackNotices']) if(backup.tables && !(key in backup.tables)) backup.tables[key]=[];
+  for(const key of ['mailConsents','mailSuppressions','mileageReadingCorrections','feedbackItems','feedbackReplies','feedbackFiles','feedbackEvents','feedbackPreferences','feedbackNotices']) if(backup.tables && !(key in backup.tables)) backup.tables[key]=[];
   if (![1,2].includes(backup.version) || Object.keys(tables).some((k) => !Array.isArray(backup.tables[k])))
     throw new Error('Invalid backup');
   await db().transaction(async (tx) => {

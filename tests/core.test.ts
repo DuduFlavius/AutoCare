@@ -809,7 +809,9 @@ test('Mail Center API rejects anonymous users, clients and foreign origins; Foun
       200,
     );
     const prefs = await (await call('communication-preferences')).json();
-    assert.deepEqual(prefs, { transactional: false, promotional: false });
+    assert.deepEqual(prefs, { transactional: false, promotional: false,
+      categories:{releases:false,news:false,maintenance:true,documents:true,monthly:false,tips:false,offers:false},
+    });
     const rows = await db().select().from(s.mailCampaigns);
     assert.ok(!JSON.stringify(rows).includes('token='));
   } finally {

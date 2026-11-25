@@ -350,6 +350,10 @@ export async function sendGoogleMail(to: string, content: EmailContent, delivery
     `To: ${to}`,
     `Subject: =?UTF-8?B?${Buffer.from(content.subject).toString('base64')}?=`,
     `Message-ID: <${hash(deliveryId)}@${new URL(origin()).hostname}>`,
+    ...(content.unsubscribeUrl ? [
+      `List-Unsubscribe: <${content.unsubscribeUrl}>`,
+      'List-Unsubscribe-Post: List-Unsubscribe=One-Click',
+    ] : []),
     'MIME-Version: 1.0',
     `Content-Type: multipart/alternative; boundary="${boundary}"`,
     '',

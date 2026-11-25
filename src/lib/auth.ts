@@ -61,6 +61,7 @@ function makeAuth() {
       autoSignIn: !requireVerification,
       minPasswordLength: 12,
       revokeSessionsOnPasswordReset: true,
+      resetPasswordTokenExpiresIn: 1800,
       sendResetPassword: async ({ user, url },request) => {
         await sendMail(
           user.email,
@@ -120,9 +121,19 @@ function makeAuth() {
           const content=renderEmail('administrative',{name:user.name,language,actionUrl:url,subject:language==='en'?'Confirm permanent AutoCare account deletion':'Confirmă ștergerea definitivă a contului AutoCare',message:language==='en'?'You requested permanent deletion of your account and its stored vehicle data. This link is the final confirmation and expires in 30 minutes. Any active Stripe subscription will be canceled before deletion. Google Play subscriptions must be canceled separately in Google Play. If you did not request deletion, do not open the confirmation link.':'Ai solicitat ștergerea definitivă a contului și a datelor auto salvate. Acest link reprezintă confirmarea finală și expiră în 30 de minute. Abonamentul Stripe activ va fi anulat înainte de ștergere. Abonamentele Google Play trebuie anulate separat în Google Play. Dacă nu ai făcut solicitarea, nu deschide linkul de confirmare.',ctaLabel:language==='en'?'Confirm permanent deletion':'Confirmă ștergerea definitivă'});
           await sendMail(user.email,content.subject,content.text,createHash('sha256').update(url).digest('hex'),content,{userId:user.id,template:'administrative'});
         },
-        afterDelete: async u => {
-          await db().delete(schema.settings).where(like(schema.settings.key,'security-email-change:'+u.id+':%'));
-          await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(u.id), financeBudgetKey(u.id), languagePreferenceKey(u.id),accountPreferencesKey(u.id),aiTitlesKey(u.id),'security-email-change:'+u.id]));
+        afterDelete: async (user,request) => {
+          await db().delete(schema.settings).where(like(schema.settings.key,'security-email-change:'+user.id+':%'));
+          await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(user.id), financeBudgetKey(user.id), languagePreferenceKey(user.id),accountPreferencesKey(user.id),aiTitlesKey(user.id),'security-email-change:'+user.id]));
+          const language = languageCookie(request?.headers.get('cookie')) ?? 'ro';
+          const en = language==='en';
+          const content = renderEmail('account_security',{name:user.name,language,ctaPath:'/contact',
+            subject:en?'Your AutoCare account was deleted':'Contul tău AutoCare a fost șters',
+            message:en?'We completed your account deletion request. Contact AutoCare support if you need help.':'Am finalizat cererea de ștergere a contului. Contactează suportul AutoCare dacă ai nevoie de ajutor.',
+            ctaLabel:en?'Contact support':'Contactează suportul'});
+          try {
+            await sendMail(user.email,content.subject,content.text,
+              'account-deleted:'+createHash('sha256').update(user.id).digest('hex'),content);
+          } catch { console.error(JSON.stringify({event:'account_deletion_notice_unconfirmed'})); }
         },
         beforeDelete: async (u) => {
           await db().delete(schema.verification).where(or(eq(schema.verification.value,u.id),inArray(schema.verification.identifier,['email-verification','sign-in','forget-password'].map(type=>type+'-otp-'+u.email.toLowerCase()))));

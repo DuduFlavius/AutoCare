@@ -2,6 +2,9 @@
 export const englishEmailCopy: Record<string, {title:string;body:string;cta:string}> = Object.fromEntries([
 ['feedback_received','Thanks for sharing your feedback!','The AutoCare team received your feedback. Thank you for helping us improve the app. If we reply, you will find our response in the Feedback section of your account.','View feedback'],
 ['invoice_help','Your billing documents','Open your subscription to view payment history. For help, send support the payment date and invoice reference, without card details.','View subscription'],
+['monthly_report','Your month in AutoCare','Review your vehicle activity and upcoming deadlines.','View report'],
+['onboarding_guide','Get started with AutoCare','Add your first vehicle and its documents. Discover SmartDrive GPS on Android and AutoCare AI in your garage.','View guide'],
+['auto_tips','Get ready for your next service','Check the recommended service intervals for your vehicle and record them in AutoCare.','View maintenance'],
 ['subscription_cancelled','Check your remaining access','Check your account for your access end date. Vehicle history remains available according to your plan after expiry.','View subscription'],
 ['export_help','Prepare a garage report','Select your vehicle, records and date range in Premium reports. Personal data export is available separately in account settings.','Open Premium'],
 ['map_help','Set up your map location','In AutoCare Maps, choose My location and allow precise location. Search for a destination or pick it on the map, then choose an available route.','Open account'],

@@ -9,6 +9,8 @@ import { useEffect, useState } from 'react';
 import GoogleMailSettings from './google-mail-settings';
 import { Mail, Eye, Send, Plus, RefreshCw } from 'lucide-react';
 import type { mailCenterOverview, campaignDetail } from '@/lib/mail-center';
+import { emailCategory, emailCategories } from '@/lib/mail-preference-categories';
+import { requestConfirmation } from './premium-dialogs';
 import { templateCategory } from '@/lib/email-templates';
 import type { EmailTemplate, EmailContent } from '@/lib/email-templates';
 type Overview = Awaited<ReturnType<typeof mailCenterOverview>>;
@@ -36,6 +38,8 @@ const labels: Record<string, string> = {
   unknown: 'Rezultat incert — verifică Gmail',
   suppressed: 'Omis: preferințe / eveniment schimbat',
   completed: 'Procesat',
+  scheduled: 'Programat',
+  cancelled: 'Anulat',
 };
 export default function MailCenter() {
 
@@ -46,6 +50,15 @@ export default function MailCenter() {
   const englishContent=englishSubject.trim()||englishMessage.trim()?{subject:englishSubject,message:englishMessage,ctaLabel:englishCta||'Open AutoCare'}:undefined;
   const [releaseVersion, setReleaseVersion] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
+  const [releaseCommit,setReleaseCommit]=useState('');
+  const [releaseTests,setReleaseTests]=useState(false);
+  const [androidRelease,setAndroidRelease]=useState(false);
+  const [androidVersion,setAndroidVersion]=useState('');
+  const [androidHash,setAndroidHash]=useState('');
+  const [androidSignature,setAndroidSignature]=useState(false);
+  const [scheduledAt,setScheduledAt]=useState('');
+  const [segment,setSegment]=useState<''|'all'|'garage'|'no_garage'>('');
+  const [segmentCount,setSegmentCount]=useState<number|null>(null);
   const [libraryName, setLibraryName] = useState('');
   const [templateLabel,setTemplateLabel]=useState(''),[categoryLabel,setCategoryLabel]=useState('');
   const [communicationType, setCommunicationType] = useState('Informare cont');
@@ -106,6 +119,7 @@ export default function MailCenter() {
     setCtaLabel(t.cta);
     setCtaPath(t.path);
     setCategory(templateCategory(id));
+    setSegmentCount(null);
     setPreview(null);
     setSaved(false);
     setDraftId(crypto.randomUUID());
@@ -123,12 +137,17 @@ export default function MailCenter() {
       setBusy(false);
     }
   }
-  const security = ['verification', 'password_reset', 'gmail_test'].includes(template);
+  const security = ['verification', 'password_reset', 'gmail_test','account_security','monthly_report'].includes(template);
+  const topics = emailCategory(template,category==='promotional');
+  const hasAudience = segment ? (segmentCount??0)>0 : recipients.length>0;
+  const draft = {id:draftId,template,category,communicationType,templateLabel,categoryLabel,subject,message,ctaLabel,ctaPath,
+    ...(segment?{segment}:{recipients}),englishContent};
+  const canDraft = !busy && !security && hasAudience && subject.trim().length>=3 && message.trim().length>=10;
   const selectedName = data?.users.find((u) => u.id === recipients[0])?.name || 'prietene';
   const eligible = (u: Overview['users'][number]) =>
     (u.emailVerified || category === 'transactional') &&
-    u.emailEnabled !== false &&
-    (category === 'promotional' ? u.promotional === true : u.transactional !== false);
+    !u.suspendedAt && u.emailEnabled !== false &&
+    (topics ? emailCategories(u.categories,u.promotional??false)[topics] : u.transactional !== false);
   if (!data)
     return (
       <section className="card">
@@ -258,7 +277,14 @@ export default function MailCenter() {
           {template === 'release_news' && <div className="form-grid">
             <label>{locale === 'ro-RO' ? 'Versiunea lansării' : 'Release version'}<input value={releaseVersion} maxLength={40} onChange={e => setReleaseVersion(e.target.value)} placeholder="2.4.0" /></label>
             <label>{locale === 'ro-RO' ? 'Data lansării' : 'Release date'}<PremiumDateInput type="date" value={releaseDate} onChange={e => setReleaseDate(e.target.value)} /></label>
-            <p className="small muted">{locale === 'ro-RO' ? 'Anunțul intră în coadă pentru data aleasă. AutoCare verifică acordul pentru noutăți înainte de expediere.' : 'The release is queued for the selected date. AutoCare verifies news consent before sending.'}</p>
+            <label>{t('Commit GitHub publicat','Published GitHub commit')}<input value={releaseCommit} maxLength={40} onChange={e=>setReleaseCommit(e.target.value.trim())}/></label>
+            <label className="check"><input type="checkbox" checked={releaseTests} onChange={e=>setReleaseTests(e.target.checked)}/>{t('Confirm că buildul și testele acestei versiuni au trecut.','I confirm this release passed its build and tests.')}</label>
+            <label className="check"><input type="checkbox" checked={androidRelease} onChange={e=>setAndroidRelease(e.target.checked)}/>{t('Include un APK Android nou','Includes a new Android APK')}</label>
+            {androidRelease && <>
+              <label>{t('Versiune Android','Android version')}<input value={androidVersion} maxLength={32} onChange={e=>setAndroidVersion(e.target.value.trim())}/></label>
+              <label>SHA-256 APK<input value={androidHash} maxLength={64} onChange={e=>setAndroidHash(e.target.value.trim().toLowerCase())}/></label>
+              <label className="check"><input type="checkbox" checked={androidSignature} onChange={e=>setAndroidSignature(e.target.checked)}/>{t('Am verificat semnătura APK-ului','I verified the APK signature')}</label>
+            </>}
           </div>}
           <label>Tip de comunicare — alege sau scrie tu
             <input list="mail-communication-options" disabled={saved || busy} maxLength={100} value={communicationType} onChange={e => setCommunicationType(e.target.value)} placeholder="Ex.: Informare service, răspuns suport…" />
@@ -351,6 +377,19 @@ export default function MailCenter() {
               Conectare Gmail.
             </p>
           )}
+          <label>{t('Destinatari','Recipients')}
+            <FilterSelect disabled={busy||saved} value={segment} onChange={event=>{setSegment(event.target.value as typeof segment);setSegmentCount(null);}}>
+              <option value="">{t('Alegere individuală','Individual selection')}</option>
+              <option value="all">{t('Toți utilizatorii eligibili','All eligible users')}</option>
+              <option value="garage">{t('Conturi cu vehicule active','Accounts with active vehicles')}</option>
+              <option value="no_garage">{t('Conturi fără vehicule active','Accounts without active vehicles')}</option>
+            </FilterSelect>
+          </label>
+          {segment && <div className="inline"><button type="button" disabled={busy||saved} onClick={()=>void run(async()=>{
+            const result=await api('/audience','POST',{segment,template,category});setSegmentCount(result.count);
+          })}>{t('Calculează destinatarii eligibili','Count eligible recipients')}</button>
+            {segmentCount!==null&&<span role="status">{segmentCount} {t('eligibili','eligible')}</span>}</div>}
+          {!segment && <>
           <label>
             Caută destinatari
             <input value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -406,6 +445,19 @@ export default function MailCenter() {
                 </label>
               ))}
           </div>
+          </>}
+          <button type="button" disabled={!canDraft||saved} onClick={()=>void run(async()=>{
+            await api('/campaigns','POST',draft);setSaved(true);setData(await api());setNotice(t('Ciornă salvată.','Draft saved.'));
+          })}>{t('Salvează ciorna','Save draft')}</button>
+          {data.permissions.canApprove && template!=='release_news' && <div className="inline">
+            <label>{t('Data și ora locală a expedierii','Local scheduled delivery time')}<input type="datetime-local" value={scheduledAt} onChange={e=>setScheduledAt(e.target.value)}/></label>
+            <button type="button" disabled={!canDraft||!scheduledAt} onClick={()=>void run(async()=>{
+              if (!await requestConfirmation(t('Aprobi și programezi expedierea acestei campanii?','Approve and schedule delivery for this campaign?'))) return;
+              if(!saved){await api('/campaigns','POST',draft);setSaved(true);}
+              await api(`/campaigns/${draftId}/schedule`,'POST',{at:new Date(scheduledAt).toISOString()});
+              setData(await api());setSection('history');
+            })}>{t('Aprobă și programează','Approve and schedule')}</button>
+          </div>}
           <button
             disabled={busy}
             onClick={() =>
@@ -432,37 +484,28 @@ export default function MailCenter() {
           <button
             type="button"
             className="mail-send-action"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', minHeight: 60, padding: '16px 20px', border: '2px solid #1C8062', borderRadius: 10, fontSize: 16, fontWeight: 800, backgroundColor: '#0B1C16', color: '#ffffff', WebkitTextFillColor: '#ffffff', opacity: 1, cursor: busy || security || !recipients.length || !subject.trim() || !message.trim() ? 'not-allowed' : 'pointer' }}
-            aria-disabled={busy || security || !recipients.length || !subject.trim() || !message.trim()}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', minHeight: 60, padding: '16px 20px', border: '2px solid #1C8062', borderRadius: 10, fontSize: 16, fontWeight: 800, backgroundColor: '#0B1C16', color: '#ffffff', WebkitTextFillColor: '#ffffff', opacity: 1, cursor: !canDraft ? 'not-allowed' : 'pointer' }}
+            aria-disabled={!canDraft}
             onClick={() => {
-              if (busy || security || !recipients.length || !subject.trim() || !message.trim()) return;
+              if (!canDraft) return;
               void run(async () => {
-              if (data.permissions.directSend && gmailStatus && !gmailStatus.connected) {
-                throw new Error('Contul Gmail nu este conectat. Apasă „Conectează Gmail” din Panoul Fondator.');
-              }
-              if (data.permissions.directSend && gmailStatus && !gmailStatus.testedAt) {
-                const testResponse = await fetch('/api/v1/mail/google/test', { method: 'POST' });
-                const testResult = await testResponse.json();
-                if (!testResponse.ok) throw new Error(testResult.error || 'Testul Gmail a eșuat. Emailurile nu au fost trimise.');
-                const statusResponse = await fetch('/api/v1/mail/google/status', { cache: 'no-store' });
-                if (!statusResponse.ok) throw new Error('Testul Gmail a fost acceptat, dar starea nu a putut fi verificată.');
-                const updated = await statusResponse.json();
-                setGmailStatus(updated);
-                if (!updated.testedAt) throw new Error('Gmail nu a confirmat activarea. Nu au fost trimise mesaje către destinatari.');
-              }
+              if (data.permissions.canApprove && !await requestConfirmation(t('Aprobi expedierea acestei comunicări către destinatarii eligibili?','Approve delivery to the eligible recipients?'))) return;
+              if (data.permissions.canApprove && gmailStatus && (!gmailStatus.connected||!gmailStatus.testedAt))
+                throw new Error(t('Conectează Gmail și rulează testul din Mail Center.','Connect Gmail and run the Mail Center test.'));
               if (!saved) {
-                await api('/campaigns', 'POST', {
-                  id: draftId, template, category, communicationType, templateLabel, categoryLabel, subject, message, ctaLabel, ctaPath, recipients, englishContent,
-                });
+                await api('/campaigns', 'POST', draft);
                 setSaved(true);
               }
-              if (!data.permissions.directSend && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved')) {
+              if (!data.permissions.canApprove && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved')) {
                 await api(`/campaigns/${draftId}/request-approval`, 'POST');
                 setData(await api()); setNotice('Cererea apare în Mail Center-ul Fondatorului. Nu s-au trimis emailuri.'); setSection('history'); return;
               }
               if (template === 'release_news') {
                 if (!data.permissions.canApprove) throw new Error('Doar Fondatorul poate publica o lansare.');
-                await api(`/campaigns/${draftId}/publish-release`, 'POST', { version: releaseVersion, releaseDate });
+                await api(`/campaigns/${draftId}/publish-release`, 'POST', { version:releaseVersion,releaseDate,proof:{
+                  commit:releaseCommit,testsPassed:releaseTests,
+                  ...(androidRelease?{android:{version:androidVersion,sha256:androidHash,signatureVerified:androidSignature}}:{}),
+                } });
                 setData(await api());
                 setNotice('Lansarea a fost programată. Starea expedierii apare în istoric.');
                 setSection('history');
@@ -489,11 +532,11 @@ export default function MailCenter() {
               });
             }}
           >
-            <Send size={17} /> {busy ? 'Se procesează…' : !data.permissions.directSend && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved') ? 'Trimite Fondatorului pentru aprobare' : template === 'release_news' ? 'Programează AutoCare News' : saved ? 'Continuă trimiterea emailurilor' : recipients.length ? `Trimite emailul către ${recipients.length} destinatari` : 'Bifează un destinatar pentru trimitere'}
+            <Send size={17} /> {busy ? 'Se procesează…' : !data.permissions.canApprove && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved') ? 'Trimite Fondatorului pentru aprobare' : template === 'release_news' ? 'Programează AutoCare News' : saved ? 'Continuă trimiterea emailurilor' : hasAudience ? `Trimite emailul către ${segment?segmentCount:recipients.length} destinatari` : 'Bifează un destinatar pentru trimitere'}
           </button>
-          {!recipients.length && <p className="small muted">Bifează cel puțin un destinatar pentru a activa trimiterea.</p>}
+          {!hasAudience && <p className="small muted">Bifează cel puțin un destinatar pentru a activa trimiterea.</p>}
           {data.permissions.directSend && gmailStatus && !gmailStatus.testedAt && (
-            <p className="small muted">La prima trimitere, AutoCare verifică automat Gmail. Dacă testul eșuează, nu expediază mesajele către destinatari.</p>
+            <p className="small muted">{t('Rulează testul Gmail înainte de prima expediere.','Run the Gmail test before the first delivery.')}</p>
           )}
         </section>
         <section className="card mail-preview">
@@ -566,6 +609,10 @@ export default function MailCenter() {
             Reîncarcă
           </button>
         </div>
+        <dl className="form-grid">
+          {([['accepted',t('Acceptate','Accepted')],['delivered',t('Livrate confirmat','Confirmed delivered')],['failed',t('Eșuate sau incerte','Failed or unconfirmed')],['bounces','Bounce'],['unsubscribed',t('Dezabonări','Unsubscribes')]] as const).map(([key,label])=>
+            <div key={key}><dt>{label}</dt><dd>{data.stats[key]}</dd></div>)}
+        </dl>
         {data.reviews.length > 0 && <div className="mail-review-list"><h3>Aprobări comunicări</h3>{data.reviews.map(review => <div className="mail-review-item" key={review.campaignId}>
           <strong>{data.campaigns.find(x => x.id === review.campaignId)?.subject || 'Comunicare'}</strong>
           <p>{data.users.find(u => u.id === review.requestedBy)?.name || review.requestedBy} · {review.status === 'pending' ? 'Așteaptă aprobarea Fondatorului' : review.status === 'approved' ? 'Aprobată' : 'Respinsă'}</p>
@@ -600,6 +647,8 @@ export default function MailCenter() {
                     {c.source === 'automation' ? 'automatizare' : 'manual'}
                   </td>
                   <td>
+                    <strong>{labels[c.status]||c.status}</strong>
+                    {c.scheduledAt && <div>{new Date(c.scheduledAt).toLocaleString(locale)}</div>}
                     {Object.entries(c.counts).map(([key, n]) => (
                       <div key={key}>
                         {labels[key] || key}: {n}
@@ -625,6 +674,7 @@ export default function MailCenter() {
                             setSaved(true);
                             setConfirmed(false);
                             setPreview(null);
+                            setSegment('');setSegmentCount(null);
                             setRecipients(
                               result.deliveries.map((d: Detail['deliveries'][number]) => d.userId),
                             );
@@ -643,6 +693,12 @@ export default function MailCenter() {
         {detail && (
           <div>
             <h3>{detail.campaign.subject}</h3><p>{detail.communicationType}</p><p style={{whiteSpace: 'pre-wrap'}}>{detail.campaign.message}</p><p>{detail.campaign.ctaLabel} · {detail.campaign.ctaPath}</p>
+            {data.permissions.canApprove && ['draft','scheduled','sending','held'].includes(detail.campaign.status) &&
+              (detail.campaign.source==='manual'||detail.campaign.template==='release_news') &&
+              <button disabled={busy} type="button" onClick={()=>void run(async()=>{
+                if(!await requestConfirmation(t('Anulezi mesajele încă neexpediate?','Cancel messages that have not been sent?'))) return;
+                await api(`/campaigns/${detail.campaign.id}/cancel`,'POST');setDetail(await api(`/campaigns/${detail.campaign.id}`));setData(await api());
+              })}>{t('Anulează campania','Cancel campaign')}</button>}
             {detail.deliveries.some(d => d.status === 'failed') && <button disabled={busy} onClick={() => void run(async () => {
               const result = await api(`/campaigns/${detail.campaign.id}/retry-failed`, 'POST');
               setDetail(await api(`/campaigns/${detail.campaign.id}`)); setData(await api());

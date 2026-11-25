@@ -1,9 +1,10 @@
+import { previousReportMonth } from './mail-monthly-report';
 import { and, eq, sql } from 'drizzle-orm';
 import { createHash } from 'node:crypto';
 import { profile, assertActiveAccount } from './service';
 import { db } from './db';
 import * as s from './schema';
-import { emailTemplates, type EmailTemplate } from './email-templates';
+import { emailTemplates, templateCategory, type EmailTemplate } from './email-templates';
 import { billingMailValid, type DeliveryContext } from './mail-policy';
 export async function automationState() {
   const row = (
@@ -41,7 +42,7 @@ export async function queueAutomatedMail(
       id,
       source: 'automation',
       template,
-      category: 'transactional',
+      category: templateCategory(template),
       subject: t.subject,
       message: t.body,
       ctaLabel: t.cta,
@@ -97,4 +98,22 @@ export async function scheduleSubscriptionMail(now = new Date()) {
         { grantId: grant.id, periodEnd: grant.expiresAt!.toISOString() },
       );
   }
+}
+
+export async function scheduleMonthlyVehicleMail(now = new Date()) {
+  const users = await db().select({id:s.user.id, timezone:s.profiles.timezone}).from(s.user)
+    .innerJoin(s.profiles,eq(s.profiles.userId,s.user.id))
+    .innerJoin(s.communicationPreferences,eq(s.communicationPreferences.userId,s.user.id))
+    .where(and(eq(s.user.emailVerified,true),eq(s.profiles.emailEnabled,true),sql`
+      ${s.communicationPreferences.categories}->>'monthly' = 'true' AND NOT EXISTS (
+        SELECT 1 FROM ${s.mailDeliveries}
+        WHERE ${s.mailDeliveries.dedupeKey} = 'monthly:' || ${s.user.id} || ':' ||
+          to_char(date_trunc('month',${now.toISOString()}::timestamptz AT TIME ZONE ${s.profiles.timezone}) - interval '1 month', 'YYYY-MM')
+      )`))
+    .orderBy(s.user.id).limit(30);
+  for (const user of users) {
+    const month = previousReportMonth(now,user.timezone);
+    await queueAutomatedMail(user.id,'monthly_report','monthly:'+user.id+':'+month,{month});
+  }
+  return users.length;
 }

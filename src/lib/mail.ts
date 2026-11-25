@@ -1,4 +1,5 @@
 import { renderEmail, type EmailContent, type EmailTemplate } from './email-templates';
+import { emailSuppressed } from './mail-consent';
 import { safeSystemMailLog } from './mail-log';
 export async function sendMail(
   to: string,
@@ -8,6 +9,7 @@ export async function sendMail(
   content?: EmailContent,
   tracking?: { userId: string; template: EmailTemplate },
 ) {
+  if (await emailSuppressed(to)) throw new Error('EMAIL_ADDRESS_SUPPRESSED');
   const rendered = content || renderEmail('administrative', { subject, message: text });
   if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
     try {
@@ -18,7 +20,7 @@ export async function sendMail(
     } catch (error) {
       const code = error instanceof Error && 'code' in error && typeof error.code === 'string' ? error.code : 'GMAIL_DELIVERY_UNCONFIRMED';
       if (tracking) await safeSystemMailLog(tracking.userId, tracking.template, key, to, 'unknown', undefined, code);
-      throw new Error('EMAIL_TRANSPORT_UNCONFIRMED', { cause: error });
+      throw new Error(/^(?:GMAIL_HTTP_429|GMAIL_AUTHORIZATION_FAILED|INVALID_EMAIL_HEADERS)$/.test(code) ? 'EMAIL_' + code : 'EMAIL_GMAIL_UNCONFIRMED', { cause:error });
     }
   }
   let providerId: string;
@@ -36,6 +38,10 @@ export async function sendMail(
         subject: rendered.subject,
         text: rendered.text,
         html: rendered.html,
+        ...(rendered.unsubscribeUrl ? {headers:{
+          'List-Unsubscribe': '<' + rendered.unsubscribeUrl + '>',
+          'List-Unsubscribe-Post':'List-Unsubscribe=One-Click',
+        }} : {}),
       }),
       signal: AbortSignal.timeout(12000),
     });
