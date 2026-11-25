@@ -6,7 +6,7 @@
     }
   ],
   "framework": "nextjs",
-  "buildCommand": "npm run build && npm run db:mail-center",
+  "buildCommand": "node scripts/check-stripe-eur.mjs && npm run build && npm run db:mail-center",
   "functions": {
     "src/app/api/v1/auto-assistant/stream/route.ts": {
       "supportsCancellation": true
