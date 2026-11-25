@@ -1,4 +1,5 @@
 'use client';
+import {EmptyState} from './application/empty-state';
 import {requestConfirmation} from '@/components/premium-dialogs';
 
 import {FilterSelect} from './filter-select';
@@ -24,7 +25,7 @@ async function request<T>(path: string, method = 'GET', body?: unknown): Promise
   if (!res.ok) throw new Error(json.error || 'Nu s-au putut încărca datele.');
   return json as T;
 }
-export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, ownerId, timezone }: { vehicles: Vehicle[]; preview: boolean; ownerId: string; timezone: string; onUpdateMileage:(vehicleId:string)=>void }) {
+export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, ownerId, timezone, onStart, hasSavedTrips }: { onStart?:()=>void; hasSavedTrips:boolean; vehicles: Vehicle[]; preview: boolean; ownerId: string; timezone: string; onUpdateMileage:(vehicleId:string)=>void }) {
 
   const locale=useApplicationLocale();
   const english = locale.startsWith('en');
@@ -129,7 +130,11 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
       </div>
       {statsError && <p className="small muted" role="status">{t('Statisticile nu s-au putut încărca.', 'Statistics could not be loaded.')}</p>}
     </section>
-    <div className="ac-trip-history-cockpit">
+    {!hasSavedTrips && !tripDate && !page && !tripError && !statsError &&
+       (preview || (tripResult?.key === tripPath && !filteredTrips.length && totals?.count === 0))
+      ? <EmptyState module="smartdrive" note={onStart?undefined:['Navigația GPS este disponibilă în aplicația AutoCare pentru Android.','GPS navigation is available in the AutoCare Android app.']}
+          action={onStart?undefined:['Descoperă aplicația Android','Explore the Android app']} onAction={onStart??(()=>window.location.assign(english?'/en/download':'/descarca'))}/>
+      : <div className="ac-trip-history-cockpit">
       <div className="ac-trip-history-list">
         <label>{t('Data călătoriei', 'Trip date')} <PremiumDateInput type="date" value={tripDate} onChange={event => { setTripDate(event.target.value); setPage(0); }} /></label>
         {tripDate && <button type="button" onClick={() => { setTripDate(''); setPage(0); }}>{t('Toate datele', 'All dates')}</button>}
@@ -164,7 +169,7 @@ export default function SmartDriveHistory({ vehicles, preview, onUpdateMileage, 
           <button type="button" disabled={clearingRoutes} onClick={() => void clearRoutes()}>{t('Șterge traseele de pe dispozitiv', 'Delete routes from this device')}</button>
         )}
       </div>
-    </div>
+    </div>}
     <div className="ac-mileage-history-callout">
       <div>
         <strong>{t('Următoarea citire de kilometraj', 'Next mileage reading')}</strong>

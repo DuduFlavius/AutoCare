@@ -1,6 +1,7 @@
 'use client';
 import {useState,type ReactNode} from 'react';
 import {MobileFinanceOverview} from './mobile-finance-overview';
+import {FirstVehicleBenefits} from './empty-state';
 import {homeDocument} from '@/lib/application-home';
 import {FilterSelect} from '../filter-select';
 import { CalendarDays, CarFront, ChevronRight, Files, Gauge, Plus, Sparkles, Coins, ChartNoAxesCombined, Wrench, ShieldCheck, Check, Clock3, Route } from 'lucide-react';
@@ -41,14 +42,14 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
  }).sort((a,b)=>a.expiry.localeCompare(b.expiry)).slice(0,3);
  const firstVehicle=data.vehicles.length===0;
  return <div className="rg-mobile-home" data-empty-garage={!car||undefined} data-first-vehicle={firstVehicle||undefined} data-workspace-ui>
-  {firstVehicle?<section className="ac-home-empty-garage ac-home-first-vehicle" aria-labelledby="home-empty-garage-title">
+  {firstVehicle?<><section className="ac-home-empty-garage ac-home-first-vehicle" aria-labelledby="home-empty-garage-title">
    <div className="ac-home-empty-garage-content">
-    <h2 id="home-empty-garage-title">{t('Adaugă-ți prima mașină','Add your first car')}</h2>
+    <h2 id="home-empty-garage-title">{t('Fiecare călătorie începe aici.','Every journey starts here.')}</h2>
     <p>{t('Ține documentele, reviziile și cheltuielile mașinii într-un singur loc.','Keep your car’s documents, servicing and expenses in one place.')}</p>
-    <button type="button" className="rg-m-primary" onClick={()=>onCreate('vehicle')}><Plus size={18} aria-hidden="true"/>{t('Adaugă mașina','Add your car')}</button>
+    <button type="button" className="rg-m-primary" onClick={()=>onCreate('vehicle')}><Plus size={18} aria-hidden="true"/>{t('Adaugă primul vehicul','Add your first vehicle')}</button>
    </div>
    <img className="ac-home-empty-garage-image" src="/images/autocare-empty-garage.webp" alt="" width={1200} height={800} decoding="async"/>
-  </section>:!car?<section className="rg-m-empty ac-home-empty-garage" aria-labelledby="home-empty-garage-title">
+  </section><FirstVehicleBenefits navigate={navigate}/></>:!car?<section className="rg-m-empty ac-home-empty-garage" aria-labelledby="home-empty-garage-title">
    <span className="ac-home-empty-garage-icon" aria-hidden="true"><CarFront size={28}/></span>
    <h2 id="home-empty-garage-title">{t('Garajul tău începe aici','Your garage starts here')}</h2>
    <p>{t('Adaugă mașina pentru a organiza documentele și întreținerea.','Add your vehicle to organize documents and maintenance.')}</p>

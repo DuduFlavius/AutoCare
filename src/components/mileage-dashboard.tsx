@@ -8,6 +8,7 @@ import {useApplicationLanguage,useApplicationLocale} from './application-locale'
 import {DocumentPreview,type PreviewSource} from './document-preview';
 import {FilterSelect} from './filter-select';
 import InlineMileageEditor from './inline-mileage-editor';
+import {EmptyState} from './application/empty-state';
 import {requestConfirmation} from './premium-dialogs';
 import './mileage-dashboard.css';
 
@@ -15,7 +16,7 @@ type Reading=MileageReading&{corrected?:boolean};
 type Car={id:string;brand:string;model:string;plate:string;odometer:number;archived:boolean};
 const pageSize=10;
 
-export default function MileageDashboard({cars,primaryId,timezone,preview,onUpdated}:{cars:Car[];primaryId:string;timezone:string;preview:boolean;onUpdated:()=>Promise<void>}){
+export default function MileageDashboard({cars,primaryId,timezone,preview,onUpdated,onAddVehicle}:{cars:Car[];primaryId:string;timezone:string;preview:boolean;onUpdated:()=>Promise<void>;onAddVehicle:()=>void}){
   const en=useApplicationLanguage()==='en', locale=useApplicationLocale();
   const t=(ro:string,english:string)=>en?english:ro;
   const [vehicle,setVehicle]=useState(primaryId);
@@ -86,6 +87,11 @@ export default function MileageDashboard({cars,primaryId,timezone,preview,onUpda
   const points=series.rows.map(row=>({row,x:8+(firstTime===lastTime?.5:(+new Date(row.recordedAt)-firstTime)/(lastTime-firstTime))*84,y:10+(min===max?.5:(max-row.odometer)/(max-min))*80}));
   const selected=points.find(point=>point.row.id===active)??points.at(-1);
   const columns=[t('Data și ora','Date and time'),t('Kilometraj','Odometer'),t('Diferență','Change'),t('Sursă','Source'),t('Status','Status'),t('Acțiuni','Actions')];
+  if(!car) return <EmptyState module="mileage" needsVehicle onAction={onAddVehicle}/>;
+  if(preview || (data?.url===url && !data.error && !all.length)) return <EmptyState module="mileage">
+    <InlineMileageEditor key={car.id} vehicleId={car.id} currentKm={car.odometer} preview={preview}
+      onSaved={refresh} triggerLabel={t('Înregistrează kilometrajul','Record mileage')}/>
+  </EmptyState>;
   return <section className="ac-mileage-board" data-workspace-ui>
     <header className="ac-mileage-header">
       <div><h2>{t('Kilometraj & Istoric','Mileage & History')}</h2><p>{t('Monitorizează evoluția kilometrajului vehiculului tău.','Track your vehicle’s mileage over time.')}</p></div>
