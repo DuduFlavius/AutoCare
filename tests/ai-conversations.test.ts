@@ -5,7 +5,7 @@ import { migrate } from '../scripts/migrate';
 import { db, closeLocalDb } from '../src/lib/db';
 import { user, vehicles, autoAiTurns } from '../src/lib/schema';
 import { askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, renameAiConversation } from '../src/lib/auto-assistant';
-import { conversationGroups, assistantLanguageInstruction } from '../src/lib/ai-conversations';
+import { AI_HISTORY_LIMIT, conversationGroups, conversationSections, assistantLanguageInstruction } from '../src/lib/ai-conversations';
 import { readFile } from 'node:fs/promises';
 delete process.env.DATABASE_URL;
 delete process.env.GEMINI_API_KEY;
@@ -135,4 +135,56 @@ test('conversation titles survive reload and are scoped to the owner and vehicle
  assert.equal((await autoAssistantHistory(uid,car)).titles[conversationId],'Revizie și documente');
  await clearAutoAssistantHistory(uid,car,[id]);
  assert.equal((await autoAssistantHistory(uid,car)).titles[conversationId],undefined);
+});
+
+test('deleting one conversation removes its entire retained history and title for its owner only', async () => {
+ const conversationId = crypto.randomUUID();
+ const secondVehicle = crypto.randomUUID();
+ await db().insert(vehicles).values({id:secondVehicle,userId:uid,brand:'Owned',model:'Second',year:2020,fuel:'Diesel',plate:'TEST2'});
+ const base = new Date('2025-08-09T00:01:00Z');
+ await db().insert(autoAiTurns).values([
+  ...Array.from({length:AI_HISTORY_LIMIT - 1}, (_, index) => ({
+   id:crypto.randomUUID(),userId:uid,vehicleId:secondVehicle,conversationId,
+   question:'History ' + index,answer:'Answer',createdAt:new Date(+base + index * 1000),
+  })),
+  {id:crypto.randomUUID(),userId:uid,vehicleId:secondVehicle,question:'Old import',answer:'Legacy answer',createdAt:base},
+  {id:crypto.randomUUID(),userId:other,vehicleId:foreign,conversationId,question:'Private history',answer:'Private answer'},
+ ]);
+ await renameAiConversation(uid,secondVehicle,conversationId,'Long conversation');
+ await renameAiConversation(uid,secondVehicle,'legacy:2025-08-09','Legacy title');
+ await renameAiConversation(other,foreign,conversationId,'Private title');
+ assert.equal((await autoAssistantHistory(uid,secondVehicle)).turns.length,AI_HISTORY_LIMIT);
+ await assert.rejects(()=>clearAutoAssistantHistory(other,secondVehicle,conversationId));
+ await assert.rejects(()=>clearAutoAssistantHistory(uid,foreign,conversationId));
+ await clearAutoAssistantHistory(uid,secondVehicle,conversationId);
+ await clearAutoAssistantHistory(uid,secondVehicle,conversationId);
+ const afterDelete = await autoAssistantHistory(uid,secondVehicle);
+ assert.deepEqual(afterDelete.turns.map(turn=>turn.question),['Old import']);
+ assert.deepEqual(afterDelete.titles,{'legacy:2025-08-09':'Legacy title'});
+ assert.equal((await autoAssistantHistory(other,foreign)).titles[conversationId],'Private title');
+ await clearAutoAssistantHistory(uid,secondVehicle,'legacy:2025-08-09');
+ assert.deepEqual(await autoAssistantHistory(uid,secondVehicle),{turns:[],titles:{}});
+});
+
+test('a continued conversation deleted while a reply is generating stays deleted', async t => {
+ const conversationId = crypto.randomUUID();
+ const previousId = crypto.randomUUID();
+ await db().insert(autoAiTurns).values({id:previousId,userId:uid,vehicleId:car,conversationId,question:'Previous',answer:'Answer'});
+ t.mock.method(globalThis,'fetch',async () => {
+  await clearAutoAssistantHistory(uid,car,conversationId);
+  return Response.json({output:[{type:'message',content:[{type:'output_text',text:'A late reply'}]}]});
+ });
+ const followup = () => askAutoAssistant(uid,car,'Follow up','en','chat',false,1,conversationId,undefined,[previousId]);
+ await assert.rejects(followup,/Conversația nu mai este disponibilă/);
+ await assert.rejects(followup,/Conversația nu mai este disponibilă/);
+ assert.ok(!(await autoAssistantHistory(uid,car)).turns.some(turn=>turn.conversationId===conversationId));
+});
+
+test('history sections use local calendar boundaries and the last seven days include today', () => {
+ const date = (day: number) => new Date(2026,10,day,0,5).toISOString();
+ const grouped = conversationGroups([18,19,23,24,25].map(day=>({id:String(day),question:String(day),answer:'',createdAt:date(day)})));
+ assert.deepEqual(
+  conversationSections(grouped, new Date(2026,10,25,23,59)).map(section=>[section.key,section.groups.map(group=>group.title)]),
+  [['today',['25']],['yesterday',['24']],['week',['23','19']],['older',['18']]],
+ );
 });

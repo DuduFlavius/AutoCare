@@ -5,9 +5,9 @@ import {FilterSelect} from '../filter-select';
 import {ActionMenu} from '../action-menu';
 import {PremiumDateInput} from '@/components/premium-date-input';
 
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import {  ArrowUpRight, FileScan, MapPin, Sparkles, Trash2, ShieldCheck, Copy, ChevronDown, MessageSquareText, Wrench, CalendarDays, BarChart3, CheckCheck, Square, RotateCcw, ThumbsUp, ThumbsDown, Paperclip, History, CarFront, X, ChevronLeft, ArrowUp, Plus, Search, Pencil } from 'lucide-react';
-import { conversationGroups, conversationKey, type AiTurn } from '@/lib/ai-conversations';
+import { AI_HISTORY_LIMIT, conversationGroups, conversationKey, conversationSections, type AiTurn } from '@/lib/ai-conversations';
 import { streamLines } from '@/lib/ai-stream';
 import type { dashboard } from '@/lib/service';
 import { useApplicationLanguage, useApplicationLocale } from '../application-locale';
@@ -83,7 +83,7 @@ export function AutoAiWorkspace({ vehicles, vehicleId, onVehicle, premium, prici
       {!premium ? <section className="card ac-ai-membership-gate" aria-labelledby="ai-membership-title"><span className="ac-ai-icon"><Sparkles size={30}/></span><h2 id="ai-membership-title">{en?'AutoCare AI — Your intelligent car assistant':'AutoCare AI — Asistentul tău auto inteligent'}</h2><p>{en?'AutoCare AI is exclusively available to Premium members. Activate Premium to understand your vehicle information and receive helpful recommendations.':'AutoCare AI este o funcție exclusivă pentru membrii Premium. Activează Premium pentru a înțelege mai ușor informațiile despre mașina ta și pentru recomandări utile.'}</p><ul><li>{en?'Understand recorded vehicle costs':'Înțelege costurile înregistrate ale mașinii'}</li><li>{en?'Prepare maintenance using your saved history':'Pregătește întreținerea folosind istoricul salvat'}</li><li>{en?'Extract document details and confirm before saving':'Extrage date din documente și confirmă înainte de salvare'}</li></ul><div className="ac-ai-gate-actions"><a className="button primary" href="/cont?tab=Premium">{en?'Activate Premium':'Activează Premium'} <ArrowUpRight size={15}/></a><a className="button" href="/cont?tab=Dashboard">{en?'Back to Dashboard':'Înapoi la Dashboard'}</a></div>{pricing&&<p className="small">{new Intl.NumberFormat(en?'en-GB':'ro-RO',{style:'currency',currency:pricing.currency}).format(pricing.monthlyBani/100)} {en?'/ month':'/ lună'}</p>}<p className="small muted">{en?'Already had Premium? Reactivate it to continue. Expiry does not automatically delete your chat history.':'Ai avut Premium? Reactivează-l pentru a continua. Expirarea nu șterge automat istoricul conversațiilor.'}</p></section>
         : !vehicles.length ? <section className="card"><p>{en ? 'Add a vehicle first.' : 'Adaugă întâi un vehicul.'}</p><a className="button" href="/cont?tab=Garaj">{en ? 'My garage' : 'Garajul meu'}</a></section>
         : <>
-          <AiConversation insights={records&&timezone&&onNavigate?(question=><AiVehicleInsights question={question} vehicle={vehicle} records={records} timezone={timezone} onNavigate={onNavigate}/>):undefined} vehiclePicker={<div className="ac-ai-vehicle-header"><label className="ac-ai-vehicle"><CarFront size={17}/>{en ? 'Vehicle' : 'Vehicul'}
+          <AiConversation insights={records&&timezone&&onNavigate?(question=><AiVehicleInsights question={question} vehicle={vehicle} records={records} timezone={timezone} onNavigate={onNavigate}/>):undefined} vehiclePicker={<div className="ac-ai-vehicle-header"><label className="ac-ai-vehicle"><CarFront size={17} aria-hidden="true"/><span>{en ? 'Vehicle' : 'Vehicul'}</span>
             <FilterSelect aria-label={en?'Vehicle for AutoCare AI':'Mașina pentru AutoCare AI'} value={vehicleId} onChange={event => onVehicle(event.target.value)}>
               {vehicles.map(vehicle => <option value={vehicle.id} key={vehicle.id}>{vehicle.brand} {vehicle.model} · {vehicle.plate}</option>)}
             </FilterSelect>
@@ -100,11 +100,17 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
   const t = (ro: string, english: string) => en ? english : ro;
   const [turns, setTurns] = useState<Turn[]>([]);
   const [question, setQuestion] = useState('');
+  const [desktopHistory, setDesktopHistory] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const historyTrigger = useRef<HTMLButtonElement>(null);
+  const historyDrawer = useRef<HTMLDivElement>(null);
+  const historyPanel = useRef<HTMLElement>(null);
+  const historyClose = useRef<HTMLButtonElement>(null);
+  const drawerOpen = historyOpen && !desktopHistory;
   const [toolsOpen, setToolsOpen] = useState(false);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [titles,setTitles]=useState<Record<string,string>>({});
-  const [titleDraft,setTitleDraft]=useState<string|null>(null);
+  const [rename, setRename] = useState<{ id: string; title: string } | null>(null);
   const groups = conversationGroups(turns,titles);
   const selectedGroup = groups.find(group => group.id === activeConversation);
   const visibleTurns = selectedGroup?.turns ?? [];
@@ -112,9 +118,13 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
   const [partialAnswer, setPartialAnswer] = useState('');
   const [atBottom, setAtBottom] = useState(true);
   const [historyQuery, setHistoryQuery] = useState('');
-  const matchingGroups = groups.filter(group =>
-    group.title.toLocaleLowerCase(locale).includes(historyQuery.toLocaleLowerCase(locale).trim()),
-  );
+  const normalizeSearch = (value: string) => value.toLocaleLowerCase(locale).normalize('NFD').replace(/\p{M}/gu, '');
+  const query = normalizeSearch(historyQuery.trim());
+  const historySections = conversationSections(groups.filter(group => normalizeSearch(group.title).includes(query)));
+  const sectionNames = {
+    today: t('Astăzi', 'Today'), yesterday: t('Ieri', 'Yesterday'),
+    week: t('Ultimele 7 zile', 'Last 7 days'), older: t('Mai vechi', 'Older'),
+  };
   const retry = useRef<{ id: string; question: string; mode: Mode; replace?: Turn } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const firstName = displayName?.trim().split(/\s+/)[0];
@@ -125,12 +135,35 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   useEffect(() => { if (!notice) return; noticeTimer.current = setTimeout(() => setNotice(''), 4500); return () => { if (noticeTimer.current) clearTimeout(noticeTimer.current); }; }, [notice]);
+  function closeHistory() {
+    setHistoryOpen(false);
+    setRename(null);
+    requestAnimationFrame(() => historyTrigger.current?.focus({ preventScroll: true }));
+  }
+  useEffect(() => {
+    const media = window.matchMedia('(min-width:1100px)');
+    const update = () => {
+      setDesktopHistory(media.matches);
+      setHistoryOpen(media.matches);
+    };
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  useEffect(() => {
+    if (drawerOpen) historyClose.current?.focus({ preventScroll: true });
+  }, [drawerOpen]);
   useEffect(() => {
     if (!historyOpen && !toolsOpen) return;
-    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') { setHistoryOpen(false); setToolsOpen(false); } };
+    const close = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      if (drawerOpen) closeHistory();
+      else if (toolsOpen) setToolsOpen(false);
+      else if (historyPanel.current?.contains(document.activeElement)) closeHistory();
+    };
     window.addEventListener('keydown', close);
     return () => window.removeEventListener('keydown', close);
-  }, [historyOpen, toolsOpen]);
+  }, [drawerOpen, historyOpen, toolsOpen]);
   const [scan, setScan] = useState<Scan | null>(null);
   const action = useRef<AbortController | null>(null);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -140,21 +173,55 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
   useLayoutEffect(() => {
     const element=messageScroll.current;
     if(autoScroll.current && element)element.scrollTop=element.scrollHeight;
-  },[turns.length,pendingQuestion,partialAnswer,activeConversation,historyOpen]);
+  },[visibleTurns.length,pendingQuestion,partialAnswer,activeConversation,historyOpen]);
+
+  const historyRequest = useRef<AbortController | null>(null);
+  const historyReady = useRef(false);
+  const loadHistory = useEffectEvent(async () => {
+    if (action.current || historyRequest.current || document.visibilityState === 'hidden') return;
+    const controller = new AbortController();
+    historyRequest.current = controller;
+    const initial = !historyReady.current;
+    try {
+      const data: { turns: Turn[]; titles?: Record<string, string> } = await request(
+        'auto-assistant/history?vehicleId=' + encodeURIComponent(vehicleId), { signal: controller.signal },
+      );
+      if (controller.signal.aborted || action.current) return;
+      const refreshed = conversationGroups(data.turns);
+      setTurns(data.turns);
+      setTitles(data.titles ?? {});
+      if (initial && !activeConversation) setActiveConversation(refreshed[0]?.id ?? crypto.randomUUID());
+      if (selectedGroup && !refreshed.some(group => group.id === selectedGroup.id)) newConversation(false);
+      historyReady.current = true;
+    } catch (cause) {
+      if (initial && !controller.signal.aborted) setError(en ? requestErrorEnglish((cause as Error).message) : (cause as Error).message);
+    } finally {
+      if (historyRequest.current === controller) historyRequest.current = null;
+      if (!controller.signal.aborted) setLoading(false);
+    }
+  });
 
   useEffect(() => {
     try { const draft = sessionStorage.getItem('autocare-ai-draft:' + vehicleId); if (draft) { setQuestion(draft.slice(0,600)); sessionStorage.removeItem('autocare-ai-draft:' + vehicleId); } } catch { /* Storage is optional. */ }
-    setHistoryOpen(window.matchMedia('(min-width:1100px)').matches);
     if (preview) return;
-    const controller = new AbortController();
-    request('auto-assistant/history?vehicleId=' + encodeURIComponent(vehicleId), { signal: controller.signal })
-      .then(data => { setTurns(data.turns); setTitles(data.titles??{}); setActiveConversation(conversationGroups(data.turns)[0]?.id ?? crypto.randomUUID()); }).catch(e => { if (!controller.signal.aborted) setError(en ? requestErrorEnglish(e.message) : e.message); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => { controller.abort(); action.current?.abort(); };
+    const refresh = () => { void loadHistory(); };
+    refresh();
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    const interval = window.setInterval(refresh, 30_000);
+    return () => {
+      historyRequest.current?.abort();
+      historyRequest.current = null;
+      action.current?.abort();
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+      window.clearInterval(interval);
+    };
   }, [vehicleId, preview]);
 
   async function run(task: (signal: AbortSignal) => Promise<void>) {
     if (preview || action.current) return;
+    historyRequest.current?.abort();
     const controller = new AbortController();
     action.current = controller;
     setPending(true); setError(''); setNotice('');
@@ -163,9 +230,20 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
     finally { if (action.current === controller) { action.current = null; setPending(false); } }
   }
 
-  function newConversation() {
-    retry.current=null; setTitleDraft(null); setPartialAnswer(''); setPendingQuestion(''); setAtBottom(true);
-    setActiveConversation(crypto.randomUUID()); if(!window.matchMedia('(min-width:1100px)').matches)setHistoryOpen(false); setQuestion(''); setError(''); setNotice(''); autoScroll.current = true; input.current?.focus();
+  function newConversation(focusInput = true) {
+    if (focusInput) historyRequest.current?.abort();
+    retry.current = null;
+    setRename(null);
+    setPartialAnswer('');
+    setPendingQuestion('');
+    setAtBottom(true);
+    setActiveConversation(crypto.randomUUID());
+    if (!desktopHistory && focusInput) setHistoryOpen(false);
+    setQuestion('');
+    setError('');
+    setNotice('');
+    autoScroll.current = true;
+    if (focusInput) requestAnimationFrame(() => input.current?.focus({ preventScroll: true }));
   }
 
   function ask(value: string, mode: Mode = 'chat', regenerate?: Turn, requestId = crypto.randomUUID()) {
@@ -180,7 +258,8 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
     retry.current={id:requestId,question:text,mode,replace:regenerate};
     setQuestion('');
     void run(async signal => {
-      const payload=json('POST',{vehicleId,question:text,language,mode,conversationId,requestId,contextTurns:Math.min(4,visibleTurns.length),contextIds:visibleTurns.filter(turn=>turn.id!==regenerate?.id).slice(-4).map(turn=>turn.id),excludeTurnId:regenerate?.id});
+      const existingTurns = conversationId === activeConversation || regenerate ? visibleTurns : [];
+      const payload=json('POST',{vehicleId,question:text,language,mode,conversationId,requestId,contextTurns:Math.min(4,existingTurns.length),contextIds:existingTurns.filter(turn=>turn.id!==regenerate?.id).slice(-4).map(turn=>turn.id),excludeTurnId:regenerate?.id});
       const response=await fetch('/api/v1/auto-assistant/stream',{...payload,headers:{...payload.headers,Accept:'application/x-ndjson'},signal,cache:'no-store'});
       if(!response.ok){
         const error=await response.json().catch(()=>({}));
@@ -196,7 +275,7 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
           const saved:Turn=event.turn;
           setTurns(previous=>{
             if(previous.some(turn=>turn.id===saved.id))return previous;
-            return regenerate ? previous.map(turn=>turn.id===regenerate.id?saved:turn) : [...previous,saved].slice(-150);
+            return regenerate ? previous.map(turn=>turn.id===regenerate.id?saved:turn) : [...previous,saved].slice(-AI_HISTORY_LIMIT);
           });
           setActiveConversation(conversationKey(saved));
           retry.current=null;
@@ -220,22 +299,26 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
 
   function saveTitle(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const title=titleDraft?.trim();
-    if(!activeConversation||!title)return;
-    const id=activeConversation;
+    const title = rename?.title.trim();
+    if (!rename || !title) return;
+    const { id } = rename;
     void run(async signal=>{
       await request('auto-assistant/history',{...json('PATCH',{vehicleId,conversationId:id,title}),signal});
       setTitles(previous=>({...previous,[id]:title}));
-      setTitleDraft(null);
+      setRename(null);
+      setNotice(t('Conversația a fost redenumită.', 'Conversation renamed.'));
     });
   }
 
-  async function removeConversation() {
-    if (!visibleTurns.length || !await requestConfirmation(t('Ștergi această conversație? Acțiunea nu poate fi anulată.', 'Delete this conversation? This cannot be undone.'))) return;
-    const ids = visibleTurns.map(turn => turn.id);
+  async function removeConversation(id: string) {
+    if (action.current || !await requestConfirmation(t('Ștergi această conversație? Mesajele ei vor fi șterse definitiv.', 'Delete this conversation? Its messages will be permanently deleted.'))) return;
     void run(async signal => {
-      await request('auto-assistant/history', { ...json('DELETE', { vehicleId, turnIds: ids }), signal });
-      setTurns(previous => previous.filter(turn => !ids.includes(turn.id))); newConversation();
+      await request('auto-assistant/history', { ...json('DELETE', { vehicleId, conversationId: id }), signal });
+      setTurns(previous => previous.filter(turn => conversationKey(turn) !== id));
+      setTitles(previous => Object.fromEntries(Object.entries(previous).filter(([key]) => key !== id)));
+      if (activeConversation === id) newConversation(false);
+      if (rename?.id === id) setRename(null);
+      setNotice(t('Conversația a fost ștearsă.', 'Conversation deleted.'));
     });
   }
 
@@ -277,18 +360,18 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
   ];
   return (
     <div className="ac-ai-layout" data-history={historyOpen}>
-      <div className="ac-ai-main">
+      <div className="ac-ai-main" inert={drawerOpen}>
       <section className="ac-ai-chat" aria-label={t('Conversație AutoCare AI', 'AutoCare AI conversation')}>
         <div className="ac-ai-heading"><button type="button" className="ac-ai-back" aria-label={t('Înapoi la Acasă','Back to Home')} onClick={()=>onExit?onExit():window.location.assign('/cont?tab=Dashboard')}><ChevronLeft size={22}/></button>
           <div className="ac-ai-brand"><span className="ac-ai-brand-icon"><Sparkles size={21}/></span><div><h3>AutoCare <span>AI</span></h3><span className="ac-ai-online" data-available={available}><i/>{available ? t('Asistentul tău auto', 'Your car assistant') : t('Indisponibil', 'Unavailable')}</span></div></div>
           <div className="ac-ai-header-actions">
-            <button type="button" className="ac-ai-history-trigger" title={t('Istoric conversații', 'Conversation history')} aria-label={t('Istoric conversații', 'Conversation history')} aria-expanded={historyOpen} onClick={() => setHistoryOpen(open => !open)}><History size={19}/></button>
-            <button className="ac-ai-new-chat" type="button" aria-label={t('Conversație nouă', 'New chat')} disabled={pending || loading} onClick={newConversation}><Plus size={18}/><span>{t('Chat nou', 'New chat')}</span></button>
+            <button type="button" ref={historyTrigger} className="ac-ai-history-trigger" title={t('Istoric conversații', 'Conversation history')} aria-label={t('Istoric conversații', 'Conversation history')} aria-expanded={historyOpen} aria-controls={historyOpen ? 'ac-ai-history' : undefined} onClick={() => historyOpen ? closeHistory() : setHistoryOpen(true)}><History size={19}/></button>
+            <button className="ac-ai-new-chat" type="button" aria-label={t('Conversație nouă', 'New chat')} disabled={pending || loading} onClick={() => newConversation()}><Plus size={18}/><span>{t('Chat nou', 'New chat')}</span></button>
 
-            <ActionMenu label={t('Opțiuni conversație', 'Conversation options')}>{''}
-              <button className="ac-ai-menu-new" type="button" disabled={pending || loading} onClick={event=>{event.currentTarget.closest('details')?.removeAttribute('open');newConversation();}}><MessageSquareText size={17}/>{t('Conversație nouă','New chat')}</button>
-              <button type="button" onClick={event => { event.currentTarget.closest('details')?.removeAttribute('open'); setToolsOpen(open => !open); }}><FileScan size={17}/>{t('Documente și rapoarte', 'Documents and reports')}</button>
-              <button type="button" disabled={pending || loading || !visibleTurns.length} onClick={event => { event.currentTarget.closest('details')?.removeAttribute('open'); removeConversation(); }}><Trash2 size={17}/>{t('Șterge conversația', 'Delete conversation')}</button>
+            <ActionMenu label={t('Opțiuni conversație', 'Conversation options')}>
+              <button type="button" disabled={pending || loading} onClick={() => newConversation()}><MessageSquareText size={17}/>{t('Conversație nouă','New chat')}</button>
+              <button type="button" onClick={() => setToolsOpen(open => !open)}><FileScan size={17}/>{t('Documente și rapoarte', 'Documents and reports')}</button>
+              <button type="button" disabled={pending || loading || !activeConversation || !visibleTurns.length} onClick={() => activeConversation && void removeConversation(activeConversation)}><Trash2 size={17}/>{t('Șterge conversația', 'Delete conversation')}</button>
             </ActionMenu>
           </div>
         </div>
@@ -344,46 +427,66 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
       </section>
       </div>
       {historyOpen && <div className="ac-ai-history-overlay">
-        <button type="button" className="ac-ai-history-backdrop" aria-label={t('Închide istoricul', 'Close history')} onClick={() => setHistoryOpen(false)}/>
-        <nav className="ac-ai-history-panel" aria-label={t('Istoricul conversațiilor', 'Conversation history')}>
+        <div className="ac-ai-history-backdrop" aria-hidden="true" onClick={closeHistory}/>
+        <div ref={historyDrawer} className="ac-ai-history-drawer" role={drawerOpen ? 'dialog' : undefined} aria-modal={drawerOpen || undefined} aria-labelledby={drawerOpen ? 'ac-ai-history-title' : undefined} onKeyDown={event => {
+          if (!drawerOpen || event.defaultPrevented || event.key !== 'Tab') return;
+          const controls = historyPanel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled)');
+          const first = controls?.[0];
+          const last = controls?.[controls.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+          if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+        }}>
+        <nav id="ac-ai-history" ref={historyPanel} className="ac-ai-history-panel" aria-labelledby="ac-ai-history-title">
           <div className="ac-ai-history-title">
-            <strong>{t('Conversațiile tale', 'Your conversations')}</strong>
-            <button className="ac-ai-icon-button" type="button" onClick={() => setHistoryOpen(false)} aria-label={t('Închide istoricul', 'Close history')}><X size={18}/></button>
+            <h3 id="ac-ai-history-title">{t('Istoricul conversațiilor', 'Conversation history')}</h3>
+            <button ref={historyClose} className="ac-ai-icon-button" type="button" onClick={closeHistory} aria-label={t('Închide istoricul', 'Close history')}><X size={18}/></button>
           </div>
-          <button type="button" className="ac-ai-history-new" disabled={pending || loading} onClick={newConversation}><Plus size={19}/>{t('Conversație nouă', 'New chat')}</button>
+          <button type="button" className="ac-ai-history-new" disabled={pending || loading} onClick={() => newConversation()}><Plus size={18}/>{t('Conversație nouă', 'New chat')}</button>
           <label className="ac-ai-history-search">
             <Search size={16}/>
             <input type="search" value={historyQuery} onChange={event => setHistoryQuery(event.target.value)} aria-label={t('Caută în istoric', 'Search history')} placeholder={t('Caută în istoric', 'Search history')}/>
           </label>
-          {titleDraft !== null && <form className="ac-ai-rename" onSubmit={saveTitle}>
-            <input autoFocus aria-label={t('Titlul conversației', 'Conversation title')} value={titleDraft} maxLength={72} onChange={event => setTitleDraft(event.target.value)} required/>
-            <button type="submit" disabled={pending}>{t('Salvează', 'Save')}</button>
-            <button type="button" onClick={() => setTitleDraft(null)}>{t('Anulează', 'Cancel')}</button>
+          {rename && <form className="ac-ai-rename" onSubmit={saveTitle}>
+            <label htmlFor="ac-ai-history-rename">{t('Titlul conversației', 'Conversation title')}</label>
+            <input id="ac-ai-history-rename" autoFocus value={rename.title} maxLength={72} onFocus={event => event.currentTarget.select()} onChange={event => setRename({ ...rename, title: event.target.value })} required/>
+            <button type="submit" disabled={pending || !rename.title.trim()}>{t('Salvează', 'Save')}</button>
+            <button type="button" disabled={pending} onClick={() => setRename(null)}>{t('Anulează', 'Cancel')}</button>
           </form>}
-          <div className="ac-ai-history-list">
-            {matchingGroups.map(group => <div className="ac-ai-history-item" key={group.id}>
-              <button type="button" className="ac-ai-history-entry" aria-current={activeConversation === group.id ? 'true' : undefined} disabled={pending} onClick={() => {
-                setActiveConversation(group.id);
-                setTitleDraft(null);
-                setPendingQuestion('');
-                setPartialAnswer('');
-                retry.current = null;
-                autoScroll.current = true;
-                setAtBottom(true);
-                if (!window.matchMedia('(min-width:1100px)').matches) setHistoryOpen(false);
-                setError('');
-              }}>
-                <MessageSquareText size={16}/>
-                <span><strong>{group.title}</strong><small>{new Date(group.updatedAt).toLocaleDateString(locale)} · {group.turns.length} {group.turns.length === 1 ? t('răspuns', 'reply') : t('răspunsuri', 'replies')}</small></span>
-              </button>
-              {activeConversation === group.id && titleDraft === null && <button className="ac-ai-history-rename ac-ai-icon-button" type="button" disabled={pending} title={t('Redenumește conversația', 'Rename conversation')} aria-label={t('Redenumește conversația', 'Rename conversation')} onClick={() => setTitleDraft(group.title)}><Pencil size={15}/></button>}
-            </div>)}
-            {!loading && !matchingGroups.length && <p>{groups.length ? t('Nicio conversație găsită.', 'No conversations found.') : t('Conversațiile vor apărea aici după primul răspuns.', 'Your conversations will appear here after the first reply.')}</p>}
+          {drawerOpen && notice && <p className="ac-ai-notice" role="status">{notice}</p>}
+          {drawerOpen && error && <p className="ac-ai-inline-error" role="alert">{error}</p>}
+          <div className="ac-ai-history-list" aria-busy={loading}>
+            {historySections.map(section => <section key={section.key}>
+              <h4>{sectionNames[section.key]}</h4>
+              <ul>{section.groups.map(group => <li className="ac-ai-history-item" key={group.id}>
+                <button type="button" className="ac-ai-history-entry" aria-current={activeConversation === group.id ? 'true' : undefined} disabled={pending} onClick={() => {
+                  historyRequest.current?.abort();
+                  setActiveConversation(group.id);
+                  setRename(null);
+                  setPendingQuestion('');
+                  setPartialAnswer('');
+                  retry.current = null;
+                  autoScroll.current = true;
+                  setAtBottom(true);
+                  if (drawerOpen) closeHistory();
+                  setError('');
+                }}>
+                  <MessageSquareText size={15} aria-hidden="true"/>
+                  <strong>{group.title}</strong>
+                </button>
+                <ActionMenu portalContainer={historyDrawer} disabled={pending} label={t(`Opțiuni pentru „${group.title}”`, `Options for “${group.title}”`)}>
+                  <button type="button" onClick={() => setRename({ id: group.id, title: group.title })}><Pencil size={17}/>{t('Redenumește conversația', 'Rename conversation')}</button>
+                  <button type="button" className="ac-action-danger" onClick={() => void removeConversation(group.id)}><Trash2 size={17}/>{t('Șterge conversația', 'Delete conversation')}</button>
+                </ActionMenu>
+              </li>)}</ul>
+            </section>)}
+            {loading && <p role="status">{t('Se încarcă…', 'Loading…')}</p>}
+            {!loading && !historySections.length && <p>{groups.length ? t('Nicio conversație găsită.', 'No conversations found.') : t('Conversațiile vor apărea aici după primul răspuns.', 'Your conversations will appear here after the first reply.')}</p>}
           </div>
         </nav>
+        </div>
       </div>}
-      <button type="button" className="ac-ai-tools-toggle" aria-expanded={toolsOpen} onClick={() => setToolsOpen(open => !open)}><FileScan size={16}/>{t("Instrumente avansate și documente", "Advanced tools and documents")} <ChevronDown size={16}/></button>
-      {toolsOpen && <aside className="ac-ai-tools"><div className="ac-ai-tools-heading"><strong>{t('Documente și rapoarte', 'Documents and reports')}</strong><button type="button" aria-label={t('Închide instrumentele', 'Close tools')} onClick={() => setToolsOpen(false)}><X size={20}/></button></div>
+      <button inert={drawerOpen} type="button" className="ac-ai-tools-toggle" aria-expanded={toolsOpen} onClick={() => setToolsOpen(open => !open)}><FileScan size={16}/>{t("Instrumente avansate și documente", "Advanced tools and documents")} <ChevronDown size={16}/></button>
+      {toolsOpen && <aside className="ac-ai-tools" inert={drawerOpen}><div className="ac-ai-tools-heading"><strong>{t('Documente și rapoarte', 'Documents and reports')}</strong><button type="button" aria-label={t('Închide instrumentele', 'Close tools')} onClick={() => setToolsOpen(false)}><X size={20}/></button></div>
         <section className="card"><h3><Sparkles size={18} /> {t('Analiză și rapoarte', 'Analysis and reports')}</h3>
           {([
             ['analysis', t('Analizează mașina', 'Analyze vehicle')],

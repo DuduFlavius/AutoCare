@@ -8,7 +8,7 @@ import { localDate } from './config';
 import { upcomingMaintenance } from './application-home';
 import { generateAi, streamAi, type AiStream } from './ai-provider';
 import { financeOverview, financeSignals, isFinancialEntry } from './finance-overview';
-import { aiTitlesKey, assistantLanguageInstruction } from './ai-conversations';
+import { AI_HISTORY_LIMIT, aiTitlesKey, assistantLanguageInstruction } from './ai-conversations';
 import { autoAssistantConfigured } from './auto-assistant-config';
 
 export const aiModes = ['chat', 'analysis', 'monthly', 'annual', 'finance', 'maintenance'] as const;
@@ -21,11 +21,14 @@ async function activeVehicle(uid: string, vehicleId: string) {
 }
 
 const turnsFor = (uid: string, vehicleId: string) => and(eq(autoAiTurns.userId, uid), eq(autoAiTurns.vehicleId, vehicleId));
+const turnsInConversation = (id: string) => id.startsWith('legacy:')
+  ? sql`${autoAiTurns.conversationId} is null and to_char(${autoAiTurns.createdAt} at time zone 'UTC','YYYY-MM-DD') = ${id.slice(7)}`
+  : eq(autoAiTurns.conversationId, id);
 
 export async function autoAssistantHistory(uid: string, vehicleId: string) {
   await activeVehicle(uid, vehicleId);
   const turns = await db().select({ id: autoAiTurns.id, question: autoAiTurns.question, answer: autoAiTurns.answer, createdAt: autoAiTurns.createdAt, conversationId: autoAiTurns.conversationId, feedback: autoAiTurns.feedback })
-    .from(autoAiTurns).where(turnsFor(uid, vehicleId)).orderBy(desc(autoAiTurns.createdAt), desc(autoAiTurns.id)).limit(150);
+    .from(autoAiTurns).where(turnsFor(uid, vehicleId)).orderBy(desc(autoAiTurns.createdAt), desc(autoAiTurns.id)).limit(AI_HISTORY_LIMIT);
   const key = aiTitlesKey(uid);
   const [saved] = await db().select({ value: settings.value }).from(settings).where(eq(settings.key, key));
   const stored = saved?.value as Record<string,string> | undefined;
@@ -37,14 +40,23 @@ export async function autoAssistantHistory(uid: string, vehicleId: string) {
   return { turns: turns.reverse(), titles };
 }
 
-export async function clearAutoAssistantHistory(uid: string, vehicleId: string, turnIds?: string[]) {
+export async function clearAutoAssistantHistory(uid: string, vehicleId: string, selection?: string | string[]) {
   await ownedVehicle(uid, vehicleId);
   await db().transaction(async tx => {
     await tx.select({ id:user.id }).from(user).where(eq(user.id,uid)).for('update');
-    await tx.delete(autoAiTurns).where(and(turnsFor(uid,vehicleId),turnIds ? inArray(autoAiTurns.id,turnIds) : undefined));
+    const conversationId = typeof selection === 'string' ? selection : undefined;
+    const selected = typeof selection === 'string' ? turnsInConversation(selection)
+      : selection && inArray(autoAiTurns.id, selection);
+    await tx.delete(autoAiTurns).where(and(turnsFor(uid, vehicleId), selected));
     const key=aiTitlesKey(uid);
     const [saved]=await tx.select({value:settings.value}).from(settings).where(eq(settings.key,key));
     if(!saved)return;
+    if (conversationId) {
+      const value = { ...saved.value as Record<string, string> };
+      delete value[vehicleId + ':' + conversationId];
+      await tx.update(settings).set({ value }).where(eq(settings.key, key));
+      return;
+    }
     const remaining=await tx.select({conversationId:autoAiTurns.conversationId,createdAt:autoAiTurns.createdAt}).from(autoAiTurns).where(turnsFor(uid,vehicleId));
     const keep=new Set(remaining.map(turn=>vehicleId+':'+(turn.conversationId??'legacy:'+turn.createdAt.toISOString().slice(0,10))));
     const value=Object.fromEntries(Object.entries(saved.value as Record<string,string>).filter(([id])=>!id.startsWith(vehicleId+':')||keep.has(id)));
@@ -57,8 +69,8 @@ export async function renameAiConversation(uid: string, vehicleId: string, conve
   await activeVehicle(uid, vehicleId);
   return db().transaction(async tx => {
     await tx.select({ id:user.id }).from(user).where(eq(user.id,uid)).for('update');
-    const [exists] = await tx.select({ id:autoAiTurns.id }).from(autoAiTurns).where(and(turnsFor(uid,vehicleId),
-      conversationId.startsWith('legacy:') ? sql`${autoAiTurns.conversationId} is null and to_char(${autoAiTurns.createdAt} at time zone 'UTC','YYYY-MM-DD') = ${conversationId.slice(7)}` : eq(autoAiTurns.conversationId,conversationId))).limit(1);
+    const [exists] = await tx.select({ id:autoAiTurns.id }).from(autoAiTurns)
+      .where(and(turnsFor(uid, vehicleId), turnsInConversation(conversationId))).limit(1);
     if (!exists) throw new AppError(404,'Conversația nu a fost găsită.');
     const key = aiTitlesKey(uid);
     const [saved] = await tx.select({ value:settings.value }).from(settings).where(eq(settings.key,key));
@@ -97,7 +109,8 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
   const monthStart = date.slice(0, 7) + '-01';
   const yearStart = date.slice(0, 4) + '-01-01';
   const scope = and(eq(records.userId, uid), eq(records.vehicleId, vehicleId), eq(records.cancelled, false));
-  const [entries, documents, services, financialRows, history, readings] = await Promise.all([
+  const conversationScope = conversationId ? and(turnsFor(uid, vehicleId), eq(autoAiTurns.conversationId, conversationId)) : undefined;
+  const [entries, documents, services, financialRows, history, readings, existingConversation] = await Promise.all([
     db().select({
       kind: records.kind, category: records.category, date: records.date, expiresAt: records.expiresAt,
       odometer: records.odometer, nextKm: records.nextKm, amountBani: records.amountBani, amountKnown: records.amountKnown,
@@ -111,7 +124,10 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
     db().select({ date: mileageReadings.recordedAt, km: mileageReadings.odometer }).from(mileageReadings)
       .where(and(eq(mileageReadings.userId, uid), eq(mileageReadings.vehicleId, vehicleId)))
       .orderBy(desc(mileageReadings.recordedAt)).limit(8),
+    conversationScope ? db().select({ id: autoAiTurns.id }).from(autoAiTurns).where(conversationScope).limit(1) : [],
   ]);
+  if (conversationScope && contextIds?.length && !excludeTurnId && !existingConversation.length)
+    throw new AppError(404, 'Conversația nu mai este disponibilă.');
   const finance = financeOverview(financialRows, date);
   const signals = financeSignals(financialRows,date);
   const datedCosts = financialRows.filter(row => row.date && row.date <= date && row.amountKnown && row.amountBani > 0 && isFinancialEntry(row, date));
@@ -227,6 +243,10 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
       await tx.delete(autoAiTurns).where(target);
       return saved;
     }
+    if (conversationScope && existingConversation.length) {
+      const [existing] = await tx.select({ id: autoAiTurns.id }).from(autoAiTurns).where(conversationScope).limit(1);
+      if (!existing) throw new AppError(404, 'Conversația nu mai este disponibilă.');
+    }
     const id = stream?.requestId ?? crypto.randomUUID();
     let [saved] = await tx.insert(autoAiTurns).values({ id, userId: uid, vehicleId, question, answer, conversationId: conversationId ?? null }).onConflictDoNothing().returning(turnFields);
     if (!saved) {
@@ -234,7 +254,7 @@ export async function askAutoAssistant(uid: string, vehicleId: string, question:
       if (!saved || saved.question !== question || saved.conversationId !== (conversationId ?? null)) throw new AppError(409, 'Identificator de mesaj deja folosit.');
     }
     await tx.delete(autoAiTurns).where(sql`${turnsFor(uid, vehicleId)} and ${autoAiTurns.id} in
-      (select id from autocare_ai_turns where "userId"=${uid} and "vehicleId"=${vehicleId} order by "createdAt" desc, id desc offset 200)`);
+      (select id from autocare_ai_turns where "userId"=${uid} and "vehicleId"=${vehicleId} order by "createdAt" desc, id desc offset ${AI_HISTORY_LIMIT})`);
     return { id: saved.id, question: saved.question, answer: saved.answer, createdAt: saved.createdAt, conversationId: saved.conversationId, feedback: saved.feedback };
   });
   return { answer: turn.answer, turn, source };

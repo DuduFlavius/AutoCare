@@ -201,14 +201,18 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
 
     if (path[0] === 'auto-assistant') {
       if (!await svc.premium(uid)) throw new svc.AppError(403, 'Asistentul AI este disponibil în Premium.');
+      const historyId = z.union([uuid, z.string().regex(/^legacy:\d{4}-\d{2}-\d{2}$/)]);
       if (route === 'auto-assistant/history' && method === 'PATCH') {
         await rate(uid,'auto-assistant-history-title',30);
-        const { vehicleId, conversationId, title } = z.object({vehicleId:uuid,conversationId:z.union([uuid,z.string().regex(/^legacy:\d{4}-\d{2}-\d{2}$/)]), title:z.string().trim().min(1).max(72)}).parse(await body(req));
+        const { vehicleId, conversationId, title } = z.object({vehicleId:uuid,conversationId:historyId, title:z.string().trim().min(1).max(72)}).parse(await body(req));
         return json(await renameAiConversation(uid, vehicleId, conversationId, title));
       }
       if (route === 'auto-assistant/history' && method === 'DELETE') {
-        const { vehicleId, turnIds } = z.object({ vehicleId: uuid, turnIds: z.array(uuid).min(1).max(150).optional() }).parse(await body(req));
-        return json(await clearAutoAssistantHistory(uid, vehicleId, turnIds));
+        const selection = z.union([
+          z.object({ vehicleId: uuid, conversationId: historyId }).strict(),
+          z.object({ vehicleId: uuid, turnIds: z.array(uuid).min(1).max(150).optional() }).strict(),
+        ]).parse(await body(req));
+        return json(await clearAutoAssistantHistory(uid, selection.vehicleId, 'conversationId' in selection ? selection.conversationId : selection.turnIds));
       }
       if (route === 'auto-assistant/feedback' && method === 'POST') {
         await rate(uid, 'auto-assistant-feedback', 60);
