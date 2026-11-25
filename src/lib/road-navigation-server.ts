@@ -11,7 +11,7 @@ export async function loadDrivingRoutes(origin: Coordinate, destination: Coordin
   const url = new URL(endpoint + '/route/v1/driving/' + pair);
   url.search = new URLSearchParams({ steps: 'true', alternatives: 'true', overview: 'full', geometries: 'geojson', radiuses: `${Math.max(250, Math.ceil(startAccuracy))};250` }).toString();
   try {
-    const response = await fetch(url, { cache: 'no-store', redirect: 'error', signal: signal ? AbortSignal.any([signal,AbortSignal.timeout(12000)]) : AbortSignal.timeout(12000) });
+    const response = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json', 'User-Agent': 'AutoCare/9.0 (+https://www.autocareapp.ro)' }, redirect: 'error', signal: signal ? AbortSignal.any([signal,AbortSignal.timeout(12000)]) : AbortSignal.timeout(12000) });
     const payload = await response.json();
     if (payload?.code === 'NoRoute' || payload?.code === 'NoSegment')
       throw new AppError(422, 'Nu există un traseu auto între punctele selectate.');

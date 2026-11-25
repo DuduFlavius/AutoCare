@@ -35,7 +35,9 @@ export default function RoadMapView({
   routeStart,
   onDestination,
   untilTurn,
+  positionSegment,
 }: {
+  positionSegment?: string;
   untilTurn?: number;
   points: GPSFix[];
   mappedRoads?: readonly SpeedRoad[];
@@ -128,7 +130,9 @@ export default function RoadMapView({
             maxZoom: 19,
             pitch: 0,
             maxPitch: 65,
-            attributionControl: { compact: true },
+            attributionControl: { compact: true, customAttribution: initialArea
+              ? '<a href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener noreferrer">' + (english ? 'Fix the map' : 'Corectează harta') + '</a>'
+              : undefined },
             renderWorldCopies: false,
           });
           map.current = view;
@@ -241,6 +245,7 @@ export default function RoadMapView({
       map.current = null;
     };
   }, [english, history, initialArea, onAreaChange]);
+  const previousPositionSegment = useRef<string | undefined>(undefined);
   const turnDistance = useRef(untilTurn);
   turnDistance.current = untilTurn;
   useEffect(() => {
@@ -274,6 +279,8 @@ export default function RoadMapView({
     if(active&&!alreadyTracking){follow.current=true;setFollowing(true);}
     wasActive.current=active;
     const previousFix=cameraPosition.current;
+    const aligned = positionSegment !== undefined && positionSegment === previousPositionSegment.current;
+    previousPositionSegment.current = positionSegment;
     const initialHeading=(!alreadyTracking||!previousFix)&&p.speed!=null&&p.speed>=1.5&&p.heading!=null&&Number.isFinite(p.heading)&&p.heading>=0&&p.heading<360;
     const bearing=active?(initialHeading?p.heading!:drivingBearing(previousFix,p,cameraBearing.current)):0;
     cameraPosition.current=p;cameraBearing.current=bearing;
@@ -316,7 +323,7 @@ export default function RoadMapView({
       const ease=cameraTurnProgress(cameraProgress);
       const point=sampleRoad
         ? {...target,...sampleRoad(positionProgress)}
-        : active&&positionProgress<1&&travel>3 ? from : interpolateFix(from,target,positionProgress);
+        : active&&positionProgress<1&&travel>3&&!aligned ? from : interpolateFix(from,target,positionProgress);
       const heading=interpolateAngle(fromBearing,bearing,ease);
       displayPosition.current=point;displayBearing.current=heading;
       marker.current?.setLngLat([point.longitude,point.latitude]).setRotation(heading);
@@ -333,7 +340,7 @@ export default function RoadMapView({
     animationFrame.current=window.requestAnimationFrame(draw);
     updateRoadPositionMarker(marker.current?.getElement(),active,p,latest.current);
     marker.current?.getElement().style.setProperty('--gps-bearing','0deg');
-      }, [position, english, history, active, loading, perspective, cameraRevision]);
+      }, [position, english, history, active, loading, perspective, cameraRevision, positionSegment]);
   useEffect(() => {
     const source = map.current?.getSource('trip') as GeoJSONSource | undefined;
     source?.setData(routeGeometry(points,traceRoads));
@@ -398,24 +405,31 @@ export default function RoadMapView({
       for(const [property,value] of Object.entries(layer.paint||{}))view.setPaintProperty(layer.id,property as keyof AllPaintProperties,value);
     }
   },[daylight,loading,failed]);
-  if (failed)
-    return <div className="rg-map-fallback"><RasterRoadMap points={points} mappedRoads={traceRoads} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart} /><p className="rg-map-fallback-note" role="status">{english?'2D fallback map · 3D unavailable on this device.':'Hartă de rezervă 2D · 3D indisponibil pe acest dispozitiv.'}</p></div>;
-  return (
-    <div className="ac-road-map" data-workspace-ui data-map-theme={daylight?'day':'night'}>
-      <div
-        ref={host}
-        className="ac-road-map-canvas"
-        aria-label={english ? 'Interactive street map' : 'Hartă rutieră interactivă'}
-      />
-      {!history&&<div className="rg-map-modes"><button type="button" aria-pressed={perspective} aria-label={english?'Toggle 2D or 3D':'Comută 2D sau 3D'} onClick={()=>setPerspective(v=>!v)}><Layers size={18}/>{perspective?'3D':'2D'}</button><button type="button" aria-label={english?'Map theme':'Tema hărții'} aria-expanded={lightSettings} onClick={()=>setLightSettings(open=>!open)}>{daylight?<Sun size={18}/>:<Moon size={18}/>}<small>{light.mode==='auto'?'Auto':daylight?(english?'Day':'Zi'):(english?'Night':'Noapte')}</small></button></div>}
-      {!history&&lightSettings&&<section className="sd-map-light" aria-label={english?'Map appearance':'Aspectul hărții'}>
+  const themeToggle = <button type="button" aria-label={english ? 'Map theme' : 'Tema hărții'} aria-expanded={lightSettings} onClick={() => setLightSettings(open => !open)}>
+    {daylight ? <Sun size={18}/> : <Moon size={18}/>}<small>{light.mode === 'auto' ? 'Auto' : daylight ? (english ? 'Day' : 'Zi') : (english ? 'Night' : 'Noapte')}</small>
+  </button>;
+  const appearance = !history && lightSettings && <section className="sd-map-light" aria-label={english?'Map appearance':'Aspectul hărții'}>
         <label>{english?'Map appearance':'Aspectul hărții'}<select value={light.mode} onChange={event=>updateLight({...light,mode:event.target.value as MapLightSettings['mode']})}>
           <option value="auto">{english?'Sunrise and sunset':'Răsărit și apus'}</option><option value="day">{english?'Always day':'Permanent zi'}</option><option value="night">{english?'Always night':'Permanent noapte'}</option><option value="schedule">{english?'Custom schedule':'Program personalizat'}</option>
         </select></label>
         {light.mode==='auto'&&<label>{english?'Night starts before sunset':'Noaptea începe înainte de apus'}<select value={light.lead} onChange={event=>updateLight({...light,lead:Number(event.target.value)})}>{[0,10,20,30].map(minutes=><option key={minutes} value={minutes}>{minutes?minutes+' min':english?'At sunset':'La apus'}</option>)}</select></label>}
         {light.mode==='schedule'&&<><label>{english?'Day starts':'Început zi'}<input type="time" required value={light.day} onChange={event=>{if(event.target.value)updateLight({...light,day:event.target.value});}}/></label><label>{english?'Night starts':'Început noapte'}<input type="time" required value={light.night} onChange={event=>{if(event.target.value)updateLight({...light,night:event.target.value});}}/></label></>}
         <button type="button" onClick={()=>setLightSettings(false)}>{english?'Done':'Gata'}</button>
-      </section>}
+      </section>;
+  if (failed) return <div className="rg-map-fallback" data-map-theme={daylight ? 'day' : 'night'}>
+    <RasterRoadMap points={points} mappedRoads={traceRoads} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart}/>
+    {!history && <div className="rg-map-modes">{themeToggle}</div>}
+    {appearance}
+    <p className="rg-map-fallback-note" role="status">{english ? '2D fallback map' : 'Hartă de rezervă 2D'}</p>
+  </div>;
+  return (
+    <div className="ac-road-map" data-workspace-ui data-map-theme={daylight ? 'day' : 'night'}>
+      <div ref={host} className="ac-road-map-canvas" aria-label={english ? 'Interactive street map' : 'Hartă rutieră interactivă'}/>
+      {!history && <div className="rg-map-modes">
+        <button type="button" aria-pressed={perspective} aria-label={english ? 'Toggle 2D or 3D' : 'Comută 2D sau 3D'} onClick={() => setPerspective(value => !value)}><Layers size={18}/>{perspective ? '3D' : '2D'}</button>
+        {themeToggle}
+      </div>}
+      {appearance}
       <span className="ac-road-map-status">
         {initialArea && active ? (english ? 'GPS · GUIDANCE' : 'GPS · GHIDARE') : history ? (english ? 'TRIP HISTORY' : 'TRASEU SALVAT') : active
           ? english

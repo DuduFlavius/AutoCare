@@ -6,6 +6,9 @@ const geometry = z.object({ coordinates: z.array(lngLat).min(2).max(150000) });
 const step = z.object({
   name: z.string().max(512), distance: z.number().nonnegative(), duration: z.number().nonnegative(),
   geometry: z.object({ coordinates: z.array(lngLat).min(1).max(150000) }),
+  intersections: z.array(z.object({
+    lanes: z.array(z.object({ indications: z.array(z.string().max(24)).max(8), valid: z.boolean() })).max(16).optional(),
+  })).max(1000).optional(),
   maneuver: z.object({ type: z.string().max(64), modifier: z.string().max(32).optional(), exit: z.number().int().positive().optional(), location: lngLat }),
 });
 const result = z.object({

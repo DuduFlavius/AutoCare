@@ -94,7 +94,8 @@ export default function RasterRoadMap({
           maxZoom: 19,
           className: 'ac-dark-road-tiles',
           attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>',
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>' +
+            (initialArea ? ' · <a href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener noreferrer">' + (english ? 'Fix the map' : 'Corectează harta') + '</a>' : ''),
         }).addTo(view);
         layer.on('tileerror', () => {
           if (!disposed) setTileError(true);

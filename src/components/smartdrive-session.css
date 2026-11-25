@@ -425,3 +425,39 @@
 .sd-route-arrival strong {font-size:clamp(19px,5vw,25px)}
 .sd-route-arrival span {font-size:12px}
 .sd-live-cockpit.rg-smartdrive-map .sd-route-strip .sd-stop-guidance {width:auto;border:1px solid #7499a566;padding:5px 9px;font-size:clamp(11px,3.5vw,13px)}
+
+/* SmartDrive 9: the maneuver and trip summary stay readable above the map. */
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-guidance-turn {
+  background:#083b4a;color:#fff;border-color:#24606d;align-items:flex-start;min-height:0;
+  inset-inline-start:max(12px,env(safe-area-inset-left));inset-inline-end:72px;
+}
+.sd-live-cockpit[data-guiding=true] .rg-guidance-turn :is(span,small) { line-height:1.3;color:#e2f1f5 }
+.sd-live-cockpit[data-guiding=true] .rg-guidance-turn strong { line-height:1.12 }
+.sd-turn-lanes { display:flex;flex-wrap:wrap;gap:4px;margin-block:2px }
+.sd-turn-lanes span { min-width:25px;padding:2px 4px;text-align:center;border-radius:5px;background:#14313b;border:1px solid #66858e }
+.sd-live-cockpit .sd-turn-lanes span[data-valid=true] { background:#d9edf2;color:#083b4a;border-color:#d9edf2;font-weight:750 }
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .sd-route-strip {
+  grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:7px;padding:8px 10px;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .sd-route-strip>button { width:auto;min-width:44px;margin:0;border:1px solid #bdd3db }
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-navigation-sidebar {
+  inset:auto max(8px,env(safe-area-inset-right)) calc(var(--nav-bottom-height,72px) + max(8px,env(safe-area-inset-bottom))) auto;
+  width:min(360px,calc(100% - 16px));max-height:min(52dvh,calc(100% - 115px));overflow-y:auto;
+}
+.sd-live-cockpit .rg-navigation-audio { position:absolute }
+.rg-navigation-audio>span { position:absolute;right:3px;top:0;font-weight:750 }
+.sd-live-cockpit.rg-smartdrive-map:has([data-map-theme=night]) .rg-guidance-turn { background:#09252e;border-color:#416478 }
+.sd-live-cockpit.rg-smartdrive-map:has([data-map-theme=night]) .sd-route-arrival { color:#e2f1f5 }
+@media (max-width:900px) {
+  .sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-navigation-sidebar { inset-inline-start:8px;width:auto }
+}
+.sd-live-cockpit[data-guiding=true][data-gps-fresh=false] .ac-road-position { opacity:.4 }
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-navigation-audio { inset-inline-end:max(12px,env(safe-area-inset-right));top:max(96px, calc(env(safe-area-inset-top) + 84px)) }
+.sd-live-cockpit .rg-map-fallback[data-map-theme=night] .ac-dark-road-tiles { filter:invert(.9) hue-rotate(175deg) saturate(.68) brightness(.88) }
+.sd-live-cockpit .rg-map-fallback[data-map-theme=night] .leaflet-container { background:#10232d }
+.sd-live-cockpit[data-guiding=true] .rg-map-fallback-note { top:auto;bottom:4px;left:8px;right:auto;max-width:calc(100% - 150px);padding:4px 6px;font-size:10px }
+/* Leaflet panes have their own z-order and must stay below guidance controls. */
+.sd-live-cockpit .rg-map-fallback { isolation:isolate;z-index:0 }
+.sd-live-cockpit .rg-map-fallback-note { color:#294653 }
+.sd-live-cockpit .rg-map-fallback[data-map-theme=night] .rg-map-fallback-note { background:#102b37;color:#e1eff3;border-color:#527281 }
+.sd-live-cockpit.rg-smartdrive-map:has([data-map-theme=night]) .sd-route-arrival strong { color:#e2f1f5 }
