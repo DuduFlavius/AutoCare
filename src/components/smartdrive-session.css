@@ -474,3 +474,10 @@
 .sd-live-cockpit.rg-smartdrive-map[data-guiding=true][data-android-apk=true] .rg-navigation-canvas :is(.leaflet-top.leaflet-right,.maplibregl-ctrl-top-right) {
   top:max(12px,env(safe-area-inset-top));inset-inline-end:max(12px,env(safe-area-inset-right));
 }
+.sd-live-cockpit .rg-map-fallback .leaflet-container { isolation:isolate;z-index:0 }
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .sd-route-strip {
+  background:#f7fbfc;color:#122c38;border:1px solid #cbdde4;border-radius:15px;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true]:has([data-map-theme=night]) .sd-route-strip {
+  background:#102b37;color:#e2f1f5;border-color:#416478;
+}
