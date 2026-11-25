@@ -150,3 +150,12 @@
 
 .ac-public-shell .ac-public-navigation-capture { max-width:390px }
 .ac-public-shell.ac-public-dark .ac-public-product-capture figcaption { color:#d5e9ee }
+
+@media (max-width: 960px) {
+  html body .ac-public-shell .public-nav .navlinks { display:none }
+  html body .ac-public-shell .public-nav { flex-wrap:wrap;gap:10px;height:auto }
+  html body .ac-public-shell .public-nav .ac-public-mobile-nav { display:block;flex:1 0 100%;min-width:0 }
+  .ac-public-shell .ac-public-mobile-nav summary { display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer }
+  .ac-public-shell .ac-public-mobile-nav nav { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding-block:8px }
+  .ac-public-shell .ac-public-mobile-nav nav a { padding:9px;border:1px solid var(--color-border);border-radius:8px }
+}

@@ -53,7 +53,8 @@ export function PublicShell({
               <Link href={href('/preturi')}>{t('Abonamente')}</Link>
               <Link href={href('/descarca')}>{language==='en'?'Download Android':'Descarcă Android'}</Link>
               <Link href={href('/rca-rovinieta')}>{language==='en'?'RCA & Road vignette':'RCA & Rovinietă'}</Link>
-            <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
+              <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
+              <Link href={href('/despre-noi')}>{t('Despre noi')}</Link>
             </nav>
           </details>
         </header>
