@@ -452,7 +452,6 @@
   .sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-navigation-sidebar { inset-inline-start:8px;width:auto }
 }
 .sd-live-cockpit[data-guiding=true][data-gps-fresh=false] .ac-road-position { opacity:.4 }
-.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-navigation-audio { inset-inline-end:max(12px,env(safe-area-inset-right));top:max(96px, calc(env(safe-area-inset-top) + 84px)) }
 .sd-live-cockpit .rg-map-fallback[data-map-theme=night] .ac-dark-road-tiles { filter:invert(.9) hue-rotate(175deg) saturate(.68) brightness(.88) }
 .sd-live-cockpit .rg-map-fallback[data-map-theme=night] .leaflet-container { background:#10232d }
 .sd-live-cockpit[data-guiding=true] .rg-map-fallback-note { top:auto;bottom:4px;left:8px;right:auto;max-width:calc(100% - 150px);padding:4px 6px;font-size:10px }
@@ -461,3 +460,17 @@
 .sd-live-cockpit .rg-map-fallback-note { color:#294653 }
 .sd-live-cockpit .rg-map-fallback[data-map-theme=night] .rg-map-fallback-note { background:#102b37;color:#e1eff3;border-color:#527281 }
 .sd-live-cockpit.rg-smartdrive-map:has([data-map-theme=night]) .sd-route-arrival strong { color:#e2f1f5 }
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] { --sd-guidance-controls-top:max(126px,calc(env(safe-area-inset-top) + 118px)) }
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true][data-native-fullscreen] .rg-navigation-audio {
+  top:var(--sd-guidance-controls-top);inset-inline-end:max(12px,env(safe-area-inset-right));
+}
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-map-modes {
+  top:calc(var(--sd-guidance-controls-top) + 58px);inset-inline-end:max(12px,env(safe-area-inset-right));flex-direction:column;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-navigation-tools { display:none }
+@media (max-height:450px) {
+  .sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-map-modes { flex-direction:row }
+}
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true][data-android-apk=true] .rg-navigation-canvas :is(.leaflet-top.leaflet-right,.maplibregl-ctrl-top-right) {
+  top:max(12px,env(safe-area-inset-top));inset-inline-end:max(12px,env(safe-area-inset-right));
+}
