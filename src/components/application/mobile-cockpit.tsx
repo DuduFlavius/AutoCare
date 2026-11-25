@@ -39,8 +39,13 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
   const row=car?homeDocument(rows,car.id,category,today):null;
   return row?.expiresAt&&row.expiresAt>=today?[{row,category,expiry:row.expiresAt}]:[];
  }).sort((a,b)=>a.expiry.localeCompare(b.expiry)).slice(0,3);
- return <div className="rg-mobile-home" data-workspace-ui>
-  {!car?<section className="rg-m-empty"><CarFront size={52}/><h2>{t('Garajul tău începe aici','Your garage starts here')}</h2><p>{t('Adaugă mașina pentru a organiza documentele și întreținerea.','Add your vehicle to organize documents and maintenance.')}</p><button className="rg-m-primary" onClick={()=>onCreate('vehicle')}><Plus size={18}/>{t('Adaugă vehicul','Add vehicle')}</button></section>:<>
+ return <div className="rg-mobile-home" data-empty-garage={!car||undefined} data-workspace-ui>
+  {!car?<section className="rg-m-empty ac-home-empty-garage" aria-labelledby="home-empty-garage-title">
+   <span className="ac-home-empty-garage-icon" aria-hidden="true"><CarFront size={28}/></span>
+   <h2 id="home-empty-garage-title">{t('Garajul tău începe aici','Your garage starts here')}</h2>
+   <p>{t('Adaugă mașina pentru a organiza documentele și întreținerea.','Add your vehicle to organize documents and maintenance.')}</p>
+   <button type="button" className="rg-m-primary" onClick={()=>onCreate('vehicle')}><Plus size={18} aria-hidden="true"/>{t('Adaugă vehicul','Add vehicle')}</button>
+  </section>:<>
    <section className="rg-m-vehicle" data-multiple={active.length>1||undefined}>
     {hasPhoto&&car?<div className="rg-home-owned-photo">
      <img src={'/api/v1/vehicles/'+encodeURIComponent(car.id)+'/photo'} alt="" decoding="async" onError={()=>setFailedPhoto(car.id)}/></div>:<CarFront className="rg-home-vehicle-silhouette" size={120} strokeWidth={.8} aria-hidden="true"/>}
