@@ -174,7 +174,7 @@ Object.assign(reviewedPublicCopy, {
   "Distanța GPS este o măsurătoare a traseului, nu o citire a odometrului din calculatorul mașinii. Verifică kilometrajul real atunci când faci o intervenție.": "GPS distance measures the route, not the vehicle computer’s odometer. Verify actual mileage when recording maintenance.",
   "Instalează AutoCare pe Android": "Install AutoCare on Android",
   "Descarcă AutoCare 1.5.1 pentru Android": "Download AutoCare 1.5.1 for Android",
-  "Descarcă AutoCare 1.7.3 pentru Android": "Download AutoCare 1.7.3 for Android",
+  "Descarcă AutoCare 1.7.4 pentru Android": "Download AutoCare 1.7.4 for Android",
   "La trecerea de la versiunile vechi, sincronizează mai întâi toate traseele din cont. Dacă Android semnalează un conflict de semnătură, dezinstalează versiunea veche abia după sincronizare, apoi instalează acest APK și autentifică-te în același cont.": "When upgrading older versions, sync all trips first. If Android reports a signature conflict, uninstall the old version only after syncing, then install this APK and sign into the same account.",
   "AutoCare are o aplicație Android și o versiune web. Disponibilitatea instalării și actualizărilor este afișată în cont. Publicarea în Google Play este o etapă separată; aici nu prezentăm o listare care încă nu există.": "AutoCare has an Android app and a web version. Installation and update availability are shown in your account. Google Play publishing is a separate step; we do not claim a listing that does not yet exist.",
   "Cât costă?": "How much does it cost?",
