@@ -6,14 +6,52 @@ import { Capacitor } from '@capacitor/core';
 import { nativeTracking, nativeAutomation, nativeMethodMissing } from '@/lib/native-tracking';
 import { useApplicationLanguage } from './application-locale';
 
+type AndroidRelease = { version: string; versionCode: number; url: string };
+const officialAndroidOrigin = 'https://www.autocareapp.ro';
+
+async function fetchAndroidRelease(): Promise<AndroidRelease | null> {
+  const response = await fetch('/api/android-update', { cache: 'no-store', signal: AbortSignal.timeout(10000) });
+  if (!response.ok) throw new Error('Update unavailable');
+  const release = await response.json();
+  if (!release.available) return null;
+  if (!Number.isSafeInteger(release.versionCode) || release.versionCode < 1 ||
+      typeof release.version !== 'string' || !/^\d+\.\d+\.\d+$/.test(release.version) ||
+      release.url !== '/downloads/AutoCare-' + release.version + '.apk') throw new Error('Invalid release');
+  return { version: release.version, versionCode: release.versionCode, url: officialAndroidOrigin + release.url };
+}
+
+function tripBlocksUpdate() {
+  const {autocareGpsActive, autocareNavigationActive} = document.documentElement.dataset;
+  return autocareGpsActive === 'true' || autocareNavigationActive === 'true';
+}
+
+async function installAndroidRelease(release: AndroidRelease) {
+  if (tripBlocksUpdate()) return 'blocked';
+  const {autocareNativeOwner: owner, autocareNativeUpdateSafe: safe} = document.documentElement.dataset;
+  if (owner) {
+    const [trip, queue] = await Promise.all([nativeTracking.snapshot(owner), nativeAutomation.pending(owner)]);
+    if (trip?.active || queue.length || safe !== 'true' || tripBlocksUpdate()) return 'blocked';
+  }
+  try {
+    await nativeTracking.installAndroidUpdate(release);
+    return 'installer';
+  } catch (error) {
+    const code = (error as {code?:string})?.code;
+    if (code === 'UPDATE_PERMISSION') return 'permission';
+    if (code === 'UPDATE_TRIP_ACTIVE') return 'blocked';
+    throw error;
+  }
+}
+
 /** Web releases refresh only at an idle, visible, online and unedited page. */
 export default function AutoUpdate() {
   const [available, setAvailable] = useState(false);
   const [native, setNative] = useState(false);
-  const [androidRelease, setAndroidRelease] = useState<{version: string; url: string} | null>(null);
+  const [androidRelease, setAndroidRelease] = useState<AndroidRelease | null>(null);
   const [installing, setInstalling] = useState(false);
   const [gpsBlocked, setGpsBlocked] = useState(false);
   const [installError, setInstallError] = useState(false);
+  const [permissionNeeded, setPermissionNeeded] = useState(false);
   const dirty = useRef(false);
   const interaction = useRef(Date.now());
   useEffect(() => {
@@ -28,10 +66,8 @@ export default function AutoUpdate() {
       if (Capacitor.getPlatform() !== 'android' || document.hidden || !navigator.onLine || busy) return;
       busy = true;
       try {
-        const [response, installed] = await Promise.all([fetch('/api/android-update', {cache:'no-store', signal:AbortSignal.timeout(10000)}), nativeTracking.appVersion()]);
-        if (!response.ok) return;
-        const release = await response.json();
-        if (!disposed && release.available && Number.isInteger(release.versionCode) && release.versionCode > installed.versionCode && typeof release.version === 'string' && typeof release.url === 'string' && /^\/downloads\/AutoCare-[0-9.]+\.apk$/.test(release.url)) setAndroidRelease({version:release.version,url:release.url});
+        const [release, installed] = await Promise.all([fetchAndroidRelease(), nativeTracking.appVersion()]);
+        if (!disposed) setAndroidRelease(release && installed.directUpdate && release.versionCode > installed.versionCode ? release : null);
       } catch { /* A failed check never interrupts a trip or requests a downgrade. */ }
       finally { busy = false; }
     };
@@ -65,7 +101,7 @@ export default function AutoUpdate() {
         if (data.version === current) { if (manual) report('current'); return; }
         pending = true;
         setAvailable(true);
-        setGpsBlocked(document.documentElement.dataset.autocareGpsActive === 'true');
+        setGpsBlocked(tripBlocksUpdate());
         if (manual) report('available');
         let nativeSafe = !Capacitor.isNativePlatform();
         const ownerId = document.documentElement.dataset.autocareNativeOwner;
@@ -73,7 +109,7 @@ export default function AutoUpdate() {
           const [active, queue] = await Promise.all([nativeTracking.snapshot(ownerId), nativeAutomation.pending(ownerId)]);
           nativeSafe = !active?.active && queue.length === 0;
         }
-        if (!disposed && document.visibilityState === 'visible' && navigator.onLine && (!Capacitor.isNativePlatform() || (document.documentElement.dataset.autocareNativeOwner === ownerId && document.documentElement.dataset.autocareNativeUpdateSafe === 'true')) && nativeSafe && !dirty.current && document.documentElement.dataset.autocareGpsActive !== 'true' && Date.now() - interaction.current > 30000) window.location.reload();
+        if (!disposed && document.visibilityState === 'visible' && navigator.onLine && (!Capacitor.isNativePlatform() || (document.documentElement.dataset.autocareNativeOwner === ownerId && document.documentElement.dataset.autocareNativeUpdateSafe === 'true')) && nativeSafe && !dirty.current && !tripBlocksUpdate() && Date.now() - interaction.current > 30000) window.location.reload();
       } catch { if (manual) report('error'); /* Keep the working page after a failed check. */ }
       finally { checking = false; }
     };
@@ -110,13 +146,19 @@ export default function AutoUpdate() {
   return <aside role="status" style={{ position: 'fixed', bottom: 'calc(88px + env(safe-area-inset-bottom))', right: 16, left: 'auto', maxWidth: 'min(370px, calc(100vw - 32px))', zIndex: 10000, padding: 18, borderRadius: 16, background: '#091611', color: '#fff', boxShadow: '0 12px 36px #0004', border: '1px solid #5AFFC4' }}>
     <strong>{en ? 'Update available' : 'Actualizare disponibilă'}{androidRelease ? ` · ${androidRelease.version}` : ''}</strong>
     <p style={{ color: '#FFFFFF', margin: '8px 0 12px' }}>{androidRelease ? (en ? 'Android will ask you to confirm installation. Save your trip first.' : 'Android îți va cere confirmarea instalării. Salvează întâi traseul.') : (en ? 'The interface refreshes automatically when idle, after trips sync and without unsaved edits.' : 'Interfața se actualizează automat în repaus, după sincronizarea traseelor și fără modificări nesalvate.')}</p>
-    <button type="button" disabled={installing} style={{ background: '#5AFFC4', color: '#fff', border: 0, padding: '12px 18px', borderRadius: 10, fontWeight: 700 }} onClick={async () => {
-      if (document.documentElement.dataset.autocareGpsActive === 'true') { setGpsBlocked(true); return; }
+    <button type="button" disabled={installing} style={{ background: '#5AFFC4', color: '#083d31', border: 0, padding: '12px 18px', borderRadius: 10, fontWeight: 700 }} onClick={async () => {
+      if (tripBlocksUpdate()) { setGpsBlocked(true); return; }
       if (dirty.current && !await requestConfirmation(en ? 'Install the update? Unsaved form changes may be lost.' : 'Instalezi actualizarea? Modificările nesalvate din formular se pot pierde.')) return;
       setInstallError(false);
+      setPermissionNeeded(false);
+      setGpsBlocked(false);
       setInstalling(true);
       if (androidRelease) {
-        try { await nativeTracking.openAndroidUpdate(new URL(androidRelease.url,window.location.origin).href); }
+        try {
+          const result = await installAndroidRelease(androidRelease);
+          setPermissionNeeded(result === 'permission');
+          setGpsBlocked(result === 'blocked');
+        }
         catch { setInstallError(true); }
         finally { setInstalling(false); }
         return;
@@ -137,7 +179,8 @@ export default function AutoUpdate() {
         }
       } catch { /* The network-first page still refreshes to the current release. */ }
       window.location.reload();
-    }}>{installing ? (en ? 'Installing…' : 'Se instalează…') : (en ? 'Install update' : 'Instalează actualizarea')}</button>
+    }}>{installing ? (en ? 'Preparing the update…' : 'Se pregătește actualizarea…') : (en ? 'Install update' : 'Instalează actualizarea')}</button>
+    {permissionNeeded && <p role="alert">{en ? 'Allow AutoCare to install apps in Android settings and retry.' : 'Permite instalarea din AutoCare în setările Android și reîncearcă.'}</p>}
     {installError && <p role="alert">{en ? 'Could not open the installer. Try again after saving your trip.' : 'Kitul de instalare nu a putut fi deschis. Reîncearcă după salvarea traseului.'}</p>}
     {gpsBlocked && <p style={{color:'var(--color-warning-ink)',margin:'10px 0 0'}}>{en ? 'Stop and save your GPS trip before installing.' : 'Oprește și salvează traseul GPS înainte de instalare.'}</p>}
   </aside>;
@@ -147,7 +190,7 @@ export default function AutoUpdate() {
 export function AppUpdateSettings() {
   const en = useApplicationLanguage() === 'en';
   const [status,setStatus] = useState('');
-  const [androidRelease,setAndroidRelease] = useState<{version:string;url:string}|null>(null);
+  const [androidRelease,setAndroidRelease] = useState<AndroidRelease|null>(null);
   const [androidStatus,setAndroidStatus] = useState('');
   const [android,setAndroid] = useState(false);
   const [native,setNative] = useState(false);
@@ -155,16 +198,15 @@ export function AppUpdateSettings() {
   const checkAndroid = async () => {
     setAndroidStatus('checking');setAndroidRelease(null);
     try {
-      const response=await fetch('/api/android-update',{cache:'no-store',signal:AbortSignal.timeout(10000)});
-      if(!response.ok)throw Error('Update unavailable');
-      const release=await response.json();
-      if(!release.available){setAndroidStatus('unpublished');return;}
-      if(!Number.isInteger(release.versionCode)||typeof release.version!=='string'||typeof release.url!=='string'||!/^\/downloads\/AutoCare-[0-9.]+\.apk$/.test(release.url))throw Error('Invalid release');
-      let installed:number|null=null;
-      try { installed=(await nativeTracking.appVersion()).versionCode; } catch(error) { if(!nativeMethodMissing(error))throw error; }
-      if(installed!==null&&installed>=release.versionCode){setAndroidStatus('current');return;}
-      setAndroidRelease({version:release.version,url:release.url});setAndroidStatus(installed===null?'unknown':'available');
-    } catch { setAndroidStatus('error'); }
+      const release = await fetchAndroidRelease();
+      if (!release) { setAndroidStatus('unpublished'); return; }
+      const installed = await nativeTracking.appVersion();
+      if (installed.directUpdate === false) { setAndroidStatus('store'); return; }
+      if (installed.versionCode >= release.versionCode) { setAndroidStatus('current'); return; }
+      if (installed.directUpdate !== true) { setAndroidStatus('bootstrap'); return; }
+      setAndroidRelease(release);
+      setAndroidStatus('available');
+    } catch (error) { setAndroidStatus(nativeMethodMissing(error) ? 'bootstrap' : 'error'); }
   };
   useEffect(() => {
     const result = (event: Event) => setStatus((event as CustomEvent<string>).detail);
@@ -191,8 +233,12 @@ export function AppUpdateSettings() {
       <strong>{en?'Android app · GPS and background tracking':'Aplicația Android · GPS și urmărire în fundal'}</strong>
       <p className="small muted">{en?'Android asks you to confirm installation. Stop and save your GPS trip first.':'Android îți cere confirmarea instalării. Oprește și salvează întâi traseul GPS.'}</p>
       <button type="button" disabled={androidStatus==='checking'} onClick={()=>void checkAndroid()}>{en?'Check Android update':'Verifică actualizarea Android'}</button>
-      {androidStatus && <p role="status" className="small">{({checking:en?'Checking…':'Se verifică…',unpublished:en?'The new Android installer has not been published yet.':'Kitul noii versiuni Android nu este încă publicat.',current:en?'The installed Android app is up to date.':'Aplicația Android instalată este la zi.',available:en?'New Android version available.':'Este disponibilă o versiune Android nouă.',unknown:en?'Installer available. This older app cannot report its installed version.':'Kit disponibil. Această aplicație mai veche nu poate comunica versiunea instalată.',error:en?'Could not check Android updates. Try again.':'Actualizarea Android nu a putut fi verificată. Reîncearcă.',blocked:en?'Stop and save your GPS trip first.':'Oprește și salvează întâi traseul GPS.'} as Record<string,string>)[androidStatus]}</p>}
-      {androidRelease && <button type="button" onClick={()=>{if(document.documentElement.dataset.autocareGpsActive==='true'){setAndroidStatus('blocked');return;}const url=new URL(androidRelease.url,window.location.origin).href;void nativeTracking.openAndroidUpdate(url).catch(error=>{if(nativeMethodMissing(error)){window.location.href='intent://'+url.slice('https://'.length)+'#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end';}else setAndroidStatus('error');});}}>{en?'Download Android':'Descarcă Android'} {androidRelease.version}</button>}
+      {androidStatus && <p role="status" className="small">{({checking:en?'Checking…':'Se verifică…',unpublished:en?'The new Android installer has not been published yet.':'Kitul noii versiuni Android nu este încă publicat.',current:en?'The installed Android app is up to date.':'Aplicația Android instalată este la zi.',available:en?'New Android version available.':'Este disponibilă o versiune Android nouă.',bootstrap:en?'Install the latest version once from the official AutoCare site. Future updates install from this screen.':'Instalează o singură dată ultima versiune de pe site-ul oficial AutoCare. Următoarele actualizări se instalează din acest ecran.',store:en?'Update this installation through Google Play.':'Actualizează această instalare din Google Play.',installing:en?'Preparing the update…':'Se pregătește actualizarea…',installer:en?'Confirm installation in Android.':'Confirmă instalarea în Android.',permission:en?'Allow AutoCare to install apps in Android settings and retry.':'Permite instalarea din AutoCare în setările Android și reîncearcă.', error:en?'Could not check Android updates. Try again.':'Actualizarea Android nu a putut fi verificată. Reîncearcă.',blocked:en?'Stop and save your GPS trip first.':'Oprește și salvează întâi traseul GPS.'} as Record<string,string>)[androidStatus]}</p>}
+      {androidRelease && <button type="button" disabled={androidStatus==='installing'} onClick={async()=>{
+        setAndroidStatus('installing');
+        try { setAndroidStatus(await installAndroidRelease(androidRelease)); }
+        catch { setAndroidStatus('error'); }
+      }}>{en ? 'Install Android update' : 'Instalează actualizarea Android'} {androidRelease.version}</button>}
     </div>}
   </div>;
 }

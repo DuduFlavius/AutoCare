@@ -12,7 +12,7 @@ import {matchRecordedRoadLink} from '@/lib/recorded-road-match';
 import {segmentMeters} from '@/lib/gps-tracking';
 import {measuredTransition,interpolateFix,interpolateAngle,cameraTurnProgress,prepareRoadInterpolation} from '@/lib/gps-animation';
 import type { GPSFix } from '@/lib/gps-tracking';
-import { roadMapStyle, plannedRouteBounds, routeGeometry, streetOnlyStyle, tripBounds } from '@/lib/road-map';
+import { alternateRouteGeometry, roadMapStyle, plannedRouteBounds, routeGeometry, streetOnlyStyle, tripBounds, type RouteVariant } from '@/lib/road-map';
 import 'maplibre-gl/dist/maplibre-gl.css';
 const noConfirmedRoads: readonly SpeedRoad[] = [];
 const RasterRoadMap = dynamic(() => import('./raster-road-map'), { ssr: false });
@@ -31,6 +31,8 @@ export default function RoadMapView({
   locating = false,
   locationError,
   plannedRoute,
+  alternateRoutes,
+  onSelectRoute,
   destination,
   routeStart,
   onDestination,
@@ -53,6 +55,8 @@ export default function RoadMapView({
   locating?: boolean;
   locationError?: string;
   plannedRoute?: [number, number][];
+  alternateRoutes?: RouteVariant[];
+  onSelectRoute?: (index:number)=>void;
   destination?: { latitude: number; longitude: number } | null;
   routeStart?: [number, number];
   onDestination?: (point: { latitude: number; longitude: number }) => void;
@@ -86,6 +90,8 @@ export default function RoadMapView({
   autoPointAction.current = onAutoPoint;
   const destinationAction = useRef(onDestination);
   destinationAction.current = onDestination;
+  const routeAction = useRef(onSelectRoute);
+  routeAction.current = onSelectRoute;
   const shownRoute = useRef(false);
   const wasActive = useRef(false);
   const follow = useRef(true);
@@ -97,7 +103,8 @@ export default function RoadMapView({
     if (!view || !plannedRoute?.length) return;
     follow.current = false;
     setFollowing(false);
-    view.fitBounds(plannedRouteBounds(plannedRoute), { padding: 58, maxZoom: 16, duration: 650 });
+    const routePoints = alternateRoutes?.length ? [...plannedRoute, ...alternateRoutes.flatMap(route => route.coordinates)] : plannedRoute;
+    view.fitBounds(plannedRouteBounds(routePoints), { padding: Math.min(58, view.getCanvas().clientHeight * .2), maxZoom: 16, duration: 650 });
   }
   const manualZoom = useRef<number | null>(null);
   const trackingCamera = useRef(active);
@@ -145,7 +152,17 @@ export default function RoadMapView({
           view.on('zoomend', event => {
             if (event.originalEvent && trackingCamera.current) manualZoom.current=view.getZoom();
           });
-          view.on('click', ({ lngLat }) => destinationAction.current?.({ longitude: lngLat.wrap().lng, latitude: lngLat.lat }));
+          view.on('click', ({ lngLat, point }) => {
+            if (view.getLayer('directions-alternates-hit')) {
+              const radius = 5;
+              const box: [[number,number],[number,number]] = [[point.x-radius,point.y-radius],[point.x+radius,point.y+radius]];
+              const onSelected = view.queryRenderedFeatures(box, {layers:['directions-line']}).length > 0;
+              const variant = onSelected ? undefined : view.queryRenderedFeatures(box, {layers:['directions-alternates-hit']})[0];
+              const index = variant?.properties?.index;
+              if (typeof index === 'number') { routeAction.current?.(index); return; }
+            }
+            destinationAction.current?.({ longitude: lngLat.wrap().lng, latitude: lngLat.lat });
+          });
           view.on('dragstart', () => {
             follow.current = false;
             setFollowing(false);
@@ -154,6 +171,12 @@ export default function RoadMapView({
             if (disposed) return;
             window.clearTimeout(fallbackTimer);
       window.cancelAnimationFrame(animationFrame.current);
+            view.addSource('directions-alternates', { type:'geojson', data: alternateRouteGeometry([]) });
+            view.addLayer({ id:'directions-alternates-line',type:'line',source:'directions-alternates',
+              paint:{'line-color':'#677e9b','line-width':6,'line-opacity':.8,'line-dasharray':[1.5,.5]},
+              layout:{'line-cap':'round','line-join':'round'} });
+            view.addLayer({ id:'directions-alternates-hit',type:'line',source:'directions-alternates',
+              paint:{'line-width':20,'line-opacity':0} });
             view.addSource('directions' , { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
             view.addLayer({
               id: 'directions-outline', type: 'line', source: 'directions',
@@ -355,6 +378,10 @@ export default function RoadMapView({
     shownRoute.current = !!source && !!plannedRoute?.length;
   }, [plannedRoute, loading]);
   useEffect(() => {
+    const source = map.current?.getSource('directions-alternates') as GeoJSONSource | undefined;
+    source?.setData(alternateRouteGeometry(alternateRoutes ?? []));
+  }, [alternateRoutes, loading]);
+  useEffect(() => {
     const view = map.current;
     if (!view || loading || !destination) return;
     let disposed = false;
@@ -398,10 +425,11 @@ export default function RoadMapView({
     const view=map.current;if(!view||loading||failed)return;
     if(view.getLayer('directions-line')){
       view.setPaintProperty('directions-outline','line-color',daylight?'#f2fbfb':'#10232d');
-      view.setPaintProperty('directions-line','line-color',daylight?'#00657b':'#49c0d2');
+      view.setPaintProperty('directions-line','line-color',daylight?'#006681':'#69d5ed');
+      view.setPaintProperty('directions-alternates-line','line-color',daylight?'#607797':'#97a7c9');
     }
     const styled=streetOnlyStyle(view.getStyle(),daylight);
-    for(const layer of styled.layers){if(['directions','trip'].some(id=>layer.id.startsWith(id)))continue;
+    for(const layer of styled.layers){if(!view.getLayer(layer.id)||['directions','trip'].some(id=>layer.id.startsWith(id)))continue;
       for(const [property,value] of Object.entries(layer.paint||{}))view.setPaintProperty(layer.id,property as keyof AllPaintProperties,value);
     }
   },[daylight,loading,failed]);
@@ -410,14 +438,14 @@ export default function RoadMapView({
   </button>;
   const appearance = !history && lightSettings && <section className="sd-map-light" aria-label={english?'Map appearance':'Aspectul hărții'}>
         <label>{english?'Map appearance':'Aspectul hărții'}<select value={light.mode} onChange={event=>updateLight({...light,mode:event.target.value as MapLightSettings['mode']})}>
-          <option value="auto">{english?'Sunrise and sunset':'Răsărit și apus'}</option><option value="day">{english?'Always day':'Permanent zi'}</option><option value="night">{english?'Always night':'Permanent noapte'}</option><option value="schedule">{english?'Custom schedule':'Program personalizat'}</option>
+          <option value="auto">{english?'AutoCare Automatic':'AutoCare Automat'}</option><option value="day">{english?'AutoCare Premium Day':'AutoCare Premium Zi'}</option><option value="night">{english?'AutoCare Premium Night':'AutoCare Premium Noapte'}</option><option value="schedule">{english?'Custom schedule':'Program personalizat'}</option>
         </select></label>
         {light.mode==='auto'&&<label>{english?'Night starts before sunset':'Noaptea începe înainte de apus'}<select value={light.lead} onChange={event=>updateLight({...light,lead:Number(event.target.value)})}>{[0,10,20,30].map(minutes=><option key={minutes} value={minutes}>{minutes?minutes+' min':english?'At sunset':'La apus'}</option>)}</select></label>}
         {light.mode==='schedule'&&<><label>{english?'Day starts':'Început zi'}<input type="time" required value={light.day} onChange={event=>{if(event.target.value)updateLight({...light,day:event.target.value});}}/></label><label>{english?'Night starts':'Început noapte'}<input type="time" required value={light.night} onChange={event=>{if(event.target.value)updateLight({...light,night:event.target.value});}}/></label></>}
         <button type="button" onClick={()=>setLightSettings(false)}>{english?'Done':'Gata'}</button>
       </section>;
   if (failed) return <div className="rg-map-fallback" data-map-theme={daylight ? 'day' : 'night'}>
-    <RasterRoadMap points={points} mappedRoads={traceRoads} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} destination={destination} routeStart={routeStart}/>
+    <RasterRoadMap points={points} mappedRoads={traceRoads} position={position} active={active} english={english} history={history} initialArea={initialArea} onAreaChange={onAreaChange} autoPoints={autoPoints} onAutoPoint={onAutoPoint} onLocate={onLocate} locating={locating} locationError={locationError} onDestination={onDestination} plannedRoute={plannedRoute} alternateRoutes={alternateRoutes} onSelectRoute={onSelectRoute} destination={destination} routeStart={routeStart}/>
     {!history && <div className="rg-map-modes">{themeToggle}</div>}
     {appearance}
     <p className="rg-map-fallback-note" role="status">{english ? '2D fallback map' : 'Hartă de rezervă 2D'}</p>

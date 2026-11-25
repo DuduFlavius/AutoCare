@@ -1,27 +1,47 @@
 {
-  "version": "1.7.4",
-  "versionCode": 25,
-  "url": "/downloads/AutoCare-1.7.4.apk",
+  "version": "1.7.5",
+  "versionCode": 26,
+  "url": "/downloads/AutoCare-1.7.5.apk",
   "publishedAt": "2026-11-25",
   "minSdk": 24,
   "changes": {
     "ro": [
-      "SmartDrive 9.0 pune manevra, ora estimată de sosire și distanța rămasă direct pe hartă.",
-      "Voce nativă în română pentru ghidarea SmartDrive și moduri audio în aplicație.",
-      "Actualizare peste instalarea 1.7.3 de pe site cu același certificat de semnare."
+      "Actualizare Android din AutoCare cu descărcare internă și confirmare de instalare.",
+      "Căutare SmartDrive cu destinații favorite, istoric editabil și căutare vocală unde este disponibilă.",
+      "Previzualizare a traseului și indicații de navigație noi."
     ],
     "en": [
-      "SmartDrive 9.0 shows the next turn, estimated arrival and remaining distance on the map.",
-      "Native Romanian voice guidance for SmartDrive and in-app audio modes.",
-      "This release uses the same signing certificate as version 1.7.3 from the website."
+      "Android updates download inside AutoCare and open the system installer.",
+      "SmartDrive search with favourites, editable history and voice input where available.",
+      "Updated route preview and navigation guidance."
     ]
   },
   "previous": [
     {
+      "version": "1.7.4",
+      "publishedAt": "2026-11-25",
+      "changes": {
+        "ro": [
+          "SmartDrive 9.0 pune manevra, ora estimată de sosire și distanța rămasă direct pe hartă.",
+          "Voce nativă în română pentru ghidarea SmartDrive și moduri audio în aplicație.",
+          "Actualizare peste instalarea 1.7.3 de pe site cu același certificat de semnare."
+        ],
+        "en": [
+          "SmartDrive 9.0 shows the next turn, estimated arrival and remaining distance on the map.",
+          "Native Romanian voice guidance for SmartDrive and in-app audio modes.",
+          "This release uses the same signing certificate as version 1.7.3 from the website."
+        ]
+      }
+    },
+    {
       "version": "1.7.3",
       "changes": {
-        "ro": ["Instalator semnat cu ghidare Android în fundal și actualizare pornită din AutoCare."],
-        "en": ["Signed installer with Android background guidance and an update check available from AutoCare."]
+        "ro": [
+          "Instalator semnat cu ghidare Android în fundal și actualizare pornită din AutoCare."
+        ],
+        "en": [
+          "Signed installer with Android background guidance and an update check available from AutoCare."
+        ]
       }
     }
   ]

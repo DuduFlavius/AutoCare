@@ -46,10 +46,96 @@ public class AutoCareTrackingPlugin extends Plugin {
         new Thread(()->{try(java.io.OutputStream output=getContext().getContentResolver().openOutputStream(destination,"w")){if(output==null)throw new java.io.IOException("No output stream");output.write(data);JSObject value=new JSObject();value.put("saved",true);call.resolve(value);}catch(Exception e){call.reject("Unable to save document.","DOCUMENT_SAVE_FAILED");}}).start();
     }
     @PluginMethod public void appVersion(PluginCall call){
-        try{android.content.pm.PackageInfo info=getContext().getPackageManager().getPackageInfo(getContext().getPackageName(),0);JSObject value=new JSObject();value.put("version",info.versionName);value.put("versionCode",Build.VERSION.SDK_INT>=28?info.getLongVersionCode():info.versionCode);call.resolve(value);}catch(Exception e){call.reject("Unable to read app version",e);}
+        try{android.content.pm.PackageInfo info=getContext().getPackageManager().getPackageInfo(getContext().getPackageName(),0);JSObject value=new JSObject();value.put("version",info.versionName);value.put("versionCode",AndroidUpdate.versionCode(info));value.put("directUpdate",declaresDirectUpdate());call.resolve(value);}catch(Exception e){call.reject("Unable to read app version",e);}
     }
-    @PluginMethod public void openAndroidUpdate(PluginCall call){
-        try{if(TrackingStore.read(getContext()).optBoolean("active")){call.reject("Stop and save GPS before installing an update");return;}Uri uri=Uri.parse(call.getString("url",""));if(!"https".equals(uri.getScheme())||!java.util.Arrays.asList("www.autocareapp.ro","autocareapp.ro","autocare-premium.vercel.app").contains(uri.getHost())||uri.getPath()==null||!uri.getPath().matches("/downloads/AutoCare-[0-9.]+\\.apk")){call.reject("Invalid update URL");return;}getActivity().startActivity(new Intent(Intent.ACTION_VIEW,uri).addCategory(Intent.CATEGORY_BROWSABLE));call.resolve();}catch(Exception e){call.reject("Unable to open Android installer",e);}
+    private boolean declaresDirectUpdate() throws PackageManager.NameNotFoundException {
+        String[] permissions = getContext().getPackageManager().getPackageInfo(getContext().getPackageName(),
+            PackageManager.GET_PERMISSIONS).requestedPermissions;
+        return permissions != null && java.util.Arrays.asList(permissions).contains(Manifest.permission.REQUEST_INSTALL_PACKAGES);
+    }
+    private final java.util.concurrent.atomic.AtomicBoolean updating = new java.util.concurrent.atomic.AtomicBoolean();
+
+    @PluginMethod public void installAndroidUpdate(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            try {
+                if (!declaresDirectUpdate()) { call.reject("Use the distribution store for updates.", "UPDATE_STORE"); return; }
+            } catch (PackageManager.NameNotFoundException e) { call.reject("Unable to find AutoCare.", "UPDATE_FAILED"); return; }
+            if (updateBlocked()) { call.reject("Save the active trip first.", "UPDATE_TRIP_ACTIVE"); return; }
+            if (Build.VERSION.SDK_INT >= 26 && !getContext().getPackageManager().canRequestPackageInstalls()) {
+                try {
+                    Intent settings = new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        Uri.parse("package:" + getContext().getPackageName()));
+                    startActivityForResult(call, settings, "updatePermission");
+                } catch (Exception e) { call.reject("Installer permission is unavailable.", "UPDATE_PERMISSION"); }
+                return;
+            }
+            downloadUpdate(call);
+        });
+    }
+
+    @ActivityCallback private void updatePermission(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        if (Build.VERSION.SDK_INT >= 26 && !getContext().getPackageManager().canRequestPackageInstalls()) {
+            call.reject("Android has not allowed AutoCare to install updates.", "UPDATE_PERMISSION"); return;
+        }
+        downloadUpdate(call);
+    }
+
+    private boolean updateBlocked() {
+        return TrackingStore.read(getContext()).optBoolean("active") || NavigationService.running != null;
+    }
+
+    private void downloadUpdate(PluginCall call) {
+        if (updateBlocked()) { call.reject("Save the active trip first.", "UPDATE_TRIP_ACTIVE"); return; }
+        String version = call.getString("version", "");
+        Integer code = call.getInt("versionCode");
+        java.net.URI uri;
+        try {
+            if (code == null || code < 1) throw new IllegalArgumentException();
+            uri = AndroidUpdate.source(call.getString("url", ""), version);
+        } catch (IllegalArgumentException e) {
+            call.reject("Invalid Android release.", "UPDATE_INVALID"); return;
+        }
+        if (!updating.compareAndSet(false, true)) {
+            call.reject("An update is already downloading.", "UPDATE_BUSY"); return;
+        }
+        new Thread(() -> {
+            try {
+                java.io.File apk = AndroidUpdate.download(getContext(), uri, version, code);
+                getActivity().runOnUiThread(() -> {
+                    try {
+                        if (updateBlocked()) { call.reject("Save the active trip first.", "UPDATE_TRIP_ACTIVE"); return; }
+                        getActivity().startActivity(AndroidUpdate.installer(getContext(), apk));
+                        call.resolve();
+                    } catch (Exception e) {
+                        call.reject("Unable to open the Android installer.", "UPDATE_FAILED");
+                    } finally { updating.set(false); }
+                });
+            } catch (Exception e) {
+                updating.set(false);
+                call.reject("Unable to download and verify the update.", "UPDATE_FAILED");
+            }
+        }, "AutoCare-update").start();
+    }
+
+    @PluginMethod public void recognizeDestination(PluginCall call) {
+        Intent intent = new Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+            .putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            .putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, call.getBoolean("english", false) ? "en-GB" : "ro-RO")
+            .putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        getActivity().runOnUiThread(() -> {
+            try { startActivityForResult(call, intent, "destinationRecognized"); }
+            catch (Exception e) { call.reject("Speech recognition unavailable.", "SPEECH_UNAVAILABLE"); }
+        });
+    }
+
+    @ActivityCallback private void destinationRecognized(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        java.util.ArrayList<String> words = result.getResultCode() == Activity.RESULT_OK && result.getData() != null
+            ? result.getData().getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS) : null;
+        JSObject value = new JSObject();
+        value.put("text", words == null || words.isEmpty() ? "" : words.get(0));
+        call.resolve(value);
     }
     private PluginCall pairing;
     private ActivityResultLauncher<IntentSenderRequest> chooser;

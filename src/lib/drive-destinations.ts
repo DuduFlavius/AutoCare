@@ -1,4 +1,6 @@
-export type SavedDestination={name:string;details?:string;latitude:number;longitude:number;kind?:'home'|'work'|'favorite'};
+import type {DestinationCategory} from './road-provider-data';
+
+export type SavedDestination={name:string;details?:string;latitude:number;longitude:number;category?:DestinationCategory;kind?:'home'|'work'|'favorite'};
 export function destinationIdentity(point:SavedDestination){return `${point.latitude.toFixed(5)}:${point.longitude.toFixed(5)}`;}
 /** Validate device storage before displaying it or sending coordinates to routing. */
 export function parseSavedDestinations(value:unknown):SavedDestination[]{

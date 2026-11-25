@@ -1,0 +1,73 @@
+.sd-live-cockpit.rg-smartdrive-map {
+  --sd-panel:#f8fcfd;--sd-ink:#143342;--sd-muted:#506775;--sd-line:#d4e4eb;--sd-tint:#e7f1f4;--sd-accent:#06586e;
+}
+.sd-live-cockpit.rg-smartdrive-map:has([data-map-theme=night]) {
+  --sd-panel:#122b37;--sd-ink:#eef8fa;--sd-muted:#bed4df;--sd-line:#416373;--sd-tint:#203e4b;--sd-accent:#a6e4f0;
+}
+.sd-live-cockpit.rg-smartdrive-map .ac-destination-search {
+  min-width:0;border:1px solid var(--sd-line);border-radius:16px;background:var(--sd-panel);color:var(--sd-ink);
+}
+.sd-live-cockpit.rg-smartdrive-map .ac-destination-search[data-expanded=true] {padding:8px;background:var(--sd-panel)}
+.sd-live-cockpit .sd-destination-label {
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap;
+}
+.sd-live-cockpit.rg-smartdrive-map .ac-destination-search-row {
+  display:flex;align-items:center;gap:4px;min-height:52px;padding:3px;min-width:0;
+}
+.sd-live-cockpit.rg-smartdrive-map .ac-destination-search-row input {
+  flex:1 1 0;width:0;min-width:0;min-height:44px;padding-inline:3px;border:0;background:transparent;color:var(--sd-ink);font-weight:680;font-size:16px;
+}
+.sd-live-cockpit .ac-destination-search-row input::placeholder{color:var(--sd-muted)}
+.sd-live-cockpit .ac-destination-search-row input::-webkit-search-cancel-button {display:none}
+.sd-live-cockpit.rg-smartdrive-map .ac-destination-search-row button {
+  flex:none;display:grid;place-items:center;width:44px;min-height:44px;padding:0;background:var(--sd-tint);border:0;color:var(--sd-accent);
+}
+.sd-live-cockpit.rg-smartdrive-map .ac-destination-search[data-expanded=true] .sd-search-submit:disabled {display:none}
+.sd-live-cockpit.rg-smartdrive-map .sd-destination-results {
+  border-top:1px solid var(--sd-line);color:var(--sd-ink);max-height:min(44vh,360px);overflow:auto;overscroll-behavior:contain;
+}
+.sd-live-cockpit .sd-destination-results ul {list-style:none;margin:0;padding:0}
+.sd-live-cockpit .sd-destination-results li {display:flex;align-items:center;margin:0;border-bottom:1px solid var(--sd-line)}
+.sd-live-cockpit.rg-smartdrive-map .sd-destination-results li>button {display:flex;align-items:center;gap:9px;text-align:start;padding:7px;color:var(--sd-ink);background:transparent;border:0}
+.sd-live-cockpit .sd-destination-results li>button:first-child {flex:1 1 auto;min-width:0}
+.sd-live-cockpit .sd-result-icon,.sd-live-cockpit .sd-preview-pin {display:grid;place-items:center;flex:none;width:39px;height:39px;color:var(--sd-accent);background:var(--sd-tint);border-radius:11px}
+.sd-live-cockpit .sd-result-text {display:grid;gap:3px;flex:1;min-width:0}
+.sd-live-cockpit .sd-result-text :is(strong,small) {overflow-wrap:anywhere}
+.sd-live-cockpit.rg-smartdrive-map .sd-destination-results :is(small,p) {color:var(--sd-muted)}
+.sd-live-cockpit .sd-result-distance {flex:none;font-weight:650}
+.sd-live-cockpit .sd-destination-results mark {background:var(--sd-tint);color:var(--sd-accent);border-radius:3px;text-decoration:underline;text-underline-offset:2px}
+.sd-live-cockpit .sd-destination-results>p {margin:8px;padding:7px;line-height:1.45;font-size:14px}
+.sd-live-cockpit .sd-recent-heading {display:flex;justify-content:space-between;align-items:center;gap:6px;padding-inline:8px}
+.sd-live-cockpit .sd-recent-heading button,.sd-live-cockpit .sd-destination-results .sd-remove-recent {background:transparent;border:0;color:var(--sd-accent);font-size:13px}
+.sd-live-cockpit .sd-destination-favorites {display:flex;gap:6px;padding:7px 2px;overflow-x:auto}
+.sd-live-cockpit.rg-smartdrive-map .sd-destination-favorites button {display:flex;flex:none;gap:6px;align-items:center;padding:7px 9px;background:var(--sd-tint);border:1px solid var(--sd-line);color:var(--sd-accent);max-width:210px}
+.sd-live-cockpit .sd-destination-favorites span {white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sd-live-cockpit .sd-route-preview {max-width:640px;margin:0 auto;padding:10px max(12px,env(safe-area-inset-left)) 12px;background:var(--sd-panel);color:var(--sd-ink);border:1px solid var(--sd-line);border-radius:17px 17px 8px 8px;max-height: min(45dvh, 350px);overflow:auto}
+.sd-live-cockpit .sd-preview-header {display:flex;align-items:center;gap:9px}
+.sd-live-cockpit .sd-preview-header>div {min-width:0;flex:1;display:grid;gap:2px}
+.sd-live-cockpit .sd-preview-header :is(strong,small) {color:var(--sd-ink);overflow-wrap:anywhere}
+.sd-live-cockpit .sd-preview-header small {color:var(--sd-muted);line-height:1.3}
+.sd-live-cockpit.rg-smartdrive-map .sd-preview-header>button {background:var(--sd-tint);border:0;color:var(--sd-ink)}
+.sd-live-cockpit .sd-preview-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:8px 0}
+.sd-live-cockpit .sd-preview-stats>div {min-width:0;padding:7px;border-radius:9px;background:var(--sd-tint)}
+.sd-live-cockpit .sd-preview-stats dt {display:flex;align-items:center;gap:4px;color:var(--sd-muted);font-size:11px}
+.sd-live-cockpit .sd-preview-stats dd {margin:2px 0 0;color:var(--sd-ink);font-size:clamp(16px,4.3vw,23px);font-weight:770}
+.sd-live-cockpit .sd-preview-options {display:flex;gap:6px;overflow-x:auto;margin:0 0 8px}
+.sd-live-cockpit.rg-smartdrive-map .sd-preview-options>button {flex:1 0 86px;display:grid;gap:3px;padding:6px;text-align:left;background:var(--sd-panel);color:var(--sd-ink);border:1px solid var(--sd-line);font-size:12px}
+.sd-live-cockpit.rg-smartdrive-map .sd-preview-options>button[aria-pressed=true] {background:var(--sd-tint);border-color:var(--sd-accent)}
+.sd-live-cockpit.rg-smartdrive-map .sd-preview-start {display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:46px;background:#07586b;color:#fff;border:1px solid #729eaa}
+.sd-live-cockpit .sd-route-preview>p {color:var(--sd-muted);margin:8px 0 0}
+.sd-live-cockpit .rg-guidance-turn>svg {flex:none;width:42px;height:42px}
+.sd-live-cockpit .sd-turn-lanes>span {display:flex;align-items:center;justify-content:center}
+.sd-live-cockpit .sd-road-sign {display:inline-block;width:fit-content;padding:2px 6px;background:#285d70;border-radius:5px}
+.sd-live-cockpit .rg-map-fallback .ac-dark-road-tiles {filter:none!important}
+@media(max-height:460px) {
+  .sd-live-cockpit .sd-destination-results {max-height:34dvh}
+  .sd-live-cockpit .sd-route-preview {max-height:42dvh}
+}
+@media(max-width:360px) {
+  .sd-live-cockpit .sd-preview-stats dt svg {display:none}
+  .sd-live-cockpit.rg-smartdrive-map .ac-destination-search-row button {width:38px;min-width:38px}
+}
+
+.sd-live-cockpit.rg-smartdrive-map .sd-destination-results .sd-remove-recent {flex:0 0 44px;width:44px;justify-content:center!important}

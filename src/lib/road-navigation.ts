@@ -5,6 +5,8 @@ export type Turn = { type: string; modifier?: string; exit?: number; location: [
 export type RoadLane = { indications: string[]; valid: boolean };
 export type RoadStep = {
   name: string;
+  destinations?: string;
+  ref?: string;
   distance: number;
   duration: number;
   maneuver: Turn;

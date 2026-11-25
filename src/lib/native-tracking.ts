@@ -33,8 +33,9 @@ interface TrackingPlugin {
   navigationSnapshot(input: { ownerId: string }): Promise<unknown>;
   navigationAudio(input: { ownerId: string; muted: boolean; test: boolean }): Promise<void>;
   navigationStop(input: { ownerId: string }): Promise<void>;
-  openAndroidUpdate(input: {url: string}): Promise<void>;
-  appVersion(): Promise<{version: string; versionCode: number}>;
+  installAndroidUpdate(input: {url: string; version: string; versionCode: number}): Promise<void>;
+  recognizeDestination(input: {english: boolean}): Promise<{text: string}>;
+  appVersion(): Promise<{version: string; versionCode: number; directUpdate?: boolean}>;
   start(input: {
     id: string;
     ownerId: string;
@@ -111,7 +112,8 @@ export function hasNativeTracking() {
 }
 export const nativeTracking = {
   async appVersion() { return plugin.appVersion(); },
-  async openAndroidUpdate(url: string) { return plugin.openAndroidUpdate({url}); },
+  async installAndroidUpdate(release: {url: string; version: string; versionCode: number}) { return plugin.installAndroidUpdate(release); },
+  async recognizeDestination(english: boolean) { return (await plugin.recognizeDestination({english})).text; },
   async snapshot(ownerId: string) {
     return readNativeTrip(await plugin.snapshot({ ownerId }), ownerId);
   },

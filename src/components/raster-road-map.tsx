@@ -7,7 +7,7 @@ import { interpolateFix, measuredTransition } from '@/lib/gps-animation';
 import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
-import { plannedRouteBounds, routeGeometry, tripBounds } from '@/lib/road-map';
+import { plannedRouteBounds, routeGeometry, tripBounds, type RouteVariant } from '@/lib/road-map';
 import 'leaflet/dist/leaflet.css';
 /** Flat street tiles are the compatibility path for devices without WebGL. */
 export default function RasterRoadMap({
@@ -25,6 +25,8 @@ export default function RasterRoadMap({
   locating = false,
   locationError,
   plannedRoute,
+  alternateRoutes,
+  onSelectRoute,
   destination,
   routeStart,
   onDestination,
@@ -43,6 +45,8 @@ export default function RasterRoadMap({
   locating?: boolean;
   locationError?: string;
   plannedRoute?: [number, number][];
+  alternateRoutes?: RouteVariant[];
+  onSelectRoute?: (index:number)=>void;
   destination?: { latitude: number; longitude: number } | null;
   routeStart?: [number, number];
   onDestination?: (point: { latitude: number; longitude: number }) => void;
@@ -62,6 +66,8 @@ export default function RasterRoadMap({
   autoPointAction.current = onAutoPoint;
   const destinationAction = useRef(onDestination);
   destinationAction.current = onDestination;
+  const routeAction = useRef(onSelectRoute);
+  routeAction.current = onSelectRoute;
   const shownRoute = useRef(false);
   const wasActive = useRef(false);
   const follow = useRef(true),
@@ -73,7 +79,8 @@ export default function RasterRoadMap({
     if (!view || !plannedRoute?.length) return;
     follow.current = false;
     setFollowing(false);
-    const [[west, south], [east, north]] = plannedRouteBounds(plannedRoute);
+    const points = alternateRoutes?.length ? [...plannedRoute, ...alternateRoutes.flatMap(route => route.coordinates)] : plannedRoute;
+    const [[west, south], [east, north]] = plannedRouteBounds(points);
     view.fitBounds([[south, west], [north, east]], { padding: [48, 48], maxZoom: 16 });
   }
   useEffect(() => {
@@ -223,6 +230,24 @@ export default function RasterRoadMap({
     if (ready && plannedRoute?.length && !active && !shownRoute.current) showRoute();
     shownRoute.current = ready && !!plannedRoute?.length;
   }, [plannedRoute, ready]);
+  useEffect(() => {
+    const view = map.current;
+    if (!view || !ready || !alternateRoutes?.length) return;
+    let live = true;
+    const lines: Polyline[] = [];
+    void import('leaflet').then(L => {
+      if (!live || map.current !== view) return;
+      for (const route of alternateRoutes) {
+        const overlay = L.polyline(route.coordinates.map(([lon,lat])=>[lat,lon]), {
+          color:'#607797',weight:7,opacity:.9,dashArray:'12 4',bubblingMouseEvents:false,
+        }).addTo(view);
+        overlay.on('click',()=>routeAction.current?.(route.index));
+        lines.push(overlay);
+      }
+      planned.current?.bringToFront();
+    });
+    return () => { live=false; lines.forEach(overlay=>overlay.remove()); };
+  }, [alternateRoutes, ready]);
   useEffect(() => {
     const view = map.current;
     if (!view || !ready || !destination) return;
