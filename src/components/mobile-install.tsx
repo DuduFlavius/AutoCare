@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useApplicationLanguage } from './application-locale';
 
 type InstallPromptEvent = Event & {
@@ -9,6 +9,7 @@ type InstallPromptEvent = Event & {
 type Platform = 'ios' | 'android' | 'desktop';
 
 export default function MobileInstall() {
+  const instructionsId = useId();
   const en = useApplicationLanguage() === 'en';
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const [platform, setPlatform] = useState<Platform>('desktop');
@@ -91,11 +92,11 @@ export default function MobileInstall() {
   return (
     <div className="ac-mobile-install" aria-label={en ? 'Install AutoCare' : 'Instalare aplicație AutoCare'} data-workspace-ui={en || undefined}>
       <button type="button" className="ac-mobile-install-trigger" onClick={() => void install()}
-        aria-expanded={expanded} aria-controls="ac-install-instructions">
+        aria-expanded={expanded} aria-controls={instructionsId}>
         {en ? 'Install AutoCare' : 'Instalează AutoCare'}
       </button>
       {expanded && (
-        <div className="ac-mobile-install-help" id="ac-install-instructions" role="status">
+        <div className="ac-mobile-install-help" id={instructionsId} role="status">
           <button type="button" aria-label={en ? 'Close instructions' : 'Închide instrucțiunile'} onClick={() => setExpanded(false)}>×</button>
           <strong>{en ? 'Install AutoCare' : 'Instalează AutoCare'}</strong>
           {message && <p>{message}</p>}

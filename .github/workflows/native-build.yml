@@ -126,6 +126,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PYTHON'
+          from datetime import datetime, timezone
           import json, pathlib, re, shutil, os, subprocess
           gradle=pathlib.Path('mobile/android/app/build.gradle').read_text()
           version=re.search(r'versionName "([0-9.]+)"',gradle).group(1)
@@ -150,8 +151,20 @@ jobs:
                         and entry['target'].get('package_name')=='ro.autocare.garage'
                         for fingerprint in entry['target']['sha256_cert_fingerprints']}
           if release_certificate not in fingerprints: raise SystemExit('Android signing key is missing from the AutoCare App Links association')
-          shutil.copyfile('mobile/android/app/build/outputs/apk/release/app-release.apk',folder/name)
-          (folder/'android-release.json').write_text(json.dumps({'version':version,'versionCode':code,'url':f'/downloads/{name}'}))
+          aapt=pathlib.Path(verifier).with_name('aapt')
+          badging=subprocess.check_output([str(aapt),'dump','badging',str(built)],text=True)
+          min_sdk=re.search(r"^sdkVersion:'([0-9]+)'",badging,re.M)
+          if not min_sdk: raise SystemExit('Cannot read minimum Android SDK from release APK')
+          release={'version':version,'versionCode':code,'url':f'/downloads/{name}','minSdk':int(min_sdk.group(1))}
+          history=previous.get('previous',[])
+          if previous['version']==version:
+              release.update({key:previous[key] for key in ('publishedAt','changes') if key in previous})
+          else:
+              history=[{key:previous[key] for key in ('version','publishedAt','changes') if key in previous},*history]
+          release.setdefault('publishedAt',datetime.now(timezone.utc).isoformat(timespec='seconds'))
+          release['previous']=history
+          shutil.copyfile(built,folder/name)
+          (folder/'android-release.json').write_text(json.dumps(release,ensure_ascii=False,indent=2)+'\n')
           PYTHON
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'

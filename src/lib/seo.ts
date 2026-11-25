@@ -2,9 +2,37 @@ import { discoveryPages } from './discovery-pages';
 import { publicLanguageAlternates } from './public-routes';
 import { technologyPages } from './public-technology';
 import type { Metadata } from 'next';
-import { origin, appName } from './config';
+import { origin } from './config';
 export const siteDescription =
   'AutoCare Premium: garaj digital pentru documente auto, ITP, RCA, revizii și cheltuieli. Istoricul mașinii tale, organizat pe telefon și desktop.';
+export const homeTitle = 'AutoCare România – Aplicația ta pentru mașină';
+export const homeDescription = 'Gestionează reviziile, documentele și cheltuielile mașinii. Descoperă SmartDrive GPS, garajul digital și asistentul AutoCare AI.';
+
+export function brandGraph() {
+  const site = new URL('/', origin()).href;
+  const page = (path: string) => new URL(path, site).href;
+  const id = (name: string) => site + '#' + name;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'Organization', '@id': id('organization'), name: 'AutoCare', alternateName: 'AutoCare România',
+        url: site, logo: { '@type': 'ImageObject', url: page('/icon-512.png'), width: 512, height: 512 } },
+      { '@type': 'WebSite', '@id': id('website'), name: 'AutoCare România', alternateName: 'AutoCare',
+        url: site, inLanguage: 'ro-RO', publisher: { '@id': id('organization') } },
+      { '@type': 'SoftwareApplication', '@id': id('application'), name: 'AutoCare', alternateName: 'AutoCare România',
+        url: page('/aplicatie-auto'), description: homeDescription, applicationCategory: 'LifestyleApplication',
+        operatingSystem: 'Android, Web', inLanguage: ['ro-RO', 'en-GB'], image: page('/opengraph-image'),
+        screenshot: page('/images/autocare-capture-garage.webp'), installUrl: page('/descarca'),
+        publisher: { '@id': id('organization') }, featureList: ['Garaj digital', 'Documente RCA, ITP și rovinietă',
+          'Istoric service și revizii', 'Cheltuieli auto', 'SmartDrive GPS pe Android', 'AutoCare AI'],
+        offers: { '@type': 'Offer', price: 0, priceCurrency: 'RON', url: page('/preturi'), description: 'Plan gratuit pentru o mașină activă' } },
+      { '@type': 'WebPage', '@id': id('webpage'), url: site, name: homeTitle, description: homeDescription,
+        inLanguage: 'ro-RO', isPartOf: { '@id': id('website') }, about: { '@id': id('application') },
+        primaryImageOfPage: { '@type': 'ImageObject', url: page('/opengraph-image'), width: 1200, height: 630 } },
+    ],
+  };
+}
+
 export const publicTopics = {
   'documente-auto': {
     title: 'Organizează documentele auto și urmărește expirarea',
@@ -87,7 +115,9 @@ export const seoTitles: Record<string, string> = {
   'cum-functioneaza': 'Cum funcționează AutoCare – Garajul tău digital',
   'documente-auto': 'Organizează Documentele Auto și Urmărește Expirarea',
   'intretinere-auto': 'Istoric Service și Întreținere Auto',
-  'cheltuieli-auto': 'Evidența Cheltuielilor Auto',
+  'cheltuieli-auto': 'Evidența cheltuielilor auto',
+  'descarca': 'Descarcă AutoCare pentru Android',
+  'noutati': 'Noutăți AutoCare',
   preturi: 'Prețuri AutoCare – Planuri Gratuit și Premium',
   comparatie: 'Gratuit sau Premium – Compară planurile AutoCare',
   'intrebari-frecvente': 'Întrebări frecvente despre AutoCare',
@@ -97,6 +127,8 @@ export const indexableSlugs = [
   'despre-noi',
   'aplicatie-auto',
   'instaleaza',
+  'descarca',
+  'noutati',
   'functionalitati',
   'cum-functioneaza',
   ...Object.keys(publicTopics),
@@ -111,15 +143,17 @@ export function publicMetadata(title: string, description: string, path: string)
   const url = new URL(path, origin()).toString();
   const english=path==='/en'||path.startsWith('/en/');
   const imagePath=english?'/en/opengraph-image':'/opengraph-image';
+  const displayTitle = /\bAutoCare\b/i.test(title) ? title : title + ' | AutoCare';
   return {
-    title,
+    title: { absolute: displayTitle },
     description,
     alternates: { canonical: url, languages: publicLanguageAlternates(path, origin()) },
     openGraph: {
-      title,
+      title: displayTitle,
       description,
       url,
-      siteName: appName,
+      siteName: 'AutoCare România',
+      alternateLocale: [english ? 'ro_RO' : 'en_GB'],
       locale: english?'en_GB':'ro_RO',
       type: 'website',
       images: [
@@ -133,7 +167,7 @@ export function publicMetadata(title: string, description: string, path: string)
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: displayTitle,
       description,
       images: [new URL(imagePath, origin()).toString()],
     },

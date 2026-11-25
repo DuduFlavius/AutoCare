@@ -1,4 +1,3 @@
-import './document-controls.css';
 import { startupImages } from '@/lib/pwa-launch';
 import './filter-select.css';
 import './document-controls.css';
@@ -25,7 +24,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(origin()),
   title: { default: `${appName} — Mașina ta, fără griji`, template: `%s | ${appName}` },
   description: siteDescription,
-  keywords: ['AutoCare', 'aplicație întreținere auto', 'garaj digital', 'expirare RCA', 'expirare ITP', 'rovinietă', 'istoric service auto', 'revizie auto', 'cheltuieli auto', 'evidență mașină', 'documente auto', 'notificări auto'],
   category: 'technology',
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
   ...(process.env.GOOGLE_SITE_VERIFICATION
@@ -36,12 +34,11 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: appName, statusBarStyle: 'black-translucent', startupImage: startupImages },
   icons: {
     icon: [
-      { url: '/favicon-96.png?v=pearl5', sizes: '96x96', type: 'image/png' },
-      { url: '/favicon.svg?v=pearl5', type: 'image/svg+xml' },
-      { url: '/icon-512.png?v=pearl5', sizes: '512x512', type: 'image/png' },
-      { url: '/icon-192.png?v=pearl5', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon-96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon.svg', sizes: 'any', type: 'image/svg+xml' },
+      { url: '/favicon.ico', type: 'image/x-icon' },
     ],
-    apple: '/apple-touch-icon.png?v=pearl5',
+    apple: { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
   },
   manifest: '/manifest.webmanifest',
   twitter: { card: 'summary_large_image', images: ['/opengraph-image'] },
@@ -64,7 +61,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#F6F9FB' };
 export default function SiteDocument({ children, language }: { children: React.ReactNode; language:'ro'|'en' }) {
   return (
-    <html lang={language}>
+    <html lang={language === 'ro' ? 'ro-RO' : 'en-GB'}>
       <body>{children}<PremiumDialogHost/><AutoUpdate /></body>
     </html>
   );

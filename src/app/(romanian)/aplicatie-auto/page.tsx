@@ -27,7 +27,7 @@ export default function AppOverview() {
     <p>SmartDrive păstrează sesiuni de condus cu durată, distanță și traseu GPS. Pe Android, conectarea la dispozitivul Bluetooth configurat al mașinii poate pregăti urmărirea; deplasarea trebuie confirmată de GPS înainte să fie înregistrată o călătorie automată. Permisiunile de localizare și setările telefonului influențează funcționarea în fundal.</p>
     <p>Distanța GPS este o măsurătoare a traseului, nu o citire a odometrului din calculatorul mașinii. Verifică kilometrajul real atunci când faci o intervenție.</p>
     <h2>Instalează AutoCare pe Android</h2>
-    <div className="actions"><a href="/downloads/AutoCare-1.7.4.apk" className="button primary" download>Descarcă AutoCare 1.7.4 pentru Android</a></div>
+    <div className="actions"><Link href="/descarca" className="button primary">Descarcă AutoCare pentru Android</Link></div>
     <p>La trecerea de la versiunile vechi, sincronizează mai întâi toate traseele din cont. Dacă Android semnalează un conflict de semnătură, dezinstalează versiunea veche abia după sincronizare, apoi instalează acest APK și autentifică-te în același cont.</p>
     <p>AutoCare are o aplicație Android și o versiune web. Disponibilitatea instalării și actualizărilor este afișată în cont. Publicarea în Google Play este o etapă separată; aici nu prezentăm o listare care încă nu există.</p>
     <h2>Cât costă?</h2>

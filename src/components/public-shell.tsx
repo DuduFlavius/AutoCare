@@ -27,9 +27,9 @@ export function PublicShell({
     <>
       <div className="wrap">
         <header className="public-nav">
-          <Brand href={href('/')} label={language==='en'?'AutoCare · Home':'AutoCare · pagina principală'} />
+          <Brand official href={href('/')} label={language==='en'?'AutoCare · Home':'AutoCare · pagina principală'} />
           <nav className="navlinks" aria-label={language==='en'?'Main navigation':'Navigare principală'}>
-            {landing && <Link href={href('/')} aria-current="page">{t('Acasă')}</Link>}
+            {landing && <Link prefetch={false} href={href('/')} aria-current="page">{t('Acasă')}</Link>}
             <Link href={href('/functionalitati')}>{t('Funcționalități')}</Link>
             {!landing && <Link href={href('/cum-functioneaza')}>{t('Cum funcționează')}</Link>}
             <Link href={href('/preturi')}>{t('Prețuri')}</Link>
@@ -37,10 +37,10 @@ export function PublicShell({
             <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
             {landing && <Link href={href('/despre-noi')}>{t('Despre')}</Link>}
           </nav>
-          <Link href={href('/autentificare')} className="button ghost">
+          <Link prefetch={false} href={href('/autentificare')} className="button ghost">
             {t('Intră în cont')} <ArrowUpRight size={16} aria-hidden="true"/>
           </Link>
-          {landing && <Link className="button ac-landing-nav-cta" href={href('/inregistrare')}>{t('Începe acum')}<ArrowUpRight size={15} aria-hidden="true" /></Link>}
+          {landing && <Link prefetch={false} className="button ac-landing-nav-cta" href={href('/inregistrare')}>{t('Începe acum')}<ArrowUpRight size={15} aria-hidden="true" /></Link>}
           <PublicLanguage/><details className="ac-public-mobile-nav">
             <summary><Menu size={18}/>{t('Meniu')}</summary>
             <nav aria-label={language==='en'?'Mobile navigation':'Navigare mobilă'}>
@@ -51,6 +51,7 @@ export function PublicShell({
               <Link href={href('/autocare-maps')}>{t('AutoCare Maps')}</Link>
               <Link href={href('/smart-maintenance')}>{t('Smart Maintenance')}</Link>
               <Link href={href('/preturi')}>{t('Abonamente')}</Link>
+              <Link href={href('/descarca')}>{language==='en'?'Download Android':'Descarcă Android'}</Link>
               <Link href={href('/rca-rovinieta')}>{language==='en'?'RCA & Road vignette':'RCA & Rovinietă'}</Link>
             <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
             </nav>
@@ -86,6 +87,8 @@ export function PublicShell({
             <Link href={href('/ghiduri')}>{t('Ghiduri')}</Link>
               <Link href={href('/despre-noi')}>{t('Despre noi')}</Link>
               <Link href={href('/contact')}>{t('Contact')}</Link>
+              <Link href={href('/descarca')}>{language==='en'?'Download Android':'Descarcă Android'}</Link>
+              <Link href={href('/noutati')}>{language==='en'?'Release notes':'Noutăți'}</Link>
               <Link href={href('/intrebari-frecvente')}>{t('Întrebări')}</Link>
               <Link href={href('/stergere-cont')}>{language==='en'?'Delete account':'Ștergere cont'}</Link>
               <Link href={href('/confidentialitate')}>{t('Confidențialitate')}</Link>

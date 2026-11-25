@@ -13,15 +13,15 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     background_color: '#F6F9FB',
     theme_color: '#F6F9FB',
-    lang: 'ro',
+    lang: 'ro-RO',
     shortcuts: [
       { name: 'Garaj', url: '/cont?tab=Garaj' },
-      { name: 'SmartDrive GPS', url: '/cont?tab=SmartDrive%20GPS&drive=points' },
+      { name: 'SmartDrive GPS', url: '/cont?tab=Plan%20%C3%AEntre%C8%9Binere&drive=points' },
       { name: 'Notificări', url: '/cont?tab=Notific%C4%83ri' },
     ],
     icons: [
-      { src: '/icon-192.png?v=pearl5', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: '/icon-512.png?v=pearl5', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
     ],
   };
 }

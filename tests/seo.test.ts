@@ -34,7 +34,7 @@ test('Public metadata has matching canonical, Open Graph URL and real absolute s
   const english=publicMetadata('Vehicle documents','Your vehicle documents','/en/vehicle-documents');
   assert.equal(english.openGraph?.locale,'en_GB');
   assert.equal((english.openGraph?.images as {url:string}[])[0].url,process.env.APP_URL+'/en/opengraph-image');
-  assert.ok(sitemap()[0].images?.some(url=>url.endsWith('/images/autocare-racing-green-preview.png')));
+  assert.ok(sitemap()[0].images?.some(url=>url.endsWith('/images/autocare-capture-garage.webp')));
   assert.equal(Object.keys(publicTopics).length, 3);
   assert.equal(Object.keys(guides).length, 3);
 });
@@ -109,4 +109,32 @@ test('Robots allows every canonical public sitemap URL and still blocks private 
  for(const entry of sitemap())assert.equal(blocked(new URL(entry.url).pathname),false,entry.url);
  for(const path of ['/cont','/cont?tab=Documente','/admin','/admin?tab=users','/dosar/private-token','/api/v1/files/private','/en/sign-in?next=private'])assert.equal(blocked(path),true,path);
  assert.equal(blocked('/administrarea-masinii'),false);assert.equal(blocked('/contact'),false);}
+});
+
+test('Brand graph connects the Romanian website and the downloadable application', async () => {
+  const { brandGraph, homeTitle, homeDescription } = await import('../src/lib/seo');
+  const graph = brandGraph()['@graph'];
+  const website = graph.find(node => node['@type'] === 'WebSite');
+  const application = graph.find(node => node['@type'] === 'SoftwareApplication');
+  assert.equal(website?.name, 'AutoCare România');
+  assert.equal(website?.publisher?.['@id'], graph.find(node => node['@type'] === 'Organization')?.['@id']);
+  assert.equal(application?.installUrl, process.env.APP_URL + '/descarca');
+  assert.equal(application?.offers?.price, 0);
+  assert.deepEqual(publicMetadata(homeTitle, homeDescription, '/').title, { absolute: homeTitle });
+});
+
+test('Android updater and download pages use the same available signed release', async () => {
+  const { readAndroidRelease } = await import('../src/lib/android-release');
+  const { GET } = await import('../src/app/api/android-update/route');
+  const release = readAndroidRelease();
+  assert.ok(release);
+  assert.ok(release.bytes > 0);
+  assert.ok(release.minSdk);
+  assert.ok(release.publishedAt);
+  assert.deepEqual(await GET().json(), {
+    available: true,
+    version: release.version,
+    versionCode: release.versionCode,
+    url: release.url,
+  });
 });

@@ -4,6 +4,12 @@ const config: NextConfig = {
   outputFileTracingIncludes: { '/api/android-update': ['./public/downloads/**/*'] },
   env: { NEXT_PUBLIC_AUTOCARE_BUILD: process.env.VERCEL_GIT_COMMIT_SHA || process.env.VERCEL_DEPLOYMENT_ID || process.env.RENDER_GIT_COMMIT || "development" },
   serverExternalPackages: ['@electric-sql/pglite'],
+  async redirects() {
+    return [
+      ['/smartdrive', '/smartdrive-gps'], ['/auto-care-ai', '/autocare-ai'], ['/despre', '/despre-noi'],
+      ['/comparatie', '/preturi'], ['/en/compare-plans', '/en/pricing'],
+    ].map(([source, destination]) => ({ source, destination, permanent: true }));
+  },
   async headers() {
     return [
       { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-store, max-age=0" }] },

@@ -3,6 +3,15 @@ import type { MetadataRoute } from 'next';
 import { origin } from '@/lib/config';
 import { indexableSlugs } from '@/lib/seo';
 import { guides } from '@/lib/guides';
+const productImages: Record<string, string> = {
+  'garaj-digital': 'garage',
+  'documente-auto': 'documents',
+  'intretinere-auto': 'maintenance',
+  'cheltuieli-auto': 'expenses',
+  'smartdrive-gps': 'smartdrive',
+  'autocare-ai': 'ai',
+  'descarca': 'mobile',
+};
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries = [
     '',
@@ -15,22 +24,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: new URL('/' + path, origin()).toString(),
     alternates: { languages: publicLanguageAlternates('/' + path, origin()) ?? {} },
     ...(path.startsWith('ghiduri/') ? { lastModified: '2026-10-20T07:26:00.000Z' } : {}),
-    ...(path === '' ? { images: [origin() + '/icon-512.png',origin() + '/images/autocare-racing-green-preview.png',origin() + '/opengraph-image'] } : {}),
-    ...(['documente-auto', 'intretinere-auto', 'cheltuieli-auto'].includes(path)
-      ? {
-          images: [
-            origin() +
-              '/images/' +
-              (
-                {
-                  'documente-auto': 'organizare-documente-auto.svg',
-                  'intretinere-auto': 'istoric-intretinere-auto.svg',
-                  'cheltuieli-auto': 'evidenta-cheltuieli-auto.svg',
-                } as Record<string, string>
-              )[path],
-          ],
-        }
-      : {}),
+    ...(path === '' ? { images: [origin() + '/icon-512.png',origin() + '/images/autocare-capture-garage.webp',origin() + '/opengraph-image'] } : {}),
+    ...(productImages[path] ? { images: [origin() + '/images/autocare-capture-' + productImages[path] + '.webp'] } : {}),
   }));
   return entries.flatMap(entry => {
     const path=new URL(entry.url).pathname;

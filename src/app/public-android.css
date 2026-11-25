@@ -1,0 +1,24 @@
+.ac-public-release .ac-release-card { border:1px solid #cfdee6;border-radius:18px;background:#edf6f8;padding:clamp(17px,3.4vw,28px);color:#112c39;margin:0 0 22px;max-width:850px }
+.ac-public-release .ac-release-card :is(h2,p) { color:#143b4a;margin:0 0 .35rem }
+.ac-release-card-title { display:flex;align-items:center;gap:13px }
+.ac-release-icon { display:grid;place-items:center;flex:none;width:52px;height:52px;border-radius:12px;background:#075365;color:#fff }
+.ac-release-facts { display:flex;flex-wrap:wrap;gap:17px 35px;margin:18px 0 }
+.ac-release-facts dt { color:#3d5968;font-size:.84rem }
+.ac-release-facts dd { margin:0;font-weight:720 }
+.ac-public-release a.ac-release-button { display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:9px 15px;border-radius:10px;background:#075365;color:#fff;text-decoration:none;font-weight:690 }
+.ac-public-release a.ac-release-button:hover { background:#10445a }
+.ac-public-release a.ac-release-button:focus-visible { outline:3px solid #178a9b;outline-offset:4px }
+.ac-public-release .ac-release-signing { margin:13px 0 0;display:flex;align-items:flex-start;gap:8px;font-size:.9rem }
+.ac-release-signing svg { flex:none;margin-top:3px }
+.ac-release-instructions { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0 26px }
+.ac-release-instructions>div { border:1px solid #dce7ed;padding:18px;border-radius:14px;background:#fff }
+.ac-release-instructions h2 { margin:0 0 8px;font-size:clamp(1.2rem,3vw,1.55rem) }
+.ac-release-timeline { margin:0 0 26px }
+@media(max-width:650px){.ac-release-instructions { grid-template-columns:minmax(0,1fr) }}
+.ac-release-overview { display:grid;grid-template-columns:minmax(0,1fr) 166px;gap:20px;align-items:center;max-width:850px;margin:0 0 22px }
+.ac-public-release .ac-release-overview .ac-release-card { margin:0 }
+.ac-release-preview { margin:0;min-width:0 }
+.ac-release-preview img { display:block;width:100%;height:auto;border:1px solid #abc7d1;border-radius:13px }
+.ac-release-preview figcaption { margin:6px 0 0;font-size:.73rem;color:#3a5564 }
+@media(max-width:540px){.ac-release-overview { grid-template-columns:minmax(0,1fr) }.ac-release-preview { width:min(155px,100%) }}
+.ac-public-release .ac-editorial-hero { background:#edf6f8;border-color:#cfdee6 }

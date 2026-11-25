@@ -4,7 +4,7 @@ export const publicRoutePairs: Record<string, string> = {
  '/rca-rovinieta':'/en/rca-road-vignette',
  '/stergere-cont':'/en/delete-account',
  '/':'/en', '/despre-noi':'/en/about', '/aplicatie-auto':'/en/car-management-app',
- '/instaleaza':'/en/install', '/functionalitati':'/en/features', '/cum-functioneaza':'/en/how-it-works',
+ '/instaleaza':'/en/install', '/descarca':'/en/download', '/noutati':'/en/releases', '/functionalitati':'/en/features', '/cum-functioneaza':'/en/how-it-works',
  '/documente-auto':'/en/vehicle-documents', '/intretinere-auto':'/en/service-history',
  '/cheltuieli-auto':'/en/vehicle-expenses', '/smart-gps':'/en/gps-trip-tracking',
  '/bluetooth':'/en/car-bluetooth', '/smart-maintenance':'/en/maintenance-planning',

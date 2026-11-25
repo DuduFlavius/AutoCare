@@ -8,7 +8,7 @@ export default function PublicLanguage() {
  const pathname=usePathname();
  const language=pathname==='/en'||pathname.startsWith('/en/')?'en':'ro';
  const authPage=['/autentificare','/inregistrare','/recuperare-parola','/resetare-parola'].includes(pathname);
- useEffect(()=>{if(!authPage){saveBrowserLanguage(language);document.documentElement.lang=language;}},[language,authPage]);
+ useEffect(()=>{if(!authPage){saveBrowserLanguage(language);document.documentElement.lang=language === 'ro' ? 'ro-RO' : 'en-GB';}},[language,authPage]);
  if(['/autentificare','/inregistrare','/recuperare-parola','/resetare-parola'].includes(pathname))return null;
  return <div className="ac-public-language" data-workspace-ui><LanguageMenu language={language} onChange={next=>{
   saveBrowserLanguage(next);

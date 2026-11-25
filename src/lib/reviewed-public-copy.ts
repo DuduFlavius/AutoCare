@@ -1,6 +1,14 @@
 import {discoveryPages,discoveryPagesEn} from './discovery-pages';
 // Reviewed English copy for public pages. Source data and legal draft qualifications are preserved.
 export const reviewedPublicCopy: Record<string,string> = {
+  "AutoCare România": "AutoCare Romania",
+  "Documentele, reviziile și costurile mașinii, într-un singur garaj digital. Știi ce expiră, ce ai făcut și ce urmează.": "Vehicle documents, maintenance and costs in one digital garage. See what expires, what is done and what comes next.",
+  "Descarcă aplicația Android": "Download the Android app",
+  "O mașină în planul gratuit. Fără card la înscriere.": "One car on the free plan. No card required to sign up.",
+  "Captură din aplicația AutoCare, cu date demonstrative.": "Screenshot of the AutoCare app with demonstration data.",
+  "Tot ce ține de mașină, la un loc": "Everything about your car in one place",
+  "Începe cu prima ta mașină": "Start with your first car",
+  "Deschide un cont gratuit și adaugă primul vehicul.": "Create a free account and add your first vehicle.",
   "SmartDrive înregistrează călătoria pentru mașina selectată. Navigația și înregistrarea GPS sunt disponibile exclusiv în aplicația Android actualizată, cu permisiunile sistemului. Pe web rămân disponibile istoricul și kilometrajul.": "SmartDrive records trips for your selected vehicle. GPS navigation and recording are exclusive to the updated Android app with system permissions. Trip history and mileage remain available on the web.",
   "Consultă istoricul curselor și kilometrajul. Navigația SmartDrive și automatizarea Bluetooth sunt disponibile exclusiv în aplicația Android; citirea datelor OBD nu este oferită.": "Review trip history and mileage. SmartDrive navigation and Bluetooth automation are exclusive to the Android app; OBD readings are not provided.",
 
@@ -174,7 +182,7 @@ Object.assign(reviewedPublicCopy, {
   "Distanța GPS este o măsurătoare a traseului, nu o citire a odometrului din calculatorul mașinii. Verifică kilometrajul real atunci când faci o intervenție.": "GPS distance measures the route, not the vehicle computer’s odometer. Verify actual mileage when recording maintenance.",
   "Instalează AutoCare pe Android": "Install AutoCare on Android",
   "Descarcă AutoCare 1.5.1 pentru Android": "Download AutoCare 1.5.1 for Android",
-  "Descarcă AutoCare 1.7.4 pentru Android": "Download AutoCare 1.7.4 for Android",
+  "Descarcă AutoCare pentru Android": "Download AutoCare for Android",
   "La trecerea de la versiunile vechi, sincronizează mai întâi toate traseele din cont. Dacă Android semnalează un conflict de semnătură, dezinstalează versiunea veche abia după sincronizare, apoi instalează acest APK și autentifică-te în același cont.": "When upgrading older versions, sync all trips first. If Android reports a signature conflict, uninstall the old version only after syncing, then install this APK and sign into the same account.",
   "AutoCare are o aplicație Android și o versiune web. Disponibilitatea instalării și actualizărilor este afișată în cont. Publicarea în Google Play este o etapă separată; aici nu prezentăm o listare care încă nu există.": "AutoCare has an Android app and a web version. Installation and update availability are shown in your account. Google Play publishing is a separate step; we do not claim a listing that does not yet exist.",
   "Cât costă?": "How much does it cost?",

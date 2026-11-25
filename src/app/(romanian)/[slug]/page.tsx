@@ -1,4 +1,4 @@
-import VehicleSymbol from '@/components/vehicle-symbol';
+import PublicProductCapture from '@/components/public-product-capture';
 import { PublicAiIntro } from '@/components/public-ai-intro';
 import { technologyPages } from '@/lib/public-technology';
 import { TechnologyNavigation } from '@/components/technology-navigation';
@@ -108,7 +108,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           <p>{p.intro}</p>
           {!legal && <Link href={cta.href} className="button primary">{cta.label} <ArrowUpRight size={17}/></Link>}
         </header>
-        {topic && <VehicleSymbol/>}
+        <PublicProductCapture slug={slug}/>
         {['functionalitati', 'autocare-ai'].includes(slug) && <PublicAiIntro />}
         {(slug === 'functionalitati' || technology) && <TechnologyNavigation current={slug}/>}
         {faq ? (
@@ -119,9 +119,8 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           </div>
         ) : (
           <div className="ac-editorial-sections">
-            {p.sections.map(([title, text], index) => (
+            {p.sections.map(([title, text]) => (
               <section key={title}>
-                {!legal && <span aria-hidden="true" className="ac-editorial-index">{String(index + 1).padStart(2, '0')}</span>}
                 <h2>{title}</h2><p>{text}</p>
               </section>
             ))}

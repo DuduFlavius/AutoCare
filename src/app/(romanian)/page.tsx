@@ -1,280 +1,73 @@
-import PublicPlanPrice from '@/components/public-plan-price';
-import { PublicAiIntro } from '@/components/public-ai-intro';
-import { TechnologyNavigation } from '@/components/technology-navigation';
-import '@/app/product-intro.css';
 import Link from 'next/link';
-import {
-  ArrowUpRight,
-  Check,
-  ShieldCheck,
-  Wrench,
-  Files,
-  CarFront,
-  Bell,
-  ChartNoAxesCombined,
-  MapPin,
-  CircleCheck,
-  CirclePlay,
-  Sparkles,
-} from 'lucide-react';
-import LuxuryExperience, { LuxuryMotion } from '@/components/luxury-experience';
-import { publicPricing, DEFAULT_PRICING } from '@/lib/pricing';
-import '@/app/luxury-public.css';
-import '@/app/studio-public.css';
-import '@/app/titanium-landing.css';
-import { LandingCockpit } from '@/components/landing-cockpit';
-import { TitaniumWave } from '@/components/titanium-wave';
+import { ArrowUpRight, Bell, CarFront, ChartNoAxesCombined, Download, Files, MapPin, Sparkles, Wrench } from 'lucide-react';
 import { PublicShell } from '@/components/public-shell';
-import { appName, origin } from '@/lib/config';
-import { publicMetadata, siteDescription } from '@/lib/seo';
 import { JsonLd } from '@/components/seo-content';
+import { brandGraph, homeDescription, homeTitle, publicMetadata } from '@/lib/seo';
 import { googleVerification } from '@/lib/google-verification-server';
+import '@/app/public-brand.css';
+
 export async function generateMetadata() {
   const verification = await googleVerification();
   return {
+    ...publicMetadata(homeTitle, homeDescription, '/'),
     ...(verification ? { verification: { google: verification } } : {}),
-    ...publicMetadata(
-      'AutoCare Premium – Garaj digital, documente și revizii auto',
-      siteDescription,
-      '/',
-    ),
-    title: { absolute: 'AutoCare Premium – Garaj digital, documente și revizii auto' },
   };
 }
-export default async function Home() {
-  const prices =
-    process.env.DATABASE_URL || process.env.LOCAL_DATABASE_PATH ? await publicPricing() : DEFAULT_PRICING;
+
+const features = [
+  { icon: CarFront, title: 'Garaj digital', href: '/garaj-digital', description: 'Adună istoricul și informațiile fiecărei mașini într-un singur loc.' },
+  { icon: MapPin, title: 'SmartDrive GPS', href: '/smartdrive-gps', description: 'Planifică destinații, primește indicații și salvează traseele pe Android.' },
+  { icon: Sparkles, title: 'AutoCare AI', href: '/autocare-ai', description: 'Pune întrebări despre revizii, documente sau costuri. Disponibil în Premium.' },
+  { icon: Wrench, title: 'Revizii și întreținere', href: '/intretinere-auto', description: 'Vezi lucrările efectuate și planifică următoarea revizie după dată sau kilometraj.' },
+  { icon: Files, title: 'Documente auto', href: '/documente-auto', description: 'Păstrează actele și urmărește termenele pentru RCA, ITP, rovinietă și CASCO.' },
+  { icon: ChartNoAxesCombined, title: 'Cheltuieli și statistici', href: '/cheltuieli-auto', description: 'Organizează costurile și compară cheltuielile pe vehicul și pe perioadă.' },
+  { icon: Bell, title: 'Notificări și remindere', href: '/cum-functioneaza', description: 'Alege când vrei să primești notificări înainte de termenele înregistrate.' },
+];
+
+export default function Home() {
   return (
-    <div className="ac-lux-public ac-studio-public">
+    <div className="ac-brand-home">
       <PublicShell landing>
-        <LuxuryMotion />
-        <main>
-          <section className="studio-landing-hero ac-titanium-hero">
-            <TitaniumWave />
-            <div className="studio-landing-copy">
-              <p className="lux-eyebrow"><ShieldCheck size={16} /> GARAJUL TĂU DIGITAL</p>
-              <h1>Mai mult control.<br /><span>La fiecare drum.</span></h1>
-              <p>Organizează întreținerea, documentele și costurile mașinii. Vezi istoricul și următoarele termene dintr-un singur loc.</p>
-              <ul className="ac-landing-checks">
-                {['Garaj digital', 'Mentenanță automată', 'SmartDrive GPS', 'Documente la îndemână'].map(label => (
-                  <li key={label}><CircleCheck size={18} /> {label}</li>
-                ))}
-              </ul>
-              <div className="studio-landing-actions">
-                <Link href="/inregistrare" className="lux-primary">Începe gratuit <ArrowUpRight size={18} /></Link>
-                <Link href="#aplicatia" className="lux-secondary"><CirclePlay size={18} /> Vezi cum funcționează</Link>
+        <main id="continut">
+          <section className="ac-brand-hero" aria-labelledby="ac-brand-title">
+            <div className="ac-brand-hero-copy">
+              <p className="ac-brand-kicker">AutoCare România</p>
+              <h1 id="ac-brand-title">Mașina ta.<br />{' '}Totul sub control.</h1>
+              <p className="ac-brand-intro">Documentele, reviziile și costurile mașinii, într-un singur garaj digital. Știi ce expiră, ce ai făcut și ce urmează.</p>
+              <div className="ac-brand-actions">
+                <Link prefetch={false} className="ac-brand-primary" href="/inregistrare">Începe acum <ArrowUpRight size={17} aria-hidden="true"/></Link>
+                <Link prefetch={false} className="ac-brand-secondary" href="/descarca"><Download size={17} aria-hidden="true"/> Descarcă aplicația Android</Link>
               </div>
-              <div className="studio-landing-trust">
-                <span><Check size={16} /> O mașină în planul gratuit</span>
-                <span><ShieldCheck size={16} /> Fără card bancar la înscriere</span>
-              </div>
+              <p className="ac-brand-plan">O mașină în planul gratuit. Fără card la înscriere.</p>
             </div>
-            <LandingCockpit />
+            <figure className="ac-brand-product">
+              {/* Prepared WebP from the current desktop app, with demo account data. */}
+              <img src="/images/autocare-capture-garage.webp"
+                srcSet="/images/autocare-capture-garage-small.webp 640w, /images/autocare-capture-garage.webp 1180w"
+                sizes="(max-width: 740px) 90vw, (max-width: 1350px) 42vw, 570px" width={1180} height={670} alt="Interfața AutoCare cu o mașină, termenele documentelor și întreținerea în același tablou de bord" fetchPriority="high"/>
+              <figcaption>Captură din aplicația AutoCare, cu date demonstrative.</figcaption>
+            </figure>
           </section>
-          <section className="ac-landing-features" aria-labelledby="ac-landing-features-title">
-            <header>
-              <h2 id="ac-landing-features-title">Funcționalități AutoCare</h2>
-              <p>De la primul drum până la următoarea revizie.</p>
-            </header>
-            <div className="ac-landing-feature-grid">
-              {[
-                { Icon: MapPin, title: 'SmartDrive GPS', description: 'Înregistrează traseul și distanța parcursă.', href: '/smartdrive-gps' },
-                { Icon: Wrench, title: 'Mentenanță automată', description: 'Urmărește reviziile și intervalele de service.', href: '/smart-maintenance' },
-                { Icon: Files, title: 'Documente digitale', description: 'Păstrează actele și termenele la un loc.', href: '/documente-auto' },
-                { Icon: CarFront, title: 'Garaj digital', description: 'Vezi istoricul fiecărei mașini.', href: '/functionalitati' },
-                { Icon: ChartNoAxesCombined, title: 'Statistici auto', description: 'Urmărește costurile din evidența ta.', href: '/cheltuieli-auto' },
-                { Icon: Bell, title: 'Remindere', description: 'Primește alerte pentru termenele configurate.', href: '/cum-functioneaza' },
-              ].map(({ Icon, title, description, href }) => (
-                <Link key={title} href={href}>
-                  <Icon size={24} aria-hidden="true" /><h3>{title}</h3><p>{description}</p>
-                  <span>Explorează <ArrowUpRight size={14} /></span>
+
+          <section className="ac-brand-features" aria-labelledby="ac-brand-features-title">
+            <header><h2 id="ac-brand-features-title">Tot ce ține de mașină, la un loc</h2></header>
+            <div className="ac-brand-grid">
+              {features.map(({ icon: Icon, title, description, href }) => (
+                <Link prefetch={false} className="ac-brand-card" href={href} key={href}>
+                  <span className="ac-brand-feature-icon"><Icon size={23} aria-hidden="true"/></span>
+                  <ArrowUpRight className="ac-brand-card-arrow" size={17} aria-hidden="true"/>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
                 </Link>
               ))}
             </div>
           </section>
-          <PublicAiIntro />
-          <section className="ac-landing-discovery" aria-label="Hartă și abonamente">
-            <article className="ac-landing-map-card">
-              <div className="ac-landing-map-symbol" aria-hidden="true"><MapPin size={50} /></div>
-              <div><h2>AutoCare Maps</h2><p>Alege o destinație și explorează punctele auto din apropiere.</p>
-                <Link href="/autocare-maps" className="lux-text-link">Explorează harta <ArrowUpRight size={16} /></Link>
-              </div>
-            </article>
-            <section className="ac-landing-plans" aria-labelledby="ac-landing-plans-title">
-              <h2 id="ac-landing-plans-title">Planuri AutoCare</h2>
-              <div>
-                <Link href="/inregistrare"><b>Gratuit</b><strong><PublicPlanPrice bani={0}/></strong><span>Începe gratuit <ArrowUpRight size={14} /></span></Link>
-                <Link href="/preturi" className="ac-landing-plan-featured"><b>Premium lunar</b><strong><PublicPlanPrice bani={prices.monthlyBani} interval="month"/></strong><span>Vezi abonamentul <ArrowUpRight size={14} /></span></Link>
-                <Link href="/preturi"><b>Premium anual</b><strong><PublicPlanPrice bani={prices.annualBani} interval="year"/></strong><span>Vezi abonamentul <ArrowUpRight size={14} /></span></Link>
-              </div>
-            </section>
-            <article className="ac-landing-assistant">
-              <Sparkles size={26} aria-hidden="true" />
-              <h2>AutoCare AI</h2>
-              <p>Asistentul personal al mașinii tale. Discută despre revizii, documente și cheltuieli, cu răspunsuri adaptate istoricului vehiculului. Inclus în toate planurile Premium.</p>
-              <Link href="/autocare-ai" className="lux-text-link">Descoperă AutoCare AI <ArrowUpRight size={16} /></Link>
-            </article>
-          </section>
-          <section className="ac-product-systems" id="aplicatia">
-            <header>
-              <p className="lux-eyebrow">SISTEME AUTOCARE</p>
-              <h2>De la drum la următoarea revizie</h2>
-              <p>Înregistrezi drumul cu Smart GPS, apoi vezi kilometrii rămași până la următoarea lucrare. Harta te ajută să găsești servicii în zona pe care o alegi.</p>
-            </header>
-            <TechnologyNavigation/>
-          </section>
-          <LuxuryExperience />
-          <section className="lux-premium" data-reveal>
-            <div>
-              <p className="lux-eyebrow">AUTOCARE PREMIUM</p>
-              <h2>
-                Mai multe mașini.
-                <br />
-                <span>Un singur garaj.</span>
-              </h2>
-              <p>Planifică lucrările și consultă rapoartele pentru fiecare mașină.</p>
-              <ul>
-                {[
-                  'Mașini nelimitate, organizate individual',
-                  'Istoric, documente și cheltuieli',
-                  'Rapoarte și exporturi PDF / CSV',
-                  'Estimări de întreținere din datele tale',
-                ].map((text) => (
-                  <li key={text}>
-                    <Check size={16} />
-                    {text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="lux-pricing-card">
-              <span>PREMIUM LUNAR</span>
-              <div>
-                <strong><PublicPlanPrice bani={prices.monthlyBani} interval="month"/></strong>
-              </div>
-              <p><PublicPlanPrice bani={prices.annualBani} interval="year"/></p>
-              <Link href="/preturi" className="lux-primary">
-                Alege planul potrivit <ArrowUpRight size={18} />
-              </Link>
-              <Link href="/comparatie" className="lux-text-link">
-                Compară Gratuit și Premium <ArrowUpRight size={16} />
-              </Link>
-              <small>Prețul final și condițiile sunt afișate înainte de plată.</small>
-            </div>
-          </section>
-          <section className="lux-plan-compare" data-reveal>
-            <div className="lux-section-heading">
-              <p className="lux-eyebrow">ALEGI CE ȚI SE POTRIVEȘTE</p>
-              <h2>
-                Gratuit pentru început.
-                <br />
-                <span>Premium pentru mai mult control.</span>
-              </h2>
-            </div>
-            <div className="lux-compare-scroll">
-              <table>
-                <caption>Comparație între funcțiile existente ale planurilor AutoCare</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Funcționalitate</th>
-                    <th scope="col">Gratuit</th>
-                    <th scope="col">Premium</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    ['Mașini active', '1', 'Nelimitate'],
-                    ['Documente și istoric de bază', 'Incluse', 'Incluse'],
-                    ['Intervale pe operațiune', 'Istoric de bază', 'Configurabile'],
-                    ['Rapoarte PDF și CSV', '—', 'Incluse'],
-                    ['Statistici și cost per km', '—', 'Cu date suficiente'],
-                    ['Export date personale JSON', 'Inclus', 'Inclus'],
-                  ].map(([label, free, premium]) => (
-                    <tr key={label}>
-                      <th scope="row">{label}</th>
-                      <td>{free}</td>
-                      <td>{premium}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <Link href="/comparatie" className="lux-text-link">
-              Vezi toate limitele și condițiile <ArrowUpRight size={16} />
-            </Link>
-          </section>
-          <section className="lux-final" data-reveal>
-            <p className="lux-eyebrow">CONT GRATUIT</p>
-            <h2>Deschide garajul tău digital</h2>
-            <Link href="/inregistrare" className="lux-primary">
-              Începe cu prima mașină <ArrowUpRight size={18} />
-            </Link>
-            <Link href="/ghiduri" className="lux-text-link">
-              Citește ghidurile practice
-            </Link>
+          <section className="ac-brand-bottom">
+            <div><h2>Începe cu prima ta mașină</h2><p>Deschide un cont gratuit și adaugă primul vehicul.</p></div>
+            <div className="ac-brand-actions"><Link prefetch={false} className="ac-brand-primary" href="/inregistrare">Creează cont <ArrowUpRight size={17} aria-hidden="true"/></Link><Link prefetch={false} className="ac-brand-text" href="/preturi">Vezi planurile</Link></div>
           </section>
         </main>
-        <JsonLd
-          value={{
-            '@context': 'https://schema.org',
-            '@graph': [
-              {
-                '@type': 'Organization',
-                '@id': origin() + '/#organization',
-                name: appName,
-                url: origin(),
-                logo: origin() + '/icon-512.png',
-              },
-              {
-                '@type': 'WebSite',
-                '@id': origin() + '/#website',
-                name: appName,
-                url: origin(),
-                inLanguage: 'ro-RO',
-                publisher: { '@id': origin() + '/#organization' },
-              },
-              {
-                '@type': 'SoftwareApplication',
-                name: appName,
-                url: origin(),
-                description: siteDescription,
-                applicationCategory: 'LifestyleApplication',
-                operatingSystem: 'Android, Web',
-                '@id': origin() + '/#application',
-                publisher: { '@id': origin() + '/#organization' },
-                featureList: [
-                  'Documente RCA, ITP și rovinietă',
-                  'Istoric service și kilometraj',
-                  'Cheltuieli auto',
-                  'Sesiuni SmartDrive',
-                ],
-                inLanguage: 'ro-RO',
-                image: origin() + '/images/autocare-racing-green-preview.png',
-                installUrl: origin() + '/aplicatie-auto',
-                offers: {
-                  '@type': 'Offer',
-                  price: '0',
-                  priceCurrency: 'RON',
-                  url: origin() + '/preturi',
-                  description: 'Plan gratuit cu o mașină activă',
-                },
-              },
-              {
-                '@type': 'WebPage',
-                url: origin(),
-                name: 'AutoCare Premium – Garaj digital, documente și revizii auto',
-                '@id': origin() + '/#webpage',
-                isPartOf: { '@id': origin() + '/#website' },
-                about: { '@id': origin() + '/#application' },
-                primaryImageOfPage: {
-                  '@type': 'ImageObject',
-                  url: origin() + '/images/autocare-racing-green-preview.png',
-                  caption: 'AutoCare — aplicație pentru documente, întreținere și cheltuieli auto',
-                },
-              },
-            ],
-          }}
-        />
+        <JsonLd value={brandGraph()}/>
       </PublicShell>
     </div>
   );
