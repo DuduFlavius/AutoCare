@@ -29,8 +29,9 @@ export type NativeTrip = {
 type NativeNavigationStep = { coordinates: [number, number][]; meters: number; instruction: string };
 interface TrackingPlugin {
   navigationRequest(input:Record<string,unknown>):Promise<{data:unknown}>;
-  navigationStart(input: { ownerId: string; destination: string; english: boolean; steps: NativeNavigationStep[] }): Promise<void>;
+  navigationStart(input: { ownerId: string; destination: string; english: boolean; steps: NativeNavigationStep[]; muted: boolean }): Promise<void>;
   navigationSnapshot(input: { ownerId: string }): Promise<unknown>;
+  navigationAudio(input: { ownerId: string; muted: boolean; test: boolean }): Promise<void>;
   navigationStop(input: { ownerId: string }): Promise<void>;
   openAndroidUpdate(input: {url: string}): Promise<void>;
   appVersion(): Promise<{version: string; versionCode: number}>;
@@ -133,14 +134,17 @@ export const nativeNavigation = {
   available: () => hasNativeTracking() && Capacitor.getPlatform() === 'android',
   async search(query:string,latitude:number,longitude:number){if(!nativeNavigation.available())throw Error('SmartDrive GPS este disponibil exclusiv în aplicația Android.');const response=await plugin.navigationRequest({kind:'search',query,latitude,longitude});return parseRoadDestinations(response.data,latitude,longitude,query);},
   async directions(start:{latitude:number;longitude:number},end:{latitude:number;longitude:number},accuracy:number){if(!nativeNavigation.available())throw Error('SmartDrive GPS este disponibil exclusiv în aplicația Android.');const response=await plugin.navigationRequest({kind:'route',start,end,accuracy});return parseDrivingRoutes(response.data);},
-  async start(ownerId: string, destination: string, english: boolean, steps: NativeNavigationStep[]) {
-    await plugin.navigationStart({ ownerId, destination: destination.slice(0, 200), english, steps });
+  async start(ownerId: string, destination: string, english: boolean, steps: NativeNavigationStep[], muted: boolean) {
+    await plugin.navigationStart({ ownerId, destination: destination.slice(0, 200), english, steps, muted });
   },
   async snapshot(ownerId: string) {
     return z.object({
       active: z.boolean(),
-      position: point.extend({ heading: z.number().optional() }).optional(),
+      position: point.extend({ heading: z.number().optional(), speed: z.number().optional() }).optional(),
     }).parse(await plugin.navigationSnapshot({ ownerId }));
+  },
+  async audio(ownerId: string, muted: boolean, test = false) {
+    await plugin.navigationAudio({ownerId,muted,test});
   },
   async stop(ownerId: string) {
     await plugin.navigationStop({ ownerId });

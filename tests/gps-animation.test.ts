@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {cameraTurnProgress,interpolateAngle,interpolateFix,measuredTransition} from '../src/lib/gps-animation';
+import {cameraTurnProgress,interpolateAngle,interpolateFix,measuredTransition,prepareRoadInterpolation} from '../src/lib/gps-animation';
 const first={latitude:45,longitude:21,accuracy:5,timestamp:1000};
 test('animation ends at measured fixes without extrapolating or changing recorded timestamps',()=>{
  const next={...first,latitude:45.0001,longitude:21.0001,timestamp:2000};
@@ -33,4 +33,12 @@ test('reacquisition never animates across long gaps or accepts impossible and du
  assert.equal(measuredTransition(first,{...first,latitude:45.001}),null);
  assert.equal(cameraTurnProgress(0.25),0.15625);
  assert.equal(cameraTurnProgress(1),1);
+});
+
+test('interpolates around a road bend without cutting across it',()=>{
+ const sample=prepareRoadInterpolation([[21,45],[21,45.001],[21.001,45.001]]);
+ assert.deepEqual(sample(0),{longitude:21,latitude:45});
+ assert.equal(sample(.5).longitude,21);
+ assert.equal(sample(.8).latitude,45.001);
+ assert.deepEqual(sample(1),{longitude:21.001,latitude:45.001});
 });

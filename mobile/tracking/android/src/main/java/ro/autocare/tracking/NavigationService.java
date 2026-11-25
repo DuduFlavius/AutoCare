@@ -10,6 +10,11 @@ public final class NavigationService extends Service implements LocationListener
     private static final String STOP = "ro.autocare.tracking.NAVIGATION_STOP";
     private static final int NOTIFICATION = 318;
     static volatile Session session;
+    static NavigationService running; // Accessed on the main thread.
+    private NavigationVoice voice;
+    private String announced = "";
+    private int announcedStep = -1;
+    private int announcedDistance = Integer.MAX_VALUE;
 
     static final class Session {
         final String owner;
@@ -18,6 +23,7 @@ public final class NavigationService extends Service implements LocationListener
         final boolean english;
         volatile Location lastPosition;
         int step;
+        volatile boolean muted = true;
 
         Session(String owner, String destination, NavigationProgress.Step[] steps, boolean english) {
             this.owner = owner;
@@ -68,6 +74,16 @@ public final class NavigationService extends Service implements LocationListener
             Intent launch = getPackageManager().getLaunchIntentForPackage(getPackageName());
             if (launch != null) notification.setContentIntent(PendingIntent.getActivity(this, NOTIFICATION, launch, pendingFlags));
             startForeground(NOTIFICATION, notification.build());
+            if (voice == null || (shown != null && shown.english != current.english)) {
+                if (voice != null) voice.close();
+                voice = new NavigationVoice(this, current.english);
+            } else voice.stop();
+            running = this;
+            if (shown == null || !shown.destination.equals(current.destination)) {
+                announced = "";
+                announcedStep = -1;
+                announcedDistance = Integer.MAX_VALUE;
+            }
             shown = current;
             lastMessage = "";
             locations = getSystemService(LocationManager.class);
@@ -83,23 +99,50 @@ public final class NavigationService extends Service implements LocationListener
         Session current = session;
         if (current == null || current != shown) return;
         current.lastPosition = new Location(location);
-        if (!location.hasAccuracy() || location.getAccuracy() > 50) {
+        long age = SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos();
+        if (!location.hasAccuracy() || location.getAccuracy() > 50 || age < 0 || age > 8_000_000_000L) {
+            if (voice != null) voice.stop();
             update(current.english ? "Waiting for accurate GPS" : "Se așteaptă un semnal GPS precis");
             return;
         }
         NavigationProgress.Result progress = NavigationProgress.at(current.steps, current.step, location.getLatitude(), location.getLongitude());
         if (progress.gap() > Math.max(65, location.getAccuracy() * 2)) {
+            if (voice != null) voice.stop();
             update(current.english ? "Off route. Open AutoCare to reroute." : "Ai ieșit de pe traseu. Deschide AutoCare pentru recalculare.");
             return;
         }
         if (progress.gap() < 40) current.step = progress.step();
         if (progress.remaining() < 35 && progress.gap() < 30) {
             update(current.english ? "You arrived" : "Ai ajuns");
-            locations.removeUpdates(this);
+            announce(current, "arrival:" + current.destination, current.english ? "You have arrived." : "Ai ajuns la destinație.");
             return;
         }
         String instruction = progress.next().isEmpty() ? (current.english ? "Continue to destination" : "Continuă spre destinație") : progress.next();
+        if (announcedStep != current.step) {
+            if (voice != null) voice.stop();
+            announcedStep = current.step;
+            announcedDistance = Integer.MAX_VALUE;
+        }
+        int meters = progress.untilTurn() <= 45 ? 0 : progress.untilTurn() <= 220 ? 200 : progress.untilTurn() <= 520 ? 500 : -1;
+        if (meters >= 0 && meters < announcedDistance && !progress.next().isEmpty()) {
+            String sentence = meters == 0 ? instruction : (current.english ? "In " : "Peste ") + meters
+                + (current.english ? " meters, " : " de metri, ") + instruction;
+            if (announce(current, current.destination + ":" + current.step + ":" + instruction + ":" + meters, sentence)) announcedDistance = meters;
+        }
         update(instruction + " · " + (Math.round(progress.untilTurn() / 10) * 10) + " m");
+    }
+
+    private boolean announce(Session current, String key, String sentence) {
+        if (current.muted || announced.equals(key) || voice == null || !voice.speak(sentence)) return false;
+        announced = key;
+        return true;
+    }
+
+    boolean setAudio(Session current, boolean muted, boolean test) {
+        if (shown != current || voice == null) return false;
+        current.muted = muted;
+        if (muted) voice.stop();
+        return !test || voice.speak(current.english ? "AutoCare voice guidance is ready." : "Ghidarea vocală AutoCare este pregătită.");
     }
 
     private void update(String message) {
@@ -122,6 +165,8 @@ public final class NavigationService extends Service implements LocationListener
     @Override public void onDestroy() {
         if (session == shown) session = null;
         if (locations != null) locations.removeUpdates(this);
+        if (running == this) running = null;
+        if (voice != null) voice.close();
         super.onDestroy();
     }
 

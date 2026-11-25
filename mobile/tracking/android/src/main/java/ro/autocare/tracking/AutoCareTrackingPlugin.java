@@ -185,6 +185,7 @@ public class AutoCareTrackingPlugin extends Plugin {
                 steps[i] = new NavigationProgress.Step(points, meters, instruction);
             }
             NavigationService.Session active = new NavigationService.Session(owner, destination, steps, Boolean.TRUE.equals(call.getBoolean("english")));
+            active.muted = Boolean.TRUE.equals(call.getBoolean("muted", true));
             if (previous != null) active.lastPosition = previous.lastPosition;
             NavigationService.session = active;
             Intent service = new Intent(getContext(), NavigationService.class);
@@ -210,9 +211,26 @@ public class AutoCareTrackingPlugin extends Plugin {
             position.put("accuracy", fix.hasAccuracy() ? fix.getAccuracy() : 1000);
             position.put("timestamp", fix.getTime());
             if (fix.hasBearing()) position.put("heading", fix.getBearing());
+            if (fix.hasSpeed()) position.put("speed", fix.getSpeed());
             result.put("position", position);
         }
         call.resolve(result);
+    }
+
+    @PluginMethod public void navigationAudio(PluginCall call) {
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+            NavigationService.Session active = NavigationService.session;
+            NavigationService service = NavigationService.running;
+            if (active == null || service == null || !active.owner.equals(call.getString("ownerId", ""))) {
+                call.reject("Pornește navigația pentru a testa vocea.");
+                return;
+            }
+            if (!service.setAudio(active, Boolean.TRUE.equals(call.getBoolean("muted")), Boolean.TRUE.equals(call.getBoolean("test")))) {
+                call.reject("Vocea nu este disponibilă. Verifică limba și motorul vocal în setările Android.");
+                return;
+            }
+            call.resolve();
+        });
     }
 
     @PluginMethod public void navigationStop(PluginCall call) {

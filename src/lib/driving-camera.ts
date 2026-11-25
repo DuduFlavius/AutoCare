@@ -20,9 +20,9 @@ export function drivingView(speed:number|null|undefined, untilTurn?:number){
  const kmh=clamp((Number.isFinite(speed)?speed!:0)*3.6,0,130);
  const velocity=kmh/130;
  const approach=untilTurn!=null&&untilTurn>=0?clamp(1-(untilTurn-35)/265,0,1):0;
- const zoom=18.25-1.52*velocity;
- const pitch=62-7*velocity;
- return {zoom:zoom+(18.55-zoom)*approach*.82,pitch:pitch+(64-pitch)*approach*.68};
+ const zoom=17.85-1.35*velocity;
+ const pitch=56-5*velocity;
+ return {zoom:clamp(zoom-.32*approach,16.35,17.85),pitch:pitch-4*approach};
 }
 export function drivingZoom(speed:number|null|undefined,untilTurn?:number){
  return drivingView(speed,untilTurn).zoom;
@@ -33,10 +33,9 @@ export function cameraSettlingTime(distanceMs:number, angle:number, lensChanged:
  if(reducedMotion)return 0;
  return Math.max(distanceMs,angle>1?clamp(angle*11,280,1400):0,lensChanged?700:0);
 }
-export function daylightMap(hour:number){return hour>=7&&hour<19;}
 
 export function drivingInsets(height:number, header:number, dock:number) {
  const available=Math.max(0,height-header-dock);
- const shift=available>40 ? 2*(header+available*.76)-height : 0;
+ const shift=available>40 ? 2*(header+available*.72)-height : 0;
  return {top:Math.max(0,shift),bottom:Math.max(0,-shift),left:0,right:0};
 }

@@ -85,21 +85,21 @@ export const roadMapStyle = 'https://tiles.openfreemap.org/styles/fiord';
 
 /** Keep OSM's topology, source filters and labels. Rebuild the navigation hierarchy around stroked roads. */
 export function streetOnlyStyle(style: StyleSpecification, day = false): StyleSpecification {
-  const background=day?'#f3f5f2':'#132329';
+  const background=day?'#f3f5f2':'#10232d';
   const roadEdge=day?'#becbd1':'#162c38';
   const street=day?'#ffffff':'#405a68';
   const major=day?'#fffbec':'#6f8590';
-  const motorway=day?'#f4d69a':'#aa9367';
+  const motorway=day?'#f4d69a':'#688496';
   const isStreet=(id:string)=>id==='highway_minor'||id==='autocare-local-casing';
   const width=(low:number,mid:number,high:number):LineLayerSpecification['paint']=>({
     'line-width':['interpolate',['linear'],['zoom'],10,low,15,mid,19,high],
   });
   const layers=style.layers.flatMap<StyleSpecification['layers'][number]>(layer=>{
-    if(layer.type==='raster'||layer.type==='hillshade'||/^railway.*_dashline$/.test(layer.id)||layer.id==='highway_path')return [];
+    if(layer.type==='fill-extrusion'||layer.type==='raster'||layer.type==='hillshade'||/^railway.*_dashline$/.test(layer.id)||layer.id==='highway_path')return [];
     if(layer.type==='background')return [{...layer,paint:{...layer.paint,'background-color':background}}];
     if(layer.type==='fill'){
       if(/building/.test(layer.id))return [{...layer,minzoom:15,paint:{...layer.paint,
-        'fill-color':day?'#dae2e1':'#26383f','fill-opacity':day?.65:.55}}];
+        'fill-color':day?'#dae2e1':'#26383f','fill-opacity':day?.42:.35}}];
       const color=/water/.test(layer.id)?(day?'#bcdbe7':'#224653'):/park|wood|grass/.test(layer.id)?(day?'#dcead8':'#233d36'):/landuse_residential/.test(layer.id)?(day?'#e9eef0':'#1c2e36'):null;
       return [color?{...layer,paint:{...layer.paint,'fill-color':color}}:layer];
     }

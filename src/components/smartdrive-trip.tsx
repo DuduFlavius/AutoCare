@@ -4,15 +4,16 @@ import {requestConfirmation} from '@/components/premium-dialogs';
 
 import {FilterSelect} from './filter-select';
 import {useApplicationLocale} from './application-locale';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import AutoDrivePanel from './auto-drive-panel';
 import {driveElapsedMs,startDriveClock,pauseDriveClock,resumeDriveClock,finishDriveClock,measuredSpeed,driveStats,type DriveClock} from '@/lib/drive-session';
 import AutoPointsMap from './auto-points-map';
-import { MapPin, Play, Square, Pause, CheckCheck, LoaderCircle } from 'lucide-react';
+import { MapPin, Play, Square } from 'lucide-react';
 
 import {hasNativeTracking,nativeAutomation,nativeTracking,type NativeTrip} from '@/lib/native-tracking';
 
 import { watchBrowserLocation } from '@/lib/browser-location';
+import {driveDuration} from '@/lib/drive-display';
 import { gpsSignal, gpsTelemetry } from '@/lib/gps-status';
 import './smartdrive-premium.css';
 import {queuePendingDrive,readPendingDrives,removePendingDrive,rememberDriveConfirmation,wasDriveConfirmed,type PendingDriveTrip} from '@/lib/pending-drive-trips';
@@ -222,7 +223,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     if(hasNativeTracking()&&!preview){
       if(nativeStarting.current || saveInFlight.current)return;
       const car=vehicles.find(v=>v.id===vehicleId)||vehicles[0];if(!car){setError(t("Selectează o mașină înainte de pornire.", "Select a vehicle before starting."));return;}
-      nativeStarting.current=true;setControlBusy(true);setError('');
+      nativeStarting.current=true;setRetryOnReconnect(false);setControlBusy(true);setError('');
       void (async()=>{try{
         ++snapshotGeneration.current;
         const previousTrip=await nativeTracking.snapshot(ownerId);
@@ -301,6 +302,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     );
     setActive(true);
   };
+  const [retryOnReconnect,setRetryOnReconnect]=useState(false);
   const saveTrip = async () => {
     if(saved || saveInFlight.current || queueFlight.current)return;
     const id = vehicles.some(v => v.id === vehicleId) ? vehicleId : undefined;
@@ -309,6 +311,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     const ended = endedAt.current ?? Date.now();
     let activeSeconds=timing.current?Math.floor(driveElapsedMs(timing.current,ended)/1000):trackingSeconds;
     saveInFlight.current=true;
+    setRetryOnReconnect(false);
     setSaveAttempted(true);
     ++snapshotGeneration.current;
     setSaving(true);
@@ -345,9 +348,24 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
       setSaved(true); setNotice(syncMileage ? 'Călătorie salvată. Distanța GPS a fost adăugată kilometrajului și planului de întreținere. Verifică periodic valoarea cu bordul mașinii.' : 'Călătoria GPS a fost salvată separat.'); setError('');
       window.dispatchEvent(new Event('autocare-trips-updated'));
       try{await onSaved();}catch{setNotice('Călătoria a fost salvată. Reîncarcă pagina pentru kilometrajul actualizat.');}
-    } catch(e) { setError(e instanceof Error ? e.message : 'Salvarea a eșuat.'); }
+    } catch(e) {
+      if(e instanceof TypeError){
+        setRetryOnReconnect(true);
+        setError(t('Sesiunea rămâne pe telefon. Salvarea se reia după reconectare.','The session stays on this device. Saving resumes after reconnection.'));
+      }else setError(e instanceof Error ? e.message : 'Salvarea a eșuat.');
+    }
     finally { saveInFlight.current=false;setSaving(false); }
   };
+  const retryCurrentSave=useEffectEvent(()=>{
+    if(!active&&!paused&&!saved&&!preview&&navigator.onLine)void saveTrip();
+  });
+  useEffect(()=>{
+    if(!retryOnReconnect)return;
+    const onOnline=()=>retryCurrentSave();
+    window.addEventListener('online',onOnline);
+    const retry=window.setTimeout(onOnline,30000);
+    return()=>{window.removeEventListener('online',onOnline);window.clearTimeout(retry);};
+  },[retryOnReconnect]);
   async function sendQueuedTrip(trip:PendingDriveTrip,separately=false){
     if(queueFlight.current||saveInFlight.current||nativeStarting.current||preview)return;
     queueFlight.current=true;setQueueBusy(true);setError('');
@@ -403,35 +421,60 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   },[speed]);
   const stats=driveStats(distance,trackingSeconds,maxSpeed);
 
-  const driveButton = <button type="button" className="sd-start primary" disabled={saving||controlBusy||preview||!currentCar||queueBusy} onClick={start}><Play size={23}/>{paused?t('Continuă','Continue'):saved?t('Pornește sesiune nouă','Start a new session'):t('Pornește sesiunea','Start session')}</button>;
+  const [summaryOpen,setSummaryOpen]=useState(false);
+  const summaryDialog=useRef<HTMLDialogElement>(null);
+  const saveAfterStop=useEffectEvent(()=>void saveTrip());
+  const autoSave=useRef(false);
+  useEffect(()=>{
+    const dialog=summaryDialog.current;
+    if(summaryOpen&&!dialog?.open)dialog?.showModal();
+    if(!summaryOpen&&dialog?.open)dialog.close();
+  },[summaryOpen]);
+  useEffect(()=>{
+    if(!autoSave.current||active||paused||controlBusy||!endedAt.current)return;
+    autoSave.current=false;
+    if(distanceRef.current>0&&!automatic)saveAfterStop();
+  },[active,paused,controlBusy,automatic]);
   const finish=async()=>{
     if(controlBusy||saving||preview)return;
     setControlBusy(true);
     try {
-      await requestConfirmation(t('Finalizezi sesiunea și deschizi rezumatul?','Finish the session and open the summary?'),async()=>{
-        await stop();
-        if(distanceRef.current<=0){
-          setSaved(true);
-          setNotice(t('Sesiune finalizată fără deplasare GPS validă. Kilometrajul nu a fost modificat.','Session finished without valid GPS movement. Mileage was unchanged.'));
-          try{localStorage.removeItem(draftKey);}catch{/* Device storage may be unavailable. */}
-        }
-      });
+      await stop();
+      if(distanceRef.current<=0){
+        setSaved(true);
+        setNotice(t('Sesiune finalizată fără deplasare GPS validă.','Session finished without valid GPS movement.'));
+        try{localStorage.removeItem(draftKey);}catch{/* Device storage may be unavailable. */}
+      }
+      autoSave.current=true;
+      setSummaryOpen(true);
     } catch(reason) { setError(reason instanceof Error?reason.message:t('Sesiunea nu a putut fi finalizată.','The session could not be finished.')); }
     finally { setControlBusy(false); }
   };
-  const finishControl=<> {(active||paused||!!startedAt&&!saved&&!endedAt.current)&&<button type="button" className="sd-finish" disabled={controlBusy||saving||preview} onClick={()=>void finish()}>{saving?<LoaderCircle size={23}/>:<Square size={22}/>} {t('Finalizează','Finish')}</button>} </>;
-  const sessionControls=<>{(!active&&!paused&&(!endedAt.current||native))||paused||saved?driveButton:active&&!automatic?<button type="button" className="sd-pause" disabled={controlBusy||saving||preview} onClick={()=>void pause()}><Pause size={23}/>{t('Pauză','Pause')}</button>:null}{saved&&distance>0&&<span className="sd-saved"><CheckCheck size={22}/>{t('Sesiune salvată','Session saved')}</span>}{!active&&!paused&&!!endedAt.current&&distance>0&&!saved&&!automatic&&<button className="sd-start primary" type="button" disabled={saving||preview||queueBusy} onClick={()=>void saveTrip()}>{saving?<LoaderCircle size={18}/>:<CheckCheck size={20}/>} {saving?t('Se salvează…','Saving…'):saveAttempted?t('Reîncearcă salvarea','Retry saving'):t('Salvează sesiunea','Save session')}</button>}</>;
+  const recording=active||paused;
+  const sessionControls=recording
+    ? <button type="button" className="sd-finish" disabled={controlBusy||saving||preview} onClick={()=>void finish()}><Square size={16}/> STOP</button>
+    : <button type="button" className="sd-start primary" disabled={saving||controlBusy||preview||!currentCar||queueBusy||(!native&&!!endedAt.current&&!saved)} onClick={start}><Play size={16}/> START</button>;
   const discardOption=!active && !paused && !!endedAt.current && !automatic && (distance>0 || (native&&startedAt!==null)) && !saved && <button type="button" disabled={saving||preview||controlBusy} onClick={async ()=>{if(!await requestConfirmation(t("Renunți la sesiune? Traseul local și kilometrii nesalvați se vor pierde.", "Discard this session? The local route and unsaved mileage will be lost.")))return;if(nativeMode.current){const discardedId=tripId.current;void nativeTracking.clear(ownerId).then(()=>{
       if(pendingDrives.some(trip=>trip.id===discardedId))setPendingDrives(removePendingDrive(ownerId,discardedId));
       distanceRef.current=0;started.current=null;timing.current=null;nativeElapsed.current=null;endedAt.current=null;draftSnapshot.current='';setPaused(false);maxSpeedRef.current=null;setMaxSpeed(null);setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');}).catch(e=>setError(e instanceof Error?e.message:'GPS indisponibil.'));return;}distanceRef.current=0;started.current=null;previous.current=null;timing.current=null;nativeElapsed.current=null;endedAt.current=null;draftSnapshot.current='';setPaused(false);maxSpeedRef.current=null;setMaxSpeed(null);setDistance(0);setRoutePoints([]);setStartedAt(null);setTrackingSeconds(0);setNotice('');setError('');try{localStorage.removeItem(draftKey);}catch{/* Storage unavailable. */}}}>{t('Renunță la traseu', 'Discard trip')}</button>;
   const syncOption=!automatic&&<label className="ac-smartdrive-sync"><input type="checkbox" checked={syncMileage} disabled={saving||saved||saveAttempted} onChange={e=>setSyncMileage(e.target.checked)}/> {t('Adaugă distanța validă la kilometraj și actualizează planul de întreținere la salvare.', 'Sync recorded distance with vehicle mileage and maintenance when saving.')}</label>;
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-drive-live-content" hidden={bluetoothOnly}>
-    <AutoPointsMap onExit={onExit} onView={onView} preview={preview} visible={liveVisible} ownerId={ownerId} session={{position:currentPosition,points:routePoints,meters:distance,seconds:trackingSeconds,speed:speed===null?null:dial??speed,average:stats.averageKmh,maximum:stats.maximumKmh,signal:status,accuracy:telemetry.accuracy,startedAt,vehicleLabel:currentCar?[currentCar.brand,currentCar.model,currentCar.plate].filter(Boolean).join(' · '):undefined,state:saving?'saving':saved?'finished':endedAt.current?'unsaved':paused?'paused':active?'active':'idle',active,locate:idleLocation.locate,start,stop,
+    <AutoPointsMap onExit={onExit} onView={onView} preview={preview} visible={liveVisible} ownerId={ownerId} session={{position:currentPosition,points:routePoints,meters:recording?distance:0,seconds:recording?trackingSeconds:0,speed:speed===null?null:dial??speed,average:stats.averageKmh,maximum:stats.maximumKmh,signal:status,accuracy:telemetry.accuracy,startedAt,vehicleLabel:currentCar?[currentCar.brand,currentCar.model,currentCar.plate].filter(Boolean).join(' · '):undefined,state:paused?'paused':active?'active':'idle',active,locate:idleLocation.locate,start,stop,
       vehicle:vehicles.length>0?<label>{t('Vehicul','Vehicle')}<FilterSelect value={currentCar?.id||''} disabled={active||!!startedAt&&!saved} onChange={e=>setVehicleId(e.target.value)}>{vehicles.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model}{v.plate?' · '+v.plate:''}</option>)}</FilterSelect></label>:null,
-      messages:<>{awaitingMotion&&<p role="status">{t('Așteaptă deplasarea mașinii.','Waiting for the vehicle to move.')}</p>}{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}</>,
-      controls:sessionControls, finishControl,options:<>{syncOption}{discardOption}{queuePanel}</>,pendingCount:queues.length
+      messages:<>{awaitingMotion&&<p role="status">{t('Așteaptă deplasarea mașinii.','Waiting for the vehicle to move.')}</p>}{!endedAt.current&&notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}</>,
+      controls:sessionControls,options:<>{!!endedAt.current&&!saved&&<button type="button" onClick={()=>setSummaryOpen(true)}>{t('Rezumat sesiune','Trip summary')}</button>}{syncOption}{queuePanel}</>,pendingCount:queues.length
     }}/>
+    <dialog ref={summaryDialog} className="sd-trip-review" onClose={()=>setSummaryOpen(false)} aria-labelledby="sd-trip-review-title">
+      <h2 id="sd-trip-review-title">{t('Rezumatul sesiunii','Trip summary')}</h2>
+      <p>{currentCar&&[currentCar.brand,currentCar.model,currentCar.plate].filter(Boolean).join(' · ')}</p>
+      <dl><div><dt>{t('Distanță','Distance')}</dt><dd>{(distance/1000).toLocaleString(locale,{maximumFractionDigits:2})} km</dd></div><div><dt>{t('Durată','Duration')}</dt><dd>{driveDuration(trackingSeconds)}</dd></div></dl>
+      {saving&&<p role="status">{t('Se sincronizează…','Syncing…')}</p>}
+      {notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}
+      {!saved&&!automatic&&distance>0&&<button className="primary" type="button" disabled={saving||queueBusy} onClick={()=>void saveTrip()}>{saveAttempted?t('Reîncearcă salvarea','Retry saving'):t('Salvează','Save')}</button>}
+      {!saved&&!automatic&&syncOption}{discardOption}
+      <button type="button" onClick={()=>setSummaryOpen(false)}>{t('Înapoi la hartă','Back to map')}</button>
+    </dialog>
     <details className="rg-drive-details"><summary>{t('Sesiune, sincronizare și permisiuni','Session, sync and permissions')}</summary>
     <div className="ac-drive-console">
     {vehicles.length > 0 && <label className="ac-drive-vehicle">{t('Mașina pentru călătorie', 'Your vehicle')} <FilterSelect value={vehicles.some(v => v.id === vehicleId) ? vehicleId : vehicles[0].id} disabled={active || (!!startedAt && !saved)} onChange={e => setVehicleId(e.target.value)}>{vehicles.map(v => <option data-user-content key={v.id} value={v.id}>{v.brand} {v.model}{v.plate ? ' · ' + v.plate : ''}</option>)}</FilterSelect></label>}

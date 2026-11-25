@@ -53,7 +53,7 @@ test('the street palette gives roads, water and labels distinct dark-map contras
   {id:'highway_minor',type:'line',source:'streets'},
   {id:'road_label',type:'symbol',source:'streets',layout:{'text-field':'{name}'}},
  ]});
- assert.equal(style.layers[0].paint?.['background-color' as keyof typeof style.layers[0]['paint']], '#132329');
+ assert.equal(style.layers[0].paint?.['background-color' as keyof typeof style.layers[0]['paint']], '#10232d');
  assert.notDeepEqual(style.layers.find(layer=>layer.id==='highway_primary')?.paint,style.layers.find(layer=>layer.id==='highway_minor')?.paint);
  assert.ok(JSON.stringify(style.layers.find(layer=>layer.id==='road_label')?.paint).includes('#d8e6e8'));
 });
@@ -79,7 +79,7 @@ test('the tracking camera reserves space for the header and bottom controls',()=
   for(const [height,header,dock] of [[720,110,155],[530,80,210],[360,65,230]]){
     const inset=drivingInsets(height,header,dock);
     const point=(height+inset.top-inset.bottom)/2;
-    assert.ok(Math.abs((point-header)/(height-header-dock)-.76)<.0001);
+    assert.ok(Math.abs((point-header)/(height-header-dock)-.72)<.0001);
   }
 });
 

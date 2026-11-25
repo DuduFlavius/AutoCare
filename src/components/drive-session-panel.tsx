@@ -29,7 +29,7 @@ export function DriveSessionPanel({session,english=false,children,compact=false,
    onPointerUp={event=>{if(touchStart.current!=null&&touchStart.current-event.clientY>36){dragged.current=true;setExpanded(true);}touchStart.current=null;}}
    onClick={event=>{if(!event.detail||!dragged.current)setExpanded(value=>!value);}}><span className="sd-sheet-grip" aria-hidden="true"/></button>}
   {compact&&children&&<div className="sd-route-glance">{children}</div>}
-  {ready&&vehicleSelector&&<div className="sd-primary-vehicle">{vehicleSelector}</div>}
+  {!compact&&ready&&vehicleSelector&&<div className="sd-primary-vehicle">{vehicleSelector}</div>}
   {review&&session.startedAt&&<div className="sd-final-context"><strong>{session.vehicleLabel}</strong><time dateTime={new Date(session.startedAt).toISOString()}>{new Intl.DateTimeFormat(english?'en-GB':'ro-RO',{dateStyle:'medium',timeStyle:'short'}).format(session.startedAt)}</time></div>}
   <div className="sd-summary-body">
    <dl className="sd-session-metrics sd-session-summary">{metrics(rows.filter(row=>compact?(review?['distance','time','average']:['distance','time']).includes(row.key):['speed','distance','time','signal'].includes(row.key)))}</dl>
@@ -48,6 +48,7 @@ export function DriveSessionPanel({session,english=false,children,compact=false,
     <div><dt><LocateFixed size={20} aria-hidden="true"/>{t('Precizie GPS','GPS accuracy')}</dt><dd>{session.accuracy!=null?'± '+Math.round(session.accuracy)+' m':'—'}</dd></div>
     <div><dt><Clock3 size={20} aria-hidden="true"/>{t('Pornire','Started at')}</dt><dd>{session.startedAt?new Date(session.startedAt).toLocaleTimeString(english?'en-GB':'ro-RO'):'—'}</dd></div>
    </dl>
+   {compact&&ready&&vehicleSelector&&<div className="sd-primary-vehicle">{vehicleSelector}</div>}
    {session.options}
   </section>
   {session.messages&&<div className="sd-session-notices">{session.messages}</div>}

@@ -4,7 +4,7 @@ import {DriveSessionPanel,type DrivePanelData} from './drive-session-panel';
 import {FilterSelect} from './filter-select';
 
 import dynamic from 'next/dynamic';
-import { ArrowUp, MapPin, Navigation,Volume2,VolumeX,ChevronDown,RotateCw,X,SlidersHorizontal,ArrowLeft,MoreHorizontal,History,Bluetooth,Flag } from 'lucide-react';
+import { ArrowUp, MapPin, Navigation,Volume2,VolumeX,ChevronDown,RotateCw,CornerUpLeft,CornerUpRight,X,SlidersHorizontal,ArrowLeft,MoreHorizontal,History,Bluetooth } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState,type ReactNode } from 'react';
 import { defaultAutoPointsArea, type MapArea } from '@/lib/auto-points';
 import { browserGPSFix, latestGPSFix, type GPSFix } from '@/lib/gps-tracking';
@@ -60,6 +60,9 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const position = latestGPSFix(latestGPSFix(latestGPSFix(location.position, oneShotPosition), nativePosition),session?.position??null);
   const requestLocate=session?.locate||location.locate;
   const [muted,setMuted]=useState(true);
+  const currentMute=useRef(true);
+  const [nativeVoice,setNativeVoice]=useState(false);
+  const [voiceError,setVoiceError]=useState("");
   const [details,setDetails]=useState(false);
   const [searchOpen,setSearchOpen]=useState(false);
   const [searchFocused,setSearchFocused]=useState(false);
@@ -164,6 +167,29 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
     }
   }
 
+  const lastDestination=useRef<Coordinate & {name?:string;details?:string} | null>(null);
+  function stopGuidance(change=false) {
+    if(destination)lastDestination.current=destination;
+    wantsNavigation.current=false;
+    ++destinationRevision.current;
+    ++locationRevision.current;
+    routingRequest.current?.abort();
+    deviation.current=0;
+    spoken.current='';
+    setStepIndex(0);
+    setNavigating(false);
+    setDestination(null);
+    setRoutes([]);
+    setRouting(false);
+    setFindingLocation(false);
+    setRouteError('');
+    setLocationError('');
+    setDetails(false);
+    setSelecting(false);
+    setSearchOpen(change);
+    if('speechSynthesis' in window)window.speechSynthesis.cancel();
+  }
+
   function choose(point: Coordinate & { name?: string; details?: string }, startGuidance = false) {
     const revision = ++destinationRevision.current;
     routingRequest.current?.abort();
@@ -202,7 +228,7 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
       coordinates: step.geometry.coordinates, meters: step.distance,
       instruction: [turnText(step.maneuver, english), step.name].filter(Boolean).join(' · ').slice(0, 200),
     })));
-    void nativeNavigation.start(ownerId, destinationName || t('Navigație AutoCare', 'AutoCare navigation'), english, steps)
+    void nativeNavigation.start(ownerId, destinationName || t('Navigație AutoCare', 'AutoCare navigation'), english, steps, currentMute.current)
       .then(() => {
         if (!wantsNavigation.current) { void nativeNavigation.stop(ownerId).catch(() => {}); return; }
         if (live) { subscribed = true; setBackground('active'); }
@@ -247,18 +273,31 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   }, [position, navigating, route, destination]);
 
   const displayPosition=useMemo(()=>progress&&precisePosition?routeDisplayFix(precisePosition,progress,stepIndex):position,[progress,precisePosition,position,stepIndex]);
-  const ManeuverIcon=progress?.next?.maneuver.exit?RotateCw:ArrowUp;
+  const modifier=progress?.next?.maneuver.modifier;
+  const ManeuverIcon=progress?.next?.maneuver.exit?RotateCw:modifier==='uturn'?RotateCw:modifier?.includes('left')?CornerUpLeft:modifier?.includes('right')?CornerUpRight:ArrowUp;
   const arrived = !!progress && progress.distance < 35 && progress.gap < 30;
   const telemetry=gpsTelemetry(position,now);
-  const roadSpeed=useRoadSpeed(telemetry.fresh && position && now-position.timestamp<8000 ? position : null,telemetry.speed??session?.speed??null,androidApk&&visible&&!preview&&(navigating||session?.state==='active'));
+  const nativeTelemetry=gpsTelemetry(latestGPSFix(nativePosition,session?.position??null),now);
+  const speed=nativeTelemetry.speed??telemetry.speed??(telemetry.fresh&&telemetry.accuracy!==null&&telemetry.accuracy<=50?session?.speed??null:null);
+  const roadSpeed=useRoadSpeed(telemetry.fresh && position && now-position.timestamp<8000 ? position : null,speed,androidApk&&visible&&!preview&&(navigating||session?.state==='active'));
   const voiceText=progress?.next?[turnText(progress.next.maneuver,english),progress.next.name].filter(Boolean).join(' · '):'';
   useEffect(()=>{
-    if(muted||!navigating||!progress||progress.untilTurn>300||progress.gap>45||!voiceText||!('speechSynthesis' in window))return;
+    if(nativeVoice||muted||!navigating||!progress||progress.untilTurn>300||progress.gap>45||!voiceText||!('speechSynthesis' in window))return;
     const key=progress.index+':'+voiceText;if(spoken.current===key)return;
     spoken.current=key;const utterance=new SpeechSynthesisUtterance(voiceText);utterance.lang=english?'en-GB':'ro-RO';window.speechSynthesis.speak(utterance);
 
-  },[muted,navigating,progress?.index,progress?.untilTurn,progress?.gap,voiceText,english]);
+  },[nativeVoice,muted,navigating,progress?.index,progress?.untilTurn,progress?.gap,voiceText,english]);
   useEffect(()=>{if((muted||!navigating)&&'speechSynthesis' in window)window.speechSynthesis.cancel();return()=>{if('speechSynthesis' in window)window.speechSynthesis.cancel()}},[muted,navigating]);
+  useEffect(()=>{
+    if(background!=='active'||!navigating){setNativeVoice(false);return;}
+    let live=true;
+    const timer=window.setTimeout(()=>{
+      void nativeNavigation.audio(ownerId,muted).then(()=>{
+        if(live){setNativeVoice(true);window.speechSynthesis?.cancel();}
+      }).catch(error=>{if(live&&!nativeMethodMissing(error)&&!muted)setVoiceError(english?'Android voice is still initializing.':'Vocea Android este în curs de inițializare.');});
+    },350);
+    return()=>{live=false;window.clearTimeout(timer);};
+  },[background,navigating,muted,ownerId,english]);
   const minutes=progress?Math.ceil(progress.seconds/60):!navigating&&route?Math.ceil(route.duration/60):null;
   const remaining=navigating?progress?.distance:route?.distance;
   const eta=progress&&navigating?new Date(Date.now()+progress.seconds*1000).toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit'}):null;
@@ -268,36 +307,40 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
         <RoadMap points={session?.points||noRoute} position={displayPosition} active={navigating||session?.state==='active'} english={english}
           initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview?undefined:requestLocate}
           locating={findingLocation||location.waiting} locationError={locationError||location.error}
-          mappedRoads={preview?undefined:roadSpeed.roads} untilTurn={progress?.untilTurn} plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting?choose:undefined}/>
+          mappedRoads={roadSpeed.roads} untilTurn={progress?.untilTurn} plannedRoute={route?.geometry.coordinates} destination={destination} routeStart={routeStart} onDestination={selecting?choose:undefined}/>
         {nativeScreen&&<>{!navigating&&<button type="button" className="rg-navigation-back" aria-label={t('Înapoi în AutoCare','Back to AutoCare')} onClick={onExit}><ArrowLeft size={20}/></button>}<details className="rg-navigation-tools"><summary aria-label={t('Meniu SmartDrive','SmartDrive menu')}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={()=>onView?.('history')}><History size={17}/>{t('Istoric trasee','Trip history')}</button><button type="button" onClick={()=>onView?.('bluetooth')}><Bluetooth size={17}/>Bluetooth</button><label className="sd-speed-preference">{t('Avertizare limită de viteză','Speed limit warning')}
           <select value={roadSpeed.mode} onChange={event=>void roadSpeed.changeMode(event.target.value as typeof roadSpeed.mode)}>
             <option value="off">{t('Dezactivată','Off')}</option><option value="visual">{t('Vizuală','Visual')}</option><option value="sound">{t('Vizuală și sonoră','Visual and sound')}</option>
           </select></label></div></details></>}
         {!navigating&&nativeScreen&&<div className="sd-android-title"><MapPin size={17}/>SmartDrive GPS</div>}
         {!navigating&&<div className="sd-destination-toolbar"><DriveDestinationSearch area={searchPosition??area} nearPosition={!!searchPosition} disabled={preview} english={english} recent={recent} onFocusChange={focused=>{setSearchFocused(focused);if(focused)setSearchOpen(false);}} onChoose={point=>choose(point)}/><button type="button" className="sd-destination-settings" hidden={searchFocused} aria-label={t('Destinații și vehicul','Destinations and vehicle')} aria-expanded={searchOpen} onClick={()=>setSearchOpen(v=>!v)}><SlidersHorizontal size={23}/></button></div>}
-        {navigating&&<button type="button" className="rg-navigation-exit" aria-label={t('Încheie navigația, păstrează înregistrarea','End navigation, keep recording')} onClick={()=>{setNavigating(false);setStepIndex(0);}}><X size={21}/></button>}
-        {navigating&&<div className="rg-guidance-turn" role="status"><ManeuverIcon size={30} style={{rotate:progress?.next?.maneuver.modifier?.includes('left')?'-90deg':progress?.next?.maneuver.modifier?.includes('right')?'90deg':undefined}}/><div><strong>{arrived?t('Ai ajuns','You arrived'):progress?distance(progress.untilTurn):t('Se caută semnal GPS precis…','Waiting for accurate GPS…')}</strong><span>{progress?.next?turnText(progress.next.maneuver,english):t('Urmează traseul','Follow the route')}</span><small>{progress?.next?.name}</small></div><button type="button" aria-expanded={details} onClick={()=>setDetails(v=>!v)}><ChevronDown size={20}/></button></div>}
+        {navigating&&<div className="rg-guidance-turn" role="status"><ManeuverIcon size={30} aria-hidden="true"/><div><strong>{arrived?t('Ai ajuns','You arrived'):progress?distance(progress.untilTurn):t('Se caută semnal GPS precis…','Waiting for accurate GPS…')}</strong><span>{progress?.next?turnText(progress.next.maneuver,english):t('Urmează traseul','Follow the route')}</span><small>{progress?.next?.name}</small></div><button type="button" aria-expanded={details} onClick={()=>setDetails(v=>!v)}><ChevronDown size={20}/></button></div>}
         {androidApk && <div className="rg-navigation-speed" data-over-limit={roadSpeed.over} aria-label={t('Viteza GPS','GPS speed')}>
-          <strong>{(telemetry.fresh ? session?.speed ?? telemetry.speed : null) ?? '—'}</strong><span>km/h</span>
+          <strong>{speed ?? '—'}</strong><span>km/h</span>
           <div className="sd-speed-sign" data-unknown={roadSpeed.limit===null} aria-label={roadSpeed.limit===null?t('Limită de viteză necunoscută','Unknown speed limit'):t(`Limită informativă: ${roadSpeed.limit} km/h. Respectă indicatoarele rutiere.`,`Advisory limit: ${roadSpeed.limit} km/h. Follow road signs.`)}>{roadSpeed.limit??'—'}</div>
         </div>}
-        <button className="rg-navigation-audio" type="button" aria-label={t('Indicații vocale','Voice guidance')} aria-pressed={!muted} title={muted?t('Sunet oprit','Sound off'):t('Sunet pornit','Sound on')} onClick={()=>{setMuted(v=>!v);spoken.current=''}}>{muted?<VolumeX size={24}/>:<Volume2 size={24}/>}</button>
+        <button className="rg-navigation-audio" type="button" aria-label={t('Indicații vocale','Voice guidance')} aria-pressed={!muted} title={muted?t('Sunet oprit','Sound off'):t('Sunet pornit','Sound on')} onClick={()=>{currentMute.current=!muted;setMuted(!muted);setVoiceError('');spoken.current=''}}>{muted?<VolumeX size={24}/>:<Volume2 size={24}/>}</button>
       </div>
       <section ref={bottomPanel} className="sd-permanent-bottom" hidden={searchFocused}>
         {!navigating&&route&&<div className="sd-planned-summary" role="status">
           <span>{t('Traseu estimat','Estimated route')}</span>
           <strong>{distance(route.distance)} · {Math.ceil(route.duration/60)} min</strong>
         </div>}
-        {session&&<DriveSessionPanel session={session} english={english} compact={androidApk} suspendDetails={searchFocused&&!navigating} vehicleSelector={androidApk?session.vehicle:undefined}>{navigating && progress && <span className="sd-route-remaining">
-          <Flag size={15} aria-hidden="true"/> {t('Rămas pe traseu', 'Route remaining')} · {remaining != null ? distance(remaining) : '—'} · {minutes} min
-          {eta && (' · ' + t('Sos. ', 'ETA ') + eta)}
-        </span>}</DriveSessionPanel>}
-        {androidApk&&session?.state==='finished'&&onView&&<div className="sd-route-actions"><button type="button" onClick={()=>onView('history')}><History size={16}/>{t('Vezi istoricul','Open history')}</button></div>}
-        {(!session||route)&&<div className="sd-route-actions">{!navigating&&route&&<button className="primary" type="button" disabled={preview||routing} onClick={()=>{setNavigating(true);requestLocate();lastReroute.current=Date.now()}}><Navigation size={22}/>{t('Pornește navigația','Start navigation')}</button>}{navigating&&!androidApk&&<button type="button" className="sd-end-guidance" onClick={()=>{setNavigating(false);setStepIndex(0);}}><Flag size={19} aria-hidden="true"/>{t('Încheie navigația','End navigation')}</button>}</div>}
+        {navigating&&<div className="sd-route-strip">
+          <div className="sd-route-arrival">{eta&&<strong aria-label={t('Ora estimată a sosirii','Estimated arrival')}>{eta}</strong>}
+            {progress&&<span>{minutes} min · {remaining!=null?distance(remaining):'—'}</span>}</div>
+          <button type="button" className="sd-stop-guidance" onClick={()=>stopGuidance()}><X size={16}/>{t('Oprește navigația','Stop navigation')}</button>
+        </div>}
+        {session&&<DriveSessionPanel session={session} english={english} compact={androidApk} suspendDetails={searchFocused&&!navigating} vehicleSelector={androidApk?session.vehicle:undefined}/>}
+        {!navigating&&route&&<div className="sd-route-actions"><button className="primary" type="button" disabled={preview||routing} onClick={()=>{setNavigating(true);requestLocate();lastReroute.current=Date.now()}}><Navigation size={22}/>{t('Pornește navigația','Start navigation')}</button></div>}
         {(routeError||locationError)&&<p role="alert">{routeError||locationError}</p>}{routing&&<p role="status">{t('Se calculează traseul…','Calculating route…')}</p>}
       </section>
       <aside className="rg-navigation-sidebar" data-open={searchOpen||details} ref={routeCard}>
         <header><span>SMARTDRIVE</span><h2>{t('Unde mergem?','Where to?')}</h2><button type="button" aria-label={t('Închide căutarea','Close search')} onClick={()=>{setSearchOpen(false);setDetails(false);}}><X size={20}/></button></header>
+        {navigating&&<button type="button" onClick={()=>void nativeNavigation.audio(ownerId,muted,true).then(()=>setVoiceError('')).catch(()=>setVoiceError(t('Vocea nu este disponibilă. Verifică motorul vocal și limba din setările Android.','Voice is unavailable. Check the speech engine and language in Android settings.')))}>{t('Testează vocea','Test voice')}</button>}
+        {navigating&&voiceError&&<p role="status">{voiceError}</p>}
+        {navigating&&<button type="button" onClick={()=>stopGuidance(true)}>{t('Schimbă destinația','Change destination')}</button>}
+        {!navigating&&!destination&&lastDestination.current&&<button type="button" onClick={()=>{const point=lastDestination.current;if(point)choose(point,true);}}>{t('Reia navigația','Resume navigation')}</button>}
         {!androidApk&&session?.vehicle}
         {!navigating&&favorites.length>0&&<div className="rg-saved-places"><small>{t('Favorite · pe acest dispozitiv','Favorites · on this device')}</small>{favorites.map(point=><div key={point.kind||destinationIdentity(point)}><button type="button" onClick={()=>choose(point)}>{point.kind==='home'?t('Acasă','Home'):point.kind==='work'?t('Serviciu','Work'):point.name}</button><button type="button" aria-label={t('Elimină favorita','Remove favorite')} onClick={()=>setFavorites(previous=>{const next=previous.filter(p=>p!==point);persistPlaces(recent,next);return next})}>×</button></div>)}</div>}
         {!navigating&&recent.length>0&&<details className="rg-recent-places"><summary>{t('Destinații recente','Recent destinations')}</summary>{recent.map(point=><button type="button" key={destinationIdentity(point)} onClick={()=>choose(point)}>{point.name}</button>)}</details>}

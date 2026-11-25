@@ -360,3 +360,68 @@
  display:flex;align-items:center;justify-content:space-between;gap:8px;
  padding:8px 12px;color:#163356;font-size:.84rem;
 }
+
+.sd-live-cockpit .sd-stop-guidance {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 44px;
+  width: 100%;
+  border: 0;
+  border-top: 1px solid #bdd3db;
+  background: #eef5f7;
+  color: #03343e;
+  font-weight: 650;
+}
+
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .sd-session-panel[data-compact=true] {
+  padding: 4px 12px 6px;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .sd-session-panel[data-compact=true] .sd-summary-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .sd-session-panel .sd-session-actions :is(.sd-start,.sd-finish) {
+  width: auto;
+  min-width: 84px;
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .sd-session-panel[data-compact=true] .sd-session-summary {
+  display: flex;
+  gap: 9px;
+}
+.sd-live-cockpit .sd-session-summary dt svg {display:none}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .sd-session-panel[data-compact=true] .sd-session-summary dd {
+  font-size: clamp(14px,4.4vw,19px);
+}
+.sd-live-cockpit.rg-smartdrive-map[data-android-apk=true] .rg-navigation-speed {border-radius:50%;width:64px;height:64px}
+.sd-live-cockpit .sd-stop-guidance {font-size:12px;min-height:44px}
+.sd-map-light {
+  position:absolute;z-index:10;inset-inline-end:60px;inset-block-start:25%;
+  width:min(230px,calc(100% - 76px));padding:12px;display:grid;gap:8px;
+  border-radius:16px;background:#f3f8fa;color:#123540;box-shadow:0 6px 24px #06273155;
+}
+.sd-map-light label {display:grid;gap:4px;font-size:13px}
+.sd-map-light :is(select,input,button) {min-height:36px;font:inherit;color:inherit;background:transparent;border:1px solid #7499a5;border-radius:8px;max-width:100%}
+.sd-live-cockpit.rg-smartdrive-map:has([data-map-theme=night]) :is(.sd-session-panel,.sd-permanent-bottom,.sd-stop-guidance,.sd-map-light,.rg-navigation-sidebar,.sd-planned-summary) {
+  background:#102832;color:#e7f4f7;border-color:#304d58;
+}
+.sd-live-cockpit.rg-smartdrive-map:has([data-map-theme=night]) :is(.sd-session-heading,.sd-session-summary,.sd-route-glance,.rg-navigation-sidebar) :is(dt,dd,small,strong,p,.sd-route-remaining) {color:#d9edf1}
+.sd-trip-review {
+  position:fixed;inset:auto 12px max(12px,env(safe-area-inset-bottom));margin:0 auto;width:min(460px,calc(100% - 24px));
+  max-height:80dvh;overflow:auto;border:1px solid #a8c0c8;border-radius:22px;padding:20px;
+  background:var(--color-surface,#f4f9fa);color:var(--color-text,#13303c);
+}
+.sd-trip-review::backdrop {background:#0719238a}
+.sd-trip-review dl {display:flex;gap:24px}
+.sd-trip-review dd {margin:4px 0;font-size:22px;font-weight:700}
+.sd-trip-review button {min-height:44px;margin:4px;padding:6px 12px}
+.sd-route-strip {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 12px;border-bottom:1px solid #aac2ca55}
+.sd-route-arrival {display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sd-route-arrival strong {font-size:clamp(19px,5vw,25px)}
+.sd-route-arrival span {font-size:12px}
+.sd-live-cockpit.rg-smartdrive-map .sd-route-strip .sd-stop-guidance {width:auto;border:1px solid #7499a566;padding:5px 9px;font-size:clamp(11px,3.5vw,13px)}

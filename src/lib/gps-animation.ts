@@ -32,3 +32,23 @@ export function cameraTurnProgress(progress:number){
  const t=Math.max(0,Math.min(1,progress));
  return t*t*(3-2*t);
 }
+
+
+/** Prepare distance-based interpolation along a confirmed road polyline. */
+export function prepareRoadInterpolation(points: readonly number[][]) {
+ const lengths=points.slice(1).map(([longitude,latitude],index)=>segmentMeters({longitude,latitude},{longitude:points[index][0],latitude:points[index][1]}));
+ const total=lengths.reduce((sum,length)=>sum+length,0);
+ return (progress:number)=>{
+  let remaining=Math.max(0,Math.min(1,progress))*total;
+  for(let i=0;i<lengths.length;i++){
+   const length=lengths[i];
+   if(length>0&&remaining<=length){
+    const fraction=remaining/length, [lon,lat]=points[i], [endLon,endLat]=points[i+1];
+    return {longitude:lon+(endLon-lon)*fraction,latitude:lat+(endLat-lat)*fraction};
+   }
+   remaining-=length;
+  }
+  const [longitude,latitude]=points.at(-1)!;
+  return {longitude,latitude};
+ };
+}
