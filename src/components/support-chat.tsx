@@ -3,6 +3,7 @@ import {Capacitor} from '@capacitor/core';
 import {activateNativePush} from '@/lib/native-push-client';
 import {requestConfirmation} from '@/components/premium-dialogs';
 
+import { supportCategories } from '@/lib/support-categories';
 import {FilterSelect} from '@/components/filter-select';
 
 import { SupportCustomerPanel, SupportStatistics } from './support-operations';
@@ -31,9 +32,13 @@ import {
   LogIn,
   LoaderCircle,
   RefreshCw,
+  Copy,
+  Reply,
+  Camera,
   UserRound,
   X,
 } from 'lucide-react';
+export type Availability = { state: 'available'|'busy'|'offline'|'break'|'after_hours'|'maintenance'; message: { ro: string; en: string } };
 type Thread = {
   id: string;
   userId: string;
@@ -44,6 +49,9 @@ type Thread = {
   updatedAt: string;
   createdAt: string;
   workingAt?: string | null;
+  category?: string;
+  language?: string | null;
+  platform?: string | null;
   assignedTo?: string | null;
   unreadCount?: number;
   priority?: string | null;
@@ -76,10 +84,10 @@ const roles: Record<string, string> = {
   superadmin: 'Super Administrator',
   system: 'Sistem',
 };
-async function request(path: string, method = 'GET', data?: unknown) {
+async function supportRequest(accountId: string | undefined, path: string, method = 'GET', data?: unknown) {
   const r = await fetch('/api/v1/support/chat' + path, {
     method,
-    headers: data ? { 'Content-Type': 'application/json' } : undefined,
+    headers: { ...(data ? { 'Content-Type': 'application/json' } : {}), ...(accountId ? { 'X-AutoCare-Account': accountId } : {}) },
     body: data ? JSON.stringify(data) : undefined,
     cache: 'no-store',
   });
@@ -101,18 +109,37 @@ export default function SupportChat({
   onFeedback,
   historyView = false,
   onOpenConversation,
+  accountId,
+  onAvailability,
 }: {
   role: string;
   preview?: boolean;
   onFeedback?:()=>void;
   historyView?:boolean;
   onOpenConversation?:()=>void;
+  accountId?: string;
+  onAvailability?: (value: Availability) => void;
 }) {
 
   const locale=useApplicationLocale();
+  async function request(path: string, method = 'GET', data?: unknown) {
+    try {
+      return await supportRequest(accountId, path, method, data);
+    } catch (cause) {
+      if (cause instanceof Error && cause.message === 'SESSION_CHANGED') {
+        document.documentElement.style.visibility = 'hidden';
+        window.location.reload();
+      }
+      throw cause;
+    }
+  }
   const en=locale==='en-GB',t=(ro:string,english:string)=>en?english:ro;
   const [view,setView]=useState<'inbox'|'statistics'>('inbox');
   const workspace=useRef<HTMLElement>(null);
+  const sendLock = useRef(false);
+  const draftIds = useRef(new Map<string, string>());
+  const drafts = useRef(new Map<string, string>());
+  const cameraInput=useRef<HTMLInputElement>(null);
   const composerInput=useRef<HTMLTextAreaElement>(null);
   const attachmentInput=useRef<HTMLInputElement>(null);
 const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
@@ -124,10 +151,15 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     [query, setQuery] = useState(''),
     [priorityFilter, setPriorityFilter] = useState(''),
     [assigneeFilter, setAssigneeFilter] = useState(''),
+    [categoryFilter, setCategoryFilter] = useState(''),
+    [languageFilter, setLanguageFilter] = useState(''),
+    [platformFilter, setPlatformFilter] = useState(''),
+    [category, setCategory] = useState<keyof typeof supportCategories>('other'),
     [unreadOnly, setUnreadOnly] = useState(false),
     [profileOpen, setProfileOpen] = useState(false),
     [text, setText] = useState(''),
     [error, setError] = useState(''),
+    [connectionError, setConnectionError] = useState(''),
     [notice, setNotice] = useState(''),
     [busy, setBusy] = useState(false),
     [loading, setLoading] = useState(!preview),
@@ -137,6 +169,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   useEffect(()=>{if(!notice)return;const timer=setTimeout(()=>setNotice(''),5000);return()=>clearTimeout(timer);},[notice]);
   const [team, setTeam] = useState<{ id: string; name: string; role: string }[]>([]);
   const [selfId, setSelfId] = useState('');
+  const [reply, setReply] = useState<Message | null>(null);
   const [serverQuery, setServerQuery] = useState('');
   const queryRef = useRef('');
   const jumpTo = useRef<string | null>(null);
@@ -175,7 +208,12 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   }
   async function openThread(thread: Thread, announce = true) {
     const turn = ++epoch.current;
-    if (selectedRef.current !== thread.id) setText('');
+    if (selectedRef.current !== thread.id) {
+      const previousKey = selectedRef.current ?? 'new';
+      if (composerInput.current?.value) drafts.current.set(previousKey, composerInput.current.value);
+      setText(drafts.current.get(thread.id) ?? '');
+      setReply(null);
+    }
     setDetail(null);
     setProfileOpen(false);
     selectedRef.current = thread.id;
@@ -206,8 +244,15 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     const currentStatus = statusRef.current;
     const currentQuery = queryRef.current;
     try {
-      const out = await request('?' + new URLSearchParams({ status: currentStatus, ...(staff && currentQuery ? { q: currentQuery } : {}) }));
+      const out = await request('?' + new URLSearchParams({ status: currentStatus, ...(currentQuery ? { q: currentQuery } : {}) }));
       if (currentStatus !== statusRef.current || currentQuery !== queryRef.current) return;
+      if (accountId && (out.selfId !== accountId || out.role !== role && !(out.role === 'user' && !staff))) {
+        document.documentElement.style.visibility = 'hidden';
+        window.location.reload();
+        return;
+      }
+      setConnectionError('');
+      onAvailability?.(out.availability);
       setThreads(out.threads);
       if (out.selfId) setSelfId(out.selfId);
       setCounts(out.counts);
@@ -234,6 +279,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         }
         notifiedMessages.current=next;notificationBaseline.current=true;
       }
+      if (!selectedRef.current && !jumpTo.current && (sendLock.current || drafts.current.get('new')?.trim())) return;
       const current =
         out.threads.find((t: Thread) => t.id === (jumpTo.current || selectedRef.current)) || out.threads[0];
       const jumped = current?.id && jumpTo.current === current.id;
@@ -262,7 +308,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         }
       }
     } catch (e) {
-      setError((e as Error).message);
+      setConnectionError((e as Error).message);
     } finally {
       setLoading(false);
       polling.current = false;
@@ -274,24 +320,29 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     void refresh();
     if (preview) return;
     const timer = setInterval(() => {
-      if (!document.hidden && navigator.onLine) void refresh();
-    }, 4000);
+      if (!document.hidden && navigator.onLine && (!historyView || staff)) void refresh();
+    }, 6500);
     const onFocus = () => { if (!document.hidden && navigator.onLine) void refresh(); };
+    const offline = () => setConnectionError(t('Conexiune indisponibilă. Mesajul rămâne în editor.', 'Connection unavailable. Your draft stays in the editor.'));
     window.addEventListener('focus', onFocus);
+    window.addEventListener('online', onFocus);
+    window.addEventListener('offline', offline);
     document.addEventListener('visibilitychange', onFocus);
     return () => {
       window.removeEventListener('focus', onFocus);
+      window.removeEventListener('online', onFocus);
+      window.removeEventListener('offline', offline);
       document.removeEventListener('visibilitychange', onFocus);
       clearInterval(timer);
       ++epoch.current;
     };
-  }, [status, preview, serverQuery, selfId]);
+  }, [status, preview, serverQuery, historyView, accountId]);
   useEffect(() => {
     if (typeof Notification !== 'undefined') notificationEnabled.current = Notification.permission === 'granted';
   }, [staff]);
   useEffect(() => {
     if (!staff || preview) return;
-    void fetch('/api/v1/support/team')
+    void fetch('/api/v1/support/team', { cache: 'no-store', headers: accountId ? { 'X-AutoCare-Account': accountId } : undefined })
       .then(async (r) => {
         if (r.ok) { const result = await r.json(); setTeam(result.team); setSelfId(result.selfId); }
       })
@@ -355,18 +406,29 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   }, [lastId, selected]);
   async function send(e: FormEvent) {
     e.preventDefault();
-    if (!text.trim() || busy || (staff && !canWrite) || (!staff && status === 'trashed')) return;
+    if (!text.trim() || busy || sendLock.current || (staff && !canWrite) || (!staff && status === 'trashed')) return;
     if (preview) {
       setNotice('Previzualizare de design: mesajele nu sunt trimise.');
       return;
     }
+    sendLock.current = true;
     setBusy(true);
     setError('');
     try {
+      const conversationId = selected && detail?.thread.status === 'open' ? selected : undefined;
+      const draftKey = selected ?? 'new';
+      const content = reply ? '↪ ' + reply.authorName + ': ' + reply.body.slice(0, 210).replace(/\s+/g, ' ') + '\n\n' + text.trim() : text.trim();
+      if (content.length > 4000) throw new Error(t('Scurtează mesajul pentru a include citatul.', 'Shorten the message to include the quote.'));
+      const payloadKey = JSON.stringify([conversationId, content]);
+      const clientId = draftIds.current.get(payloadKey) ?? crypto.randomUUID();
+      draftIds.current.set(payloadKey, clientId);
       const out = await request('', 'POST', {
-        message: text.trim(),
-        ...(selected && detail?.thread.status === 'open' ? { conversationId: selected } : {}),
+        message: content, conversationId, clientId, language: en ? 'en' : 'ro',
+        ...(!staff && !conversationId ? { category, platform: Capacitor.getPlatform() } : {}),
       });
+      draftIds.current.delete(payloadKey);
+      drafts.current.delete(draftKey);
+      setReply(null);
       setText('');
       if (selected) void request('/' + selected + '/typing', 'POST', { typing: false }).catch(() => {});
       typingAt.current = 0;
@@ -382,6 +444,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      sendLock.current = false;
       setBusy(false);
     }
   }
@@ -405,6 +468,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               : 'Conversația a fost redeschisă.',
       );
       delete more.current[thread.id];
+      drafts.current.delete(thread.id);
       await refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -432,6 +496,9 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   const visible = threads.filter(thread =>
     (!unreadOnly || !!thread.unreadCount) &&
     (!priorityFilter || (thread.priority ?? 'normal') === priorityFilter) &&
+    (!categoryFilter || thread.category === categoryFilter) &&
+    (!languageFilter || thread.language === languageFilter) &&
+    (!platformFilter || thread.platform === platformFilter) &&
     (!assigneeFilter || (assigneeFilter === 'mine' ? !!selfId && thread.assignedTo === selfId : !thread.assignedTo)),
   );
   const canWrite = staff
@@ -443,11 +510,28 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       if (!document.hidden && navigator.onLine) void request('/' + selected + '/typing', 'POST', {}).catch(() => {});
     };
     ping();
-    const timer = setInterval(ping, 20000);
+    const timer = setInterval(ping, 26000);
     return () => clearInterval(timer);
   }, [staff, canWrite, selected, preview]);
+  useEffect(() => {
+    if (!staff || preview) return;
+    const ping = () => {
+      if (document.hidden || !navigator.onLine) return;
+      void fetch('/api/v1/support/presence', {
+        method: 'POST', cache: 'no-store',
+        headers: { 'Content-Type': 'application/json', ...(accountId ? { 'X-AutoCare-Account': accountId } : {}) },
+        body: JSON.stringify({ busy: Boolean(canWrite) }),
+      }).then(response => {
+        if (!response.ok && response.status !== 429) setNotice(t('Disponibilitatea echipei nu s-a putut actualiza.', 'Could not update team availability.'));
+      }).catch(() => setNotice(t('Disponibilitatea echipei nu s-a putut actualiza.', 'Could not update team availability.')));
+    };
+    ping();
+    const timer = window.setInterval(ping, 22000);
+    return () => window.clearInterval(timer);
+  }, [staff, preview, canWrite, accountId]);
   function updateText(value: string) {
     setText(value);
+    drafts.current.set(selected ?? 'new', value);
     if (!selected || preview || detail?.thread.status !== 'open' || !canWrite) return;
     const now = Date.now();
     if (value.trim() && now - typingAt.current < 3500) return;
@@ -531,6 +615,19 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             </details>
             <button type="button" className="support-stats-trigger" onClick={()=>setView('statistics')}><BarChart3 size={15}/>{t('Statistici','Statistics')}</button>
           </div>
+          <details className="sc-inbox-filters">
+            <summary>{t('Categorie, limbă, platformă', 'Category, language, platform')}</summary>
+            <label>{t('Categorie','Category')}<FilterSelect value={categoryFilter} onChange={event=>setCategoryFilter(event.target.value)}>
+              <option value="">{t('Toate','All')}</option>
+              {Object.entries(supportCategories).map(([key,value])=><option key={key} value={key}>{value[en ? 1 : 0]}</option>)}
+            </FilterSelect></label>
+            <label>{t('Limba','Language')}<FilterSelect value={languageFilter} onChange={event=>setLanguageFilter(event.target.value)}>
+              <option value="">{t('Toate','All')}</option><option value="ro">Română</option><option value="en">English</option>
+            </FilterSelect></label>
+            <label>{t('Platformă','Platform')}<FilterSelect value={platformFilter} onChange={event=>setPlatformFilter(event.target.value)}>
+              <option value="">{t('Toate','All')}</option><option value="web">Web</option><option value="android">Android</option><option value="ios">iOS</option>
+            </FilterSelect></label>
+          </details>
           <div className="support-thread-list">
             {loading ? (
               <p className="support-placeholder">Se încarcă conversațiile…</p>
@@ -576,11 +673,12 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       )}
       <div className="support-chat-panel" data-history={!staff&&historyView || undefined}>
         {!staff && historyView && <section className="support-request-list" aria-label={t('Cererile mele', 'My requests')}>
+          <label className="sc-history-search"><Search size={16}/><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={t('Caută conversațiile tale','Search your conversations')} aria-label={t('Caută conversații','Search conversations')} /></label>
           {loading ? <p role="status">{t('Se încarcă…', 'Loading…')}</p> : threads.length ? threads.map(thread => (
             <button type="button" key={thread.id} onClick={() => { void openThread(thread, false); onOpenConversation?.(); }}>
               <span className="support-request-icon"><CarFront size={22} aria-hidden="true"/></span>
               <span className="support-request-content">
-                <strong data-user-content>{thread.title}</strong>
+                <strong data-user-content>{thread.title}</strong><small>{supportCategories[thread.category as keyof typeof supportCategories]?.[en ? 1 : 0]}</small>
                 {thread.lastMessage && <span className="support-request-excerpt" data-user-content>{thread.lastMessage.body}</span>}
               </span>
               <span className="support-request-meta">
@@ -732,10 +830,10 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         {staff && current?.assignedTo && current.assignedTo !== selfId && (
           <div className="support-notice" role="status">Conversația este preluată de {team.find((person) => person.id === current.assignedTo)?.name || 'alt membru al echipei'}. O poți consulta, dar nu poți răspunde.</div>
         )}
-        {error && (
+        {(error || connectionError) && (
           <div role="alert" className="support-error">
-            {error}
-            <button onClick={() => void refresh()} aria-label="Reîncearcă încărcarea">
+            {error || connectionError}
+            <button onClick={() => void refresh()} aria-label={t('Reîncearcă încărcarea','Retry loading')}>
               <RefreshCw size={15} />
             </button>
           </div>
@@ -768,7 +866,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             detail.messages.map((message,index) => <Fragment key={message.id}>{(index===0||new Date(detail.messages[index-1].createdAt).toLocaleDateString(locale)!==new Date(message.createdAt).toLocaleDateString(locale))&&<div className="support-day-divider"><time dateTime={message.createdAt}>{new Date(message.createdAt).toLocaleDateString(locale)===new Date().toLocaleDateString(locale)?t('Azi','Today'):new Date(message.createdAt).toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric'})}</time></div>}{message.authorRole === 'system' ? (
                 <div className="support-system-message" key={message.id}>
                   <ShieldCheck size={14} />
-                  <span data-user-content>{message.body}</span>
+                  <span className="support-auto-label">{t('Mesaj automat','Automated message')}</span><span data-user-content>{message.body}</span>
                   <time>
                     {new Date(message.createdAt).toLocaleTimeString(locale, {
                       hour: '2-digit',
@@ -788,10 +886,19 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                   <div className="support-message-meta">
                     <strong>{message.authorName}</strong>
                     <span className={'support-rank rank-' + message.authorRole}>
-                      {roles[message.authorRole] || 'Client'}
+                      {en ? ({user:'Customer',assistant:'Agent',admin:'Administrator',founder:'Founder',superadmin:'Super Administrator'}[message.authorRole] ?? 'Customer') : roles[message.authorRole] || 'Client'}
                     </span>
                   </div>
                   <p data-user-content>{message.body}</p>
+                  <div className="sc-message-actions">
+                    <button type="button" aria-label={t('Copiază mesajul','Copy message')} onClick={()=>{
+                      void navigator.clipboard.writeText(message.body).then(()=>setNotice(t('Mesaj copiat.','Message copied.')))
+                        .catch(()=>setError(t('Mesajul nu a putut fi copiat.','Could not copy the message.')));
+                    }}><Copy size={13}/></button>
+                    {canWrite && detail.thread.status === 'open' && <button type="button" aria-label={t('Citează mesajul','Quote message')} onClick={()=>{
+                      setReply(message);requestAnimationFrame(()=>composerInput.current?.focus());
+                    }}><Reply size={14}/></button>}
+                  </div>
                   {detail.attachments
                     ?.filter((f) => f.messageId === message.id)
                     .map((f) => (
@@ -832,7 +939,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             </div>
           )}
         </div>
-        {detail?.typing && <p className="support-typing-label" role="status">{staff ? 'Clientul scrie…' : 'Operatorul scrie…'}</p>}
+        {detail?.typing && <p className="support-typing-label" role="status">{staff ? t('Clientul scrie…','Customer is typing…') : t('Operatorul scrie…','Agent is typing…')}</p>}
         {!staff && current?.status === 'completed' && (
           <section className="support-rating" aria-label="Evaluează conversația">
             <strong>{detail?.rating ? 'Evaluarea ta: ' + detail.rating + '/5' : 'Cum a fost experiența cu suportul?'}</strong>
@@ -847,28 +954,42 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                 ? 'Selectează o conversație activă pentru a răspunde.'
                 : current.status === 'trashed'
                   ? 'Conversația este în coș. Restaureaz-o pentru a o administra.'
-                  : 'Conversație finalizată. O poți redeschide din acțiuni.'}
+                  : current.status === 'completed' ? t('Conversație finalizată. O poți redeschide din acțiuni.', 'Completed conversation. Reopen it from the actions menu.')
+                  : current.assignedTo === selfId ? t('Intră în conversație ca să răspunzi.', 'Join the conversation to reply.')
+                  : t('Preia conversația înainte să răspunzi.', 'Take ownership of the conversation to reply.')}
             </span>
           </footer>
         ) : (
-          <form className="support-composer" onSubmit={send}>
+          <form className="support-composer" onSubmit={send} aria-busy={busy}>
+            {!staff && detail?.thread.status !== 'open' && <label className="sc-new-category">
+              {t('Cu ce te putem ajuta?', 'What can we help you with?')}
+              <FilterSelect value={category} onChange={event=>setCategory(event.target.value as keyof typeof supportCategories)}>
+                {Object.entries(supportCategories).map(([key, value])=><option key={key} value={key}>{value[en ? 1 : 0]}</option>)}
+              </FilterSelect>
+            </label>}
             {!staff && detail?.thread.status === 'completed' && (
               <p className="support-composer-hint">
                 Solicitarea anterioară a fost finalizată. Un mesaj nou deschide o conversație nouă.
               </p>
             )}
+            {reply && <section className="sc-quoted" aria-label={t('Mesaj citat','Quoted message')}>
+              <span data-user-content>{reply.authorName} · {reply.body.slice(0,120)}</span>
+              <button type="button" aria-label={t('Elimină citatul','Remove quote')} onClick={()=>setReply(null)}><X size={15}/></button>
+            </section>}
             {staff && <details className="support-quick-reply-menu"><summary>{t('Răspuns rapid','Quick reply')}</summary><label className="support-quick-reply"><span className="sr-only">Răspuns rapid</span>
               <FilterSelect value="" onChange={event => { if (event.target.value) setText(previous => previous ? previous + '\n' + event.target.value : event.target.value); }}>
-                <option value="">Alege un răspuns</option>
-                <option value="Bună ziua! Îți mulțumim pentru mesaj. Cum te putem ajuta?">Salut și preluare</option>
-                <option value="Ne poți spune în ce secțiune apare problema și ce mesaj vezi pe ecran?">Cere detalii</option>
-                <option value="Dacă mai ai nevoie de ajutor, scrie-ne aici. Îți mulțumim!">Încheiere</option>
+                <option value="">{t('Alege un răspuns', 'Choose a reply')}</option>
+                <option value={t('Bună ziua! Îți mulțumim pentru mesaj. Cum te putem ajuta?', 'Hello! Thank you for reaching out. How can we help?')}>{t('Salut și preluare','Greeting')}</option>
+                <option value={t('Ne poți spune în ce secțiune apare problema și ce mesaj vezi pe ecran?', 'Which section are you in, and what message do you see?')}>{t('Cere detalii','Request information')}</option>
+                <option value={t('Am înregistrat problema. Verificăm pașii și îți scriem când avem o actualizare.', 'We’ve logged the issue and will follow up here with an update.')}>{t('Confirmare problemă','Acknowledge issue')}</option>
+                <option value={t('Poți încerca din nou și să ne spui dacă problema se mai reproduce?', 'Could you try again and let us know if the problem still occurs?')}>{t('Verificare remediere','Verify resolution')}</option>
+                <option value={t('Dacă mai ai nevoie de ajutor, scrie-ne aici. Îți mulțumim!', 'If you need anything else, write to us here. Thank you!')}>{t('Încheiere','Closing')}</option>
               </FilterSelect>
             </label></details>}
             <div>
               <div className="support-input-shell"><textarea ref={composerInput}
                 disabled={busy || preview}
-                aria-label="Mesaj către suport"
+                aria-label={t('Mesaj către suport','Support message')}
                 placeholder={staff ? t('Scrie un răspuns clientului…','Write a reply…') : t('Scrie un mesaj…','Write a message…')}
                 value={text}
                 onChange={e => updateText(e.target.value)}
@@ -889,10 +1010,15 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                   }}
                 />
               </label>}
+              <input ref={cameraInput} type="file" accept="image/*" capture="environment" hidden onChange={event=>{
+                const file=event.target.files?.[0];if(file) void upload(file);event.target.value='';
+              }}/>
+              <button type="button" className="sc-camera" aria-label={t('Fotografiază','Take photo')} disabled={busy || preview || !selected || detail?.thread.status!=='open'}
+                onClick={()=>cameraInput.current?.click()}><Camera size={18}/></button>
 </div>
               <button
                 className="primary"
-                aria-label="Trimite mesajul"
+                aria-label={t('Trimite mesajul','Send message')}
                 type="submit"
                 disabled={busy || preview || !text.trim()}
               >

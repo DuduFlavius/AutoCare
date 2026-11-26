@@ -375,10 +375,11 @@ test('09 Private attachment authentication, ownership, MIME and size checks', as
     title: 'Fișier',
     vehicleId: car.id,
   });
-  const file = await svc.uploadFile(uid, r.id, {
-    name: 'test.pdf',
-    bytes: Buffer.from('%PDF-1.4 test-only'),
-  });
+  const upload = { uploadId: crypto.randomUUID(), name: 'test.pdf', bytes: Buffer.from('%PDF-1.4 test-only') };
+  const file = await svc.uploadFile(uid, r.id, upload);
+  assert.equal(file.id, upload.uploadId);
+  assert.equal((await svc.uploadFile(uid, r.id, upload)).id, file.id);
+  await assert.rejects(() => svc.uploadFile(uid, r.id, { ...upload, name: 'different.pdf' }), { status: 409 });
   assert.equal((await svc.getFile(uid, file.id)).name, 'test.pdf');
   await assert.rejects(() => svc.getFile(other, file.id));
   assert.throws(() => svc.detectMime(Buffer.from('<script>alert(1)</script>')));
@@ -521,6 +522,12 @@ test('13 Server role checks and CSRF reject privilege escalation and foreign ori
   delete process.env.AUTOCARE_FOUNDER_USER_ID;
   assert.equal((await db().select().from(s.audit)).length, 1);
 });
+test('An old account workspace request is rejected when the session belongs to another account', async () => {
+  const req = new Request('http://localhost:3000/api/v1/support/chat', { headers: { Cookie: cookie, 'X-AutoCare-Account': other } });
+  const result = await GET(req, { params: Promise.resolve({ path: ['support','chat'] }) });
+  assert.equal(result.status, 409);
+  assert.deepEqual(await result.json(), {error:'SESSION_CHANGED'});
+});
 test('14 Verified delivery callback is distinct from provider acceptance', async () => {
   const n = (
     await db().select().from(s.notifications).where(eq(s.notifications.status, 'accepted'))
@@ -582,6 +589,11 @@ test('vehicle onboarding stores optional documents and rejects duplicate identif
   ]);
   await assert.rejects(()=>svc.createVehicle(id,{...input,plate:'tm43test',vin:null}),{status:409});
   await assert.rejects(()=>svc.createVehicle(id,{...input,plate:'TM44TEST'}),{status:409});
+  await db().insert(s.premiumGrants).values({id:crypto.randomUUID(),userId:id,note:'Garage test fixture'});
+  const noVin = await svc.createVehicle(id,{...input,plate:'TM44TEST',vin:null});
+  await svc.createVehicle(id,{...input,plate:'TM45TEST',vin:null});
+  await assert.rejects(()=>svc.editVehicle(id,noVin.id,{...input,plate:'TM44TEST'}),{status:409});
+  assert.equal((await svc.editVehicle(id,vehicle.id,{...input,vin:input.vin.toLowerCase()})).id,vehicle.id);
 });
 test('16 Vehicle photos stay private and reject document files', async () => {
   const png = Buffer.concat([

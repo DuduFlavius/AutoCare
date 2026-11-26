@@ -1,3 +1,8 @@
+import { recipientAllowed } from '@/lib/mail-policy';
+import { effectiveRole } from '@/lib/permissions';
+import { vehicleCatalog } from '@/lib/vehicle-catalog';
+import { documentSheet, documentSheetName } from '@/lib/document-sheet';
+import { updateSupportPresence, supportAvailabilitySettings } from '@/lib/support-availability';
 import { loadSpeedRoads } from '@/lib/road-speed-server';
 import {mileageOrder,mileageSeries} from '@/lib/mileage-history';
 import {mileageReport} from '@/lib/mileage-report';
@@ -165,7 +170,12 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       return json({ error: 'Autentifică-te și confirmă emailul.' }, 401);
     const uid = sess.user.id;
     await svc.assertActiveAccount(uid);
-    await rate(uid);
+    const expectedAccount = req.headers.get('x-autocare-account');
+    if (expectedAccount && expectedAccount !== uid) return json({ error: 'SESSION_CHANGED' }, 409);
+    if (path[0] === 'support') {
+      const background = method === 'GET' || ['read', 'typing', 'presence'].includes(path.at(-1) ?? '');
+      await rate(uid, background ? 'support-background' : 'support-write', background ? 160 : 40);
+    } else await rate(uid);
     if(path[0]==='feedback'){
       const params=new URL(req.url).searchParams;
       const publish=(result:{noticeIds:string[]})=>{if(result.noticeIds.length)after(()=>feedback.deliverFeedbackNotices(result.noticeIds).catch(()=>console.error(JSON.stringify({event:'feedback_notification_failed'}))));};
@@ -718,6 +728,10 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         });
       }
     }
+    if (route === 'vehicles/catalog' && method === 'GET') {
+      await rate(uid, 'vehicle-catalog', 20);
+      return json(await vehicleCatalog(new URL(req.url).searchParams));
+    }
     if (path[0] === 'vehicles') {
       if (method === 'POST' && path.length === 1)
         return json(await svc.createVehicle(uid, await body(req)), 201);
@@ -727,6 +741,23 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         await svc.archiveVehicle(uid, uuid.parse(path[1]));
         return json({ ok: true });
       }
+    }
+    if (path[0] === 'records' && path.length === 3 && path[2] === 'sheet' && method === 'GET') {
+      const record = await svc.ownedRecord(uid, uuid.parse(path[1]));
+      if (record.kind !== 'document') throw new svc.AppError(404, 'Document inexistent.');
+      const [vehicle, profile] = await Promise.all([svc.ownedVehicle(uid, record.vehicleId), svc.profile(uid)]);
+      const params = new URL(req.url).searchParams;
+      const language = z.enum(['ro','en']).optional().parse(params.get('language') ?? undefined) ?? languageCookie(req.headers.get('cookie')) ?? await userLanguage(uid);
+      const currency = accountDisplayCurrency(language, await readCurrencyPreference(uid));
+      const rate = currency === 'EUR' && record.amountKnown ? await latestExchangeRate() : null;
+      const pdf = await documentSheet(record, vehicle, { language, currency, rate, timezone: profile.timezone });
+      return new Response(new Uint8Array(pdf), { headers: {
+        'Content-Type':'application/pdf',
+        'Content-Disposition':documentDisposition(documentSheetName(record.category, vehicle.plate, language), params.get('view') === '1'),
+        'Cache-Control':'private, no-store',
+        'X-Content-Type-Options':'nosniff',
+        'X-Robots-Tag':'noindex',
+      } });
     }
     if (path[0] === 'records') {
       if (method === 'DELETE' && path.length === 3 && path[2] === 'permanent') { const input=z.object({confirmation:z.literal('DELETE'),revision:z.number().int().positive()}).strict().parse(await body(req)); return json(await svc.deleteRecord(uid,uuid.parse(path[1]),input.revision)); }
@@ -764,6 +795,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       return json(
         await svc.uploadFile(uid, uuid.parse(f.get('recordId')), {
           name: file.name,
+          uploadId: f.has('uploadId') ? uuid.parse(f.get('uploadId')) : undefined,
           bytes: Buffer.from(await file.arrayBuffer()),
         }),
         201,
@@ -1088,6 +1120,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           .where(eq(s.invoices.userId, uid))
           .orderBy(desc(s.invoices.createdAt)),
       );
+    if (route === 'support/availability' && method === 'GET') return json(await supportAvailabilitySettings(uid));
+    if (route === 'support/availability' && method === 'PUT') return json(await supportAvailabilitySettings(uid, await body(req)));
+    if (route === 'support/presence' && method === 'POST') return json(await updateSupportPresence(uid, await body(req)));
     if (route === 'support/statistics' && method === 'GET') return json(await supportChat.supportStatistics(uid));
     if (route === 'support/guide' && method === 'POST') {
       await rate(uid, 'support-guide-day', 5, 86400000);
@@ -1153,6 +1188,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         );
       if (path.length === 2 && method === 'POST') {
         const result = await supportChat.sendSupportMessage(uid, await body(req));
+        if ('duplicate' in result && result.duplicate) return json(result);
         // Push is best-effort: never fail or duplicate a saved message because delivery failed.
         try {
           const messageResult = result as { threadId: string; message: { id: string } };
@@ -1165,13 +1201,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               ? thread.assignedTo
                 ? [thread.assignedTo]
                 : (await db().select({ userId: s.profiles.userId, role: s.profiles.role }).from(s.profiles))
-                    .filter((p) => supportChat.isSupportStaff(p.role)).map((p) => p.userId)
+                    .filter((p) => supportChat.isSupportStaff(effectiveRole(p.userId,p.role))).map((p) => p.userId)
               : [thread.userId];
             const recipientIds = [...new Set(recipients)].filter((id) => id !== uid);
-            const title = thread.userId === uid ? 'AutoCare · Mesaj nou pentru suport' : 'AutoCare · Răspuns de la suport';
-            const bodyText = thread.userId === uid
-              ? 'A sosit un mesaj nou în Centrul de suport.'
-              : 'Echipa AutoCare ți-a răspuns în Centrul de suport.';
             const users = recipientIds.length
               ? await db().select({
                   id: s.user.id, name: s.user.name, email: s.user.email, verified: s.user.emailVerified,
@@ -1182,19 +1214,31 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
             await Promise.allSettled(users.map(async (user) => {
               const tasks: Promise<unknown>[] = [];
               if (!(await accountPreferences(user.id)).alerts.chat) return;
+              const language = await userLanguage(user.id);
+              const en = language === 'en';
+              const incoming = thread.userId === uid;
+              const title = incoming ? (en ? 'AutoCare · New support message' : 'AutoCare · Mesaj nou pentru suport')
+                : (en ? 'AutoCare · Support reply' : 'AutoCare · Răspuns de la suport');
+              const bodyText = incoming
+                ? (en ? 'A new message arrived in the support inbox.' : 'A sosit un mesaj nou în Centrul de suport.')
+                : (en ? 'The AutoCare team has replied in your support conversation.' : 'Echipa AutoCare ți-a răspuns în Centrul de suport.');
               if (user.pushEnabled) tasks.push(sendPushNotification(user.id, {
                 id: 'support-' + messageResult.message.id, title, body: bodyText,
               }));
-              if (user.emailEnabled && user.verified) tasks.push(sendMail(
-                user.email, title,
-                bodyText + '\n\nDeschide AutoCare: ' + origin() + '/cont?tab=Centru%20de%20suport\n\nPoți dezactiva notificările e-mail din Setări.',
-                'support/' + messageResult.message.id + '/' + user.id,
-                renderEmail('administrative', {name:user.name,subject:title,message:bodyText,ctaLabel:'Vezi mesajul de suport',ctaPath:'/cont?tab=Centru%20de%20suport'}),
-              ));
-              await Promise.allSettled(tasks);
+              if (user.emailEnabled && user.verified && !('routesThroughMailStudio' in result && result.routesThroughMailStudio) &&
+                await recipientAllowed(user.id, 'transactional', false, 'support_reply')) {
+                const content = renderEmail('support_reply', {
+                  name:user.name, language, subject:title, message:bodyText,
+                  ctaLabel:en ? 'View support message' : 'Vezi mesajul de suport', ctaPath:'/cont?tab=Centru%20de%20suport',
+                });
+                tasks.push(sendMail(user.email, title, content.text,
+                  'support/' + messageResult.message.id + '/' + user.id, content, {userId:user.id, template:'support_reply'}));
+              }
+              const results = await Promise.allSettled(tasks);
+              if (results.some(task => task.status === 'rejected')) console.error(JSON.stringify({ event: 'support_notification_failed', messageId: messageResult.message.id }));
             }));
           }
-        } catch { /* A push failure must not affect a successfully saved message. */ }
+        } catch { console.error(JSON.stringify({ event: 'support_notification_dispatch_failed' })); }
         return json(result, 201);
       }
       if (path.length === 3 && method === 'GET')

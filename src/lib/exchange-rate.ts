@@ -45,3 +45,10 @@ export function currencyRateLabel(language: 'ro' | 'en', rate: ExchangeRate | nu
   const value = new Intl.NumberFormat(locale, {maximumFractionDigits:6}).format(Number(rate.ronPerEuro));
   return language === 'en' ? `Indicative ECB rate · ${date} · 1 EUR = ${value} RON` : `Curs orientativ BCE · ${date} · 1 EUR = ${value} RON`;
 }
+
+export function ronBaniFromEuroCents(cents: number, rate: ExchangeRate): number {
+  const decimals = rate.ronPerEuro.split('.')[1].length;
+  const scale = 10n ** BigInt(decimals);
+  const rateUnits = BigInt(rate.ronPerEuro.replace('.', ''));
+  return Number((2n * BigInt(cents) * rateUnits + scale) / (2n * scale));
+}

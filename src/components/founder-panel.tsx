@@ -28,6 +28,10 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import SupportChat from './support-chat';
+import SupportAvailabilitySettings from './support-availability-settings';
+import './application/signature-support.css';
+import './signature-form.css';
+import './founder-signature.css';
 import './founder-responsive-layout.css';
 import BillingCatalogAudit from './billing-catalog-audit';
 import SearchConsoleSettings from './search-console-settings';
@@ -107,8 +111,16 @@ function Pagination({
     </div>
   );
 }
-export default function FounderPanel({ initial, name }: { initial: Overview; name: string }) {
+export default function FounderPanel({ initial, name, accountId }: { initial: Overview; name: string; accountId: string }) {
 
+  const [sectionQuery, setSectionQuery] = useState('');
+  const [appearance, setAppearance] = useState<'auto'|'light'|'dark'>('auto');
+  useEffect(() => {
+    try {
+      const value = localStorage.getItem('autocare:founder-theme');
+      if (value === 'light' || value === 'dark') setAppearance(value);
+    } catch { /* Optional browser preferences. */ }
+  }, []);
   const locale=useApplicationLocale();
   const money=(b:number)=>formatMoney(b,locale);
 const [tab, setTab] = useState('Utilizatori'),
@@ -207,8 +219,13 @@ const [tab, setTab] = useState('Utilizatori'),
     setQuery(q);
     setPage(1);
   }
+  const searchInput = <label className="founder-tool-search"><Search size={17} aria-hidden="true" />
+    <span className="sr-only">{locale === 'en-GB' ? 'Find a section' : 'Caută o secțiune'}</span>
+    <input type="search" value={sectionQuery} onChange={event=>setSectionQuery(event.target.value)}
+      placeholder={locale === 'en-GB' ? 'Find a section…' : 'Caută o secțiune…'} />
+  </label>;
   return (
-    <div className="founder-shell" data-language={locale.startsWith('en')?'en':'ro'}>
+    <div className="founder-shell founder-signature" data-appearance={appearance} data-language={locale.startsWith('en')?'en':'ro'}>
       <aside className="founder-sidebar">
         <a href="/cont" className="founder-brand">
           <span>
@@ -219,9 +236,11 @@ const [tab, setTab] = useState('Utilizatori'),
         <div className="founder-owner">
           <span className="founder-owner-dot" /> SPAȚIUL FONDATORULUI
         </div>
+        {searchInput}
         <nav aria-label="Panou Fondator">
-          {nav.map(([label, Icon]) => (
+          {nav.filter(([label])=>label.toLocaleLowerCase().includes(sectionQuery.trim().toLocaleLowerCase())).map(([label, Icon]) => (
             <button
+              aria-current={tab === label ? 'page' : undefined}
               className={tab === label ? 'active' : ''}
               key={label}
               onClick={() => navigate(label)}
@@ -255,6 +274,14 @@ const [tab, setTab] = useState('Utilizatori'),
           <span className="founder-role-badge">
             <Shield size={14} /> Fondator
           </span>
+          <label className="founder-appearance">
+            <span className="sr-only">{locale === 'en-GB' ? 'Founder appearance' : 'Aspect Panou Fondator'}</span>
+            <select value={appearance} onChange={event=>{
+              const value=event.target.value as typeof appearance;
+              setAppearance(value);
+              try { localStorage.setItem('autocare:founder-theme',value); } catch { /* Optional browser preferences. */ }
+            }}><option value="auto">Auto</option><option value="light">Platinum Light</option><option value="dark">Graphite Dark</option></select>
+          </label>
         </header>
         {error && (
           <div role="alert" className="error">
@@ -930,7 +957,10 @@ const [tab, setTab] = useState('Utilizatori'),
             </div>
           </section>
         )}
-        {tab === 'Chat și suport' && <SupportChat role="founder" onFeedback={()=>setTab('Feedback utilizatori')} />}
+        {tab === 'Chat și suport' && <section className="founder-support-studio">
+          <SupportAvailabilitySettings accountId={accountId} />
+          <SupportChat accountId={accountId} role="founder" onFeedback={()=>setTab('Feedback utilizatori')} />
+        </section>}
         {tab==='Feedback utilizatori'&&<FeedbackWorkspace admin onExit={()=>setTab('Utilizatori')} onDirty={value=>{feedbackDirty.current=value;}} onSaving={value=>{feedbackSaving.current=value;}}/>}
         {tab === 'Jurnal de audit' && (
           <section className="card">

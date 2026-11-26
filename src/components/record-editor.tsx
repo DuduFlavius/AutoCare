@@ -3,17 +3,18 @@ import {FilterSelect} from './filter-select';
 import {PremiumDateInput} from './premium-date-input';
 import {PremiumAttachment} from './premium-attachment';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
-import { useRef, useState, type FormEvent } from 'react';
+import { useId, useRef, useState, type FormEvent } from 'react';
 import OperationAlerts from './operation-alerts';
-import ServiceMileage from './service-mileage';
-import RecordCategoryPicker from './record-category-picker';
+import { SignatureActions } from './signature-form';
+import RecordCategoryPicker, { categoryIcon } from './record-category-picker';
+import { currencyRateLabel, ronBaniFromEuroCents, type ExchangeRate } from '@/lib/exchange-rate';
 import { readFuelFill } from '@/lib/fuel-log';
 import { recordCategory } from '@/lib/record-categories';
 import ServiceDetailFields, {
   serializeServiceDetails,
   parseServiceDetails,
 } from './service-detail-fields';
-import { Files, Wallet, Wrench, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type RecordItem = Data['records'][number];
@@ -28,6 +29,9 @@ export default function RecordEditor({
   initialCategory,
   initialDate,
   onSave,
+  completeAction,
+  uploading = false,
+  exchangeRate,
   onCancel,
   onDirty,
 }: {
@@ -39,12 +43,21 @@ export default function RecordEditor({
   initialCategory?: string;
   initialDate?: string;
   onSave: (payload: RecordPayload, file: File | null) => Promise<boolean>;
+  completeAction?: React.ReactNode;
+  uploading?: boolean;
+  exchangeRate?: ExchangeRate | null;
   onCancel: () => void;
   onDirty: (dirty: boolean) => void;
 }) {
   const locale = useApplicationLocale();
   const language = useApplicationLanguage();
   const en = language === 'en';
+  const t = (ro: string, english: string) => en ? english : ro;
+  const errorId = useId();
+  const body = useRef<HTMLDivElement>(null);
+  const categoryHeading = useRef<HTMLHeadingElement>(null);
+  const [invalid, setInvalid] = useState<{ field: string; message: string } | null>(null);
+  const [returnFromCategory, setReturnFromCategory] = useState(false);
   const plannedWork = kind === 'service' && (planned || parseServiceDetails(record?.parts ?? '').planned === '1');
   const formRef = useRef<HTMLFormElement>(null);
   const categoryDrafts = useRef<Record<string, string>>({});
@@ -61,7 +74,7 @@ export default function RecordEditor({
     ),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
-    [details, setDetails] = useState(Boolean(record)),
+    [details, setDetails] = useState(false),
     [file, setFile] = useState<File | null>(null),
     [costParts, setCostParts] = useState(parseServiceDetails(record?.parts || '').costPiese || ''),
     [costLabor, setCostLabor] = useState(parseServiceDetails(record?.parts || '').costLabor || ''),
@@ -88,12 +101,21 @@ export default function RecordEditor({
     [unknownCost, setUnknownCost] = useState(
       kind === 'document' ? false : record ? record.amountKnown === false : false,
     );
+  const [euroRate, setEuroRate] = useState<ExchangeRate | null>(null);
+  const [euroDraft, setEuroDraft] = useState<string | null>(null);
+  const euroValue = euroDraft ?? (euroRate && manualAmount !== '' ? (Number(manualAmount) / Number(euroRate.ronPerEuro)).toFixed(2) : '');
+  const expenseAmount = () => {
+    if (!euroRate || euroDraft === null) return manualAmount;
+    if (euroDraft === '') return '';
+    return (ronBaniFromEuroCents(Math.round(Number(euroDraft) * 100), euroRate) / 100).toFixed(2);
+  };
   const sent = useRef(false);
   const custom =
     !recordCategory(kind, category) ||
     ['Alt document', 'Altă operațiune', 'Altele'].includes(category);
-  const IntroIcon = kind === 'expense' ? Wallet : kind === 'document' ? Files : Wrench;
   const selectedCategory = recordCategory(kind, category);
+  const CategoryIcon = categoryIcon(selectedCategory?.icon);
+  const currentKm = cars.find(vehicle => vehicle.id === car)?.odometer;
   const rememberDetails = () => {
     if (formRef.current && kind === 'service')
       categoryDrafts.current[category] = serializeServiceDetails('', new FormData(formRef.current));
@@ -128,6 +150,8 @@ export default function RecordEditor({
     e.preventDefault();
     if (sent.current) return;
     const f = new FormData(e.currentTarget);
+    if (kind === 'expense' && euroRate && !unknownCost) f.set('amount', expenseAmount());
+    setInvalid(null);
     sent.current = true;
     setBusy(true);
     try {
@@ -145,92 +169,88 @@ export default function RecordEditor({
       const okay = await onSave(payload, file);
       if (okay) onDirty(false);
     } catch (e) {
-      setError((e as Error).message);
+      setError(e instanceof Error ? e.message : t('Salvarea a eșuat. Încearcă din nou.', 'Saving failed. Try again.'));
+      body.current?.scrollTo({ top: 0 });
     } finally {
       sent.current = false;
       setBusy(false);
     }
   }
+  const closePicker = () => {
+    setChoosing(false);
+    requestAnimationFrame(() => {
+      body.current?.scrollTo({ top: 0 });
+      categoryHeading.current?.focus({ preventScroll: true });
+    });
+  };
+  const fieldError = (name: string) => invalid?.field === name
+    ? { 'aria-invalid': true as const, 'aria-describedby': errorId }
+    : {};
+  const errorFor = (name: string) => invalid?.field === name &&
+    <small className="sf-error" id={errorId} role="alert">{invalid.message}</small>;
+
   return (
-    <form
-      ref={formRef}
-      className="quick-record-form record-editor-shell"
-      onSubmit={submit}
-      onChange={(e) => {
-        mark();
-        syncLive(e.currentTarget);
+    <form ref={formRef} className="sf-form" onSubmit={submit} aria-busy={busy}
+      onInvalid={(event) => {
+        const field = event.target;
+        if (!(field instanceof HTMLInputElement) && !(field instanceof HTMLTextAreaElement) && !(field instanceof HTMLSelectElement)) return;
+        for (let parent = field.parentElement; parent && parent !== event.currentTarget; parent = parent.parentElement) {
+          if (parent instanceof HTMLDetailsElement) parent.open = true;
+        }
+        if (!event.currentTarget.querySelector(':invalid:not(form)')?.isSameNode(field)) return;
+        setInvalid({ field: field.name, message: field.validationMessage });
+      }}
+      onInput={(event) => {
+        const field = event.target;
+        if (field instanceof HTMLInputElement && !['search', 'file', 'hidden'].includes(field.type)) mark();
+      }}
+      onChange={(event) => {
+        if (!(event.target instanceof HTMLInputElement && ['search', 'file'].includes(event.target.type))) mark();
+        if (invalid && event.target instanceof HTMLElement && event.target.getAttribute('name') === invalid.field) setInvalid(null);
+        syncLive(event.currentTarget);
       }}
     >
-      {choosing && (
-        <RecordCategoryPicker
-          kind={kind}
-          selected={category}
-          onCancel={onCancel}
-          onSelect={(value) => {
-            rememberDetails();
-            setCategory(value);
-            setChoosing(false);
-            mark();
-            requestAnimationFrame(() => {
-              if (formRef.current) {
-                syncLive(formRef.current, value);
-                formRef.current.closest('.dialog')?.scrollTo({ top: 0 });
-              }
-            });
-          }}
-        />
-      )}
-      <div className="record-form-stage" hidden={choosing}>
-        <div className="record-selected-category" data-workspace-ui>
-          <div>
-            <span className="record-step">
-              {en ? '02 · RECORD DETAILS' : '02 · DETALIILE ÎNREGISTRĂRII'}
-            </span>
-            <h3>
-              {selectedCategory ? (en ? selectedCategory.en : selectedCategory.ro) : category}
-            </h3>
-            <p>
-              {selectedCategory
-                ? en
-                  ? selectedCategory.descriptionEn
-                  : selectedCategory.description
-                : ''}
-            </p>
-          </div>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => {
+      <div className="sf-body" ref={body}>
+        {choosing && (
+          <RecordCategoryPicker kind={kind} selected={category}
+            onCancel={returnFromCategory ? closePicker : onCancel} back={returnFromCategory}
+            onSelect={(value) => {
               rememberDetails();
-              setChoosing(true);
-              requestAnimationFrame(() =>
-                formRef.current?.closest('.dialog')?.scrollTo({ top: 0 }),
-              );
+              if (category !== value) { setCategory(value); mark(); }
+              closePicker();
+              requestAnimationFrame(() => { if (formRef.current) syncLive(formRef.current, value); });
             }}
-          >
-            {en ? 'Change category' : 'Schimbă categoria'}
-          </button>
-        </div>
-        <div className="record-editor-intro">
-          <span>
-            <IntroIcon size={21} aria-hidden="true" />
-          </span>
-          <p>
-            {kind === 'service'
-              ? 'Înregistrează o revizie sau o reparație. Poți adăuga costul și următorul termen.'
-              : kind === 'document'
-                ? 'Completează datele actului. Dacă are termen de expirare, introdu data pentru a o urmări.'
-                : 'Completează mașina, suma și data cheltuielii.'}
-          </p>
-        </div>
+          />
+        )}
+        <div className="sf-stage" hidden={choosing} inert={busy}>
+          <div className="sf-category-current" data-workspace-ui>
+            <span className="sf-category-icon"><CategoryIcon size={21} aria-hidden="true" /></span>
+            <div>
+              <h3 tabIndex={-1} ref={categoryHeading}>{selectedCategory ? (en ? selectedCategory.en : selectedCategory.ro) : category}</h3>
+              {kind === 'service' && <p className="sf-status">
+                {record?.cancelled ? t('Arhivată', 'Archived') : plannedWork ? t('Planificată', 'Scheduled') : record ? t('Efectuată', 'Completed') : t('Intervenție nouă', 'New service')}
+              </p>}
+            </div>
+            <button type="button" className="sf-secondary" onClick={() => {
+              rememberDetails();
+              setInvalid(null);
+              setReturnFromCategory(true);
+              setChoosing(true);
+              requestAnimationFrame(() => {
+                body.current?.scrollTo({ top: 0 });
+                body.current?.querySelector<HTMLInputElement>('input[type=search]')?.focus();
+              });
+            }}>{t('Schimbă categoria', 'Change category')}</button>
+          </div>
+
         {error && (
-          <div role="alert" className="error">
+          <div role="alert" className="sf-error">
             {error}
           </div>
         )}
         <label>
-          Mașină
-          <FilterSelect name="vehicleId" value={car} required onChange={(e) => setCar(e.target.value)}>
+          {t('Vehicul', 'Vehicle')}
+          <FilterSelect name="vehicleId" value={car} required {...fieldError('vehicleId')} onChange={(e) => setCar(e.target.value)}>
             <option value="" disabled>
               {language === "en" ? "Choose a vehicle" : "Alege mașina"}
             </option>
@@ -240,32 +260,23 @@ export default function RecordEditor({
               </option>
             ))}
           </FilterSelect>
+          {errorFor('vehicleId')}
         </label>
         <input name="category" value={category} readOnly hidden />
-        {kind === 'service' && (
-          <section className="service-reminder-box" data-workspace-ui>
-            <h3>{en ? 'Service mileage' : 'Kilometrii intervenției'}</h3>
-            <ServiceMileage
-              currentKm={data.vehicles.find((v) => v.id === car)?.odometer ?? 0}
-              lastKm={record?.odometer ?? null}
-              nextKm={record?.nextKm ?? null}
-            />
-            <small>
-              {en
-                ? 'Saved trips update current mileage and remaining distance. Historical service mileage stays fixed.'
-                : 'Sesiunile salvate actualizează kilometrajul actual și distanța rămasă. Kilometrajul intervenției rămâne fix.'}
-            </small>
-          </section>
-        )}
+        {kind === 'service' && currentKm != null && <div className="sf-mileage" data-workspace-ui>
+          <span>{t('Kilometraj actual al vehiculului', 'Current vehicle mileage')}</span>
+          <strong>{currentKm.toLocaleString(locale)} km</strong>
+        </div>}
         <label>
           {kind === 'document'
-            ? 'Denumirea documentului'
+            ? t('Denumirea documentului', 'Document name')
             : kind === 'expense'
-              ? 'Denumirea cheltuielii'
-              : 'Denumirea operațiunii'}
+              ? t('Denumirea cheltuielii', 'Expense name')
+              : t('Denumirea operațiunii', 'Service name')}
           {!custom && <small>Opțional</small>}
           <input
             name="title"
+            {...fieldError('title')}
             defaultValue={record?.title || ''}
             maxLength={250}
             required={custom}
@@ -273,9 +284,10 @@ export default function RecordEditor({
               selectedCategory ? (en ? selectedCategory.en : selectedCategory.ro) : category
             }
           />
+          {errorFor('title')}
         </label>
         {plannedWork && <input type="hidden" name="ac_planned" value="1" />}
-        {plannedWork && <p className="small" data-workspace-ui>{en ? 'Saved in Calendar. It enters the service history after completion.' : 'Lucrarea se salvează în Calendar. Apare în istoric după ce o marchezi efectuată.'}</p>}
+        {plannedWork && !record && <p className="small" data-workspace-ui>{en ? 'Saved in Calendar. It enters the service history after completion.' : 'Lucrarea se salvează în Calendar. Apare în istoric după ce o marchezi efectuată.'}</p>}
         <div className="form-grid">
           <label>
             {kind === 'document'
@@ -286,6 +298,7 @@ export default function RecordEditor({
             <PremiumDateInput
               type="date"
               name="date"
+              {...fieldError('date')}
               required={kind !== 'document'}
               defaultValue={
                 record?.date || initialDate ||
@@ -294,6 +307,7 @@ export default function RecordEditor({
                   : new Date().toLocaleDateString('en-CA', { timeZone: data.profile.timezone }))
               }
             />
+            {errorFor('date')}
           </label>
           {kind === 'document' ? (
             <label>
@@ -305,9 +319,11 @@ export default function RecordEditor({
               <PremiumDateInput
                 type="date"
                 name="expiresAt"
+                {...fieldError('expiresAt')}
                 required={category === 'RCA'}
                 defaultValue={record?.expiresAt || ''}
               />
+              {errorFor('expiresAt')}
               <small data-workspace-ui>
                 {category === 'RCA'
                   ? en
@@ -326,20 +342,20 @@ export default function RecordEditor({
                     ? 'Odometer at the last timing service · km'
                     : 'Kilometraj la ultimul schimb de distribuție · km'
                   : en
-                    ? 'Odometer · optional'
-                    : 'Kilometraj · opțional'}
+                    ? kind === 'service' ? 'Odometer at service · km' : 'Odometer · optional'
+                    : kind === 'service' ? 'Kilometrajul intervenției · km' : 'Kilometraj · opțional'}
               </span>
               <input
                 type="number"
                 name="odometer"
+                inputMode="numeric"
+                {...fieldError('odometer')}
                 min={0}
                 max={10000000}
                 defaultValue={record?.odometer ?? ''}
-                placeholder={
-                  data.vehicles.find((v) => v.id === car)?.odometer.toLocaleString(locale) +
-                  ' km · ultima valoare'
-                }
+                placeholder={t('Opțional', 'Optional')}
               />
+              {errorFor('odometer')}
             </label>
           )}
         </div>
@@ -449,15 +465,15 @@ export default function RecordEditor({
           </>
         )}
         {kind === 'document' && (
-          <section className="service-reminder-box" data-workspace-ui>
-            <h3>{en ? 'Document expiry reminders' : 'Notificări pentru expirarea documentului'}</h3>
+          <details className="sf-optional-section service-reminder-box" data-workspace-ui>
+            <summary>{en ? 'Document expiry reminders' : 'Notificări pentru expirarea documentului'}</summary>
             <p>
               {en
                 ? 'General reminders follow your account preferences in Settings → Notifications and email.'
                 : 'Mementourile respectă preferințele din Setări → Notificări și email.'}
             </p>
             <OperationAlerts parts={record?.parts || ''} premium={data.premium} mileage={false} />
-          </section>
+          </details>
         )}
         {kind === 'document' && (
           <label>
@@ -584,14 +600,15 @@ export default function RecordEditor({
               </details>
             )}
             <label>
-              {kind === 'service' ? 'Cost total · RON' : 'Sumă (lei)'}
+              {kind === 'service' ? t('Cost total · RON', 'Total cost · RON') : t('Sumă plătită', 'Amount paid')}
               <input
                 key={costEdited ? 'computed-cost' : 'manual-cost'}
                 type="number"
                 inputMode="decimal"
                 name="amount"
+                {...fieldError('amount')}
                 min={0}
-                max={1000000}
+                max={euroRate ? Math.floor(100000000 / Number(euroRate.ronPerEuro)) / 100 : 1000000}
                 step="0.01"
                 disabled={unknownCost || (kind === 'service' && costEdited)}
                 value={
@@ -601,12 +618,29 @@ export default function RecordEditor({
                         Number(costLabor || 0) +
                         Number(costOther || 0)
                       ).toFixed(2)
-                    : manualAmount
+                    : euroRate ? euroValue : manualAmount
                 }
-                onChange={(event) => setManualAmount(event.target.value)}
-                placeholder={kind === 'expense' ? '0,00' : 'Introdu costul total'}
+                onChange={(event) => euroRate ? setEuroDraft(event.target.value) : setManualAmount(event.target.value)}
+                placeholder={en ? '0.00' : '0,00'}
               />
+              {errorFor('amount')}
             </label>
+            {kind === 'expense' && <label>
+              {t('Monedă', 'Currency')}
+              <FilterSelect value={euroRate ? 'EUR' : 'RON'} disabled={unknownCost} onChange={event => {
+                if (event.target.value === 'EUR') setEuroRate(exchangeRate ?? null);
+                else {
+                  setManualAmount(expenseAmount());
+                  setEuroRate(null);
+                  setEuroDraft(null);
+                }
+              }}>
+                <option value="RON">RON</option>
+                <option value="EUR" disabled={!exchangeRate}>EUR</option>
+              </FilterSelect>
+              {euroRate ? <small>{currencyRateLabel(language, euroRate)} · {t('Soldurile se păstrează în RON.', 'Balances are stored in RON.')}</small>
+                : !exchangeRate && <small>{t('EUR este disponibil când cursul BCE este încărcat.', 'EUR is available when the ECB rate is loaded.')}</small>}
+            </label>}
             {kind === 'service' &&
               ['Filtre', 'Schimb ulei'].includes(category) &&
               filterCostLive > 0 && (
@@ -677,6 +711,7 @@ export default function RecordEditor({
                 Cost document · RON, opțional
                 <input
                   name="amount"
+                {...fieldError('amount')}
                   type="number"
                   step="0.01"
                   min={0}
@@ -685,6 +720,7 @@ export default function RecordEditor({
                     record && record.amountKnown !== false ? record.amountBani / 100 : ''
                   }
                 />
+                {errorFor('amount')}
               </label>
             )}
             {kind === 'service' && (
@@ -746,93 +782,21 @@ export default function RecordEditor({
                 </div>
               </div>
             )}
-            {kind !== 'document' && <PremiumAttachment file={file} onChange={next=>{setFile(next);mark();}} disabled={busy}/>}
+            {kind !== 'document' && <PremiumAttachment file={file} onChange={next=>{setFile(next);mark();}} disabled={busy} uploading={uploading}/>}
             <label>
               Notițe
               <textarea name="notes" maxLength={4000} defaultValue={record?.notes || ''} />
             </label>
           </div>
         </details>
-        {kind === 'document' && <PremiumAttachment file={file} onChange={next=>{setFile(next);mark();}} disabled={busy}/>}
-        {kind === 'service' && (
-          <aside className="ac-service-summary" aria-label="Rezumatul intervenției">
-            <h3>Rezumatul intervenției</h3>
-            <div>
-              <span>Operațiune</span>
-              <strong data-workspace-ui>
-                {selectedCategory ? (en ? selectedCategory.en : selectedCategory.ro) : category}
-              </strong>
-            </div>
-            <div>
-              <span>Data</span>
-              <strong>
-                {live.date
-                  ? new Date(live.date + 'T12:00:00').toLocaleDateString(locale)
-                  : 'Necompletată'}
-              </strong>
-            </div>
-            <div>
-              <span>Kilometraj</span>
-              <strong>
-                {live.km ? Number(live.km).toLocaleString(locale) + ' km' : 'Necompletat'}
-              </strong>
-            </div>
-            <div>
-              <span>Cost</span>
-              <strong>
-                {unknownCost
-                  ? 'Necunoscut'
-                  : costEdited
-                    ? (
-                        Number(costParts || 0) +
-                        Number(costLabor || 0) +
-                        Number(costOther || 0)
-                      ).toFixed(2) + ' RON'
-                    : manualAmount !== ''
-                      ? Number(manualAmount).toFixed(2) + ' RON'
-                      : filterCostLive > 0
-                        ? filterCostLive.toFixed(2) + ' RON'
-                        : 'Cost necompletat'}
-              </strong>
-            </div>
-            <div>
-              <span>Următorul termen</span>
-              <strong>
-                {live.due ||
-                  (live.next
-                    ? Number(live.next).toLocaleString(locale) + ' km'
-                    : category === 'Schimb ulei' && serviceKmInterval && live.km
-                      ? (Number(live.km) + Number(serviceKmInterval)).toLocaleString(locale) + ' km'
-                      : 'Nesetat')}
-              </strong>
-            </div>
-            <div>
-              <span>Memento</span>
-              <strong>
-                {live.due ||
-                live.next ||
-                (category === 'Schimb ulei' && serviceKmInterval && live.km)
-                  ? 'Termen configurat'
-                  : 'Fără termen configurat'}
-              </strong>
-            </div>
-          </aside>
-        )}
-        <footer className="record-form-footer">
-          <button type="button" onClick={onCancel} disabled={busy}>
-            Anulează
-          </button>
-          <button className="primary" disabled={busy} type="submit">
-            {busy
-              ? 'Se salvează…'
-              : kind === 'service'
-                ? 'Salvează intervenția'
-                : kind === 'document'
-                  ? 'Salvează documentul'
-                  : 'Salvează cheltuiala'}
-          </button>
-        </footer>
+        {kind === 'document' && <PremiumAttachment file={file} onChange={next=>{setFile(next);mark();}} disabled={busy} uploading={uploading}/>}
+        </div>
       </div>
+      {!choosing && <SignatureActions onCancel={onCancel} busy={busy}
+        status={uploading ? t('Se încarcă…', 'Uploading…') : undefined}
+        label={record ? t('Salvează modificările', 'Save changes') : t('Salvează', 'Save')}>
+        {completeAction}
+      </SignatureActions>}
     </form>
   );
 }

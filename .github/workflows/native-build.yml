@@ -1,7 +1,7 @@
 name: Native GPS builds
 on:
   push:
-    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated, audit/rca-gps-play-20261117, release/smartdrive-61, release/play-readiness]
+    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated, audit/rca-gps-play-20261117, release/smartdrive-61, release/play-readiness, release/signature-forms]
     paths: ["mobile/**", ".github/workflows/native-build.yml"]
   pull_request:
     branches: [feature/autocare-ai-integrated, feature/autocare-desktop-premium-20261102, feature/autocare-native-gps-20261104]
@@ -210,7 +210,7 @@ jobs:
           git commit -m "Publish signed Android installer for in-app updates"
           git push origin HEAD:${{ github.ref_name }}
   ios:
-    if: github.ref != 'refs/heads/release/smartdrive-61' && github.ref != 'refs/heads/release/play-readiness'
+    if: github.ref != 'refs/heads/release/smartdrive-61' && github.ref != 'refs/heads/release/play-readiness' && github.ref != 'refs/heads/release/signature-forms'
     runs-on: macos-26
     timeout-minutes: 25
     steps:

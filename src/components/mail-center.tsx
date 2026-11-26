@@ -82,6 +82,11 @@ export default function MailCenter() {
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [search, setSearch] = useState('');
+  const [historyQuery, setHistoryQuery] = useState('');
+  const [historyStatus, setHistoryStatus] = useState('');
+  const [historySource, setHistorySource] = useState('');
+  const [historyCategory, setHistoryCategory] = useState('');
+  const [historyDate, setHistoryDate] = useState('');
   useEffect(() => {
     let active = true;
     void fetch('/api/v1/mail/google/status', { cache: 'no-store' })
@@ -155,6 +160,13 @@ export default function MailCenter() {
         <p role="status">{error || 'Se încarcă…'}</p>
       </section>
     );
+  const history = data.campaigns.filter(campaign => {
+    const matchesText = !historyQuery.trim() || [campaign.subject, campaign.message, campaign.template].some(value=>value.toLocaleLowerCase().includes(historyQuery.trim().toLocaleLowerCase()));
+    return matchesText && (!historyStatus || campaign.status === historyStatus || Number((campaign.counts as Record<string,number>)[historyStatus]) > 0) &&
+      (!historySource || campaign.source === historySource) && (!historyCategory || campaign.category === historyCategory) &&
+      (!historyDate || new Date(campaign.createdAt).toLocaleDateString('en-CA') >= historyDate);
+  });
+
   return (
     <div className="mail-center mail-studio">
       <section className="card">
@@ -624,6 +636,15 @@ export default function MailCenter() {
           retrimise automat. Ciornele salvate rămân nemodificabile; creează o ciornă nouă pentru
           schimbări.
         </p>
+        <div className="mail-history-filters form-grid">
+          <label>{t('Caută în comunicări','Search communications')}<input type="search" maxLength={120} value={historyQuery} onChange={event=>setHistoryQuery(event.target.value)} /></label>
+          <label>{t('Status','Status')}<FilterSelect value={historyStatus} onChange={event=>setHistoryStatus(event.target.value)}><option value="">{t('Toate statusurile','All statuses')}</option>{Object.entries(labels).map(([key,label])=><option value={key} key={key}>{en?key:label}</option>)}</FilterSelect></label>
+          <label>{t('Sursa','Source')}<FilterSelect value={historySource} onChange={event=>setHistorySource(event.target.value)}><option value="">{t('Toate sursele','All sources')}</option><option value="manual">{t('Manual','Manual')}</option><option value="automation">{t('Automatizare','Automation')}</option></FilterSelect></label>
+          <label>{t('Categorie','Category')}<FilterSelect value={historyCategory} onChange={event=>setHistoryCategory(event.target.value)}><option value="">{t('Toate categoriile','All categories')}</option><option value="transactional">{t('Tranzacțional','Transactional')}</option><option value="promotional">{t('Promoțional','Promotional')}</option></FilterSelect></label>
+          <label>{t('De la data','Created on or after')}<PremiumDateInput value={historyDate} onChange={event=>setHistoryDate(event.target.value)} /></label>
+          <p role="status">{history.length} {t('comunicări găsite în istoricul încărcat','communications found in loaded history')}</p>
+        </div>
+        {!history.length && <p role="status">{t('Nu există comunicări pentru aceste filtre.','No communications match these filters.')}</p>}
         <div className="table-wrap">
           <table>
             <thead>
@@ -635,7 +656,7 @@ export default function MailCenter() {
               </tr>
             </thead>
             <tbody>
-              {data.campaigns.map((c) => (
+              {history.map((c) => (
                 <tr key={c.id}>
                   <td>
                     {c.subject}

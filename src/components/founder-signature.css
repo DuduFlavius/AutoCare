@@ -1,0 +1,29 @@
+html body .founder-signature {
+  --fc-bg: #f2f4f7; --fc-panel: #fff; --fc-sidebar: #e9edf1; --fc-text: #17232d; --fc-muted: #4f606f; --fc-border: #cfd7e0;
+  background: var(--fc-bg); color: var(--fc-text);
+  --color-bg: var(--fc-bg); --color-surface: var(--fc-panel); --surface-card: var(--fc-panel);
+  --color-text: var(--fc-text); --color-muted: var(--fc-muted); --color-border: var(--fc-border);
+  --color-surface-muted: var(--fc-sidebar); --color-primary-soft: #dbe7eb; --color-primary-ink: #214d60;
+}
+html body .founder-signature[data-appearance=dark] {
+  --fc-bg: #161a20; --fc-panel: #202730; --fc-sidebar: #1c222a; --fc-text: #eef4f9; --fc-muted: #b1bfcc; --fc-border: #3d4b58;
+  --color-primary-soft: #304658; --color-primary-ink: #c4e4f5;
+  color-scheme: dark;
+}
+@media(prefers-color-scheme:dark) {
+  html body .founder-signature[data-appearance=auto] {
+    --fc-bg: #161a20; --fc-panel: #202730; --fc-sidebar: #1c222a; --fc-text: #eef4f9; --fc-muted: #b1bfcc; --fc-border: #3d4b58;
+    --color-primary-soft: #304658; --color-primary-ink: #c4e4f5;
+    color-scheme: dark;
+  }
+}
+html body .founder-signature :is(.founder-sidebar,.founder-main,.card,.founder-page-header) { color: var(--fc-text) !important; background: var(--fc-panel) !important; border-color: var(--fc-border) !important; }
+html body .founder-signature .founder-sidebar { background: var(--fc-sidebar) !important; }
+html body .founder-signature .founder-main { background: var(--fc-bg) !important; }
+html body .founder-signature :is(.founder-brand,.founder-back,.founder-profile,.founder-owner,.founder-sidebar nav button) { color: var(--fc-text) !important; }
+html body .founder-signature .founder-sidebar nav button { background: transparent !important; }
+html body .founder-signature .founder-sidebar nav button:is(.active,:hover) { background: var(--fc-panel) !important; border-color: var(--fc-border) !important; }
+.founder-tool-search { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.founder-tool-search input { width: 100%; min-width: 0; }
+.founder-support-studio { display: grid; gap: 12px; min-width: 0; }
+.founder-signature .mail-history-filters { border: 1px solid var(--fc-border); background: var(--fc-sidebar); padding: 14px; border-radius: 12px; margin-block: 14px; }

@@ -49,16 +49,20 @@ const icons: Record<string, LucideIcon> = {
   engine: Settings2,
   steering: Settings2,
 };
+export const categoryIcon = (icon?: string) => icons[icon ?? ''] ?? Wrench;
+
 export default function RecordCategoryPicker({
   kind,
   selected,
   onSelect,
   onCancel,
+  back = false,
 }: {
   kind: RecordKind;
   selected: string;
   onSelect: (value: string) => void;
   onCancel: () => void;
+  back?: boolean;
 }) {
   const [query, setQuery] = useState('');
   const en = useApplicationLanguage() === 'en';
@@ -68,19 +72,9 @@ export default function RecordCategoryPicker({
     ),
   );
   return (
-    <section className="record-category-browser" data-workspace-ui>
-      <header>
-        <span className="record-step">
-          {en ? '01 · CHOOSE A CATEGORY' : '01 · ALEGE CATEGORIA'}
-        </span>
-        <h3>{en ? 'What would you like to add?' : 'Ce vrei să înregistrezi?'}</h3>
-        <p>
-          {en
-            ? 'Choose a category. The form will show only the details relevant to your record.'
-            : 'Alege categoria. Formularul va afișa detaliile relevante pentru înregistrarea ta.'}
-        </p>
-      </header>
-      <label className="record-category-search">
+    <section data-workspace-ui>
+      <h3 className="sf-standard-heading">{en ? 'Choose a category' : 'Alege categoria'}</h3>
+      <label className="sf-category-search">
         <Search size={19} />
         <span className="sr-only">{en ? 'Search categories' : 'Caută categorii'}</span>
         <input
@@ -93,9 +87,9 @@ export default function RecordCategoryPicker({
           placeholder={en ? 'Search oil, brakes, insurance…' : 'Caută ulei, frâne, asigurare…'}
         />
       </label>
-      <div className="record-category-grid">
+      <div className="sf-category-grid">
         {options.map((c) => {
-          const Icon = icons[c.icon] || Wrench;
+          const Icon = categoryIcon(c.icon);
           return (
             <button
               type="button"
@@ -103,7 +97,7 @@ export default function RecordCategoryPicker({
               aria-pressed={selected === c.value}
               onClick={() => onSelect(c.value)}
             >
-              <span className="record-category-icon">
+              <span className="sf-category-icon">
                 <Icon size={22} />
               </span>
               <span>
@@ -132,15 +126,10 @@ export default function RecordCategoryPicker({
           {selected}
         </button>
       )}
-      <footer>
-        <button type="button" onClick={onCancel}>
-          {en ? 'Cancel' : 'Anulează'}
+      <footer className="sf-picker-footer">
+        <button className="sf-secondary" type="button" onClick={onCancel}>
+          {back ? (en ? 'Back to form' : 'Înapoi la formular') : (en ? 'Cancel' : 'Anulează')}
         </button>
-        <span>
-          {en
-            ? 'Your existing records remain unchanged.'
-            : 'Înregistrările existente rămân neschimbate.'}
-        </span>
       </footer>
     </section>
   );

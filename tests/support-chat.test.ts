@@ -368,3 +368,31 @@ test('Support: owner and admin can delete active conversations without losing hi
   await chat.changeSupportThread(admin, id, { action: 'trash' });
   assert.equal((await chat.readSupportThread(owner, id)).thread.status, 'trashed');
 });
+
+test('Support: presence and bilingual welcome are scoped to the actual team and message retries are idempotent', async () => {
+  const { supportAvailability, updateSupportPresence, supportAvailabilitySettings, resolveSupportState } = await import('../src/lib/support-availability');
+  assert.equal(resolveSupportState({mode:'auto', hours:{days:[1],start:'09:00',end:'17:00'}, operators:[false]}, new Date('2026-11-23T06:00:00Z')), 'after_hours');
+  assert.equal(resolveSupportState({mode:'auto', hours:null, operators:[]}), 'offline');
+  await assert.rejects(() => updateSupportPresence(customer, {busy:false}), status(403));
+  await assert.rejects(() => supportAvailabilitySettings(other), status(403));
+  await updateSupportPresence(founder, {busy:true});
+  assert.equal((await supportAvailability()).state, 'busy');
+  await updateSupportPresence(founder, {busy:false});
+  assert.equal((await supportAvailability()).state, 'available');
+  await updateSupportPresence(founder, {busy:true});
+  const id=crypto.randomUUID();
+  await db().insert(s.user).values({id, name:'Customer QA', email:id+'@example.invalid', emailVerified:true});
+  const payload={ message:'Test request with idempotency', clientId:crypto.randomUUID(), language:'en', category:'documents', platform:'android' };
+  const [first, second] = await Promise.all([chat.sendSupportMessage(id,payload), chat.sendSupportMessage(id,payload)]);
+  assert.equal(first.threadId,second.threadId);
+  assert.equal([first,second].filter(result=>'duplicate' in result).length,1);
+  const detail=await chat.readSupportThread(id, first.threadId);
+  assert.equal(detail.messages.length,2);
+  assert.match(detail.messages[0].body, /assisting other customers/);
+  assert.equal((await chat.listSupportThreads(id)).threads[0].category,'documents');
+  assert.equal((await chat.listSupportThreads(id)).threads[0].platform,'android');
+  const outsider=crypto.randomUUID();
+  await db().insert(s.user).values({id:outsider, name:'Separate QA account', email:outsider+'@example.invalid', emailVerified:true});
+  await assert.rejects(() => chat.sendSupportMessage(outsider, payload), status(409));
+  await assert.rejects(() => chat.markSupportRead(outsider, first.threadId, {messageId:first.message.id}), status(404));
+});

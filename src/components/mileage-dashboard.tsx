@@ -138,7 +138,7 @@ export default function MileageDashboard({cars,primaryId,timezone,preview,onUpda
         </tbody></table>
         {!visible.length&&<p>{t('Nicio citire pentru filtrele selectate.','No readings match the selected filters.')}</p>}
         {pageCount>1&&<nav className="ac-mileage-controls" aria-label={t('Pagini istoric','History pages')}><button disabled={current===0} onClick={()=>setPage(current-1)}>{t('Anterior','Previous')}</button><span>{current+1} / {pageCount}</span><button disabled={current+1===pageCount} onClick={()=>setPage(current+1)}>{t('Următor','Next')}</button></nav>}
-        {edit&&<form key={edit.id} className="ac-mileage-correction" onSubmit={saveCorrection}>
+        {edit&&<form key={edit.id} className="ac-mileage-correction sf-inline" aria-busy={busy} onSubmit={saveCorrection}>
           <h4>{t('Corectează citirea manuală','Correct manual reading')} · {timestamp.format(new Date(edit.recordedAt))}</h4>
           <label>{columns[1]} <input name="odometer" type="number" min={0} max={99999999} step={1} defaultValue={edit.odometer} required autoFocus/></label>
           <label>{t('Motivul corectării','Reason for correction')} <input name="reason" minLength={3} maxLength={500} required/></label>

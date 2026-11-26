@@ -1,7 +1,10 @@
+import { supportAvailability } from './support-availability';
+import { supportCategories } from './support-categories';
+import { userLanguage } from './user-language';
 import { generateAi } from './ai-provider';
 import { autoAssistantConfigured } from './auto-assistant-config';
 import { pricing } from './pricing';
-import { queueAutomatedMail } from './mail-automation';
+import { automationState, queueAutomatedMail } from './mail-automation';
 import { and, eq, desc, sql, gte, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { effectiveRole } from './permissions';
@@ -47,13 +50,16 @@ export async function listSupportThreads(uid: string, status = 'open', query = '
   const state = z.enum(['open', 'completed', 'trashed']).parse(status);
   const search = query.trim().slice(0, 120);
   const queryFilter = search ? sql`(
-    strpos(lower(${s.user.name} || ' ' || ${s.user.email} || ' ' || ${s.supportThreads.title}), lower(${search})) > 0
+    strpos(lower(${s.user.name} || ' ' || ${s.user.email} || ' ' || ${s.supportThreads.title} || ' ' || ${s.supportThreads.id} || ' ' || ${s.supportThreads.userId}), lower(${search})) > 0
     or exists (select 1 from support_chat_messages m where m."threadId" = ${s.supportThreads.id} and strpos(lower(m.body),lower(${search})) > 0)
   )` : undefined;
   const threads = await db()
     .select({
       id: s.supportThreads.id,
       title: s.supportThreads.title,
+      category: s.supportThreads.category,
+      language: s.supportThreads.language,
+      platform: s.supportThreads.platform,
       status: s.supportThreads.status,
       userId: s.supportThreads.userId,
       updatedAt: s.supportThreads.updatedAt,
@@ -73,7 +79,7 @@ export async function listSupportThreads(uid: string, status = 'open', query = '
     .where(
       who.staff
         ? and(eq(s.supportThreads.status, state), queryFilter)
-        : and(eq(s.supportThreads.userId, uid), state === 'trashed' ? eq(s.supportThreads.status, 'trashed') : sql`${s.supportThreads.status}<>'trashed'`),
+        : and(eq(s.supportThreads.userId, uid), state === 'trashed' ? eq(s.supportThreads.status, 'trashed') : sql`${s.supportThreads.status}<>'trashed'`, queryFilter),
     )
     .orderBy(who.staff ? sql`case ${s.supportOperations.priority} when 'urgent' then 0 when 'high' then 1 else 2 end` : sql`0 + 0`, desc(s.supportThreads.updatedAt), desc(s.supportThreads.id))
     .limit(200);
@@ -90,6 +96,7 @@ export async function listSupportThreads(uid: string, status = 'open', query = '
     counts: Object.fromEntries(counts.map((x) => [x.status, x.n])),
     aiAvailable: autoAssistantConfigured(),
     role: who.role,
+    availability: await supportAvailability(),
   };
 }
 export async function readSupportThread(uid: string, id: string, cursor?: string) {
@@ -193,14 +200,32 @@ export async function sendSupportMessage(uid: string, input: unknown) {
     .object({
       conversationId: z.string().min(1).max(100).optional(),
       message: z.string().trim().min(1).max(4000),
+      clientId: z.string().uuid().optional(),
+      language: z.enum(['ro','en']).optional(),
+      category: z.enum(Object.keys(supportCategories) as [keyof typeof supportCategories]).optional(),
+      platform: z.enum(['web','android','ios']).optional(),
     })
     .strict()
     .parse(input);
   const who = await actor(uid);
   if (who.staff && !data.conversationId) throw new AppError(400, 'Selectează o conversație.');
   if (who.staff && data.conversationId) await joinSupportThread(uid, data.conversationId);
+  const routesThroughMailStudio = who.staff && process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED === 'true' &&
+    (await automationState().catch(() => ({ enabled:false }))).enabled;
+  const language = data.language ?? (!who.staff ? await userLanguage(uid) : 'ro');
+  const welcome = !who.staff && !data.conversationId ? (await supportAvailability()).message[language] : null;
+
   return db().transaction(async (tx) => {
     await tx.select().from(s.user).where(eq(s.user.id, uid)).for('update');
+    if (data.clientId) {
+      const [previous] = await tx.select().from(s.supportChatMessages).where(eq(s.supportChatMessages.id, data.clientId));
+      if (previous) {
+        if (previous.authorId !== uid || previous.body !== data.message || (data.conversationId && previous.threadId !== data.conversationId)) {
+          throw new AppError(409, 'Identificatorul mesajului a fost deja folosit.');
+        }
+        return { threadId: previous.threadId, message: previous, duplicate: true };
+      }
+    }
     let thread = data.conversationId
       ? (
           await tx
@@ -227,13 +252,14 @@ export async function sendSupportMessage(uid: string, input: unknown) {
       thread = (
         await tx
           .insert(s.supportThreads)
-          .values({ id: crypto.randomUUID(), userId: uid, title: data.message.slice(0, 80) })
+          .values({ id: crypto.randomUUID(), userId: uid, title: data.message.slice(0, 80),
+            category: data.category ?? 'other', language, platform: data.platform })
           .returning()
       )[0];
     const sentAt = new Date();
     // An actual welcome message in the conversation, not only a temporary banner.
     // Create it once, for newly opened client conversations.
-    if (!who.staff && !data.conversationId) {
+    if (welcome) {
       const previous = await tx.select({ id: s.supportChatMessages.id })
         .from(s.supportChatMessages)
         .where(eq(s.supportChatMessages.threadId, thread.id))
@@ -246,7 +272,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
           authorName: 'AutoCare',
           createdAt: new Date(sentAt.getTime() - 1),
           authorRole: 'system',
-          body: `Bine ai venit, ${who.name}, la Centrul de suport AutoCare! Am primit mesajul tău. Un membru al echipei îți va răspunde aici cât mai curând posibil. Îți mulțumim pentru răbdare!`,
+          body: (language === 'en' ? 'Hello, ' + who.name + '! ' : 'Bine ai venit, ' + who.name + ', la AutoCare! ') + welcome,
         });
       }
     }
@@ -254,7 +280,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
       await tx
         .insert(s.supportChatMessages)
         .values({
-          id: crypto.randomUUID(),
+          id: data.clientId ?? crypto.randomUUID(),
           threadId: thread.id,
           authorId: uid,
           authorName: who.name,
@@ -268,10 +294,10 @@ export async function sendSupportMessage(uid: string, input: unknown) {
       .update(s.supportThreads)
       .set({ updatedAt: sentAt })
       .where(eq(s.supportThreads.id, thread.id));
-    if (who.staff) {
+    if (routesThroughMailStudio) {
       await queueAutomatedMail(thread.userId, 'support_reply', `support-reply:${thread.id}:${sentAt.toISOString().slice(0, 13)}`, {}, tx);
     }
-    return { threadId: thread.id, message };
+    return { threadId: thread.id, message, routesThroughMailStudio };
   });
 }
 export async function changeSupportThread(uid: string, id: string, input: unknown) {

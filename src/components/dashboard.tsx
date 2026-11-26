@@ -3,7 +3,7 @@ import MileageDashboard from './mileage-dashboard';
 import {EmptyState} from './application/empty-state';
 import {isFinancialEntry} from '@/lib/finance-overview';
 import {vehicleDocumentCategories} from '@/lib/validation';
-import {VehicleCreateForm} from './application/vehicle-create-form';
+import {VehicleForm} from './application/vehicle-create-form';
 import {Capacitor} from '@capacitor/core';
 import {requestConfirmation} from '@/components/premium-dialogs';
 
@@ -16,7 +16,7 @@ import './mobile-polish.css';
 import './filter-select.css';
 import {FilterSelect} from './filter-select';
 import {DocumentActions} from './document-actions';
-import {PremiumDateInput} from './premium-date-input';
+import './signature-form.css';
 import { RenewalCenter } from './application/renewal-center';
 import AccountSettings from './account-settings';
 import {hasPlayBilling,purchasePlayPlan,restorePlayPurchases} from '@/lib/play-billing-client';
@@ -63,6 +63,7 @@ import NativeTripSync from './native-trip-sync';
 import MaintenanceForecast from './maintenance-forecast';
 import {maintenanceTargets} from '@/lib/maintenance-schedule';
 import ServiceForecastCards from './service-forecast-cards';
+import { SignatureDialog } from './signature-form';
 import RecordEditor from './record-editor';
 import './targeted-green-ui-fixes.css';
 import ServiceMileage from './service-mileage';
@@ -115,14 +116,18 @@ type Modal = {
   planned?: boolean;
   initialDate?: string;
 } | null;
-async function api(path: string, method = 'GET', data?: unknown) {
+async function api(path: string, method = 'GET', data?: unknown, accountId?: string) {
   if(method!=='GET' && typeof navigator!=='undefined' && !navigator.onLine) throw new Error('Ești offline. Reconectează-te înainte de a salva.');
   const r = await fetch('/api/v1/' + path, {
     method,
-    headers: data ? { 'Content-Type': 'application/json' } : undefined,
+    headers: { ...(data ? { 'Content-Type': 'application/json' } : {}), ...(accountId ? { 'X-AutoCare-Account':accountId } : {}) },
     body: data ? JSON.stringify(data) : undefined,
   });
   const result = await r.json().catch(()=>({error:'Serviciul nu a răspuns corect. Încearcă din nou.'}));
+  if (r.status === 409 && result.error === 'SESSION_CHANGED') {
+    document.documentElement.style.visibility = 'hidden';
+    window.location.reload();
+  }
   if (r.status === 401)
     throw new Error(
       'Sesiunea a expirat. Reconectează-te pentru a continua; datele nesalvate rămân în formular.',
@@ -337,7 +342,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   );
 }
 
-export default function Dashboard({ name: initialName, previewData, initialTab='Dashboard', initialVehicle, initialDrive, smartDriveEnabled=true }: { smartDriveEnabled?:boolean; name: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
+export default function Dashboard({ name: initialName, accountId, previewData, initialTab='Dashboard', initialVehicle, initialDrive, smartDriveEnabled=true }: { smartDriveEnabled?:boolean; name: string; accountId?: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
   const [name,setName]=useState(initialName);
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
@@ -363,6 +368,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     [period, setPeriod] = useState('all'),
     [recordDirty, setRecordDirty] = useState(false),
     [recordSaving, setRecordSaving] = useState(false),
+    [recordUploading, setRecordUploading] = useState(false),
     [recordView, setRecordView] = useState('timeline'),
     [, setCalendarView] = useState('list'),
     [racingMenu,setRacingMenu]=useState(false),
@@ -401,8 +407,9 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     return () => { ++currencyRequest.current; };
   }, [currencyOwner, previewData]);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
+  const needsExchangeRate = currency === 'EUR' || modal?.kind === 'expense';
   useEffect(() => {
-    if (currency !== 'EUR') return;
+    if (!needsExchangeRate) return;
     const controller = new AbortController();
     const update = async () => {
       setExchangeRate(previous => validExchangeRate(previous) ? previous : null);
@@ -428,7 +435,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       window.clearInterval(timer);
       window.removeEventListener('online', update);
     };
-  }, [currency]);
+  }, [needsExchangeRate]);
   useEffect(()=>{if(previewData||tab!=='Abonament')return;const timer=setInterval(()=>{if(document.visibilityState==='visible'){void api('billing/sync','POST').then(()=>refresh(true)).catch(()=>{});void refresh(true);void api('billing/invoices').then(setInvoices).catch(e=>setError(e.message));}},15000);return()=>clearInterval(timer);},[tab,previewData]);
   useEffect(()=>{
     if(previewData||!data?.profile.userId)return;
@@ -571,7 +578,13 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     if (previewData) return;
     const request = ++dashboardRequest.current;
     try {
-      const updated = await api('dashboard');
+      const updated = await api('dashboard','GET',undefined,accountId);
+      if (accountId && updated.profile?.userId !== accountId) {
+        setData(null);
+        document.documentElement.style.visibility = 'hidden';
+        window.location.reload();
+        return;
+      }
       if (request === dashboardRequest.current) setData(updated);
     } catch (e) {
       if (!silent && request === dashboardRequest.current) setError((e as Error).message);
@@ -593,6 +606,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     }, '');
   }
 
+  const partialSave = useRef<{ modal: Modal; id: string; payload: string; file: File | null; attachmentId: string } | null>(null);
   const actionInFlight=useRef(false);
   async function act(fn: () => Promise<unknown>, message = 'Modificările au fost salvate.', propagateError=false) {
     if (previewData) {
@@ -797,6 +811,11 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       !await requestConfirmation(translateApplicationCopy('Ai modificări nesalvate. Închizi formularul și renunți la ele?',locale==='ro-RO'?'ro':'en'))
     )
       return;
+    if (partialSave.current?.modal === modal && partialSave.current) {
+      partialSave.current = null;
+      void refresh();
+    }
+    setError('');
     setRecordDirty(false);
     setModal(null);
   }
@@ -817,50 +836,29 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
   }
   async function saveForm(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!modal) return;
+    if (modal?.kind !== 'vehicle') return;
     const f = new FormData(e.currentTarget);
     const str = (key: string) => String(f.get(key) || '');
     const number = (key: string) => (str(key) === '' ? null : Number(str(key)));
-    let payload: unknown, path: string, method: string;
-    if (modal.kind === 'vehicle') {
-      payload = {
-        brand: str('brand'),
-        model: str('model'),
-        year: number('year'),
-        plate: str('plate'),
-        vin: (modal.vehicle ? str('vin') : str('vin').trim().toUpperCase()) || null,
-        engine: str('engine'),
-        fuel: str('fuel'),
-        capacity: number('capacity'),
-        odometer: number('odometer') || 0,
-        purchasedAt: str('purchasedAt') || null,
-        notes: str('notes'),
-        ...(!modal.vehicle&&{documents:vehicleDocumentCategories.flatMap(category=>{
-          const expiresAt=str('document-'+category);
-          return expiresAt?[{category,expiresAt}]:[];
-        })}),
-      };
-      path = 'vehicles' + (modal.vehicle ? '/' + modal.vehicle.id : '');
-      method = modal.vehicle ? 'PATCH' : 'POST';
-    } else {
-      payload = {
-        kind: modal.kind,
-        vehicleId: str('vehicleId'),
-        category: str('category'),
-        title: str('title'),
-        date: str('date') || null,
-        expiresAt: str('expiresAt') || null,
-        nextKm: number('nextKm'),
-        odometer: number('odometer'),
-        amountBani: Math.round((number('amount') || 0) * 100),
-        provider: str('provider'),
-        number: str('number'),
-        parts: str('parts'),
-        notes: str('notes'),
-      };
-      path = 'records' + (modal.record ? '/' + modal.record.id : '');
-      method = modal.record ? 'PATCH' : 'POST';
-    }
+    const payload = {
+      brand: str('brand'),
+      model: str('model'),
+      year: number('year'),
+      plate: str('plate'),
+      vin: str('vin').trim().toUpperCase() || null,
+      engine: str('engine'),
+      fuel: str('fuel'),
+      capacity: number('capacity'),
+      odometer: number('odometer') || 0,
+      purchasedAt: str('purchasedAt') || null,
+      notes: str('notes'),
+      ...(!modal.vehicle && { documents: vehicleDocumentCategories.flatMap(category => {
+        const expiresAt = str('document-' + category);
+        return expiresAt ? [{ category, expiresAt }] : [];
+      }) }),
+    };
+    const path = 'vehicles' + (modal.vehicle ? '/' + modal.vehicle.id : '');
+    const method = modal.vehicle ? 'PATCH' : 'POST';
     if (await act(() => api(path, method, payload))) {
       setRecordDirty(false);
       setModal(null);
@@ -944,7 +942,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace ac-studio ac-reference-theme" data-language={language} data-settings-panel={settingsPanel} data-workspace-section={tab}>
       <WorkspaceViewport service={tab==='Întreținere'}/>
       <a className="ws-skip" data-workspace-ui href="#workspace-main">{language==='en'?'Skip to workspace':'Sari la conținut'}</a>
-      {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setModal({kind});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>navigate('Garaj', 'push', id)} /></Dialog>}
+      {launcherOpen && <Dialog title={language==='en'?'Search & quick actions':'Căutare și acțiuni rapide'} onClose={()=>setLauncherOpen(false)}><WorkspaceLauncher data={data} language={language} navigate={navigate} onCreate={kind=>{setLauncherOpen(false);setError('');setModal({kind: kind === 'vehicle' || activeCars.length ? kind : 'vehicle'});}} onRecord={record=>{setLauncherOpen(false);setModal({kind:record.kind as 'document'|'service'|'expense',record});}} onVehicle={id=>navigate('Garaj', 'push', id)} /></Dialog>}
       {racingMenu&&<Dialog className="rg-menu-dialog" title={language==='en'?'Menu':'Meniu'} onClose={()=>setRacingMenu(false)}><RacingMenu active={tab} onClose={()=>setRacingMenu(false)} name={name} premium={!!data?.premium} navigate={async next=>{if(await navigate(next))setRacingMenu(false);}} onSignOut={()=>void signOut()} preview={!!previewData}/></Dialog>}
       <aside className="rg-sidebar sidebar">
         <Brand racing href={previewData?'/previzualizare':'/cont'} onClick={e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();navigate('Dashboard');}}/>
@@ -1122,7 +1120,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               onRestore={record=>{void act(()=>api('records/'+record.id+'/restore','POST'));}}
               onHistory={record=>{void act(async()=>{setHistory(await api('records/'+record.id+'/history'));},'');}}
               onDeleteFile={async file=>{await requestConfirmation(language==='en'?'Permanently delete this attachment?':'Ștergi definitiv acest atașament?',async()=>{await act(()=>api('files/'+file.id,'DELETE'),undefined,true);});}}
-              onUpload={async(record,file)=>{if(file.size>2097152)throw Error(language==='en'?'Choose a file up to 2 MB.':'Alege un fișier de maximum 2 MB.');const form=new FormData();form.set('file',file);form.set('recordId',record.id);const res=await fetch('/api/v1/files',{method:'POST',body:form});const out=await res.json().catch(()=>({}));if(!res.ok)throw new Error(out.error||(language==='en'?'Upload failed.':'Încărcarea a eșuat.'));await refresh();setNotice(language==='en'?'Document attached.':'Documentul a fost atașat.');}}
+              onUpload={async(record,file,uploadId)=>{if(file.size>2097152)throw Error(language==='en'?'Choose a file up to 2 MB.':'Alege un fișier de maximum 2 MB.');const form=new FormData();form.set('file',file);form.set('recordId',record.id);form.set('uploadId',uploadId);const res=await fetch('/api/v1/files',{method:'POST',body:form});const out=await res.json().catch(()=>({}));if(!res.ok)throw new Error(out.error||(language==='en'?'Upload failed.':'Încărcarea a eșuat.'));await refresh();setNotice(language==='en'?'Document attached.':'Documentul a fost atașat.');}}
             />)}
             {['Întreținere'].includes(tab) && !emptyModule && (
               <details className="maintenance-advanced"><summary>{language==='en'?'All records, filters & exports':'Toate înregistrările, filtre și exporturi'}</summary>
@@ -1642,7 +1640,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               </div>
             )}
             {tab === 'Centru de suport' && (
-              <RacingSupport role={data.profile.role} preview={!!previewData} onFeedback={()=>navigate('Feedback')} />
+              <RacingSupport accountId={accountId} role={data.profile.role} preview={!!previewData} onFeedback={()=>navigate('Feedback')} />
             )}
             {tab==='Abonament'&&<><PlayBillingPanel onUpdated={()=>refresh(true)}/><SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(hasPlayBilling())throw new Error('Gestionează abonamentul din Google Play.');if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/></>}
             {tab==='Rapoarte'&&(data.premium?<PremiumDownloads data={data} language={language} currency={currency} rate={currentRate} preview={!!previewData} navigate={navigate}/>:<section className="card studio-report-intro"><Download size={32}/><h2>{language==='en'?'Reports, ready when you need them.':'Rapoartele tale, gata când ai nevoie.'}</h2><p>{language==='en'?'PDF and CSV reports are included with Premium. Your personal data export remains free in account settings.':'Rapoartele PDF și CSV sunt incluse cu Premium. Exportul datelor personale rămâne gratuit în setările contului.'}</p><button className="primary" onClick={()=>navigate('Premium')}>{language==='en'?'Compare plans':'Compară planurile'}</button></section>)}
@@ -1686,7 +1684,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                   </p>
                   <CommunicationPreferences />
                   <form
-                    className="stack"
+                    className="stack sf-inline"
+                    aria-busy={busy}
                     onSubmit={async (e) => {
                       e.preventDefault();
                       const f = new FormData(e.currentTarget);
@@ -1922,37 +1921,29 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
           </Dialog>
         )}
         {modal && data && (
-          <Dialog
-            title={
-              modal.kind === 'vehicle'
-                ? modal.vehicle
-                  ? 'Editează mașina'
-                  : 'Adaugă mașină'
-                : modal.completionOf
-                  ? (language==='en'?'Record completed service':'Înregistrează lucrarea efectuată')
-                  : modal.record
-                  ? 'Editează înregistrarea'
-                  : modal.kind === 'document'
-                    ? 'Adaugă document'
-                    : modal.kind === 'service'
-                      ? 'Adaugă intervenție'
-                      : 'Adaugă cheltuială'
-            }
+          <SignatureDialog
+            title={modal.kind === 'vehicle'
+              ? modal.vehicle ? (language === 'en' ? 'Edit vehicle' : 'Editează vehiculul') : (language === 'en' ? 'Add vehicle' : 'Adaugă vehicul')
+              : modal.completionOf ? (language === 'en' ? 'Record completed service' : 'Înregistrează lucrarea efectuată')
+              : modal.kind === 'service' ? modal.record
+                ? (language === 'en' ? 'Edit service' : 'Editează intervenția')
+                : modal.planned ? (language === 'en' ? 'Schedule service' : 'Planifică o intervenție') : (language === 'en' ? 'Add service' : 'Adaugă intervenție')
+              : modal.kind === 'document' ? modal.record
+                ? (language === 'en' ? 'Edit document' : 'Editează documentul') : (language === 'en' ? 'Add document' : 'Adaugă document')
+              : modal.record ? (language === 'en' ? 'Edit expense' : 'Editează cheltuiala') : (language === 'en' ? 'Add expense' : 'Adaugă cheltuială')}
+            icon={modal.kind === 'vehicle' ? CarFront : modal.kind === 'service' ? Wrench : modal.kind === 'document' ? Files : Wallet}
+            compact={modal.kind === 'expense'}
+            busy={busy || recordSaving}
             onClose={closeRecord}
           >
-            {modal.kind === 'service' && modal.record && !modal.completionOf && !modal.record.cancelled && data.premium && isPlannedService(modal.record, nowDate) && calendarRecordDate(modal.record, nowDate) && (
-              <button type="button" className="primary" onClick={async () => {
-                const record = modal.record!;
-                if (recordDirty && !await requestConfirmation(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?', language))) return;
-                setRecordDirty(false);
-                setModal({ kind: 'service', completionOf: record.id, record: completedServiceSeed(record, data.vehicles.find(v => v.id === record.vehicleId)?.odometer ?? record.odometer ?? 0, nowDate) });
-              }} data-workspace-ui>{language === 'en' ? 'Mark as completed' : 'Marchează ca efectuată'}</button>
-            )}
-            {modal.kind !== 'vehicle' ? (
+            {modal.kind === 'vehicle' ? (
+              <VehicleForm key={modal.vehicle?.id ?? 'new-vehicle'} vehicle={modal.vehicle} vehicles={data.vehicles}
+                error={error} busy={busy} onDirty={() => setRecordDirty(true)} onCancel={closeRecord} onSave={saveForm} />
+            ) : (
               <RecordEditor
                 key={modal.completionOf ? 'completion:' + modal.completionOf : modal.record?.id || modal.kind}
                 kind={modal.kind}
-                initialCategory={tab==='RCA & Rovinietă'?renewalCategory:undefined}
+                initialCategory={tab === 'RCA & Rovinietă' ? renewalCategory : undefined}
                 record={modal.record}
                 initialDate={modal.initialDate}
                 planned={modal.planned || (!modal.completionOf && !!modal.record && isPlannedService(modal.record, nowDate))}
@@ -1960,42 +1951,69 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                 vehicleId={filter || undefined}
                 onDirty={setRecordDirty}
                 onCancel={closeRecord}
+                uploading={recordUploading}
+                exchangeRate={currentRate}
+                completeAction={modal.kind === 'service' && modal.record && !modal.completionOf &&
+                  !modal.record.cancelled && data.premium && isPlannedService(modal.record, nowDate) &&
+                  calendarRecordDate(modal.record, nowDate) && (
+                    <button type="button" disabled={recordSaving} onClick={async () => {
+                      const record = modal.record!;
+                      if (recordDirty && !await requestConfirmation(translateApplicationCopy('Ai modificări nesalvate. Vrei să le abandonezi?', language))) return;
+                      setRecordDirty(false);
+                      setModal({ kind: 'service', completionOf: record.id, record: completedServiceSeed(record,
+                        data.vehicles.find(vehicle => vehicle.id === record.vehicleId)?.odometer ?? record.odometer ?? 0, nowDate) });
+                    }} data-workspace-ui>{language === 'en' ? 'Mark as completed' : 'Marchează ca efectuată'}</button>
+                  )}
                 onSave={async (payload, file) => {
                   if (recordSaving) return false;
                   setRecordSaving(true);
                   setError('');
                   setNotice('');
                   try {
-                    if (previewData)
-                      throw new Error(
-                        'La cererea ta, formularele salvează numai în contul autentificat; demonstrația nu trimite date.',
-                      );
-                    const saved = await api(
-                      modal.completionOf ? 'records/'+modal.completionOf+'/complete' : 'records' + (modal.record ? '/' + modal.record.id : ''),
-                      modal.record && !modal.completionOf ? 'PATCH' : 'POST',
-                      payload,
-                    );
+                    const en = language === 'en';
+                    if (previewData) throw new Error(en ? 'Sign in to save a record.' : 'Autentifică-te pentru a salva înregistrarea.');
+                    const serialized = JSON.stringify(payload);
+                    let pending = partialSave.current?.modal === modal ? partialSave.current : null;
+                    if (!pending || serialized !== pending.payload) {
+                      const existingId = pending?.id ?? (modal.completionOf ? undefined : modal.record?.id);
+                      const path = existingId ? 'records/' + existingId
+                        : modal.completionOf ? 'records/' + modal.completionOf + '/complete' : 'records';
+                      const saved = await api(path, existingId ? 'PATCH' : 'POST', payload, accountId);
+                      pending = { modal, id: saved.id, payload: serialized, file: pending?.file ?? null,
+                        attachmentId: pending?.attachmentId ?? crypto.randomUUID() };
+                      partialSave.current = pending;
+                    }
                     if (file) {
+                      if (pending.file !== file) {
+                        pending.file = file;
+                        pending.attachmentId = crypto.randomUUID();
+                      }
+                      setRecordUploading(true);
                       const form = new FormData();
                       form.set('file', file);
-                      form.set('recordId', saved.id);
-                      const response = await fetch('/api/v1/files', { method: 'POST', body: form });
-                      if (!response.ok) {
-                        const out = await response.json();
-                        await refresh();
-                        setRecordDirty(false);
-                        setModal(null);
-                        setNotice(
-                          'Înregistrarea a fost salvată, dar atașamentul nu s-a încărcat: ' +
-                            out.error +
-                            '. Poți reîncerca atașarea din listă.',
-                        );
-                        return true;
+                      form.set('recordId', pending.id);
+                      form.set('uploadId', pending.attachmentId);
+                      try {
+                        const response = await fetch('/api/v1/files', { method: 'POST', body: form, headers: accountId ? { 'X-AutoCare-Account':accountId } : undefined });
+                        if (!response.ok) {
+                          const result = await response.json().catch(() => ({}));
+                          throw new Error(typeof result.error === 'string' ? result.error : '');
+                        }
+                      } catch (cause) {
+                        await refresh(true);
+                        const message = en
+                          ? 'The record was saved. Retry the attachment, replace it or remove it before closing.'
+                          : 'Înregistrarea a fost salvată. Reîncearcă încărcarea, înlocuiește fișierul sau elimină-l înainte de a închide.';
+                        const detail = cause instanceof Error ? cause.message : '';
+                        throw new Error(detail ? message + ' ' + detail : message, {cause});
+                      } finally {
+                        setRecordUploading(false);
                       }
                     }
+                    partialSave.current = null;
                     await refresh();
                     setRecordDirty(false);
-                    setNotice('Înregistrarea a fost salvată.');
+                    setNotice(en ? 'Record saved.' : 'Înregistrarea a fost salvată.');
                     setModal(null);
                     return true;
                   } finally {
@@ -2003,113 +2021,8 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
                   }
                 }}
               />
-            ) : !modal.vehicle ? (
-              <VehicleCreateForm vehicles={data.vehicles} busy={busy} onDirty={()=>setRecordDirty(true)} onCancel={closeRecord} onSave={saveForm}/>
-            ) : (
-              <form className="form-grid ac-premium-vehicle-form" onChange={() => setRecordDirty(true)} onSubmit={saveForm}>
-                <div className="ac-premium-form-intro full">
-                  <div className="ac-premium-form-symbol"><CarFront size={31}/></div>
-                  <div><strong>{modal.vehicle ? 'Actualizează datele mașinii' : 'Configurează noua mașină'}</strong>
-                  <p>Completează informațiile reale. Le poți modifica ulterior din Garaj.</p></div>
-                </div>
-                <div className="ac-premium-form-section full"><span>01</span> Identificare și înmatriculare</div>
-                <>
-                  <label>
-                    Marcă
-                    <input name="brand" required defaultValue={modal.vehicle?.brand} />
-                  </label>
-                  <label>
-                    Model
-                    <input name="model" required defaultValue={modal.vehicle?.model} />
-                  </label>
-                  <label>
-                    An
-                    <input
-                      type="number"
-                      name="year"
-                      required
-                      min={1886}
-                      max={new Date().getFullYear() + 1}
-                      defaultValue={modal.vehicle?.year || new Date().getFullYear()}
-                    />
-                  </label>
-                  <label>
-                    Număr de înmatriculare
-                    <input
-                      name="plate"
-                      required
-                      maxLength={20}
-                      defaultValue={modal.vehicle?.plate}
-                    />
-                  </label>
-                  <div className="ac-premium-form-section full"><span>02</span> Date tehnice și kilometraj</div>
-                  <label>
-                    Kilometraj actual
-                    <input
-                      name="odometer"
-                      type="number"
-                      min={0}
-                      required
-                      defaultValue={modal.vehicle?.odometer ?? 0}
-                    />
-                  </label>
-                  <label>
-                    Combustibil
-                    <FilterSelect name="fuel" defaultValue={modal.vehicle?.fuel || 'Benzină'}>
-                      {['Benzină', 'Diesel', 'Hibrid', 'Electric', 'GPL', 'Altul'].map((f) => (
-                        <option key={f} value={f}>{f}</option>
-                      ))}
-                    </FilterSelect>
-                  </label>
-                  <details className="app-vehicle-extra full"><summary>{language==='en'?'Technical details · optional':'Detalii tehnice · opțional'}</summary><div className="form-grid">
-                  <label>
-                    VIN (opțional)
-                    <input name="vin" maxLength={17} defaultValue={modal.vehicle?.vin || ''} />
-                  </label>
-                  <label>
-                    Motorizare
-                    <input name="engine" defaultValue={modal.vehicle?.engine || ''} />
-                  </label>
-                  <label>
-                    Capacitate (cm³)
-                    <input
-                      name="capacity"
-                      type="number"
-                      min={0}
-                      defaultValue={modal.vehicle?.capacity || ''}
-                    />
-                  </label>
-                  <div className="ac-premium-form-section full"><span>03</span> Alte informații</div>
-                  <label>
-                    Data achiziției
-                    <PremiumDateInput
-                      name="purchasedAt"
-                      type="date"
-                      defaultValue={modal.vehicle?.purchasedAt || ''}
-                    />
-                  </label>
-                  </div></details>
-                </>
-                <label className="full">
-                  Note
-                  <textarea
-                    name="notes"
-                    maxLength={4000}
-                    defaultValue={modal.record?.notes || modal.vehicle?.notes || ''}
-                  />
-                </label>
-                <div className="full actions">
-                  <button className="primary" disabled={busy}>
-                    {busy ? 'Se salvează…' : 'Salvează'}
-                  </button>
-                  <button type="button" disabled={busy} onClick={closeRecord}>
-                    Renunță
-                  </button>
-                </div>
-                <p className="micro full">Datele sunt salvate în contul tău. Documentele se pot adăuga ulterior în secțiunea Documente.</p>
-              </form>
             )}
-          </Dialog>
+          </SignatureDialog>
         )}
       </main>
     </div></ApplicationLanguageProvider>

@@ -247,6 +247,8 @@ export const documentCategories: RecordCategory[] = [
     'Assessment, payment and any deadline.',
     'wallet',
   ),
+  c('CIV', 'Cartea de identitate a vehiculului (CIV)', 'Vehicle Identity Card (CIV)', 'Serie și date de identificare.', 'Document number and identification details.', 'card'),
+  c('Asistență rutieră', 'Asistență rutieră', 'Roadside Assistance', 'Contract, emitent și valabilitate.', 'Contract, provider and validity.', 'road'),
   c(
     'Alt document',
     'Alte documente',

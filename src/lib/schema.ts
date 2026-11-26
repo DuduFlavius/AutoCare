@@ -336,6 +336,9 @@ export const supportThreads = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     title: text().notNull(),
+    category: text().notNull().default('other'),
+    language: text(),
+    platform: text(),
     status: text().notNull().default('open'),
     completedAt: timestamp({ withTimezone: true }),
     trashedAt: timestamp({ withTimezone: true }),

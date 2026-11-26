@@ -1,0 +1,83 @@
+.sc-signature {
+  --sc-border: var(--color-border);
+  --sc-paper: var(--color-surface);
+  --sc-muted: var(--color-surface-muted);
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.sc-signature .sc-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(240px, .75fr);
+  gap: 24px;
+  align-items: center;
+  padding: clamp(18px, 3.6vw, 40px);
+  border: 1px solid var(--sc-border);
+  background: var(--sc-paper);
+  border-radius: 20px;
+}
+.sc-brand { display: flex; align-items: center; gap: 8px; color: var(--color-primary-ink); font-size: 13px; font-weight: 750; }
+.sc-signature .sc-hero h2 { margin: 10px 0 6px; font-size: clamp(26px, 4vw, 44px); letter-spacing: -.05em; line-height: 1.05; }
+.sc-signature p { color: var(--color-muted); }
+.sc-signature .sc-hero p { margin: 0; line-height: 1.5; }
+.sc-availability { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--sc-border); border-radius: 12px; background: var(--sc-muted); font-size: 13px; }
+.sc-availability strong { display: flex; align-items: center; gap: 8px; }
+.sc-availability strong span { width: 9px; height: 9px; border-radius: 50%; background: var(--color-muted); }
+.sc-availability strong span[data-state=available] { background: #367d61; }
+.sc-availability strong span[data-state=busy], .sc-availability strong span[data-state=break] { background: #9f7540; }
+.sc-navigation { display: flex; flex-wrap: wrap; gap: 7px; min-width: 0; }
+.sc-signature .sc-navigation button, .sc-signature .sc-studio-link {
+ display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 9px 13px; text-align: start;
+ border: 1px solid var(--sc-border); border-radius: 11px; background: var(--sc-paper); color: var(--color-text);
+}
+.sc-signature .sc-navigation button[aria-pressed=true] { border-color: var(--color-primary); background: var(--color-primary-soft); }
+.sc-help { display: grid; gap: 8px; padding: 16px; border: 1px solid var(--sc-border); border-radius: 14px; background: var(--sc-paper); }
+.sc-help label { display: flex; align-items: center; gap: 12px; }
+.sc-help input { width: 100%; min-width: 0; }
+.sc-help details { border-top: 1px solid var(--sc-border); padding: 11px 0; }
+.sc-help small { color: var(--color-muted); margin-inline-end: 12px; }
+.sc-help summary { cursor: pointer; font-weight: 630; }
+.sc-signature .support-workspace, .founder-shell .support-workspace { min-width: 0; }
+body :is(.sc-signature, .founder-shell) .support-chat .support-message.is-own {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-text) !important;
+}
+body :is(.sc-signature, .founder-shell) .support-auto-label { font-size: 10px; font-weight: 750; color: var(--color-primary-ink); }
+body :is(.sc-signature, .founder-shell) .support-messages { overscroll-behavior: contain; }
+@media (max-width: 700px) {
+ .sc-signature .sc-hero { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+ .sc-navigation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ .sc-navigation button { min-width: 0; overflow-wrap: anywhere; }
+ .sc-signature:has([data-keyboard-open=true]) > :is(.sc-hero,.sc-navigation) { display: none; }
+}
+.sc-availability-settings > summary { display: flex; gap: 8px; align-items: center; cursor: pointer; min-height: 44px; font-weight: 680; }
+.sc-availability-settings form { display: grid; gap: 14px; align-items: start; margin-top: 16px; }
+.sc-hours { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.sc-weekdays { display: flex; flex-wrap: wrap; gap: 10px; }
+.sc-message-preview { padding: 8px; background: var(--color-surface-muted); border-radius: 8px; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .sc-hours { grid-template-columns: minmax(0,1fr); } }
+.sc-inbox-filters { margin: 5px 12px; }
+.sc-inbox-filters summary { font-size: 12px; font-weight: 650; cursor: pointer; }
+.sc-inbox-filters label { display: grid; margin: 8px 0; gap: 4px; }
+.sc-new-category, .sc-history-search { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.sc-history-search input { flex: 1; min-width: 0; }
+.sc-message-actions { display: flex; gap: 5px; }
+.sc-message-actions button, .sc-quoted button { display:inline-grid; place-items:center; min-width: 32px; min-height: 32px; padding: 4px; }
+.sc-quoted { display:flex; align-items:center; justify-content:space-between; gap:8px; border-inline-start:3px solid var(--color-primary); padding-inline-start:8px; }
+.sc-quoted span { overflow-wrap:anywhere; }
+.sc-camera { display:none !important; }
+@media (pointer:coarse) { .sc-camera { display:grid !important; place-items:center; min-width:40px; min-height:40px; } }
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .sc-signature .support-workspace#autocare-support#autocare-support.ac-support-center .support-messages .support-message.is-own,
+html body .founder-signature .support-workspace#autocare-support#autocare-support.ac-support-center .support-messages .support-message.is-own { background: var(--color-primary-soft) !important; color: var(--color-text) !important; }
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .sc-signature .support-workspace#autocare-support#autocare-support.ac-support-center .support-message.is-own :is(p,strong,time) { color: var(--color-text) !important; }
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .sc-signature .support-workspace#autocare-support#autocare-support.ac-support-center .support-composer .support-input-shell .support-upload {
+  position: relative !important; inset: auto !important; flex: none !important; margin-block-end: 3px !important;
+}
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .sc-signature .support-workspace#autocare-support#autocare-support.ac-support-center .support-composer .support-input-shell textarea { padding-inline-end: 8px !important; }
+@media (max-width: 700px) {
+ .sc-signature:has(.support-client .support-messages .support-message) .sc-hero { padding: 10px; }
+ .sc-signature:has(.support-client .support-messages .support-message) .sc-hero > div:first-child,
+ .sc-signature:has(.support-client .support-messages .support-message) .sc-availability p { display: none; }
+ .sc-signature:has(.support-client .support-messages .support-message) .sc-availability { padding: 8px; }
+ .sc-message-actions button { min-width: 44px; min-height: 44px; }
+}

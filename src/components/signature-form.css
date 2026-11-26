@@ -1,0 +1,222 @@
+.sf-backdrop {
+  position: fixed;
+  z-index: 220;
+  inset: var(--sf-offset, 0px) 0 auto;
+  height: var(--sf-viewport, 100dvh);
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  background: rgb(8 25 32 / 52%);
+  backdrop-filter: blur(5px);
+}
+
+.sf-window {
+  --sf-gutter: clamp(16px, 4vw, 32px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(100%, 720px);
+  max-height: min(100%, 920px);
+  min-width: 0;
+  min-height: 0;
+  overflow: clip;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 24px 84px rgb(3 20 28 / 30%);
+  animation: sf-enter 180ms ease-out;
+}
+
+.sf-window[data-compact] { width: min(100%, 600px); }
+
+.sf-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 15px var(--sf-gutter);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sf-header h2 { margin: 0; font-size: clamp(18px, 3.4vw, 24px); line-height: 1.2; letter-spacing: -.025em; }
+.sf-header h2:focus { outline: none; }
+.sf-header-icon, .sf-category-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 13px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+}
+
+.sf-window .sf-close { width: 40px; height: 40px; min-height: 40px; padding: 0; display: grid; place-items: center; border-radius: 12px; }
+
+.sf-window > .sf-form {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  margin: 0;
+}
+
+.sf-window .sf-body {
+  min-width: 0;
+  min-height: 0;
+  padding: 20px var(--sf-gutter);
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  scroll-padding: 14px;
+}
+
+.sf-window .sf-stage, .sf-window .sf-vehicle-content { display: grid; gap: 16px; min-width: 0; }
+.sf-window [hidden] { display: none !important; }
+
+.sf-window .sf-actions {
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px var(--sf-gutter);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.sf-actions-primary, .sf-actions-extra { display: flex; gap: 8px; }
+.sf-actions-extra { margin-inline-end: auto; }
+
+.sf-window .sf-actions button, .sf-window .sf-secondary, .sf-inline .sf-submit {
+  min-height: 44px;
+  padding: 9px 14px;
+  white-space: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-weight: 650;
+  transition: background 160ms, border-color 160ms;
+}
+.sf-window .sf-actions .sf-primary { color: var(--color-on-primary); background: var(--color-primary); border-color: var(--color-primary); }
+.sf-window .sf-actions .sf-primary:hover { background: var(--color-primary-hover); }
+.sf-window button:disabled { opacity: .6; }
+
+.sf-window .form-grid, .sf-inline .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  min-width: 0;
+}
+.sf-window .form-grid > .full, .sf-window .sf-group-title { grid-column: 1 / -1; }
+.sf-window :where(label, fieldset, .form-grid > *, .stack, .ac-date-field, .ac-filter-select) { min-width: 0; max-width: 100%; }
+.sf-window label, .sf-inline label { display: grid; align-content: start; gap: 6px; font-size: 13px; font-weight: 650; }
+.sf-window label.check, .sf-inline label.check { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.sf-window :is(input, select, textarea):not([type=hidden], [type=checkbox], [type=radio], [type=file]),
+.sf-inline :is(input, select, textarea):not([type=hidden], [type=checkbox], [type=radio], [type=file]) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 45px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: 9px 12px;
+  line-height: 1.35;
+}
+.sf-window .ac-date-field input { padding-inline-end: 46px; }
+.sf-window textarea, .sf-inline textarea { min-height: 82px; resize: vertical; }
+.sf-window :is(input, select, textarea, button, summary):focus-visible,
+.sf-inline :is(input, select, textarea, button, summary):focus-visible {
+  outline: 2px solid var(--color-primary-ink);
+  outline-offset: 2px;
+}
+.sf-window [aria-invalid=true], .sf-window :user-invalid { border-color: var(--color-danger-ink); }
+.sf-window :is(small, .micro) { font-weight: 450; color: var(--color-muted); }
+.sf-window :is(h3, p) { margin: 0; }
+.sf-window :is(strong, p, span, small) { overflow-wrap: anywhere; }
+
+.sf-category-current { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.sf-category-current > div { flex: 1 1 150px; min-width: 0; }
+.sf-category-current h3 { line-height: 1.25; font-size: 17px; }
+.sf-status { font-size: 12px; color: var(--color-primary-ink); margin-top: 4px !important; }
+.sf-mileage { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; color: var(--color-muted); padding: 10px 12px; font-size: 13px; border-radius: 10px; background: var(--color-surface-muted); }
+.sf-mileage strong { color: var(--color-text); font-variant-numeric: tabular-nums; }
+.sf-group-title { padding: 12px 0 2px; border-top: 1px solid var(--color-border); font-weight: 700; font-size: 13px; }
+.sf-window :is(.record-extra, .record-technical-details, .record-cost-details, .service-reminder-box, .ac-cost-breakdown, .sf-vehicle-details) {
+  display: block;
+  min-width: 0;
+  margin: 0;
+  padding: 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+}
+.sf-window :is(.record-extra, .record-technical-details, .record-cost-details, .sf-vehicle-details) > :not(summary) { margin-top: 12px; }
+.sf-window .ac-cost-breakdown { display: grid; gap: 10px; }
+.sf-window .record-cost-mode { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sf-window summary, .sf-inline summary { cursor: pointer; font-weight: 650; min-height: 28px; }
+.sf-window summary svg { float: right; }
+.sf-window .sf-error { border-inline-start: 3px solid var(--color-danger-ink); color: var(--color-danger-ink); padding: 8px 10px; font-size: 13px; }
+.sf-category-search { position: relative; margin-bottom: 14px; }
+.sf-category-search svg { position: absolute; inset-inline-start: 12px; align-self: center; color: var(--color-muted); pointer-events: none; }
+.sf-window .sf-category-search input { padding-inline-start: 39px !important; }
+.sf-category-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.sf-window .sf-category-grid button { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 62px; text-align: start; padding: 9px; white-space: normal; border-radius: 12px; border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text); }
+.sf-window .sf-category-grid button[aria-pressed=true], .sf-window .sf-category-grid button:hover { border-color: var(--color-primary-ink); background: var(--color-primary-soft); }
+.sf-category-grid :is(strong, small) { display: block; line-height: 1.3; }
+.sf-category-grid .sf-category-icon { width: 32px; height: 32px; border-radius: 9px; }
+.sf-window .sf-picker-footer { margin-block-start: 12px; display: flex; justify-content: flex-end; }
+.sf-window .sf-standard-heading { margin: 0 0 12px; font-size: 16px; }
+.sf-inline { min-width: 0; }
+.sf-spinner { animation: sf-spin 750ms linear infinite; }
+
+@media (max-width: 640px) {
+  .sf-backdrop { padding: 0; place-items: end stretch; }
+  .sf-window { width: 100%; max-height: none; height: 100%; border: 0; border-radius: 0; box-sizing: border-box; }
+  .sf-window[data-compact] { width: 100%; max-height: min(100%, 680px); height: auto; border: 1px solid var(--color-border); border-radius: 22px 22px 0 0; }
+  .sf-window .sf-header { padding-top: max(12px, env(safe-area-inset-top)); }
+  .sf-window :is(.sf-header,.sf-body,.sf-actions) { padding-inline: max(var(--sf-gutter), env(safe-area-inset-left)) max(var(--sf-gutter), env(safe-area-inset-right)); }
+  .sf-window .sf-actions { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .sf-actions-primary { flex: 1 1 100%; }
+  .sf-actions-primary > * { flex: 1; }
+  .sf-actions-extra > * { min-height: 44px; }
+  .sf-window .form-grid, .sf-category-grid { grid-template-columns: minmax(0, 1fr); }
+  .sf-window :is(input, select, textarea):not([type=checkbox], [type=radio]) { font-size: 16px; }
+}
+@keyframes sf-enter { from { opacity: 0; transform: translateY(8px); } }
+@keyframes sf-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .sf-window, .sf-spinner { animation: none; }
+}
+
+.ac-attachment .sf-camera { display: none !important; }
+.sf-window .ac-attachment { padding: 12px !important; border-radius: 12px !important; }
+.sf-window .ac-attachment progress { width: 100%; height: 5px; accent-color: var(--color-primary); }
+.sf-window .sf-upload-status { color: var(--color-muted); font-size: 13px; }
+.sf-window label :is(input[type=checkbox], input[type=radio]), .sf-inline label input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+.sf-window .sf-optional-section > :not(summary) { margin-block-start: 10px; }
+@media (pointer: coarse) {
+  .ac-attachment .sf-camera { display: inline-flex !important; }
+}
+
+.ac-finance-analysis { display: contents; }
+.ac-m-finance-more { display: none; }
+@media (max-width: 760px) {
+  .ac-finance .ac-m-finance-more { display: inline-flex; align-items: center; justify-content: space-between; min-height: 44px; }
+  .ac-finance-analysis[data-open=false] { display: none !important; }
+}

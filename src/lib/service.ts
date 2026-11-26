@@ -84,6 +84,14 @@ export async function ownedRecord(uid: string, id: string) {
   if (!r) throw new AppError(404, 'Înregistrarea nu există.');
   return r;
 }
+const normalizeVehicleIdentifier = (value: string | null | undefined) => value?.replace(/\s/g, '').toUpperCase() || '';
+function assertUniqueVehicle(cars: { plate: string; vin: string | null }[], data: { plate: string; vin?: string | null }) {
+  const plate = normalizeVehicleIdentifier(data.plate);
+  const vin = normalizeVehicleIdentifier(data.vin);
+  if (cars.some(car => normalizeVehicleIdentifier(car.plate) === plate)) throw new AppError(409, 'Există deja o mașină cu acest număr de înmatriculare.');
+  if (vin && cars.some(car => normalizeVehicleIdentifier(car.vin) === vin)) throw new AppError(409, 'Există deja o mașină cu acest VIN.');
+}
+
 export async function createVehicle(uid: string, input: unknown) {
   const {documents,...data} = vehicleCreateInput.parse(input);
   return db().transaction(async (tx) => {
@@ -93,11 +101,7 @@ export async function createVehicle(uid: string, input: unknown) {
       .select({plate:s.vehicles.plate,vin:s.vehicles.vin,archived:s.vehicles.archived})
       .from(s.vehicles)
       .where(eq(s.vehicles.userId,uid));
-    const normalizeIdentifier = (value: string | null | undefined) => value?.replace(/\s/g,'').toUpperCase();
-    const plate = normalizeIdentifier(data.plate);
-    const vin = normalizeIdentifier(data.vin);
-    if (cars.some(car => normalizeIdentifier(car.plate) === plate || (vin && normalizeIdentifier(car.vin) === vin)))
-      throw new AppError(409, 'Există deja o mașină cu acest număr sau VIN.');
+    assertUniqueVehicle(cars, data);
     const grants = await tx
       .select()
       .from(s.premiumGrants)
@@ -124,15 +128,22 @@ export async function createVehicle(uid: string, input: unknown) {
 }
 export async function editVehicle(uid: string, id: string, input: unknown) {
   const data = vehicleInput.parse(input);
-  await ownedVehicle(uid, id);
-  return (
-    await db()
-      .update(s.vehicles)
-      .set(data)
-      .where(and(eq(s.vehicles.id, id), eq(s.vehicles.userId, uid)))
-      .returning()
-  )[0];
+  return db().transaction(async tx => {
+    await tx.select({ id: s.user.id }).from(s.user).where(eq(s.user.id, uid)).for('update');
+    const cars = await tx.select({ id: s.vehicles.id, plate: s.vehicles.plate, vin: s.vehicles.vin }).from(s.vehicles).where(eq(s.vehicles.userId, uid));
+    const current = cars.find(car => car.id === id);
+    if (!current) throw new AppError(404, 'Mașina nu există.');
+    const others = cars.filter(car => car.id !== id);
+    if (normalizeVehicleIdentifier(current.plate) !== normalizeVehicleIdentifier(data.plate) ||
+      normalizeVehicleIdentifier(current.vin) !== normalizeVehicleIdentifier(data.vin === undefined ? current.vin : data.vin)) {
+      assertUniqueVehicle(others, { ...data, vin: data.vin === undefined ? current.vin : data.vin });
+    }
+    const [vehicle] = await tx.update(s.vehicles).set(data)
+      .where(and(eq(s.vehicles.id, id), eq(s.vehicles.userId, uid))).returning();
+    return vehicle;
+  });
 }
+
 export async function saveFinanceBudget(uid: string, vehicleId: string, amountBani: number | null) {
   return db().transaction(async tx => {
     await tx.select({ id: s.user.id }).from(s.user).where(eq(s.user.id, uid)).for('update');
@@ -419,14 +430,26 @@ export function detectMime(bytes: Buffer) {
 export async function uploadFile(
   uid: string,
   recordId: string,
-  file: { name: string; bytes: Buffer },
+  file: { name: string; bytes: Buffer; uploadId?: string },
 ) {
   await ownedRecord(uid, recordId);
   if (file.bytes.length > 2 * 1024 * 1024) throw new AppError(413, 'Maximum 2 MB per fișier.');
   const mime = detectMime(file.bytes);
   const max = (await premium(uid)) ? (await limits()).maxFiles : 2;
+  const data = file.bytes.toString('base64');
+  const name = file.name.replace(/[^\p{L}\p{N}._ -]/gu, '_').slice(0, 150) || 'document';
   return db().transaction(async (tx) => {
     await tx.select().from(s.user).where(eq(s.user.id, uid)).for('update');
+    if (file.uploadId) {
+      const [existing] = await tx.select().from(s.files).where(eq(s.files.id, file.uploadId));
+      if (existing) {
+        if (existing.userId !== uid || existing.recordId !== recordId || existing.name !== name || existing.data !== data) {
+          throw new AppError(409, 'Încărcarea nu poate fi reluată cu acest identificator.');
+        }
+        const { data: _data, ...metadata } = existing;
+        return metadata;
+      }
+    }
     const count = (
       await tx
         .select({ n: sql<number>`count(*)::int` })
@@ -438,12 +461,12 @@ export async function uploadFile(
       await tx
         .insert(s.files)
         .values({
-          id: crypto.randomUUID(),
+          id: file.uploadId ?? crypto.randomUUID(),
           userId: uid,
           recordId,
-          name: file.name.replace(/[^\p{L}\p{N}._ -]/gu, '_').slice(0, 150) || 'document',
+          name,
           mime,
-          data: file.bytes.toString('base64'),
+          data,
           size: file.bytes.length,
         })
         .returning()

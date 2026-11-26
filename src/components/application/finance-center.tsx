@@ -150,7 +150,8 @@ export function FinanceCenter({ data, today, primaryId, preview, money, currency
         </button>)}
       </div>
     </section>
-    <button className="ac-m-finance-more" aria-expanded={mobileDetails} onClick={()=>setMobileDetails(value=>!value)}>{t('Bugete, categorii și analiză','Budgets, categories & analysis')} <Sparkles size={16}/></button>
+    <button type="button" className="ac-m-finance-more" aria-controls="ac-finance-analysis" aria-expanded={mobileDetails} onClick={()=>setMobileDetails(value=>!value)}>{t('Bugete, categorii și analiză','Budgets, categories & analysis')} <Sparkles size={16}/></button>
+    <div className="ac-finance-analysis" id="ac-finance-analysis" data-open={mobileDetails}>
     <section className="ac-finance-hero"><TitaniumWave />
       <div><span className="studio-kicker">AUTOCARE · FINANCE</span><h2>{t('Centrul financiar auto', 'Vehicle finance center')}</h2><p>{t('Costuri reale din cheltuieli, intervenții și documente, o singură dată per înregistrare.', 'Actual costs from expenses, service and documents, counted once per record.')}</p></div>
       <label>{t('Vehicul', 'Vehicle')}<FilterSelect aria-label={t('Vehicul','Vehicle')} value={vehicle} onChange={e => { setVehicle(e.target.value); setPage(0); setPoint(null); }}>
@@ -220,6 +221,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, currency
         })}
       </ul> : <p>{t('Nu există cheltuieli cunoscute în selecție.','There are no known expenses in this selection.')}</p>}
     </section>}
+    </div>
     <section className="ac-finance-card ac-finance-history" aria-labelledby="ac-finance-history">
       <header><div><span className="studio-kicker">AUTOCARE · LEDGER</span><h3 id="ac-finance-history">{t('Istoric cheltuieli', 'Expense history')}</h3><p>{t('Toate tranzacțiile, documentele și acțiunile într-un singur loc.', 'Transactions, documents and actions in one place.')}</p></div>
         <div className="ac-finance-toggle">{data.premium ? <><button type="button" disabled={preview} onClick={()=>setReportPreview({url:exportUrl('pdf')+'&view=1',name:t('Situația cheltuielilor','Expense report'),mime:'application/pdf',nativeShare:true,downloadName:'autocare-situatia-cheltuielilor.pdf'})}>{t('Previzualizează raportul','Preview report')}</button><button type="button" disabled={preview||reportSaving} onClick={()=>void saveExpenseReport('pdf')}><Download size={15}/>{reportSaving?t('Se generează…','Generating…'):t('Descarcă PDF','Download PDF')}</button>{!preview&&<button type="button" disabled={reportSaving} onClick={()=>void saveExpenseReport('csv')}>CSV</button>}</> : <a className="button" href="/cont?tab=Premium">{t('Export Premium', 'Premium export')}</a>}</div>
@@ -286,7 +288,7 @@ function FinanceBudget({ vehicle, amount, used, premium, preview, money, onRefre
         <p>{state.remaining < 0 ? t('Depășit cu ', 'Over by ') : t('Rămas ', 'Remaining ')}{money(Math.abs(state.remaining))} · {state.percent.toFixed(0)}%</p>
         {!!state.threshold && <p className="ac-finance-budget-alert" role="status">{t('Prag atins', 'Threshold reached')} · {state.threshold}%</p>}
       </>}
-      <form onSubmit={save}><label>{t('Limită lunară (RON)', 'Monthly limit (RON)')}<input type="number" min=".01" max="1000000" step=".01" value={value} onChange={e => setValue(e.target.value)} placeholder="—" /></label>
+      <form className="sf-inline" aria-busy={pending} onSubmit={save}><label>{t('Limită lunară (RON)', 'Monthly limit (RON)')}<input type="number" min=".01" max="1000000" step=".01" value={value} onChange={e => setValue(e.target.value)} placeholder="—" /></label>
         <button type="submit" disabled={pending || preview}>{value ? t('Salvează bugetul', 'Save budget') : t('Elimină limita', 'Remove limit')}</button></form>
       {message && <p role={error ? 'alert' : 'status'}>{message}</p>}
     </>}
