@@ -227,7 +227,7 @@ const [tab, setTab] = useState('Utilizatori'),
       placeholder={locale === 'en-GB' ? 'Find a section…' : 'Caută o secțiune…'} />
   </label>;
   return (
-    <div className="founder-shell founder-signature" data-workspace={tab==='Mail Center'?'mail':undefined} data-appearance={appearance} data-language={locale.startsWith('en')?'en':'ro'}>
+    <div className="founder-shell founder-signature" data-workspace={tab==='Mail Center'?'mail':tab==='Chat și suport'?'support':undefined} data-appearance={appearance} data-language={locale.startsWith('en')?'en':'ro'}>
       <aside className="founder-sidebar">
         <a href="/cont" className="founder-brand">
           <span>

@@ -761,16 +761,6 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             : t('Nu există conversații aici. Poți trimite o solicitare din Centrul de suport.', 'There are no conversations here. You can send a request from the Support Center.')}</p>}
         </section>}
 
-        {!staff && threads.length > 1 && (
-          <label className="support-own-history">Istoric conversații
-            <FilterSelect value={selected ?? ''} onChange={event => {
-              const thread = threads.find(item => item.id === event.target.value);
-              if (thread) void openThread(thread, false);
-            }}>
-              {threads.map(thread => <option key={thread.id} value={thread.id}>{new Date(thread.createdAt).toLocaleDateString(locale)} · {thread.title}</option>)}
-            </FilterSelect>
-          </label>
-        )}
         <header className="support-chat-header">
           {staff && (
             <button
