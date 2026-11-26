@@ -80,9 +80,9 @@ public class AutoCareTrackingPlugin extends Plugin {
                 java.io.File file = new java.io.File(directory, documentName(call));
                 try (java.io.FileOutputStream stream = new java.io.FileOutputStream(file)) { stream.write(bytes); }
                 Uri uri = androidx.core.content.FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
-                Intent send = new Intent(Intent.ACTION_SEND).setType(mime).putExtra(Intent.EXTRA_STREAM, uri)
-                    .setClipData(android.content.ClipData.newRawUri("AutoCare", uri))
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Intent send = new Intent(Intent.ACTION_SEND).setType(mime).putExtra(Intent.EXTRA_STREAM, uri);
+                send.setClipData(android.content.ClipData.newRawUri("AutoCare", uri));
+                send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 getActivity().runOnUiThread(() -> {
                     try { getActivity().startActivity(Intent.createChooser(send, null)); call.resolve(); }
                     catch (Exception error) { call.reject("Unable to share document.", "DOCUMENT_SHARE_FAILED"); }
