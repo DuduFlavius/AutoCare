@@ -46,6 +46,7 @@ import { stripe, checkout, billingPortal, billingInvoice, processStripeEvent } f
 import {createMechanicShare,listMechanicShares,revokeMechanicShare} from '@/lib/mechanic-shares';
 import {syncPaidExtensions} from '@/lib/subscription-extensions';
 import {vehicleReport} from '@/lib/vehicle-report';
+import {reportKinds} from '@/lib/report-analysis';
 import {latestExchangeRate} from '@/lib/exchange-rate-server';
 import {accountDisplayCurrency} from '@/lib/display-currency';
 import {currencyPreference,currencyPreferenceKey} from '@/lib/exchange-rate';
@@ -487,6 +488,28 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       return json({ ok: true });
     }
 
+    if (route==='reports/distances' && method==='GET') {
+      if (!await svc.premium(uid)) throw new svc.AppError(403,'Premium necesar.');
+      const params = z.object({vehicleId:z.string().uuid().optional(),from:verifiedDate.optional(),to:verifiedDate.optional()})
+        .parse(Object.fromEntries(new URL(req.url).searchParams));
+      if(params.from&&params.to&&params.from>params.to)throw new svc.AppError(400,'Interval invalid.');
+      const [cars, profile] = await Promise.all([
+        db().select({id:s.vehicles.id}).from(s.vehicles).where(and(eq(s.vehicles.userId,uid),eq(s.vehicles.archived,false),
+          params.vehicleId?eq(s.vehicles.id,params.vehicleId):undefined)),svc.profile(uid),
+      ]);
+      const ids=cars.map(car=>car.id);
+      if(!ids.length)return json({});
+      const readings=await db().select().from(s.mileageReadings)
+        .where(and(eq(s.mileageReadings.userId,uid),inArray(s.mileageReadings.vehicleId,ids)));
+      const today=localDate(new Date(),profile.timezone);
+      const end=params.to&&params.to<today?params.to:today;
+      const results=ids.flatMap(id=>{
+        const distance=mileageSeries(readings.filter(row=>row.vehicleId===id),profile.timezone,params.from,end).distance;
+        return distance==null?[]:[[id,distance] as const];
+      });
+      return json(Object.fromEntries(results));
+    }
+
     // Authenticated SmartDrive history; every read/write is scoped to the session user.
     if (route === 'smartdrive/preferences') {
       if (method === 'GET') {
@@ -507,12 +530,12 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         const scope=and(eq(s.mileageReadings.userId,uid),eq(s.mileageReadings.vehicleId,vehicleId));
         if (method === 'GET') {
           const params=new URL(req.url).searchParams;
-          const query=z.object({from:verifiedDate.optional(),to:verifiedDate.optional()}).parse(Object.fromEntries(params));
+          const query=z.object({from:verifiedDate.optional(),to:verifiedDate.optional(),language:z.enum(['ro','en']).optional()}).parse(Object.fromEntries(params));
           if(query.from&&query.to&&query.from>query.to)throw new svc.AppError(400,'Interval invalid.');
           const entries=await db().select().from(s.mileageReadings).where(scope);
           if(params.get('format')==='pdf'){
             const timezone=(await svc.profile(uid)).timezone;
-            const report=await mileageReport(ownedCar,mileageSeries(entries,timezone,query.from,query.to),timezone,query.from,query.to,languageCookie(req.headers.get('cookie'))==='en');
+            const report=await mileageReport(ownedCar,mileageSeries(entries,timezone,query.from,query.to),timezone,query.from,query.to,(query.language??languageCookie(req.headers.get('cookie'))??await userLanguage(uid))==='en');
             return new Response(report,{headers:{'Content-Type':'application/pdf','Content-Disposition':'inline; filename="autocare-kilometraj.pdf"','Cache-Control':'private, no-store'}});
           }
           if(params.get('history')==='full'){
@@ -927,6 +950,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       const params = new URL(req.url).searchParams;
       const filters = z
         .object({
+          report: z.enum(reportKinds).optional(),
           kind: z.enum(['document', 'service', 'expense']).optional(),
           language: z.enum(['ro','en']).optional(),
           currency: z.enum(['RON','EUR']).optional(),
@@ -939,25 +963,25 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           status: z.enum(['valid', 'soon', 'expired', 'incomplete', 'archived']).optional(),
           archived: z.enum(['all', 'active', 'only']).optional(),
           q: z.string().max(250).optional(),
-          from: z
-            .string()
-            .regex(/^\d{4}-\d{2}-\d{2}$/)
-            .optional(),
-          to: z
-            .string()
-            .regex(/^\d{4}-\d{2}-\d{2}$/)
-            .optional(),
+          from: verifiedDate.optional(),
+          to: verifiedDate.optional(),
         })
         .parse(
           Object.fromEntries(Array.from(params.entries()).filter(([key]) => key !== 'format' && key !== 'view')),
         );
+      if (filters.from && filters.to && filters.from > filters.to) throw new svc.AppError(400,'Interval invalid.');
       const today = localDate(new Date(), data.profile.timezone);
-      const activeVehicleIds = new Set(data.vehicles.filter(vehicle => !vehicle.archived).map(vehicle => vehicle.id));
-      const eligible = filters.vehicleScope === 'active' ? data.records.filter(row => activeVehicleIds.has(row.vehicleId)) : data.records;
-      const selection = filters.finance
+      const report = filters.report ?? (filters.finance || filters.kind==='expense' ? 'finance'
+        : filters.kind==='service' ? 'service' : filters.kind==='document' ? 'documents' : 'journal');
+      const reportCars = data.vehicles.filter(vehicle =>
+        (!filters.vehicleId || vehicle.id === filters.vehicleId) && (filters.vehicleScope !== 'active' || !vehicle.archived));
+      const allowed = new Set(reportCars.map(vehicle=>vehicle.id));
+      const eligible = data.records.filter(row=>allowed.has(row.vehicleId));
+      const kind = filters.kind ?? (report==='service'?'service':report==='documents'?'document':undefined);
+      const selection = report==='finance' || filters.finance
         ? [...new Map(eligible.map(row => [row.id, row])).values()].filter(row => isFinancialEntry(row, today) && (!filters.financeCategory || financeGroup(row) === filters.financeCategory))
         : filters.journal ? eligible.filter(row => !isPlannedService(row, today)) : eligible;
-      const selected = filterRecords(selection, filters, new Date(), data.profile.timezone);
+      const selected = filterRecords(selection, {...filters,kind}, new Date(), data.profile.timezone);
       const rows = selected.map(
         ({
           id,
@@ -985,25 +1009,31 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         }),
       );
       if (format === 'pdf') {
-        const vehicleIds = new Set(selected.map(row => row.vehicleId));
-        if (filters.vehicleId && (!filters.vehicleScope || activeVehicleIds.has(filters.vehicleId))) vehicleIds.add(filters.vehicleId);
         const language = filters.language ?? languageCookie(req.headers.get('cookie')) ?? await userLanguage(uid);
         const en = language === 'en';
         const currency = accountDisplayCurrency(language, filters.currency ?? await readCurrencyPreference(uid));
-        const finance = !!filters.finance || filters.kind === 'expense';
-        const title = filters.kind === 'service' ? (en ? 'Service sheet' : 'Fișă de service')
-          : filters.kind === 'document' ? (en ? 'Vehicle documents' : 'Situația documentelor')
-          : finance ? (en ? 'Expense report' : 'Situația cheltuielilor') : (en ? 'Vehicle history' : 'Istoric auto');
-        const report = await vehicleReport({
-          vehicles: data.vehicles.filter(vehicle => vehicleIds.has(vehicle.id)), records: selected, finance,
+        const mileageIds = reportCars.map(car=>car.id);
+        const upcoming = report==='annual' || report==='service'
+          ? filterRecords(eligible,{...filters,archived:'active',kind,from:undefined,to:undefined},new Date(),data.profile.timezone)
+            .filter(row=>row.kind==='service'&&isPlannedService(row,today)&&(!row.date||row.date>=today) ||
+              report==='annual'&&row.kind==='document'&&row.expiresAt&&row.expiresAt>=today)
+          : [];
+        const [mileage,exchangeRate] = await Promise.all([
+          (report==='annual'||report==='finance')&&mileageIds.length
+            ? db().select().from(s.mileageReadings).where(and(eq(s.mileageReadings.userId,uid),inArray(s.mileageReadings.vehicleId,mileageIds))) : [],
+          currency==='EUR' ? latestExchangeRate() : null,
+        ]);
+        const pdf = await vehicleReport({
+          vehicles: reportCars, records: selected, variant:report,
           generatedAt: new Date().toLocaleDateString(en ? 'en-GB' : 'ro-RO', { timeZone: data.profile.timezone }),
-          language, currency, exchangeRate: currency === 'EUR' ? await latestExchangeRate() : null,
-          asOf: today, title, period: [filters.from,filters.to].filter(Boolean).join(' - ') || undefined,
+          timezone:data.profile.timezone, language, currency, exchangeRate, mileage, upcoming,
+          asOf: today, from:filters.from,to:filters.to,
         });
-        return new Response(report, {
+        const filenames={service:'autocare-revizii.pdf',finance:'autocare-cheltuieli.pdf',annual:'autocare-dosarul-garajului.pdf',documents:'autocare-documente.pdf',journal:'autocare-raport.pdf'};
+        return new Response(pdf, {
           headers: {
             'Content-Type': 'application/pdf',
-            'Content-Disposition': (params.get('view')==='1'?'inline':'attachment')+'; filename="'+(filters.kind==='service'?'autocare-revizii.pdf':finance?'autocare-cheltuieli.pdf':'autocare-raport.pdf')+'"',
+            'Content-Disposition': (params.get('view')==='1'?'inline':'attachment')+'; filename="'+filenames[report]+'"',
             'Cache-Control': 'no-store',
           },
         });

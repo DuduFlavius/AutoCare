@@ -100,7 +100,7 @@ export default function MileageDashboard({cars,primaryId,timezone,preview,onUpda
           {cars.filter(x=>!x.archived).map(x=><option key={x.id} value={x.id}>{x.brand} {x.model} · {x.plate}</option>)}
         </FilterSelect>
         <InlineMileageEditor key={car.id} vehicleId={car.id} currentKm={car.odometer} preview={preview} onSaved={refresh} triggerLabel={t('Actualizează kilometraj','Update mileage')}/>
-        <button type="button" disabled={preview||invalid} onClick={()=>setPdf({url:url+'?'+new URLSearchParams({format:'pdf',...(start&&{from:start}),...(end&&{to:end})}),name:t('Raport kilometraj','Mileage report'),mime:'application/pdf',downloadName:'autocare-kilometraj.pdf'})}><Download size={17}/>{t('Exportă raport PDF','Export PDF report')}</button>
+        <button type="button" disabled={preview||invalid} onClick={()=>setPdf({url:url+'?'+new URLSearchParams({format:'pdf',...(start&&{from:start}),...(end&&{to:end})}),name:t('Raport kilometraj','Mileage report'),mime:'application/pdf',nativeShare:true,downloadName:'autocare-kilometraj.pdf'})}><Download size={17}/>{t('Exportă raport PDF','Export PDF report')}</button>
       </div>}
     </header>
     {!car?<p>{t('Adaugă un vehicul pentru a vedea istoricul.','Add a vehicle to see its history.')}</p>:<>

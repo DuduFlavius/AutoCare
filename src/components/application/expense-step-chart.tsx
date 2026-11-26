@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { cumulativeAt, type expenseSelection } from '@/lib/finance-selection';
 
 const width = 680;
@@ -21,11 +21,14 @@ export function ExpenseStepChart({ selection, en, locale, money }: {
   const fraction = (at: number) => start === end ? .5 : (at - start) / span;
   const max = Math.max(1, total);
   const y = (bani: number) => baseline - bani / max * (baseline - top);
-  const line = `M ${left} ${baseline}` +
-    changes.map(change => ` H ${xAt(fraction(change.day))} V ${y(change.total)}`).join('') + ` H ${right}`;
+  const line = useMemo(() => `M ${left} ${baseline}` + changes.map(change => {
+    const position=start===end?.5:(change.day-start)/Math.max(1,end-start);
+    return ` H ${xAt(position)} V ${baseline-change.total/Math.max(1,total)*(baseline-top)}`;
+  }).join('') + ` H ${right}`,[changes,start,end,total]);
   const point = cumulativeAt(changes, day);
-  const label = (at: number) => new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', ...(end-start>365?{year:'numeric' as const}:{}), timeZone: 'UTC' })
-    .format(new Date(at * 86400000));
+  const formatter=useMemo(()=>new Intl.DateTimeFormat(locale,{ day:'numeric',month:'short',
+    ...(end-start>365?{year:'numeric' as const}:{}),timeZone:'UTC'}),[locale,start,end]);
+  const label = (at: number) => formatter.format(new Date(at * 86400000));
   const dates = [...new Set([start, Math.round((start + end) / 2), end])];
   return <div className="ac-step-chart">
     <div className="ac-step-grid" aria-hidden="true">

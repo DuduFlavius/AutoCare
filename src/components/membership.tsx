@@ -335,7 +335,7 @@ export default function Membership({
       )}
       <PremiumWorkspace data={data} language={language} navigate={navigate} onRecord={onRecord} />
       {data.premium && <PremiumCareTools money={money} data={data} language={language} preview={preview} onRecord={onRecord}/> }
-      {data.premium && <div id="premium-reports" style={{scrollMarginTop:90}}><PremiumDownloads data={data} language={language} currency={currency} money={money} preview={preview} /></div>}
+      {data.premium && <div id="premium-reports" style={{scrollMarginTop:90}}><PremiumDownloads data={data} language={language} currency={currency} preview={preview} navigate={navigate} /></div>}
       <section className="card" id="premium-plans" data-workspace-ui><h3>{language==='en'?'Subscription and renewal':'Abonament și prelungire'}</h3><p>{language==='en'?'Manage your paid period, plans and invoices on the dedicated subscription page.':'Gestionează perioada achitată, planurile și facturile pe pagina separată de abonament.'}</p><button type="button" onClick={()=>navigate('Abonament')}>{language==='en'?'Open subscription':'Deschide abonamentul'}</button></section>
     </div>
   );

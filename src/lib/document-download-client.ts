@@ -2,8 +2,8 @@
 import { Capacitor } from '@capacitor/core';
 import { nativeDocumentBridge } from './native-tracking';
 
-export async function fetchDownloadDocument(url: string, fallback: string, expectedMime?: string) {
-  const response = await fetch(url, { cache: 'no-store' });
+export async function fetchDownloadDocument(url: string, fallback: string, expectedMime?: string, signal?: AbortSignal) {
+  const response = await fetch(url, { cache: 'no-store', signal });
   if (!response.ok) throw Error(response.status === 401 ? 'SESSION_EXPIRED' : response.status === 403 ? 'FORBIDDEN' : 'DOWNLOAD_FAILED');
   const mime = (response.headers.get('content-type') ?? '').split(';')[0];
   if (expectedMime && mime !== expectedMime) throw Error('DOWNLOAD_FAILED');
@@ -18,7 +18,9 @@ export async function fetchDownloadDocument(url: string, fallback: string, expec
   return { blob, name: name.replace(/[\\/\r\n]/g, '_'), mime };
 }
 
-async function nativeFile(file: Awaited<ReturnType<typeof fetchDownloadDocument>>) {
+export type DownloadableDocument = Awaited<ReturnType<typeof fetchDownloadDocument>>;
+
+async function nativeFile(file: DownloadableDocument) {
   const bytes = new Uint8Array(await file.blob.arrayBuffer());
   let binary = '';
   for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
@@ -41,7 +43,10 @@ export async function nativeReportShareAvailable() {
 }
 
 export async function downloadDocument(url: string, name: string, expectedMime?: string) {
-  const file = await fetchDownloadDocument(url, name, expectedMime);
+  return downloadDocumentFile(await fetchDownloadDocument(url, name, expectedMime));
+}
+
+export async function downloadDocumentFile(file: DownloadableDocument) {
   if (nativeDocumentPlatform()) {
     if (file.mime === 'text/csv' && !await nativeReportShareAvailable()) throw Error('ANDROID_UPDATE_REQUIRED');
     try {
@@ -66,7 +71,10 @@ export async function downloadDocument(url: string, name: string, expectedMime?:
 }
 
 export async function shareDocument(url: string, name: string, expectedMime: string) {
-  const file = await fetchDownloadDocument(url, name, expectedMime);
+  return shareDocumentFile(await fetchDownloadDocument(url, name, expectedMime));
+}
+
+export async function shareDocumentFile(file: DownloadableDocument) {
   try { await nativeDocumentBridge.share(await nativeFile(file)); }
   catch (error) { throw Error(bridgeError(error) || 'DOWNLOAD_FAILED', {cause:error}); }
 }

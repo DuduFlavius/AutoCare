@@ -1,23 +1,31 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {X,Download,Share2,FileText,ChevronLeft,ChevronRight,LoaderCircle,Plus,Minus,Maximize2,MoveHorizontal} from 'lucide-react';
+import {X,Download,Share2,FileText,ChevronLeft,ChevronRight,LoaderCircle,Printer,Plus,Minus,Maximize2,MoveHorizontal} from 'lucide-react';
 import {useApplicationLanguage} from './application-locale';
 import {documentFitSize} from '@/lib/document-presentation';
-import {downloadDocument,documentDownloadError,nativeReportShareAvailable,shareDocument} from '@/lib/document-download-client';
+import {downloadDocument,downloadDocumentFile,documentDownloadError,fetchDownloadDocument,nativeDocumentPlatform,nativeReportShareAvailable,shareDocument,shareDocumentFile,type DownloadableDocument} from '@/lib/document-download-client';
 export type PreviewSource={url?:string;file?:File;name:string;mime:string;downloadName?:string;nativeShare?:boolean};
 export function DocumentPreview({source,onClose}:{source:PreviewSource;onClose:()=>void}){
  const en=useApplicationLanguage()==='en',t=(ro:string,english:string)=>en?english:ro;
  const surface=useRef<HTMLDivElement>(null),root=useRef<HTMLDivElement>(null),canvas=useRef<HTMLCanvasElement>(null),pdf=useRef<import('pdfjs-dist').PDFDocumentProxy|null>(null);
+ const reportFile=useRef<DownloadableDocument|null>(null);
  const [viewport,setViewport]=useState({width:800,height:600}),[natural,setNatural]=useState({width:0,height:0}),[mode,setMode]=useState<'fit'|'width'>('fit'),[pageWidth,setPageWidth]=useState(600);
  const [image,setImage]=useState(''),[pages,setPages]=useState(0),[page,setPage]=useState(1),[loading,setLoading]=useState(true),[error,setError]=useState(''),[saving,setSaving]=useState(false),[zoom,setZoom]=useState(1);
  useEffect(()=>{const element=surface.current;if(!element)return;const measure=()=>{const css=getComputedStyle(element);setViewport({width:Math.max(1,element.clientWidth-parseFloat(css.paddingLeft)-parseFloat(css.paddingRight)),height:Math.max(1,element.clientHeight-parseFloat(css.paddingTop)-parseFloat(css.paddingBottom))});};measure();const observer=new ResizeObserver(measure);observer.observe(element);return()=>observer.disconnect();},[]);
  useEffect(()=>{const old=document.activeElement as HTMLElement,overflow=document.body.style.overflow;document.body.style.overflow='hidden';root.current?.querySelector<HTMLButtonElement>('button')?.focus();return()=>{document.body.style.overflow=overflow;old?.focus();};},[]);
  useEffect(()=>{
   let disposed=false,object='',task:import('pdfjs-dist').PDFDocumentLoadingTask|undefined;
+  const controller=new AbortController();
+  reportFile.current=null;
   setLoading(true);setError('');setImage('');setPages(0);setPage(1);setZoom(1);setMode('fit');setNatural({width:0,height:0});
   void(async()=>{try{
-   const blob=source.file??await fetch(source.url!,{cache:'no-store'}).then(async response=>{if(!response.ok)throw Error(t('Documentul nu este disponibil. Verifică sesiunea și încearcă din nou.','The document is unavailable. Check your session and try again.'));return response.blob();});
+   let blob=source.file as Blob|undefined;
+   if(!blob&&source.url){
+    const file=await fetchDownloadDocument(source.url,source.downloadName||source.name,source.nativeShare?'application/pdf':undefined,controller.signal);
+    if(!disposed&&source.nativeShare)reportFile.current=file;
+    blob=file.blob;
+   }
    if(disposed)return;if(!blob)throw Error('Document unavailable');
    if(source.mime==='application/pdf'||blob.type==='application/pdf'){
     const engine=await import('pdfjs-dist');engine.GlobalWorkerOptions.workerSrc='/pdf.worker.min.mjs';
@@ -27,7 +35,7 @@ export function DocumentPreview({source,onClose}:{source:PreviewSource;onClose:(
     object=URL.createObjectURL(blob);setImage(object);
    }else throw Error(t('Acest format nu poate fi previzualizat. Descarcă documentul.','This format cannot be previewed. Download the document.'));
   }catch{if(!disposed){setError(t('Documentul nu poate fi previzualizat. Verifică fișierul sau descarcă-l pentru a-l deschide.','This document cannot be previewed. Check the file or download it to open it.'));setLoading(false);}}})();
-  return()=>{disposed=true;if(object)URL.revokeObjectURL(object);if(task)void task.destroy();pdf.current=null;};
+  return()=>{disposed=true;controller.abort();reportFile.current=null;if(object)URL.revokeObjectURL(object);if(task)void task.destroy();pdf.current=null;};
  },[source]);
  useEffect(()=>{
   if(!pages||!pdf.current)return;let disposed=false,render:import('pdfjs-dist').RenderTask|undefined;
@@ -48,16 +56,22 @@ export function DocumentPreview({source,onClose}:{source:PreviewSource;onClose:(
   setSaving(true);setError('');setActionStatus('');
   try{
    const name=source.downloadName||source.name;
-   if(share){await shareDocument(source.url,name,'application/pdf');return;}
-   const result=await downloadDocument(source.url,name,source.nativeShare ? source.mime : undefined);
+   if(share){if(reportFile.current)await shareDocumentFile(reportFile.current);else await shareDocument(source.url,name,'application/pdf');return;}
+   const result=reportFile.current?await downloadDocumentFile(reportFile.current):await downloadDocument(source.url,name,source.nativeShare ? source.mime : undefined);
    if(result==='saved')setActionStatus(t('Document salvat.','Document saved.'));
    if(result==='started')setActionStatus(t('Descărcarea a început.','Download started.'));
   }catch(reason){setError(documentDownloadError(reason,en));}finally{setSaving(false);}
  };
+ function openForPrinting(){
+  if(!reportFile.current)return;
+  const url=URL.createObjectURL(reportFile.current.blob);
+  window.open(url,'_blank','noopener,noreferrer');
+  setTimeout(()=>URL.revokeObjectURL(url),300000);
+ }
  const imageSize=documentFitSize(natural.width,natural.height,viewport.width,viewport.height,zoom,mode);
  return createPortal(<div className="ac-document-overlay" onPointerDown={event=>{if(event.target===event.currentTarget)onClose();}}><section ref={root} role="dialog" aria-modal="true" aria-label={t('Previzualizare document','Document preview')} className="ac-document-preview" onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'){e.preventDefault();onClose();}if(e.key==='Tab'){const nodes=Array.from(root.current!.querySelectorAll<HTMLElement>('button:not(:disabled),a[href]')),first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}}}>
   <header><FileText size={24}/><div><h2>{t('Previzualizare document','Document preview')}</h2><p data-user-content>{source.name}</p></div><button type="button" onClick={onClose} aria-label={t('Închide previzualizarea','Close preview')}><X size={22}/></button></header>
-  <div className="ac-document-preview-toolbar">{source.url?<button type="button" disabled={saving} onClick={()=>void save()}><Download size={17}/>{saving?t('Se salvează…','Saving…'):t('Descarcă documentul','Download document')}</button>:<span>{t('Previzualizare locală · se încarcă după salvare','Local preview · uploaded when you save')}</span>}{source.url&&canShare&&<button type="button" disabled={saving} onClick={()=>void save(true)}><Share2 size={17}/>{t('Distribuie PDF','Share PDF')}</button>}{pages>0&&<nav aria-label={t('Paginile documentului','Document pages')}><button type="button" disabled={page<=1} onClick={()=>setPage(p=>p-1)} aria-label={t('Pagina anterioară','Previous page')}><ChevronLeft size={19}/></button><span aria-live="polite">{page} / {pages}</span><button type="button" disabled={page>=pages} onClick={()=>setPage(p=>p+1)} aria-label={t('Pagina următoare','Next page')}><ChevronRight size={19}/></button></nav>}<nav aria-label={t('Încadrare document','Document fit')}><button type="button" aria-pressed={mode==='fit'&&zoom===1} onClick={()=>{setMode('fit');setZoom(1);}}><Maximize2 size={16}/>{t('Încadrează','Fit page')}</button><button type="button" aria-pressed={mode==='width'} onClick={()=>{setMode('width');setZoom(1);}}><MoveHorizontal size={16}/>{t('La lățime','Fit width')}</button></nav><nav aria-label={t('Mărire document','Document zoom')}><button type="button" disabled={zoom<=.5} onClick={()=>setZoom(z=>Math.max(.5,z-.25))} aria-label={t('Micșorează documentul','Zoom out')}><Minus size={17}/></button><span>{Math.round(zoom*100)}%</span><button type="button" disabled={zoom>=4} onClick={()=>setZoom(z=>Math.min(4,z+.25))} aria-label={t('Mărește documentul','Zoom in')}><Plus size={17}/></button></nav></div>
+  <div className="ac-document-preview-toolbar">{source.url?<button type="button" disabled={saving} onClick={()=>void save()}><Download size={17}/>{saving?t('Se salvează…','Saving…'):t('Descarcă documentul','Download document')}</button>:<span>{t('Previzualizare locală · se încarcă după salvare','Local preview · uploaded when you save')}</span>}{source.url&&canShare&&<button type="button" disabled={saving} onClick={()=>void save(true)}><Share2 size={17}/>{t('Distribuie PDF','Share PDF')}</button>}{source.nativeShare&&pages>0&&!nativeDocumentPlatform()&&<button type="button" onClick={openForPrinting}><Printer size={17}/>{t('Deschide pentru imprimare','Open for printing')}</button>}{pages>0&&<nav aria-label={t('Paginile documentului','Document pages')}><button type="button" disabled={page<=1} onClick={()=>setPage(p=>p-1)} aria-label={t('Pagina anterioară','Previous page')}><ChevronLeft size={19}/></button><span aria-live="polite">{page} / {pages}</span><button type="button" disabled={page>=pages} onClick={()=>setPage(p=>p+1)} aria-label={t('Pagina următoare','Next page')}><ChevronRight size={19}/></button></nav>}<nav aria-label={t('Încadrare document','Document fit')}><button type="button" aria-pressed={mode==='fit'&&zoom===1} onClick={()=>{setMode('fit');setZoom(1);}}><Maximize2 size={16}/>{t('Încadrează','Fit page')}</button><button type="button" aria-pressed={mode==='width'} onClick={()=>{setMode('width');setZoom(1);}}><MoveHorizontal size={16}/>{t('La lățime','Fit width')}</button></nav><nav aria-label={t('Mărire document','Document zoom')}><button type="button" disabled={zoom<=.5} onClick={()=>setZoom(z=>Math.max(.5,z-.25))} aria-label={t('Micșorează documentul','Zoom out')}><Minus size={17}/></button><span>{Math.round(zoom*100)}%</span><button type="button" disabled={zoom>=4} onClick={()=>setZoom(z=>Math.min(4,z+.25))} aria-label={t('Mărește documentul','Zoom in')}><Plus size={17}/></button></nav></div>
   {actionStatus&&<p role="status">{actionStatus}</p>}
   {error&&<p className="ac-document-preview-error" role="alert">{error}</p>}
   <div ref={surface} className="ac-document-preview-surface" aria-busy={loading}>{loading&&<p role="status" className="ac-document-preview-loading"><LoaderCircle size={24}/>{t('Se pregătește documentul…','Preparing document…')}</p>}<div className="ac-document-preview-stage">{pages>0&&<canvas ref={canvas} style={{width:pageWidth,maxWidth:'none'}} aria-label={t('Pagina documentului ','Document page ')+page}/>} {image&&<img src={image} style={{width:imageSize.width,maxWidth:'none',visibility:natural.width?'visible':'hidden'}} alt={t('Documentul selectat','Selected document')} onLoad={event=>{setNatural({width:event.currentTarget.naturalWidth,height:event.currentTarget.naturalHeight});setLoading(false);}} onError={()=>{setLoading(false);setError(t('Imaginea nu a putut fi afișată.','The image could not be displayed.'));}}/>}</div></div>
