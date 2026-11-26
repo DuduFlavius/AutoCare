@@ -28,6 +28,21 @@
   --studio-selection: #263e50;
   --studio-header: #1a2940;
 }
+@media (prefers-color-scheme: dark) {
+  .founder-signature[data-appearance="auto"] .mail-studio {
+    color-scheme: dark;
+    --studio-page: #121721;
+    --studio-panel: #181f2b;
+    --studio-raised: #202938;
+    --studio-edge: #364459;
+    --studio-ink: #f0f3fb;
+    --studio-muted: #b9c5d8;
+    --studio-accent: #a8e4f2;
+    --studio-accent-ink: #112530;
+    --studio-selection: #263e50;
+    --studio-header: #1a2940;
+  }
+}
 .mail-studio *, .mail-studio *::before, .mail-studio *::after { box-sizing: border-box; }
 .mail-studio [hidden] { display: none !important; }
 .mail-studio :is(.studio-surface,.card) { min-width: 0; border: 1px solid var(--studio-edge); border-radius: 17px; padding: clamp(14px,2vw,25px); background: var(--studio-panel); box-shadow: 0 4px 16px #101a290a; }
@@ -136,10 +151,12 @@
 
 html body .founder-signature[data-workspace="mail"] .founder-main { margin: 0 auto; align-self: start; padding-top: 14px !important; }
 html body .founder-signature[data-workspace="mail"] .founder-page-header { justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 12px; background: transparent !important; }
-html body .founder-signature[data-workspace="mail"] .founder-sidebar nav button[aria-current="page"] { -webkit-text-fill-color: currentColor !important; }
+html body .founder-signature[data-workspace="mail"] .founder-sidebar nav button[aria-current="page"] { color: var(--fc-text) !important; -webkit-text-fill-color: var(--fc-text) !important; }
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio :is(h2,h3) { color: var(--studio-ink) !important; }
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button { background: var(--studio-panel) !important; color: var(--studio-ink) !important; -webkit-text-fill-color: currentColor !important; border-color: var(--studio-edge) !important; box-shadow: none !important; }
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button:is([aria-current],[aria-pressed=true],:hover):not(:disabled) { background: var(--studio-selection) !important; color: var(--studio-accent) !important; border-color: var(--studio-accent) !important; }
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button.studio-primary:not(:disabled) { background: var(--studio-accent) !important; color: var(--studio-accent-ink) !important; border-color: var(--studio-accent) !important; }
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button:disabled { background: var(--studio-raised) !important; color: var(--studio-muted) !important; }
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio :is(button,a,input,textarea,select,summary):focus-visible { outline: 2px solid var(--studio-accent) !important; outline-offset: 3px; }
+
+html body .ac-admin-frame .founder-signature[data-workspace="mail"] .mail-studio .studio-navigation button:not([aria-current]):not(:hover) { background: transparent !important; border-color: transparent !important; }
