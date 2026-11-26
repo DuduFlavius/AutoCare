@@ -4,22 +4,21 @@
 .rg-premium-downloads .ac-garage-report-library p{color:var(--color-muted);line-height:1.6;margin:0 0 22px}
 .rg-premium-downloads .ac-garage-report-kicker{font-size:11px;letter-spacing:.16em;color:var(--color-primary);font-weight:800}
 .rg-premium-downloads .ac-garage-report-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.rg-premium-downloads .ac-garage-report-links>a{display:flex;flex-direction:column;gap:10px;min-width:0;padding:19px;border:1px solid var(--color-border);border-radius:15px;background:var(--color-surface);text-decoration:none;color:var(--color-text);transition:border-color .18s,transform .18s,background .18s}
-.rg-premium-downloads .ac-garage-report-links>a:is(:hover,:focus-visible){border-color:var(--color-primary);background:var(--color-surface-muted);transform:translateY(-2px);outline-offset:3px}
-.rg-premium-downloads .ac-garage-report-links>a span{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--color-primary)}
-.rg-premium-downloads .ac-garage-report-links>a strong{font-size:16px;line-height:1.4;color:var(--color-text)}
-.rg-premium-downloads .ac-garage-report-links>a small{color:var(--color-primary);font-weight:700}
-.rg-premium-downloads .rg-report-tabs button[aria-pressed=true]{background:var(--color-surface-muted)!important;color:#f8fff9!important;border-color:var(--color-primary)!important}
+.rg-premium-downloads .ac-garage-report-links>article{display:flex;flex-direction:column;gap:10px;min-width:0;padding:19px;border:1px solid var(--color-border);border-radius:15px;background:var(--color-surface);text-decoration:none;color:var(--color-text);transition:border-color .18s,transform .18s,background .18s}
+.rg-premium-downloads .ac-garage-report-links>article span{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--color-primary)}
+.rg-premium-downloads .ac-garage-report-links>article strong{font-size:16px;line-height:1.4;color:var(--color-text)}
+.rg-premium-downloads .rg-report-tabs button[aria-pressed=true]{background:var(--color-surface-muted)!important;color:var(--color-text)!important;border-color:var(--color-primary)!important}
 .rg-premium-downloads .rg-report-details,.rg-premium-downloads .ac-report-filters{color:var(--color-text)}
-.rg-premium-downloads .ac-report-filters label{color:#d4e9dd!important;min-width:0}
+.rg-premium-downloads .ac-report-filters label{color:var(--color-text)!important;min-width:0}
 .rg-premium-downloads .ac-report-filters .ac-filter-select{display:block;min-width:0;width:100%}
 .rg-premium-downloads .ac-report-filters .ac-filter-select-trigger{width:100%!important;min-height:46px!important;background:var(--color-surface-muted)!important;color:var(--color-text)!important;border:1px solid var(--color-border)!important;border-radius:12px!important;padding:11px 14px!important}
 .rg-premium-downloads .ac-report-filters .ac-filter-select-trigger:focus-visible{outline:2px solid var(--color-primary)!important}
 .rg-premium-downloads .ac-premium-download-actions :is(a,button){border-radius:12px}
-@media(max-width:720px){.rg-premium-downloads .ac-garage-report-links{grid-template-columns:1fr}.rg-premium-downloads .ac-garage-report-links>a{padding:16px}}
+@media(max-width:720px){.rg-premium-downloads .ac-garage-report-links{grid-template-columns:1fr}.rg-premium-downloads .ac-garage-report-links>article{padding:16px}}
 
-.rg-premium-downloads .ac-garage-report-links>a{width:100%;font:inherit;text-align:left;cursor:pointer}
-.rg-premium-downloads .ac-garage-report-links>a:disabled{opacity:.6;cursor:wait;transform:none}
 
 
 .rg-premium-downloads .ac-premium-download-actions>a.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:var(--color-primary);color:var(--color-bg);border:1px solid var(--color-border);border-radius:12px;text-decoration:none;min-height:44px;padding:10px 16px}
+
+.rg-premium-downloads .ac-garage-report-links>article>div{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.rg-premium-downloads .ac-garage-report-links>article button{white-space:normal;min-height:44px}

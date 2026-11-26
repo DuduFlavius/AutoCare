@@ -14,9 +14,9 @@ import { documentStatus, localDate } from '@/lib/config';
 
 type Data=Awaited<ReturnType<typeof dashboard>>;
 type RecordRow=Data['records'][number];
-export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onDrill=(tab)=>navigate(tab),onVehicle,onCreate,onRecord,onNextService,currency,smartDrive}:{
+export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onDrill=(tab)=>navigate(tab),onVehicle,onCreate,onRecord,onNextService,money,exchangeNote,smartDrive}:{
  data:Data;selectedVehicle:string;onSelectVehicle:(id:string)=>void;onDrill?:(tab:string,vehicleId:string,ids:string[],label:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;
- onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:RecordRow)=>void;onNextService:()=>void;currency:'RON'|'EUR';smartDrive?:ReactNode;
+ onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:RecordRow)=>void;onNextService:()=>void;money:(bani:number)=>string;exchangeNote:string;smartDrive?:ReactNode;
 }){
  const [failedPhoto,setFailedPhoto]=useState('');
  const [chartPeriod,setChartPeriod]=useState('6');
@@ -32,7 +32,6 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
  const source=next?rows.find(r=>r.id===next.service.id||next.service.id.startsWith(r.id+':')):null;
  const progress=source?.odometer!=null&&source.nextKm!=null&&source.nextKm>source.odometer&&car&&car.odometer>=source.odometer?Math.min(100,Math.max(0,(car.odometer-source.odometer)/(source.nextKm-source.odometer)*100)):null;
  const itp=car?homeDocument(rows,car.id,'ITP',today):null;
- const money=(bani:number)=>new Intl.NumberFormat(locale,{style:'currency',currency,maximumFractionDigits:0}).format(bani/(currency==='EUR'?500:100));
  const date=(value:string)=>new Date(value+'T12:00:00Z').toLocaleDateString(locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
  const active=data.vehicles.filter(row=>!row.archived);
  const hasPhoto=car&&failedPhoto!==car.id&&data.photos?.some(photo=>photo.vehicleId===car.id);
@@ -93,7 +92,7 @@ export function MobileCockpit({data,selectedVehicle,onSelectVehicle,navigate,onD
     {Icon:ChartNoAxesCombined,label:t('Intervenții','Service entries'),value:String(rows.filter(r=>r.kind==='service'&&r.date&&r.date<=today&&!isPlannedService(r,today)).length),note:t('Istoric înregistrat','Recorded history'),tab:'Întreținere'},
     {Icon:Gauge,label:t('Revizie în','Next service in'),value:next?.status.remainingKm!=null?Math.max(0,next.status.remainingKm).toLocaleString(locale)+' km':'—',note:t('Prag de kilometraj','Mileage threshold'),tab:'Întreținere'},
    ].map(({Icon,label,value,note,tab})=><button key={tab+label} onClick={()=>onDrill(tab,car?.id??'',rows.filter(r=>tab==='Întreținere'?r.kind==='service':true).map(r=>r.id),label)}><Icon size={23}/><span>{label}</span><strong>{value}</strong><small>{note}</small></button>)}</div>
-   {currency==='EUR'&&<small className="rg-currency-note">{t('Afișare orientativă: 1 EUR = 5 RON.','Indicative display: 1 EUR = 5 RON.')}</small>}
+   {exchangeNote&&<small className="rg-currency-note">{exchangeNote}</small>}
    <section className="rg-m-recent"><header><h2>{t('Cheltuieli recente','Recent expenses')}</h2><button onClick={()=>navigate('Cheltuieli')}>{t('Vezi toate','View all')}<ChevronRight size={15}/></button></header>{recent.length?<ul>{recent.map(row=><li key={row.id}><button onClick={()=>onRecord(row)}><span className="rg-m-icon"><Wrench size={22}/></span><span><strong data-user-content>{row.title}</strong><small>{row.date&&date(row.date)}</small></span><b>{row.amountKnown===false?'—':money(row.amountBani)}</b></button></li>)}</ul>:<p>{t('Cheltuielile înregistrate vor apărea aici.','Your recorded expenses will appear here.')}</p>}</section>
   </>}
   {!car&&smartDrive}

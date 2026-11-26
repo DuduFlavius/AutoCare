@@ -27,7 +27,10 @@ export type NativeTrip = {
   lastPosition?: GPSFix;
 };
 type NativeNavigationStep = { coordinates: [number, number][]; meters: number; instruction: string };
+export type NativeDocumentFile = { name: string; mime: string; data: string };
 interface TrackingPlugin {
+  saveDocument(input: NativeDocumentFile): Promise<{ saved: boolean }>;
+  shareDocument(input: NativeDocumentFile): Promise<void>;
   navigationRequest(input:Record<string,unknown>):Promise<{data:unknown}>;
   navigationStart(input: { ownerId: string; destination: string; english: boolean; steps: NativeNavigationStep[]; muted: boolean }): Promise<void>;
   navigationSnapshot(input: { ownerId: string }): Promise<unknown>;
@@ -71,6 +74,11 @@ interface TrackingPlugin {
   }): Promise<void>;
 }
 const plugin = registerPlugin<TrackingPlugin>('AutoCareTracking');
+export const nativeDocumentBridge = {
+  version: () => plugin.appVersion(),
+  save: (file: NativeDocumentFile) => plugin.saveDocument(file),
+  share: (file: NativeDocumentFile) => plugin.shareDocument(file),
+};
 const point = z.object({
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),

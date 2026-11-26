@@ -1,3 +1,6 @@
-export function accountDisplayCurrency(language:'ro'|'en',saved?:string|null,savedLanguage?:string|null):'RON'|'EUR' {
- return savedLanguage===language&&(saved==='RON'||saved==='EUR')?saved:language==='en'?'EUR':'RON';
+import type { CurrencyPreference, DisplayCurrency } from './exchange-rate';
+
+export function accountDisplayCurrency(language: 'ro' | 'en', preferred: CurrencyPreference = 'auto'): DisplayCurrency {
+  if (preferred !== 'auto') return preferred;
+  return language === 'en' ? 'EUR' : 'RON';
 }

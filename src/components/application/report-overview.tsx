@@ -4,10 +4,9 @@ import { Gauge, ReceiptText, Wrench } from 'lucide-react';
 import { financeTimeline, isFinancialEntry, type FinanceEntry } from '@/lib/finance-overview';
 import { isPlannedService } from '@/lib/planned-service';
 import { MobileFinanceOverview } from './mobile-finance-overview';
-export function ReportOverview({rows,vehicleCount,today,en,nextKm}:{rows:FinanceEntry[];vehicleCount:number;today:string;en:boolean;nextKm?:number|null}){
+export function ReportOverview({rows,vehicleCount,today,en,nextKm,money}:{rows:FinanceEntry[];vehicleCount:number;today:string;en:boolean;nextKm?:number|null;money:(bani:number)=>string}){
  const [period,setPeriod]=useState('12');
  const locale=en?'en-GB':'ro-RO';
- const money=(bani:number)=>new Intl.NumberFormat(locale,{style:'currency',currency:'RON',maximumFractionDigits:2}).format(bani/100);
  const report=financeTimeline(rows,today,period==='all'?null:Number(period));
  const selectedRows=rows.filter(row=>row.date&&row.date>=report.from&&row.date<=today);
  const categoryTotals=new Map<string,number>();for(const row of new Map(selectedRows.map(r=>[r.id,r])).values())if(isFinancialEntry(row,today)&&row.amountKnown!==false)categoryTotals.set(row.category,(categoryTotals.get(row.category)||0)+row.amountBani);

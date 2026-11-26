@@ -2,6 +2,7 @@ import { aiTitlesKey } from './ai-conversations';
 import {accountPreferencesKey} from './account-preferences';
 import {registrationLanguage} from './mail-language';
 import {languageCookie} from './language-preference';
+import {currencyPreferenceKey} from './exchange-rate';
 import {languagePreferenceKey,userLanguage} from './user-language';
 import { eq, inArray, like, sql, or } from 'drizzle-orm';
 import { betterAuth } from 'better-auth';
@@ -123,7 +124,7 @@ function makeAuth() {
         },
         afterDelete: async (user,request) => {
           await db().delete(schema.settings).where(like(schema.settings.key,'security-email-change:'+user.id+':%'));
-          await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(user.id), financeBudgetKey(user.id), languagePreferenceKey(user.id),accountPreferencesKey(user.id),aiTitlesKey(user.id),'security-email-change:'+user.id]));
+          await db().delete(schema.settings).where(inArray(schema.settings.key, [primaryVehicleKey(user.id), financeBudgetKey(user.id), languagePreferenceKey(user.id),currencyPreferenceKey(user.id),accountPreferencesKey(user.id),aiTitlesKey(user.id),'security-email-change:'+user.id]));
           const language = languageCookie(request?.headers.get('cookie')) ?? 'ro';
           const en = language==='en';
           const content = renderEmail('account_security',{name:user.name,language,ctaPath:'/contact',

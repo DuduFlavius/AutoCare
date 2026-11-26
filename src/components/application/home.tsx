@@ -8,7 +8,7 @@ import {useMileageUsage} from '../use-mileage-usage';
 import {MobileCockpit} from './mobile-cockpit';
 type Data=Awaited<ReturnType<typeof dashboard>>;
 type Row=Data['records'][number];
-type Props={androidSmartDrive?:boolean;data:Data;name:string;selectedVehicle:string;onSelectVehicle:(id:string)=>void;onDrill:(tab:string,vehicleId:string,ids:string[],label:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:Row)=>void;onRefresh:()=>Promise<void>;currency:'RON'|'EUR';preview:boolean};
+type Props={androidSmartDrive?:boolean;data:Data;name:string;selectedVehicle:string;onSelectVehicle:(id:string)=>void;onDrill:(tab:string,vehicleId:string,ids:string[],label:string)=>void;navigate:(tab:string)=>void;onVehicle:(id:string)=>void;onCreate:(kind:'vehicle'|'service'|'document'|'expense',vehicleId?:string)=>void;onRecord:(row:Row)=>void;onRefresh:()=>Promise<void>;money:(bani:number)=>string;exchangeNote:string;preview:boolean};
 export default function ApplicationHome(props:Props){
  const {data,name,selectedVehicle,navigate,onRecord,preview}=props;
  const en=useApplicationLanguage()==='en',t=(ro:string,english:string)=>en?english:ro;

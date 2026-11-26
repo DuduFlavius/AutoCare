@@ -1,11 +1,13 @@
 'use client';
 import {DocumentPreview} from '../document-preview';
-import {downloadDocument} from '@/lib/document-download-client';
+import {documentDownloadError,downloadDocument} from '@/lib/document-download-client';
 import {ActionMenu} from '../action-menu';
 import {FilterSelect} from '../filter-select';
 import {DocumentActions} from '../document-actions';
 
-import { MobileFinanceOverview } from './mobile-finance-overview';
+import { ExpenseStepChart } from './expense-step-chart';
+import { expenseSelection } from '@/lib/finance-selection';
+import { translateApplicationCopy } from '@/lib/application-language';
 import { useMemo, useState, type FormEvent } from 'react';
 import { SlidersHorizontal, ArrowUpRight, BarChart3, CalendarDays, Download, Gauge, Fuel, Wrench, ShieldCheck, CircleDot, Settings2, Files, Sparkles, Wallet } from 'lucide-react';
 import { budgetState, financeSignals, financeGroup, financeOverview, financialChange, type FinanceGroup } from '@/lib/finance-overview';
@@ -20,8 +22,8 @@ type Entry = Data['records'][number];
 type Sample = { bani: number; count: number; known: number };
 const pageSize = 10;
 
-export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, onArchive, onDelete, onRestore, onAi, onRefresh }: {
-  data: Data; today: string; primaryId: string; preview: boolean; money: (bani: number) => string;
+export function FinanceCenter({ data, today, primaryId, preview, money, currency, onEdit, onArchive, onDelete, onRestore, onAi, onRefresh }: {
+  data: Data; today: string; primaryId: string; preview: boolean; money: (bani: number) => string; currency: 'RON' | 'EUR';
   onDelete?: (row: Entry) => void; onEdit: (row: Entry) => void; onArchive: (row: Entry) => void; onRestore: (row: Entry) => void; onAi: (vehicleId: string) => void;
   onRefresh: () => Promise<void>;
 }) {
@@ -36,6 +38,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
   const [vehicle, setVehicle] = useState('');
   const [view, setView] = useState<'month' | 'year'>('year');
   const [group, setGroup] = useState('');
+  const [category, setCategory] = useState('');
   const [query, setQuery] = useState('');
   const [range, setRange] = useState('year');
   const [archived, setArchived] = useState(false);
@@ -44,6 +47,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
   const [reportPreview,setReportPreview]=useState<import('../document-preview').PreviewSource|null>(null);
   const [reportSaving,setReportSaving]=useState(false);
   const [reportError,setReportError]=useState('');
+  const [reportStatus,setReportStatus]=useState('');
   const [point, setPoint] = useState<number | null>(null);
   const report = useMemo(() => financeOverview(data.records, today, vehicle), [data.records, today, vehicle]);
   const signals = useMemo(()=>financeSignals(data.records,today,vehicle),[data.records,today,vehicle]);
@@ -71,17 +75,10 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
   const details = (row: Sample) => row.known ? money(row.bani) : row.count ? t('Cost necunoscut', 'Cost unknown') : t('Fără înregistrări', 'No entries');
   const changeText = (value: number | null) => value == null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(value) + '%';
   const from = range === '6' || range === '12' || range === '24' ? new Date(Date.UTC(y,m-Number(range),1)).toISOString().slice(0,10) : range === 'month' ? month + '-01' : range === 'year' ? year + '-01-01' : undefined;
-  const customCategoryPeriod=['6','12','24','all'].includes(range);
-  const categoryRows=report.entries.filter(row=>!row.cancelled&&row.amountKnown!==false&&row.date&&row.date<=today&&(!from||row.date>=from));
-  const categoryTotal=categoryRows.reduce((sum,row)=>sum+row.amountBani,0);
-  const priorFrom=customCategoryPeriod&&from&&range!=='all'?new Date(Date.UTC(y,m-Number(range)*2,1)).toISOString().slice(0,10):null;
-  const categoryItems=customCategoryPeriod?(Object.keys(groups) as FinanceGroup[]).map(group=>{
-    const bani=categoryRows.filter(row=>financeGroup(row)===group).reduce((sum,row)=>sum+row.amountBani,0);
-    const previousBani=priorFrom?report.entries.filter(row=>!row.cancelled&&row.amountKnown!==false&&row.date&&row.date>=priorFrom&&row.date<from!&&financeGroup(row)===group).reduce((sum,row)=>sum+row.amountBani,0):0;
-    return {group,bani,previousBani,share:categoryTotal?bani/categoryTotal*100:0,change:financialChange(bani,previousBani)};
-  }):report.categories(view);
-  const filters = { q: query.trim(), archived: archived ? 'all' : 'active', from, to: from ? today : undefined } as const;
-  const rows = filterRecords(report.entries.filter(row => !group || financeGroup(row) === group), filters)
+  const filters = { q: query.trim(), archived: archived ? 'all' : 'active', category, from, to: today } as const;
+  const selectedRows = filterRecords(report.entries.filter(row => !group || financeGroup(row) === group), filters);
+  const selection = expenseSelection(selectedRows, today, from);
+  const rows = selectedRows
     .sort((a, b) => sort === 'amount' ? Number(a.amountKnown === false) - Number(b.amountKnown === false) || b.amountBani - a.amountBani :
       sort === 'category' ? groups[financeGroup(a)].localeCompare(groups[financeGroup(b)], locale) : sort === 'old' ? (a.date || '9999').localeCompare(b.date || '9999') : (b.date || '').localeCompare(a.date || ''));
   const pages = Math.max(1, Math.ceil(rows.length / pageSize));
@@ -94,36 +91,65 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
     byRecord.set(file.recordId, existing);
   }
   const exportUrl = (format: string) => '/api/v1/export?' + new URLSearchParams({
-    finance: '1', format, archived: filters.archived, ...(vehicle ? { vehicleId: vehicle } : {}),
-    ...(group ? { financeCategory: group } : {}), ...(filters.q ? { q: filters.q } : {}),
-    ...(from ? { from, to: today } : {}),
+    finance: '1', format, currency, language: en ? 'en' : 'ro', archived: filters.archived, ...(vehicle ? { vehicleId: vehicle } : {}),
+    ...(group ? { financeCategory: group } : {}), ...(category ? { category } : {}), ...(filters.q ? { q: filters.q } : {}),
+    ...(from ? { from } : {}), to: today,
   });
-  async function saveExpenseReport(){
+  async function saveExpenseReport(format: 'pdf' | 'csv'){
     if(reportSaving||preview)return;
     setReportError('');
+    setReportStatus('');
     setReportSaving(true);
-    try{await downloadDocument(exportUrl('pdf'),'autocare-situatia-cheltuielilor.pdf');}
-    catch{setReportError(t('Raportul nu a putut fi descărcat. Încearcă din nou.','The report could not be downloaded. Try again.'));}
+    try{const result=await downloadDocument(exportUrl(format),'autocare-cheltuieli.'+format,format==='pdf'?'application/pdf':'text/csv');if(result==='saved')setReportStatus(t('Document salvat.','Document saved.'));if(result==='started')setReportStatus(t('Descărcarea a început.','Download started.'));}
+    catch(error){setReportError(documentDownloadError(error,en));}
     finally{setReportSaving(false);}
   }
-  const historyKnown = rows.filter(row => !row.cancelled && row.amountKnown !== false && row.date && row.date <= today);
-  const historyTotal = historyKnown.reduce((sum,row)=>sum+row.amountBani,0);
+  const { known: historyKnown, total: historyTotal } = selection;
   const categoryIcons = { Combustibil: Fuel, Service: Wrench, Frâne: CircleDot, RCA: ShieldCheck, ITP: Files, Anvelope: CircleDot, Distribuție: Settings2, 'Alte cheltuieli': Wallet };
+  const percentage = new Intl.NumberFormat(locale, {style:'percent',maximumFractionDigits:2});
+  const categoryName = (name: string) => translateApplicationCopy(name, en ? 'en' : 'ro');
+  const palette = ['#3b9aab','#5d75c9','#2d9874','#8662bd','#bc7041','#c25880','#638fa1','#898438'];
+  const categoryColor = (name: string) => {
+    let hash = 0;
+    for (const char of name.normalize('NFC')) hash = (31 * hash + char.charCodeAt(0)) >>> 0;
+    return palette[hash % palette.length];
+  };
+  let offset = 0;
+  const slices = selection.categories.filter(item => item.bani > 0).map(item => {
+    const stop = offset + item.bani / historyTotal * 100;
+    const slice = `${categoryColor(item.name)} ${offset}% ${stop}%`;
+    offset = stop;
+    return slice;
+  });
   const date = (value: string | null) => value ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value + 'T12:00:00Z')) : '—';
 
   return <div className="ac-finance" data-workspace-ui data-mobile-details={mobileDetails||undefined} data-mobile-filters={mobileFilters||undefined}>
+    {reportStatus&&<p role="status">{reportStatus}</p>}
     {reportError&&<p role="alert">{reportError}</p>}
     {reportPreview&&<DocumentPreview source={reportPreview} onClose={()=>setReportPreview(null)}/>}
     <div className="ac-m-finance-filter ac-finance-filter-toggle"><span>{t('Cheltuielile tale, pe scurt','Your expenses at a glance')}</span><button type="button" className="ac-m-round" onClick={()=>setMobileFilters(value=>!value)} aria-expanded={mobileFilters} aria-controls="ac-finance-ledger-filters" aria-label={t('Filtre cheltuieli','Expense filters')}><SlidersHorizontal size={21}/></button></div>
       <div className="ac-finance-filters ac-finance-filter-panel" id="ac-finance-ledger-filters" aria-label={t('Filtre cheltuieli','Expense filters')}>
-        <header><div><strong>{t('Filtre cheltuieli','Expense filters')}</strong><small>{t('Alege categoria, perioada și ordinea.','Choose the category, period and order.')}</small></div><button type="button" onClick={()=>{setQuery('');setGroup('');setRange('year');setView('year');setPoint(null);setSort('recent');setArchived(false);setPage(0);}}>{t('Resetează','Reset')}</button><button type="button" className="ac-finance-filter-close" onClick={()=>setMobileFilters(false)} aria-label={t('Închide filtrele','Close filters')}>×</button></header>
+        <header><div><strong>{t('Filtre cheltuieli','Expense filters')}</strong><small>{t('Alege categoria, perioada și ordinea.','Choose the category, period and order.')}</small></div><button type="button" onClick={()=>{setQuery('');setGroup('');setCategory('');setRange('year');setView('year');setPoint(null);setSort('recent');setArchived(false);setPage(0);}}>{t('Resetează','Reset')}</button><button type="button" className="ac-finance-filter-close" onClick={()=>setMobileFilters(false)} aria-label={t('Închide filtrele','Close filters')}>×</button></header>
         <input type="search" maxLength={250} placeholder={t('Caută în cheltuieli…', 'Search expenses…')} aria-label={t('Caută cheltuieli', 'Search expenses')} value={query} onChange={e => { setQuery(e.target.value); setPage(0); }} />
-        <FilterSelect aria-label={t('Categorie', 'Category')} value={group} onChange={e => { setGroup(e.target.value); setPage(0); }}><option value="">{t('Toate categoriile', 'All categories')}</option>{Object.entries(groups).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</FilterSelect>
+        <FilterSelect aria-label={t('Categorie', 'Category')} value={category ? 'record:' + category : group} onChange={e => { const value = e.target.value; setCategory(value.startsWith('record:') ? value.slice(7) : ''); setGroup(value.startsWith('record:') ? '' : value); setPage(0); }}><option value="">{t('Toate categoriile', 'All categories')}</option>{Object.entries(groups).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+          {[...new Set(report.entries.map(row => row.category))].sort((a,b) => a.localeCompare(b,locale)).map(name => <option key={name} value={'record:' + name}>{categoryName(name)}</option>)}
+        </FilterSelect>
         <FilterSelect aria-label={t('Perioadă', 'Period')} value={range} onChange={e => { setRange(e.target.value); if(e.target.value==='month'||e.target.value==='year'){setView(e.target.value);setPoint(null);} setPage(0); }}><option value="6">{t('Ultimele 6 luni','Last 6 months')}</option><option value="12">{t('Ultimele 12 luni','Last 12 months')}</option><option value="24">{t('Ultimele 2 ani','Last 2 years')}</option><option value="all">{t('Tot istoricul', 'All history')}</option><option value="month">{t('Luna curentă', 'Current month')}</option><option value="year">{t('Anul curent', 'Current year')}</option></FilterSelect>
         <FilterSelect aria-label={t('Sortare', 'Sort order')} value={sort} onChange={e => { setSort(e.target.value); setPage(0); }}><option value="recent">{t('Cele mai recente', 'Newest first')}</option><option value="old">{t('Cele mai vechi', 'Oldest first')}</option><option value="category">{t('Categorie A–Z', 'Category A–Z')}</option><option value="amount">{t('Valoare descrescătoare', 'Highest value')}</option></FilterSelect>
         <label className="check"><input type="checkbox" checked={archived} onChange={e => { setArchived(e.target.checked); setPage(0); }} /> {t('Include arhivate', 'Include archived')}</label>
       </div>
-    <MobileFinanceOverview rows={report.entries} today={today} money={money} period={range} onPeriod={value=>{setRange(value);setPage(0);}} onFilters={()=>setMobileFilters(value=>!value)} filtersOpen={mobileFilters}/>
+    <section className="ac-finance-card ac-selection-chart" aria-labelledby="ac-selection-chart">
+      <header><div><h3 id="ac-selection-chart">{t('Toate cheltuielile', 'All expenses')}</h3>
+        <p>{t('Totalul costurilor înregistrate în selecție', 'Recorded costs in the current selection')}</p></div>
+        <strong>{money(historyTotal)}</strong>
+      </header>
+      <ExpenseStepChart key={range + ':' + vehicle + ':' + group + ':' + category} selection={selection} en={en} locale={locale} money={money}/>
+      <div className="ac-finance-toggle" role="group" aria-label={t('Perioada cheltuielilor','Expense period')}>
+        {(['6','12','24','all','month','year'] as const).map((value,index)=><button key={value} type="button" aria-pressed={range===value} onClick={()=>{setRange(value);setPage(0);}}>
+          {(en ? ['6M','1Y','2Y','All','Month','Year'] : ['6L','1A','2A','Tot','Luna','Anul'])[index]}
+        </button>)}
+      </div>
+    </section>
     <button className="ac-m-finance-more" aria-expanded={mobileDetails} onClick={()=>setMobileDetails(value=>!value)}>{t('Bugete, categorii și analiză','Budgets, categories & analysis')} <Sparkles size={16}/></button>
     <section className="ac-finance-hero"><TitaniumWave />
       <div><span className="studio-kicker">AUTOCARE · FINANCE</span><h2>{t('Centrul financiar auto', 'Vehicle finance center')}</h2><p>{t('Costuri reale din cheltuieli, intervenții și documente, o singură dată per înregistrare.', 'Actual costs from expenses, service and documents, counted once per record.')}</p></div>
@@ -175,17 +201,28 @@ export function FinanceCenter({ data, today, primaryId, preview, money, onEdit, 
         </section>
       </div>
     </div>
-    {data.premium && <section className="ac-finance-categories" aria-label={t('Categorii financiare', 'Expense categories')}>
-      <h3 className="ac-category-heading">{t('Cheltuieli pe categorii','Expenses by category')} <small>{customCategoryPeriod?(range==='all'?t('Tot istoricul','All history'):from+' – '+today):view==='year'?year:month}</small></h3>
-      {categoryItems.map(item => <button key={item.group} type="button" className="ac-finance-card" aria-pressed={group === item.group} onClick={() => { setGroup(group === item.group ? '' : item.group); setPage(0); }}>
-        <span className="ac-category-label">{(() => { const Icon = categoryIcons[item.group]; return <Icon size={20}/>; })()}{groups[item.group]}</span><strong>{money(item.bani)}</strong>
-        <progress max={100} value={item.share} aria-label={t('Pondere în total', 'Share of total')} />
-        <small>{item.share.toLocaleString(locale, { maximumFractionDigits: 1 })}% · {changeText(item.change)}</small>
-      </button>)}
+    {data.premium && <section className="ac-finance-categories ac-finance-card" aria-labelledby="ac-category-title">
+      <h3 id="ac-category-title" className="ac-category-heading">{t('Cheltuieli pe categorii','Expenses by category')}</h3>
+      <div className="ac-category-donut">
+        <div className="ac-category-ring" aria-hidden="true" style={slices.length ? {background: `conic-gradient(${slices.join(', ')})`} : undefined}/>
+        <div><span>{t('Total selecție','Selection total')}</span><strong>{money(historyTotal).replaceAll("\u00a0"," ")}</strong></div>
+      </div>
+      {selection.categories.length ? <ul className="ac-category-list">
+        {selection.categories.map(item => {
+          const Icon = categoryIcons[financeGroup({category:item.name,kind:item.kind})];
+          const share = historyTotal > 0 ? item.bani / historyTotal : 0;
+          return <li key={item.name} style={{'--category-color': categoryColor(item.name)} as React.CSSProperties}>
+            <div className="ac-category-label"><Icon size={18} aria-hidden="true"/><span>{categoryName(item.name)}</span></div>
+            <strong>{money(item.bani).replaceAll("\u00a0"," ")}</strong>
+            <progress max={1} value={share} aria-label={categoryName(item.name)}/>
+            <small>{share > 0 && share < .0001 ? '<'+percentage.format(.0001) : percentage.format(share)}</small>
+          </li>;
+        })}
+      </ul> : <p>{t('Nu există cheltuieli cunoscute în selecție.','There are no known expenses in this selection.')}</p>}
     </section>}
     <section className="ac-finance-card ac-finance-history" aria-labelledby="ac-finance-history">
       <header><div><span className="studio-kicker">AUTOCARE · LEDGER</span><h3 id="ac-finance-history">{t('Istoric cheltuieli', 'Expense history')}</h3><p>{t('Toate tranzacțiile, documentele și acțiunile într-un singur loc.', 'Transactions, documents and actions in one place.')}</p></div>
-        <div className="ac-finance-toggle">{data.premium ? <><button type="button" disabled={preview} onClick={()=>setReportPreview({url:exportUrl('pdf')+'&view=1',name:t('Situația cheltuielilor','Expense report'),mime:'application/pdf',downloadName:'autocare-situatia-cheltuielilor.pdf'})}>{t('Previzualizează raportul','Preview report')}</button><button type="button" disabled={preview||reportSaving} onClick={()=>void saveExpenseReport()}><Download size={15}/>{t('Descarcă PDF','Download PDF')}</button>{!preview&&<a className="button" href={exportUrl('csv')}>CSV</a>}</> : <a className="button" href="/cont?tab=Premium">{t('Export Premium', 'Premium export')}</a>}</div>
+        <div className="ac-finance-toggle">{data.premium ? <><button type="button" disabled={preview} onClick={()=>setReportPreview({url:exportUrl('pdf')+'&view=1',name:t('Situația cheltuielilor','Expense report'),mime:'application/pdf',nativeShare:true,downloadName:'autocare-situatia-cheltuielilor.pdf'})}>{t('Previzualizează raportul','Preview report')}</button><button type="button" disabled={preview||reportSaving} onClick={()=>void saveExpenseReport('pdf')}><Download size={15}/>{reportSaving?t('Se generează…','Generating…'):t('Descarcă PDF','Download PDF')}</button>{!preview&&<button type="button" disabled={reportSaving} onClick={()=>void saveExpenseReport('csv')}>CSV</button>}</> : <a className="button" href="/cont?tab=Premium">{t('Export Premium', 'Premium export')}</a>}</div>
       </header>
       <div className="ac-ledger-summary">{[
         [t('Total selecție','Selection total'), money(historyTotal)],

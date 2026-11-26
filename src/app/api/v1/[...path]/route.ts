@@ -46,6 +46,9 @@ import { stripe, checkout, billingPortal, billingInvoice, processStripeEvent } f
 import {createMechanicShare,listMechanicShares,revokeMechanicShare} from '@/lib/mechanic-shares';
 import {syncPaidExtensions} from '@/lib/subscription-extensions';
 import {vehicleReport} from '@/lib/vehicle-report';
+import {latestExchangeRate} from '@/lib/exchange-rate-server';
+import {accountDisplayCurrency} from '@/lib/display-currency';
+import {currencyPreference,currencyPreferenceKey} from '@/lib/exchange-rate';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -189,6 +192,16 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if(path.length===3&&path[2]==='read'&&method==='POST')return json(await feedback.markFeedbackRead(uid,path[1]));
       if(path.length===3&&path[2]==='replies'&&method==='POST'){const result=await feedback.replyFeedback(uid,path[1],await body(req));publish(result);return json(result,201);}
       return json({error:'Ruta nu există.'},404);
+    }
+    if (route === 'preferences/currency' && (method === 'GET' || method === 'PUT')) {
+      const key = currencyPreferenceKey(uid);
+      if (method === 'GET') {
+        const [saved] = await db().select({value:s.settings.value}).from(s.settings).where(eq(s.settings.key,key));
+        return json({currency:currencyPreference(saved?.value)});
+      }
+      const {currency} = z.object({currency:z.enum(['RON','EUR','auto'])}).strict().parse(await body(req));
+      await db().insert(s.settings).values({key,value:currency}).onConflictDoUpdate({target:s.settings.key,set:{value:currency}});
+      return json({currency});
     }
     if (route === 'preferences/language') {
       if (method === 'GET') return json({language:await userLanguage(uid)});
@@ -913,6 +926,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       const filters = z
         .object({
           kind: z.enum(['document', 'service', 'expense']).optional(),
+          language: z.enum(['ro','en']).optional(),
+          currency: z.enum(['RON','EUR']).optional(),
+          vehicleScope: z.literal('active').optional(),
           finance: z.literal('1').optional(),
           financeCategory: z.enum(financeGroups).optional(),
           journal: z.literal('1').optional(),
@@ -934,9 +950,11 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           Object.fromEntries(Array.from(params.entries()).filter(([key]) => key !== 'format' && key !== 'view')),
         );
       const today = localDate(new Date(), data.profile.timezone);
+      const activeVehicleIds = new Set(data.vehicles.filter(vehicle => !vehicle.archived).map(vehicle => vehicle.id));
+      const eligible = filters.vehicleScope === 'active' ? data.records.filter(row => activeVehicleIds.has(row.vehicleId)) : data.records;
       const selection = filters.finance
-        ? data.records.filter(row => isFinancialEntry(row, today) && (!filters.financeCategory || financeGroup(row) === filters.financeCategory))
-        : filters.journal ? data.records.filter(row => !isPlannedService(row, today)) : data.records;
+        ? [...new Map(eligible.map(row => [row.id, row])).values()].filter(row => isFinancialEntry(row, today) && (!filters.financeCategory || financeGroup(row) === filters.financeCategory))
+        : filters.journal ? eligible.filter(row => !isPlannedService(row, today)) : eligible;
       const selected = filterRecords(selection, filters, new Date(), data.profile.timezone);
       const rows = selected.map(
         ({
@@ -961,21 +979,34 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
           odometer,
           amountBani: amountKnown === false ? null : amountBani,
           amountKnown,
+          currency: 'RON',
         }),
       );
       if (format === 'pdf') {
-        const vehicleIds=new Set(selected.map(r=>r.vehicleId));
-        if(filters.vehicleId)vehicleIds.add(filters.vehicleId);
-        const report=await vehicleReport({vehicles:data.vehicles.filter(v=>vehicleIds.has(v.id)),records:selected,finance:!!filters.finance||filters.kind==='expense',generatedAt:new Date().toLocaleDateString(languageCookie(req.headers.get('cookie'))==='en'?'en-GB':'ro-RO',{timeZone:data.profile.timezone}),language:languageCookie(req.headers.get('cookie'))==='en'?'en':'ro',asOf:today,title:languageCookie(req.headers.get('cookie'))==='en'?(filters.kind==='service'?'Service sheet':filters.kind==='document'?'Vehicle documents':filters.kind==='expense'||filters.finance?'Expense report':'Vehicle history'):(filters.kind==='service'?'Fișă de service':filters.kind==='document'?'Situația documentelor':filters.kind==='expense'||filters.finance?'SITUAȚIA CHELTUIELILOR':'Istoric auto'),period:[filters.from,filters.to].filter(Boolean).join(' - ')||undefined});
+        const vehicleIds = new Set(selected.map(row => row.vehicleId));
+        if (filters.vehicleId && (!filters.vehicleScope || activeVehicleIds.has(filters.vehicleId))) vehicleIds.add(filters.vehicleId);
+        const language = filters.language ?? (languageCookie(req.headers.get('cookie')) === 'en' ? 'en' : 'ro');
+        const en = language === 'en';
+        const currency = accountDisplayCurrency(language, filters.currency);
+        const finance = !!filters.finance || filters.kind === 'expense';
+        const title = filters.kind === 'service' ? (en ? 'Service sheet' : 'Fișă de service')
+          : filters.kind === 'document' ? (en ? 'Vehicle documents' : 'Situația documentelor')
+          : finance ? (en ? 'Expense report' : 'Situația cheltuielilor') : (en ? 'Vehicle history' : 'Istoric auto');
+        const report = await vehicleReport({
+          vehicles: data.vehicles.filter(vehicle => vehicleIds.has(vehicle.id)), records: selected, finance,
+          generatedAt: new Date().toLocaleDateString(en ? 'en-GB' : 'ro-RO', { timeZone: data.profile.timezone }),
+          language, currency, exchangeRate: currency === 'EUR' ? await latestExchangeRate() : null,
+          asOf: today, title, period: [filters.from,filters.to].filter(Boolean).join(' - ') || undefined,
+        });
         return new Response(report, {
           headers: {
             'Content-Type': 'application/pdf',
-            'Content-Disposition': (params.get('view')==='1'?'inline':'attachment')+'; filename="autocare-raport.pdf"',
+            'Content-Disposition': (params.get('view')==='1'?'inline':'attachment')+'; filename="'+(filters.kind==='service'?'autocare-revizii.pdf':finance?'autocare-cheltuieli.pdf':'autocare-raport.pdf')+'"',
             'Cache-Control': 'no-store',
           },
         });
       }
-      return new Response(svc.csv(rows), {
+      return new Response(svc.csv(rows, ['id','vehicleId','kind','category','title','date','expiresAt','odometer','amountBani','amountKnown','currency']), {
         headers: {
           'Content-Type': 'text/csv; charset=utf-8',
           'Content-Disposition': 'attachment; filename="autocare-istoric.csv"',

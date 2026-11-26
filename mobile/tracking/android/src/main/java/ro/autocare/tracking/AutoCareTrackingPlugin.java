@@ -21,21 +21,74 @@ public class AutoCareTrackingPlugin extends Plugin {
         if(pendingNavigationRequests.incrementAndGet()>2){pendingNavigationRequests.decrementAndGet();call.reject("Navigation request already in progress.","NAVIGATION_BUSY");return;}
         new Thread(()->{try{JSONObject data=NativeRoadProvider.request(call.getData());JSObject result=new JSObject();result.put("data",data);call.resolve(result);}catch(Exception error){call.reject("Navigation provider unavailable. Try again.","NAVIGATION_PROVIDER_UNAVAILABLE");}finally{pendingNavigationRequests.decrementAndGet();}},"AutoCare-routing").start();
     }
+    private static final int DOCUMENT_LIMIT_BYTES = 2 * 1024 * 1024;
     private byte[] pendingDocument;
-    @PluginMethod public synchronized void saveDocument(PluginCall call){
-        if(pendingDocument!=null){call.reject("Finish the current save first.");return;}
-        try{
-            String encoded=call.getString("data",""),mime=call.getString("mime","");
-            if(encoded.length()>2800000||!java.util.Arrays.asList("application/pdf","image/png","image/jpeg").contains(mime)){call.reject("Invalid document.");return;}
-            byte[] data=android.util.Base64.decode(encoded,android.util.Base64.DEFAULT);
-            boolean valid=mime.equals("application/pdf")?data.length>=5&&new String(data,0,5,java.nio.charset.StandardCharsets.US_ASCII).equals("%PDF-"):mime.equals("image/png")?data.length>=8&&java.util.Arrays.equals(java.util.Arrays.copyOf(data,8),new byte[]{(byte)137,80,78,71,13,10,26,10}):data.length>=3&&(data[0]&255)==255&&(data[1]&255)==216&&(data[2]&255)==255;
-            if(!valid||data.length>2097152){call.reject("Invalid document.");return;}
-            String name=call.getString("name","AutoCare document").replaceAll("[^\\p{L}\\p{N}._ -]","_");
-            if(name.length()>200)name=name.substring(0,200);
-            pendingDocument=data;
-            Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType(mime).putExtra(Intent.EXTRA_TITLE,name);
-            startActivityForResult(call,intent,"documentSaved");
-        }catch(Exception e){pendingDocument=null;call.reject("Unable to save document.","DOCUMENT_SAVE_FAILED");}
+
+    private static byte[] documentBytes(PluginCall call, String mime) throws java.io.IOException {
+        String encoded = call.getString("data", "");
+        if (encoded.length() > 2800000) throw new java.io.IOException("Document too large.");
+        byte[] data = android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
+        if (data.length == 0 || data.length > DOCUMENT_LIMIT_BYTES) throw new java.io.IOException("Invalid document size.");
+        boolean valid = switch (mime) {
+            case "application/pdf" -> data.length >= 5 && new String(data, 0, 5, java.nio.charset.StandardCharsets.US_ASCII).equals("%PDF-");
+            case "image/png" -> data.length >= 8 && java.util.Arrays.equals(java.util.Arrays.copyOf(data, 8), new byte[]{(byte)137,80,78,71,13,10,26,10});
+            case "image/jpeg" -> data.length >= 3 && (data[0]&255)==255 && (data[1]&255)==216 && (data[2]&255)==255;
+            case "text/csv" -> java.nio.charset.StandardCharsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(data)).toString().indexOf(0) < 0;
+            default -> false;
+        };
+        if (!valid) throw new java.io.IOException("Invalid document.");
+        return data;
+    }
+
+    private static String documentName(PluginCall call) {
+        String name = call.getString("name", "AutoCare document").replaceAll("[^\\p{L}\\p{N}._ -]", "_").trim();
+        if (name.isEmpty() || name.equals(".") || name.equals("..")) return "AutoCare document";
+        return name.length() > 200 ? name.substring(0, 200) : name;
+    }
+
+    @PluginMethod public synchronized void saveDocument(PluginCall call) {
+        if (pendingDocument != null) { call.reject("Finish the current save first.", "DOCUMENT_SAVE_BUSY"); return; }
+        try {
+            String mime = call.getString("mime", "");
+            pendingDocument = documentBytes(call, mime);
+            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
+                .setType(mime).putExtra(Intent.EXTRA_TITLE, documentName(call));
+            startActivityForResult(call, intent, "documentSaved");
+        } catch (Exception error) {
+            pendingDocument = null;
+            call.reject("Unable to save document.", "DOCUMENT_SAVE_FAILED");
+        }
+    }
+
+    @PluginMethod public void shareDocument(PluginCall call) {
+        new Thread(() -> {
+            try {
+                String mime = call.getString("mime", "");
+                if (!mime.equals("application/pdf")) throw new java.io.IOException("Only PDF documents can be shared.");
+                byte[] bytes = documentBytes(call, mime);
+                java.io.File root = new java.io.File(getContext().getCacheDir(), "autocare-shared-documents");
+                if (!root.isDirectory() && !root.mkdirs()) throw new java.io.IOException("Cache unavailable.");
+                java.io.File[] older = root.listFiles();
+                if (older != null) for (java.io.File folder : older) {
+                    if (System.currentTimeMillis() - folder.lastModified() < 86400000L || !folder.isDirectory()) continue;
+                    java.io.File[] files = folder.listFiles();
+                    if (files != null) for (java.io.File file : files) file.delete();
+                    folder.delete();
+                }
+                java.io.File directory = new java.io.File(root, java.util.UUID.randomUUID().toString());
+                if (!directory.mkdir()) throw new java.io.IOException("Cache unavailable.");
+                java.io.File file = new java.io.File(directory, documentName(call));
+                try (java.io.FileOutputStream stream = new java.io.FileOutputStream(file)) { stream.write(bytes); }
+                Uri uri = androidx.core.content.FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
+                Intent send = new Intent(Intent.ACTION_SEND).setType(mime).putExtra(Intent.EXTRA_STREAM, uri)
+                    .setClipData(android.content.ClipData.newRawUri("AutoCare", uri))
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                getActivity().runOnUiThread(() -> {
+                    try { getActivity().startActivity(Intent.createChooser(send, null)); call.resolve(); }
+                    catch (Exception error) { call.reject("Unable to share document.", "DOCUMENT_SHARE_FAILED"); }
+                });
+            } catch (Exception error) { call.reject("Unable to share document.", "DOCUMENT_SHARE_FAILED"); }
+        }, "AutoCare-document-share").start();
     }
     @ActivityCallback private synchronized void documentSaved(PluginCall call,ActivityResult result){
         byte[] data=pendingDocument;pendingDocument=null;
@@ -43,7 +96,18 @@ public class AutoCareTrackingPlugin extends Plugin {
         if(result.getResultCode()!=Activity.RESULT_OK){call.reject("Save cancelled.","DOCUMENT_SAVE_CANCELLED");return;}
         if(data==null||result.getData()==null||result.getData().getData()==null){call.reject("Select the document again.","DOCUMENT_SAVE_FAILED");return;}
         Uri destination=result.getData().getData();
-        new Thread(()->{try(java.io.OutputStream output=getContext().getContentResolver().openOutputStream(destination,"w")){if(output==null)throw new java.io.IOException("No output stream");output.write(data);JSObject value=new JSObject();value.put("saved",true);call.resolve(value);}catch(Exception e){call.reject("Unable to save document.","DOCUMENT_SAVE_FAILED");}}).start();
+        new Thread(() -> {
+            try (java.io.OutputStream output = getContext().getContentResolver().openOutputStream(destination, "w")) {
+                if (output == null) throw new java.io.IOException("No output stream");
+                output.write(data);
+            } catch (Exception error) {
+                call.reject("Unable to save document.", "DOCUMENT_SAVE_FAILED");
+                return;
+            }
+            JSObject value = new JSObject();
+            value.put("saved", true);
+            call.resolve(value);
+        }, "AutoCare-document-save").start();
     }
     @PluginMethod public void appVersion(PluginCall call){
         try{android.content.pm.PackageInfo info=getContext().getPackageManager().getPackageInfo(getContext().getPackageName(),0);JSObject value=new JSObject();value.put("version",info.versionName);value.put("versionCode",AndroidUpdate.versionCode(info));value.put("directUpdate",declaresDirectUpdate());call.resolve(value);}catch(Exception e){call.reject("Unable to read app version",e);}

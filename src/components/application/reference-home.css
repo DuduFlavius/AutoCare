@@ -242,3 +242,6 @@
  .rg-home-reference .ac-home-first-vehicle {min-height:310px}
  .ac-home-first-vehicle::after {background:linear-gradient(90deg,#061b22ef,#061b228c)}
 }
+
+/* The heading is a programmatic focus destination after workspace navigation. */
+.rg-home-welcome h1[tabindex="-1"]:focus { outline: none; }

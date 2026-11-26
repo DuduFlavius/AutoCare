@@ -26,6 +26,7 @@ import {saveBrowserLanguage} from '@/lib/language-preference';
 import dynamic from 'next/dynamic';
 import ReferenceArtwork from './reference-artwork';
 import {accountDisplayCurrency} from '@/lib/display-currency';
+import {currencyPreference, currencyRateLabel, formatDisplayMoney, validExchangeRate, type CurrencyPreference, type ExchangeRate} from '@/lib/exchange-rate';
 import {translateApplicationCopy} from '@/lib/application-language';
 import {ApplicationLanguageProvider,useApplicationLanguage,useApplicationLocale} from './application-locale';
 import './app-workspace.css';
@@ -350,7 +351,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     [offline,setOffline] = useState(false),
     [settingsPanel,setSettingsPanel] = useState('account'),
     [language, setLanguage] = useState<'ro' | 'en'>('ro'),
-    [currency, setCurrency] = useState<'RON' | 'EUR'>('RON'),
+    [preferredCurrency, setPreferredCurrency] = useState<CurrencyPreference>('auto'),
     [signingOut,setSigningOut]=useState(false),
     [busy, setBusy] = useState(false),
     [modal, setModal] = useState<Modal>(null),
@@ -385,6 +386,51 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
   useEffect(()=>{if(tab==='Plan întreținere')setSmartDriveOpened(true)},[tab]);
   const dashboardRequest = useRef(0);
   const locale=language==='en'?'en-GB':'ro-RO';
+  const currency = accountDisplayCurrency(language, preferredCurrency);
+  const currencyRequest = useRef(0);
+  const currencyQueue = useRef(Promise.resolve());
+  const currencyOwner = data?.profile.userId;
+  useEffect(() => {
+    if (!currencyOwner || previewData) return;
+    const request = ++currencyRequest.current;
+    try { setPreferredCurrency(currencyPreference(localStorage.getItem('autocare-display-currency:' + currencyOwner))); } catch { /* Optional storage. */ }
+    void api('preferences/currency').then(value => {
+      if (request !== currencyRequest.current) return;
+      const preferred = currencyPreference(value.currency);
+      setPreferredCurrency(preferred);
+      try { localStorage.setItem('autocare-display-currency:' + currencyOwner, preferred); } catch { /* Optional storage. */ }
+    }).catch(()=>{});
+    return () => { ++currencyRequest.current; };
+  }, [currencyOwner, previewData]);
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
+  useEffect(() => {
+    if (currency !== 'EUR') return;
+    const controller = new AbortController();
+    const update = async () => {
+      setExchangeRate(previous => validExchangeRate(previous) ? previous : null);
+      try {
+        const cached: unknown = JSON.parse(localStorage.getItem('autocare-ecb-rate') ?? 'null');
+        if (validExchangeRate(cached)) setExchangeRate(previous => !previous || cached.date >= previous.date ? cached : previous);
+      } catch { /* Optional offline cache. */ }
+      try {
+        const response = await fetch('/api/exchange-rate', { signal: controller.signal });
+        if (!response.ok) return;
+        const rate: unknown = await response.json();
+        if (!controller.signal.aborted && validExchangeRate(rate)) {
+          setExchangeRate(previous => !previous || rate.date >= previous.date ? rate : previous);
+          try { localStorage.setItem('autocare-ecb-rate', JSON.stringify(rate)); } catch { /* Optional offline cache. */ }
+        }
+      } catch { /* The last valid publication remains available offline. */ }
+    };
+    void update();
+    const timer = window.setInterval(update, 3600000);
+    window.addEventListener('online', update);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+      window.removeEventListener('online', update);
+    };
+  }, [currency]);
   useEffect(()=>{if(previewData||tab!=='Abonament')return;const timer=setInterval(()=>{if(document.visibilityState==='visible'){void api('billing/sync','POST').then(()=>refresh(true)).catch(()=>{});void refresh(true);void api('billing/invoices').then(setInvoices).catch(e=>setError(e.message));}},15000);return()=>clearInterval(timer);},[tab,previewData]);
   useEffect(()=>{
     if(previewData||!data?.profile.userId)return;
@@ -393,13 +439,13 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
       const saved=localStorage.getItem('autocare-language');
       if(saved==='ro'||saved==='en') {void api('preferences/language','PUT',{language:saved}).catch(()=>{});return;}
     } catch { /* Account preference still works without browser storage. */ }
-    void api('preferences/language').then(value=>{if(!stopped){setLanguage(value.language);setCurrency(accountDisplayCurrency(value.language));try{saveBrowserLanguage(value.language);}catch{/* Optional storage. */}}}).catch(()=>{});
+    void api('preferences/language').then(value=>{if(!stopped){setLanguage(value.language);try{saveBrowserLanguage(value.language);}catch{/* Optional storage. */}}}).catch(()=>{});
     return()=>{stopped=true};
   },[data?.profile.userId,previewData]);
   const displayDate=(value:string)=>new Date(value+'T12:00:00').toLocaleDateString(locale);
   useEffect(() => {
     try { const language=window.localStorage.getItem('autocare-language')==='en'?'en':'ro';setLanguage(language);
-      setCurrency(accountDisplayCurrency(language,localStorage.getItem('autocare-currency'),localStorage.getItem('autocare-currency-language'))); } catch { /* Storage may be unavailable. */ }
+      if (previewData) setPreferredCurrency(currencyPreference(localStorage.getItem('autocare-display-currency:preview'))); } catch { /* Storage may be unavailable. */ }
     const t = new URLSearchParams(window.location.search).get('tab');
     if (t) setTab(normalizeWorkspaceTab(t));
     refresh();
@@ -648,13 +694,22 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
   },[modal,recordDirty,recordSaving]);
   function changeLanguage(next:'ro'|'en'){
     setLanguage(next);
-    const displayCurrency=accountDisplayCurrency(next);setCurrency(displayCurrency);
-    try{localStorage.setItem('autocare-currency',displayCurrency);localStorage.setItem('autocare-currency-language',next);}catch{/* Optional persistence. */}
     if(!previewData) void api('preferences/language','PUT',{language:next}).catch(()=>setError(next==='en'?'Language changed on this device. Account preference could not be saved; try again when connected.':'Limba s-a schimbat pe acest dispozitiv. Preferința contului nu s-a putut salva; reîncearcă după conectare.'));
     try{saveBrowserLanguage(next);window.dispatchEvent(new Event('autocare-language-change'));}catch{ /* Storage may be unavailable. */ }
   }
-  function changeCurrency(next:'EUR'|'RON'){
-    setCurrency(next);try{localStorage.setItem('autocare-currency',next);localStorage.setItem('autocare-currency-language',language);}catch{ /* Storage may be unavailable. */ }
+  function changeCurrency(next: CurrencyPreference){
+    ++currencyRequest.current;
+    setPreferredCurrency(next);
+    if (currencyOwner || previewData) {
+      const key = 'autocare-display-currency:' + (previewData ? 'preview' : currencyOwner);
+      try { localStorage.setItem(key, next); } catch { /* Optional offline storage. */ }
+    }
+    if (currencyOwner && !previewData) {
+      currencyQueue.current = currencyQueue.current.then(async () => {
+        try { await api('preferences/currency','PUT',{currency:next}); }
+        catch { setError(language==='en'?'Currency changed on this device. Account sync failed. Try again online.':'Moneda s-a schimbat pe acest dispozitiv. Sincronizarea contului a eșuat. Încearcă din nou online.'); }
+      });
+    }
   }
   const activeCars = data?.vehicles.filter((v) => !v.archived) || [];
   const primaryVehicleId = selectActiveVehicle(activeCars, data?.primaryVehicleId ?? activeVehicleId)?.id ?? '';
@@ -727,13 +782,13 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
     new Date(),
     data?.profile.timezone || 'Europe/Bucharest',
   );
-  const moneyDisplay = (bani: number): string => currency === 'EUR'
-    ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR'}).format(bani / 500)
-    : new Intl.NumberFormat(locale, {style:'currency',currency:'RON'}).format(bani / 100);
+  const currentRate = validExchangeRate(exchangeRate) ? exchangeRate : null;
+  const moneyDisplay = formatDisplayMoney(locale, currency, currentRate);
+  const exchangeNote = currency === 'EUR' ? currencyRateLabel(language, currentRate) : '';
   const exportUrl = (format: string) =>
     '/api/v1/export?' +
     new URLSearchParams(
-      Object.entries({ ...exportFilters, format }).filter(
+      Object.entries({ ...exportFilters, format, currency, language }).filter(
         ([, v]) => v !== undefined && v !== '',
       ) as [string, string][],
     ).toString();
@@ -984,13 +1039,14 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               ) : null}
             </WorkspaceModuleHeader>}
             {!['Feedback','Feedback utilizatori'].includes(tab)&&<div className="rg-feedback-slot"><FeedbackNotice admin={['admin','superadmin','founder'].includes(data.profile.role)} preview={!!previewData} onOpen={()=>navigate(['admin','superadmin','founder'].includes(data.profile.role)?'Feedback utilizatori':'Feedback')}/></div>}
+            {exchangeNote && ['Cheltuieli','Întreținere','Rapoarte','Documente','Garaj','Premium'].includes(tab) && <p className="small muted">{exchangeNote}</p>}
             {tab==='Feedback'&&<FeedbackWorkspace onExit={()=>navigate('Cont','push',null,true)} onSupport={()=>navigate('Centru de suport','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>}
             {tab==='Feedback utilizatori'&&(['admin','superadmin','founder'].includes(data.profile.role)?<FeedbackWorkspace admin onExit={()=>navigate('Cont','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>:<p role="alert">{language==='en'?'Administrator access required.':'Acces rezervat administratorilor.'}</p>)}
             <FeedbackInvitation enabled={tab==='Dashboard'&&!busy&&!modal&&!recordDirty&&!recordSaving} userId={data.profile.userId} preview={!!previewData} onOpen={()=>navigate('Feedback')}/>
             {!['Dashboard','Garaj','Documente','Întreținere','Rapoarte','Calendar','RCA & Rovinietă','Cont','Centru de suport','AutoCare AI'].includes(tab)&&<WorkspaceContext tab={tab} language={language} navigate={navigate}/>}
             {drill && !emptyModule && <div className="card between"><strong>{drill.label}</strong><button type="button" onClick={()=>setDrill(null)}>{language==='en'?'Show all':'Vezi toate'}</button></div>}
             {tab==='Întreținere'&&(emptyModule?<EmptyState module="maintenance" needsVehicle={needsVehicle} onAction={()=>needsVehicle?openVehicleForm():setModal({kind:'service'})}/>:<RacingMaintenance data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} today={nowDate} onOpen={record=>setModal({kind:'service',record})} onCreate={()=>setModal({kind:'service'})}/>)}
-            {tab === 'Dashboard' && <ApplicationHome androidSmartDrive={androidApk&&smartDriveEnabled} onDrill={async (next,vehicleId,ids,label)=>{if(!await navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} currency={currency} preview={!!previewData}/>}
+            {tab === 'Dashboard' && <ApplicationHome androidSmartDrive={androidApk&&smartDriveEnabled} onDrill={async (next,vehicleId,ids,label)=>{if(!await navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} money={moneyDisplay} exchangeNote={exchangeNote} preview={!!previewData}/>}
             {tab === 'RCA & Rovinietă' && <RenewalCenter key={data.profile.offsets.join(',')+String(data.profile.emailEnabled)+String(data.profile.pushEnabled)} data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} onDocument={(category,record)=>{setRenewalCategory(category);setModal({kind:'document',record});}} onNavigate={async next=>{if(await navigate(next)&&next==='Setări')setSettingsPanel('alerts');}} onPreferences={async profile=>{await act(()=>api('profile','PUT',{timezone:profile.timezone,emailEnabled:profile.emailEnabled,pushEnabled:profile.pushEnabled,afterExpiry:profile.afterExpiry,offsets:profile.offsets,hour:profile.hour}));}} busy={busy} preview={!!previewData}/>}
             {tab === 'AutoCare AI' && <AutoAiWorkspace onAddVehicle={openVehicleForm} records={data.records} timezone={data.profile.timezone} onNavigate={tab=>void navigate(tab)} displayName={name} onExit={()=>navigate('Dashboard')}
               vehicles={activeCars}
@@ -1053,7 +1109,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               />
             )}
             {tab === 'Cheltuieli' && (emptyModule ? <EmptyState module="expenses" needsVehicle={needsVehicle} onAction={()=>needsVehicle?openVehicleForm():setModal({kind:'expense'})}/> : <FinanceCenter
-              onDelete={setDeleteRecordTarget} data={data} today={nowDate} primaryId={primaryVehicleId} preview={!!previewData} money={moneyDisplay}
+              onDelete={setDeleteRecordTarget} data={data} today={nowDate} primaryId={primaryVehicleId} preview={!!previewData} money={moneyDisplay} currency={currency}
               onEdit={record => setModal({ kind: record.kind as 'document' | 'service' | 'expense', record })}
               onArchive={async record => {
                 await requestConfirmation(language === 'en' ? 'Archive this record and stop its reminders?' : 'Arhivezi înregistrarea și oprești alertele asociate?',async()=>{await act(() => api('records/' + record.id, 'DELETE'),undefined,true);});
@@ -1590,10 +1646,12 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               <RacingSupport role={data.profile.role} preview={!!previewData} onFeedback={()=>navigate('Feedback')} />
             )}
             {tab==='Abonament'&&<><PlayBillingPanel onUpdated={()=>refresh(true)}/><SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(hasPlayBilling())throw new Error('Gestionează abonamentul din Google Play.');if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/></>}
-            {tab==='Rapoarte'&&(data.premium?<PremiumDownloads data={data} language={language} preview={!!previewData}/>:<section className="card studio-report-intro"><Download size={32}/><h2>{language==='en'?'Reports, ready when you need them.':'Rapoartele tale, gata când ai nevoie.'}</h2><p>{language==='en'?'PDF and CSV reports are included with Premium. Your personal data export remains free in account settings.':'Rapoartele PDF și CSV sunt incluse cu Premium. Exportul datelor personale rămâne gratuit în setările contului.'}</p><button className="primary" onClick={()=>navigate('Premium')}>{language==='en'?'Compare plans':'Compară planurile'}</button></section>)}
+            {tab==='Rapoarte'&&(data.premium?<PremiumDownloads data={data} language={language} currency={currency} money={moneyDisplay} preview={!!previewData}/>:<section className="card studio-report-intro"><Download size={32}/><h2>{language==='en'?'Reports, ready when you need them.':'Rapoartele tale, gata când ai nevoie.'}</h2><p>{language==='en'?'PDF and CSV reports are included with Premium. Your personal data export remains free in account settings.':'Rapoartele PDF și CSV sunt incluse cu Premium. Exportul datelor personale rămâne gratuit în setările contului.'}</p><button className="primary" onClick={()=>navigate('Premium')}>{language==='en'?'Compare plans':'Compară planurile'}</button></section>)}
             {tab === 'Premium' && (
               <Membership
                 language={language}
+                currency={currency}
+                money={moneyDisplay}
                 data={data}
                 preview={!!previewData}
                 invoices={invoices}
@@ -1613,7 +1671,7 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               <div className="ws-settings-layout ac-settings-premium">
               <nav className="ws-settings-nav" aria-label={language==='en'?'Settings categories':'Categorii setări'} data-workspace-ui>{([['account','Setări cont','Account Settings'],['alerts','Notificări și email','Notifications & email'],['device','Aplicație și afișare','App & display'],['help','Ajutor','Help']] as const).map(([id,ro,en])=><button type="button" key={id} aria-current={settingsPanel===id?'page':undefined} onClick={()=>setSettingsPanel(id)}>{language==='en'?en:ro}<ArrowUpRight size={15}/></button>)}</nav>
               <div className="grid2 settings-workspace">
-                <section hidden={settingsPanel!=='device'} className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /><AppUpdateSettings /><WorkspacePreferences language={language} currency={currency} onLanguage={changeLanguage} onCurrency={changeCurrency}/></section>
+                <section hidden={settingsPanel!=='device'} className="card ac-install-settings"><h3>AutoCare pe telefon</h3><p className="small muted">Instalează aplicația pe iPhone sau Samsung, fără să pierzi datele contului.</p><MobileInstall /><AppUpdateSettings /><WorkspacePreferences language={language} currency={preferredCurrency} onLanguage={changeLanguage} onCurrency={changeCurrency}/></section>
                 <section hidden={settingsPanel!=='alerts'} className="card">
                   <div className="settings-section-title">
                     <span className="list-icon">

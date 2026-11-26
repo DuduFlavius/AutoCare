@@ -23,8 +23,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         manifestPlaceholders.autocareInstallPermission = playDistribution ? "android.permission.INTERNET" : "android.permission.REQUEST_INSTALL_PACKAGES"
-        versionCode 26
-        versionName "1.7.5"
+        versionCode 27
+        versionName "1.7.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

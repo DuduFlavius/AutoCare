@@ -399,9 +399,9 @@ export function WorkspacePreferences({
   onCurrency,
 }: {
   language: Language;
-  currency: 'RON' | 'EUR';
+  currency: 'RON' | 'EUR' | 'auto';
   onLanguage: (v: Language) => void;
-  onCurrency: (v: 'RON' | 'EUR') => void;
+  onCurrency: (v: 'RON' | 'EUR' | 'auto') => void;
 }) {
   return (
     <div className="ws-device-preferences" data-workspace-ui>
@@ -420,8 +420,9 @@ export function WorkspacePreferences({
         {language === 'en' ? 'Display currency' : 'Moneda de afișare'}
         <FilterSelect
           value={currency}
-          onChange={(e) => onCurrency(e.target.value === 'EUR' ? 'EUR' : 'RON')}
+          onChange={(e) => onCurrency(e.target.value === 'EUR' ? 'EUR' : e.target.value === 'RON' ? 'RON' : 'auto')}
         >
+          <option value="auto">{language === 'en' ? 'Follow language' : 'După limba aplicației'}</option>
           <option>RON</option>
           <option>EUR</option>
         </FilterSelect>

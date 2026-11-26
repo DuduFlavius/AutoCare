@@ -451,9 +451,9 @@ export async function uploadFile(
     return metadata;
   });
 }
-export function csv(rows: Array<Record<string, unknown>>) {
-  if (!rows.length) return '\ufeff';
-  const keys = Object.keys(rows[0]);
+export function csv(rows: Array<Record<string, unknown>>, columns?: string[]) {
+  const keys = columns ?? Object.keys(rows[0] ?? {});
+  if (!keys.length) return '\ufeff';
   const quote = (v: unknown) => {
     let t = String(v ?? '');
     if (/^[\s]*[=+@-]/.test(t)) t = "'" + t;
