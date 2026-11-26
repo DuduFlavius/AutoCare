@@ -583,3 +583,41 @@ test('a recent registration welcome waits for verification and delivers once',as
   if(old)await db().update(s.settings).set({value:old.value}).where(eq(s.settings.key,'mail-automation-approval'));else await db().delete(s.settings).where(eq(s.settings.key,'mail-automation-approval'));
  }
 });
+
+test('Studio catalog has at least 50 distinct bilingual templates and shared preview/send formatting persists', async()=>{
+  const catalog=Object.keys(emailTemplates) as (keyof typeof emailTemplates)[];
+  assert.ok(catalog.length>=50);
+  for(const template of catalog){
+    const ro=renderEmail(template,{language:'ro'});
+    const en=renderEmail(template,{language:'en'});
+    assert.notEqual(ro.subject,en.subject,template);
+    assert.match(en.html,/<html lang="en">/);
+  }
+  const draft={...input({message:'AutoCare: **verificare** și _detalii_ <script>alert(1)</script>.'}),
+    design:{style:'compact',preheader:'Previzualizare reală',englishPreheader:'English preheader',formatted:true}};
+  const preview=await center.previewMail(founder,{
+    template:draft.template,subject:draft.subject,message:draft.message,ctaLabel:draft.ctaLabel,ctaPath:draft.ctaPath,
+    name:'Ana <script>',design:draft.design,language:'ro',
+  });
+  await center.saveCampaign(founder,draft);
+  assert.deepEqual((await center.campaignDetail(founder,draft.id)).design,draft.design);
+  let sent: ReturnType<typeof renderEmail>|undefined;
+  await center.deliverCampaign(draft.id,async(_address,content)=>{sent=content;return 'isolated-studio';});
+  assert.ok(sent);
+  assert.equal(sent.html,preview.html);
+  assert.match(preview.html,/<strong>verificare<\/strong>/);
+  assert.match(preview.html,/<em>detalii<\/em>/);
+  assert.match(preview.html,/Previzualizare reală/);
+  assert.doesNotMatch(preview.html,/<script>/);
+  assert.doesNotMatch(preview.text,/\*\*/);
+});
+
+test('Mail Studio refuses external campaign delivery on Vercel Preview', async()=>{
+  const original=process.env.VERCEL_ENV;
+  try {
+    process.env.VERCEL_ENV='preview';
+    await assert.rejects(()=>center.sendCampaign(founder,crypto.randomUUID()), {status:403});
+  } finally {
+    if(original===undefined)delete process.env.VERCEL_ENV;else process.env.VERCEL_ENV=original;
+  }
+});

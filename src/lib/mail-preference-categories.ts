@@ -23,7 +23,7 @@ export function emailCategories(stored: unknown, legacyPromotional: boolean): Em
 export function emailCategory(template: string, promotional: boolean): keyof EmailCategories | null {
   if (template === 'monthly_report') return 'monthly';
   if (template === 'release_news' || template === 'app_update' || template === 'android_update') return 'releases';
-  if (template === 'feature_news' || template === 'onboarding_guide') return 'news';
+  if (template === 'feature_news' || template === 'onboarding_guide' || template === 'newsletter_editorial') return 'news';
   if (template === 'auto_tips' || template === 'tires') return 'tips';
   return promotional ? 'offers' : null;
 }

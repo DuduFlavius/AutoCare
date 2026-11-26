@@ -1,3 +1,4 @@
+import { studioStyles } from './mail-studio-templates';
 import {accountPreferences} from './account-preferences';
 import {campaignEnglish,englishMailSchema} from './mail-localization';
 import {userLanguage} from './user-language';
@@ -69,6 +70,12 @@ export async function requestAutomationApproval(uid: string) {
   return { requested: true };
 }
 const templateIds = Object.keys(emailTemplates) as [EmailTemplate, ...EmailTemplate[]];
+const studioDesignSchema = z.object({
+  style:z.enum(studioStyles),
+  preheader:z.string().trim().max(130).optional(),
+  englishPreheader:z.string().trim().max(130).optional(),
+  formatted:z.boolean().optional(),
+}).strict();
 const inputSchema = z
   .object({
     id: z.uuid(),
@@ -76,6 +83,7 @@ const inputSchema = z
     templateLabel:z.string().trim().max(100).optional(),
     categoryLabel:z.string().trim().max(100).optional(),
     englishContent:englishMailSchema.optional(),
+    design:studioDesignSchema.optional(),
     template: z.enum(templateIds),
     category: z.enum(['transactional', 'promotional']),
     subject: z
@@ -135,6 +143,7 @@ export async function getCommunicationPreference(uid: string) {
 const libraryEntrySchema = z.object({
   id: z.uuid(), kind: z.enum(['template', 'communication']),
   englishContent:englishMailSchema.optional(),
+  design:studioDesignSchema.optional(),
   label: z.string().trim().min(2).max(100),
   category: z.enum(['transactional', 'promotional']),
   template: z.enum(templateIds).default('administrative'),
@@ -244,6 +253,8 @@ export async function previewMail(uid: string, input: unknown) {
       ctaLabel: z.string().max(60).optional(),
       ctaPath: z.string().max(400).optional(),
       promotional: z.boolean().optional(),
+      design: studioDesignSchema.optional(),
+      previewTheme:z.enum(['light','dark']).optional(),
     })
     .strict()
     .parse(input);
@@ -327,6 +338,7 @@ export async function saveCampaign(uid: string, input: unknown) {
       fingerprint,
       status: 'draft',
     });
+    if(data.design)await tx.insert(s.settings).values({key:'mail-design:'+data.id,value:data.design});
     if(data.englishContent)await tx.insert(s.settings).values({key:'mail-english:'+data.id,value:data.englishContent});
     await tx.insert(s.settings).values({ key: 'mail-kind:' + data.id, value: { label: data.communicationType,templateLabel:data.templateLabel,categoryLabel:data.categoryLabel } });
     for (let index=0; index<audience.length; index+=250) await tx.insert(s.mailDeliveries).values(
@@ -347,6 +359,11 @@ export async function saveCampaign(uid: string, input: unknown) {
     return { id: data.id, duplicate: false, count:audience.length };
   });
 }
+async function campaignDesign(id:string) {
+  const [row]=await db().select({value:s.settings.value}).from(s.settings).where(eq(s.settings.key,'mail-design:'+id));
+  const design=studioDesignSchema.safeParse(row?.value);
+  return design.success?design.data:undefined;
+}
 export async function campaignDetail(uid: string, id: string) {
   await requireMailStaff(uid);
   const campaign = (await db().select().from(s.mailCampaigns).where(eq(s.mailCampaigns.id, id)))[0];
@@ -366,7 +383,7 @@ export async function campaignDetail(uid: string, id: string) {
     .where(eq(s.mailDeliveries.campaignId, id))
     .limit(100);
   const kind = (await db().select().from(s.settings).where(eq(s.settings.key, 'mail-kind:' + id)))[0]?.value as { label?: string;templateLabel?:string;categoryLabel?:string } | undefined;
-  return { campaign, deliveries, communicationType: kind?.label || 'Informare cont',templateLabel:kind?.templateLabel||'',categoryLabel:kind?.categoryLabel||'' };
+  return { campaign, deliveries, englishContent:await campaignEnglish(id), design:await campaignDesign(id), communicationType: kind?.label || 'Informare cont',templateLabel:kind?.templateLabel||'',categoryLabel:kind?.categoryLabel||'' };
 }
 export type MailTransport = (to: string, content: EmailContent, id: string) => Promise<string>;
 async function lifecycleEventStillValid(userId: string, template: string, context: typeof s.mailDeliveries.$inferSelect.context) {
@@ -424,6 +441,7 @@ export async function deliverCampaign(
         sql`${s.mailDeliveries.attemptedAt}<${new Date(now.getTime() - 120000).toISOString()}::timestamptz`,
       ),
     );
+  const design = await campaignDesign(id);
   const candidates = await db()
     .select()
     .from(s.mailDeliveries)
@@ -491,6 +509,7 @@ export async function deliverCampaign(
           ctaLabel: campaign.ctaLabel,
           ctaPath: campaign.ctaPath,
           promotional: campaign.category === 'promotional',
+          design,
           ...(english??{}),
           ...(report ?? {}),
           ...(campaign.template==='welcome' ? {links:[
@@ -577,6 +596,7 @@ export async function cancelCampaign(uid: string, id: string) {
 
 export async function sendCampaign(uid: string, id: string) {
   await requireMailStaff(uid);
+  if(process.env.VERCEL_ENV==='preview') throw new AppError(403,'Trimiterea campaniilor este oprită în Preview.');
   const { campaign } = await campaignDetail(uid, id);
   if (campaign.template === 'release_news') throw new AppError(400, 'Publică lansarea prin AutoCare News.');
   if (campaign.source !== 'manual')

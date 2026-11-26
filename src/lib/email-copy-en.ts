@@ -1,5 +1,6 @@
+import {studioExtraEnglish} from './mail-studio-templates';
 /** Reviewed English templates. Custom campaign messages and user records stay unchanged. */
-export const englishEmailCopy: Record<string, {title:string;body:string;cta:string}> = Object.fromEntries([
+export const englishEmailCopy: Record<string, {title:string;body:string;cta:string;subject?:string}> = Object.fromEntries([
 ['feedback_received','Thanks for sharing your feedback!','The AutoCare team received your feedback. Thank you for helping us improve the app. If we reply, you will find our response in the Feedback section of your account.','View feedback'],
 ['invoice_help','Your billing documents','Open your subscription to view payment history. For help, send support the payment date and invoice reference, without card details.','View subscription'],
 ['monthly_report','Your month in AutoCare','Review your vehicle activity and upcoming deadlines.','View report'],
@@ -54,3 +55,5 @@ export const englishEmailCopy: Record<string, {title:string;body:string;cta:stri
 ['promotional','More for every journey','Discover AutoCare updates and available options for your digital garage.','Discover AutoCare'],
 ['reminder','A small detail. A smoother journey.','Check the documents and scheduled work in your AutoCare garage.','View garage'],
 ].map(([key,title,body,cta])=>[key,{title,body,cta}]));
+
+Object.assign(englishEmailCopy,studioExtraEnglish);

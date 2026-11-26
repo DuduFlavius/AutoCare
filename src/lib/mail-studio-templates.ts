@@ -1,0 +1,22 @@
+const moreTemplates = {
+  casco: ['Expirare CASCO','Revizuiește asigurarea CASCO','Verifică data înscrisă în garaj și actualizeaz-o după reînnoirea poliței.','CASCO expiry','Review your comprehensive cover','Check the date recorded in your garage and update it once your policy is renewed.','/cont?tab=Documente'],
+  registration_card: ['Certificat de înmatriculare','Păstrează certificatul la îndemână','Adaugă datele certificatului în garaj și consultă originalul când ai nevoie de informațiile oficiale.','Vehicle registration','Keep your registration details close','Add the registration details to your garage and consult the original when you need official information.','/cont?tab=Documente'],
+  road_assistance: ['Asistență rutieră','Pregătește datele de asistență','Verifică perioada contractului și păstrează datele de contact ale furnizorului pentru drum.','Roadside assistance','Keep your roadside assistance details ready','Review your cover dates and keep the provider’s contact details handy for your next trip.','/cont?tab=Documente'],
+  mileage_check: ['Verificare kilometraj','Actualizează kilometrajul din bord','Consultă ultima citire din cont și adaugă o valoare nouă dacă kilometrajul din bord s-a schimbat.','Mileage check','Update your dashboard reading','Review the latest reading in your account and add a new one if the dashboard reading has changed.','/cont?tab=Kilometraj'],
+  expense_review: ['Revizuire cheltuieli','Verifică cheltuielile înregistrate','Consultă categoriile și adaugă sumele lipsă din facturi sau bonuri pentru un istoric corect.','Expense review','Review your recorded expenses','Check your categories and add any missing amounts from invoices or receipts to keep your records accurate.','/cont?tab=Cheltuieli'],
+  winter_storage: ['Pregătire pentru sezon','Pregătește mașina pentru următorul sezon','Verifică în garaj lucrările planificate și confirmă cu atelierul verificările necesare înainte de următorul drum.','Seasonal preparation','Prepare for the next driving season','Check your planned maintenance and agree any necessary checks with your workshop before your next trip.','/cont?tab=Întreținere'],
+  support_details: ['Detalii pentru suport','Spune-ne ce s-a întâmplat','Redeschide conversația și trimite pașii pe care i-ai urmat, plus mesajul afișat. Nu include parole sau date de card.','Support follow-up','Tell us what happened','Open your conversation and share the steps you followed and the message you saw. Keep passwords and card details private.','/cont?tab=Centru+de+suport'],
+  notification_help: ['Setări notificări','Alege notificările care te ajută','Poți schimba tipurile de alerte și canalele de livrare din preferințele contului.','Notification settings','Choose the reminders you need','Review alert categories and delivery channels in your account preferences.','/cont?tab=Setări'],
+  statement_ready: ['Situație cheltuieli','Consultă situația cheltuielilor auto','Alege vehiculul și perioada în Rapoarte pentru a consulta sau descărca datele pe care le-ai înregistrat.','Vehicle expenses statement','Review your vehicle expenses statement','Select a vehicle and period in Reports to review or download the information you recorded.','/cont?tab=Rapoarte'],
+  newsletter_editorial: ['Noutăți din garaj','Descoperă mai mult din garajul AutoCare','Alege ce vrei să explorezi astăzi: istoricul auto, documentele digitale sau rapoartele de cheltuieli.','Garage newsletter','Explore your AutoCare garage','Choose what to explore today: your vehicle history, digital documents, or expense reports.','/cont'],
+} as const;
+type ExtraTemplate = keyof typeof moreTemplates;
+export const studioExtraTemplates = Object.fromEntries(Object.entries(moreTemplates).map(([id,[label,title,body,,,,path]])=>[
+  id,{label,title,subject:'AutoCare — '+label,body,path,cta:'Deschide AutoCare',category:id==='newsletter_editorial'?'promotional':'transactional'},
+])) as Record<ExtraTemplate,{label:string;title:string;subject:string;body:string;path:string;cta:string;category:'promotional'|'transactional'}>;
+export const studioExtraEnglish = Object.fromEntries(Object.entries(moreTemplates).map(([id,[,,,label,title,body]])=>[
+  id,{title,body,cta:'Open AutoCare',subject:'AutoCare — '+label},
+]));
+export const studioStyles = ['signature','editorial','compact'] as const;
+export type StudioStyle = typeof studioStyles[number];
+export type StudioDesign = {style:StudioStyle;preheader?:string;englishPreheader?:string;formatted?:boolean};

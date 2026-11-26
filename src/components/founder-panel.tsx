@@ -225,7 +225,7 @@ const [tab, setTab] = useState('Utilizatori'),
       placeholder={locale === 'en-GB' ? 'Find a section…' : 'Caută o secțiune…'} />
   </label>;
   return (
-    <div className="founder-shell founder-signature" data-appearance={appearance} data-language={locale.startsWith('en')?'en':'ro'}>
+    <div className="founder-shell founder-signature" data-workspace={tab==='Mail Center'?'mail':undefined} data-appearance={appearance} data-language={locale.startsWith('en')?'en':'ro'}>
       <aside className="founder-sidebar">
         <a href="/cont" className="founder-brand">
           <span>
@@ -264,9 +264,9 @@ const [tab, setTab] = useState('Utilizatori'),
       </aside>
       <main className="founder-main">
         <header className="founder-page-header">
-          <div>
+          <div className={tab==='Mail Center'?'sr-only':undefined}>
             <p className="eyebrow">AUTOCARE / ADMINISTRARE</p>
-            <h1>{tab}</h1>
+            <h1>{tab==='Mail Center'?'Mail Studio':tab}</h1>
             <p className="small muted">
               Control real asupra platformei. Acțiunile importante sunt înregistrate în audit.
             </p>
