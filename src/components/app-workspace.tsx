@@ -323,12 +323,12 @@ export function WorkspaceContext({
 export function WorkspaceOverview({
   data,
   language,
-  currency,
+  money,
   navigate,
 }: {
   data: Data;
   language: Language;
-  currency: 'RON' | 'EUR';
+  money: (bani: number) => string;
   navigate: (tab: string) => Promise<boolean>;
 }) {
   const active = data.vehicles.filter((v) => !v.archived);
@@ -336,10 +336,7 @@ export function WorkspaceOverview({
     (r) => r.kind === 'document' && !r.cancelled && active.some((v) => v.id === r.vehicleId),
   );
   const attention = docs.filter((r) => r.status.days !== null && r.status.days <= 30).length;
-  const cost = new Intl.NumberFormat(language === 'en' ? 'en-IE' : 'ro-RO', {
-    style: 'currency',
-    currency,
-  }).format(data.summary.monthBani / (currency === 'EUR' ? 500 : 100));
+  const cost = money(data.summary.monthBani);
   const stats = [
     {
       tab: 'Garaj',
@@ -365,14 +362,7 @@ export function WorkspaceOverview({
       ro: 'Costuri luna aceasta',
       en: 'Costs this month',
       value: cost,
-      info:
-        currency === 'EUR'
-          ? language === 'en'
-            ? 'Indicative conversion · 1 EUR = 5 RON'
-            : 'Conversie orientativă · 1 EUR = 5 RON'
-          : language === 'en'
-            ? 'Recorded in your account'
-            : 'Înregistrate în contul tău',
+      info: language === 'en' ? 'Recorded in your account' : 'Înregistrate în contul tău',
       Icon: Wallet,
     },
   ];
@@ -429,8 +419,8 @@ export function WorkspacePreferences({
       </label>
       <p>
         {language === 'en'
-          ? 'EUR is an indicative display conversion at 1 EUR = 5 RON. Saved values and subscription billing remain in RON.'
-          : 'EUR este o conversie orientativă la 1 EUR = 5 RON. Valorile salvate și facturarea abonamentelor rămân în RON.'}
+          ? 'EUR is displayed using the latest available ECB rate. Recorded expenses remain in their original RON amounts.'
+          : 'Valorile în EUR folosesc ultimul curs BCE disponibil. Cheltuielile rămân înregistrate cu sumele originale în RON.'}
       </p>
     </div>
   );

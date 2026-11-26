@@ -52,6 +52,11 @@ import {currencyPreference,currencyPreferenceKey} from '@/lib/exchange-rate';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
+async function readCurrencyPreference(uid: string) {
+  const [saved] = await db().select({value:s.settings.value}).from(s.settings).where(eq(s.settings.key,currencyPreferenceKey(uid)));
+  return currencyPreference(saved?.value);
+}
+
 const json = (value: unknown, status = 200) =>
   Response.json(value, {
     status,
@@ -195,10 +200,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     }
     if (route === 'preferences/currency' && (method === 'GET' || method === 'PUT')) {
       const key = currencyPreferenceKey(uid);
-      if (method === 'GET') {
-        const [saved] = await db().select({value:s.settings.value}).from(s.settings).where(eq(s.settings.key,key));
-        return json({currency:currencyPreference(saved?.value)});
-      }
+      if (method === 'GET') return json({currency:await readCurrencyPreference(uid)});
       const {currency} = z.object({currency:z.enum(['RON','EUR','auto'])}).strict().parse(await body(req));
       await db().insert(s.settings).values({key,value:currency}).onConflictDoUpdate({target:s.settings.key,set:{value:currency}});
       return json({currency});
@@ -985,9 +987,9 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (format === 'pdf') {
         const vehicleIds = new Set(selected.map(row => row.vehicleId));
         if (filters.vehicleId && (!filters.vehicleScope || activeVehicleIds.has(filters.vehicleId))) vehicleIds.add(filters.vehicleId);
-        const language = filters.language ?? (languageCookie(req.headers.get('cookie')) === 'en' ? 'en' : 'ro');
+        const language = filters.language ?? languageCookie(req.headers.get('cookie')) ?? await userLanguage(uid);
         const en = language === 'en';
-        const currency = accountDisplayCurrency(language, filters.currency);
+        const currency = accountDisplayCurrency(language, filters.currency ?? await readCurrencyPreference(uid));
         const finance = !!filters.finance || filters.kind === 'expense';
         const title = filters.kind === 'service' ? (en ? 'Service sheet' : 'Fișă de service')
           : filters.kind === 'document' ? (en ? 'Vehicle documents' : 'Situația documentelor')

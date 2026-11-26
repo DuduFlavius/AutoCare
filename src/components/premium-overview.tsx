@@ -10,11 +10,13 @@ type Data = Awaited<ReturnType<typeof dashboard>>;
 export default function PremiumOverview({
   data,
   language,
+  money,
   preview,
   navigate,
 }: {
   data: Data;
   language: 'ro' | 'en';
+  money: (bani: number) => string;
   preview: boolean;
   navigate: (tab: string) => void;
 }) {
@@ -26,10 +28,6 @@ export default function PremiumOverview({
   const rows = data.records
     .filter((r) => !r.cancelled && r.kind === 'service' && r.vehicleId === car?.id)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  const money = (bani: number) =>
-    new Intl.NumberFormat(locale, { style: 'currency', currency: en ? 'EUR' : 'RON' }).format(
-      bani / (en ? 500 : 100),
-    );
   return (
     <section className="ac-premium-overview-dashboard" data-workspace-ui>
       <header>
@@ -69,11 +67,6 @@ export default function PremiumOverview({
           </strong>
         </article>
       </div>
-      {en && (
-        <p className="micro">
-          EUR amounts are indicative at EUR 1 ≈ RON 5. Saved costs remain in RON.
-        </p>
-      )}
       {car && (
         <>
           <label>

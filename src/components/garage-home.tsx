@@ -41,8 +41,6 @@ import {
 import type { dashboard } from '@/lib/service';
 type Data = Awaited<ReturnType<typeof dashboard>>;
 type Entry = Data['records'][number];
-const formatMoney = (value: number,locale:string) =>
-  new Intl.NumberFormat(locale, { style: 'currency', currency: 'RON' }).format(value / 100);
 const formatDate = (value: string | null,locale:string) =>
   value
     ? new Date(value + 'T12:00:00').toLocaleDateString(locale, {
@@ -58,7 +56,7 @@ const kindNames: Record<string, string> = {
 };
 export function GarageHome({
   language = 'ro',
-  currency = 'RON',
+  moneyDisplay,
   preview=false,
   data,
   navigate,
@@ -67,7 +65,7 @@ export function GarageHome({
   onMileageSaved,
 }: {
   language?: 'ro' | 'en';
-  currency?: 'RON' | 'EUR';
+  moneyDisplay: (bani: number) => string;
   preview?:boolean;
   onMileageSaved: () => Promise<void>;
   data: Data;
@@ -80,9 +78,6 @@ export function GarageHome({
   const locale=useApplicationLocale();
   const date=(value:string|null)=>formatDate(value,locale);
 const home = dashboardHome(data);
-  const moneyDisplay = (bani: number): string => currency === 'EUR'
-    ? new Intl.NumberFormat('en-IE', {style:'currency',currency:'EUR',maximumFractionDigits:2}).format(bani / 500)
-    : new Intl.NumberFormat(locale, {style:'currency',currency:'RON'}).format(bani / 100);
   const { cars, records, attention: due } = home;
   const [selectedCar, setSelectedCar] = useState('');
   const car = cars.find((v) => v.id === selectedCar) || cars[0];
@@ -124,7 +119,6 @@ const home = dashboardHome(data);
   // The existing detailed overview remains below for compatibility.
   return (
     <div className="ac-premium-dashboard">
-      {currency === 'EUR' && <p className="micro" style={{margin:"0 0 12px",color:"#0B1C16"}}>{language==='en'?'EUR amounts are estimates (EUR 1 ≈ RON 5). Saved amounts and payments remain in RON.':'Sumele în EUR sunt orientative (1 EUR ≈ 5 RON). Valorile salvate și plățile rămân în RON.'}</p>}
       {cars.length > 1 && (
         <label className="ac-premium-car-selector">Mașina afișată
           <FilterSelect value={car?.id || ''} onChange={(e) => setSelectedCar(e.target.value)}>
@@ -646,11 +640,10 @@ const home = dashboardHome(data);
     </div>
   );
 }
-export function VehicleJournal({ data, open }: { data: Data; open: (record: Entry) => void }) {
+export function VehicleJournal({ data, open, money }: { data: Data; money: (bani: number) => string; open: (record: Entry) => void }) {
 
   const locale=useApplicationLocale();
   const date=(value:string|null)=>formatDate(value,locale);
-  const money=(value:number)=>formatMoney(value,locale);
 const [car, setCar] = useState(''),
     [kind, setKind] = useState(''),
     [from, setFrom] = useState(''),
@@ -744,6 +737,7 @@ const [car, setCar] = useState(''),
 
 export function VehicleSheet({
   data,
+  money,
   id,
   open,
   edit,
@@ -754,6 +748,7 @@ export function VehicleSheet({
   onAi,
 }: {
   data: Data;
+  money: (bani: number) => string;
   id: string;
   open: (record: Entry) => void;
   edit: () => void;
@@ -771,7 +766,6 @@ export function VehicleSheet({
   const [section, setSection] = useState<'overview' | 'document' | 'service' | 'expense' | 'mileage'>('overview');
   const en = locale.startsWith('en');
   const date=(value:string|null)=>formatDate(value,locale);
-  const money=(value:number)=>formatMoney(value,locale);
   const v = data.vehicles.find((vehicle) => vehicle.id === id);
   const usage = useMileageUsage(id, v?.odometer ?? 0, preview);
   if (!v) return null;

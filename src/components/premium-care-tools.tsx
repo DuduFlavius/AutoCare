@@ -15,11 +15,13 @@ type LinkRow = {
 export default function PremiumCareTools({
   data,
   language,
+  money,
   preview,
   onRecord,
 }: {
   data: Data;
   language: 'ro' | 'en';
+  money: (bani: number) => string;
   preview: boolean;
   onRecord?: (record: Data['records'][number]) => void;
 }) {
@@ -42,11 +44,6 @@ export default function PremiumCareTools({
         cars.some((v) => v.id === r.vehicleId) &&
         parseServiceDetails(r.parts || '').budgetEstimat !== undefined,
     );
-  const money = (b: number) =>
-    new Intl.NumberFormat(en ? 'en-GB' : 'ro-RO', {
-      style: 'currency',
-      currency: en ? 'EUR' : 'RON',
-    }).format(b / (en ? 500 : 100));
   useEffect(() => {
     if (preview) return;
     let cancelled = false;
@@ -83,7 +80,6 @@ export default function PremiumCareTools({
     <div className="stack" data-workspace-ui>
       <section className="card" id="premium-budgets" style={{ scrollMarginTop: 90 }}>
         <h3>{en ? 'Maintenance budgets' : 'Bugetele lucrărilor'}</h3>
-        {en && <p>EUR amounts are indicative at EUR 1 ≈ RON 5. Saved costs remain in RON.</p>}
         <p>
           {en
             ? 'Estimates are separate from actual expenses. Add a budget when creating or editing maintenance.'

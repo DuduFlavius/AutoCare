@@ -115,8 +115,6 @@ type Modal = {
   planned?: boolean;
   initialDate?: string;
 } | null;
-const _money = (b: number) =>
-  new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(b / 100);
 async function api(path: string, method = 'GET', data?: unknown) {
   if(method!=='GET' && typeof navigator!=='undefined' && !navigator.onLine) throw new Error('Ești offline. Reconectează-te înainte de a salva.');
   const r = await fetch('/api/v1/' + path, {
@@ -1039,13 +1037,13 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               ) : null}
             </WorkspaceModuleHeader>}
             {!['Feedback','Feedback utilizatori'].includes(tab)&&<div className="rg-feedback-slot"><FeedbackNotice admin={['admin','superadmin','founder'].includes(data.profile.role)} preview={!!previewData} onOpen={()=>navigate(['admin','superadmin','founder'].includes(data.profile.role)?'Feedback utilizatori':'Feedback')}/></div>}
-            {exchangeNote && ['Cheltuieli','Întreținere','Rapoarte','Documente','Garaj','Premium'].includes(tab) && <p className="small muted">{exchangeNote}</p>}
+            {exchangeNote && ['Cheltuieli','Întreținere','Rapoarte','Documente','Garaj','Premium','Istoric auto','Setări'].includes(tab) && <p className="small muted">{exchangeNote}</p>}
             {tab==='Feedback'&&<FeedbackWorkspace onExit={()=>navigate('Cont','push',null,true)} onSupport={()=>navigate('Centru de suport','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>}
             {tab==='Feedback utilizatori'&&(['admin','superadmin','founder'].includes(data.profile.role)?<FeedbackWorkspace admin onExit={()=>navigate('Cont','push',null,true)} preview={!!previewData} onDirty={setRecordDirty} onSaving={setRecordSaving}/>:<p role="alert">{language==='en'?'Administrator access required.':'Acces rezervat administratorilor.'}</p>)}
             <FeedbackInvitation enabled={tab==='Dashboard'&&!busy&&!modal&&!recordDirty&&!recordSaving} userId={data.profile.userId} preview={!!previewData} onOpen={()=>navigate('Feedback')}/>
             {!['Dashboard','Garaj','Documente','Întreținere','Rapoarte','Calendar','RCA & Rovinietă','Cont','Centru de suport','AutoCare AI'].includes(tab)&&<WorkspaceContext tab={tab} language={language} navigate={navigate}/>}
             {drill && !emptyModule && <div className="card between"><strong>{drill.label}</strong><button type="button" onClick={()=>setDrill(null)}>{language==='en'?'Show all':'Vezi toate'}</button></div>}
-            {tab==='Întreținere'&&(emptyModule?<EmptyState module="maintenance" needsVehicle={needsVehicle} onAction={()=>needsVehicle?openVehicleForm():setModal({kind:'service'})}/>:<RacingMaintenance data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} today={nowDate} onOpen={record=>setModal({kind:'service',record})} onCreate={()=>setModal({kind:'service'})}/>)}
+            {tab==='Întreținere'&&(emptyModule?<EmptyState module="maintenance" needsVehicle={needsVehicle} onAction={()=>needsVehicle?openVehicleForm():setModal({kind:'service'})}/>:<RacingMaintenance money={moneyDisplay} data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} today={nowDate} onOpen={record=>setModal({kind:'service',record})} onCreate={()=>setModal({kind:'service'})}/>)}
             {tab === 'Dashboard' && <ApplicationHome androidSmartDrive={androidApk&&smartDriveEnabled} onDrill={async (next,vehicleId,ids,label)=>{if(!await navigate(next))return;setFilter(vehicleId);setQuery('');setRecordState('');setCategoryFilter('');setPeriod('all');setShowArchived(false);setDrill({ids,label});setCalendarView('list');}} data={data} name={name} selectedVehicle={primaryVehicleId} onSelectVehicle={selectVehicle} navigate={navigate} onVehicle={id=>navigate('Garaj', 'push', id)} onCreate={(kind,vehicleId)=>{if(vehicleId)setFilter(vehicleId);setModal({kind});}} onRecord={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})} onRefresh={refresh} money={moneyDisplay} exchangeNote={exchangeNote} preview={!!previewData}/>}
             {tab === 'RCA & Rovinietă' && <RenewalCenter key={data.profile.offsets.join(',')+String(data.profile.emailEnabled)+String(data.profile.pushEnabled)} data={data} vehicleId={filter||primaryVehicleId||''} onVehicle={setFilter} onDocument={(category,record)=>{setRenewalCategory(category);setModal({kind:'document',record});}} onNavigate={async next=>{if(await navigate(next)&&next==='Setări')setSettingsPanel('alerts');}} onPreferences={async profile=>{await act(()=>api('profile','PUT',{timezone:profile.timezone,emailEnabled:profile.emailEnabled,pushEnabled:profile.pushEnabled,afterExpiry:profile.afterExpiry,offsets:profile.offsets,hour:profile.hour}));}} busy={busy} preview={!!previewData}/>}
             {tab === 'AutoCare AI' && <AutoAiWorkspace onAddVehicle={openVehicleForm} records={data.records} timezone={data.profile.timezone} onNavigate={tab=>void navigate(tab)} displayName={name} onExit={()=>navigate('Dashboard')}
@@ -1055,12 +1053,13 @@ export default function Dashboard({ name: initialName, previewData, initialTab='
               pricing={data.pricing} premium={data.premium} available={data.autoAssistantAvailable} preview={!!previewData} onSaved={refresh}
             />}
             {tab === 'Cont' && <AccountHub data={data} name={name} navigate={navigate} onLanguage={changeLanguage} onSettings={async panel=>{if(await navigate('Setări'))setSettingsPanel(panel);}} onSignOut={()=>void signOut()} signingOut={signingOut} preview={!!previewData}/>}
-            {tab === 'Istoric auto' && <VehicleJournal data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
+            {tab === 'Istoric auto' && <VehicleJournal money={moneyDisplay} data={data} open={record=>setModal({kind:record.kind as 'document'|'service'|'expense',record})}/>}
         {tab === 'Garaj' && vehicleDetail && (
           <section className="ac-vehicle-profile" aria-label={language === 'en' ? 'Vehicle profile' : 'Profilul vehiculului'}>
             <button className="studio-text-button" type="button" onClick={() => navigate('Garaj')}>{language === 'en' ? '← Back to garage' : '← Înapoi în garaj'}</button>
             {data.vehicles.some(car => car.id === vehicleDetail) ? (
             <VehicleSheet
+              money={moneyDisplay}
               key={vehicleDetail}
               onAi={() => navigate('AutoCare AI', 'push', vehicleDetail)}
               preview={!!previewData}

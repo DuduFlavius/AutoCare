@@ -14,6 +14,6 @@ test('Racing calendar renders actual leap-year days and only owned active-vehicl
 test('mobile maintenance preserves a known zero cost and does not count future work as completed',()=>{
  const row={id:'completed',vehicleId:'active',kind:'service',date:'2026-11-01',title:'Completed',category:'Reparație',amountBani:0,amountKnown:true,cancelled:false,parts:null,expiresAt:null,nextKm:null,odometer:1000};
  const data={profile:{timezone:'Europe/Bucharest'},vehicles:[{id:'active',archived:false,brand:'Vehicle',model:'One',plate:'PRIVATE',odometer:1000}],records:[row,{...row,id:'future',date:'2027-01-01',amountBani:90000}]} as unknown as Data;
- const html=renderToStaticMarkup(createElement(RacingMaintenance,{data,vehicleId:'active',today:'2026-11-19',onVehicle:noop,onOpen:noop,onCreate:noop}));
- assert.match(html,/0\s*RON/);assert.match(html,/<strong>1<\/strong><small>Intervenții/);
+ const html=renderToStaticMarkup(createElement(RacingMaintenance,{data,vehicleId:'active',today:'2026-11-19',money:bani=>new Intl.NumberFormat('ro-RO',{style:'currency',currency:'RON'}).format(bani/100),onVehicle:noop,onOpen:noop,onCreate:noop}));
+ assert.match(html,/0,00\s*RON/);assert.match(html,/<strong>1<\/strong><small>Intervenții/);
 });

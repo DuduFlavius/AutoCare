@@ -329,12 +329,12 @@ export default function Membership({
       </section>
       {data.premium && <nav aria-label={language==='en'?'Premium shortcuts':'Acces rapid Premium'} data-workspace-ui className="card" style={{display:'flex',gap:12,flexWrap:'wrap',padding:16}}><a className="button" href="#premium-budgets">{language==='en'?'Maintenance budgets':'Bugetele lucrărilor'}</a><a className="button" href="#premium-mechanic-folder">{language==='en'?'Mechanic folder':'Dosar pentru mecanic'}</a><a className="button" href="#premium-reports">{language==='en'?'PDF and CSV reports':'Rapoarte PDF și CSV'}</a></nav>}
       {data.premium ? (
-        <PremiumOverview data={data} language={language} preview={preview} navigate={navigate} />
+        <PremiumOverview money={money} data={data} language={language} preview={preview} navigate={navigate} />
       ) : (
         <PremiumSales language={language} attachmentLimit={data.planLimits.attachments} onChoosePlan={() => navigate('Abonament')} />
       )}
       <PremiumWorkspace data={data} language={language} navigate={navigate} onRecord={onRecord} />
-      {data.premium && <PremiumCareTools data={data} language={language} preview={preview} onRecord={onRecord}/> }
+      {data.premium && <PremiumCareTools money={money} data={data} language={language} preview={preview} onRecord={onRecord}/> }
       {data.premium && <div id="premium-reports" style={{scrollMarginTop:90}}><PremiumDownloads data={data} language={language} currency={currency} money={money} preview={preview} /></div>}
       <section className="card" id="premium-plans" data-workspace-ui><h3>{language==='en'?'Subscription and renewal':'Abonament și prelungire'}</h3><p>{language==='en'?'Manage your paid period, plans and invoices on the dedicated subscription page.':'Gestionează perioada achitată, planurile și facturile pe pagina separată de abonament.'}</p><button type="button" onClick={()=>navigate('Abonament')}>{language==='en'?'Open subscription':'Deschide abonamentul'}</button></section>
     </div>
