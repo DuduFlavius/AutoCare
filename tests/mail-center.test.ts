@@ -553,7 +553,7 @@ test('saved English custom content follows recipient language and survives campa
   assert.match(message,/English content written by the founder/);
  }finally{if(old)await db().update(s.settings).set({value:old.value}).where(eq(s.settings.key,key));else await db().delete(s.settings).where(eq(s.settings.key,key));}
 });
-test('a recent registration welcome reaches its unverified signup address once, without allowing unrelated automatic mail',async()=>{
+test('a recent registration welcome waits for verification and delivers once',async()=>{
  const uid=crypto.randomUUID();
  await db().insert(s.user).values({id:uid,name:'New signup',email:uid+'@example.invalid',emailVerified:false});
  await db().insert(s.profiles).values({userId:uid,role:'user'});
@@ -568,7 +568,11 @@ test('a recent registration welcome reaches its unverified signup address once, 
   let count=0;
   const transport=async()=>{count++;return 'welcome-provider';};
   await center.deliverCampaign(delivery.campaignId,transport);
-  await center.deliverCampaign(delivery.campaignId,transport);
+  assert.equal(count,0);
+  const [waiting]=await db().select().from(s.mailDeliveries).where(eq(s.mailDeliveries.id,delivery.id));
+  assert.equal(waiting.status,'held');
+  await db().update(s.user).set({emailVerified:true}).where(eq(s.user.id,uid));
+  await Promise.all([center.deliverCampaign(delivery.campaignId,transport),center.deliverCampaign(delivery.campaignId,transport)]);
   assert.equal(count,1);
   await queueAutomatedMail(uid,'welcome','unrelated:'+uid);
   const [unrelated]=await db().select().from(s.mailDeliveries).where(eq(s.mailDeliveries.dedupeKey,'unrelated:'+uid));

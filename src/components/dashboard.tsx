@@ -1752,7 +1752,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
                             name="offset"
                             value={n}
                             defaultChecked={data.profile.offsets.includes(n)}
-                            disabled={!data.premium && ![30, 15, 7, 1, 0].includes(n)}
+                            disabled={!data.premium && ![30, 15, 7, 3, 1, 0].includes(n)}
                           />
                           {n === 0 ? 'În ziua expirării' : n === 1 ? '1 zi' : n + ' zile'}
                         </label>

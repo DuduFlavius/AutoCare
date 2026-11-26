@@ -1,3 +1,5 @@
+import { automationSettings } from './mail-lifecycle';
+import { recordCategory } from './record-categories';
 import {accountPreferences,reminderPreference} from './account-preferences';
 import {sendNativePush} from './native-push';
 import {userLanguage} from './user-language';
@@ -25,6 +27,7 @@ export async function scheduleReminders(now = new Date()) {
     .innerJoin(s.user, eq(s.records.userId, s.user.id))
     .leftJoin(s.subscriptions, eq(s.records.userId, s.subscriptions.userId))
     .where(and(eq(s.records.cancelled, false), eq(s.vehicles.archived, false)));
+  const automation = await automationSettings();
   let queued = 0;
   const preferences = new Map<string,Awaited<ReturnType<typeof accountPreferences>>>();
   const mailPreferences = new Map<string, Awaited<ReturnType<typeof communicationPreference>>>();
@@ -50,24 +53,21 @@ export async function scheduleReminders(now = new Date()) {
     const due = planned ? (days !== null && [7, 3, 1, 0].includes(days) ? ['plan-' + days] : []) : reminderOffsets({parts:r.parts,paid,defaults:p.offsets,days,nextKm:r.kind==='service'?r.nextKm:null,odometer:v.odometer,afterExpiry:p.afterExpiry});
     for (const offset of due)
       for (const channel of ['email', 'push', 'app']) {
+        if (offset === 'overdue') {
+          const previous = await db().select({id:s.notifications.id}).from(s.notifications)
+            .where(and(eq(s.notifications.recordId,r.id),eq(s.notifications.revision,r.revision),
+              eq(s.notifications.channel,channel),eq(s.notifications.offset,offset))).limit(1);
+          if (previous.length) continue;
+        }
         if (channel === 'email') {
-          if (!u.emailVerified) continue;
+          if (!u.emailVerified || (r.kind === 'document' && !automation.documents)) continue;
           const mail = mailPreferences.get(u.id) ?? await communicationPreference(u.id);
           mailPreferences.set(u.id,mail);
           if (!mail.categories[r.kind === 'service' ? 'maintenance' : 'documents']) continue;
         }
         if ((channel === 'email' && !p.emailEnabled) || (channel === 'push' && !p.pushEnabled))
           continue;
-        const subject = `${r.category || r.title}: ${v.brand} ${v.model} (${v.plate})`;
-        const reminder = planned ? (days === 0 ? 'Lucrarea programată este astăzi.' : `Lucrarea programată se apropie. Mai sunt ${days} ${days === 1 ? 'zi' : 'zile'}.`) : offset.startsWith('km-before-') ? `Mai sunt ${Math.max(0,(r.nextKm??v.odometer)-v.odometer)} km până la intervenția programată.` : offset === 'km'
-          ? `Ai atins ${r.nextKm} km. Verifică lucrarea programată.`
-          : days === 0
-            ? `Astăzi expiră ${r.category || r.title}.`
-            : days! < 0
-              ? `${r.category || r.title} a expirat de ${Math.abs(days!)} ${Math.abs(days!) === 1 ? 'zi' : 'zile'}.`
-              : `În ${days} ${days === 1 ? 'zi' : 'zile'} expiră ${r.category || r.title}.`;
-        const englishReminder=planned ? (days===0?'Your scheduled service is today.':`Your scheduled service is in ${days} ${days===1?'day':'days'}.`) : offset.startsWith('km-before-') ? `${Math.max(0,(r.nextKm??v.odometer)-v.odometer)} km until your scheduled service.` : offset==='km' ? `You have reached ${r.nextKm} km. Check your scheduled service.` : days===0 ? 'Expires today.' : days!<0 ? `Expired ${Math.abs(days!)} ${Math.abs(days!)===1?'day':'days'} ago.` : `Expires in ${days} ${days===1?'day':'days'}.`;
-        const message = `${subject} — ${en?englishReminder:reminder}`;
+        const message = reminderMessage(r,v,offset,days,en);
         const out = await db()
           .insert(s.notifications)
           .values({
@@ -90,6 +90,30 @@ export async function scheduleReminders(now = new Date()) {
   }
   return queued;
 }
+function reminderMessage(
+  record: typeof s.records.$inferSelect,
+  vehicle: Pick<typeof s.vehicles.$inferSelect, 'odometer'|'brand'|'model'|'plate'>,
+  offset: string,
+  days: number | null,
+  en: boolean,
+) {
+  const category = recordCategory(record.kind === 'service' ? 'service' : 'document', record.category)?.[en?'en':'ro']
+    ?? (record.category || record.title);
+  const distance = Math.max(0, (record.nextKm??vehicle.odometer)-vehicle.odometer);
+  const remaining = Math.abs(days ?? 0);
+  const units = en ? remaining===1?'day':'days' : remaining===1?'zi':'zile';
+  const length = `${remaining} ${units}`;
+  const text = offset.startsWith('plan-')
+    ? days===0 ? (en?'Your scheduled service is today.':'Lucrarea programată este astăzi.') : (en?`Your scheduled service is in ${length}.`:`Mai sunt ${length} până la lucrarea programată.`)
+    : offset.startsWith('km-before-')
+      ? (en?`${distance} km until your scheduled service.`:`Mai sunt ${distance} km până la intervenția programată.`)
+      : offset==='km'
+        ? (en?`You have reached ${record.nextKm} km. Check your scheduled service.`:`Ai atins ${record.nextKm} km. Verifică lucrarea programată.`)
+        : days===0 ? (en?'Expires today.':'Expiră astăzi.')
+          : (days ?? 0)<0 ? (en?`Expired ${length} ago.`:`A expirat de ${length}.`)
+            : (en?`Expires in ${length}.`:`Expiră în ${length}.`);
+  return `${category}: ${vehicle.brand} ${vehicle.model} (${vehicle.plate}) — ${text}`;
+}
 export type Transport = (
   item: typeof s.notifications.$inferSelect,
   email: string,
@@ -104,7 +128,11 @@ export const realTransport: Transport = async (n, email) => {
     if (deadline) facts.push({label:en?'Due date':'Termen',value:new Intl.DateTimeFormat(en?'en-GB':'ro-RO',{dateStyle:'long',timeZone:'UTC'}).format(new Date(deadline+'T12:00:00Z'))});
     if (record?.nextKm != null && record.kind==='service') facts.push({label:en?'Service mileage':'Kilometraj revizie',value:record.nextKm.toLocaleString(en?'en-GB':'ro-RO')+' km'});
     const service = record?.kind==='service';
-    const content = renderEmail('reminder', {language, message:n.message, name:await userEmailName(n.userId), facts,
+    const [vehicle] = record ? await db().select().from(s.vehicles)
+      .where(and(eq(s.vehicles.id,record.vehicleId),eq(s.vehicles.userId,n.userId))) : [];
+    if (!record || !vehicle || vehicle.archived || record.cancelled || record.revision !== n.revision) throw new Error('EMAIL_EVENT_CHANGED');
+    const days = deadline ? Math.round((Date.parse(deadline) - Date.parse(n.localDate)) / 86400000) : null;
+    const content = renderEmail('reminder', {language, message:reminderMessage(record,vehicle,n.offset,days,en), name:await userEmailName(n.userId), facts,
       ctaLabel:en ? (service?'Open maintenance':'Open documents') : (service?'Vezi întreținerea':'Vezi documentele'),
       ctaPath:'/cont?tab='+encodeURIComponent(service?'Întreținere':'Documente'),
       preheader:en?'Review the deadline in your AutoCare garage.':'Verifică termenul în garajul tău AutoCare.'});
@@ -169,6 +197,7 @@ export async function deliverReminders(now = new Date(), transport: Transport = 
         sql`${s.notifications.createdAt} < ${new Date(now.getTime() - 23 * 3600000)}`,
       ),
     );
+  const automation = await automationSettings();
   const candidates = await db()
     .select()
     .from(s.notifications)
@@ -226,6 +255,7 @@ export async function deliverReminders(now = new Date(), transport: Transport = 
       !context.v.archived &&
       context.r.revision === n.revision &&
       (n.channel !== 'email' || (context.u.emailVerified &&
+        (context.r.kind !== 'document' || automation.documents) &&
         (await communicationPreference(context.u.id)).categories[context.r.kind==='service'?'maintenance':'documents'] &&
         !(await emailSuppressed(context.u.email)))) &&
       (n.channel === 'email' ? context.p.emailEnabled : context.p.pushEnabled) &&
@@ -266,7 +296,7 @@ export async function deliverReminders(now = new Date(), transport: Transport = 
     } catch (e) {
       const raw = e instanceof Error ? e.message : 'PROVIDER_ERROR';
       const code = /^(EMAIL_|PUSH_)[A-Z0-9_]+$/.test(raw) ? raw : 'PROVIDER_ERROR';
-      const permanent = /CONFIGURED|NO_SUBSCRIPTION|EMAIL_PROVIDER_4(?!29)|EMAIL_GMAIL_UNCONFIRMED|EMAIL_ADDRESS_SUPPRESSED|INVALID_EMAIL_HEADERS/.test(code);
+      const permanent = /CONFIGURED|NO_SUBSCRIPTION|EMAIL_PROVIDER_4(?!29)|EMAIL_GMAIL_UNCONFIRMED|EMAIL_ADDRESS_SUPPRESSED|EMAIL_EVENT_CHANGED|INVALID_EMAIL_HEADERS/.test(code);
       const status = n.attempts >= 4 || permanent ? 'failed' : 'retry';
       await db().transaction(async (tx) => {
         await tx
@@ -286,6 +316,7 @@ export async function deliverReminders(now = new Date(), transport: Transport = 
   return accepted;
 }
 export async function runJob(now = new Date()) {
+  if (process.env.VERCEL_ENV === 'preview') return {queued:0,accepted:0,blocked:'PREVIEW_DELIVERY_DISABLED'};
   const id = crypto.randomUUID();
   await db().insert(s.jobRuns).values({ id, status: 'running' });
   try {

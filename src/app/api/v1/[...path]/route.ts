@@ -1,3 +1,4 @@
+import {automationSettings,saveAutomationSettings} from '@/lib/mail-lifecycle';
 import { recipientAllowed } from '@/lib/mail-policy';
 import { effectiveRole } from '@/lib/permissions';
 import { vehicleCatalog } from '@/lib/vehicle-catalog';
@@ -391,6 +392,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
       if (path.length === 5 && path[1] === 'mail' && path[2] === 'campaigns' && path[4] === 'review' && method === 'POST') return json(await mailCenter.reviewCampaign(uid, path[3], await body(req)));
       if (route === 'founder/mail/library' && method === 'POST') return json(await mailCenter.saveMailLibraryEntry(uid, await body(req)));
       if (path.length === 4 && path[1] === 'mail' && path[2] === 'library' && method === 'DELETE') return json(await mailCenter.deleteMailLibraryEntry(uid, path[3]));
+      if (route === 'founder/mail/lifecycle' && method === 'PUT') return json(await saveAutomationSettings(uid, await body(req)));
       if (route === 'founder/mail/approve' && method === 'POST') return json(await mailCenter.approveMailAutomation(uid, await body(req)));
       if (route === 'founder/mail/audience' && method === 'POST') return json(await mailCenter.countSegment(uid,await body(req)));
       if (route === 'founder/mail/preview' && method === 'POST') return json(await mailCenter.previewMail(uid, await body(req)));
@@ -1225,7 +1227,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
               if (user.pushEnabled) tasks.push(sendPushNotification(user.id, {
                 id: 'support-' + messageResult.message.id, title, body: bodyText,
               }));
-              if (user.emailEnabled && user.verified && !('routesThroughMailStudio' in result && result.routesThroughMailStudio) &&
+              if ((incoming || (await automationSettings()).support) && user.emailEnabled && user.verified && !('routesThroughMailStudio' in result && result.routesThroughMailStudio) &&
                 await recipientAllowed(user.id, 'transactional', false, 'support_reply')) {
                 const content = renderEmail('support_reply', {
                   name:user.name, language, subject:title, message:bodyText,

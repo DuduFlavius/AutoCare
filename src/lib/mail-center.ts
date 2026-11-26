@@ -5,7 +5,7 @@ import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { emailCategorySchema, emailCategories, emailCategory } from './mail-preference-categories';
 import { emailAddressHash, unsubscribeLink } from './mail-consent';
 import { monthlyVehicleReport } from './mail-monthly-report';
-import { releaseProofSchema, verifyPublishedRelease, type ReleaseProof } from './mail-release-proof';
+import { releaseProofSchema, verifyPublishedRelease } from './mail-release-proof';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { db } from './db';
@@ -24,6 +24,7 @@ import {
 import { gmailReady, GoogleDeliveryError, sendGoogleMail, verifyGoogleMailAuthorization } from './google-mail';
 import { billingMailValid, communicationPreference, recipientAllowed } from './mail-policy';
 import { automationState, queueAutomatedMail } from './mail-automation';
+import { automationGroup, automationSettings, automationOverview, eligibleAutomationDelivery, releaseChannel, readReleaseSettings } from './mail-lifecycle';
 export async function requireMailStaff(uid: string) {
   await assertActiveAccount(uid);
   const actor = await profile(uid);
@@ -228,6 +229,7 @@ export async function mailCenterOverview(uid: string) {
     })),
     users,
     automation,
+    lifecycle: await automationOverview(),
   };
 }
 export async function previewMail(uid: string, input: unknown) {
@@ -367,6 +369,20 @@ export async function campaignDetail(uid: string, id: string) {
   return { campaign, deliveries, communicationType: kind?.label || 'Informare cont',templateLabel:kind?.templateLabel||'',categoryLabel:kind?.categoryLabel||'' };
 }
 export type MailTransport = (to: string, content: EmailContent, id: string) => Promise<string>;
+async function lifecycleEventStillValid(userId: string, template: string, context: typeof s.mailDeliveries.$inferSelect.context) {
+  if (context.threadId) {
+    const [thread] = await db().select({status:s.supportThreads.status}).from(s.supportThreads)
+      .where(and(eq(s.supportThreads.id,context.threadId),eq(s.supportThreads.userId,userId)));
+    return !!thread && (template === 'support_resolved' ? thread.status === 'completed' : thread.status !== 'trashed');
+  }
+  if (context.vehicleId) {
+    const [vehicle] = await db().select({archived:s.vehicles.archived}).from(s.vehicles)
+      .where(and(eq(s.vehicles.id,context.vehicleId),eq(s.vehicles.userId,userId)));
+    return !!vehicle && !vehicle.archived;
+  }
+  return true;
+}
+
 export async function deliverCampaign(
   id: string,
   transport: MailTransport = sendGoogleMail,
@@ -381,6 +397,23 @@ export async function deliverCampaign(
   }
   if (campaign.source === 'automation' && !(await automationState()).enabled)
     return { accepted: 0, held: true };
+  const operatorSettings = campaign.source === 'automation' ? await automationSettings() : null;
+  const release = campaign.source === 'automation' && campaign.template === 'release_news'
+    ? await readReleaseSettings(id) : undefined;
+  const group = automationGroup(campaign.template, release?.proof ? releaseChannel(release.proof) : undefined);
+  if (operatorSettings && group && !operatorSettings[group]) return { accepted: 0, held: true };
+  if (campaign.source === 'automation' && campaign.template === 'release_news') {
+    if (!release?.proof || release.releaseDate > new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Bucharest' }).format(now))
+      return { accepted: 0, held: true };
+    if (release.mode === 'auto' && !(group === 'releaseAndroid' ? operatorSettings?.autoAndroid : operatorSettings?.autoWeb))
+      return { accepted:0,held:true };
+    try { await verifyPublishedRelease(release.proof); }
+    catch {
+      await db().update(s.mailCampaigns).set({scheduledAt:new Date(now.getTime()+60*60000)})
+        .where(and(eq(s.mailCampaigns.id,id),inArray(s.mailCampaigns.status,['held','sending'])));
+      return { accepted: 0, held: true, blocked:'RELEASE_NOT_LIVE' };
+    }
+  }
   await db()
     .update(s.mailDeliveries)
     .set({ status: 'unknown', error: 'DELIVERY_INTERRUPTED_CHECK_MAILBOX' })
@@ -401,7 +434,7 @@ export async function deliverCampaign(
           s.mailDeliveries.status,
           campaign.source === 'automation' ? ['held', 'pending'] : ['pending'],
         ),
-        sql`(${s.mailDeliveries.error} is distinct from 'GMAIL_HTTP_429' or ${s.mailDeliveries.attemptedAt} + (interval '15 minutes' * power(2, greatest(0, coalesce((${s.mailDeliveries.context}->>'retryCount')::int,1)-1))) <= ${now.toISOString()}::timestamptz)`,
+        eligibleAutomationDelivery(campaign.template, now),
       ),
     )
     .limit(2);
@@ -423,9 +456,10 @@ export async function deliverCampaign(
       if (
         !categoryEnabled ||
         (campaign.source === 'automation' &&
-          ((campaign.template === 'welcome' && now.getTime() - campaign.createdAt.getTime() > 86400000) ||
+          ((campaign.template === 'welcome' && (candidate.dedupeKey !== 'welcome:' + candidate.userId || now.getTime() - campaign.createdAt.getTime() > 14*86400000)) ||
            (campaign.template === 'onboarding_guide' && now.getTime() - campaign.createdAt.getTime() > 14*86400000))) ||
-        !(await recipientAllowed(candidate.userId, campaign.category, campaign.source === 'manual'||(campaign.source==='automation'&&campaign.template==='welcome'&&candidate.dedupeKey==='welcome:'+candidate.userId), campaign.template)) ||
+        !(await recipientAllowed(candidate.userId, campaign.category, campaign.source === 'manual', campaign.template)) ||
+        !(await lifecycleEventStillValid(candidate.userId,campaign.template,candidate.context)) ||
         !(await billingMailValid(candidate.userId, campaign.template, candidate.context, now))
       ) {
         await db()
@@ -449,8 +483,6 @@ export async function deliverCampaign(
             .where(eq(s.mailDeliveries.id,candidate.id));
           return;
         }
-        const release = campaign.template === 'release_news' ? (await db().select({value:s.settings.value}).from(s.settings)
-          .where(sql`${s.settings.key} like 'mail-release:%' AND ${s.settings.value}->>'campaignId' = ${id}`).limit(1))[0]?.value as {proof?:ReleaseProof} | undefined : undefined;
         const content = renderEmail(campaign.template as EmailTemplate, {
           name: user.name,
           language,
@@ -461,6 +493,11 @@ export async function deliverCampaign(
           promotional: campaign.category === 'promotional',
           ...(english??{}),
           ...(report ?? {}),
+          ...(campaign.template==='welcome' ? {links:[
+            {label:language==='en'?'Get started with AutoCare':'Descoperă AutoCare',path:language==='en'?'/en/how-it-works':'/cum-functioneaza'},
+            {label:language==='en'?'Contact support':'Contactează echipa de suport',path:'/cont?tab=Centru+de+suport'},
+          ]} : {}),
+          ...(candidate.context.threadId ? {ctaPath:'/cont?tab=Centru+de+suport'+(language==='en'?'&lang=en':'')} : {}),
           ...(campaign.template==='onboarding_guide' ? {links:[
             {label:language==='en'?'Explore SmartDrive GPS':'Descoperă SmartDrive GPS',path:language==='en'?'/en/smartdrive-gps':'/smartdrive-gps'},
             {label:'AutoCare AI',path:language==='en'?'/en/automotive-ai':'/autocare-ai'},
@@ -591,45 +628,59 @@ export async function retryFailedCampaign(uid: string, id: string) {
 }
 export async function publishReleaseNews(uid: string, id: string, input: unknown) {
   await requireFounder(uid);
-  const { version, releaseDate, proof } = z.object({
+  const { version, releaseDate, proof, mode } = z.object({
     version: z.string().trim().regex(/^[0-9][A-Za-z0-9.+-]{0,39}$/),
     releaseDate: z.iso.date(),
     proof: releaseProofSchema.optional(),
+    mode: z.enum(['approval','auto']).default('approval'),
   }).strict().parse(input);
   if (!(await automationState()).enabled || !(await gmailReady()))
     throw new AppError(409, 'Activează automatizările și verifică expeditorul înainte de publicare.');
   if (!proof) throw new AppError(400,'Confirmă testele și introduce commitul publicat. Pentru Android este necesară verificarea APK-ului semnat.');
-  await verifyPublishedRelease(proof);
-  const key = 'mail-release:' + version.toLowerCase();
+  const platform = releaseChannel(proof);
+  if (proof.android && version !== proof.android.version) throw new AppError(400,'Versiunea anunțului trebuie să coincidă cu versiunea Android.');
+  if (mode === 'auto') {
+    const config = await automationSettings();
+    if (!(platform === 'android' ? config.autoAndroid : config.autoWeb))
+      throw new AppError(409,'Activează modul automat pentru această platformă.');
+  } else {
+    await verifyPublishedRelease(proof);
+  }
+  const key = 'mail-release:' + platform + ':' + version.toLowerCase();
   return db().transaction(async tx => {
     const [campaign] = await tx.select().from(s.mailCampaigns).where(eq(s.mailCampaigns.id, id)).for('update');
-    if (!campaign || campaign.template !== 'release_news' || campaign.category !== 'promotional' || campaign.source !== 'manual')
+    if (!campaign || campaign.template !== 'release_news' || campaign.category !== 'promotional')
       throw new AppError(404, 'Alege o ciornă AutoCare News.');
-    const [existing] = await tx.select().from(s.settings).where(eq(s.settings.key, key));
+    const [existing] = await tx.select().from(s.settings).where(sql`${s.settings.key} = ${key} or
+      (${s.settings.key} = ${'mail-release:' + version.toLowerCase()} and
+       ((${s.settings.value}->'proof' ? 'android') = ${platform === 'android'}))`);
     if (existing) {
       if ((existing.value as { campaignId?: string }).campaignId === id) return { scheduled: true };
       throw new AppError(409, 'Versiunea are deja un anunț publicat.');
     }
-    if (campaign.status !== 'draft') throw new AppError(409, 'Anunțul nu mai este o ciornă.');
+    if (campaign.source !== 'manual' || campaign.status !== 'draft') throw new AppError(409, 'Anunțul nu mai este o ciornă.');
     if (campaign.message === emailTemplates.release_news.body)
       throw new AppError(400, 'Completează funcțiile și schimbările reale ale versiunii.');
-    const reserved = await tx.insert(s.settings).values({ key, value: { version, releaseDate, campaignId: id, proof } })
+    const englishRow=(await tx.select().from(s.settings).where(eq(s.settings.key,'mail-english:'+id)))[0];
+    const english=englishMailSchema.safeParse(englishRow?.value);
+    if (!english.success) throw new AppError(400, 'Completează și notele aprobate în limba engleză.');
+    const reserved = await tx.insert(s.settings).values({ key, value: { version, releaseDate, campaignId: id, proof, mode } })
       .onConflictDoNothing().returning({ key: s.settings.key });
     if (!reserved.length) throw new AppError(409, 'Versiunea are deja un anunț publicat.');
     await tx.update(s.mailCampaigns).set({
       source: 'automation', actorId: uid, status: 'held', ctaPath:'/cont', ctaLabel:'Deschide AutoCare',
+      scheduledAt: null,
       message: `Versiunea ${version} · ${releaseDate}\n\n${campaign.message}`,
     }).where(eq(s.mailCampaigns.id, id));
-    const englishRow=(await tx.select().from(s.settings).where(eq(s.settings.key,'mail-english:'+id)))[0];
-    const english=englishMailSchema.safeParse(englishRow?.value);
-    if(english.success)await tx.update(s.settings).set({value:{...english.data,message:`Version ${version} · ${releaseDate}\n\n${english.data.message}`,ctaLabel:'Open AutoCare'}}).where(eq(s.settings.key,'mail-english:'+id));
+    await tx.update(s.settings).set({value:{...english.data,message:`Version ${version} · ${releaseDate}\n\n${english.data.message}`,ctaLabel:'Open AutoCare'}}).where(eq(s.settings.key,'mail-english:'+id));
     await tx.insert(s.audit).values({ id: crypto.randomUUID(), actorId: uid, action: 'mail.release.scheduled', target: id });
     return { scheduled: true };
   });
 }
-export async function deliverAutomatedMail() {
+export async function deliverAutomatedMail(now = new Date()) {
   if (!(await automationState()).enabled) return { enabled: false, accepted: 0 };
   if (!(await gmailReady().catch(() => false))) return { enabled: true, accepted: 0, blocked: 'GMAIL_TEST_REQUIRED' };
+  const settings = await automationSettings();
   const campaigns = await db()
     .select({ id: s.mailCampaigns.id })
     .from(s.mailCampaigns)
@@ -637,10 +688,22 @@ export async function deliverAutomatedMail() {
       and(
         eq(s.mailCampaigns.source, 'automation'),
         inArray(s.mailCampaigns.status, ['held', 'sending']),
+        sql`(${s.mailCampaigns.scheduledAt} is null or ${s.mailCampaigns.scheduledAt} <= ${now.toISOString()}::timestamptz)`,
+        sql`(${s.mailCampaigns.template} not in ('welcome','vehicle_added') or ${settings.welcome})
+          and (${s.mailCampaigns.template} <> 'monthly_report' or ${settings.monthly})
+          and (${s.mailCampaigns.template} <> 'premium_grant' or ${settings.premium})
+          and (${s.mailCampaigns.template} not in ('support_reply', 'support_received', 'support_resolved') or ${settings.support})`,
+        sql`exists (select 1 from ${s.mailDeliveries}
+          where ${s.mailDeliveries.campaignId} = ${s.mailCampaigns.id}
+          and ((${s.mailDeliveries.status} in ('held','pending') and ${eligibleAutomationDelivery(s.mailCampaigns.template, now)})
+            or (${s.mailDeliveries.status} = 'sending' and ${s.mailDeliveries.attemptedAt} < ${new Date(now.getTime()-120000).toISOString()}::timestamptz)))`,
         sql`(${s.mailCampaigns.template} <> 'release_news' or exists (
           select 1 from ${s.settings} where ${s.settings.key} like 'mail-release:%'
           and ${s.settings.value}->>'campaignId' = ${s.mailCampaigns.id}
           and ${s.settings.value}->'proof' is not null
+          and case when (${s.settings.value}->'proof' ? 'android')
+            then ${settings.releaseAndroid} and (${s.settings.value}->>'mode' is distinct from 'auto' or ${settings.autoAndroid})
+            else ${settings.releaseWeb} and (${s.settings.value}->>'mode' is distinct from 'auto' or ${settings.autoWeb}) end
           and ${s.settings.value}->>'releaseDate' <= to_char(now() at time zone 'Europe/Bucharest', 'YYYY-MM-DD')
         ))`,
       ),
@@ -649,7 +712,7 @@ export async function deliverAutomatedMail() {
     .limit(4);
   if(!campaigns.length)return {enabled:true,accepted:0};
   await verifyGoogleMailAuthorization();
-  const results = await Promise.all(campaigns.map(campaign=>deliverCampaign(campaign.id)));
+  const results = await Promise.all(campaigns.map(campaign=>deliverCampaign(campaign.id, undefined, now)));
   return {enabled:true, accepted:results.reduce((sum,r)=>sum+r.accepted,0),
     remaining:results.some(result=>'remaining' in result && result.remaining)};
 

@@ -17,6 +17,7 @@ export async function automationState() {
     try { await assertActiveAccount(approval.approvedBy); trusted = (await profile(approval.approvedBy)).role === 'superadmin'; } catch { trusted = false; }
   }
   const enabled =
+    process.env.VERCEL_ENV !== 'preview' &&
     process.env.AUTOCARE_MAIL_AUTOMATIONS_ENABLED === 'true' &&
     !!approval?.approvedAt &&
     !!approval.testedAt &&
@@ -32,8 +33,9 @@ export async function queueAutomatedMail(
   template: EmailTemplate,
   dedupeKey: string,
   context: DeliveryContext = {},
-  store: Pick<ReturnType<typeof db>, 'insert'> = db(),
-) {
+  store?: Pick<ReturnType<typeof db>, 'insert'>,
+): Promise<void> {
+  if (!store) return db().transaction(tx=>queueAutomatedMail(uid,template,dedupeKey,context,tx));
   const t = emailTemplates[template];
   const id = 'auto-' + createHash('sha256').update(dedupeKey).digest('hex');
   await store

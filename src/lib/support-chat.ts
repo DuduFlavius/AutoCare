@@ -249,6 +249,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
     if (thread && thread.status !== 'open')
       throw new AppError(409, 'Conversația este finalizată. Deschide o solicitare nouă.');
     if (who.staff && thread?.assignedTo !== uid) throw new AppError(409, 'Conversația este atribuită altui coleg.');
+    const newThread = !thread;
     if (!thread)
       thread = (
         await tx
@@ -295,8 +296,11 @@ export async function sendSupportMessage(uid: string, input: unknown) {
       .update(s.supportThreads)
       .set({ updatedAt: sentAt })
       .where(eq(s.supportThreads.id, thread.id));
+    if (newThread && !who.staff) {
+      await queueAutomatedMail(thread.userId, 'support_received', 'support-received:'+thread.id, {threadId:thread.id}, tx);
+    }
     if (routesThroughMailStudio) {
-      await queueAutomatedMail(thread.userId, 'support_reply', `support-reply:${thread.id}:${sentAt.toISOString().slice(0, 13)}`, {}, tx);
+      await queueAutomatedMail(thread.userId, 'support_reply', `support-reply:${thread.id}:${sentAt.toISOString().slice(0, 13)}`, {threadId:thread.id}, tx);
     }
     return { threadId: thread.id, message, routesThroughMailStudio };
   });
@@ -363,6 +367,9 @@ export async function changeSupportThread(uid: string, id: string, input: unknow
     await tx
       .insert(s.audit)
       .values({ id: crypto.randomUUID(), actorId: uid, action: 'support.' + action, target: id });
+    if (who.staff && action === 'complete') {
+      await queueAutomatedMail(thread.userId, 'support_resolved', 'support-resolved:'+id+':'+now.toISOString(), {threadId:id}, tx);
+    }
     return updated;
   });
 }

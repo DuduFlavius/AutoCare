@@ -1,3 +1,4 @@
+import { queueAutomatedMail } from './mail-automation';
 import {activePlaySubscriptions} from './play-billing';
 import { financeBudgetKey, summarize } from './finance-overview';
 import { isPlannedService } from './planned-service';
@@ -123,6 +124,7 @@ export async function createVehicle(uid: string, input: unknown) {
         category,title:category,expiresAt,amountKnown:false,
       })));
     }
+    if (!cars.length) await queueAutomatedMail(uid,'vehicle_added','vehicle-added:'+uid,{vehicleId:vehicle.id},tx);
     return vehicle;
   });
 }
@@ -298,7 +300,7 @@ export async function saveProfile(uid: string, input: unknown) {
   const data = profileInput.parse(input);
   if (
     !(await premium(uid)) &&
-    (data.afterExpiry || data.hour !== 9 || data.offsets.some((n) => ![30, 15, 7, 1, 0].includes(n)))
+    (data.afterExpiry || data.hour !== 9 || data.offsets.some((n) => ![30, 15, 7, 3, 1, 0].includes(n)))
   )
     throw new AppError(403, 'Aceste preferințe necesită Premium.');
   await profile(uid);

@@ -41,6 +41,15 @@ const labels: Record<string, string> = {
   scheduled: 'Programat',
   cancelled: 'Anulat',
 };
+const lifecycleRows = [
+  ['welcome','Bun venit','Welcome','Cont nou cu adresă confirmată','New account with a verified email','welcome'],
+  ['releaseWeb','Actualizări web','Web updates','Lansare web verificată și aprobată','Verified and approved web release','release_news'],
+  ['releaseAndroid','Actualizări Android','Android updates','APK publicat, semnătură și SHA-256 verificate','Published APK with verified signature and SHA-256','release_news'],
+  ['documents','Expirare documente','Document deadlines','Termene și intervale din preferințele utilizatorului','Deadlines and intervals from account preferences','reminder'],
+  ['premium','Bun venit în Premium','Premium welcome','Acces Premium acordat de echipă','Premium access granted by the team','premium_grant'],
+  ['monthly','Rezumat lunar','Monthly summary','Date reale și opțiune activată de destinatar','Real data and recipient opt-in','monthly_report'],
+  ['support','Mesaje de suport','Support messages','Cerere înregistrată, răspuns sau rezolvare','Request received, reply or resolution','support_reply'],
+] as const;
 export default function MailCenter() {
 
   const locale=useApplicationLocale();
@@ -48,6 +57,7 @@ export default function MailCenter() {
   const [englishSubject,setEnglishSubject]=useState(''),[englishMessage,setEnglishMessage]=useState(''),[englishCta,setEnglishCta]=useState('');
   const [previewLanguage,setPreviewLanguage]=useState<'ro'|'en'>(en?'en':'ro');
   const englishContent=englishSubject.trim()||englishMessage.trim()?{subject:englishSubject,message:englishMessage,ctaLabel:englishCta||'Open AutoCare'}:undefined;
+  const [releaseMode,setReleaseMode]=useState<'approval'|'auto'>('approval');
   const [releaseVersion, setReleaseVersion] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
   const [releaseCommit,setReleaseCommit]=useState('');
@@ -82,6 +92,11 @@ export default function MailCenter() {
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [search, setSearch] = useState('');
+  const [automationQuery,setAutomationQuery]=useState('');
+  const [automationFilter,setAutomationFilter]=useState('all');
+  const [automationResult,setAutomationResult]=useState('any');
+  const [automationPreview,setAutomationPreview]=useState<EmailContent|null>(null);
+  const [automationExample,setAutomationExample]=useState<(typeof lifecycleRows)[number] | null>(null);
   const [historyQuery, setHistoryQuery] = useState('');
   const [historyStatus, setHistoryStatus] = useState('');
   const [historySource, setHistorySource] = useState('');
@@ -493,6 +508,13 @@ export default function MailCenter() {
             <Eye size={16} />
             Previzualizează emailul
           </button>
+          {template==='release_news' && <label>{t('Mod de expediere','Delivery mode')}
+            <FilterSelect value={releaseMode} onChange={e=>setReleaseMode(e.target.value==='auto'?'auto':'approval')}>
+              <option value="approval">{t('Aprobare după publicare','Approval after publication')}</option>
+              {(androidRelease ? data.lifecycle.configuration.autoAndroid : data.lifecycle.configuration.autoWeb) &&
+                <option value="auto">{t('Automat după validarea publicării','Automatic after publication check')}</option>}
+            </FilterSelect>
+          </label>}
           <button
             type="button"
             className="mail-send-action"
@@ -514,7 +536,7 @@ export default function MailCenter() {
               }
               if (template === 'release_news') {
                 if (!data.permissions.canApprove) throw new Error('Doar Fondatorul poate publica o lansare.');
-                await api(`/campaigns/${draftId}/publish-release`, 'POST', { version:releaseVersion,releaseDate,proof:{
+                await api(`/campaigns/${draftId}/publish-release`, 'POST', { version:releaseVersion,releaseDate,mode:releaseMode,proof:{
                   commit:releaseCommit,testsPassed:releaseTests,
                   ...(androidRelease?{android:{version:androidVersion,sha256:androidHash,signatureVerified:androidSignature}}:{}),
                 } });
@@ -593,13 +615,79 @@ export default function MailCenter() {
         </section>
       </div>
       <section className="card stack mail-automation-card" hidden={section !== 'automation'}>
-        <p className="eyebrow">AUTOCARE · AUTOMATIONS</p><h2>Automatizări</h2>
-        <div className="mail-automation-flows">
-          <article><strong>{t('Bun venit','Welcome')}</strong><p>{t('La crearea contului · un singur mesaj · limba aleasă de utilizator','On signup · one message · the user’s selected language')}</p></article>
-          <article><strong>AutoCare News</strong><p>{t('La publicarea unei versiuni din Mail Studio · destinatari cu acord pentru noutăți','On release publication in Mail Studio · opted-in news recipients')}</p></article>
-          <article><strong>{t('Procesare automată','Automatic delivery')}</strong><p>{t('Coada este verificată periodic cât serverul rulează și după înregistrări. Render Free suspendă procesarea când serviciul doarme.','The queue is checked while the server runs and after signup. Render Free pauses processing while the service sleeps.')}</p></article>
+        <h2>{t('Automatizări','Automations')}</h2>
+        <div className="mail-lifecycle-intro">
+          <p>{t('Evenimentele eligibile intră în coadă. Procesarea programată funcționează și când nu ești conectat.','Eligible events enter a queue. Scheduled processing runs even when you are signed out.')}</p>
+          <p className="mail-status">{data.automation.enabled && gmailStatus?.connected && gmailStatus.testedAt && !gmailStatus.reconnectRequired
+            ? t('Automatizări Gmail autorizate','Gmail automations authorized')
+            : t('Automatizările Gmail așteaptă configurarea sau autorizarea','Gmail automations await setup or authorization')}</p>
+          <p>{t('Ultimul job de remindere','Last reminder job')}{' · '}{data.lifecycle.lastJob ? new Date(data.lifecycle.lastJob).toLocaleString(locale) : t('Fără execuții înregistrate','No recorded runs')}</p>
         </div>
-        <p className="mail-status">{data.automation.enabled&&gmailStatus?.connected&&gmailStatus.testedAt&&!gmailStatus.reconnectRequired ? 'Automatizările sunt active.' : 'Automatizările sunt oprite.'}</p>
+        {data.permissions.canApprove && <fieldset className="mail-lifecycle-row">
+          <legend>{t('Expediere automată după publicare','Automatic delivery after publication')}</legend>
+          {(['autoWeb','autoAndroid'] as const).map(key=><label key={key}>
+            <input type="checkbox" disabled={busy} checked={data.lifecycle.configuration[key]} onChange={e=>{
+              const checked=e.target.checked;
+              void run(async()=>{
+                if (checked && !await requestConfirmation(t('Permiți trimiterea automată a anunțurilor pregătite după ce versiunea este disponibilă?','Allow queued announcements to send automatically once the release is live?'))) return;
+                await api('/lifecycle','PUT',{...data.lifecycle.configuration,[key]:checked});
+                setData(await api());
+              });
+            }} />{key==='autoWeb'?'Web':'Android'}
+          </label>)}
+        </fieldset>}
+        <div className="mail-lifecycle-filters">
+          <label>{t('Caută','Search')}<input type="search" value={automationQuery} onChange={e=>setAutomationQuery(e.target.value)} /></label>
+          <label>{t('Configurare','Configuration')}<FilterSelect value={automationFilter} onChange={e=>setAutomationFilter(e.target.value)}>
+            <option value="all">{t('Toate','All')}</option><option value="on">{t('Permise','Allowed')}</option><option value="off">{t('Oprite','Paused')}</option>
+          </FilterSelect></label>
+          <label>{t('Rezultat','Result')}<FilterSelect value={automationResult} onChange={e=>setAutomationResult(e.target.value)}>
+            <option value="any">{t('Toate','All')}</option><option value="pending">{t('În coadă','Queued')}</option><option value="delivered">{t('Livrare confirmată','Confirmed delivery')}</option><option value="failed">{t('Eșecuri','Failures')}</option>
+          </FilterSelect></label>
+        </div>
+        <div className="mail-lifecycle-grid">
+          {lifecycleRows.filter(([key,ro,english,triggerRo,triggerEn])=>{
+            const config=data.lifecycle.configuration[key];
+            const stats=data.lifecycle.stats[key];
+            return (!automationQuery.trim() || t(ro+' '+triggerRo,english+' '+triggerEn).toLocaleLowerCase(locale).includes(automationQuery.trim().toLocaleLowerCase(locale))) &&
+              (automationFilter==='all' || config===(automationFilter==='on')) &&
+              (automationResult==='any' || (automationResult==='pending' ? stats.pending : automationResult==='delivered' ? stats.delivered : stats.failed)>0);
+          }).map(row=>{
+            const [key,ro,english,triggerRo,triggerEn,associated]=row;
+            const stats=data.lifecycle.stats[key], configured=data.lifecycle.configuration[key];
+            return <article className="mail-lifecycle-item" key={key}>
+              <div className="mail-lifecycle-row"><Mail size={20} aria-hidden="true"/><h3>{t(ro,english)}</h3><span>{configured?t('Permis','Allowed'):t('Oprit','Paused')}</span></div>
+              <p>{t(triggerRo,triggerEn)}</p>
+              <dl><div><dt>{t('În coadă','Queued')}</dt><dd>{stats.pending}</dd></div><div><dt>{t('Acceptate','Accepted')}</dt><dd>{stats.accepted}</dd></div><div><dt>{t('Livrate','Delivered')}</dt><dd>{stats.delivered}</dd></div><div><dt>{t('Erori','Errors')}</dt><dd>{stats.failed}</dd></div></dl>
+              <p className="small muted">{t('Ultima încercare','Last attempt')}{' · '}{stats.lastAttempt ? new Date(stats.lastAttempt).toLocaleString(locale) : '—'}</p>
+              <div className="mail-lifecycle-row">
+                <button type="button" disabled={busy} onClick={()=>void run(async()=>{
+                  setAutomationExample(row);
+                  setAutomationPreview(await api('/preview','POST',{template:associated,language:previewLanguage}));
+                })}>{t('Previzualizează','Preview')}</button>
+                {data.permissions.canApprove && <button type="button" disabled={busy} onClick={()=>void run(async()=>{
+                  await api('/lifecycle','PUT',{...data.lifecycle.configuration,[key]:!configured});
+                  setData(await api());
+                })}>{configured?t('Oprește','Pause'):t('Permite','Allow')}</button>}
+              </div>
+            </article>;
+          })}
+          {automationFilter!=='on' && automationResult==='any' && !automationQuery.trim() && <article className="mail-lifecycle-item">
+            <h3>{t('Mentenanță și reactivare','Maintenance and re-engagement')}</h3>
+            <p>{t('Oprite. Comunicările de mentenanță pot fi pregătite manual.','Inactive. Maintenance announcements can be prepared manually.')}</p>
+          </article>}
+        </div>
+        {automationExample && automationPreview && <div className="mail-lifecycle-example">
+          <div className="mail-lifecycle-row">
+            <h3>{t(automationExample[1],automationExample[2])}</h3>
+            {(['ro','en'] as const).map(lang=><button key={lang} type="button" aria-pressed={previewLanguage===lang} disabled={busy} onClick={()=>void run(async()=>{
+              setPreviewLanguage(lang);
+              setAutomationPreview(await api('/preview','POST',{template:automationExample[5],language:lang}));
+            })}>{lang.toUpperCase()}</button>)}
+            <button type="button" onClick={()=>setAutomationExample(null)}>{t('Închide','Close')}</button>
+          </div>
+          <iframe title={t('Previzualizare email','Email preview')} sandbox="" srcDoc={automationPreview.html} />
+        </div>}
         <p>{data.permissions.directSend ? 'Poți autoriza automatizările direct. Preferințele utilizatorilor și regulile de livrare rămân active.' : 'Solicitarea ta ajunge în Mail Center-ul Fondatorului pentru aprobare.'}</p>
         <button className="primary" disabled={busy} onClick={() => void run(async () => {
           if (data.permissions.directSend) {

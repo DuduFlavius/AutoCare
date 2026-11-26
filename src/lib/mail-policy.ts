@@ -22,7 +22,7 @@ export async function recipientAllowed(uid: string, category: string, manual = f
     communicationPreference(uid),
   ]);
   const preference = emailCategory(template, category === 'promotional');
-  if (template === 'support_reply' && !(await accountPreferences(uid)).alerts.chat) return false;
+  if (['support_reply','support_received','support_resolved'].includes(template) && !(await accountPreferences(uid)).alerts.chat) return false;
   return (
     !!user[0] && (user[0].emailVerified || (manual && category === 'transactional')) &&
     !restrictions[0]?.suspendedAt &&
