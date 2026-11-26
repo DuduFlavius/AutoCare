@@ -20,6 +20,7 @@ export function RacingSupport({ role, accountId, preview, onFeedback }: { role: 
   const t = (ro: string, english: string) => en ? english : ro;
   const [tab, setTab] = useState<'chat' | 'requests' | 'faq'>('chat');
   const [query, setQuery] = useState('');
+  const [newRequest, setNewRequest] = useState(0);
   const [availability, setAvailability] = useState<Availability>();
   const staff = ['assistant', 'admin', 'founder', 'superadmin'].includes(role);
   const states = {
@@ -43,14 +44,14 @@ export function RacingSupport({ role, accountId, preview, onFeedback }: { role: 
       {staff && role === 'founder' && <a href="/admin" className="sc-studio-link">{t('Deschide Panoul Fondator', 'Open Founder Studio')} <ArrowUpRight size={16} /></a>}
     </header>
     <nav className="sc-navigation" aria-label={t('Secțiuni suport', 'Support sections')}>
-      <button type="button" aria-pressed={tab === 'chat'} onClick={() => setTab('chat')}><MessageSquarePlus size={17} />{staff ? t('Inbox echipă', 'Team inbox') : t('Trimite o solicitare', 'Send a request')}</button>
+      <button type="button" aria-pressed={tab === 'chat'} onClick={() => {setTab('chat');if(!staff)setNewRequest(value=>value+1);}}><MessageSquarePlus size={17} />{staff ? t('Inbox echipă', 'Team inbox') : t('Trimite o solicitare', 'Send a request')}</button>
       {!staff && <button type="button" aria-pressed={tab === 'requests'} onClick={() => setTab('requests')}><MessageCircle size={17} />{t('Conversațiile mele', 'My conversations')}</button>}
       <button type="button" aria-pressed={tab === 'faq'} onClick={() => setTab('faq')}><BookOpen size={17} />{t('Centrul de ajutor', 'Help center')}</button>
       <button type="button" onClick={onFeedback}><LifeBuoy size={17} />{t('Raportează o problemă sau trimite o idee', 'Report an issue or share an idea')}</button>
     </nav>
     <div hidden={tab === 'faq'} className="ac-support-conversation">
       <SupportChat key={accountId} accountId={accountId} role={role} preview={preview} onFeedback={onFeedback}
-        historyView={tab === 'requests'} onAvailability={setAvailability} onOpenConversation={() => setTab('chat')} />
+        newRequest={newRequest} historyView={tab === 'requests'} onAvailability={setAvailability} onOpenConversation={() => setTab('chat')} />
     </div>
     {tab === 'faq' && <div className="sc-help">
       <label><Search size={19} aria-hidden="true" /><span className="sr-only">{t('Caută în centrul de ajutor', 'Search the help center')}</span>

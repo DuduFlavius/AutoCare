@@ -201,6 +201,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
       conversationId: z.string().min(1).max(100).optional(),
       message: z.string().trim().min(1).max(4000),
       clientId: z.string().uuid().optional(),
+      newConversation: z.boolean().optional(),
       language: z.enum(['ro','en']).optional(),
       category: z.enum(Object.keys(supportCategories) as [keyof typeof supportCategories]).optional(),
       platform: z.enum(['web','android','ios']).optional(),
@@ -234,7 +235,7 @@ export async function sendSupportMessage(uid: string, input: unknown) {
             .where(eq(s.supportThreads.id, data.conversationId))
             .for('update')
         )[0]
-      : (
+      : data.newConversation ? undefined : (
           await tx
             .select()
             .from(s.supportThreads)

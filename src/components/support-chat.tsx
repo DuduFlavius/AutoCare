@@ -111,6 +111,7 @@ export default function SupportChat({
   onOpenConversation,
   accountId,
   onAvailability,
+  newRequest = 0,
 }: {
   role: string;
   preview?: boolean;
@@ -119,6 +120,7 @@ export default function SupportChat({
   onOpenConversation?:()=>void;
   accountId?: string;
   onAvailability?: (value: Availability) => void;
+  newRequest?: number;
 }) {
 
   const locale=useApplicationLocale();
@@ -137,6 +139,8 @@ export default function SupportChat({
   const [view,setView]=useState<'inbox'|'statistics'>('inbox');
   const workspace=useRef<HTMLElement>(null);
   const sendLock = useRef(false);
+  const composingNew = useRef(false);
+  const newRequestSeen = useRef(0);
   const draftIds = useRef(new Map<string, string>());
   const drafts = useRef(new Map<string, string>());
   const cameraInput=useRef<HTMLInputElement>(null);
@@ -190,6 +194,20 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     notificationBaseline = useRef(false),
     notifiedMessages = useRef(new Map<string, string>()),
     notificationEnabled = useRef(false);
+  useEffect(() => {
+    if (staff || newRequest === newRequestSeen.current) return;
+    newRequestSeen.current = newRequest;
+    if (sendLock.current) return;
+    composingNew.current = true;
+    ++epoch.current;
+    selectedRef.current = null;
+    setSelected(null);
+    setDetail(null);
+    setReply(null);
+    setText(drafts.current.get('new') ?? '');
+    setError('');
+    requestAnimationFrame(() => composerInput.current?.focus({preventScroll:true}));
+  }, [newRequest, staff]);
   useLayoutEffect(()=>{
     const element=workspace.current;if(!element)return;let frame=0,lastHeight=-1;
     const update=()=>{frame=0;const viewport=window.visualViewport,bottom=(viewport?.height??window.innerHeight)+(viewport?.offsetTop??0);element.dataset.keyboardOpen=String(!!viewport&&window.innerHeight-viewport.height>140);const dock=document.querySelector<HTMLElement>('.rg-mobile-dock, .autocare-mobile-dock');const rect=dock?.getBoundingClientRect();const reserved=rect&&rect.height&&rect.top<bottom&&getComputedStyle(dock!).position==='fixed'?bottom-rect.top:0;const height=Math.max(0,bottom-Math.max(0,element.getBoundingClientRect().top)-reserved-12);if(Math.abs(lastHeight-height)<1)return;lastHeight=height;element.style.setProperty('--support-height',height+'px');element.toggleAttribute('data-compact',height<440);};
@@ -207,6 +225,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     return rows;
   }
   async function openThread(thread: Thread, announce = true) {
+    composingNew.current = false;
     const turn = ++epoch.current;
     if (selectedRef.current !== thread.id) {
       const previousKey = selectedRef.current ?? 'new';
@@ -279,7 +298,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         }
         notifiedMessages.current=next;notificationBaseline.current=true;
       }
-      if (!selectedRef.current && !jumpTo.current && (sendLock.current || drafts.current.get('new')?.trim())) return;
+      if (!selectedRef.current && !jumpTo.current && (composingNew.current || sendLock.current || drafts.current.get('new')?.trim())) return;
       const current =
         out.threads.find((t: Thread) => t.id === (jumpTo.current || selectedRef.current)) || out.threads[0];
       const jumped = current?.id && jumpTo.current === current.id;
@@ -424,10 +443,12 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       draftIds.current.set(payloadKey, clientId);
       const out = await request('', 'POST', {
         message: content, conversationId, clientId, language: en ? 'en' : 'ro',
+        newConversation: !conversationId && composingNew.current,
         ...(!staff && !conversationId ? { category, platform: Capacitor.getPlatform() } : {}),
       });
       draftIds.current.delete(payloadKey);
       drafts.current.delete(draftKey);
+      composingNew.current = false;
       setReply(null);
       setText('');
       if (selected) void request('/' + selected + '/typing', 'POST', { typing: false }).catch(() => {});

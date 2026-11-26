@@ -2,7 +2,7 @@
   position: fixed;
   z-index: 220;
   inset: var(--sf-offset, 0px) 0 auto;
-  height: var(--sf-viewport, 100dvh);
+  height: min(var(--sf-viewport, 100dvh), 100dvh);
   display: grid;
   place-items: center;
   box-sizing: border-box;

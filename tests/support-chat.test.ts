@@ -391,6 +391,9 @@ test('Support: presence and bilingual welcome are scoped to the actual team and 
   assert.match(detail.messages[0].body, /assisting other customers/);
   assert.equal((await chat.listSupportThreads(id)).threads[0].category,'documents');
   assert.equal((await chat.listSupportThreads(id)).threads[0].platform,'android');
+  const followup=await chat.sendSupportMessage(id, {message:'Separate ticket intent',clientId:crypto.randomUUID(),newConversation:true});
+  assert.notEqual(followup.threadId,first.threadId);
+  assert.equal((await chat.listSupportThreads(id)).threads.length,2);
   const outsider=crypto.randomUUID();
   await db().insert(s.user).values({id:outsider, name:'Separate QA account', email:outsider+'@example.invalid', emailVerified:true});
   await assert.rejects(() => chat.sendSupportMessage(outsider, payload), status(409));
