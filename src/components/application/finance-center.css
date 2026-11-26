@@ -109,7 +109,8 @@ html body .ac-workspace.ac-studio .ac-service-garage .ac-service-vehicle {
 .ac-selection-chart header strong { font-size:clamp(19px,3vw,27px); font-variant-numeric:tabular-nums; }
 .ac-step-chart { display:grid; grid-template-columns:minmax(0,auto) minmax(0,1fr); gap:8px; }
 .ac-step-grid { align-self:start; height:clamp(122px,24vw,166px); display:flex; flex-direction:column; justify-content:space-between; text-align:end; overflow-wrap:anywhere; max-width:9em; padding-block:3px 5px; font-size:.75rem; color:var(--color-muted); }
-.ac-step-plot { min-width:0; border-radius:6px; }
+.ac-step-plot { position:relative; min-width:0; border-radius:6px; }
+.ac-step-plot input.ac-step-control { position:absolute; inset-block-start:0; inset-inline-start:0; inline-size:1px; block-size:1px; min-inline-size:0; min-block-size:0; margin:0; padding:0; clip-path:inset(50%); }
 .ac-step-plot:has(.ac-step-control:focus-visible) { outline:2px solid var(--color-primary); outline-offset:4px; }
 .ac-step-plot svg { width:100%; height:clamp(122px,24vw,166px); display:block; }
 .ac-step-plot line { stroke:var(--color-border); }
