@@ -29,7 +29,7 @@ function combine(values: unknown[]) {
   return [...names.values()].sort((a,b) => a.localeCompare(b));
 }
 async function provider(url: URL) {
-  const response = await fetch(url, { headers: { Accept: 'application/json' }, next: { revalidate: 86400 }, signal: AbortSignal.timeout(3500) });
+  const response = await fetch(url, { headers: { Accept: 'application/json' }, next: { revalidate: 86400 }, signal: AbortSignal.timeout(9000) });
   if (!response.ok) throw new Error('Vehicle catalogue unavailable');
   return response.json();
 }
@@ -37,10 +37,10 @@ export async function vehicleCatalog(params: URLSearchParams) {
   const input = requestSchema.parse(Object.fromEntries(params));
   if (input.type === 'engines') {
     const url = new URL('https://www.fueleconomy.gov/ws/rest/vehicle/menu/options');
-    url.search = new URLSearchParams({ make: input.make, model: input.model, year: String(input.year) }).toString();
+    url.search = new URLSearchParams({ year: String(input.year), make: input.make, model: input.model }).toString();
     try {
       const result = await provider(url);
-      const items = result.menuItem;
+      const items = result?.menuItem;
       return { items: combine((Array.isArray(items) ? items : items ? [items] : []).map(item => item.text)).slice(0, 100), degraded: false };
     } catch { return { items: [], degraded: true }; }
   }
