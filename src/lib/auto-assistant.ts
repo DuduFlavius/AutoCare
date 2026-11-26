@@ -10,6 +10,7 @@ import { generateAi, streamAi, type AiStream } from './ai-provider';
 import { financeOverview, financeSignals, isFinancialEntry } from './finance-overview';
 import { AI_HISTORY_LIMIT, aiTitlesKey, assistantLanguageInstruction } from './ai-conversations';
 import { autoAssistantConfigured } from './auto-assistant-config';
+import { createFeedback } from './feedback';
 
 export const aiModes = ['chat', 'analysis', 'monthly', 'annual', 'finance', 'maintenance'] as const;
 type Mode = typeof aiModes[number];
@@ -86,6 +87,25 @@ export async function feedbackAutoAssistant(uid: string, vehicleId: string, turn
   const saved = await db().update(autoAiTurns).set({ feedback }).where(and(turnsFor(uid, vehicleId), eq(autoAiTurns.id, turnId))).returning({ id: autoAiTurns.id });
   if (!saved.length) throw new AppError(404, 'Mesajul nu a fost găsit.');
   return { ok: true };
+}
+
+export async function reportAutoAssistant(uid: string, vehicleId: string, turnId: string) {
+  await ownedVehicle(uid, vehicleId);
+  const [turn] = await db().select({ answer: autoAiTurns.answer }).from(autoAiTurns)
+    .where(and(turnsFor(uid, vehicleId), eq(autoAiTurns.id, turnId)));
+  if (!turn) throw new AppError(404, 'Mesajul nu a fost găsit.');
+
+  // Share just the selected output, with no adjacent messages or uploaded file.
+  const answer = Array.from(turn.answer.trim()).slice(0, 2350).join('');
+  return createFeedback(uid, {
+    clientId: turnId,
+    category: 'problem',
+    area: 'ai',
+    message: `Răspuns AutoCare AI raportat / Reported AutoCare AI answer
+Mesaj / Message: ${turnId}
+
+${answer}`,
+  });
 }
 
 const knownCategories = new Set(['RCA', 'ITP', 'Rovinietă', 'CASCO', 'Revizie', 'Distribuție', 'Schimb ulei', 'Alimentare', 'Filtre', 'Frâne', 'Anvelope', 'Reparații', 'Service']);

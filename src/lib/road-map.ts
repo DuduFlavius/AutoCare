@@ -43,6 +43,7 @@ function cachedMatch(start:GPSFix,end:GPSFix,roads:readonly SpeedRoad[]){
 
 /** Draw only supported links. Keep the recorded samples and mileage untouched. */
 export function routeGeometry(points: GPSFix[], mappedRoads?: readonly SpeedRoad[]): FeatureCollection<LineString> {
+  if (!points.length || mappedRoads?.length === 0) return {type:'FeatureCollection',features:[]};
   const lines: number[][][] = [];
   let previous: GPSFix | null = null;
   let line: number[][] | null = null;
@@ -81,6 +82,24 @@ export function routeGeometry(points: GPSFix[], mappedRoads?: readonly SpeedRoad
       })),
   };
 }
+/** Coalesce touching display segments without adding links or changing routing geometry. */
+export function visualTrackGeometry(points:GPSFix[],roads?:readonly SpeedRoad[]):FeatureCollection<LineString> {
+  const geometry=routeGeometry(points,roads);
+  if (!roads || geometry.features.length < 2) return geometry;
+  const features:typeof geometry.features=[];
+  for (const feature of geometry.features) {
+    const current=features.at(-1)?.geometry.coordinates;
+    const next=feature.geometry.coordinates;
+    const end=current?.at(-1);
+    if (current && end && end[0]===next[0][0] && end[1]===next[0][1]) {
+      for(let i=1;i<next.length;i++)current.push(next[i]);
+    } else {
+      features.push({...feature,geometry:{...feature.geometry,coordinates:next.slice()}});
+    }
+  }
+  return {...geometry,features};
+}
+
 export type RouteVariant = { index: number; coordinates: [number, number][] };
 export function alternateRouteGeometry(variants: RouteVariant[]): GeoJSON.FeatureCollection<GeoJSON.LineString, {index: number}> {
   return {

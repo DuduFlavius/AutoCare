@@ -17,7 +17,7 @@ import {languagePreferenceKey, userLanguage} from '@/lib/user-language';
 import { financeGroup, financeGroups, isFinancialEntry } from '@/lib/finance-overview';
 import { isPlannedService } from '@/lib/planned-service';
 import { localDate } from '@/lib/config';
-import { aiModes, askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, renameAiConversation, scanAutoDocument } from '@/lib/auto-assistant';
+import { aiModes, askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, reportAutoAssistant, renameAiConversation, scanAutoDocument } from '@/lib/auto-assistant';
 import { autoPointCategories } from '@/lib/auto-points';
 import { loadAutoPoints } from '@/lib/auto-points-server';
 import {automaticTripBatch} from '@/lib/automatic-trips';
@@ -216,6 +216,15 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     }
 
     if (path[0] === 'auto-assistant') {
+      if (route === 'auto-assistant/report' && method === 'POST') {
+        await rate(uid, 'auto-assistant-report', 20);
+        const { vehicleId, turnId } = z.object({ vehicleId: uuid, turnId: uuid }).strict().parse(await body(req));
+        const result = await reportAutoAssistant(uid, vehicleId, turnId);
+        if (result.noticeIds.length) after(() => feedback.deliverFeedbackNotices(result.noticeIds).catch(() => {
+          console.error(JSON.stringify({ event:'ai_report_notification_failed' }));
+        }));
+        return json({ id:result.id }, result.duplicate ? 200 : 201);
+      }
       if (!await svc.premium(uid)) throw new svc.AppError(403, 'Asistentul AI este disponibil în Premium.');
       const historyId = z.union([uuid, z.string().regex(/^legacy:\d{4}-\d{2}-\d{2}$/)]);
       if (route === 'auto-assistant/history' && method === 'PATCH') {

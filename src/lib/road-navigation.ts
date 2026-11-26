@@ -6,6 +6,7 @@ export type RoadLane = { indications: string[]; valid: boolean };
 export type RoadStep = {
   name: string;
   destinations?: string;
+  exits?: string;
   ref?: string;
   distance: number;
   duration: number;

@@ -1,7 +1,7 @@
 name: Native GPS builds
 on:
   push:
-    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated, audit/rca-gps-play-20261117, release/smartdrive-61]
+    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated, audit/rca-gps-play-20261117, release/smartdrive-61, release/play-readiness]
     paths: ["mobile/**", ".github/workflows/native-build.yml"]
   pull_request:
     branches: [feature/autocare-ai-integrated, feature/autocare-desktop-premium-20261102, feature/autocare-native-gps-20261104]
@@ -36,8 +36,7 @@ jobs:
           export JAVA_HOME="$JAVA_HOME_21_X64"
           export PATH="$JAVA_HOME/bin:$PATH"
           cd mobile/android
-          ./gradlew :app:assembleDebug :app:lintRelease :app:testDebugUnitTest
-          ./gradlew :app:bundleRelease -PautocareDistribution=play
+          ./gradlew :app:assembleDebug :app:lintRelease :app:testDebugUnitTest :autocare-native-tracking:testDebugUnitTest
       - name: Verify production Firebase release compilation
         run: |
           cp mobile/firebase/google-services.production.json mobile/android/app/google-services.json
@@ -51,6 +50,36 @@ jobs:
         with:
           name: AutoCare-production-unsigned-APK
           path: mobile/android/app/build/outputs/apk/release/app-release-unsigned.apk
+          retention-days: 7
+      - name: Verify Play distribution package and permissions
+        working-directory: mobile/android
+        run: |
+          set -euo pipefail
+          export JAVA_HOME="$JAVA_HOME_21_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          ./gradlew -PautocareDistribution=play :app:assembleRelease :app:bundleRelease
+          mkdir -p "$RUNNER_TEMP/autocare-play"
+          apk=app/build/outputs/apk/release/app-release-unsigned.apk
+          aapt="$ANDROID_HOME/build-tools/36.0.0/aapt"
+          "$aapt" dump badging "$apk" > "$RUNNER_TEMP/autocare-play/badging.txt"
+          "$aapt" dump permissions "$apk" > "$RUNNER_TEMP/autocare-play/permissions.txt"
+          grep -F "package: name='ro.autocare.garage'" "$RUNNER_TEMP/autocare-play/badging.txt"
+          grep -F "targetSdkVersion:'36'" "$RUNNER_TEMP/autocare-play/badging.txt"
+          grep -F "com.android.vending.BILLING" "$RUNNER_TEMP/autocare-play/permissions.txt"
+          if grep -Fq "android.permission.REQUEST_INSTALL_PACKAGES" "$RUNNER_TEMP/autocare-play/permissions.txt"; then
+            echo "Play package declares external package installation"
+            exit 1
+          fi
+          unzip -tq app/build/outputs/bundle/release/app-release.aab
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 4 "$apk"
+          python3 ../../scripts/check-android-page-size.py "$apk"
+          python3 ../../scripts/check-android-page-size.py app/build/outputs/bundle/release/app-release.aab
+      - name: Archive Play package verification
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-Play-package-verification
+          path: ${{ runner.temp }}/autocare-play/
+          if-no-files-found: error
           retention-days: 7
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -119,6 +148,14 @@ jobs:
           name: AutoCare-Google-Play-signed-AAB
           path: mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 7
+      - name: Archive signed Play APK for device tests
+        if: inputs.distribution == 'play'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AutoCare-Play-signed-APK
+          path: mobile/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 7
       - name: Publish signed Android installer for in-app updates
         if: inputs.distribution != 'play'
         env:
@@ -173,7 +210,7 @@ jobs:
           git commit -m "Publish signed Android installer for in-app updates"
           git push origin HEAD:${{ github.ref_name }}
   ios:
-    if: github.ref != 'refs/heads/release/smartdrive-61'
+    if: github.ref != 'refs/heads/release/smartdrive-61' && github.ref != 'refs/heads/release/play-readiness'
     runs-on: macos-26
     timeout-minutes: 25
     steps:

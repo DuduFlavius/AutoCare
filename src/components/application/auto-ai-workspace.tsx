@@ -7,7 +7,7 @@ import {ActionMenu} from '../action-menu';
 import {PremiumDateInput} from '@/components/premium-date-input';
 
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import {  ArrowUpRight, FileScan, MapPin, Sparkles, Trash2, ShieldCheck, Copy, ChevronDown, MessageSquareText, Wrench, CalendarDays, BarChart3, CheckCheck, Square, RotateCcw, ThumbsUp, ThumbsDown, Paperclip, History, CarFront, X, ChevronLeft, ArrowUp, Plus, Search, Pencil } from 'lucide-react';
+import {  ArrowUpRight, FileScan, MapPin, Sparkles, Trash2, ShieldCheck, Copy, ChevronDown, MessageSquareText, Wrench, CalendarDays, BarChart3, CheckCheck, Square, RotateCcw, ThumbsUp, ThumbsDown, Paperclip, History, CarFront, X, ChevronLeft, ArrowUp, Plus, Search, Pencil, Flag } from 'lucide-react';
 import { AI_HISTORY_LIMIT, conversationGroups, conversationKey, conversationSections, type AiTurn } from '@/lib/ai-conversations';
 import { streamLines } from '@/lib/ai-stream';
 import type { dashboard } from '@/lib/service';
@@ -288,6 +288,28 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
     });
   }
 
+  const [reportedTurns, setReportedTurns] = useState<Set<string>>(() => new Set());
+  const reportingTurn = useRef<string | null>(null);
+
+  async function report(turn: Turn) {
+    if (preview || !vehicleId || reportingTurn.current || reportedTurns.has(turn.id)) return;
+    reportingTurn.current = turn.id;
+    try {
+      const accepted = await requestConfirmation(t(
+        'Trimiți acest răspuns echipei AutoCare pentru verificare? Întrebarea și fișierele nu sunt trimise.',
+        'Send this answer to the AutoCare team for review? The question and attached files are excluded.',
+      ));
+      if (!accepted) return;
+      await request('auto-assistant/report', json('POST', { vehicleId, turnId: turn.id }));
+      setReportedTurns(previous => new Set(previous).add(turn.id));
+      setNotice(t('Răspuns raportat echipei AutoCare.', 'Answer reported to the AutoCare team.'));
+    } catch {
+      setError(t('Raportarea nu a putut fi trimisă. Reîncearcă mai târziu.', 'The report could not be sent. Please try again later.'));
+    } finally {
+      reportingTurn.current = null;
+    }
+  }
+
   async function feedback(turn: Turn, value: 1 | -1) {
     if (preview || pending) return;
     const next = turn.feedback === value ? null : value;
@@ -388,6 +410,9 @@ function AiConversation({ vehicleId, available, preview, onSaved, onExit, displa
                 {index === visibleTurns.length - 1 && <button type="button" disabled={pending || !available} title={t('Regenerează răspunsul', 'Regenerate answer')} aria-label={t('Regenerează răspunsul', 'Regenerate answer')} onClick={() => ask(turn.question, 'chat', turn)}><RotateCcw size={15}/></button>}
                 <button type="button" disabled={pending} aria-pressed={turn.feedback === 1} title={t('Răspuns util', 'Helpful answer')} aria-label={t('Răspuns util', 'Helpful answer')} onClick={() => void feedback(turn, 1)}><ThumbsUp size={15}/></button>
                 <button type="button" disabled={pending} aria-pressed={turn.feedback === -1} title={t('Răspuns neutil', 'Unhelpful answer')} aria-label={t('Răspuns neutil', 'Unhelpful answer')} onClick={() => void feedback(turn, -1)}><ThumbsDown size={15}/></button>
+                <button type="button" disabled={preview || reportedTurns.has(turn.id)} onClick={() => void report(turn)}
+                  title={t('Raportează răspunsul', 'Report answer')}
+                  aria-label={reportedTurns.has(turn.id) ? t('Răspuns raportat', 'Answer reported') : t('Raportează răspunsul', 'Report answer')}><Flag size={15}/></button>
                 <time dateTime={turn.createdAt}>{new Date(turn.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</time>
               </div></div></div>
             </li>)}

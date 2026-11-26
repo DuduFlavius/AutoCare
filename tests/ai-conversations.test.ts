@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { eq, sql } from 'drizzle-orm';
 import { migrate } from '../scripts/migrate';
 import { db, closeLocalDb } from '../src/lib/db';
-import { user, vehicles, autoAiTurns } from '../src/lib/schema';
-import { askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, renameAiConversation } from '../src/lib/auto-assistant';
+import { user, vehicles, autoAiTurns, feedbackItems } from '../src/lib/schema';
+import { askAutoAssistant, autoAssistantHistory, clearAutoAssistantHistory, feedbackAutoAssistant, reportAutoAssistant, renameAiConversation } from '../src/lib/auto-assistant';
 import { AI_HISTORY_LIMIT, conversationGroups, conversationSections, assistantLanguageInstruction } from '../src/lib/ai-conversations';
 import { readFile } from 'node:fs/promises';
 delete process.env.DATABASE_URL;
@@ -187,4 +187,20 @@ test('history sections use local calendar boundaries and the last seven days inc
   conversationSections(grouped, new Date(2026,10,25,23,59)).map(section=>[section.key,section.groups.map(group=>group.title)]),
   [['today',['25']],['yesterday',['24']],['week',['23','19']],['older',['18']]],
  );
+});
+
+test('AI reports share only the selected output, require ownership and are idempotent', async () => {
+ const id=crypto.randomUUID();
+ await db().insert(autoAiTurns).values({id,userId:uid,vehicleId:car,question:'PRIVATE QUESTION',answer:'Selected answer for review.'});
+ await assert.rejects(()=>reportAutoAssistant(other,car,id));
+ await assert.rejects(()=>reportAutoAssistant(other,foreign,id));
+ const first=await reportAutoAssistant(uid,car,id);
+ const next=await reportAutoAssistant(uid,car,id);
+ assert.equal(first.id,next.id);
+ assert.equal(next.duplicate,true);
+ const [item]=await db().select().from(feedbackItems).where(eq(feedbackItems.id,first.id));
+ assert.equal(item.userId,uid);
+ assert.equal(item.area,'ai');
+ assert.match(item.message,/Selected answer for review/);
+ assert.doesNotMatch(item.message,/PRIVATE QUESTION/);
 });

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useId, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useApplicationLanguage } from './application-locale';
 
 type InstallPromptEvent = Event & {
@@ -19,6 +20,10 @@ export default function MobileInstall() {
   const [androidRelease, setAndroidRelease] = useState<{version:string;url:string}|null>(null);
 
   useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      setInstalled(true);
+      return;
+    }
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const android = /Android/i.test(navigator.userAgent);

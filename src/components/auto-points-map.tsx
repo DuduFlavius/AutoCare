@@ -14,7 +14,7 @@ import {gpsTelemetry} from '@/lib/gps-status';
 import './smartdrive-navigation.css';
 import './smartdrive-session.css';
 import './smartdrive-maps.css';
-import { describeDriveManeuver as turnText } from '@/lib/drive-maneuvers';
+import { describeDriveManeuver as turnText, driveManeuver } from '@/lib/drive-maneuvers';
 import type { RouteVariant } from '@/lib/road-map';
 import { DriveManeuverIcon } from './drive-maneuver-icon';
 import DriveRoutePreview from './drive-route-preview';
@@ -29,7 +29,7 @@ import { useApplicationLocale } from './application-locale';
 const RoadMap = dynamic(() => import('./road-map'), { ssr: false });
 const noRoute: GPSFix[] = [];
 
-export type NavigationSession=DrivePanelData & {position:GPSFix|null;points:GPSFix[];meters:number;active:boolean;controls:ReactNode;vehicle:ReactNode;messages?:ReactNode;start:()=>void;stop:()=>void;locate:()=>void};
+export type NavigationSession=DrivePanelData & {now?:number;position:GPSFix|null;points:GPSFix[];meters:number;active:boolean;controls:ReactNode;vehicle:ReactNode;messages?:ReactNode;start:()=>void;stop:()=>void;locate:()=>void};
 export default function AutoPointsMap({ preview, visible, ownerId, session,onExit,onView,previewRoute,previewNavigation=false }: { preview: boolean; visible: boolean; ownerId: string;session?:NavigationSession;onExit?:()=>void;onView?:(view:'live'|'history'|'points'|'bluetooth')=>void;previewRoute?:DrivingRoute;previewNavigation?:boolean }) {
   const locale = useApplicationLocale();
   const english = locale.startsWith('en');
@@ -64,9 +64,11 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const [details,setDetails]=useState(false);
   const [searchOpen,setSearchOpen]=useState(false);
   const [searchFocused,setSearchFocused]=useState(false);
-  const [now,setNow]=useState(()=>Date.now());
+  const [mapClock,setMapClock]=useState(()=>Date.now());
+  const ownsClock=session?.now===undefined;
+  const now=session?.now??mapClock;
   const spoken=useRef('');
-  useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),2000);return()=>clearInterval(timer)},[]);
+  useEffect(()=>{if(!visible||!ownsClock)return;setMapClock(Date.now());const timer=setInterval(()=>setMapClock(Date.now()),2000);return()=>clearInterval(timer);},[visible,ownsClock]);
   const [background, setBackground] = useState<'idle' | 'active' | 'upgrade' | 'blocked'>('idle');
   const wantsNavigation = useRef(false);
   const [locationError, setLocationError] = useState('');
@@ -372,10 +374,16 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
   const minutes=progress?Math.ceil(progress.seconds/60):!navigating&&route?Math.ceil(route.duration/60):null;
   const remaining=navigating?progress?.distance:route?.distance;
   const eta=progress&&navigating?new Date(Date.now()+progress.seconds*1000).toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit'}):null;
+  const nextTurn=arrived||routing?undefined:progress?.next;
+  const exit=driveManeuver(nextTurn?.maneuver).exit;
+  const sign=nextTurn&&(nextTurn.exits||nextTurn.destinations)
+    ? [nextTurn.exits&&t('Ieșire ','Exit ')+nextTurn.exits,nextTurn.ref,nextTurn.destinations].filter(Boolean).join(' · ')
+    : '';
+
   return <section ref={root} className="rg-smartdrive-map sd-live-cockpit" data-native-fullscreen={nativeScreen} data-android-apk={androidApk} data-guiding={navigating} data-gps-fresh={!!precisePosition} data-search-open={searchOpen} data-typing={searchFocused} aria-label="SmartDrive GPS">
     <div className="rg-navigation-layout" data-sidebar-open={searchOpen||details}>
       <div className="rg-navigation-canvas">
-        <RoadMap points={session?.points||noRoute} position={displayPosition} active={navigating||(!destination&&session?.state==='active')} english={english}
+        <RoadMap visible={visible} points={session?.points||noRoute} position={displayPosition} active={navigating||(!destination&&session?.state==='active')} english={english}
           initialArea={defaultAutoPointsArea} onAreaChange={setArea} onLocate={preview?undefined:requestLocate}
           locating={findingLocation||location.waiting} locationError={locationError||location.error}
           autoPoints={navigating || !searchOpen ? undefined : nearby} onAutoPoint={id => { const point = nearby.find(result => result.id === id); if (point) chooseNearby(point); }}
@@ -388,22 +396,35 @@ export default function AutoPointsMap({ preview, visible, ownerId, session,onExi
         {!navigating&&<div className="sd-destination-toolbar"><DriveDestinationSearch area={searchPosition??area} nearPosition={!!searchPosition} disabled={preview} english={english} recent={recent} favorites={favorites}
           onRemoveRecent={p=>replaceRecent(recent.filter(entry=>destinationIdentity(entry)!==destinationIdentity(p)))}
           onClearRecent={()=>replaceRecent([])} onFocusChange={focused=>{setSearchFocused(focused);if(focused)setSearchOpen(false);}} onChoose={point=>choose(point)}/><button type="button" className="sd-destination-settings" hidden={searchFocused} aria-label={t('Destinații și vehicul','Destinations and vehicle')} aria-expanded={searchOpen} onClick={()=>setSearchOpen(v=>!v)}><SlidersHorizontal size={23}/></button></div>}
-        {navigating && <div className="rg-guidance-turn">
-          <DriveManeuverIcon turn={arrived ? {type:'arrive'} : progress?.next?.maneuver}/>
-          <div>
+        {navigating && <div className="rg-guidance-turn" aria-label={t('Următoarea manevră','Next maneuver')}>
+          <span className="sd-maneuver-symbol" aria-hidden="true">
+            <DriveManeuverIcon turn={arrived ? {type:'arrive'} : nextTurn?.maneuver} size={43}/>
+            {exit&&<b>{exit}</b>}
+          </span>
+          <div className="sd-maneuver-copy">
             <strong>{arrived ? t('Ai ajuns', 'You arrived') : progress && !routing ? distance(progress.untilTurn) :
-              routing ? t('Se recalculează', 'Rerouting') : offRoute ? t('În afara traseului', 'Off route') : t('GPS indisponibil', 'GPS unavailable')}</strong>
+              routing ? t('Se recalculează', 'Rerouting') : offRoute ? t('În afara traseului', 'Off route') :
+              precisePosition?t('Urmează traseul', 'Follow the route'):t('GPS indisponibil', 'GPS unavailable')}</strong>
             {!precisePosition && !arrived && <small>{t('Se așteaptă o poziție confirmată', 'Waiting for a confirmed fix')}</small>}
-            {!arrived && !routing && progress?.next && <span aria-live="polite">{turnText(progress.next.maneuver, english)}</span>}
-            {!arrived && !routing && progress?.next?.name && <small>{progress.next.name}</small>}
-            {!arrived && !routing && progress?.next?.destinations && <small className="sd-road-sign" data-user-content>{[progress.next.ref, progress.next.destinations].filter(Boolean).join(' · ')}</small>}
-            {!arrived && !routing && lanes && progress.untilTurn < 350 && <div className="sd-turn-lanes" aria-label={t('Benzi recomandate', 'Recommended lanes')}>
-              {lanes.map((lane, index) => <span key={index} data-valid={lane.valid} aria-label={lane.indications.join(', ')}>
-                {lane.indications.filter(indication=>indication!=='none').map(indication=><DriveManeuverIcon key={indication} turn={{ type:'turn', modifier: indication }} size={14}/>)}
-              </span>)}
+            {nextTurn&&<span className="sd-maneuver-instruction" aria-live="polite">{turnText(nextTurn.maneuver, english)}</span>}
+            {nextTurn?.name&&<small className="sd-maneuver-street" data-user-content>{nextTurn.name}</small>}
+            {sign&&<small className="sd-road-sign" data-user-content>{sign}</small>}
+            {nextTurn&&lanes&&progress&&progress.untilTurn<350&&<div className="sd-turn-lanes" aria-label={t('Benzi recomandate', 'Recommended lanes')}>
+              {lanes.map((lane,index)=>{
+                const directions=[...new Set(lane.indications)].flatMap(indication=>{
+                  const turn={type:'turn',modifier:indication,location:nextTurn.maneuver.location};
+                  return driveManeuver(turn).kind==='unknown'?[]:[turn];
+                });
+                return <span key={index} data-valid={lane.valid} aria-label={[
+                  lane.valid?t('Bandă recomandată','Recommended lane'):t('Altă bandă','Other lane'),
+                  ...directions.map(turn=>turnText(turn,english)),
+                ].join(' · ')}>
+                  {directions.length?directions.map(turn=><DriveManeuverIcon key={turn.modifier} turn={turn} size={15}/>):<DriveManeuverIcon size={15}/>}
+                </span>;
+              })}
             </div>}
-            {!arrived && !routing && progress?.following && progress.untilTurn < 250 && progress.next && progress.next.distance < 180 &&
-              <small>{t('Apoi', 'Then')} · {turnText(progress.following.maneuver, english)}</small>}
+            {nextTurn&&progress?.following&&progress.untilTurn<250&&nextTurn.distance<180&&
+              <small className="sd-maneuver-following"><DriveManeuverIcon turn={progress.following.maneuver} size={17}/>{t('Apoi', 'Then')} · {turnText(progress.following.maneuver, english)}</small>}
           </div>
         </div>}
         {androidApk && <div className="rg-navigation-speed" data-over-limit={roadSpeed.over} aria-label={t('Viteza GPS','GPS speed')}>

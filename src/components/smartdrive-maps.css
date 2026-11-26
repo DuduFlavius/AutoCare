@@ -71,3 +71,33 @@
 }
 
 .sd-live-cockpit.rg-smartdrive-map .sd-destination-results .sd-remove-recent {flex:0 0 44px;width:44px;justify-content:center!important}
+
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-guidance-turn {
+  gap:12px;padding:12px 13px;border-radius:14px;
+  background:#073743;border-color:#326270;box-shadow:0 5px 14px #061f3040;
+}
+.sd-live-cockpit.rg-smartdrive-map[data-guiding=true]:has([data-map-theme=night]) .rg-guidance-turn {
+  background:#102630;border-color:#476775;
+}
+.sd-live-cockpit .rg-guidance-turn .sd-maneuver-symbol {
+  position:relative;display:grid;place-items:center;flex:0 0 56px;height:56px;
+  border:1px solid #7fb7c34f;border-radius:11px;background:#155361;color:#fff;
+}
+.sd-maneuver-symbol>b {
+  position:absolute;bottom:-3px;right:-4px;min-width:19px;padding:1px 4px;
+  text-align:center;font-size:12px;border-radius:5px;color:#073743;background:#cdf4f5;
+}
+.sd-live-cockpit .rg-guidance-turn .sd-maneuver-copy {display:grid;gap:3px;min-width:0}
+.sd-live-cockpit .rg-guidance-turn .sd-maneuver-copy>strong {
+  font-size:clamp(21px,4.8vw,32px);font-variant-numeric:tabular-nums;letter-spacing:-.025em;
+}
+.sd-live-cockpit .rg-guidance-turn .sd-maneuver-instruction {font-size:13px;font-weight:700;color:#fff}
+.sd-live-cockpit .rg-guidance-turn .sd-maneuver-street {font-weight:600}
+.sd-live-cockpit .sd-maneuver-following {display:flex;align-items:center;gap:5px}
+.sd-live-cockpit .sd-maneuver-following>svg {flex:none}
+.sd-live-cockpit .sd-turn-lanes>span {min-width:26px;min-height:22px;gap:2px}
+@media(max-width:360px), (max-height:475px){
+  .sd-live-cockpit.rg-smartdrive-map[data-guiding=true] .rg-guidance-turn {gap:8px;padding:9px}
+  .sd-live-cockpit .rg-guidance-turn .sd-maneuver-symbol {flex-basis:43px;height:43px;border-radius:8px}
+  .sd-maneuver-symbol>svg {width:34px;height:34px}
+}
