@@ -139,7 +139,9 @@ const [tab, setTab] = useState('Utilizatori'),
     [notice, setNotice] = useState(''),
     [duration, setDuration] = useState('1');
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).has('gmail')) setTab('Setări administrative');
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('gmail') || params.has('mail')) setTab('Mail Center');
+    if (params.get('support')==='inbox') setTab('Chat și suport');
   }, []);
   const detailsRef = useRef<HTMLElement>(null);
   const selectionRequest=useRef(0);

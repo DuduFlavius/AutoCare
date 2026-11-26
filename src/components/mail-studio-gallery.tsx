@@ -5,6 +5,7 @@ import { ArrowUpRight, Search, Star } from 'lucide-react';
 import { englishEmailCopy } from '@/lib/email-copy-en';
 import { renderEmail, templateCategory, type EmailTemplate } from '@/lib/email-templates';
 import { studioStyles, type StudioDesign, type StudioStyle } from '@/lib/mail-studio-templates';
+import {mailTopic,mailTopics} from '@/lib/mail-topics';
 import { FilterSelect } from './filter-select';
 
 type LibraryCard = {
@@ -32,6 +33,7 @@ export function EmailGallery({ entries, language, onChoose, disabled }: {
   const en=language==='en';
   const t=(ro:string,english:string)=>en?english:ro;
   const [query,setQuery]=useState('');
+  const [topic,setTopic]=useState('');
   const [category,setCategory]=useState('');
   const [style,setStyle]=useState('');
   const [filter,setFilter]=useState('');
@@ -53,7 +55,7 @@ export function EmailGallery({ entries, language, onChoose, disabled }: {
   const ordered=filter==='recent'?[...entries].sort((a,b)=>marks.recent.indexOf(a.id)-marks.recent.indexOf(b.id)):
     [...entries].sort((a,b)=>priority(a.id)-priority(b.id));
   const filtered=ordered.filter(entry=>
-    (!category||entry.category===category) && (!style||(entry.design?.style??defaultStudioStyle(entry.template))===style) &&
+    (!topic||mailTopic(entry.template)===topic) && (!category||entry.category===category) && (!style||(entry.design?.style??defaultStudioStyle(entry.template))===style) &&
     (filter==='favorites'?marks.favorites.includes(entry.id):filter==='recent'?marks.recent.includes(entry.id):true) &&
     normalize(entry.label+' '+entry.subject+' '+entry.template+' '+(entry.englishContent?.subject??englishEmailCopy[entry.template]?.title??'')).includes(normalize(query.trim()))
   );
@@ -64,6 +66,7 @@ export function EmailGallery({ entries, language, onChoose, disabled }: {
     <div className="studio-filters">
       <label>{t('Caută','Search')}<span className="studio-search"><Search size={16} aria-hidden="true"/><input type="search" value={query} onChange={e=>{setPage(0);setQuery(e.target.value);}} /></span></label>
       <label>{t('Categorie','Category')}<FilterSelect value={category} onChange={e=>{setPage(0);setCategory(e.target.value);}}><option value="">{t('Toate','All')}</option><option value="transactional">{t('Tranzacțional','Transactional')}</option><option value="promotional">{t('Promoțional','Promotional')}</option></FilterSelect></label>
+      <label>{t('Subiect tematic','Topic')}<FilterSelect value={topic} onChange={e=>{setPage(0);setTopic(e.target.value);}}><option value="">{t('Toate subiectele','All topics')}</option>{mailTopics.map(item=><option key={item.id} value={item.id}>{en?item.en:item.ro}</option>)}</FilterSelect></label>
       <label>{t('Stil','Style')}<FilterSelect value={style} onChange={e=>{setPage(0);setStyle(e.target.value);}}><option value="">{t('Toate','All')}</option>{studioStyles.map(value=><option key={value}>{value}</option>)}</FilterSelect></label>
       <label>{t('Colecție','Collection')}<FilterSelect value={filter} onChange={e=>{setPage(0);setFilter(e.target.value);}}><option value="">{t('Toate','All')}</option><option value="favorites">{t('Favorite','Favourites')}</option><option value="recent">{t('Recente','Recent')}</option></FilterSelect></label>
       <label>{t('Limba modelului','Template language')}<FilterSelect value={lang} onChange={e=>setLang(e.target.value==='en'?'en':'ro')}><option value="ro">Română</option><option value="en">English</option></FilterSelect></label>

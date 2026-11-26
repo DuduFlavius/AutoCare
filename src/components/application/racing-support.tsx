@@ -31,17 +31,17 @@ export function RacingSupport({ role, accountId, preview, onFeedback }: { role: 
   const visibleArticles = articles.filter(article => article.join(' ').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
 
   return <section className="ac-support-page ac-reference-support sc-signature">
-    <header className="sc-hero">
+    <header className="sc-hero" data-staff={staff}>
       <div>
         <div className="sc-brand"><Headphones size={18} aria-hidden="true" /> AutoCare Support</div>
-        <h2>{t('Suntem aici pentru tine.', 'We’re here for you.')}</h2>
-        <p>{t('Orice întrebare. Orice problemă. Echipa AutoCare te ajută să mergi mai departe.', 'Any question. Any problem. The AutoCare team helps you get back on track.')}</p>
+        <h2>{staff?t('Inbox de suport','Support inbox'):t('Suntem aici pentru tine.', 'We’re here for you.')}</h2>
+        <p>{staff?t('Preia solicitările și răspunde din conversație.','Pick up requests and reply from the conversation.'):t('Scrie echipei AutoCare pentru întrebări despre cont, vehicule sau aplicație.','Contact the AutoCare team for help with your account, vehicles or app.')}</p>
       </div>
       {!staff && <div className="sc-availability" role="status">
         <strong><span data-state={availability?.state} />{availability ? states[availability.state] : t('Disponibilitate în curs de verificare', 'Checking team availability')}</strong>
         {availability && <p>{availability.message[language]}</p>}
       </div>}
-      {staff && role === 'founder' && <a href="/admin" className="sc-studio-link">{t('Deschide Panoul Fondator', 'Open Founder Studio')} <ArrowUpRight size={16} /></a>}
+      {staff && role === 'founder' && <a href="/admin?support=inbox" className="sc-studio-link">{t('Deschide Panoul Fondator', 'Open Founder Studio')} <ArrowUpRight size={16} /></a>}
     </header>
     <nav className="sc-navigation" aria-label={t('Secțiuni suport', 'Support sections')}>
       <button type="button" aria-pressed={tab === 'chat'} onClick={() => {setTab('chat');if(!staff)setNewRequest(value=>value+1);}}><MessageSquarePlus size={17} />{staff ? t('Inbox echipă', 'Team inbox') : t('Trimite o solicitare', 'Send a request')}</button>

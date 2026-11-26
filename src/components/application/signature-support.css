@@ -73,3 +73,19 @@ html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .sc-signature .s
  .sc-signature:has(.support-client .support-messages .support-message) .sc-availability { padding: 8px; }
  .sc-message-actions button { min-width: 44px; min-height: 44px; }
 }
+html body .ac-support-page.sc-signature .sc-hero {
+  background:linear-gradient(115deg,var(--color-surface),var(--color-primary-soft))!important;
+  padding:clamp(14px,2.2vw,28px)!important;
+}
+html body .ac-support-page.sc-signature .sc-hero h2 { font-size:clamp(23px,2.7vw,36px)!important; }
+html body .ac-support-page.sc-signature .sc-hero[data-staff=true] { grid-template-columns:minmax(0,1fr) auto; }
+html body .ac-support-page.sc-signature .sc-navigation button[aria-pressed=true] {
+  background:var(--color-primary-soft)!important; border-color:var(--color-primary)!important;
+  color:var(--color-text)!important; -webkit-text-fill-color:currentColor!important;
+}
+html body .ac-support-page.sc-signature :is(.sc-studio-link,.sc-navigation button):focus-visible {
+  outline:2px solid var(--color-primary)!important; outline-offset:3px!important;
+}
+@media(max-width:700px) {
+  html body .ac-support-page.sc-signature .sc-hero[data-staff=true] { grid-template-columns:minmax(0,1fr); }
+}

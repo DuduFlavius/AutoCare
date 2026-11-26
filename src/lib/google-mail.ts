@@ -302,10 +302,12 @@ export async function testGoogleMail(uid: string) {
     );
   }
   const testedAt = new Date().toISOString();
-  await db()
+  const updated = await db()
     .update(s.settings)
     .set({ value: seal({ ...value, testedAt }) })
-    .where(and(eq(s.settings.key, row.key), eq(s.settings.value, row.value)));
+    .where(and(eq(s.settings.key, row.key), eq(s.settings.value, row.value)))
+    .returning({key:s.settings.key});
+  if (!updated.length) throw new AppError(409, 'Gmail a acceptat testul, dar conexiunea s-a schimbat între timp. Reîncarcă starea și testează conexiunea curentă.');
   return { ok: true, to: c.from, testedAt, automaticEnabled: (await automationState()).enabled };
 }
 export async function disconnectGoogleMail(uid: string) {

@@ -351,12 +351,16 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
     }
     if (path[0] === 'mail' && path[1] === 'google') {
       await founder.requireFounder(uid);
+      const gmailCallback=googleMail.googleMailCallback();
+      const gmailOnThisOrigin=process.env.VERCEL_ENV!=='preview' &&
+        isGoogleMailProductionRequest(req,gmailCallback,process.env.RENDER==='true');
       if (route === 'mail/google/status' && method === 'GET')
-        return json(await googleMail.googleMailStatus(uid));
+        return json({...await googleMail.googleMailStatus(uid), availableHere:gmailOnThisOrigin,
+          studioUrl:new URL('/admin?mail=1',gmailCallback).href});
+      if (!gmailOnThisOrigin)
+        return json({ error: 'Conectarea și testarea Gmail sunt disponibile pe domeniul de producție configurat.' }, 403);
       if (route === 'mail/google/disconnect' && method === 'POST')
         return json(await googleMail.disconnectGoogleMail(uid));
-      if (!isGoogleMailProductionRequest(req,googleMail.googleMailCallback(),process.env.RENDER==='true'))
-        return json({ error: 'Conectarea și testarea Gmail sunt disponibile pe domeniul de producție configurat.' }, 403);
       if (route === 'mail/google/connect' && method === 'POST') {
         const result = await googleMail.beginGoogleMail(uid, sess.session.id);
         return Response.json({ url: result.url }, { headers: {

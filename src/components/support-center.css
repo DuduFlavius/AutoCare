@@ -398,3 +398,34 @@ html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspa
   background:#f4f7f9!important;
   color:#17323b!important;
 }
+
+/* Inbox controls stay compact while the conversation list and the chat scroll independently. */
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center :is(.sc-inbox-toolbar,.sc-customer-filters) {
+  display:flex!important; flex-wrap:wrap!important; align-items:end!important; gap:7px!important; min-width:0!important;
+}
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center :is(.sc-inbox-toolbar,.sc-customer-filters) button {
+  min-height:38px!important; display:inline-flex!important; align-items:center!important; gap:6px!important; padding:7px 9px!important;
+}
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center :is(.sc-inbox-toolbar,.sc-customer-filters) button[aria-pressed=true] {
+  background:var(--color-primary-soft)!important; color:var(--color-text)!important; -webkit-text-fill-color:currentColor!important; border-color:var(--color-primary)!important;
+}
+.sc-customer-filters label { display:grid; gap:5px; flex:1 1 130px; min-width:0; color:var(--color-text); font-size:13px; font-weight:650; }
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center .sc-control-fold {
+  flex:none!important; margin:0!important; border:1px solid var(--color-border)!important; border-radius:10px!important; background:var(--color-surface)!important;
+}
+.sc-control-fold>summary { display:flex; align-items:center; gap:7px; min-height:38px; padding:7px 10px; color:var(--color-text); list-style:none; }
+.sc-control-fold>summary>span { margin-inline-start:auto; border-radius:15px; background:var(--color-primary-soft); padding:2px 7px; }
+.sc-filter-fields { display:grid; gap:5px; max-height:190px; max-height:min(190px,24dvh); overflow:auto; overscroll-behavior:contain; padding:0 9px 9px; }
+.sc-filter-fields>label { display:grid; gap:4px; margin:0; font-size:12px; }
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center .support-conversation-menu-content {
+  width:min(260px,calc(100vw - 52px))!important; padding:7px!important; box-shadow:0 10px 24px #141d292b!important;
+}
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center .support-conversation-menu-content :is(.support-session-bar,.support-client-folders,.support-notification-optin) { padding:6px 0!important; gap:5px!important; }
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center .support-conversation-menu-content button {
+  min-height:38px!important; padding:6px 9px!important; justify-content:flex-start!important;
+}
+html body :is(.app-shell.ac-workspace.ac-studio,.founder-shell) .support-workspace#autocare-support#autocare-support.ac-support-center .sc-join-action {
+  display:inline-flex!important; align-items:center!important; gap:6px!important; margin-inline-start:auto!important;
+  padding:7px 10px!important; min-height:36px!important; background:var(--color-primary-soft)!important; color:var(--color-text)!important;
+  -webkit-text-fill-color:currentColor!important; border:1px solid var(--color-border)!important; border-radius:9px!important;
+}

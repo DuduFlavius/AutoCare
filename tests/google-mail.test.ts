@@ -247,3 +247,20 @@ test('Google redirect follows the configured official origin after a domain migr
  try{process.env.APP_URL='https://autocare-premium.vercel.app/';assert.equal(mail.googleMailCallback(),'https://autocare-premium.vercel.app/api/v1/mail/google/callback');}
  finally{if(old===undefined)delete process.env.APP_URL;else process.env.APP_URL=old;}
 });
+
+test('A provider-accepted test cannot unlock a Gmail connection removed while sending', async () => {
+  const state=await start();
+  await mail.completeGoogleMail(uid,session,callback(state.state,state.cookie));
+  await db().delete(s.requestLimits);
+  const provider=globalThis.fetch;
+  globalThis.fetch=(async(url,init)=>{
+    if(String(url).endsWith('/messages/send')) await mail.disconnectGoogleMail(uid);
+    return provider(url,init);
+  }) as typeof fetch;
+  try {
+    await assert.rejects(()=>mail.testGoogleMail(uid),{status:409});
+    assert.equal((await mail.googleMailStatus(uid)).connected,false);
+  } finally {
+    globalThis.fetch=provider;
+  }
+});

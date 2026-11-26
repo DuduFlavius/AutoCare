@@ -160,3 +160,11 @@ html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio button
 html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio :is(button,a,input,textarea,select,summary):focus-visible { outline: 2px solid var(--studio-accent) !important; outline-offset: 3px; }
 
 html body .ac-admin-frame .founder-signature[data-workspace="mail"] .mail-studio .studio-navigation button:not([aria-current]):not(:hover) { background: transparent !important; border-color: transparent !important; }
+.studio-gmail { display:grid; gap:10px; min-width:0; overflow-wrap:anywhere; }
+.mail-studio .studio-gmail-compact { padding:14px 16px; border:1px solid var(--studio-edge); border-radius:12px; background:var(--studio-panel); }
+.studio-gmail-status { display:flex; align-items:center; gap:12px; }
+.studio-gmail-status>span { display:grid; place-items:center; width:42px; height:42px; flex:none; border-radius:11px; background:var(--studio-selection,var(--color-primary-soft)); color:var(--studio-accent,var(--color-primary-ink)); }
+.studio-gmail-status p,.studio-gmail>p { margin:0; font-size:13px; }
+.studio-gmail a { display:inline-flex; align-items:center; gap:6px; min-height:40px; font-weight:650; }
+.studio-preset-field { display:grid; align-content:start; gap:6px; min-width:0; }
+.studio-classification { padding:12px; border:1px solid var(--studio-edge); background:var(--studio-raised); border-radius:10px; }

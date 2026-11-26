@@ -1,172 +1,86 @@
 'use client';
-import {useApplicationLocale} from './application-locale';
-import { useEffect, useState } from 'react';
-import { Mail } from 'lucide-react';
-type Status = {
-  configured: boolean;
-  missing?:string[];
-  callback?:string;
-  connected: boolean;
-  from?: string;
-  testedAt?: string | null;
-  reconnectRequired?: boolean;
+import { useApplicationLocale } from './application-locale';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { ArrowUpRight, CircleCheck, Mail, MailCheck, RefreshCw, Unplug } from 'lucide-react';
+import { requestConfirmation } from './premium-dialogs';
+
+export type GmailStatus = {
+  configured:boolean; connected:boolean; testedAt?:string|null; reconnectRequired?:boolean;
+  from?:string; missing?:string[]; callback?:string; availableHere?:boolean; studioUrl?:string;
 };
-async function request(action: string, method = 'GET') {
-  const response = await fetch('/api/v1/mail/google/' + action, { method, cache: 'no-store' });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error || 'Operațiunea Gmail nu a reușit.');
+
+export async function googleMailRequest(action:string, method='GET') {
+  const response=await fetch('/api/v1/mail/google/'+action,{method,cache:'no-store'});
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'Operațiunea Gmail nu a reușit.');
   return result;
 }
-export default function GoogleMailSettings() {
 
-  const locale=useApplicationLocale();
-const [status, setStatus] = useState<Status | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
-  useEffect(() => {
-    let cancelled = false;
-    const outcome = new URLSearchParams(window.location.search).get('gmail');
-    if (outcome) {
-      const url = new URL(window.location.href);
+export default function GoogleMailSettings({compact=false,onStatus}:{
+  compact?:boolean; onStatus?:(value:GmailStatus|null)=>void;
+}={}) {
+  const en=useApplicationLocale()==='en-GB';
+  const t=(ro:string,eng:string)=>en?eng:ro;
+  const [status,setStatus]=useState<GmailStatus|null>(null);
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  const [notice,setNotice]=useState('');
+  const running=useRef(false);
+  const update=useCallback((value:GmailStatus|null)=>{setStatus(value);onStatus?.(value);},[onStatus]);
+  useEffect(()=>{
+    let active=true;
+    const url=new URL(window.location.href);
+    const outcome=url.searchParams.get('gmail');
+    if(outcome){
       url.searchParams.delete('gmail');
-      window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+      window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+      if(outcome==='connected')setNotice(en?'Gmail connected. Send a test to finish.':'Gmail conectat. Trimite testul pentru a finaliza.');
+      if(outcome==='failed')setError(en?'Google authorization did not complete. Try connecting again.':'Autorizarea Google nu s-a încheiat. Reîncearcă conectarea.');
     }
-    if (outcome === 'connected')
-      setNotice('Autorizarea Gmail a fost salvată. Trimite un email de test.');
-    if (outcome === 'failed')
-      setError('Conectarea Gmail nu a fost finalizată sau a expirat. Reconectează contul.');
-    void request('status')
-      .then((value) => {
-        if (!cancelled) setStatus(value);
-      })
-      .catch(() => {
-        if (!cancelled) setError('Starea Gmail nu a putut fi încărcată.');
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-  async function copyCallback() {
-    if (!status?.callback) return;
-    try {
-      await navigator.clipboard.writeText(status.callback);
-      setNotice('Adresa OAuth a fost copiată.');
-      setError('');
-    } catch {
-      setError('Copiază manual adresa OAuth afișată mai jos.');
-    }
-  }
-  async function act(action: 'connect' | 'test' | 'disconnect') {
-    if (busy) return;
-    setBusy(true);
-    setError('');
-    setNotice('');
-    try {
-      const result = await request(action, 'POST');
-      if (action === 'connect') {
-        const url = new URL(result.url);
-        if (url.origin !== 'https://accounts.google.com' || url.pathname !== '/o/oauth2/v2/auth')
-          throw new Error('Adresă Google invalidă.');
-        window.location.assign(url.toString());
+    void googleMailRequest('status').then(value=>{if(active)update(value);}).catch(e=>{if(active)setError(e.message);});
+    return()=>{active=false;};
+  },[update,en]);
+  async function act(action:'connect'|'test'|'disconnect'|'status'){
+    if(running.current)return;
+    running.current=true;setBusy(true);setError('');setNotice('');
+    try{
+      if(action==='disconnect'&&!await requestConfirmation(t('Deconectezi adresa Gmail din AutoCare?','Disconnect the Gmail address from AutoCare?')))return;
+      const result=await googleMailRequest(action,action==='status'?'GET':'POST');
+      if(action==='connect'){
+        const url=new URL(result.url);
+        if(url.origin!=='https://accounts.google.com'||url.pathname!=='/o/oauth2/v2/auth')throw new Error('Adresă Google invalidă.');
+        window.location.assign(url.href);
         return;
       }
-      setStatus(await request('status'));
-      setNotice(
-        action === 'test'
-          ? `Emailul de test a fost trimis către ${result.to}. Verifică Inbox și Spam.`
-          : 'Autorizarea Gmail a fost eliminată din AutoCare.',
-      );
-    } catch (e) {
+      if(action==='test')setNotice(t('Gmail a acceptat testul pentru '+result.to+'. Verifică Inbox și Spam.','Gmail accepted the test for '+result.to+'. Check Inbox and Spam.'));
+      update(action==='status'?result:await googleMailRequest('status'));
+    }catch(e){
       setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
+      if(action!=='status')await googleMailRequest('status').then(update).catch(()=>{});
+    }finally{running.current=false;setBusy(false);}
   }
-  return (
-    <section className="card google-console-settings">
-      <div className="inline">
-        <Mail size={24} />
-        <div>
-          <p className="eyebrow">DOAR FONDATOR</p>
-          <h2>Conectare Gmail</h2>
-        </div>
-      </div>
-      <p>
-        Conectează contul oficial pentru trimitere prin Gmail API. Google solicită exclusiv
-        permisiunea de a trimite emailuri.
-      </p>
-      {!status ? (
-        <p>Se încarcă starea conexiunii…</p>
-      ) : (
-        <>
-          <p>
-            <strong>
-              {status.connected
-                ? 'Autorizare salvată'
-                : status.reconnectRequired
-                  ? 'Reconectare necesară'
-                  : 'Neconectat'}
-            </strong>
-            {status.from ? ` · ${status.from}` : ''}
-          </p>
-          {!status.configured && <div className="ac-email-missing"><p>Configurarea Gmail pe server este incompletă.</p><ul>{status.missing?.map(key=><li key={key}><code>{key}</code></li>)}</ul>{status.callback&&<p>OAuth redirect URI: <code>{status.callback}</code></p>}</div>}
-          {!status.configured && <div className="ac-email-setup">
-            <strong>Configurare inițială</strong>
-            <ol>
-              <li>Activează Gmail API în proiectul Google Cloud și creează un client OAuth de tip Web application.</li>
-              <li>Adaugă adresa OAuth de mai sus la Authorized redirect URIs.</li>
-              <li>În Render → Environment, completează Client ID, Client secret și adresa Gmail oficială în variabilele afișate. Salvează și publică modificările.</li>
-              <li>Revino aici, conectează contul Google și trimite emailul de test.</li>
-            </ol>
-            <div className="inline">
-              <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener noreferrer">Deschide Google Cloud</a>
-              <a href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank" rel="noopener noreferrer">Activează Gmail API</a>
-              {status.callback&&<button type="button" onClick={()=>void copyCallback()}>Copiază adresa OAuth</button>}
-            </div>
-          </div>}
-          {status.testedAt && (
-            <p>Ultimul test trimis: {new Date(status.testedAt).toLocaleString(locale)}</p>
-          )}
-          <div className="inline">
-            <button
-              className="primary"
-              disabled={busy || !status.configured}
-              onClick={() => void act('connect')}
-            >
-              {status.connected ? 'Reconectează Gmail' : 'Conectează Gmail'}
-            </button>
-            <button disabled={busy || !status.connected} onClick={() => void act('test')}>
-              Trimite email de test
-            </button>
-            {status.connected && (
-              <button disabled={busy} onClick={() => void act('disconnect')}>
-                Deconectează Gmail
-              </button>
-            )}
-          </div>
-          {status.from && (
-            <p className="small muted">
-              Testul manual se trimite exclusiv către {status.from}, cel mult o dată pe minut.
-            </p>
-          )}
-        </>
-      )}
-      {error && (
-        <p className="error" role="alert">
-          {error}
-        </p>
-      )}
-      {notice && (
-        <p className="notice" role="status">
-          {notice}
-        </p>
-      )}
-      <p className="small muted">
-        Notificările automate Gmail sunt controlate separat din Mail Center și prin configurarea
-        serverului. Emailurile existente continuă prin serviciul configurat anterior. Deconectarea
-        elimină autorizarea locală; accesul Google poate fi revocat și din contul Google.
-      </p>
-    </section>
-  );
+  const ready=Boolean(status?.connected&&status.testedAt&&!status.reconnectRequired);
+  const canTest=Boolean(status?.availableHere&&status.connected&&!status.reconnectRequired);
+  const label=!status?t('Se verifică Gmail…','Checking Gmail…'):!status.configured?t('Configurare Gmail necesară','Gmail setup required'):
+    status.reconnectRequired?t('Reconectare necesară','Reconnect required'):!status.connected?t('Gmail deconectat','Gmail disconnected'):
+    ready?t('Gmail pregătit pentru trimitere','Gmail ready to send'):t('Gmail conectat · test necesar','Gmail connected · test needed');
+  return <section className={'google-console-settings studio-gmail '+(compact?'studio-gmail-compact':'card')} aria-busy={busy}>
+    <div className="studio-gmail-status"><span aria-hidden="true">{ready?<CircleCheck size={21}/>:<Mail size={21}/>}</span>
+      <div><h3>{label}</h3>{status?.from&&<p>{status.from}{status.testedAt?' · '+new Date(status.testedAt).toLocaleString(en?'en-GB':'ro-RO'):''}</p>}</div>
+    </div>
+    {status?.availableHere===false&&<p>{t('Conectarea și testul Gmail se fac pe domeniul oficial AutoCare.','Connect and test Gmail on the official AutoCare domain.')}</p>}
+    {canTest&&!ready&&<p>{t('Testul se trimite exclusiv către adresa Gmail conectată.','The test is sent only to the connected Gmail address.')}</p>}
+    <div className="inline">
+      {status?.availableHere===false&&status.studioUrl&&<a href={status.studioUrl}>{t('Deschide Mail Studio oficial','Open official Mail Studio')} <ArrowUpRight size={15}/></a>}
+      {canTest&&(!ready||!compact)&&<button className="studio-primary primary" type="button" disabled={busy} onClick={()=>void act('test')}><MailCheck size={17}/>{t('Trimite email de test','Send test email')}</button>}
+      {status?.availableHere&&status.configured&&(!status.connected||status.reconnectRequired)&&<button className="studio-primary primary" type="button" disabled={busy} onClick={()=>void act('connect')}>{t(status.reconnectRequired?'Reconectează Gmail':'Conectează Gmail',status.reconnectRequired?'Reconnect Gmail':'Connect Gmail')}</button>}
+      {!compact&&status?.availableHere&&status.connected&&<button type="button" disabled={busy} onClick={()=>void act('disconnect')}><Unplug size={16}/>{t('Deconectează','Disconnect')}</button>}
+      <button type="button" disabled={busy} onClick={()=>void act('status')}><RefreshCw size={16}/>{t('Verifică starea','Refresh status')}</button>
+    </div>
+    {!compact&&status&&!status.configured&&<details><summary>{t('Detalii de configurare OAuth','OAuth setup details')}</summary>
+      <ul>{status.missing?.map(key=><li key={key}><code>{key}</code></li>)}</ul>{status.callback&&<p>Redirect URI · <code>{status.callback}</code></p>}
+    </details>}
+    {error&&<p className="error" role="alert">{error}</p>}
+    {notice&&<p className="notice" role="status">{notice}</p>}
+  </section>;
 }

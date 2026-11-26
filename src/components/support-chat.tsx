@@ -18,6 +18,8 @@ import {
   Bell,
   BarChart3,
   MoreHorizontal,
+  SlidersHorizontal,
+  Inbox,
   Paperclip,
   PanelRight,
   Search,
@@ -138,6 +140,21 @@ export default function SupportChat({
   const en=locale==='en-GB',t=(ro:string,english:string)=>en?english:ro;
   const [view,setView]=useState<'inbox'|'statistics'>('inbox');
   const workspace=useRef<HTMLElement>(null);
+  const conversationMenu=useRef<HTMLDetailsElement>(null);
+  const [customerHistory,setCustomerHistory]=useState('');
+  useEffect(()=>{
+    function outside(event:PointerEvent){
+      const menu=conversationMenu.current;
+      if(menu?.open && event.target instanceof Node && !menu.contains(event.target)) menu.open=false;
+    }
+    function escape(event:KeyboardEvent){
+      const menu=conversationMenu.current;
+      if(event.key==='Escape'&&menu?.open){menu.open=false;menu.querySelector('summary')?.focus();}
+    }
+    document.addEventListener('pointerdown',outside);
+    document.addEventListener('keydown',escape);
+    return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',escape);};
+  },[]);
   const sendLock = useRef(false);
   const composingNew = useRef(false);
   const newRequestSeen = useRef(0);
@@ -198,6 +215,9 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     if (staff || newRequest === newRequestSeen.current) return;
     newRequestSeen.current = newRequest;
     if (sendLock.current) return;
+    setStatus('open');
+    setCustomerHistory('');
+    setQuery('');
     composingNew.current = true;
     ++epoch.current;
     selectedRef.current = null;
@@ -524,9 +544,22 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
     (!platformFilter || thread.platform === platformFilter) &&
     (!assigneeFilter || (assigneeFilter === 'mine' ? !!selfId && thread.assignedTo === selfId : !thread.assignedTo)),
   );
+  const customerThreads=visible.filter(thread=>!customerHistory||thread.status===customerHistory);
+  const filterCount=[unreadOnly,priorityFilter,categoryFilter,languageFilter,platformFilter,assigneeFilter].filter(Boolean).length;
+  function clearFilters(){setUnreadOnly(false);setPriorityFilter('');setCategoryFilter('');setLanguageFilter('');setPlatformFilter('');setAssigneeFilter('');}
   const canWrite = staff
     ? !!current && current.status === 'open' && detail?.thread.id === selected && !!selfId && current.assignedTo === selfId && entered
     : true;
+  async function joinCurrent() {
+    if(!current||busy||preview||!selfId)return;
+    setBusy(true);setError('');
+    try {
+      await request('/'+current.id+'/join','POST');
+      joined.current.add(current.id);setEntered(true);
+      await refresh();
+    }catch(e){setError((e as Error).message);}
+    finally{setBusy(false);}
+  }
   useEffect(() => {
     if (!staff || !canWrite || !selected || preview) return;
     const ping = () => {
@@ -626,20 +659,19 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               onChange={(e) => setQuery(e.target.value)}
             />
           </label>
-          <div className="support-inbox-tools">
-            <label><input type="checkbox" checked={unreadOnly} onChange={event => setUnreadOnly(event.target.checked)} /> Doar necitite</label>
-            <details><summary><MoreHorizontal size={16}/>{t('Filtre','Filters')}</summary>
-              <label>Prioritate<FilterSelect value={priorityFilter} onChange={event => setPriorityFilter(event.target.value)}>
-                <option value="">Toate</option><option value="normal">Normală</option><option value="high">Ridicată</option><option value="urgent">Urgentă</option>
-              </FilterSelect></label>
-              <label>Responsabil<FilterSelect value={assigneeFilter} onChange={event => setAssigneeFilter(event.target.value)}>
-                <option value="">Toți</option><option value="mine">Atribuite mie</option><option value="unassigned">Neatribuite</option>
-              </FilterSelect></label>
-            </details>
+          <div className="sc-inbox-toolbar">
+            <button type="button" aria-pressed={unreadOnly} onClick={()=>setUnreadOnly(value=>!value)}><Inbox size={15}/>{t('Necitite','Unread')}</button>
             <button type="button" className="support-stats-trigger" onClick={()=>setView('statistics')}><BarChart3 size={15}/>{t('Statistici','Statistics')}</button>
           </div>
-          <details className="sc-inbox-filters">
-            <summary>{t('Categorie, limbă, platformă', 'Category, language, platform')}</summary>
+          <details className="sc-inbox-filters sc-control-fold">
+            <summary><SlidersHorizontal size={16}/>{t('Filtre inbox','Inbox filters')}{filterCount>0&&<span>{filterCount}</span>}</summary>
+            <div className="sc-filter-fields">
+              <label>{t('Prioritate','Priority')}<FilterSelect value={priorityFilter} onChange={event => setPriorityFilter(event.target.value)}>
+                <option value="">Toate</option><option value="normal">Normală</option><option value="high">Ridicată</option><option value="urgent">Urgentă</option>
+              </FilterSelect></label>
+              <label>{t('Responsabil','Assignee')}<FilterSelect value={assigneeFilter} onChange={event => setAssigneeFilter(event.target.value)}>
+                <option value="">Toți</option><option value="mine">Atribuite mie</option><option value="unassigned">Neatribuite</option>
+              </FilterSelect></label>
             <label>{t('Categorie','Category')}<FilterSelect value={categoryFilter} onChange={event=>setCategoryFilter(event.target.value)}>
               <option value="">{t('Toate','All')}</option>
               {Object.entries(supportCategories).map(([key,value])=><option key={key} value={key}>{value[en ? 1 : 0]}</option>)}
@@ -650,6 +682,8 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             <label>{t('Platformă','Platform')}<FilterSelect value={platformFilter} onChange={event=>setPlatformFilter(event.target.value)}>
               <option value="">{t('Toate','All')}</option><option value="web">Web</option><option value="android">Android</option><option value="ios">iOS</option>
             </FilterSelect></label>
+              <button type="button" onClick={clearFilters}>{t('Resetează filtrele','Clear filters')}</button>
+            </div>
           </details>
           <div className="support-thread-list">
             {loading ? (
@@ -662,7 +696,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                   className={'support-thread ' + (selected === thread.id ? 'selected' : '')}
                   key={thread.id}
                 >
-                  <button className="support-thread-select" onClick={() => { setEntered(false); void openThread(thread, false); }}>
+                  <button className="support-thread-select" aria-pressed={selected===thread.id} onClick={() => { setEntered(false); void openThread(thread, false); }}>
                     <span data-user-content className="support-avatar">{initials(thread.name)}</span>
                     <span>
                       <strong data-user-content>
@@ -697,7 +731,17 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       <div className="support-chat-panel" data-history={!staff&&historyView || undefined}>
         {!staff && historyView && <section className="support-request-list" aria-label={t('Cererile mele', 'My requests')}>
           <label className="sc-history-search"><Search size={16}/><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={t('Caută conversațiile tale','Search your conversations')} aria-label={t('Caută conversații','Search conversations')} /></label>
-          {loading ? <p role="status">{t('Se încarcă…', 'Loading…')}</p> : threads.length ? threads.map(thread => (
+          <div className="sc-customer-filters">
+            <label>{t('Stare','Status')}<FilterSelect value={status==='trashed'?'trashed':customerHistory} onChange={event=>{
+              const next=event.target.value;
+              setStatus(next==='trashed'?'trashed':'open');setCustomerHistory(next==='trashed'?'':next);
+            }}><option value="">{t('Toate conversațiile','All conversations')}</option><option value="open">{t('Deschise','Open')}</option><option value="completed">{t('Finalizate','Completed')}</option><option value="trashed">{t('Coș de gunoi','Trash')}</option></FilterSelect></label>
+            <label>{t('Categorie','Category')}<FilterSelect value={categoryFilter} onChange={event=>setCategoryFilter(event.target.value)}>
+              <option value="">{t('Toate categoriile','All categories')}</option>{Object.entries(supportCategories).map(([key,value])=><option key={key} value={key}>{value[en?1:0]}</option>)}
+            </FilterSelect></label>
+            <button type="button" aria-pressed={unreadOnly} onClick={()=>setUnreadOnly(value=>!value)}><Inbox size={16}/>{t('Necitite','Unread')}</button>
+          </div>
+          {loading ? <p role="status">{t('Se încarcă…', 'Loading…')}</p> : customerThreads.length ? customerThreads.map(thread => (
             <button type="button" key={thread.id} onClick={() => { void openThread(thread, false); onOpenConversation?.(); }}>
               <span className="support-request-icon"><CarFront size={22} aria-hidden="true"/></span>
               <span className="support-request-content">
@@ -712,7 +756,9 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                 </span>
               </span>
             </button>
-          )) : <p>{t('Nu ai încă solicitări. Scrie-ne în fila Conversație.', 'No requests yet. Send us a message in Conversation.')}</p>}
+          )) : <p role="status">{query||unreadOnly||categoryFilter||customerHistory
+            ? t('Nicio conversație pentru aceste filtre.', 'No conversations match these filters.')
+            : t('Nu există conversații aici. Poți trimite o solicitare din Centrul de suport.', 'There are no conversations here. You can send a request from the Support Center.')}</p>}
         </section>}
 
         {!staff && threads.length > 1 && (
@@ -765,7 +811,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
               <span className="support-header-role">Conversație privată</span>
             </div>
           )}
-          <details className="support-conversation-menu"><summary aria-label={t('Opțiuni conversație','Conversation options')}><MoreHorizontal size={21}/></summary><div className="support-conversation-menu-content">{onFeedback && <button type="button" onClick={event => {
+          <details ref={conversationMenu} className="support-conversation-menu"><summary aria-label={t('Opțiuni conversație','Conversation options')}><MoreHorizontal size={21}/></summary><div className="support-conversation-menu-content" onClick={event=>{if(event.target instanceof Element && event.target.closest('button'))event.currentTarget.closest('details')?.removeAttribute('open');}}>{onFeedback && <button type="button" onClick={event => {
             event.currentTarget.closest('details')?.removeAttribute('open');
             onFeedback();
           }}><Star size={16}/>{t('Trimite feedback', 'Send feedback')}</button>}        {!staff && (
@@ -786,17 +832,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             </div>
             <div className="support-session-actions">
               {current.status === 'open' && (!current.assignedTo || current.assignedTo === selfId) && (!entered ?
-                <button type="button" className="support-session-enter" disabled={busy || preview || !selfId} onClick={async () => {
-                  setBusy(true); setError('');
-                  try {
-                    await request('/' + current.id + '/join', 'POST');
-                    joined.current.add(current.id);
-                    setEntered(true);
-
-                    await refresh();
-                  } catch (e) { setError((e as Error).message); }
-                  finally { setBusy(false); }
-                }}><LogIn size={17}/> {current.assignedTo ? 'Intră în conversație' : 'Preia conversația'}</button>
+                <button type="button" className="support-session-enter" disabled={busy || preview || !selfId} onClick={()=>void joinCurrent()}><LogIn size={17}/> {current.assignedTo ? 'Intră în conversație' : 'Preia conversația'}</button>
                 : <button type="button" className="support-session-exit" onClick={() => { setEntered(false); setNotice('Ai ieșit din conversație. Responsabilul rămâne atribuit.'); }}><LogOut size={17}/> Ieși din conversație</button>
               )}
               {current.status === 'open' && (role !== 'assistant' || !current.assignedTo || current.assignedTo === selfId) && (
@@ -981,6 +1017,8 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
                   : current.assignedTo === selfId ? t('Intră în conversație ca să răspunzi.', 'Join the conversation to reply.')
                   : t('Preia conversația înainte să răspunzi.', 'Take ownership of the conversation to reply.')}
             </span>
+            {staff&&current?.status==='open'&&(!current.assignedTo||current.assignedTo===selfId)&&!entered&&
+              <button className="sc-join-action" type="button" disabled={busy||preview||!selfId} onClick={()=>void joinCurrent()}><LogIn size={16}/>{current.assignedTo?t('Intră în conversație','Join conversation'):t('Preia conversația','Take conversation')}</button>}
           </footer>
         ) : (
           <form className="support-composer" onSubmit={send} aria-busy={busy}>
