@@ -1,3 +1,4 @@
+import {supportAppDestination} from '@/lib/app-links';
 import {automationSettings,saveAutomationSettings} from '@/lib/mail-lifecycle';
 import { recipientAllowed } from '@/lib/mail-policy';
 import { effectiveRole } from '@/lib/permissions';
@@ -1235,7 +1236,7 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
                 await recipientAllowed(user.id, 'transactional', false, 'support_reply')) {
                 const content = renderEmail('support_reply', {
                   name:user.name, language, subject:title, message:bodyText,
-                  ctaLabel:en ? 'View support message' : 'Vezi mesajul de suport', ctaPath:'/cont?tab=Centru%20de%20suport',
+                  ctaLabel:en ? 'View support message' : 'Vezi mesajul de suport', ctaPath:supportAppDestination(messageResult.threadId),
                 });
                 tasks.push(sendMail(user.email, title, content.text,
                   'support/' + messageResult.message.id + '/' + user.id, content, {userId:user.id, template:'support_reply'}));

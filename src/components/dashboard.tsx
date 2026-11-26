@@ -342,7 +342,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   );
 }
 
-export default function Dashboard({ name: initialName, accountId, previewData, initialTab='Dashboard', initialVehicle, initialDrive, smartDriveEnabled=true }: { smartDriveEnabled?:boolean; name: string; accountId?: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string }) {
+export default function Dashboard({ name: initialName, accountId, previewData, initialTab='Dashboard', initialVehicle, initialDrive, initialRecord, initialThread, smartDriveEnabled=true }: { smartDriveEnabled?:boolean; name: string; accountId?: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string; initialRecord?:string; initialThread?:string }) {
   const [name,setName]=useState(initialName);
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
@@ -384,6 +384,16 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
     [admin, setAdmin] = useState<any>(null),
     [invoices, setInvoices] = useState<any[]>([]),
     [_calendarMonth, _setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
+  const openedRecord = useRef('');
+  useEffect(()=>{
+    if(!data||!initialRecord||openedRecord.current===initialRecord)return;
+    openedRecord.current=initialRecord;
+    const expected=tab==='Documente'?'document':tab==='Întreținere'?'service':tab==='Cheltuieli'?'expense':null;
+    if(!expected)return;
+    const record=data.records.find(row=>row.id===initialRecord&&row.kind===expected);
+    if(record)setModal({kind:expected,record});
+    else setNotice(language==='en'?'This record is unavailable in your account.':'Această înregistrare nu este disponibilă în contul tău.');
+  },[data,initialRecord,tab,language]);
   const [androidApk,setAndroidApk]=useState(false);
   useEffect(()=>setAndroidApk(Capacitor.isNativePlatform()&&Capacitor.getPlatform()==='android'),[]);
   const [smartDriveOpened,setSmartDriveOpened]=useState(normalizeWorkspaceTab(initialTab)==='Plan întreținere');
@@ -1640,7 +1650,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
               </div>
             )}
             {tab === 'Centru de suport' && (
-              <RacingSupport accountId={accountId} role={data.profile.role} preview={!!previewData} onFeedback={()=>navigate('Feedback')} />
+              <RacingSupport initialThread={initialThread} accountId={accountId} role={data.profile.role} preview={!!previewData} onFeedback={()=>navigate('Feedback')} />
             )}
             {tab==='Abonament'&&<><PlayBillingPanel onUpdated={()=>refresh(true)}/><SubscriptionPage data={data} language={language} busy={busy} invoices={invoices} portal={()=>void act(async()=>{if(hasPlayBilling())throw new Error('Gestionează abonamentul din Google Play.');if(previewData)throw new Error('Disponibil în contul autentificat.');const out=await api('billing/portal','POST');window.location.assign(out.url);},'')} checkout={startCheckout}/></>}
             {tab==='Rapoarte'&&(data.premium?<PremiumDownloads data={data} language={language} currency={currency} rate={currentRate} preview={!!previewData} navigate={navigate}/>:<section className="card studio-report-intro"><Download size={32}/><h2>{language==='en'?'Reports, ready when you need them.':'Rapoartele tale, gata când ai nevoie.'}</h2><p>{language==='en'?'PDF and CSV reports are included with Premium. Your personal data export remains free in account settings.':'Rapoartele PDF și CSV sunt incluse cu Premium. Exportul datelor personale rămâne gratuit în setările contului.'}</p><button className="primary" onClick={()=>navigate('Premium')}>{language==='en'?'Compare plans':'Compară planurile'}</button></section>)}
@@ -1933,6 +1943,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
               : modal.record ? (language === 'en' ? 'Edit expense' : 'Editează cheltuiala') : (language === 'en' ? 'Add expense' : 'Adaugă cheltuială')}
             icon={modal.kind === 'vehicle' ? CarFront : modal.kind === 'service' ? Wrench : modal.kind === 'document' ? Files : Wallet}
             compact={modal.kind === 'expense'}
+            wide={modal.kind !== 'expense'}
             busy={busy || recordSaving}
             onClose={closeRecord}
           >
@@ -1952,7 +1963,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
                 onDirty={setRecordDirty}
                 onCancel={closeRecord}
                 uploading={recordUploading}
-                exchangeRate={currentRate}
+                exchangeRate={currentRate} displayCurrency={currency.toUpperCase()==='EUR'?'EUR':'RON'}
                 completeAction={modal.kind === 'service' && modal.record && !modal.completionOf &&
                   !modal.record.cancelled && data.premium && isPlannedService(modal.record, nowDate) &&
                   calendarRecordDate(modal.record, nowDate) && (

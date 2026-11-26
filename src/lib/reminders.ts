@@ -1,3 +1,4 @@
+import {recordAppDestination} from './app-links';
 import { automationSettings } from './mail-lifecycle';
 import { recordCategory } from './record-categories';
 import {accountPreferences,reminderPreference} from './account-preferences';
@@ -134,7 +135,7 @@ export const realTransport: Transport = async (n, email) => {
     const days = deadline ? Math.round((Date.parse(deadline) - Date.parse(n.localDate)) / 86400000) : null;
     const content = renderEmail('reminder', {language, message:reminderMessage(record,vehicle,n.offset,days,en), name:await userEmailName(n.userId), facts,
       ctaLabel:en ? (service?'Open maintenance':'Open documents') : (service?'Vezi întreținerea':'Vezi documentele'),
-      ctaPath:'/cont?tab='+encodeURIComponent(service?'Întreținere':'Documente'),
+      ctaPath:recordAppDestination(service?'service':'document',n.recordId),
       preheader:en?'Review the deadline in your AutoCare garage.':'Verifică termenul în garajul tău AutoCare.'});
     return sendMail(email,content.subject,content.text,`reminder/${n.id}`,content);
   }

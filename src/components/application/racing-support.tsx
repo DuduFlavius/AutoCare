@@ -14,7 +14,7 @@ const articles = [
   ['Notificări', 'Notifications', 'Cum aleg ce notificări primesc?', 'How do I choose my notifications?', 'Deschide Setări → Notificări și email și activează canalele și mementourile de care ai nevoie.', 'Open Settings → Notifications & email and select the channels and reminders you need.'],
 ];
 
-export function RacingSupport({ role, accountId, preview, onFeedback }: { role: string; accountId?: string; preview: boolean; onFeedback: () => void }) {
+export function RacingSupport({ role, accountId, preview, onFeedback, initialThread }: { role: string; accountId?: string; initialThread?:string; preview: boolean; onFeedback: () => void }) {
   const language = useApplicationLanguage();
   const en = language === 'en';
   const t = (ro: string, english: string) => en ? english : ro;
@@ -51,7 +51,7 @@ export function RacingSupport({ role, accountId, preview, onFeedback }: { role: 
     </nav>
     <div hidden={tab === 'faq'} className="ac-support-conversation">
       <SupportChat key={accountId} accountId={accountId} role={role} preview={preview} onFeedback={onFeedback}
-        newRequest={newRequest} historyView={tab === 'requests'} onAvailability={setAvailability} onOpenConversation={() => setTab('chat')} />
+        initialThread={initialThread} newRequest={newRequest} historyView={tab === 'requests'} onAvailability={setAvailability} onOpenConversation={() => setTab('chat')} />
     </div>
     {tab === 'faq' && <div className="sc-help">
       <label><Search size={19} aria-hidden="true" /><span className="sr-only">{t('Caută în centrul de ajutor', 'Search the help center')}</span>

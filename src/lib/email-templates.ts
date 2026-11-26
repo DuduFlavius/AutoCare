@@ -1,3 +1,4 @@
+import {safeAppDestination} from './app-links';
 import {studioExtraTemplates,type StudioDesign} from './mail-studio-templates';
 import {emailAssets} from './email-assets';
 import {englishEmailCopy} from './email-copy-en';
@@ -193,7 +194,7 @@ export function renderEmail(template: EmailTemplate, input: TemplateInput = {}, 
   const website=link(en?'/en':'/');
   const url = input.actionUrl || link(input.ctaPath || t.path);
   const parsed = new URL(url);
-  const primaryUrl=isSecurityAction?url:link('/open-app?next='+encodeURIComponent(parsed.pathname+parsed.search+parsed.hash)+(en?'&lang=en':''));
+  const primaryUrl=isSecurityAction?url:link('/open-app?next='+encodeURIComponent(safeAppDestination(parsed.pathname+parsed.search+parsed.hash))+(en?'&lang=en':''));
   if (
     !['https:', 'http:'].includes(parsed.protocol) ||
     parsed.origin !== new URL(baseOrigin).origin ||

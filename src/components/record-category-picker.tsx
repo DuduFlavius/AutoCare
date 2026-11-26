@@ -57,16 +57,23 @@ export default function RecordCategoryPicker({
   onSelect,
   onCancel,
   back = false,
+  recent = [],
 }: {
   kind: RecordKind;
   selected: string;
   onSelect: (value: string) => void;
   onCancel: () => void;
   back?: boolean;
+  recent?:string[];
 }) {
   const [query, setQuery] = useState('');
+  const [filter,setFilter]=useState('');
   const en = useApplicationLanguage() === 'en';
+  const groups=[['periodic','Revizii','Routine'],['safety','Siguranță','Safety'],['systems','Sisteme','Systems'],['other','Altele','Other']] as const;
+  const frequent=kind==='service'?['Schimb ulei','Revizie generală','Anvelope','Distribuție']:
+    kind==='document'?['RCA','ITP','Rovinietă','CASCO']:['Combustibil','Service','Altele'];
   const options = categoriesFor(kind).filter((c) =>
+    (!filter || (filter==='recent'?recent.includes(c.value):filter==='frequent'?frequent.includes(c.value):c.group===filter)) &&
     normalizeWorkspaceSearch([c.ro, c.en, c.description, c.descriptionEn].join(' ')).includes(
       normalizeWorkspaceSearch(query),
     ),
@@ -87,6 +94,10 @@ export default function RecordCategoryPicker({
           placeholder={en ? 'Search oil, brakes, insurance…' : 'Caută ulei, frâne, asigurare…'}
         />
       </label>
+      <div className="sf2-category-controls" role="group" aria-label={en?'Category filters':'Filtre categorii'}>
+        {([['','Toate','All'],['frequent','Frecvente','Frequent'],...(recent.length?[['recent','Recente','Recent']]:[]),...(kind==='service'?groups:[])]).map(([value,ro,english])=>
+          <button type="button" className="sf-secondary" key={value} aria-pressed={filter===value} onClick={()=>setFilter(value)}>{en?english:ro}</button>)}
+      </div>
       <div className="sf-category-grid">
         {options.map((c) => {
           const Icon = categoryIcon(c.icon);

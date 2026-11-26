@@ -114,3 +114,11 @@ test('RCA requires expiry and retains configured document day reminders on edits
  const inherit=prepareRecordDraft(form({expiresAt:'2031-12-01',ac_alertDays:'inherit'}),{...options,existingParts:saved.parts});
  assert.equal(parseServiceDetails(inherit.parts).alertDays,undefined);
 });
+
+test('Explicit service threshold beats the calculated timing interval and preserves recorded mileage',()=>{
+  const f=form({odometer:'81000',nextKm:'95000',ac_intervalIntretinere:'15000',ac_manualServiceDue:'1'});
+  assert.equal(recordDraftSchedule(f,'service','Distribuție').nextKm,95000);
+  f.delete('ac_manualServiceDue');
+  assert.equal(recordDraftSchedule(f,'service','Distribuție').nextKm,96000);
+  assert.equal(f.get('odometer'),'81000');
+});

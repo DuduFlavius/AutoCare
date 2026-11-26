@@ -1,3 +1,4 @@
+import {supportAppDestination} from './app-links';
 import { studioStyles } from './mail-studio-templates';
 import {accountPreferences} from './account-preferences';
 import {campaignEnglish,englishMailSchema} from './mail-localization';
@@ -516,7 +517,7 @@ export async function deliverCampaign(
             {label:language==='en'?'Get started with AutoCare':'Descoperă AutoCare',path:language==='en'?'/en/how-it-works':'/cum-functioneaza'},
             {label:language==='en'?'Contact support':'Contactează echipa de suport',path:'/cont?tab=Centru+de+suport'},
           ]} : {}),
-          ...(candidate.context.threadId ? {ctaPath:'/cont?tab=Centru+de+suport'+(language==='en'?'&lang=en':'')} : {}),
+          ...(candidate.context.threadId ? {ctaPath:supportAppDestination(candidate.context.threadId)} : {}),
           ...(campaign.template==='onboarding_guide' ? {links:[
             {label:language==='en'?'Explore SmartDrive GPS':'Descoperă SmartDrive GPS',path:language==='en'?'/en/smartdrive-gps':'/smartdrive-gps'},
             {label:'AutoCare AI',path:language==='en'?'/en/automotive-ai':'/autocare-ai'},

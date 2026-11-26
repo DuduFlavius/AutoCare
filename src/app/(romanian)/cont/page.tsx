@@ -1,3 +1,4 @@
+import {workspaceEntryId} from '@/lib/app-links';
 import { normalizeWorkspaceTab } from '@/lib/workspace';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -6,8 +7,11 @@ import Dashboard from '@/components/dashboard';
 import { PublicShell } from '@/components/public-shell';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Garajul meu', robots: { index: false, follow: false } };
-export default async function Account({searchParams}:{searchParams:Promise<{tab?:string;drive?:string;vehicle?:string;plan?:string;currency?:string}>}) {
+export default async function Account({searchParams}:{searchParams:Promise<{tab?:string;drive?:string;vehicle?:string;plan?:string;currency?:string;record?:string;thread?:string}>}) {
   const params=await searchParams;
+  const tab=normalizeWorkspaceTab(params.tab);
+  const record=['Documente','Întreținere','Cheltuieli'].includes(tab)?workspaceEntryId(params.record):undefined;
+  const thread=tab==='Centru de suport'?workspaceEntryId(params.thread):undefined;
   let sess;
   try {
     sess = await auth().api.getSession({ headers: await headers() });
@@ -28,6 +32,6 @@ export default async function Account({searchParams}:{searchParams:Promise<{tab?
     !sess?.user ||
     !sess.user.emailVerified
   )
-    redirect(params.tab ? '/autentificare?' + new URLSearchParams({ next: '/cont?' + new URLSearchParams({ tab: normalizeWorkspaceTab(params.tab), ...(params.drive ? { drive: params.drive } : {}), ...(params.plan && ['monthly', 'quarterly', 'annual'].includes(params.plan) ? { plan: params.plan } : {}), ...(params.currency && ['RON','EUR'].includes(params.currency.toUpperCase()) ? {currency:params.currency.toUpperCase()} : {}), ...(params.vehicle && ['Garaj', 'AutoCare AI'].includes(normalizeWorkspaceTab(params.tab)) ? { vehicle: params.vehicle } : {}) }) }).toString() : '/autentificare');
-  return <Dashboard key={sess.user.id} accountId={sess.user.id} smartDriveEnabled name={sess.user.name} initialTab={normalizeWorkspaceTab(params.tab)} initialDrive={params.drive} initialVehicle={['Garaj', 'AutoCare AI'].includes(normalizeWorkspaceTab(params.tab)) ? params.vehicle : undefined} />;
+    redirect(params.tab ? '/autentificare?' + new URLSearchParams({ next: '/cont?' + new URLSearchParams({ tab, ...(record?{record}:{}), ...(thread?{thread}:{}), ...(params.drive ? { drive: params.drive } : {}), ...(params.plan && ['monthly', 'quarterly', 'annual'].includes(params.plan) ? { plan: params.plan } : {}), ...(params.currency && ['RON','EUR'].includes(params.currency.toUpperCase()) ? {currency:params.currency.toUpperCase()} : {}), ...(params.vehicle && ['Garaj', 'AutoCare AI'].includes(normalizeWorkspaceTab(params.tab)) ? { vehicle: params.vehicle } : {}) }) }).toString() : '/autentificare');
+  return <Dashboard key={sess.user.id} accountId={sess.user.id} smartDriveEnabled name={sess.user.name} initialTab={tab} initialRecord={record} initialThread={thread} initialDrive={params.drive} initialVehicle={['Garaj', 'AutoCare AI'].includes(normalizeWorkspaceTab(params.tab)) ? params.vehicle : undefined} />;
 }

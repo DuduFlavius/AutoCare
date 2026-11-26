@@ -39,7 +39,7 @@ export function recordDraftSchedule(
     // For timing service, an entered repeat interval is authoritative. Recalculate
     // after editing historical mileage instead of keeping a stale absolute threshold.
     nextKm:
-      category === 'Distribuție' && (details.intervalIntretinere || details.intervalDistributie)
+      category === 'Distribuție' && details.manualServiceDue!=='1' && (details.intervalIntretinere || details.intervalDistributie)
         ? null
         : next,
     expiresAt: value('expiresAt'),

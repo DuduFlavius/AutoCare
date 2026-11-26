@@ -27,3 +27,16 @@ test('Published domain association grants only the existing release package and 
  const associations=JSON.parse(readFileSync('public/.well-known/assetlinks.json','utf8'));assert.equal(associations.length,1);assert.equal(associations[0].target.package_name,'ro.autocare.garage');assert.equal(associations[0].target.namespace,'android_app');assert.match(associations[0].target.sha256_cert_fingerprints[0],/^(?:[A-F0-9]{2}:){31}[A-F0-9]{2}$/);
  const manifest=readFileSync('mobile/android/app/src/main/AndroidManifest.xml','utf8');assert.match(manifest,/android:autoVerify="true"/);assert.match(manifest,/android:host="www.autocareapp.ro" android:path="\/open-app"/);assert.doesNotMatch(manifest,/android:host="\*"/);
 });
+
+test('Workspace deep-link IDs keep the exact record or thread and reject path fragments',async()=>{
+ const {recordAppDestination,supportAppDestination,workspaceEntryId}=await import('../src/lib/app-links');
+ const document=new URL(recordAppDestination('document','record-123'),'https://www.autocareapp.ro');
+ assert.equal(document.searchParams.get('tab'),'Documente');
+ assert.equal(document.searchParams.get('record'),'record-123');
+ const service=renderEmail('reminder',{ctaPath:recordAppDestination('service','service-123')});
+ assert.match(service.html,/service-123/);
+ const support=new URL(supportAppDestination('thread-8'),'https://www.autocareapp.ro');
+ assert.equal(support.searchParams.get('thread'),'thread-8');
+ assert.equal(workspaceEntryId('../../record'),undefined);
+ assert.equal(new URL(supportAppDestination('bad&thread=other'),'https://www.autocareapp.ro').searchParams.has('thread'),false);
+});

@@ -1,10 +1,11 @@
 'use client';
 
+import {CarFront,FileCheck,Settings2} from 'lucide-react';
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { vehicleDocumentCategories } from '@/lib/validation';
 import { FilterSelect } from '../filter-select';
 import { PremiumDateInput } from '../premium-date-input';
-import { SignatureActions } from '../signature-form';
+import { SignatureActions, SignatureGroup, SignatureFold } from '../signature-form';
 import { useApplicationLanguage } from '../application-locale';
 
 type VehicleFields = {
@@ -68,6 +69,8 @@ export function VehicleForm({ vehicle, vehicles, busy, error, onDirty, onCancel,
     <div className="sf-body" ref={body} inert={busy}>
       <div className="sf-vehicle-content">
         {error && <p className="sf-error" role="alert">{en && error.includes('acest VIN') ? 'A vehicle with this VIN already exists in your account.' : en && error.includes('acest număr') ? 'A vehicle with this registration plate already exists in your account.' : error}</p>}
+        <div className="sf2-identity"><span className="sf-category-icon"><CarFront size={22}/></span><div className="sf2-identity-copy"><h3>{[make,model].filter(Boolean).join(' ')||t('Vehicul nou','New vehicle')}</h3>{vehicle?.plate&&<p><code>{vehicle.plate}</code></p>}</div></div>
+        <SignatureGroup icon={CarFront} title={t('Identitate și utilizare','Vehicle identity and usage')}>
         <div className="form-grid">
           <label>{t('Marcă', 'Make')}<input name="brand" required list={suggestions+'-makes'} value={make} onChange={event=>setMake(event.target.value)} /></label>
           <datalist id={suggestions+'-makes'}>{brands.map(brand => <option key={brand} value={brand} />)}</datalist>
@@ -83,8 +86,8 @@ export function VehicleForm({ vehicle, vehicles, busy, error, onDirty, onCancel,
             {(['Benzină', 'Diesel', 'Hibrid', 'Electric', 'GPL', 'Altul'] as const).map((fuel, index) => <option key={fuel} value={fuel}>{en ? ['Petrol', 'Diesel', 'Hybrid', 'Electric', 'LPG', 'Other'][index] : fuel}</option>)}
           </FilterSelect></label>
         </div>
-        <details className="sf-vehicle-details">
-          <summary>{t('Identificare și observații · opțional', 'Identification and notes · optional')}</summary>
+        </SignatureGroup>
+        <SignatureFold icon={Settings2} title={t('Identificare și observații','Identification and notes')} summary={vehicle?.engine||vehicle?.vin||undefined}>
           <div className="form-grid">
             <label>VIN<input name="vin" maxLength={17} pattern="[A-HJ-NPR-Za-hj-npr-z0-9]{17}" title={t('17 caractere, fără I, O sau Q', '17 characters, excluding I, O and Q')} defaultValue={vehicle?.vin ?? ''} /></label>
             <label>{t('Motorizare', 'Engine')}<input name="engine" defaultValue={vehicle?.engine ?? ''} list={suggestions+'-engines'} maxLength={250} />
@@ -95,13 +98,12 @@ export function VehicleForm({ vehicle, vehicles, busy, error, onDirty, onCancel,
             <label>{t('Data achiziției', 'Purchase date')}<PremiumDateInput name="purchasedAt" defaultValue={vehicle?.purchasedAt ?? ''} /></label>
             <label className="full">{t('Observații', 'Notes')}<textarea name="notes" maxLength={4000} defaultValue={vehicle?.notes ?? ''} /></label>
           </div>
-        </details>
-        {!vehicle && <details className="sf-vehicle-details">
-          <summary>{t('Expirarea documentelor · opțional', 'Document expiry · optional')}</summary>
+        </SignatureFold>
+        {!vehicle && <SignatureFold icon={FileCheck} title={t('Expirarea documentelor','Document expiry')}>
           <div className="form-grid">
             {vehicleDocumentCategories.map(category => <label key={category}>{category}<PremiumDateInput name={'document-'+category} /></label>)}
           </div>
-        </details>}
+        </SignatureFold>}
       </div>
     </div>
     <SignatureActions onCancel={onCancel} busy={busy} label={vehicle ? t('Salvează modificările', 'Save changes') : t('Salvează vehiculul', 'Save vehicle')} />

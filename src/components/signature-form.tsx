@@ -4,13 +4,14 @@ import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { LoaderCircle, X, type LucideIcon } from 'lucide-react';
 import { useApplicationLanguage } from './application-locale';
 
-export function SignatureDialog({ title, icon: Icon, children, onClose, busy, compact }: {
+export function SignatureDialog({ title, icon: Icon, children, onClose, busy, compact, wide }: {
   title: string;
   icon: LucideIcon;
   children: ReactNode;
   onClose: () => void;
   busy: boolean;
   compact?: boolean;
+  wide?: boolean;
 }) {
   const en = useApplicationLanguage() === 'en';
   const titleId = useId();
@@ -55,7 +56,7 @@ export function SignatureDialog({ title, icon: Icon, children, onClose, busy, co
 
   return <div className="sf-backdrop">
     <div className="sf-window" ref={root} role="dialog" aria-modal="true" aria-labelledby={titleId}
-      data-compact={compact || undefined} onKeyDown={event => {
+      data-compact={compact || undefined} data-wide={wide || undefined} onKeyDown={event => {
         if (event.defaultPrevented || !event.currentTarget.contains(event.target as Node)) return;
         if (event.key === 'Escape') {
           event.preventDefault();
@@ -106,4 +107,15 @@ export function SignatureActions({ children, onCancel, busy, label, status, canc
       </button>
     </div>
   </footer>;
+}
+
+export function SignatureGroup({title,icon:Icon,children}: {title:string;icon:LucideIcon;children:ReactNode}) {
+  return <section className="sf2-group"><h3><Icon size={17} aria-hidden="true"/>{title}</h3><div className="sf2-group-content">{children}</div></section>;
+}
+
+export function SignatureFold({title,summary,icon:Icon,children}: {title:string;summary?:string;icon:LucideIcon;children:ReactNode}) {
+  return <details className="sf2-fold">
+    <summary><span className="sf2-fold-icon"><Icon size={17} aria-hidden="true"/></span><span><strong>{title}</strong>{summary&&<small>{summary}</small>}</span><span className="sf2-fold-chevron" aria-hidden="true"/></summary>
+    <div className="sf2-fold-content">{children}</div>
+  </details>;
 }

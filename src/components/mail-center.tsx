@@ -418,6 +418,25 @@ export default function MailCenter() {
               }}
             />
           </label>
+          <label>{t('Acțiune predefinită','Button action')}
+            <FilterSelect value="" disabled={saved||busy} onChange={event=>{
+              const path=event.target.value;if(!path)return;
+              setCtaPath(path);
+              const labels:Record<string,[string,string]>={'/cont':['Deschide aplicația AutoCare','Open the AutoCare app'],
+                '/cont?tab=Documente':['Deschide Documente','Open Documents'],'/cont?tab=Întreținere':['Deschide Întreținere','Open Maintenance'],
+                '/cont?tab=Centru+de+suport':['Deschide Suport','Open Support']};
+              const pair=labels[path];if(!pair)return;
+              setCtaLabel(pair[0]);setEnglishCta(pair[1]);
+              const translation=englishEmailCopy[template];
+              if(translation){setEnglishSubject(value=>value||translation.subject||'AutoCare — '+translation.title);setEnglishMessage(value=>value||translation.body);}
+            }}>
+              <option value="">{t('Alege destinația','Choose a destination')}</option>
+              <option value="/cont">{t('Deschide aplicația AutoCare','Open the AutoCare app')}</option>
+              <option value="/cont?tab=Documente">{t('Deschide Documente','Open Documents')}</option>
+              <option value="/cont?tab=Întreținere">{t('Deschide Întreținere','Open Maintenance')}</option>
+              <option value="/cont?tab=Centru+de+suport">{t('Deschide Suport','Open Support')}</option>
+            </FilterSelect>
+          </label>
           <label>
             Destinație CTA în AutoCare
             <input

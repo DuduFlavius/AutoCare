@@ -111,6 +111,7 @@ export default function SupportChat({
   onFeedback,
   historyView = false,
   onOpenConversation,
+  initialThread,
   accountId,
   onAvailability,
   newRequest = 0,
@@ -120,6 +121,7 @@ export default function SupportChat({
   onFeedback?:()=>void;
   historyView?:boolean;
   onOpenConversation?:()=>void;
+  initialThread?:string;
   accountId?: string;
   onAvailability?: (value: Availability) => void;
   newRequest?: number;
@@ -193,7 +195,8 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
   const [reply, setReply] = useState<Message | null>(null);
   const [serverQuery, setServerQuery] = useState('');
   const queryRef = useRef('');
-  const jumpTo = useRef<string | null>(null);
+  const jumpTo = useRef<string | null>(initialThread??null);
+  const initialThreadPending = useRef(Boolean(initialThread));
   const typingAt = useRef(0);
   useEffect(() => {
     const timer = setTimeout(() => setServerQuery(query.trim().slice(0, 120)), 330);
@@ -319,6 +322,16 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
         notifiedMessages.current=next;notificationBaseline.current=true;
       }
       if (!selectedRef.current && !jumpTo.current && (composingNew.current || sendLock.current || drafts.current.get('new')?.trim())) return;
+      if(initialThreadPending.current){
+        initialThreadPending.current=false;
+        const target=out.threads.find((thread:Thread)=>thread.id===initialThread);
+        if(!target){
+          jumpTo.current=null;
+          composingNew.current=true;
+          setError(t('Conversația nu este disponibilă în contul tău.','This conversation is unavailable in your account.'));
+          return;
+        }
+      }
       const current =
         out.threads.find((t: Thread) => t.id === (jumpTo.current || selectedRef.current)) || out.threads[0];
       const jumped = current?.id && jumpTo.current === current.id;

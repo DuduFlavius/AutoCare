@@ -9,3 +9,18 @@ export function androidAppIntent(destination:string){
  const link='https://'+androidLinkHost+'/open-app?next='+encodeURIComponent(safeAppDestination(destination));
  return link.replace('https://','intent://')+'#Intent;scheme=https;package='+androidPackage+';S.browser_fallback_url='+encodeURIComponent('https://'+androidLinkHost+'/instaleaza')+';end';
 }
+
+export function workspaceEntryId(value:unknown):string|undefined {
+ return typeof value==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(value)?value:undefined;
+}
+
+export function recordAppDestination(kind:'service'|'document'|'expense',id:string){
+ const tab=kind==='service'?'Întreținere':kind==='document'?'Documente':'Cheltuieli';
+ const record=workspaceEntryId(id);
+ return '/cont?'+new URLSearchParams({tab,...(record?{record}:{})});
+}
+
+export function supportAppDestination(threadId:string){
+ const thread=workspaceEntryId(threadId);
+ return '/cont?'+new URLSearchParams({tab:'Centru de suport',...(thread?{thread}:{})});
+}
