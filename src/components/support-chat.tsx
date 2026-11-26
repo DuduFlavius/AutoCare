@@ -373,13 +373,15 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
       preview ||
       !selected ||
       !lastId ||
+      historyView ||
+      detail?.thread.id !== selected ||
       view === 'statistics' ||
       document.hidden ||
       (staff && (!entered || (window.innerWidth <= 760 && !mobileThread)))
     )
       return;
     void request('/' + selected + '/read', 'POST', { messageId: lastId }).catch(() => {});
-  }, [selected, lastId, preview, staff, mobileThread, view, entered]);
+  }, [selected, lastId, preview, staff, mobileThread, view, entered, historyView, detail?.thread.id]);
   async function assign(assigneeId: string) {
     if (!selected || preview) return;
     setBusy(true);
