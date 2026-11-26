@@ -7,7 +7,7 @@ import { interpolateFix, measuredTransition } from '@/lib/gps-animation';
 import { createRoadPositionMarker, updateRoadPositionMarker } from '@/lib/road-position-marker';
 import { autoPointCategories, type AutoPoint, type MapArea } from '@/lib/auto-points';
 import type { GPSFix } from '@/lib/gps-tracking';
-import { plannedRouteBounds, routeGeometry, tripBounds, type RouteVariant } from '@/lib/road-map';
+import { plannedRouteBounds, visualTrackGeometry, tripBounds, type RouteVariant } from '@/lib/road-map';
 import 'leaflet/dist/leaflet.css';
 /** Flat street tiles are the compatibility path for devices without WebGL. */
 export default function RasterRoadMap({
@@ -15,6 +15,7 @@ export default function RasterRoadMap({
   mappedRoads,
   position,
   active,
+  visible=true,
   english,
   history,
   initialArea,
@@ -35,6 +36,7 @@ export default function RasterRoadMap({
   mappedRoads?: readonly SpeedRoad[];
   position?: GPSFix | null;
   active: boolean;
+  visible?: boolean;
   english: boolean;
   history: boolean;
   initialArea?: MapArea;
@@ -58,6 +60,12 @@ export default function RasterRoadMap({
     planned = useRef<Polyline | null>(null),
     latest = useRef(points);
   latest.current = points;
+  const publishedArea=useRef(onAreaChange);publishedArea.current=onAreaChange;
+  const initial=useRef(initialArea);initial.current=initialArea;
+  const tracking=useRef(active);tracking.current=active;
+  const trackUpdate=useRef<number|null>(null);
+  const lastPan=useRef(0);
+
   const latestRoads=useRef(mappedRoads);
   latestRoads.current=mappedRoads;
   const latestPosition = useRef(position);
@@ -89,11 +97,13 @@ export default function RasterRoadMap({
     void import('leaflet')
       .then((L) => {
         if (disposed || !host.current) return;
+        const initialArea=initial.current;
         const last = history ? latest.current.at(-1) : latestPosition.current,
           view = L.map(host.current, {
             zoomControl: false,
             attributionControl: true,
             preferCanvas: false,
+            trackResize: false,
           }).setView(initialArea ? [initialArea.latitude, initialArea.longitude] : last ? [last.latitude, last.longitude] : [45.9432, 24.9668], initialArea?.zoom ?? (last ? 16 : 6));
         map.current = view;
         L.control.zoom({ position: 'topright' }).addTo(view);
@@ -112,7 +122,7 @@ export default function RasterRoadMap({
         });
         planned.current = L.polyline([], { color: '#087287', weight: 7, interactive: false }).addTo(view);
         line.current = L.polyline(
-          routeGeometry(latest.current,latestRoads.current).features.map((f) =>
+          visualTrackGeometry(latest.current,latestRoads.current).features.map((f) =>
             f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
           ),
           { color: history ? '#5AFFC4' : '#168a9d', weight: 4, lineCap: 'round', lineJoin: 'round' },
@@ -133,9 +143,10 @@ export default function RasterRoadMap({
             }),
           }).addTo(view);
         }
-        if (onAreaChange) view.on('moveend', () => {
+        view.on('moveend', () => {
+          if(tracking.current&&follow.current)return;
           const center = view.getCenter().wrap();
-          onAreaChange({ latitude: center.lat, longitude: center.lng, zoom: view.getZoom() });
+          publishedArea.current?.({ latitude: center.lat, longitude: center.lng, zoom: view.getZoom() });
         });
         view.on('click', ({ latlng }) => destinationAction.current?.({ longitude: latlng.wrap().lng, latitude: latlng.lat }));
         setReady(true);
@@ -143,7 +154,7 @@ export default function RasterRoadMap({
           follow.current = false;
           setFollowing(false);
         });
-        resize = new ResizeObserver(() => view.invalidateSize());
+        resize = new ResizeObserver(() => view.invalidateSize({pan:false,debounceMoveend:true}));
         resize.observe(host.current);
       })
       .catch(() => {
@@ -152,20 +163,23 @@ export default function RasterRoadMap({
     return () => {
       disposed = true;
       resize?.disconnect();
+      if(trackUpdate.current!==null)window.clearTimeout(trackUpdate.current);
+      trackUpdate.current=null;
       map.current?.remove();
       map.current = null;
       marker.current = null;
       line.current = null;
       planned.current = null;
     };
-  }, [english, history, initialArea, onAreaChange]);
+  }, [english, history]);
   const acceptedFix = useRef<GPSFix | null>(null);
   const renderedFix = useRef<GPSFix | null>(null);
   useEffect(() => {
     const view = map.current,
       last = position;
-    if (!view || history) return;
+    if (!view || history || !visible) return;
     if (!last) {
+      if(active)return;
       marker.current?.remove();
       marker.current = null;
       return;
@@ -198,33 +212,38 @@ export default function RasterRoadMap({
       setFollowing(true);
     }
     wasActive.current = active;
-    if (follow.current)
-      view.setView([last.latitude, last.longitude], Math.max(15, view.getZoom()), {
-        animate: true,
-        duration: (duration || 700) / 1000,
-      });
     updateRoadPositionMarker(marker.current?.getElement()?.querySelector<HTMLElement>('.ac-road-position'), active, last, latest.current);
     const from = renderedFix.current ?? last;
     const began = performance.now();
     let frame = 0;
-    function draw(now: number) {
+    const draw=(now:number)=>{
       if (map.current !== view) return;
       const progress = duration ? Math.min(1, (now - began) / duration) : 1;
       const point = interpolateFix(from, last!, progress);
-      renderedFix.current = point;
-      marker.current?.setLatLng([point.latitude, point.longitude]);
+      const rendered=renderedFix.current;
+      if(!rendered||point.latitude!==rendered.latitude||point.longitude!==rendered.longitude)
+        marker.current?.setLatLng([point.latitude,point.longitude]);
+      renderedFix.current=point;
+      if(follow.current&&(progress===1||now-lastPan.current>=100)){
+        const center=view.getCenter(),zoom=view.getZoom();
+        if(zoom<15||Math.abs(center.lat-point.latitude)>1e-7||Math.abs(center.lng-point.longitude)>1e-7){
+          lastPan.current=now;
+          view.setView([point.latitude,point.longitude],Math.max(15,zoom),{animate:false});
+        }
+      }
       if (progress < 1) frame = requestAnimationFrame(draw);
     }
     frame = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(frame);
-  }, [position, english, history, active, ready]);
+  }, [position, english, history, active, ready, visible]);
   useEffect(() => {
-    line.current?.setLatLngs(
-      routeGeometry(points,mappedRoads).features.map((f) =>
-        f.geometry.coordinates.map(([lon, lat]) => [lat, lon] as [number, number]),
-      ),
-    );
-  }, [points, mappedRoads, ready]);
+    if(!visible||!ready||trackUpdate.current!==null)return;
+    trackUpdate.current=window.setTimeout(()=>{
+      trackUpdate.current=null;
+      line.current?.setLatLngs(visualTrackGeometry(latest.current,latestRoads.current).features.map(feature=>
+        feature.geometry.coordinates.map(([lon,lat])=>[lat,lon] as [number,number])));
+    },active?425:0);
+  }, [points, mappedRoads, ready, active, visible]);
   useEffect(() => {
     planned.current?.setLatLngs(plannedRoute?.map(([lon, lat]) => [lat, lon]) ?? []);
     if (ready && plannedRoute?.length && !active && !shownRoute.current) showRoute();

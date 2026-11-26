@@ -47,7 +47,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const english = locale.startsWith('en');
   const t = (ro: string, en: string) => english ? en : ro;
   const [clock, setTelemetryClock] = useState(() => Date.now());
-  useEffect(() => { const timer = setInterval(() => setTelemetryClock(Date.now()), 1000); return () => clearInterval(timer); }, []);
+  useEffect(()=>{if(!liveVisible&&!active)return;setTelemetryClock(Date.now());const timer=setInterval(()=>setTelemetryClock(Date.now()),1000);return()=>clearInterval(timer);},[liveVisible,active]);
   const idleLocation = useMapLocation(liveVisible && !active && !preview, english);
   useEffect(() => {
     document.documentElement.dataset.autocareGpsActive = active ? 'true' : 'false';
@@ -77,7 +77,6 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const lastPreciseBrowserFix=useRef<number|null>(null);
   const [routePoints, setRoutePoints] = useState<Sample[]>([]);
   const [trackingSeconds, setTrackingSeconds] = useState(0);
-  const [, setClock] = useState('');
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const watcher = useRef<(() => void) | null>(null);
   const previous = useRef<Sample | null>(null);
@@ -120,7 +119,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     setRoutePoints(previousPoints=>previousPoints.length===shownPoints.length&&
       previousPoints[0]?.timestamp===shownPoints[0]?.timestamp&&previousPoints.at(-1)?.timestamp===shownPoints.at(-1)?.timestamp
         ? previousPoints : shownPoints);
-    setClock(new Date().toLocaleTimeString(locale));setTrackingSeconds(value.awaitingMotion?0:Math.max(0,Math.floor((nativeEnd-value.startedAt-nativePaused)/1000)));
+    setTrackingSeconds(value.awaitingMotion?0:Math.max(0,Math.floor((nativeEnd-value.startedAt-nativePaused)/1000)));
     const position=value.lastPosition??shownPoints.at(-1);
     if(position){updateMeasuredSpeed(position);setMapPosition(current=>!current||position.timestamp>current.timestamp?position:current);}
     const last=position;if(last){lastFix.current=value.lastFixAt||last.timestamp;setSignal(value.active&&Date.now()-lastFix.current>25000?'lost':'ok');}
@@ -270,7 +269,6 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
     const car=vehicles.find(v=>v.id===vehicleId)||vehicles[0];
     if(!car){setError(t("Selectează o mașină înainte de pornire.", "Select a vehicle before starting."));return;}
     if(!resume){lastPreciseBrowserFix.current=null;setVehicleId(car.id);baseline.current=startMileage(car);tripId.current=crypto.randomUUID();} endedAt.current=null; setSaved(false);
-    setClock(new Date().toLocaleTimeString(locale));
     if(!resume){const now=Date.now();timing.current=startDriveClock(now);started.current=now;setStartedAt(now);setDistance(0);distanceRef.current=0;setRoutePoints([]);setTrackingSeconds(0);maxSpeedRef.current=null;setMaxSpeed(null);lastLiveFix.current=null;}else if(timing.current){timing.current=resumeDriveClock(timing.current,Date.now());}setPaused(false);
     setSaveAttempted(false);
     setSignal('requesting');lastFix.current=0;setError('');setNotice('');previous.current=null;
@@ -460,7 +458,7 @@ export default function SmartDriveTrip({ preview, vehicles, onSaved, ownerId, bl
   const syncOption=!automatic&&<label className="ac-smartdrive-sync"><input type="checkbox" checked={syncMileage} disabled={saving||saved||saveAttempted} onChange={e=>setSyncMileage(e.target.checked)}/> {t('Adaugă distanța validă la kilometraj și actualizează planul de întreținere la salvare.', 'Sync recorded distance with vehicle mileage and maintenance when saving.')}</label>;
   return <section className="ac-smartdrive-trip" aria-label="SmartDrive GPS">
     <div className="ac-drive-live-content" hidden={bluetoothOnly}>
-    <AutoPointsMap onExit={onExit} onView={onView} preview={preview} visible={liveVisible} ownerId={ownerId} session={{position:currentPosition,points:routePoints,meters:recording?distance:0,seconds:recording?trackingSeconds:0,speed:speed===null?null:dial??speed,average:stats.averageKmh,maximum:stats.maximumKmh,signal:status,accuracy:telemetry.accuracy,startedAt,vehicleLabel:currentCar?[currentCar.brand,currentCar.model,currentCar.plate].filter(Boolean).join(' · '):undefined,state:paused?'paused':active?'active':'idle',active,locate:idleLocation.locate,start,stop,
+    <AutoPointsMap onExit={onExit} onView={onView} preview={preview} visible={liveVisible} ownerId={ownerId} session={{now:clock,position:currentPosition,points:routePoints,meters:recording?distance:0,seconds:recording?trackingSeconds:0,speed:speed===null?null:dial??speed,average:stats.averageKmh,maximum:stats.maximumKmh,signal:status,accuracy:telemetry.accuracy,startedAt,vehicleLabel:currentCar?[currentCar.brand,currentCar.model,currentCar.plate].filter(Boolean).join(' · '):undefined,state:paused?'paused':active?'active':'idle',active,locate:idleLocation.locate,start,stop,
       vehicle:vehicles.length>0?<label>{t('Vehicul','Vehicle')}<FilterSelect value={currentCar?.id||''} disabled={active||!!startedAt&&!saved} onChange={e=>setVehicleId(e.target.value)}>{vehicles.map(v=><option key={v.id} value={v.id}>{v.brand} {v.model}{v.plate?' · '+v.plate:''}</option>)}</FilterSelect></label>:null,
       messages:<>{awaitingMotion&&<p role="status">{t('Așteaptă deplasarea mașinii.','Waiting for the vehicle to move.')}</p>}{!endedAt.current&&notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}</>,
       controls:sessionControls,options:<>{!!endedAt.current&&!saved&&<button type="button" onClick={()=>setSummaryOpen(true)}>{t('Rezumat sesiune','Trip summary')}</button>}{syncOption}{queuePanel}</>,pendingCount:queues.length

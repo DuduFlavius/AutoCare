@@ -4,7 +4,7 @@ import type {DrivingRoute} from './road-navigation';
 const lngLat = z.tuple([z.number().min(-180).max(180), z.number().min(-85).max(85)]);
 const geometry = z.object({ coordinates: z.array(lngLat).min(2).max(150000) });
 const step = z.object({
-  name: z.string().max(512), destinations: z.string().max(512).optional(), ref: z.string().max(200).optional(), distance: z.number().nonnegative(), duration: z.number().nonnegative(),
+  name: z.string().max(512), destinations: z.string().max(512).optional(), ref: z.string().max(200).optional(), exits: z.string().max(200).optional(), distance: z.number().nonnegative(), duration: z.number().nonnegative(),
   geometry: z.object({ coordinates: z.array(lngLat).min(1).max(150000) }),
   intersections: z.array(z.object({
     lanes: z.array(z.object({ indications: z.array(z.string().max(24)).max(8), valid: z.boolean() })).max(16).optional(),
