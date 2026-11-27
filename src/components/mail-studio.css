@@ -102,7 +102,6 @@
 .studio-template-actions button:first-child { flex: 1; }
 .studio-pagination { justify-content: center; margin-top: 14px; }
 .studio-thumbnail { position: relative; overflow: hidden; height: 130px; border: 1px solid #dbe2ea; border-radius: 8px; background: #eaf0f7; pointer-events: none; }
-.studio-thumbnail iframe { position: absolute; top: 0; left: 50%; margin-left: -200px; border: 0; width: 400px; height: 290px; transform: scale(.53); transform-origin: top center; }
 .studio-steps { display: flex; flex-wrap: wrap; padding: 0; margin: 0; list-style: none; gap: 6px; }
 .studio-steps button span { display: grid; place-items: center; width: 21px; height: 21px; border-radius: 7px; background: var(--studio-raised); color: var(--studio-accent); padding: 0; }
 .studio-freeform { justify-self: start; }
@@ -179,6 +178,10 @@ html body .ac-admin-frame .founder-signature[data-workspace="mail"] .mail-studio
 .studio-advanced[open] > summary { margin-bottom:10px; }
 .studio-gallery-count { color:var(--studio-muted); font-size:13px; margin:12px 0 0; }
 .studio-library .studio-thumbnail { display:grid; align-content:space-between; box-sizing:border-box; padding:14px; height:110px; background:#075365; color:#fff; }
+html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .studio-library .studio-thumbnail :is(strong,span) {
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
 .studio-library .studio-thumbnail[data-style=editorial] { background:#223c62; }
 .studio-library .studio-thumbnail[data-style=compact] { background:#344a56; height:110px; }
 .studio-library .studio-thumbnail > div { display:flex; align-items:center; gap:8px; font-size:12px; }
