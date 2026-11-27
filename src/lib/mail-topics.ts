@@ -1,3 +1,4 @@
+import {signatureTemplateMetadata} from './mail-signature-templates';
 const topics = [
   ['account','Cont și acces','Account & access','welcome verification password_reset account_security onboarding_guide notification_help'],
   ['garage','Garaj și kilometraj','Garage & mileage','first_vehicle vehicle_added mileage_check'],
@@ -9,8 +10,20 @@ const topics = [
   ['navigation','Navigație și conectivitate','Navigation & connectivity','gps_review gps_setup gps_sync bluetooth_help map_help permissions_help offline_help'],
   ['reports','Rapoarte și cheltuieli','Reports & expenses','expense_review statement_ready export_help monthly_report'],
   ['operations','Incidente și mentenanță','Incidents & operations','incident_open incident_progress incident_resolved planned_outage maintenance_notice'],
+  ['onboarding','Pornire și onboarding','Getting started',''],
+  ['launches','Lansări importante','Major launches',''],
+  ['reminders','Mementouri','Reminders',''],
+  ['ai','AutoCare AI','AutoCare AI',''],
+  ['subscriptions','Abonamente','Subscriptions',''],
+  ['payments','Plăți','Payments',''],
+  ['newsletter','Newsletter','Newsletter',''],
+  ['promotions','Promoții','Promotions',''],
+  ['founder','Mesaje ale fondatorului','Founder messages',''],
+  ['holidays','Sărbători','Holidays',''],
+  ['reactivation','Reactivare','Re-engagement',''],
+  ['announcements','Anunțuri importante','Key announcements',''],
   ['general','Comunicare generală','General communication','administrative promotional data_request gmail_test'],
 ] as const;
 export const mailTopics=topics.map(([id,ro,en])=>({id,ro,en}));
-const index=new Map(topics.flatMap(([id,,,templates])=>templates.split(' ').map(template=>[template,id] as const)));
-export function mailTopic(template:string){return index.get(template)??'general';}
+const index=new Map(topics.flatMap(([id,,,templates])=>templates.split(' ').filter(Boolean).map(template=>[template,id] as const)));
+export function mailTopic(template:string){return signatureTemplateMetadata(template)?.topic??index.get(template)??'general';}

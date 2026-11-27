@@ -12,6 +12,7 @@ import { EmailGallery, defaultStudioStyle } from './mail-studio-gallery';
 import MailRichText from './mail-rich-text';
 import {MailPresetField} from './mail-preset-field';
 import {mailTopic,mailTopics} from '@/lib/mail-topics';
+import {signatureTemplateMetadata} from '@/lib/mail-signature-templates';
 import {studioStyles,type StudioStyle} from '@/lib/mail-studio-templates';
 import type { mailCenterOverview, campaignDetail } from '@/lib/mail-center';
 import { emailCategory, emailCategories } from '@/lib/mail-preference-categories';
@@ -165,7 +166,8 @@ export default function MailCenter() {
     setTemplate(id);
     const topic=mailTopics.find(item=>item.id===mailTopic(id));
     setCommunicationType(topic?.ro??'Comunicare generală');setCategoryLabel(topic?.ro??'');setTemplateLabel(t.label);
-    setStyle(defaultStudioStyle(id));setPreheader(t.body.slice(0,130));setEnglishPreheader(englishEmailCopy[id]?.body.slice(0,130)??'');setFormatted(false);
+    const preset=signatureTemplateMetadata(id);
+    setStyle(defaultStudioStyle(id));setPreheader(preset?.roPreheader??t.body.slice(0,130));setEnglishPreheader(preset?.enPreheader??englishEmailCopy[id]?.body.slice(0,130)??'');setFormatted(false);
     setEnglishSubject('');setEnglishMessage('');setEnglishCta('');
     setSubject(t.subject);
     setMessage(t.body);
@@ -306,7 +308,8 @@ export default function MailCenter() {
             <div><h2>{section==='audiences'?t('Audiențe','Audiences'):t(steps[step][0],steps[step][1])}</h2><p>{t('Model selectat','Selected template')}{' · '}{en?englishEmailCopy[template]?.title:data.templates[template].label}</p></div>
           </header>
           <div className="studio-fields" hidden={section!=='compose'||step!==2}>
-          <details className="mail-library"><summary>Șabloanele și tipurile mele</summary>
+          <details className="studio-advanced"><summary>{t('Setări avansate și modele proprii','Advanced settings and custom templates')}</summary>
+          <details className="mail-library"><summary>{t('Modelele și tipurile mele','My templates and types')}</summary>
           <label>Biblioteca ta
             <FilterSelect value="" disabled={busy || saved} onChange={e => {
               const entry = data.library.find(x => x.id === e.target.value);
@@ -328,7 +331,7 @@ export default function MailCenter() {
             {(['template', 'communication'] as const).map(kind => <button key={kind} type="button" disabled={busy || security || libraryName.trim().length < 2} onClick={() => void run(async () => {
               await api('/library', 'POST', {id: crypto.randomUUID(), kind, label: libraryName, category, template, subject, message, ctaLabel, ctaPath, englishContent, design});
               setData(await api()); setLibraryName(''); setNotice('Salvat în biblioteca ta.');
-            })}>{kind === 'template' ? 'Salvează ca șablon propriu' : 'Adaugă tip de comunicare'}</button>)}
+            })}>{kind === 'template' ? t('Salvează o copie ca model propriu','Save a copy as a custom template') : t('Adaugă tip de comunicare','Add communication type')}</button>)}
           </div>
           {data.library.length > 0 && <details><summary>Gestionează biblioteca</summary>{data.library.map(x => <p key={x.id}>{x.label} <button type="button" disabled={busy} onClick={() => void run(async () => { await api('/library/' + x.id, 'DELETE'); setData(await api()); })}>Șterge</button></p>)}</details>}
           </details>
@@ -381,8 +384,9 @@ export default function MailCenter() {
             Ofertele și comunicările de marketing trebuie marcate promoționale. Oamenii fără acord
             sunt excluși. Preferințele se verifică din nou înaintea trimiterii.
           </p>
+          </details>
           <label>
-            Subiect — alege o sugestie sau scrie tu
+            {t('Subiect','Subject')}
             <input
               list="mail-subject-options"
               maxLength={180}

@@ -579,12 +579,13 @@ export default function RecordEditor({
           </label>
         )}
             </SignatureGroup>
-            {kind==='service'&&<SignatureGroup icon={CalendarClock} title={t('Următorul termen de service','Next service')}>
-              <div className="sf2-service-snapshot">
+            {kind==='service'&&<SignatureFold icon={CalendarClock} title={t('Următorul termen de service','Next service')}
+              summary={[live.next?number(Number(live.next))+' km':'',live.due?new Date(live.due+'T12:00:00Z').toLocaleDateString(locale,{timeZone:'UTC'}):''].filter(Boolean).join(' · ')||t('Opțional · adaugă un interval sau o dată','Optional · add an interval or date')}>
+              {(live.next||live.due)&&<div className="sf2-service-snapshot">
                 <div><small>{t('Următorul prag','Next threshold')}</small><strong>{live.next?number(Number(live.next))+' km':'—'}</strong></div>
                 <div><small>{t('Kilometri rămași','Distance remaining')}</small><strong>{remaining==null?'—':remaining<0?t('Depășit cu ','Overdue by ')+number(-remaining)+' km':number(remaining)+' km'}</strong></div>
                 {progress!=null&&<progress max={100} value={progress} aria-label={t('Progres până la următoarea intervenție','Progress towards next service')}/>}
-              </div>
+              </div>}
               <div className="form-grid sf2-schedule">
                 <label>{t('Interval de service · km','Service interval · km')}
                   <input key={category==='Schimb ulei'?'oil':'generic'} name={category==='Schimb ulei'?'ac_intervalUlei':'ac_intervalIntretinere'} type="number" inputMode="numeric" min={1} max={99999999}
@@ -599,7 +600,7 @@ export default function RecordEditor({
               </div>
               <p className="micro">{t('Kilometrajul intervenției rămâne cel înregistrat. Pragul manual are prioritate.','The service mileage stays as recorded. A manual threshold takes precedence.')}</p>
               <SignatureFold icon={Gauge} title={t('Alerte de service','Service reminders')}><OperationAlerts parts={record?.parts||''} premium={data.premium}/></SignatureFold>
-            </SignatureGroup>}
+            </SignatureFold>}
             {kind==='expense'&&<SignatureGroup icon={Wallet} title={t('Sumă și monedă','Amount and currency')}>{costFields}</SignatureGroup>}
           </div>
           <aside className="sf2-optional">

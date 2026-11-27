@@ -11,7 +11,9 @@ import {
   scheduleSubscriptionMail,
 } from '../src/lib/mail-automation';
 import { billingMailValid, recipientAllowed } from '../src/lib/mail-policy';
-import { emailTemplates, renderEmail, appLink } from '../src/lib/email-templates';
+import { emailTemplates, renderEmail, appLink, templateCategory } from '../src/lib/email-templates';
+import { signatureTemplates, signatureTemplateMetadata } from '../src/lib/mail-signature-templates';
+import { mailTopics } from '../src/lib/mail-topics';
 import { GoogleDeliveryError } from '../src/lib/google-mail';
 process.env.LOCAL_DATABASE_PATH = 'memory';
 process.env.APP_URL = 'https://project-sxage.vercel.app';
@@ -584,9 +586,9 @@ test('a recent registration welcome waits for verification and delivers once',as
  }
 });
 
-test('Studio catalog has at least 50 distinct bilingual templates and shared preview/send formatting persists', async()=>{
+test('Studio catalog has at least 80 distinct bilingual templates and shared preview/send formatting persists', async()=>{
   const catalog=Object.keys(emailTemplates) as (keyof typeof emailTemplates)[];
-  assert.ok(catalog.length>=50);
+  assert.ok(catalog.length>=80);
   for(const template of catalog){
     const ro=renderEmail(template,{language:'ro'});
     const en=renderEmail(template,{language:'en'});
@@ -610,6 +612,30 @@ test('Studio catalog has at least 50 distinct bilingual templates and shared pre
   assert.match(preview.html,/Previzualizare reală/);
   assert.doesNotMatch(preview.html,/<script>/);
   assert.doesNotMatch(preview.text,/\*\*/);
+});
+
+test('Signature presets have distinct copy, localized preheaders and verified-app destinations', () => {
+  const subjects = new Set<string>();
+  for (const id of Object.keys(signatureTemplates) as (keyof typeof signatureTemplates)[]) {
+    const model = signatureTemplates[id];
+    const metadata = signatureTemplateMetadata(id)!;
+    const ro = renderEmail(id,{language:'ro'});
+    const en = renderEmail(id,{language:'en'});
+    for (const mail of [ro,en]) {
+      assert.ok(!subjects.has(mail.subject), id);
+      subjects.add(mail.subject);
+      const link = new URL(mail.text.match(/https?:\/\/[^\s]+\/open-app\?[^\s]+/)![0]);
+      assert.equal(link.searchParams.get('next'),new URL(model.path,'https://www.autocareapp.ro').pathname+new URL(model.path,'https://www.autocareapp.ro').search);
+    }
+    assert.match(ro.text,new RegExp(model.title));
+    assert.ok(ro.html.includes(metadata.roPreheader));
+    assert.ok(en.html.includes(metadata.enPreheader));
+    assert.ok(!en.text.includes(model.body));
+    assert.ok(mailTopics.some(topic=>topic.id===metadata.topic));
+  }
+  for (const id of ['owner_notes_digest','premium_features_guide','return_to_garage'] as const) {
+    assert.equal(templateCategory(id),'promotional');
+  }
 });
 
 test('Mail Studio refuses external campaign delivery on Vercel Preview', async()=>{

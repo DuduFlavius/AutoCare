@@ -465,6 +465,12 @@ Object.assign(dictionary, {
 Object.assign(dictionary, {"Exclusiv pentru abonații Premium. Conturile gratuite nu au acces la conversații sau scanare AI.":"Exclusively for Premium subscribers. Free accounts cannot access AI conversations or document scanning."});
 Object.assign(dictionary,reviewedPublicCopy);
 Object.assign(dictionary, dashboardCopy);
+Object.assign(dictionary, {
+  'Vâscozitate':'Viscosity', 'Model anvelope':'Tyre model', 'Cod DOT':'DOT code',
+  'Poziție pe vehicul':'Position on vehicle', 'Număr de anvelope':'Number of tyres',
+  'Plăcuțe montate':'Pads fitted', 'Discuri montate':'Discs fitted',
+  'Lichid de frână folosit':'Brake fluid used',
+});
 const normalizedDictionary=Object.fromEntries(Object.entries(dictionary).map(([ro,en])=>[normalizeCopy(ro),en]));
  const templates: [RegExp,(...parts:string[])=>string][]=[
  [/^Bună,(.*)$/,(_,name)=>'Hello,'+name],

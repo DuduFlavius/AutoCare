@@ -1,3 +1,4 @@
+import {signatureTemplateMetadata, signatureTemplates} from './mail-signature-templates';
 import {safeAppDestination} from './app-links';
 import {studioExtraTemplates,type StudioDesign} from './mail-studio-templates';
 import {emailAssets} from './email-assets';
@@ -6,6 +7,7 @@ import {translateApplicationCopy} from './application-language';
 import { origin } from './config';
 export const emailTemplates = {
   ...studioExtraTemplates,
+  ...signatureTemplates,
   monthly_report: { label:'Raport lunar', title:'Luna ta în AutoCare', subject:'AutoCare — Raport lunar', body:'Vezi situația vehiculelor tale și următoarele termene.', cta:'Deschide raportul', path:'/cont?tab=Rapoarte' },
   onboarding_guide: { label:'Ghid de început', title:'Pregătește primul drum cu AutoCare', subject:'AutoCare — Ghid de început', body:'Adaugă prima mașină și documentele ei. Descoperă SmartDrive GPS pe Android și AutoCare AI din garaj.', cta:'Vezi ghidul', path:'/cum-functioneaza', category:'promotional' },
   auto_tips: { label:'Sfaturi auto', title:'Pregătește următoarea revizie', subject:'AutoCare — Sfaturi pentru mașina ta', body:'Verifică intervalele de întreținere recomandate pentru mașina ta și notează termenele în AutoCare.', cta:'Vezi întreținerea', path:'/cont?tab=Întreținere', category:'promotional' },
@@ -218,9 +220,10 @@ export function renderEmail(template: EmailTemplate, input: TemplateInput = {}, 
   const plain = formatted ? message.replace(/\*\*([^*\n]+)\*\*/g,'$1').replace(/(^|\s)_([^_\n]+)_/g,'$1$2') : message;
   const text = `AutoCare\n\n${local('Salut','Hello')}, ${name}!\n\n${title}\n\n${plain}${facts.map(({label,value})=>'\n'+label+': '+value).join('')}${trend.map(({label,value})=>'\n'+label+': '+value).join('')}\n\n${cta}: ${primaryUrl}\n${local('Pe site','On the website')}: ${url}\n\n${footer}\n${local('Preferințe','Preferences')}: ${preferences}${links.map(({label,url})=>'\n'+label+': '+url).join('')}${unsubscribe?'\n'+local('Dezabonare','Unsubscribe')+': '+unsubscribe:''}\nAutoCare · ${local('Garajul tău digital','Your digital garage')}\n${link('/contact')}`;
   const e = escapeHtml;
-  const palette = input.design?.style === 'editorial' ? '#223c62' : '#075365';
+  const style = input.design?.style ?? signatureTemplateMetadata(template)?.style;
+  const palette = style === 'editorial' ? '#223c62' : style === 'compact' ? '#344a56' : '#075365';
   const tone = input.previewTheme === 'dark' ? 'all' : input.previewTheme === 'light' ? 'not all' : '(prefers-color-scheme:dark)';
-  const preheader = (en?input.design?.englishPreheader:input.design?.preheader) || input.preheader || (isSecurityAction ? subject : plain);
+  const preheader = (en?input.design?.englishPreheader:input.design?.preheader) || input.preheader || (en?signatureTemplateMetadata(template)?.enPreheader:signatureTemplateMetadata(template)?.roPreheader) || (isSecurityAction ? subject : plain);
   const format = (value:string) => formatted
     ? e(value).replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/(^|\s)_([^_\n]+)_/g,'$1<em>$2</em>')
     : e(value);

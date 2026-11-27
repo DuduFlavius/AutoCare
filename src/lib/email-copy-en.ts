@@ -1,3 +1,4 @@
+import {signatureEnglish} from './mail-signature-templates';
 import {studioExtraEnglish} from './mail-studio-templates';
 /** Reviewed English templates. Custom campaign messages and user records stay unchanged. */
 export const englishEmailCopy: Record<string, {title:string;body:string;cta:string;subject?:string}> = Object.fromEntries([
@@ -56,4 +57,4 @@ export const englishEmailCopy: Record<string, {title:string;body:string;cta:stri
 ['reminder','A small detail. A smoother journey.','Check the documents and scheduled work in your AutoCare garage.','View garage'],
 ].map(([key,title,body,cta])=>[key,{title,body,cta}]));
 
-Object.assign(englishEmailCopy,studioExtraEnglish);
+Object.assign(englishEmailCopy,studioExtraEnglish,signatureEnglish);
