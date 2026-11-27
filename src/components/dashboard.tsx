@@ -118,10 +118,11 @@ type Modal = {
 } | null;
 const workspaceSessionChangedKey = 'autocare-workspace-session-changed';
 
-async function workspaceApi(path: string, method = 'GET', data?: unknown, accountId?: string) {
+async function workspaceApi(path: string, method = 'GET', data?: unknown, accountId?: string, signal?: AbortSignal) {
   if(method!=='GET' && typeof navigator!=='undefined' && !navigator.onLine) throw new Error('Ești offline. Reconectează-te înainte de a salva.');
   const r = await fetch('/api/v1/' + path, {
     method,
+    signal,
     headers: { ...(data ? { 'Content-Type': 'application/json' } : {}), ...(accountId ? { 'X-AutoCare-Account':accountId } : {}) },
     body: data ? JSON.stringify(data) : undefined,
   });
@@ -411,6 +412,8 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
   useEffect(()=>{if(tab==='Plan întreținere')setSmartDriveOpened(true)},[tab]);
   const dashboardRequest = useRef(0);
   const sessionEnded = useRef(false);
+  const webPushSync = useRef<Promise<void>>(Promise.resolve());
+  const signOutPending = useRef(false);
   useEffect(() => {
     if (previewData || !accountId) return;
     const invalidate = () => {
@@ -534,7 +537,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
   },[previewData,data?.profile.userId]);
   // Reconnect an already-authorized desktop/mobile device to Web Push after login.
   useEffect(() => {
-    if (previewData || !data?.pushPublicKey || !data.notificationSetup.pushConfigured) return;
+    if (previewData || signingOut || !data?.profile.pushEnabled || !data.pushPublicKey || !data.notificationSetup.pushConfigured) return;
     if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     let cancelled = false;
@@ -551,17 +554,18 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
           sub = null;
         }
         sub ??= await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: bytes });
-        if (!cancelled) {
-          await api('push', 'POST', sub.toJSON());
-          if (!data.profile.pushEnabled) await api('profile', 'PUT', { ...profileValues(), pushEnabled: true });
+        if (!cancelled && !sessionEnded.current && !signOutPending.current) {
+          await workspaceApi('push', 'POST', sub.toJSON(), accountId, AbortSignal.timeout(4000));
         }
       } catch (error) {
         console.warn('AutoCare: sincronizarea notificărilor nu a reușit.', error);
       }
     };
-    void sync();
+    webPushSync.current = webPushSync.current.then(() => {
+      if (!cancelled && !signOutPending.current) return sync();
+    });
     return () => { cancelled = true; };
-  }, [previewData, data?.pushPublicKey, data?.notificationSetup.pushConfigured]);
+  }, [accountId, previewData, signingOut, data?.profile.pushEnabled, data?.pushPublicKey, data?.notificationSetup.pushConfigured]);
 
   useEffect(() => {
     if (previewData) return;
@@ -963,8 +967,14 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
       sub ??= await timeout(
         reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: bytes }),
       );
-      await api('push', 'POST', sub.toJSON());
-      await api('profile', 'PUT', { ...profileValues(), pushEnabled: true });
+      if (sessionEnded.current || signOutPending.current) return;
+      const activation = webPushSync.current.then(async () => {
+        if (sessionEnded.current || signOutPending.current) return;
+        await workspaceApi('push', 'POST', sub.toJSON(), accountId, AbortSignal.timeout(4000));
+        await workspaceApi('profile', 'PUT', { ...profileValues(), pushEnabled: true }, accountId, AbortSignal.timeout(4000));
+      });
+      webPushSync.current = activation.catch(() => {});
+      await activation;
   }
   async function push() {await act(registerPush, 'Notificările au fost activate pe acest dispozitiv.');}
   async function selectVehicle(id: string) {
@@ -976,10 +986,33 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
     catch { /* The server preference remains available if storage is blocked. */ }
   }
   async function signOut() {
-    if (previewData || signingOut) return;
+    if (previewData || signOutPending.current) return;
     if (recordDirty && !await requestConfirmation(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
+    if (signOutPending.current) return;
+    signOutPending.current = true;
     setSigningOut(true); setError('');
     try {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        try {
+          await webPushSync.current;
+          const registration = await navigator.serviceWorker.getRegistration('/sw.js');
+          const subscription = await registration?.pushManager.getSubscription();
+          const cleanup = await Promise.allSettled([
+            subscription?.unsubscribe(),
+            subscription && accountId
+              ? workspaceApi('push/device', 'DELETE', { endpoint: subscription.endpoint }, accountId, AbortSignal.timeout(4000))
+              : undefined,
+            registration?.getNotifications().then(notifications => {
+              notifications.forEach(notification => notification.close());
+            }),
+          ]);
+          if (cleanup.some(result => result.status === 'rejected')) {
+            console.warn('AutoCare: notificările acestui browser nu au putut fi curățate complet.');
+          }
+        } catch {
+          console.warn('AutoCare: notificările acestui browser nu au putut fi curățate complet.');
+        }
+      }
       await disconnectNativePush(accountId);
       if (hasNativeTracking() && data?.profile.userId) await nativeAutomation.signOut(data.profile.userId);
       const result=await authClient.signOut();
@@ -990,7 +1023,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
       try { localStorage.setItem(workspaceSessionChangedKey, crypto.randomUUID()); } catch { /* Private mode may deny storage access. */ }
       window.location.assign('/autentificare');
     }
-    catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
+    catch(cause) { signOutPending.current = false; setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (
     <ApplicationLanguageProvider language={language}><div className="app-shell ac-workspace ac-studio ac-reference-theme" data-language={language} data-settings-panel={settingsPanel} data-workspace-section={tab}>

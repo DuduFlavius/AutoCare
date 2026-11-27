@@ -746,6 +746,32 @@ test('19a Push test is authenticated, sends only to the current user and reports
     await db().delete(s.pushes);
   }
 });
+test('19b Disconnecting browser push preserves other devices and accounts', async () => {
+  const endpoint = (device: string) => 'https://fcm.googleapis.com/fcm/send/disconnect-' + device;
+  const devices = [
+    { userId: uid, endpoint: endpoint('current') },
+    { userId: uid, endpoint: endpoint('spare') },
+    { userId: other, endpoint: endpoint('other-account') },
+  ];
+  await db().insert(s.pushes).values(devices.map(device => ({
+    ...device,
+    id: crypto.randomUUID(),
+    keys: { auth: 'fixture', p256dh: 'fixture' },
+  })));
+  try {
+    assert.equal((await call('push/device', 'DELETE', { endpoint: endpoint('spare') }, '')).status, 401);
+    for (const device of ['other-account', 'current', 'current']) {
+      assert.equal((await call('push/device', 'DELETE', { endpoint: endpoint(device) })).status, 200);
+    }
+    const current = await db().select().from(s.pushes);
+    assert.deepEqual(
+      current.map(row => row.endpoint).sort(),
+      [endpoint('other-account'), endpoint('spare')],
+    );
+  } finally {
+    await db().delete(s.pushes);
+  }
+});
 test('19aa Founder team API rejects anonymous users and authenticated clients', async () => {
   assert.equal(
     (

@@ -80,3 +80,17 @@ Exemplu de volum: 20 utilizatori × 1 mașină × 3 documente × 4 alerte ≈ 24
 - https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/
 
 Aceste pagini pot fi actualizate. Reconfirmă înainte de activarea unui plan sau începerea încasărilor.
+
+## Marketing și promovare · Signature Cinematic
+
+Campania propune mastere verticale de 7, 10 și 15 secunde, în română și engleză, cu imagini de produs din capturile demo ale proiectului. Mesajele publicitare sunt limitate la garaj, documente, întreținere și cheltuieli. Publicarea pe Google Play și afirmațiile despre funcții nevalidate sunt în afara scenariului publicitar.
+
+Preflight Higgsfield a confirmat Kling 3.0 Turbo, 9:16, 1080p și un cost de 6 credite pentru cadrul de test de 3 secunde. Lansarea jobului a fost refuzată cu `Requires basic plan or higher`. Campania are un montaj de rezervă din sursele AutoCare, coloane sonore originale, coperte localizate, prompturi pe cadre și texte de narațiune. Filmarea generată, înregistrarea vocii, verificarea drepturilor și previzualizarea în platformele sociale sunt puncte deschise pentru acceptarea finală.
+
+Validarea de marketing este separată de acceptarea tehnică. Verdictul de lansare și blocajele Android, semnare, livrare reală și auditurile funcționale se urmăresc în rapoartele lor existente.
+
+## Audit Enterprise · Sesiuni și notificări web
+
+- Reconectarea la Web Push respectă preferința salvată a contului. Permisiunea browserului se aplică domeniului și nu înlocuiește preferința utilizatorului.
+- Deconectarea din dashboard închide notificările web afișate și elimină abonamentul browserului curent. Backendul limitează eliminarea la contul autentificat și la dispozitiv. Setarea contului și abonamentele celorlalte dispozitive sunt păstrate.
+- Verificarea necesita sesiuni separate și fixture-uri locale. Notificările din coada unui serviciu extern, dispozitivele Android și livrarea efectivă trebuie verificate separat înainte de acceptarea versiunii.

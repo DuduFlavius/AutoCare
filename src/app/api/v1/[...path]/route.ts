@@ -898,6 +898,11 @@ async function handle(req: Request, ctx: { params: Promise<{ path: string[] }> }
         .onConflictDoUpdate({ target: s.pushes.endpoint, set: { userId: uid, keys: p.keys } });
       return json({ ok: true });
     }
+    if (route === 'push/device' && method === 'DELETE') {
+      const { endpoint } = z.object({ endpoint: z.string().max(2000).url() }).parse(await body(req));
+      await db().delete(s.pushes).where(and(eq(s.pushes.userId, uid), eq(s.pushes.endpoint, endpoint)));
+      return json({ ok: true });
+    }
     if (route === 'push' && method === 'DELETE') {
       await db().delete(s.pushes).where(eq(s.pushes.userId, uid));
       return json({ ok: true });
