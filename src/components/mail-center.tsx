@@ -7,7 +7,7 @@ import {englishEmailCopy} from '@/lib/email-copy-en';
 import {useApplicationLocale} from './application-locale';
 import { useEffect, useState } from 'react';
 import GoogleMailSettings, {googleMailRequest,type GmailStatus} from './google-mail-settings';
-import { Mail, Eye, Send, Plus, RefreshCw, LayoutDashboard, PenLine, LayoutTemplate, Megaphone, Users, Zap, CalendarClock, History, ChartNoAxesColumn, Activity, Settings2, ArrowRight, CircleCheck } from 'lucide-react';
+import { Mail, Eye, Send, Plus, RefreshCw, LayoutDashboard, PenLine, LayoutTemplate, Megaphone, Users, Zap, CalendarClock, History, ChartNoAxesColumn, Activity, Settings2, ArrowRight, CircleCheck, Search } from 'lucide-react';
 import { EmailGallery, defaultStudioStyle } from './mail-studio-gallery';
 import MailRichText from './mail-rich-text';
 import {MailPresetField} from './mail-preset-field';
@@ -72,7 +72,7 @@ const studioSections = [
 ] as const;
 type StudioSection = typeof studioSections[number][0];
 const steps = [
-  ['Șablon','Template'],['Audiență','Audience'],['Conținut','Content'],['Previzualizare','Preview'],['Trimitere','Send'],
+  ['Șablon','Template'],['Destinatari','Recipients'],['Mesaj','Message'],['Revizuire și trimitere','Review and send'],
 ] as const;
 export default function MailCenter() {
 
@@ -124,6 +124,7 @@ export default function MailCenter() {
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [search, setSearch] = useState('');
+  const [selectedOnly,setSelectedOnly]=useState(false);
   const [automationQuery,setAutomationQuery]=useState('');
   const [automationFilter,setAutomationFilter]=useState('all');
   const [automationResult,setAutomationResult]=useState('any');
@@ -205,13 +206,33 @@ export default function MailCenter() {
   }
   const security = ['verification', 'password_reset', 'gmail_test','account_security','monthly_report'].includes(template);
   const topics = emailCategory(template,category==='promotional');
-  const hasAudience = segment ? (segmentCount??0)>0 : recipients.length>0;
+  function disabledReason(user: Overview['users'][number]) {
+    if (user.suspendedAt) return t('Cont suspendat','Suspended account');
+    if (user.emailEnabled === false) return t('Emailuri dezactivate','Email disabled');
+    if (!user.emailVerified && category === 'promotional') return t('Adresă neconfirmată','Unverified address');
+    if (topics && !emailCategories(user.categories,user.promotional??false)[topics])
+      return t('Fără acord pentru acest tip de email','No consent for this email type');
+    if (!topics && user.transactional === false) return t('Comunicări dezactivate','Communications disabled');
+    return null;
+  }
+  const audienceUsers = data?.users.map(user => ({ ...user, reason: disabledReason(user) })) ?? [];
+  const selectedRecipients = saved ? recipients : recipients.filter(id => audienceUsers.some(user => user.id === id && !user.reason));
+  const selectedCount = segment ? segmentCount ?? 0 : selectedRecipients.length;
+  const hasAudience = selectedCount > 0;
+  const messageReady = subject.trim().length >= 3 && message.trim().length >= 10;
+  const audienceView = section === 'audiences' || section === 'compose' && step === 1;
+  const searchTerm = search.trim().toLocaleLowerCase();
+  const visibleUsers = audienceUsers.filter(user =>
+    (!selectedOnly || selectedRecipients.includes(user.id)) &&
+    (user.name + ' ' + user.email).toLocaleLowerCase().includes(searchTerm),
+  );
+  const selectableUsers = visibleUsers.filter(user => !user.reason && !selectedRecipients.includes(user.id));
   const draft = {id:draftId,template,category,communicationType,templateLabel,categoryLabel,subject,message,ctaLabel,ctaPath,design,
-    ...(segment?{segment}:{recipients}),englishContent};
-  const canDraft = !busy && !security && hasAudience && subject.trim().length>=3 && message.trim().length>=10;
-  const selectedName = data?.users.find((u) => u.id === recipients[0])?.name || 'prietene';
+    ...(segment?{segment}:{recipients:selectedRecipients}),englishContent};
+  const canDraft = !busy && !security && hasAudience && messageReady;
+  const selectedName = data?.users.find((u) => u.id === selectedRecipients[0])?.name || 'prietene';
   useEffect(()=>{
-    if(section!=='compose'||step===0)return;
+    if(section!=='compose'||step<2)return;
     const controller=new AbortController();
     const timeout=setTimeout(()=>{
       void api('/preview','POST',{
@@ -228,10 +249,6 @@ export default function MailCenter() {
     return ()=>{clearTimeout(timeout);controller.abort();};
   },[section,step,previewLanguage,template,subject,message,ctaLabel,ctaPath,selectedName,category,
     style,preheader,englishPreheader,formatted,theme,englishSubject,englishMessage,englishCta]);
-  const eligible = (u: Overview['users'][number]) =>
-    (u.emailVerified || category === 'transactional') &&
-    !u.suspendedAt && u.emailEnabled !== false &&
-    (topics ? emailCategories(u.categories,u.promotional??false)[topics] : u.transactional !== false);
   if (!data)
     return (
       <section className="card">
@@ -253,11 +270,26 @@ export default function MailCenter() {
       (!historyEnd || new Date(campaign.createdAt).toLocaleDateString('en-CA') <= historyEnd);
   });
 
+  const gallery = <EmailGallery language={en?'en':'ro'} disabled={busy} onChoose={chooseFromGallery} entries={[
+    ...Object.entries(data.templates).map(([id,entry])=>({id,template:id as EmailTemplate,label:entry.label,subject:entry.subject,message:entry.body,ctaLabel:entry.cta,ctaPath:entry.path,category:templateCategory(id as EmailTemplate)})),
+    ...data.library.filter(item=>item.kind==='template'),
+  ]}/>;
+  function copyForNewAudience() {
+    setDraftId(crypto.randomUUID());
+    setSaved(false);
+    setDetail(null);
+    setRecipients([]);
+    setSegment('');
+    setSegmentCount(null);
+    setSearch('');
+    setSelectedOnly(false);
+    setNotice(t('Copie nouă. Alege destinatarii.','New copy. Choose its recipients.'));
+  }
   return (
     <div className="mail-center mail-studio">
       <header className="studio-masthead">
         <div className="studio-brand"><span className="studio-brand-mark"><Mail size={24}/></span><div><h2>Mail Studio</h2><p>{t('Comunicări AutoCare','AutoCare communications')}</p></div></div>
-        <button type="button" className="studio-primary" disabled={busy} onClick={()=>{choose('administrative');setRecipients([]);setSegment('');setDetail(null);setSection('compose');setStep(0);}}>
+        <button type="button" className="studio-primary" disabled={busy} onClick={()=>{choose('administrative');setRecipients([]);setSegment('');setSearch('');setSelectedOnly(false);setDetail(null);setSection('compose');setStep(0);}}>
           <Plus size={17}/>{t('Ciornă nouă','New draft')}
         </button>
       </header>
@@ -274,7 +306,7 @@ export default function MailCenter() {
       <nav className="studio-navigation" aria-label={t('Meniu Mail Studio','Mail Studio navigation')}>
         {studioSections.map(([id,ro,english,Icon])=><button key={id} type="button" aria-current={section===id?'page':undefined} onClick={()=>setSection(id)}><Icon size={17}/><span>{t(ro,english)}</span></button>)}
       </nav>
-      {data.permissions.canApprove && (section==='overview'||section==='settings'||section==='compose'&&step===4) &&
+      {data.permissions.canApprove && (section==='overview'||section==='settings'||section==='compose'&&step===3) &&
         <GoogleMailSettings compact={section!=='settings'} onStatus={setGmailStatus}/>}
       {['overview','analytics','delivery'].includes(section) && <section className="studio-surface studio-overview">
         <header className="studio-section-heading"><div><h2>{t(...(section==='overview'?['Prezentare generală','Overview']:section==='analytics'?['Statistici','Statistics']:['Livrabilitate','Deliverability']) as [string,string])}</h2>
@@ -293,16 +325,18 @@ export default function MailCenter() {
         </div>}
       </section>}
       {section==='compose'&&<ol className="studio-steps" aria-label={t('Pași de redactare','Composition steps')}>
-        {steps.map(([ro,english],index)=><li key={ro}><button type="button" aria-current={step===index?'step':undefined} onClick={()=>setStep(index)}><span>{step>index?<CircleCheck size={15}/>:index+1}</span>{t(ro,english)}</button></li>)}
+        {steps.map(([ro,english],index)=><li key={ro}><button type="button" aria-current={step===index?'step':undefined} disabled={busy || index>=2 && !hasAudience || index===3 && !messageReady} onClick={()=>setStep(index)}><span>{step>index?<CircleCheck size={15}/>:index+1}</span>{t(ro,english)}</button></li>)}
       </ol>}
-      {(section==='library'||(section==='compose'&&step===0)) && <>
-        {section==='compose'&&<button className="studio-freeform" type="button" disabled={busy} onClick={()=>{choose('administrative');setSubject('');setMessage('');setPreheader('');setEnglishPreheader('');setStep(1);}}><PenLine size={16}/>{t('Începe fără șablon','Start from scratch')}</button>}
-        <EmailGallery language={en?'en':'ro'} disabled={busy} onChoose={chooseFromGallery} entries={[
-          ...Object.entries(data.templates).map(([id,entry])=>({id,template:id as EmailTemplate,label:entry.label,subject:entry.subject,message:entry.body,ctaLabel:entry.cta,ctaPath:entry.path,category:templateCategory(id as EmailTemplate)})),
-          ...data.library.filter(item=>item.kind==='template'),
-        ]}/>
-      </>}
-      <div className="mail-center-grid" data-audience={section==='audiences'} hidden={section!=='audiences'&&(section!=='compose'||step===0)}>
+      {section==='compose'&&step===0&&<section className="studio-surface studio-quick-templates">
+        <h2>{t('Alege un șablon','Choose a template')}</h2>
+        <div className="studio-quick-options">
+          {(['administrative','welcome','document_update','support_details'] as const).map(id=><button type="button" key={id} disabled={busy} onClick={()=>chooseFromGallery(id)}>{en?englishEmailCopy[id]?.title:data.templates[id].label}<ArrowRight size={16}/></button>)}
+        </div>
+        <button className="studio-freeform" type="button" disabled={busy} onClick={()=>{choose('administrative');setSubject('');setMessage('');setPreheader('');setEnglishPreheader('');setStep(1);}}><PenLine size={16}/>{t('Scrie de la zero','Write from scratch')}</button>
+        <details><summary>{t('Toate șabloanele','All templates')}</summary>{gallery}</details>
+      </section>}
+      {section==='library'&&gallery}
+      <div className="mail-center-grid" data-audience={audienceView} hidden={section!=='audiences'&&(section!=='compose'||step===0)}>
         <section className="studio-surface studio-editor">
           <header className="studio-section-heading">
             <div><h2>{section==='audiences'?t('Audiențe','Audiences'):t(steps[step][0],steps[step][1])}</h2><p>{t('Model selectat','Selected template')}{' · '}{en?englishEmailCopy[template]?.title:data.templates[template].label}</p></div>
@@ -399,9 +433,7 @@ export default function MailCenter() {
             />
           </label>
           <datalist id="mail-subject-options">{Object.entries(data.templates).map(([key, t]) => <option key={key} value={t.subject} />)}{data.library.filter(x => x.kind === 'template').map(t => <option key={t.id} value={t.subject} />)}</datalist>
-          <label>{t('Preheader','Preheader')}<input value={preheader} disabled={saved||busy} maxLength={130} onChange={e=>setPreheader(e.target.value)}/></label>
           <MailRichText formatLabel={t('Formatare','Formatting')} label={t('Mesaj','Message')} value={message} onChange={setMessage} onFormat={()=>setFormatted(x=>!x)} enabled={formatted} disabled={saved||busy}/>
-          <label>{t('Stil vizual','Visual style')}<FilterSelect value={style} disabled={saved||busy} onChange={e=>setStyle(e.target.value as StudioStyle)}>{studioStyles.map(id=><option key={id}>{id}</option>)}</FilterSelect></label>
           <details className="mail-english-editor"><summary>{t('Versiune în engleză pentru destinatarii EN','English version for EN recipients')}</summary>
             <p>{t('Șabloanele standard se traduc automat. Pentru textul propriu, completează aici versiunea în engleză. Fără această versiune, mesajul propriu rămâne în limba în care l-ai scris.','Standard templates are localized automatically. For your own text, write the English version here. Without it, custom text is sent in the language you wrote.')}</p>
             <label>Subject · EN<input value={englishSubject} maxLength={180} disabled={saved||busy} onChange={e=>{setEnglishSubject(e.target.value);setPreview(null);}}/></label>
@@ -409,7 +441,9 @@ export default function MailCenter() {
             <MailRichText formatLabel="Formatting · EN" label="Message · EN" value={englishMessage} onChange={setEnglishMessage} onFormat={()=>setFormatted(x=>!x)} enabled={formatted} disabled={saved||busy}/>
             <label>Button · EN<input value={englishCta} placeholder="Open AutoCare" maxLength={60} disabled={saved||busy} onChange={e=>setEnglishCta(e.target.value)}/></label>
           </details>
-          <details><summary>Personalizează butonul și linkul</summary>
+          <details><summary>{t('Buton, stil și text de previzualizare','Button, style and preview text')}</summary>
+          <label>{t('Preheader','Preheader')}<input value={preheader} disabled={saved||busy} maxLength={130} onChange={e=>setPreheader(e.target.value)}/></label>
+          <label>{t('Stil vizual','Visual style')}<FilterSelect value={style} disabled={saved||busy} onChange={e=>setStyle(e.target.value as StudioStyle)}>{studioStyles.map(id=><option key={id}>{id}</option>)}</FilterSelect></label>
           <label>
             Text buton CTA
             <input
@@ -462,79 +496,57 @@ export default function MailCenter() {
             </p>
           )}
           </div>
-          <div className="studio-fields" hidden={section!=='audiences'&&step!==1}>
-          <label>{t('Destinatari','Recipients')}
-            <FilterSelect disabled={busy||saved} value={segment} onChange={event=>{setSegment(event.target.value as typeof segment);setSegmentCount(null);}}>
-              <option value="">{t('Alegere individuală','Individual selection')}</option>
-              <option value="all">{t('Toți utilizatorii eligibili','All eligible users')}</option>
-              <option value="garage">{t('Conturi cu vehicule active','Accounts with active vehicles')}</option>
-              <option value="no_garage">{t('Conturi fără vehicule active','Accounts without active vehicles')}</option>
-            </FilterSelect>
-          </label>
-          {segment && <div className="inline"><button type="button" disabled={busy||saved} onClick={()=>void run(async()=>{
-            const result=await api('/audience','POST',{segment,template,category});setSegmentCount(result.count);
-          })}>{t('Calculează destinatarii eligibili','Count eligible recipients')}</button>
-            {segmentCount!==null&&<span role="status">{segmentCount} {t('eligibili','eligible')}</span>}</div>}
-          {!segment && <>
-          <label>
-            Caută destinatari
-            <input value={search} onChange={(e) => setSearch(e.target.value)} />
-          </label>
-          <div className="inline" style={{ flexWrap: 'wrap', gap: 10 }}>
-            <button type="button" disabled={busy || saved} onClick={() => {
-              const matching = data.users.filter((u) =>
-                (u.name + ' ' + u.email).toLowerCase().includes(search.toLowerCase()) && eligible(u)
-              );
-              setRecipients((old) => [...new Set([...old, ...matching.map((u) => u.id)])].slice(0, 50));
-              setPreview(null);
-            }}>Bifează utilizatorii afișați</button>
-            <button type="button" disabled={busy || saved || recipients.length === 0} onClick={() => {
-              setRecipients([]);
-              setPreview(null);
-            }}>Debifează toți</button>
-          </div>
-          <div className="mail-recipients" role="group" aria-label="Destinatari">
-            <p>
-              {recipients.length}/50 selectați ·{' '}
-              {category === 'promotional'
-                ? 'numai acord promoțional explicit'
-                : 'preferințe tranzacționale respectate'}
-            </p>
-            {data.users
-              .filter((u) => (u.name + ' ' + u.email).toLowerCase().includes(search.toLowerCase()))
-              .map((u) => (
-                <label className="check" key={u.id}>
-                  <input
-                    type="checkbox"
-                    disabled={
-                      saved ||
-                      busy ||
-                      !eligible(u) ||
-                      (!recipients.includes(u.id) && recipients.length >= 50)
-                    }
-                    checked={recipients.includes(u.id)}
-                    onChange={(e) => {
-                      setRecipients((old) =>
-                        e.target.checked ? [...old, u.id] : old.filter((id) => id !== u.id),
-                      );
-                      setPreview(null);
-                    }}
-                  />
-                  <span>
-                    {u.name}
-                    <br />
-                    <small>
-                      {u.email}
-                      {!eligible(u) ? ' · indisponibil pentru această categorie' : ''}
-                    </small>
-                  </span>
+          <div className="studio-fields" hidden={!audienceView}>
+            {saved ? <div className="studio-audience-notice">
+              <p>{t('Destinatarii unei ciorne salvate sunt fixați. Creează o copie pentru a alege alți destinatari.','Recipients are fixed once a draft is saved. Make a copy to choose different recipients.')}</p>
+              <button type="button" disabled={busy} onClick={copyForNewAudience}>{t('Copiază și alege destinatarii','Copy and choose recipients')}</button>
+            </div> : <>
+              <div className="studio-audience-modes" role="group" aria-label={t('Mod de selectare','Selection mode')}>
+                <button type="button" aria-pressed={!segment} disabled={busy} onClick={()=>{setSegment('');setSegmentCount(null)}}>{t('Alege persoane','Choose people')}</button>
+                <button type="button" aria-pressed={!!segment} disabled={busy} onClick={()=>{if(!segment){setSegment('all');setSegmentCount(null)}}}>{t('Alege un grup','Choose a group')}</button>
+              </div>
+              {segment ? <>
+                <label>{t('Grup de destinatari','Recipient group')}
+                  <FilterSelect disabled={busy} value={segment} onChange={event=>{setSegment(event.target.value as typeof segment);setSegmentCount(null)}}>
+                    <option value="all">{t('Toate conturile eligibile','All eligible accounts')}</option>
+                    <option value="garage">{t('Conturi cu vehicule active','Accounts with active vehicles')}</option>
+                    <option value="no_garage">{t('Conturi fără vehicule active','Accounts without active vehicles')}</option>
+                  </FilterSelect>
                 </label>
-              ))}
+                <button type="button" disabled={busy} onClick={()=>void run(async()=>{
+                  const result=await api('/audience','POST',{segment,template,category});setSegmentCount(result.count);
+                })}>{t('Verifică grupul','Check group')}</button>
+                {segmentCount!==null&&<span role="status">{segmentCount} {t('destinatari eligibili','eligible recipients')}</span>}
+              </> : <>
+                <label>{t('Caută destinatari','Find recipients')}
+                  <span className="studio-search"><Search size={16} aria-hidden="true"/><input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder={t('Nume sau adresă de email','Name or email address')}/></span>
+                </label>
+                <div className="studio-audience-toolbar">
+                  <strong role="status">{selectedCount} / 50 {t('selectați','selected')}</strong>
+                  <button type="button" aria-pressed={selectedOnly} onClick={()=>setSelectedOnly(value=>!value)}>{t('Doar selectați','Selected only')}</button>
+                  <button type="button" disabled={busy||!selectableUsers.length||selectedCount>=50} onClick={()=>{
+                    setRecipients([...selectedRecipients,...selectableUsers.map(user=>user.id)].slice(0,50));
+                  }}>{t('Bifează utilizatorii afișați','Select visible users')}</button>
+                  <button type="button" disabled={busy||!selectedCount} onClick={()=>{setRecipients([]);setSelectedOnly(false)}}>{t('Debifează toți','Clear selection')}</button>
+                </div>
+                {category==='promotional'&&<p className="small">{t('Pentru acest șablon poți selecta doar persoane care au acceptat acest tip de email.','This template is limited to people who opted in to this type of email.')}</p>}
+                {visibleUsers.length ? <div className="mail-recipients" role="group" aria-label={t('Destinatari','Recipients')}>
+                  {[...visibleUsers].sort((a,b)=>Number(!!a.reason)-Number(!!b.reason)).map(user=>{
+                    const checked=selectedRecipients.includes(user.id);
+                    return <label className="check studio-recipient" key={user.id} data-unavailable={!!user.reason}>
+                      <input type="checkbox" checked={checked} disabled={busy||!!user.reason||!checked&&selectedCount>=50}
+                        onChange={event=>setRecipients(event.target.checked?[...selectedRecipients,user.id]:selectedRecipients.filter(id=>id!==user.id))}/>
+                      <span className="studio-recipient-address"><strong>{user.name}</strong><small>{user.email}</small></span>
+                      {user.reason&&<small className="studio-recipient-reason">{user.reason}</small>}
+                    </label>;
+                  })}
+                </div> : <p role="status">{selectedOnly?t('Nu există destinatari selectați care corespund căutării.','No selected recipients match the search.'):t('Nu am găsit destinatari.','No recipients found.')}</p>}
+              </>}
+              {section==='audiences'&&<button type="button" className="studio-primary" disabled={!hasAudience||busy} onClick={()=>{setSection('compose');setStep(2)}}>{t('Scrie mesajul','Write the message')}<ArrowRight size={16}/></button>}
+            </>}
           </div>
-          </>}
-          </div>
-          {section==='compose'&&step===3&&<p>{t('Verifică subiectul, conținutul și linkurile în ambele limbi folosind panoul de previzualizare.','Review the subject, content and links in both languages using the preview panel.')}</p>}
-          <div className="studio-fields" hidden={section!=='compose'||step!==4}>
+          <div className="studio-fields" hidden={section!=='compose'||step!==3}>
+            <p role="status">{selectedCount} {t('destinatari','recipients')} · {subject}</p>
             <button type="button" onClick={()=>setSection('settings')}><Settings2 size={16}/>{t('Conectare și test Gmail','Gmail connection and test')}</button>
           <button type="button" disabled={!canDraft||saved} onClick={()=>void run(async()=>{
             await api('/campaigns','POST',draft);setSaved(true);setData(await api());setNotice(t('Ciornă salvată.','Draft saved.'));
@@ -605,19 +617,19 @@ export default function MailCenter() {
               });
             }}
           >
-            <Send size={17} /> {busy ? 'Se procesează…' : !data.permissions.canApprove && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved') ? 'Trimite Fondatorului pentru aprobare' : template === 'release_news' ? 'Programează AutoCare News' : saved ? 'Continuă trimiterea emailurilor' : hasAudience ? `Trimite emailul către ${segment?segmentCount:recipients.length} destinatari` : 'Bifează un destinatar pentru trimitere'}
+            <Send size={17} /> {busy ? 'Se procesează…' : !data.permissions.canApprove && !data.reviews.some(x => x.campaignId === draftId && x.status === 'approved') ? 'Trimite Fondatorului pentru aprobare' : template === 'release_news' ? 'Programează AutoCare News' : saved ? 'Continuă trimiterea emailurilor' : hasAudience ? `Trimite emailul către ${selectedCount} destinatari` : 'Bifează un destinatar pentru trimitere'}
           </button>
           {!hasAudience && <p className="small muted">Bifează cel puțin un destinatar pentru a activa trimiterea.</p>}
           {data.permissions.directSend && gmailStatus && !gmailStatus.testedAt && (
             <p className="small muted">{t('Rulează testul Gmail înainte de prima expediere.','Run the Gmail test before the first delivery.')}</p>
           )}
           </div>
-          {section==='compose'&&step<4&&<footer className="studio-editor-footer">
+          {section==='compose'&&step>0&&<footer className="studio-editor-footer">
             <button type="button" onClick={()=>setStep(step-1)}>{t('Înapoi','Back')}</button>
-            <button type="button" className="studio-primary" onClick={()=>setStep(step+1)}>{t('Continuă','Continue')}<ArrowRight size={16}/></button>
+            {step<3&&<button type="button" className="studio-primary" disabled={busy || (step===1 ? !hasAudience : !messageReady || !hasAudience)} onClick={()=>setStep(step+1)}>{step===1?t('Scrie mesajul','Write the message'):t('Verifică emailul','Review email')}<ArrowRight size={16}/></button>}
           </footer>}
         </section>
-        <section className="studio-surface mail-preview" hidden={section!=='compose'}>
+        <section className="studio-surface mail-preview" hidden={section!=='compose'||step<2}>
           <header className="studio-section-heading"><div><h2>{t('Previzualizare live','Live preview')}</h2><p>{preview?.subject||t('Se pregătește previzualizarea…','Preparing preview…')}</p></div><Eye size={20}/></header>
           <div className="studio-preview-controls">
             {(['ro','en'] as const).map(id=><button type="button" key={id} aria-pressed={previewLanguage===id} onClick={()=>setPreviewLanguage(id)}>{id.toUpperCase()}</button>)}
@@ -802,7 +814,7 @@ export default function MailCenter() {
                             setCategory(c.category as typeof category);
                             setEnglishSubject(result.englishContent?.subject??'');setEnglishMessage(result.englishContent?.message??'');setEnglishCta(result.englishContent?.ctaLabel??'');
                             setStyle(result.design?.style??'signature');setPreheader(result.design?.preheader??'');setEnglishPreheader(result.design?.englishPreheader??'');setFormatted(result.design?.formatted??false);
-                            setStep(4);
+                            setStep(3);
                             setCommunicationType(result.communicationType);setTemplateLabel(result.templateLabel);setCategoryLabel(result.categoryLabel);
                             setSaved(true);
                             setConfirmed(false);
@@ -827,7 +839,7 @@ export default function MailCenter() {
           <div>
             <h3>{detail.campaign.subject}</h3>
             {detail.campaign.id===draftId && detail.campaign.source==='manual' && ['draft','sending'].includes(detail.campaign.status) &&
-              <button type="button" onClick={()=>{setSection('compose');setStep(4);}}>{t('Vezi redactarea și trimiterea','Open composer and sending')}</button>}<p>{detail.communicationType}</p><p style={{whiteSpace: 'pre-wrap'}}>{detail.campaign.message}</p><p>{detail.campaign.ctaLabel} · {detail.campaign.ctaPath}</p>
+              <button type="button" onClick={()=>{setSection('compose');setStep(3);}}>{t('Vezi redactarea și trimiterea','Open composer and sending')}</button>}<p>{detail.communicationType}</p><p style={{whiteSpace: 'pre-wrap'}}>{detail.campaign.message}</p><p>{detail.campaign.ctaLabel} · {detail.campaign.ctaPath}</p>
             {data.permissions.canApprove && ['draft','scheduled','sending','held'].includes(detail.campaign.status) &&
               (detail.campaign.source==='manual'||detail.campaign.template==='release_news') &&
               <button disabled={busy} type="button" onClick={()=>void run(async()=>{

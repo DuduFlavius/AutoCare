@@ -187,3 +187,29 @@ html body :is(.ac-admin-frame,.mail-staff-shell) .mail-center.mail-studio .studi
 .studio-library .studio-thumbnail > div { display:flex; align-items:center; gap:8px; font-size:12px; }
 .studio-library .studio-thumbnail > strong { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; overflow-wrap:anywhere; font-size:15px; }
 @media(max-width:560px) { .studio-gallery-tools { grid-template-columns:minmax(0,1fr); } }
+
+.studio-quick-templates { display:grid; gap:14px; }
+.studio-quick-options { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr)); gap:8px; }
+.studio-quick-options button { justify-content:space-between; text-align:left; }
+.studio-quick-templates .studio-freeform { justify-self:start; }
+.studio-quick-templates details[open] > .studio-library { margin-top:10px; }
+.studio-audience-modes,.studio-audience-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.studio-audience-toolbar > strong { margin-inline-end:auto; }
+.mail-studio .mail-recipients label.studio-recipient {
+  display:grid; grid-template-columns:24px minmax(0,1fr) auto; gap:12px; align-items:center; min-height:54px;
+  padding:8px 10px; border:1px solid transparent; border-radius:8px; cursor:pointer;
+}
+.mail-studio .mail-recipients label.studio-recipient:has(input:checked) { border-color:var(--studio-accent); }
+.mail-studio .mail-recipients label.studio-recipient:focus-within { outline:2px solid var(--studio-accent); outline-offset:-2px; }
+html body .mail-center.mail-studio .mail-recipients .studio-recipient input[type=checkbox] {
+  appearance:auto!important; inline-size:20px!important; block-size:20px!important; min-height:0!important;
+  margin:0; padding:0!important; cursor:inherit; accent-color:var(--studio-accent);
+}
+.mail-studio .mail-recipients label.studio-recipient:has(input:disabled) { cursor:default; }
+.studio-recipient-address { display:grid; gap:3px; overflow-wrap:anywhere; }
+.studio-recipient-address small,.studio-recipient-reason { color:var(--studio-muted); }
+@media(max-width:560px) {
+  .mail-studio .mail-recipients label.studio-recipient { grid-template-columns:24px minmax(0,1fr); }
+  .studio-recipient-reason { grid-column:2; }
+  .studio-audience-toolbar > strong { flex-basis:100%; }
+}
