@@ -2,8 +2,8 @@ name: Native GPS builds
 on:
   push:
     branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated, audit/rca-gps-play-20261117, release/smartdrive-61, release/play-readiness, release/signature-forms, release/signature-3-final, release/enterprise-audit]
-    # The controlled release branches run this packaging gate without publishing.
-    paths: ["mobile/**", ".github/workflows/native-build.yml"]
+    # Recheck native packaging when the Android-backed dashboard changes.
+    paths: ["mobile/**", "src/components/dashboard.tsx", ".github/workflows/native-build.yml"]
   pull_request:
     branches: [feature/autocare-ai-integrated, feature/autocare-desktop-premium-20261102, feature/autocare-native-gps-20261104]
     paths: ["mobile/**", ".github/workflows/native-build.yml"]

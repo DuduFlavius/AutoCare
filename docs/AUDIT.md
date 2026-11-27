@@ -94,3 +94,4 @@ Validarea de marketing este separată de acceptarea tehnică. Verdictul de lansa
 - Reconectarea la Web Push respectă preferința salvată a contului. Permisiunea browserului se aplică domeniului și nu înlocuiește preferința utilizatorului.
 - Deconectarea din dashboard închide notificările web afișate și elimină abonamentul browserului curent. Backendul limitează eliminarea la contul autentificat și la dispozitiv. Setarea contului și abonamentele celorlalte dispozitive sunt păstrate.
 - Verificarea necesita sesiuni separate și fixture-uri locale. Notificările din coada unui serviciu extern, dispozitivele Android și livrarea efectivă trebuie verificate separat înainte de acceptarea versiunii.
+- Reîncercarea încărcării dashboardului elimină alerta precedentă. O cerere care eșuează din nou afișează eroarea curentă.

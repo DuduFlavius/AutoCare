@@ -1088,7 +1088,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
         {!data ? (
           <div className="ws-loading" role="status">
             <p>{language==='en'?'Loading your workspace…':'Se încarcă spațiul tău de lucru…'}</p>
-            {error ? <button type="button" onClick={() => void refresh()}>{language==='en'?'Try again':'Reîncearcă'}</button> : <div className="ws-loading-grid" aria-hidden="true"><span/><span/><span/><span/></div>}
+            {error ? <button type="button" onClick={() => { setError(''); void refresh(); }}>{language==='en'?'Try again':'Reîncearcă'}</button> : <div className="ws-loading-grid" aria-hidden="true"><span/><span/><span/><span/></div>}
           </div>
         ) : (
           <>
