@@ -1,6 +1,8 @@
 'use client';
 import {requestConfirmation} from '@/components/premium-dialogs';
 
+import {Gauge} from 'lucide-react';
+import {SignatureActions, SignatureDialog, SignatureGroup} from './signature-form';
 import {PremiumDateInput} from './premium-date-input';
 import { useRef, useState } from 'react';
 import { useApplicationLanguage, useApplicationLocale } from './application-locale';
@@ -31,26 +33,46 @@ export default function InlineMileageEditor({ vehicleId, currentKm, preview, onS
     } catch (cause) { setError(cause instanceof Error ? cause.message : (en ? 'Please try again.' : 'Încearcă din nou.')); }
     finally { inFlight.current=false;setBusy(false); }
   }
+  async function close() {
+    if (inFlight.current) return;
+    if ((value !== String(currentKm) || notes || date !== new Date().toLocaleDateString('en-CA')) &&
+      !await requestConfirmation(en ? 'Discard unsaved mileage changes?' : 'Renunți la modificările nesalvate?')) return;
+    setOpen(false);
+    setError('');
+  }
+  const label = busy ? (en ? 'Saving…' : 'Se salvează…') :
+    confirmed === target ? (en ? 'Confirm mileage' : 'Confirmă kilometrajul') : (en ? 'Save mileage' : 'Salvează kilometrajul');
   return <div className="ac-inline-mileage" data-workspace-ui>
-    {!open && <button type="button" disabled={busy} onClick={() => { setValue(String(currentKm)); setDate(new Date().toLocaleDateString('en-CA')); setNotes(''); setConfirmed(null); setError(''); setSaved(false); setOpen(true); }}>{triggerLabel ?? (en ? 'Enter mileage manually' : 'Introdu kilometraj manual')}</button>}
-    {open && <form className="sf-inline" aria-busy={busy} onSubmit={save}>
-      <label>{en ? 'Current odometer reading (km)' : 'Kilometrajul actual de pe bord (km)'}
-        <input type="number" inputMode="numeric" min={currentKm} max={99999999} step="1" value={value} disabled={busy} onChange={e => { setValue(e.target.value); setConfirmed(null); setError(''); }} autoFocus required aria-invalid={invalid || undefined}/>
-      </label>
-      <label>{en?'Reading date':'Data citirii'}<PremiumDateInput type="date" value={date} max={new Date().toLocaleDateString('en-CA')} onChange={event=>setDate(event.target.value)} required disabled={busy}/></label>
-      <label>{en?'Notes (optional)':'Observații (opțional)'}<input value={notes} maxLength={500} onChange={event=>setNotes(event.target.value)} disabled={busy}/></label>
-      <small>{en ? 'Previously saved: ' : 'Înregistrat anterior: '}{currentKm.toLocaleString(locale)} km. {en ? 'Enter the total on the dashboard, not just the kilometers driven.' : 'Introdu totalul de pe bord, nu doar kilometrii parcurși.'}</small>
-      {!invalid && delta > 0 && <small>+{delta.toLocaleString(locale)} {en ? 'km since the previous reading' : 'km față de citirea anterioară'}</small>}
-      {invalid && <p role="alert">{en ? 'Enter a whole number at least equal to the saved mileage.' : 'Introdu un număr întreg, cel puțin egal cu kilometrajul salvat.'}</p>}
-      {confirmed === target && <p role="alert">{en ? 'Large increase. Check the total on your dashboard and confirm.' : 'Creștere mare de kilometraj. Verifică totalul de pe bord și confirmă.'}</p>}
-      <div><button type="submit" disabled={invalid || busy}>{busy ? (en ? 'Saving…' : 'Se salvează…') : confirmed === target ? (en ? 'Confirm mileage' : 'Confirmă kilometrajul') : (en ? 'Save mileage' : 'Salvează kilometrajul')}</button>
-      <button type="button" disabled={busy} onClick={async () => {
-        if ((value !== String(currentKm) || notes || date !== new Date().toLocaleDateString('en-CA')) &&
-          !await requestConfirmation(en ? 'Discard unsaved mileage changes?' : 'Renunți la modificările nesalvate?')) return;
-        setOpen(false); setError('');
-      }}>{en ? 'Cancel' : 'Anulează'}</button></div>
-    </form>}
+    <button type="button" disabled={busy || open} onClick={() => {
+      setValue(String(currentKm));
+      setDate(new Date().toLocaleDateString('en-CA'));
+      setNotes('');
+      setConfirmed(null);
+      setError('');
+      setSaved(false);
+      setOpen(true);
+    }}>{triggerLabel ?? (en ? 'Enter mileage manually' : 'Introdu kilometraj manual')}</button>
+    {open && <SignatureDialog title={en ? 'Record mileage' : 'Înregistrează kilometrajul'} icon={Gauge} compact busy={busy} onClose={() => void close()}>
+      <form className="sf-form" aria-busy={busy} onSubmit={save}>
+        <div className="sf-body">
+          <SignatureGroup title={en ? 'Odometer' : 'Citire kilometraj'} icon={Gauge}>
+            <small>{en ? 'Previously saved: ' : 'Înregistrat anterior: '}{currentKm.toLocaleString(locale)} km.</small>
+            <div className="form-grid">
+              <label>{en ? 'Current odometer reading (km)' : 'Kilometrajul actual de pe bord (km)'}
+                <input type="number" inputMode="numeric" min={currentKm} max={99999999} step="1" value={value} disabled={busy} onChange={e => { setValue(e.target.value); setConfirmed(null); setError(''); }} required aria-invalid={invalid || undefined}/>
+              </label>
+              <label>{en?'Reading date':'Data citirii'}<PremiumDateInput type="date" value={date} max={new Date().toLocaleDateString('en-CA')} onChange={event=>setDate(event.target.value)} required disabled={busy}/></label>
+              <label className="full">{en?'Notes (optional)':'Observații (opțional)'}<input value={notes} maxLength={500} onChange={event=>setNotes(event.target.value)} disabled={busy}/></label>
+            </div>
+            {!invalid && delta > 0 && <small>+{delta.toLocaleString(locale)} {en ? 'km since the previous reading' : 'km față de citirea anterioară'}</small>}
+            {invalid && <p role="alert">{en ? 'Enter a whole number at least equal to the saved mileage.' : 'Introdu un număr întreg, cel puțin egal cu kilometrajul salvat.'}</p>}
+            {confirmed === target && <p role="alert">{en ? 'Large increase. Check the total on your dashboard and confirm.' : 'Creștere mare de kilometraj. Verifică totalul de pe bord și confirmă.'}</p>}
+            {error && <p className="sf-error" role="alert">{error}</p>}
+          </SignatureGroup>
+        </div>
+        <SignatureActions busy={busy} disabled={invalid} label={label} onCancel={() => void close()}/>
+      </form>
+    </SignatureDialog>}
     {saved && <p role="status">{en ? 'Mileage saved. Maintenance estimates recalculated.' : 'Kilometraj salvat. Estimările de întreținere au fost recalculate.'}</p>}
-    {error && <p role="alert">{error}</p>}
   </div>;
 }

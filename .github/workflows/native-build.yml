@@ -1,7 +1,7 @@
 name: Native GPS builds
 on:
   push:
-    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated, audit/rca-gps-play-20261117, release/smartdrive-61, release/play-readiness, release/signature-forms]
+    branches: [feature/autocare-native-gps-20261104, feature/autocare-ai-integrated, audit/rca-gps-play-20261117, release/smartdrive-61, release/play-readiness, release/signature-forms, release/signature-3-final]
     # The controlled release branches run this packaging gate without publishing.
     paths: ["mobile/**", ".github/workflows/native-build.yml"]
   pull_request:
@@ -32,6 +32,16 @@ jobs:
           "$JAVA_HOME_21_X64/bin/javac" -version
       - run: npm ci --prefix mobile
       - run: cd mobile && npx cap sync android
+      - name: Verify Gradle distribution with bounded retries
+        working-directory: mobile/android
+        run: |
+          export JAVA_HOME="$JAVA_HOME_21_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          for attempt in 1 2 3; do
+            if ./gradlew --version; then exit 0; fi
+            if [ "$attempt" -lt 3 ]; then sleep "$((attempt * 5))"; fi
+          done
+          exit 1
       - name: Compile Android debug app
         run: |
           export JAVA_HOME="$JAVA_HOME_21_X64"
@@ -104,7 +114,7 @@ jobs:
   android-release:
     permissions:
       contents: write
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/feature/autocare-ai-integrated') || (github.event_name == 'workflow_dispatch' && inputs.signed_android_release)
+    if: github.ref != 'refs/heads/release/signature-3-final' && ((github.event_name == 'push' && github.ref == 'refs/heads/feature/autocare-ai-integrated') || (github.event_name == 'workflow_dispatch' && inputs.signed_android_release))
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     environment: android-release
@@ -211,7 +221,7 @@ jobs:
           git commit -m "Publish signed Android installer for in-app updates"
           git push origin HEAD:${{ github.ref_name }}
   ios:
-    if: github.ref != 'refs/heads/release/smartdrive-61' && github.ref != 'refs/heads/release/play-readiness' && github.ref != 'refs/heads/release/signature-forms'
+    if: github.ref != 'refs/heads/release/signature-3-final' && github.ref != 'refs/heads/release/smartdrive-61' && github.ref != 'refs/heads/release/play-readiness' && github.ref != 'refs/heads/release/signature-forms'
     runs-on: macos-26
     timeout-minutes: 25
     steps:

@@ -12,28 +12,33 @@ interface PushPlugin {
 }
 const plugin = registerPlugin<PushPlugin>('PushNotifications');
 export function hasNativePush() { return Capacitor.getPlatform()==='android' && Capacitor.isPluginAvailable('PushNotifications'); }
-let activeToken: string | null = null;
-let activation: Promise<void> | null = null;
+let activeToken: { value: string; accountId?: string } | null = null;
+let activation: { result: Promise<void>; accountId?: string } | null = null;
 export async function nativePushPermission() {
   return hasNativePush() ? (await plugin.checkPermissions()).receive : 'unsupported';
 }
-async function saveToken(token:string, method='POST') {
-  const response=await fetch('/api/v1/push/native',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+function accountHeaders(accountId?:string): Record<string,string> {
+  return accountId ? { 'X-AutoCare-Account': accountId } : {};
+}
+async function saveToken(token:string, method='POST', accountId?:string) {
+  const response=await fetch('/api/v1/push/native',{method,headers:{'Content-Type':'application/json',...accountHeaders(accountId)},body:JSON.stringify({token})});
   if(!response.ok)throw Error('Nu s-a putut conecta dispozitivul la notificări.');
 }
-export async function activateNativePush(requestPermission=true) {
+export async function activateNativePush(requestPermission=true, accountId?:string) {
   if (activation) {
-    try { await activation; return; }
-    catch (error) { if (!requestPermission) throw error; }
+    const current=activation;
+    try { await current.result; if (current.accountId===accountId) return; }
+    catch (error) { if (current.accountId===accountId && !requestPermission) throw error; }
+    return activateNativePush(requestPermission, accountId);
   }
-  const operation = registerNativePush(requestPermission);
+  const operation = { result:registerNativePush(requestPermission, accountId), accountId };
   activation = operation;
-  try { await operation; }
+  try { await operation.result; }
   finally { if (activation === operation) activation = null; }
 }
-async function registerNativePush(requestPermission: boolean) {
+async function registerNativePush(requestPermission: boolean, accountId?:string) {
   if(!hasNativePush()) throw Error('Actualizează aplicația pentru notificări Android.');
-  const config=await fetch('/api/v1/push/native',{cache:'no-store'});
+  const config=await fetch('/api/v1/push/native',{cache:'no-store',headers:accountHeaders(accountId)});
   if(!config.ok || !(await config.json()).configured)throw Error('Notificările nu pot fi activate momentan. Încearcă din nou în câteva momente.');
   let permission=await plugin.checkPermissions();
   if(permission.receive!=='granted' && requestPermission)permission=await plugin.requestPermissions();
@@ -50,14 +55,15 @@ async function registerNativePush(requestPermission: boolean) {
         await plugin.register();
       })().catch(()=>finish());
     });
-    await saveToken(token); activeToken=token;
+    await saveToken(token,'POST',accountId); activeToken={value:token,accountId};
   } finally {await Promise.all(handles.map(handle=>handle.remove()));}
 }
-export async function disconnectNativePush() {
+export async function disconnectNativePush(accountId?:string) {
   if(!hasNativePush()) return;
+  if (activation) await activation.result.catch(()=>{});
   // Delete FCM identity before logout, including registrations from a previous app session.
   await plugin.removeAllDeliveredNotifications();
   await plugin.unregister();
-  if(activeToken)await saveToken(activeToken,'DELETE');
+  if(activeToken && activeToken.accountId===accountId) await saveToken(activeToken.value,'DELETE',accountId);
   activeToken=null;
 }

@@ -3,12 +3,14 @@ import {DocumentPreview} from '../document-preview';
 import {documentDownloadError,downloadDocument} from '@/lib/document-download-client';
 import {ActionMenu} from '../action-menu';
 import {FilterSelect} from '../filter-select';
+import {requestConfirmation} from '../premium-dialogs';
+import {SignatureActions, SignatureDialog, SignatureGroup} from '../signature-form';
 import {DocumentActions} from '../document-actions';
 
 import { ExpenseStepChart } from './expense-step-chart';
 import { expenseSelection } from '@/lib/finance-selection';
 import { translateApplicationCopy } from '@/lib/application-language';
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useRef, useState, type FormEvent } from 'react';
 import { SlidersHorizontal, ArrowUpRight, BarChart3, CalendarDays, Download, Gauge, Fuel, Wrench, ShieldCheck, CircleDot, Settings2, Files, Sparkles, Wallet } from 'lucide-react';
 import { budgetState, financeSignals, financeGroup, financeOverview, financialChange, type FinanceGroup } from '@/lib/finance-overview';
 import { filterRecords } from '@/lib/record-filters';
@@ -195,7 +197,7 @@ export function FinanceCenter({ data, today, primaryId, preview, money, currency
         </> : <p>{t('Graficele comparative sunt disponibile în Premium.', 'Comparison charts are available in Premium.')}</p>}
       </section>
       <div className="ac-finance-side">
-        <FinanceBudget key={budgetCar?.id ?? 'empty'} vehicle={budgetCar} amount={budgetCar ? data.financeBudgets[budgetCar.id] ?? null : null} used={budgetUsage} premium={data.premium} preview={preview} money={money} onRefresh={onRefresh} />
+        <FinanceBudget key={budgetCar?.id ?? 'empty'} vehicle={budgetCar} accountId={data.profile.userId} amount={budgetCar ? data.financeBudgets[budgetCar.id] ?? null : null} used={budgetUsage} premium={data.premium} preview={preview} money={money} onRefresh={onRefresh} />
         <section className="ac-finance-card ac-finance-ai"><Sparkles size={22} /><h3>AutoCare AI Finance</h3><p>{t('Compară perioade, verifică unde se duc costurile și explorează sugestii pentru vehiculul ales.', 'Compare periods, review spending and explore suggestions for the selected vehicle.')}</p>
           {data.premium&&<div className="ac-finance-signals"><p><strong>{t('Estimare lunară','Monthly estimate')}</strong><br/>{signals.forecastBani==null?t('Sunt necesare cel puțin 3 luni încheiate cu costuri înregistrate.','At least 3 completed months with recorded costs are required.'):money(signals.forecastBani)+' · '+t('medie din ','average of ')+signals.measuredMonths+t(' luni înregistrate; estimare, nu cost garantat.',' recorded months; estimate, not a guaranteed cost.')}</p>{signals.unusual.length>0&&<p role="status">{t('De verificat: ','Review: ')}{signals.unusual.length} {t('cheltuieli de cel puțin 3× mediana anului.','expenses at least 3× the annual median.')}</p>}</div>}
           <button type="button" className="primary" disabled={!budgetCar} onClick={() => budgetCar && onAi(budgetCar.id)}>{t('Deschide analiza', 'Open analysis')} <ArrowUpRight size={15} /></button>
@@ -253,31 +255,41 @@ export function FinanceCenter({ data, today, primaryId, preview, money, currency
   </div>;
 }
 
-function FinanceBudget({ vehicle, amount, used, premium, preview, money, onRefresh }: {
-  vehicle?: Data['vehicles'][number]; amount: number | null; used: number; premium: boolean; preview: boolean;
+function FinanceBudget({ vehicle, accountId, amount, used, premium, preview, money, onRefresh }: {
+  vehicle?: Data['vehicles'][number]; accountId: string; amount: number | null; used: number; premium: boolean; preview: boolean;
   money: (bani: number) => string; onRefresh: () => Promise<void>;
 }) {
   const en = useApplicationLanguage() === 'en';
   const t = (ro: string, english: string) => en ? english : ro;
-  const [value, setValue] = useState(amount == null ? '' : (amount / 100).toFixed(2));
+  const initial = amount == null ? '' : (amount / 100).toFixed(2);
+  const [value, setValue] = useState(initial);
+  const [open, setOpen] = useState(false);
+  const inFlight = useRef(false);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState(false);
   const state = amount ? budgetState(amount, used) : null;
   async function save(event: FormEvent) {
     event.preventDefault();
-    if (!vehicle || preview || pending) return;
+    if (!vehicle || preview || inFlight.current) return;
+    inFlight.current = true;
     setPending(true); setMessage(''); setError(false);
     try {
       const response = await fetch('/api/v1/finance/budget', {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-AutoCare-Account':accountId },
         body: JSON.stringify({ vehicleId: vehicle.id, amountBani: value === '' ? null : Math.round(Number(value) * 100) }),
       });
       if (!response.ok) throw Error((await response.json()).error);
       await onRefresh();
+      setOpen(false);
       setMessage(t('Bugetul a fost actualizat.', 'Budget updated.'));
     } catch (cause) { setError(true); setMessage((cause as Error).message); }
-    finally { setPending(false); }
+    finally { inFlight.current = false; setPending(false); }
+  }
+  async function close() {
+    if (inFlight.current) return;
+    if (value !== initial && !await requestConfirmation(t('Renunți la modificările bugetului?', 'Discard changes to the budget?'))) return;
+    setOpen(false); setMessage(''); setError(false);
   }
   return <section className="ac-finance-card ac-finance-budget">
     <h3>{t('Buget lunar', 'Monthly budget')}</h3>
@@ -288,9 +300,23 @@ function FinanceBudget({ vehicle, amount, used, premium, preview, money, onRefre
         <p>{state.remaining < 0 ? t('Depășit cu ', 'Over by ') : t('Rămas ', 'Remaining ')}{money(Math.abs(state.remaining))} · {state.percent.toFixed(0)}%</p>
         {!!state.threshold && <p className="ac-finance-budget-alert" role="status">{t('Prag atins', 'Threshold reached')} · {state.threshold}%</p>}
       </>}
-      <form className="sf-inline" aria-busy={pending} onSubmit={save}><label>{t('Limită lunară (RON)', 'Monthly limit (RON)')}<input type="number" min=".01" max="1000000" step=".01" value={value} onChange={e => setValue(e.target.value)} placeholder="—" /></label>
-        <button type="submit" disabled={pending || preview}>{value ? t('Salvează bugetul', 'Save budget') : t('Elimină limita', 'Remove limit')}</button></form>
-      {message && <p role={error ? 'alert' : 'status'}>{message}</p>}
+      <button type="button" disabled={preview || pending} onClick={() => {
+        setValue(initial); setMessage(''); setError(false); setOpen(true);
+      }}>{amount == null ? t('Configurează bugetul', 'Set budget') : t('Editează bugetul', 'Edit budget')}</button>
+      {open && <SignatureDialog title={t('Buget lunar', 'Monthly budget')} compact icon={Wallet} busy={pending} onClose={() => void close()}>
+        <form className="sf-form" aria-busy={pending} onSubmit={save}>
+          <div className="sf-body">
+            <SignatureGroup title={t('Limită de cheltuieli', 'Spending limit')} icon={Wallet}>
+              <p data-user-content>{vehicle.brand} {vehicle.model} · {vehicle.plate}</p>
+              <label>{t('Limită lunară (RON)', 'Monthly limit (RON)')}<input type="number" inputMode="decimal" min=".01" max="1000000" step=".01" value={value} onChange={e => setValue(e.target.value)} placeholder="—" /></label>
+              {amount != null && <small>{t('Golește suma și confirmă pentru a elimina limita.', 'Clear the amount and confirm to remove the limit.')}</small>}
+              {error && message && <p className="sf-error" role="alert">{message}</p>}
+            </SignatureGroup>
+          </div>
+          <SignatureActions onCancel={() => void close()} busy={pending} disabled={value === '' && amount == null} label={value ? t('Salvează bugetul', 'Save budget') : t('Elimină limita', 'Remove limit')}/>
+        </form>
+      </SignatureDialog>}
+      {!open && message && <p role={error ? 'alert' : 'status'}>{message}</p>}
     </>}
   </section>;
 }

@@ -71,7 +71,7 @@ import {parseServiceDetails} from '@/lib/service-details';
 import {completedServiceSeed} from '@/lib/completed-service';
 import { filterRecords, documentCounts, serviceStats } from '@/lib/record-filters';
 import SupportChat from './support-chat';
-import { useState, useEffect, useRef, type FormEvent } from 'react';
+import { useState, useEffect, useRef, useCallback, type FormEvent } from 'react';
 import {
   CarFront,
   Files,
@@ -116,7 +116,9 @@ type Modal = {
   planned?: boolean;
   initialDate?: string;
 } | null;
-async function api(path: string, method = 'GET', data?: unknown, accountId?: string) {
+const workspaceSessionChangedKey = 'autocare-workspace-session-changed';
+
+async function workspaceApi(path: string, method = 'GET', data?: unknown, accountId?: string) {
   if(method!=='GET' && typeof navigator!=='undefined' && !navigator.onLine) throw new Error('Ești offline. Reconectează-te înainte de a salva.');
   const r = await fetch('/api/v1/' + path, {
     method,
@@ -125,9 +127,9 @@ async function api(path: string, method = 'GET', data?: unknown, accountId?: str
   });
   const result = await r.json().catch(()=>({error:'Serviciul nu a răspuns corect. Încearcă din nou.'}));
   if (r.status === 409 && result.error === 'SESSION_CHANGED') {
-    document.documentElement.style.visibility = 'hidden';
-    window.location.reload();
+    hideWorkspaceAndReload();
   }
+  if (r.status === 401 && accountId && path === 'dashboard') hideWorkspaceAndReload();
   if (r.status === 401)
     throw new Error(
       'Sesiunea a expirat. Reconectează-te pentru a continua; datele nesalvate rămân în formular.',
@@ -135,6 +137,11 @@ async function api(path: string, method = 'GET', data?: unknown, accountId?: str
   if (!r.ok) throw new Error(result.error || 'Operațiunea nu a reușit.');
   return result;
 }
+function hideWorkspaceAndReload() {
+  document.documentElement.style.visibility = 'hidden';
+  window.location.reload();
+}
+
 function Empty({
   text,
   action,
@@ -244,7 +251,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
   const [saving, setSaving] = useState(false);
   const [lastReadings, setLastReadings] = useState<Record<string,{odometer:number;recordedAt:string}>>({});
   const [confirmedJump, setConfirmedJump] = useState<string | null>(null);
-  useEffect(() => { if (preview) return; let cancelled=false; Promise.all(data.vehicles.filter(v=>!v.archived).map(async v=>{try{const rows=await api('smartdrive/vehicles/'+v.id+'/readings') as {odometer:number;recordedAt:string}[];return [v.id,rows[0]] as const}catch{return [v.id,undefined] as const}})).then(entries=>{if(!cancelled)setLastReadings(Object.fromEntries(entries.filter((e): e is readonly [string,{odometer:number;recordedAt:string}] => e[1] !== undefined))) });return()=>{cancelled=true}; },[preview,data.vehicles.map(v=>v.id+':'+v.odometer).join('|')]);
+  useEffect(() => { if (preview) return; let cancelled=false; Promise.all(data.vehicles.filter(v=>!v.archived).map(async v=>{try{const rows=await workspaceApi('smartdrive/vehicles/'+v.id+'/readings') as {odometer:number;recordedAt:string}[];return [v.id,rows[0]] as const}catch{return [v.id,undefined] as const}})).then(entries=>{if(!cancelled)setLastReadings(Object.fromEntries(entries.filter((e): e is readonly [string,{odometer:number;recordedAt:string}] => e[1] !== undefined))) });return()=>{cancelled=true}; },[preview,data.vehicles.map(v=>v.id+':'+v.odometer).join('|')]);
   const cars = data.vehicles.filter(v => !v.archived);
   const services = data.records.filter(r => r.kind === 'service' && !r.cancelled && (r.nextKm != null && Number(r.nextKm) > 0 || !!r.expiresAt));
   const fmt = (n: number) => n.toLocaleString(locale) + ' km';
@@ -263,7 +270,7 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
     if (preview) { onError('În previzualizare nu se salvează date.'); return; }
     setSaving(true);
     try {
-      await api('smartdrive/vehicles/' + v.id + '/readings', 'POST', { odometer: value });
+      await workspaceApi('smartdrive/vehicles/' + v.id + '/readings', 'POST', { odometer: value });
       await onUpdated();
       setEditing(null); setConfirmedJump(null);
     } catch (e) { onError(e instanceof Error ? e.message : 'Nu s-a putut actualiza kilometrajul.'); }
@@ -343,6 +350,10 @@ function MileagePlanner({ data, preview, onUpdated, onError, mileageOnly = false
 }
 
 export default function Dashboard({ name: initialName, accountId, previewData, initialTab='Dashboard', initialVehicle, initialDrive, initialRecord, initialThread, smartDriveEnabled=true }: { smartDriveEnabled?:boolean; name: string; accountId?: string; previewData?: Data; initialTab?:string; initialDrive?: string; initialVehicle?: string; initialRecord?:string; initialThread?:string }) {
+  const api = useCallback(
+    (path: string, method = 'GET', payload?: unknown) => workspaceApi(path, method, payload, accountId),
+    [accountId],
+  );
   const [name,setName]=useState(initialName);
   const [data, setData] = useState<Data | null>(previewData || null),
     [tab, setTab] = useState(normalizeWorkspaceTab(initialTab)),
@@ -399,6 +410,27 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
   const [smartDriveOpened,setSmartDriveOpened]=useState(normalizeWorkspaceTab(initialTab)==='Plan întreținere');
   useEffect(()=>{if(tab==='Plan întreținere')setSmartDriveOpened(true)},[tab]);
   const dashboardRequest = useRef(0);
+  const sessionEnded = useRef(false);
+  useEffect(() => {
+    if (previewData || !accountId) return;
+    const invalidate = () => {
+      sessionEnded.current = true;
+      ++dashboardRequest.current;
+      hideWorkspaceAndReload();
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === workspaceSessionChangedKey && event.newValue) invalidate();
+    };
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) invalidate();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('pageshow', onPageShow);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('pageshow', onPageShow);
+    };
+  }, [accountId, previewData]);
   const locale=language==='en'?'en-GB':'ro-RO';
   const currency = accountDisplayCurrency(language, preferredCurrency);
   const currencyRequest = useRef(0);
@@ -486,7 +518,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
   useEffect(() => {
     if(previewData || !data?.profile.userId || !hasNativePush() || !data.profile.pushEnabled)return;
     const reconnect = () => {
-      if (!document.hidden && navigator.onLine) void activateNativePush(false).catch(()=>{});
+      if (!document.hidden && navigator.onLine) void activateNativePush(false, accountId).catch(()=>{});
     };
     reconnect();
     window.addEventListener('online', reconnect);
@@ -536,13 +568,15 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
     let lastUnread: number | null = null;
     let unreadBusy = false;
     const check = () => {
-      if (document.hidden || !navigator.onLine || unreadBusy) return;
+      if (sessionEnded.current || document.hidden || !navigator.onLine || unreadBusy) return;
       unreadBusy = true;
       void api('support/unread')
         .then(async (x) => {
+          if (sessionEnded.current) return;
           const count = Number(x.unread || 0);
           if (!Capacitor.isNativePlatform() && lastUnread !== null && count > lastUnread && typeof Notification !== 'undefined' && Notification.permission === 'granted' && !document.hidden) {
             const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration('/sw.js').catch(() => undefined) : undefined;
+            if (sessionEnded.current) return;
             if (reg) {
               await reg.showNotification('AutoCare · Mesaje noi', {
                 body: 'Ai mesaje noi în Centrul de suport.',
@@ -585,17 +619,17 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
     return () => window.removeEventListener('beforeunload', warn);
   }, [recordDirty]);
   async function refresh(silent = false) {
-    if (previewData) return;
+    if (previewData || sessionEnded.current) return;
     const request = ++dashboardRequest.current;
     try {
-      const updated = await api('dashboard','GET',undefined,accountId);
+      const updated = await api('dashboard');
+      if (request !== dashboardRequest.current || sessionEnded.current) return;
       if (accountId && updated.profile?.userId !== accountId) {
         setData(null);
-        document.documentElement.style.visibility = 'hidden';
-        window.location.reload();
+        hideWorkspaceAndReload();
         return;
       }
-      if (request === dashboardRequest.current) setData(updated);
+      setData(updated);
     } catch (e) {
       if (!silent && request === dashboardRequest.current) setError((e as Error).message);
     }
@@ -875,7 +909,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
     }
   }
   async function registerPush() {
-      if(Capacitor.isNativePlatform()) {await activateNativePush(); await refresh(true); return;}
+      if(Capacitor.isNativePlatform()) {await activateNativePush(true, accountId); await refresh(true); return;}
       if (!window.isSecureContext)
         throw new Error('Deschide AutoCare prin HTTPS pentru notificări.');
       if (
@@ -945,7 +979,17 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
     if (previewData || signingOut) return;
     if (recordDirty && !await requestConfirmation(translateApplicationCopy('Ai modificări nesalvate. Vrei să te deconectezi?',language))) return;
     setSigningOut(true); setError('');
-    try { await disconnectNativePush(); if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId); const result=await authClient.signOut(); if(result.error)throw Error(result.error.message||'Deconectarea nu a reușit. Încearcă din nou.'); window.location.assign('/autentificare'); }
+    try {
+      await disconnectNativePush(accountId);
+      if (hasNativeTracking() && data?.profile.userId) await nativeAutomation.signOut(data.profile.userId);
+      const result=await authClient.signOut();
+      if (result.error) throw Error(result.error.message || 'Deconectarea nu a reușit. Încearcă din nou.');
+      sessionEnded.current = true;
+      ++dashboardRequest.current;
+      document.documentElement.style.visibility = 'hidden';
+      try { localStorage.setItem(workspaceSessionChangedKey, crypto.randomUUID()); } catch { /* Private mode may deny storage access. */ }
+      window.location.assign('/autentificare');
+    }
     catch(cause) { setError(cause instanceof Error?cause.message:'Deconectarea nu a reușit. Încearcă din nou.'); setSigningOut(false); }
   }
   return (
@@ -1883,7 +1927,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
                 e.preventDefault();
                 const f = new FormData(e.currentTarget);
                 await act(async () => {
-                  await disconnectNativePush();
+                  await disconnectNativePush(accountId);
                   if(hasNativeTracking()&&data?.profile.userId)await nativeAutomation.signOut(data.profile.userId);
                   await api('account', 'DELETE', {
                     password: String(f.get('password')),
@@ -1989,7 +2033,7 @@ export default function Dashboard({ name: initialName, accountId, previewData, i
                       const existingId = pending?.id ?? (modal.completionOf ? undefined : modal.record?.id);
                       const path = existingId ? 'records/' + existingId
                         : modal.completionOf ? 'records/' + modal.completionOf + '/complete' : 'records';
-                      const saved = await api(path, existingId ? 'PATCH' : 'POST', payload, accountId);
+                      const saved = await api(path, existingId ? 'PATCH' : 'POST', payload);
                       pending = { modal, id: saved.id, payload: serialized, file: pending?.file ?? null,
                         attachmentId: pending?.attachmentId ?? crypto.randomUUID() };
                       partialSave.current = pending;

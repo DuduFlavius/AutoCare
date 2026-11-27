@@ -872,7 +872,7 @@ const staff = ['assistant', 'admin', 'superadmin', 'founder'].includes(role);
             <button type="button" onClick={async () => {
               if (Capacitor.isNativePlatform()) {
                 try {
-                  await activateNativePush();
+                  await activateNativePush(true, accountId);
                   setNotice(t('Notificările AutoCare sunt activate pe telefon.', 'AutoCare notifications are enabled on this phone.'));
                 } catch (error) {
                   setNotice(error instanceof Error ? error.message : t('Notificările AutoCare nu au putut fi activate.', 'AutoCare notifications could not be enabled.'));
